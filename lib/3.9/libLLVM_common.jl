@@ -4,11 +4,6 @@ using Compat
 
 typealias LLVMFatalErrorHandler Ptr{Void}
 
-const LLVM_VERSION_MAJOR = 3
-const LLVM_VERSION_MINOR = 9
-const LLVM_VERSION_PATCH = 0
-const LLVM_VERSION_STRING = "3.9.0"
-
 typealias LLVMBool Cint
 
 type LLVMOpaqueMemoryBuffer
