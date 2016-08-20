@@ -1,6 +1,8 @@
 using Clang.cindex
 using Clang.wrap_c
 
+include("common.jl")
+
 function wrap(config, destdir)
     info("Wrapping LLVM C API at $destdir")
     if !isdir(destdir)
@@ -44,3 +46,12 @@ function wrap(config, destdir)
     context.headers = header_files
     run(context)
 end
+
+length(ARGS) == 1 || error("Usage: wrap.jl /path/to/llvm-config")
+config = first(ARGS)
+ispath(config) || error("llvm-config at $config is't a valid path")
+
+version = VersionNumber(readchomp(`$config --version`))
+wrapped_libdir = joinpath(dirname(@__FILE__), "..", "lib", verstr(version))
+
+wrap(config, wrapped_libdir)

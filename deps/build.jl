@@ -1,6 +1,8 @@
 using Compat
 import Compat.String
 
+include("common.jl")
+
 # Returns locations of a llvm-config binary
 function find_config(name)
     paths = String[]
@@ -23,10 +25,6 @@ function find_config(name)
     end
 
     return paths
-end
-
-function verstr(version)
-    return "$(version.major).$(version.minor)"
 end
 
 # check if the user specifically requested a version
@@ -72,6 +70,10 @@ version = VersionNumber(readchomp(`$config --version`))
 root = readchomp(`$config --obj-root`)
 info("Tuning for LLVM $version at $root")
 
+# check if the library is wrapped
+wrapped_libdir = joinpath(dirname(@__FILE__), "..", "lib", verstr(version))
+isdir(wrapped_libdir) || error("LLVM v$version is not supported, please file an issue")
+
 # find the library
 # NOTE: we can't use Libdl.find_library because we require RTLD_DEEPBIND
 #       in order to avoid different LLVM libraries trampling over one another
@@ -81,13 +83,6 @@ libname = "libLLVM-$(verstr(version)).so"
 libllvm = joinpath(libdir, libname)
 if !ispath(libllvm)
     libllvm = libname
-end
-
-# wrap the library, if necessary
-wrapped_libdir = joinpath(dirname(@__FILE__), "..", "lib", verstr(version))
-if !isdir(wrapped_libdir)
-    include("wrap.jl")
-    wrap(config, wrapped_libdir)
 end
 
 # write ext.jl
