@@ -1,5 +1,5 @@
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/ErrorHandling.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/ErrorHandling.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMInstallFatalErrorHandler(Handler::LLVMFatalErrorHandler)
     ccall((:LLVMInstallFatalErrorHandler,libllvm),Void,(LLVMFatalErrorHandler,),Handler)
@@ -14,8 +14,8 @@ function LLVMEnablePrettyStackTrace()
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Object.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Object.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMCreateObjectFile(MemBuf::LLVMMemoryBufferRef)
     ccall((:LLVMCreateObjectFile,libllvm),LLVMObjectFileRef,(LLVMMemoryBufferRef,),MemBuf)
@@ -130,8 +130,8 @@ function LLVMGetRelocationValueString(RI::LLVMRelocationIteratorRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Target.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Target.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMInitializeNVPTXTargetInfo()
     ccall((:LLVMInitializeNVPTXTargetInfo,libllvm),Void,())
@@ -302,8 +302,8 @@ function LLVMOffsetOfElement(TD::LLVMTargetDataRef,StructTy::LLVMTypeRef,Element
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/TargetMachine.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/TargetMachine.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMGetFirstTarget()
     ccall((:LLVMGetFirstTarget,libllvm),LLVMTargetRef,())
@@ -390,12 +390,12 @@ function LLVMAddAnalysisPasses(T::LLVMTargetMachineRef,PM::LLVMPassManagerRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Types.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Types.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Analysis.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Analysis.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMVerifyModule(M::LLVMModuleRef,Action::LLVMVerifierFailureAction,OutMessage)
     ccall((:LLVMVerifyModule,libllvm),LLVMBool,(LLVMModuleRef,LLVMVerifierFailureAction,Ptr{Cstring}),M,Action,OutMessage)
@@ -414,8 +414,8 @@ function LLVMViewFunctionCFGOnly(Fn::LLVMValueRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/BitReader.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/BitReader.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMParseBitcode(MemBuf::LLVMMemoryBufferRef,OutModule,OutMessage)
     ccall((:LLVMParseBitcode,libllvm),LLVMBool,(LLVMMemoryBufferRef,Ptr{LLVMModuleRef},Ptr{Cstring}),MemBuf,OutModule,OutMessage)
@@ -450,8 +450,8 @@ function LLVMGetBitcodeModule2(MemBuf::LLVMMemoryBufferRef,OutM)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/BitWriter.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/BitWriter.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMWriteBitcodeToFile(M::LLVMModuleRef,Path)
     ccall((:LLVMWriteBitcodeToFile,libllvm),Cint,(LLVMModuleRef,Cstring),M,Path)
@@ -470,8 +470,8 @@ function LLVMWriteBitcodeToMemoryBuffer(M::LLVMModuleRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Core.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Core.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMInitializeCore(R::LLVMPassRegistryRef)
     ccall((:LLVMInitializeCore,libllvm),Void,(LLVMPassRegistryRef,),R)
@@ -2802,8 +2802,8 @@ function LLVMIsMultithreaded()
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Disassembler.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Disassembler.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMCreateDisasm(TripleName,DisInfo,TagType::Cint,GetOpInfo::LLVMOpInfoCallback,SymbolLookUp::LLVMSymbolLookupCallback)
     ccall((:LLVMCreateDisasm,libllvm),LLVMDisasmContextRef,(Cstring,Ptr{Void},Cint,LLVMOpInfoCallback,LLVMSymbolLookupCallback),TripleName,DisInfo,TagType,GetOpInfo,SymbolLookUp)
@@ -2830,8 +2830,8 @@ function LLVMDisasmInstruction(DC::LLVMDisasmContextRef,Bytes,BytesSize::UInt64,
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/ExecutionEngine.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/ExecutionEngine.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMLinkInMCJIT()
     ccall((:LLVMLinkInMCJIT,libllvm),Void,())
@@ -2966,8 +2966,8 @@ function LLVMDisposeMCJITMemoryManager(MM::LLVMMCJITMemoryManagerRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Initialization.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Initialization.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMInitializeTransformUtils(R::LLVMPassRegistryRef)
     ccall((:LLVMInitializeTransformUtils,libllvm),Void,(LLVMPassRegistryRef,),R)
@@ -3014,24 +3014,24 @@ function LLVMInitializeTarget(R::LLVMPassRegistryRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/IRReader.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/IRReader.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMParseIRInContext(ContextRef::LLVMContextRef,MemBuf::LLVMMemoryBufferRef,OutM,OutMessage)
     ccall((:LLVMParseIRInContext,libllvm),LLVMBool,(LLVMContextRef,LLVMMemoryBufferRef,Ptr{LLVMModuleRef},Ptr{Cstring}),ContextRef,MemBuf,OutM,OutMessage)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Linker.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Linker.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMLinkModules2(Dest::LLVMModuleRef,Src::LLVMModuleRef)
     ccall((:LLVMLinkModules2,libllvm),LLVMBool,(LLVMModuleRef,LLVMModuleRef),Dest,Src)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/LinkTimeOptimizer.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/LinkTimeOptimizer.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function llvm_create_optimizer()
     ccall((:llvm_create_optimizer,libllvm),llvm_lto_t,())
@@ -3050,8 +3050,8 @@ function llvm_optimize_modules(lto::llvm_lto_t,output_filename)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/lto.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/lto.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function lto_get_version()
     ccall((:lto_get_version,libllvm),Cstring,())
@@ -3302,8 +3302,8 @@ function thinlto_codegen_add_cross_referenced_symbol(cg::thinlto_code_gen_t,name
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/OrcBindings.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/OrcBindings.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMOrcCreateInstance(TM::LLVMTargetMachineRef)
     ccall((:LLVMOrcCreateInstance,libllvm),LLVMOrcJITStackRef,(LLVMTargetMachineRef,),TM)
@@ -3358,8 +3358,8 @@ function LLVMOrcDisposeInstance(JITStack::LLVMOrcJITStackRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Support.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Support.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMLoadLibraryPermanently(Filename)
     ccall((:LLVMLoadLibraryPermanently,libllvm),LLVMBool,(Cstring,),Filename)
@@ -3378,8 +3378,8 @@ function LLVMAddSymbol(symbolName,symbolValue)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Transforms/IPO.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Transforms/IPO.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMAddArgumentPromotionPass(PM::LLVMPassManagerRef)
     ccall((:LLVMAddArgumentPromotionPass,libllvm),Void,(LLVMPassManagerRef,),PM)
@@ -3438,8 +3438,8 @@ function LLVMAddStripSymbolsPass(PM::LLVMPassManagerRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Transforms/PassManagerBuilder.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Transforms/PassManagerBuilder.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMPassManagerBuilderCreate()
     ccall((:LLVMPassManagerBuilderCreate,libllvm),LLVMPassManagerBuilderRef,())
@@ -3486,8 +3486,8 @@ function LLVMPassManagerBuilderPopulateLTOPassManager(PMB::LLVMPassManagerBuilde
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Transforms/Scalar.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Transforms/Scalar.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMAddAggressiveDCEPass(PM::LLVMPassManagerRef)
     ccall((:LLVMAddAggressiveDCEPass,libllvm),Void,(LLVMPassManagerRef,),PM)
@@ -3642,8 +3642,8 @@ function LLVMAddBasicAliasAnalysisPass(PM::LLVMPassManagerRef)
 end
 
 
-# Julia wrapper for header: /home/tbesard/Projects/Julia-CUDA/julia/build/release/usr/include/llvm-c/Transforms/Vectorize.h
-# Automatically generated using Clang.jl wrap_c, version 0.0.0
+# Julia wrapper for header: llvm-c/Transforms/Vectorize.h
+# Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMAddBBVectorizePass(PM::LLVMPassManagerRef)
     ccall((:LLVMAddBBVectorizePass,libllvm),Void,(LLVMPassManagerRef,),PM)
