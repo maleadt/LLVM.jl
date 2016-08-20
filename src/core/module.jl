@@ -15,7 +15,7 @@ end
 dispose(mod::Module) = API.LLVMDisposeModule(mod.handle)
 
 function show(io::IO, mod::Module)
-    output = unsafe_wrap(String, API.LLVMPrintModuleToString(mod.handle))
+    output = unsafe_string(API.LLVMPrintModuleToString(mod.handle))
     print(io, output)
 end
 

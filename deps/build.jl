@@ -1,51 +1,93 @@
 using Compat
 import Compat.String
 
-# Returns path to `llvm-config`, or throws
-function find_llvm()
-    if haskey(ENV, "TRAVIS")
-        return readchomp(`which llvm-config-3.4`)
+# Returns locations of a llvm-config binary
+function find_config(name)
+    paths = String[]
+
+    # new build location, in usr/tools
+    let
+        config = joinpath(JULIA_HOME, "..", "tools", name)
+        ispath(config) && push!(paths, config)
     end
 
     # old build location, in usr/bin
-    config = joinpath(JULIA_HOME, "llvm-config")
-    isfile(config) && return config
-
-    # new build location, in usr/tools
-    config = joinpath(JULIA_HOME, "..", "tools", "llvm-config")
-    isfile(config) && return config
+    let
+        config = joinpath(JULIA_HOME, name)
+        ispath(config) && push!(paths, config)
+    end
 
     try
-        config = readchomp(`which llvm-config`)
+        config = readchomp(pipeline(`which $name`, stderr=DevNull))
+        ispath(config) && push!(paths, config)
     end
-    isfile(config) && return config
 
-    error("No useable llvm-config found")
+    return paths
 end
 
-config = get(ENV, "LLVM_CONFIG", find_llvm())
+function verstr(version)
+    return "$(version.major).$(version.minor)"
+end
+
+# check if the user specifically requested a version
+requested_version = Nullable{VersionNumber}()
+if haskey(ENV, "LLVM_VERSION")
+    requested_version = Nullable(VersionNumber(ENV["LLVM_VERSION"]))
+end
+
+# list of valid llvm-config binary names, in descending priority
+config_names = ["llvm-config"]
+if isnull(requested_version)
+    unshift!(config_names, "llvm-config-" * Base.libllvm_version)
+else
+    unshift!(config_names, "llvm-config-" * verstr(get(requested_version)))
+end
+if haskey(ENV, "LLVM_CONFIG")
+    ispath(ENV["LLVM_CONFIG"]) || error("specified llvm-config does not exist")
+    config_names = String[ENV["LLVM_CONFIG"]]
+end
+
+# look for all llvm-config candidate names
+configs = String[]
+for config_name in config_names
+    append!(configs, find_config(config_name))
+end
+
+# if we requested a specific LLVM version, filter on that
+# NOTE/TODO: this discards the patch version, as we cannot discern
+#            the case where patch=0 vs not specifying it
+if !isnull(requested_version)
+    configs = filter(config -> begin
+                        version = VersionNumber(readchomp(`$config --version`))
+                        return version.major == get(requested_version).major &&
+                               version.minor == get(requested_version).minor
+                     end, configs)
+end
+
+# select a final llvm-config
+isempty(configs) && error("could not find any satisfying LLVM installation")
+config = first(configs)
 
 version = VersionNumber(readchomp(`$config --version`))
 root = readchomp(`$config --obj-root`)
-info("Building for LLVM $version at $root")
-destdir = joinpath(dirname(@__FILE__), "..", "lib", "$(version.major).$(version.minor)")
-libdir = readchomp(`$config --libdir`)
-libllvm = joinpath(libdir, "libLLVM.so")
-ispath(libllvm) || error("Could not find libllvm at $libdir, please verify your LLVM installation")
+info("Tuning for LLVM $version at $root")
 
-# Check if the library is wrapped already
-if !isdir(destdir)
+# wrap the library, if necessary
+wrapped_libdir = joinpath(dirname(@__FILE__), "..", "lib", verstr(version))
+if !isdir(wrapped_libdir)
     include("wrap.jl")
-    wrap(config, destdir)
+    wrap(config, wrapped_libdir)
 end
 
-# Write ext.jl
-wrapper_common = joinpath(destdir, "libLLVM_common.jl")
-wrapper_header = joinpath(destdir, "libLLVM_h.jl")
+# write ext.jl
+libdir = readchomp(`$config --libdir`)
+libname = "libLLVM-$(verstr(version)).so"
+wrapper_common = joinpath(wrapped_libdir, "libLLVM_common.jl")
+wrapper_header = joinpath(wrapped_libdir, "libLLVM_h.jl")
 open(joinpath(dirname(@__FILE__), "ext.jl"), "w") do fh
     write(fh, """
-        const libllvm = "$libllvm"
-        # TODO: check version library at runtime, if we can get it from the library
+        const libllvm = Libdl.find_library(["$libname"], ["$libdir"])
+        @assert(libllvm != "", "Failed to find LLVM library $libname")
         const libllvm_version = v"$version"
         include("$wrapper_common")
         include("$wrapper_header")""")

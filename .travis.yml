@@ -1,12 +1,26 @@
 language: julia
-os:
-  - osx
-  - linux
-julia:
-  - 0.4
-  - 0.5
-  - nightly
+sudo: false
 notifications:
   email: false
+
+addons_shortcuts:
+  addons_llvm38linux: &llvm38linux
+    apt:
+      sources: [ubuntu-toolchain-r-test, llvm-toolchain-precise-3.8]
+      packages: [llvm-3.8]
+
+before_install:
+  - export LD_LIBRARY_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib/
+  - export PATH=/usr/lib/llvm-${LLVM_VERSION}/bin:$PATH
+
+# NOTE: Travis does not allow applying a global (eg. julia/os array) to a matrix,
+#       so construct it manually
+matrix:
+  include:
+    - os: linux
+      env: LLVM_VERSION=3.8
+      julia: 0.4
+      addons: *llvm38linux
+
 after_success:
- - julia -e 'cd(Pkg.dir("Example")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
+ - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
