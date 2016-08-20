@@ -72,6 +72,17 @@ version = VersionNumber(readchomp(`$config --version`))
 root = readchomp(`$config --obj-root`)
 info("Tuning for LLVM $version at $root")
 
+# find the library
+# NOTE: we can't use Libdl.find_library because we require RTLD_DEEPBIND
+#       in order to avoid different LLVM libraries trampling over one another
+#       (we rely on ccall using JL_RTLD_DEFAULT=RTLD_LAZY|RTLD_DEEPBIND)
+libdir = readchomp(`$config --libdir`)
+libname = "libLLVM-$(verstr(version)).so"
+libllvm = joinpath(libdir, libname)
+if !ispath(libllvm)
+    libllvm = libname
+end
+
 # wrap the library, if necessary
 wrapped_libdir = joinpath(dirname(@__FILE__), "..", "lib", verstr(version))
 if !isdir(wrapped_libdir)
@@ -80,14 +91,11 @@ if !isdir(wrapped_libdir)
 end
 
 # write ext.jl
-libdir = readchomp(`$config --libdir`)
-libname = "libLLVM-$(verstr(version)).so"
 wrapper_common = joinpath(wrapped_libdir, "libLLVM_common.jl")
 wrapper_header = joinpath(wrapped_libdir, "libLLVM_h.jl")
 open(joinpath(dirname(@__FILE__), "ext.jl"), "w") do fh
     write(fh, """
-        const libllvm = Libdl.find_library(["$libname"], ["$libdir"])
-        @assert(libllvm != "", "Failed to find LLVM library $libname")
+        const libllvm = "$libllvm"
         const libllvm_version = v"$version"
         include("$wrapper_common")
         include("$wrapper_header")""")
