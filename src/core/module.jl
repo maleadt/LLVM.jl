@@ -14,14 +14,7 @@ end
 
 dispose(mod::Module) = API.LLVMDisposeModule(mod.handle)
 
-function show(io::IO, mod::Module)
-    if get(io, :compact, false)
-        API.LLVMDumpModule(mod.handle)
-    else
-        # TODO: get and only print module name
-        API.LLVMDumpModule(mod.handle)
-    end
-end
+show(io::IO, mod::Module) = API.LLVMDumpModule(mod.handle)
 
 target(mod::Module) = unsafe_string(API.LLVMGetTarget(mod.handle))
 setTarget(mod::Module, triple) = API.LLVMSetTarget(mod.handle, triple)
