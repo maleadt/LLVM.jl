@@ -8,6 +8,8 @@ addons_shortcuts:
     apt:
       sources: [ubuntu-toolchain-r-test, llvm-toolchain-precise-3.8]
       packages: [llvm-3.8]
+  # TODO: add LLVM 3.9 as soon as whitelisted
+  #       https://github.com/travis-ci/apt-source-whitelist/issues/300
 
 before_install:
   - export LD_LIBRARY_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib/
@@ -20,6 +22,14 @@ matrix:
     - os: linux
       env: LLVM_VERSION=3.8
       julia: 0.4
+      addons: *llvm38linux
+    - os: linux
+      env: LLVM_VERSION=3.8
+      julia: 0.5
+      addons: *llvm38linux
+    - os: linux
+      env: LLVM_VERSION=3.8
+      julia: nightly
       addons: *llvm38linux
 
 after_success:
