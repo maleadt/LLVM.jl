@@ -14,7 +14,10 @@ end
 
 dispose(mod::Module) = API.LLVMDisposeModule(mod.handle)
 
-show(io::IO, mod::Module) = API.LLVMDumpModule(mod.handle)
+function show(io::IO, mod::Module)
+    output = unsafe_wrap(String, API.LLVMPrintModuleToString(mod.handle))
+    print(io, output)
+end
 
 target(mod::Module) = unsafe_string(API.LLVMGetTarget(mod.handle))
 setTarget(mod::Module, triple) = API.LLVMSetTarget(mod.handle, triple)

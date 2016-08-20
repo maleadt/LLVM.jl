@@ -1,6 +1,6 @@
 # Contexts are execution states for the core LLVM IR system.
 
-export Context, dispose, getGlobalContext
+export Context, dispose, GlobalContext
 
 immutable Context
     handle::API.LLVMContextRef
@@ -11,4 +11,4 @@ end
 
 dispose(ctx::Context) = API.LLVMContextDispose(ctx.handle)
 
-getGlobalContext() = Context(API.LLVMGetGlobalContext())
+GlobalContext() = Context(API.LLVMGetGlobalContext())
