@@ -45,6 +45,8 @@ wrapper_header = joinpath(destdir, "libLLVM_h.jl")
 open(joinpath(dirname(@__FILE__), "ext.jl"), "w") do fh
     write(fh, """
         const libllvm = "$libllvm"
+        # TODO: check version library at runtime, if we can get it from the library
+        const libllvm_version = v"$version"
         include("$wrapper_common")
         include("$wrapper_header")""")
 end
