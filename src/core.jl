@@ -3,3 +3,4 @@
 
 include("core/context.jl")
 include("core/module.jl")
+include("core/type.jl")
