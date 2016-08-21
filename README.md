@@ -8,6 +8,6 @@ Linux: [![Build Status](https://travis-ci.org/maleadt/LLVM.jl.svg?branch=master)
 
 Code Coverage: [![Coverage Status](https://codecov.io/gh/maleadt/LLVM.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/maleadt/LLVM.jl)
 
-This package provides a shallow wrapper around the LLVM C API. The entire API, wrapped by
-means of [Clang.jl](https://github.com/ihnorton/Clang.jl/), is available in the `LLVM.API`
-module. Higher-level wrappers will be added to the `LLVM` module as the need arises.
+This package provides a shallow wrapper around the LLVM C API. The API, wrapped by means of
+[Clang.jl](https://github.com/ihnorton/Clang.jl/), is available in the `LLVM.API` module.
+Higher-level wrappers will be added to the `LLVM` module as the need arises.
