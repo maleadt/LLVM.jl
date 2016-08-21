@@ -1,6 +1,9 @@
 using Clang.cindex
 using Clang.wrap_c
 
+using Compat
+import Compat.String
+
 include("common.jl")
 
 function wrap(config, destdir)
@@ -9,14 +12,18 @@ function wrap(config, destdir)
         mkdir(destdir)
     end
 
-    libdir = readchomp(`$config --libdir`)
-    version = readchomp(`$config --version`)
     includedir = readchomp(`$config --includedir`)
     cppflags = split(readchomp(`$config --cppflags`))
 
+    # TODO: this should really be taken care of by Clang.jl...
+    haskey(ENV, "LLVM_CONFIG") || error("please provide the llvm-config Clang.jl was build with using LLVM_CONFIG")
+    clang_config = ENV["LLVM_CONFIG"]
+    clang_libdir = readchomp(`$clang_config --libdir`)
+    clang_version = readchomp(`$clang_config --version`)
+
     # Set-up arguments to clang
     clang_includes = map(x->x[3:end], filter( x->startswith(x,"-I"), cppflags))
-    push!(clang_includes, "$libdir/clang/$version/include")
+    push!(clang_includes, "$clang_libdir/clang/$clang_version/include")
     clang_extraargs =                 filter(x->!startswith(x,"-I"), cppflags)
 
     # Recursively discover LLVM C API headers (files ending in .h)
