@@ -1,7 +1,7 @@
 # Modules represent the top-level structure in an LLVM program.
 
 export Module, dispose,
-       target, setTarget, datalayout, setDatalayout
+       target, target!, datalayout, datalayout!
 
 import Base: show
 
@@ -20,7 +20,7 @@ function show(io::IO, mod::Module)
 end
 
 target(mod::Module) = unsafe_string(API.LLVMGetTarget(mod.handle))
-setTarget(mod::Module, triple) = API.LLVMSetTarget(mod.handle, triple)
+target!(mod::Module, triple) = API.LLVMSetTarget(mod.handle, triple)
 
 datalayout(mod::Module) = unsafe_string(API.LLVMGetDataLayout(mod.handle))
-setDatalayout(mod::Module, layout) = API.LLVMSetDataLayout(mod.handle, layout)
+datalayout!(mod::Module, layout) = API.LLVMSetDataLayout(mod.handle, layout)

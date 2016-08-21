@@ -19,11 +19,11 @@ let
     show(DevNull, mod)
 
     dummyTarget = "SomeTarget"
-    setTarget(mod, dummyTarget)
+    target!(mod, dummyTarget)
     @test target(mod) == dummyTarget
 
     dummyLayout = "e-p:64:64:64"
-    setDatalayout(mod, dummyLayout)
+    datalayout!(mod, dummyLayout)
     @test datalayout(mod) == dummyLayout
 
     dispose(mod)
