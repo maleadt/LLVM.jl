@@ -11,30 +11,6 @@ let
 end
 
 
-## module
-
-let
-    mod = LLVM.Module("foo")
-
-    show(DevNull, mod)
-
-    dummyTarget = "SomeTarget"
-    target!(mod, dummyTarget)
-    @test target(mod) == dummyTarget
-
-    dummyLayout = "e-p:64:64:64"
-    datalayout!(mod, dummyLayout)
-    @test datalayout(mod) == dummyLayout
-
-    dispose(mod)
-end
-
-let
-    mod = LLVM.Module("foo", global_ctx)
-    dispose(mod)
-end
-
-
 ## type
 
 let
@@ -103,4 +79,57 @@ let
         @test elements(st) == elem
         @test !isopaque(st)
     end
+end
+
+
+## value
+
+let
+    typ = LLVM.Int32Type()
+    val = ConstInt(typ, 1)
+
+    show(DevNull, val)
+
+    @test LLVM.typeof(val) == typ
+    @test name(val) == ""
+    @test isconstant(val)
+    @test !isundef(val)
+
+    # TODO: name! and replace_uses! if embedded in module
+end
+
+let
+    t1 = LLVM.Int32Type()
+    c1 = ConstInt(t1, 1)
+    @test value_zext(c1) == 1
+    c2 = ConstInt(t1, -1, true)
+    @test value_sext(c2) == -1
+
+    t2 = LLVM.DoubleType()
+    c = ConstReal(t2, 1.1)
+    @test value_double(c) == 1.1
+end
+
+
+## module
+
+let
+    mod = LLVM.Module("foo")
+
+    show(DevNull, mod)
+
+    dummyTarget = "SomeTarget"
+    target!(mod, dummyTarget)
+    @test target(mod) == dummyTarget
+
+    dummyLayout = "e-p:64:64:64"
+    datalayout!(mod, dummyLayout)
+    @test datalayout(mod) == dummyLayout
+
+    dispose(mod)
+end
+
+let
+    mod = LLVM.Module("foo", global_ctx)
+    dispose(mod)
 end
