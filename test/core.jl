@@ -114,7 +114,11 @@ end
 ## module
 
 let
-    mod = LLVM.Module("foo")
+    mod = LLVMModule("foo")
+
+    clone = LLVMModule(mod)
+    @test mod != clone
+    dispose(clone)
 
     show(DevNull, mod)
 
@@ -130,6 +134,14 @@ let
 end
 
 let
-    mod = LLVM.Module("foo", global_ctx)
+    mod = LLVMModule("foo", local_ctx)
+
+    @test context(mod) == local_ctx
+
+    clone = LLVMModule(mod)
+    @test mod != clone
+    @test context(clone) == local_ctx
+    dispose(clone)
+
     dispose(mod)
 end
