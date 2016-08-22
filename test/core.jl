@@ -164,5 +164,30 @@ Context() do ctx
     @test fs == 1
     @test last(functions(mod)) == f
 
+    mdit = metadata(mod)
+    md = MDNode([MDString("bar", ctx)], ctx)
+    add!(mdit, "foo", md)
+    @test haskey(mdit, "foo")
+    mds = get(mdit, "foo")
+    @test mds[1] == md
+    @test !haskey(mdit, "bar")
+    @test_throws KeyError get(mdit, "bar")
+
     dispose(mod)
+end
+
+
+## metadata
+
+Context() do ctx
+    str = MDString("foo", ctx)
+    @test mdstring(str) == "foo"
+end
+
+Context() do ctx
+    str = MDString("foo", ctx)
+    node = MDNode([str], ctx)
+    ops = mdoperands(node)
+    @test length(ops) == 1
+    @test ops[1] == str
 end

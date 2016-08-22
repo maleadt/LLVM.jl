@@ -74,7 +74,7 @@ function get(md::ModuleMetadataIterator, name::String)
     nops = API.LLVMGetNamedMetadataNumOperands(md.mod.handle, name)
     nops == 0 && throw(KeyError(name))
     ops = Vector{API.LLVMValueRef}(nops)
-    LLVMType(API.LLVMGetNamedMetadataOperands(md.mod.handle, )name, ops)
+    API.LLVMGetNamedMetadataOperands(md.mod.handle, name, ops)
     return map(t->Value(t), ops)
 end
 
