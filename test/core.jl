@@ -10,6 +10,8 @@ let
     dispose(ctx)
 end
 
+Context() do ctx end
+
 
 ## type
 
@@ -17,6 +19,10 @@ let
     typ = LLVM.Int1Type()
     @test context(typ) == global_ctx
     @test LLVM.Int1Type(local_ctx) != typ
+end
+
+Context() do ctx
+    typ = LLVM.Int1Type(ctx)
 
     # type agnostic
     @test kind(typ) == LLVM.API.LLVMIntegerTypeKind
@@ -26,9 +32,9 @@ let
     @test width(LLVM.Int32Type()) == 32
 end
 
-let
-    x = LLVM.Int1Type()
-    y = [LLVM.Int8Type(), LLVM.Int16Type()]
+Context() do ctx
+    x = LLVM.Int1Type(ctx)
+    y = [LLVM.Int8Type(ctx), LLVM.Int16Type(ctx)]
     ft = LLVM.FunctionType(x, y)
 
     @test !isvararg(ft)
@@ -36,8 +42,8 @@ let
     @test parameters(ft) == y
 end
 
-let
-    eltyp = LLVM.Int32Type()
+Context() do ctx
+    eltyp = LLVM.Int32Type(ctx)
 
     ptrtyp = LLVM.PointerType(eltyp)
     @test eltype(ptrtyp) == eltyp
@@ -47,32 +53,32 @@ let
     @test addrspace(ptrtyp) == 1
 end
 
-let
-    eltyp = LLVM.Int32Type()
+Context() do ctx
+    eltyp = LLVM.Int32Type(ctx)
 
     arrtyp = LLVM.ArrayType(eltyp, 2)
     @test eltype(arrtyp) == eltyp
     @test length(arrtyp) == 2
 end
 
-let
-    eltyp = LLVM.Int32Type()
+Context() do ctx
+    eltyp = LLVM.Int32Type(ctx)
 
     vectyp = LLVM.VectorType(eltyp, 2)
     @test eltype(vectyp) == eltyp
     @test size(vectyp) == 2
 end
 
-let
-    elem = [LLVM.Int32Type(), LLVM.FloatType()]
+Context() do ctx
+    elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]
 
-    let st = LLVM.StructType(elem)
+    let st = LLVM.StructType(elem, ctx)
         @test !ispacked(st)
         @test !isopaque(st)
         @test elements(st) == elem
     end
 
-    let st = LLVM.StructType("foo")
+    let st = LLVM.StructType("foo", ctx)
         @test name(st) == "foo"
         @test isopaque(st)
         elements!(st, elem)
@@ -84,8 +90,8 @@ end
 
 ## value
 
-let
-    typ = LLVM.Int32Type()
+Context() do ctx
+    typ = LLVM.Int32Type(ctx)
     val = ConstInt(typ, 1)
 
     show(DevNull, val)
@@ -98,14 +104,14 @@ let
     # TODO: name! and replace_uses! if embedded in module
 end
 
-let
-    t1 = LLVM.Int32Type()
+Context() do ctx
+    t1 = LLVM.Int32Type(ctx)
     c1 = ConstInt(t1, 1)
     @test value_zext(c1) == 1
     c2 = ConstInt(t1, -1, true)
     @test value_sext(c2) == -1
 
-    t2 = LLVM.DoubleType()
+    t2 = LLVM.DoubleType(ctx)
     c = ConstReal(t2, 1.1)
     @test value_double(c) == 1.1
 end
@@ -115,12 +121,24 @@ end
 
 let
     mod = LLVMModule("foo")
+    @test context(mod) == global_ctx
+
+    dispose(mod)
+end
+
+Context() do ctx
+    mod = LLVMModule("foo", ctx)
+    @test context(mod) == ctx
 
     clone = LLVMModule(mod)
     @test mod != clone
+    @test context(clone) == ctx
     dispose(clone)
 
     show(DevNull, mod)
+
+    inline_asm!(mod, "nop")
+    @test contains(sprint(io->show(io,mod)), "module asm")
 
     dummyTarget = "SomeTarget"
     target!(mod, dummyTarget)
@@ -130,18 +148,21 @@ let
     datalayout!(mod, dummyLayout)
     @test datalayout(mod) == dummyLayout
 
-    dispose(mod)
-end
+    st = LLVM.StructType("foo", ctx)
+    ft = LLVM.FunctionType(st, [st])
+    add!(functions(mod), "bar", ft)
 
-let
-    mod = LLVMModule("foo", local_ctx)
+    @test get(types(mod), "foo") == st
+    @test_throws KeyError get(types(mod), "bar")
 
-    @test context(mod) == local_ctx
-
-    clone = LLVMModule(mod)
-    @test mod != clone
-    @test context(clone) == local_ctx
-    dispose(clone)
+    f = get(functions(mod), "bar")
+    @test first(functions(mod)) == f
+    fs = 0
+    for f in functions(mod)
+        fs += 1
+    end
+    @test fs == 1
+    @test last(functions(mod)) == f
 
     dispose(mod)
 end

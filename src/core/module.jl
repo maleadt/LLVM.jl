@@ -1,7 +1,7 @@
 # Modules represent the top-level structure in an LLVM program.
 
 export LLVMModule, dispose,
-       target, target!, datalayout, datalayout!
+       target, target!, datalayout, datalayout!, context, inline_asm!
 
 import Base: show
 
@@ -48,8 +48,8 @@ function haskey(types::ModuleTypeIterator, name::String)
 end
 
 function get(types::ModuleTypeIterator, name::String)
-    typ = API.LLVMGetTypeByName(types.mod.handle, name)
-    typ == C_NULL && throw(KeyError(name))
+    ptr = API.LLVMGetTypeByName(types.mod.handle, name)
+    ptr == C_NULL && throw(KeyError(name))
     return LLVMType(ptr)
 end
 
@@ -82,7 +82,6 @@ add!(md::ModuleMetadataIterator, name::String, val::Value) =
     API.LLVMAddNamedMetadataOperand(md.mod.handle, name, val.handle)
 
 
-
 ## function iteration
 
 export functions, add!
@@ -101,8 +100,8 @@ function haskey(funcs::ModuleFunctionIterator, name::String)
 end
 
 function get(funcs::ModuleFunctionIterator, name::String)
-    func = API.LLVMGetNamedFunction(funcs.mod.handle, name)
-    func == C_NULL && throw(KeyError(name))
+    ptr = API.LLVMGetNamedFunction(funcs.mod.handle, name)
+    ptr == C_NULL && throw(KeyError(name))
     return LLVM.Value(ptr)
 end
 

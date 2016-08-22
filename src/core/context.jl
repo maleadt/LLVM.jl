@@ -9,6 +9,15 @@ immutable Context
     Context() = new(API.LLVMContextCreate())
 end
 
+function Context(f::Function)
+    ctx = Context()
+    try
+        f(ctx)
+    finally
+        dispose(ctx)
+    end
+end
+
 dispose(ctx::Context) = API.LLVMContextDispose(ctx.handle)
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())
