@@ -19,6 +19,8 @@ let
     typ = LLVM.Int1Type()
     @test context(typ) == global_ctx
     @test LLVM.Int1Type(local_ctx) != typ
+
+    show(DevNull, typ)
 end
 
 Context() do ctx
@@ -153,6 +155,7 @@ Context() do ctx
     add!(functions(mod), "bar", ft)
 
     @test get(types(mod), "foo") == st
+    @test !haskey(types(mod), "bar")
     @test_throws KeyError get(types(mod), "bar")
 
     f = get(functions(mod), "bar")
