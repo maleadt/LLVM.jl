@@ -27,7 +27,6 @@ Context() do ctx
     typ = LLVM.Int1Type(ctx)
 
     # type agnostic
-    @test kind(typ) == LLVM.API.LLVMIntegerTypeKind
     @test issized(typ)
 
     # int specific
@@ -94,7 +93,7 @@ end
 
 Context() do ctx
     typ = LLVM.Int32Type(ctx)
-    val = ConstInt(typ, 1)
+    val = ConstantInt(typ, 1)
 
     show(DevNull, val)
 
@@ -108,14 +107,14 @@ end
 
 Context() do ctx
     t1 = LLVM.Int32Type(ctx)
-    c1 = ConstInt(t1, 1)
-    @test value_zext(c1) == 1
-    c2 = ConstInt(t1, -1, true)
-    @test value_sext(c2) == -1
+    c1 = ConstantInt(t1, 1)
+    @test convert(UInt, c1) == 1
+    c2 = ConstantInt(t1, -1, true)
+    @test convert(Int, c2) == -1
 
     t2 = LLVM.DoubleType(ctx)
-    c = ConstReal(t2, 1.1)
-    @test value_double(c) == 1.1
+    c = ConstantFP(t2, 1.1)
+    @test convert(Float64, c) == 1.1
 end
 
 
@@ -184,13 +183,13 @@ end
 
 Context() do ctx
     str = MDString("foo", ctx)
-    @test mdstring(str) == "foo"
+    @test convert(String, str) == "foo"
 end
 
 Context() do ctx
     str = MDString("foo", ctx)
     node = MDNode([str], ctx)
-    ops = mdoperands(node)
+    ops = operands(node)
     @test length(ops) == 1
     @test ops[1] == str
 end

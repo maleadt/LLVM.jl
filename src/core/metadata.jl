@@ -1,25 +1,36 @@
-export MDString, mdstring,
-       MDNode, mdoperands
+import Base: convert
+
+export MDString, MDNode, operands
+
+@llvmtype immutable MetadataAsValue <: Value end
+
+# NOTE: the C API doesn't allow us to differentiate between MD kinds,
+#       all are wrapped by the opaque MetadataAsValue...
+
+typealias MDString MetadataAsValue
 
 function MDString(val::String, ctx::Context=GlobalContext())
-    return Value(API.LLVMMDStringInContext(ctx.handle, val, Cuint(length(val))))
+    return MDString(API.LLVMMDStringInContext(convert(API.LLVMContextRef, ctx), val, Cuint(length(val))))
 end
 
-function mdstring(md::Value)
+function convert(::Type{String}, md::MDString)
     len = Ref{Cuint}()
-    ptr = API.LLVMGetMDString(md.handle, len)
-    ptr == C_NULL && throw(ArgumentError("invalid value, not a MDString?"))
+    ptr = API.LLVMGetMDString(convert(API.LLVMValueRef, md), len)
+    ptr == C_NULL && throw(ArgumentError("invalid metadata, not a MDString?"))
     return unsafe_string(convert(Ptr{Int8}, ptr), len[])
 end
 
-function MDNode(vals::Vector{Value}, ctx::Context=GlobalContext())
-    _vals = map(v->v.handle, vals)
-    return Value(API.LLVMMDNodeInContext(ctx.handle, _vals, Cuint(length(vals))))
+
+typealias MDNode MetadataAsValue
+
+function MDNode{T<:Value}(vals::Vector{T}, ctx::Context=GlobalContext())
+    _vals = map(v->convert(API.LLVMValueRef, v), vals)
+    return MDNode(API.LLVMMDNodeInContext(convert(API.LLVMContextRef, ctx), _vals, Cuint(length(vals))))
 end
 
-function mdoperands(md::Value)
-    nops = API.LLVMGetMDNodeNumOperands(md.handle)
+function operands(md::MDNode)
+    nops = API.LLVMGetMDNodeNumOperands(convert(API.LLVMValueRef, md))
     ops = Vector{API.LLVMValueRef}(nops)
-    API.LLVMGetMDNodeOperands(md.handle, ops)
-    return map(v->Value(v), ops)
+    API.LLVMGetMDNodeOperands(convert(API.LLVMValueRef, md), ops)
+    return map(v->dynamic_convert(Value, v), ops)
 end

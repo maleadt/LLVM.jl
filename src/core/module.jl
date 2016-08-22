@@ -5,30 +5,28 @@ export LLVMModule, dispose,
 
 import Base: show
 
-immutable LLVMModule
-    handle::API.LLVMModuleRef
+@llvmtype immutable LLVMModule end
 
-    LLVMModule(name::String) = new(API.LLVMModuleCreateWithName(name))
-    LLVMModule(name::String, ctx::Context) = new(API.LLVMModuleCreateWithNameInContext(name, ctx.handle))
-    LLVMModule(mod::LLVMModule) = new(API.LLVMCloneModule(mod.handle))
-end
+LLVMModule(name::String) = LLVMModule(API.LLVMModuleCreateWithName(name))
+LLVMModule(name::String, ctx::Context) = LLVMModule(API.LLVMModuleCreateWithNameInContext(name, convert(API.LLVMContextRef, ctx)))
+LLVMModule(mod::LLVMModule) = LLVMModule(API.LLVMCloneModule(convert(API.LLVMModuleRef, mod)))
 
-dispose(mod::LLVMModule) = API.LLVMDisposeModule(mod.handle)
+dispose(mod::LLVMModule) = API.LLVMDisposeModule(convert(API.LLVMModuleRef, mod))
 
 function show(io::IO, mod::LLVMModule)
-    output = unsafe_string(API.LLVMPrintModuleToString(mod.handle))
+    output = unsafe_string(API.LLVMPrintModuleToString(convert(API.LLVMModuleRef, mod)))
     print(io, output)
 end
 
-target(mod::LLVMModule) = unsafe_string(API.LLVMGetTarget(mod.handle))
-target!(mod::LLVMModule, triple) = API.LLVMSetTarget(mod.handle, triple)
+target(mod::LLVMModule) = unsafe_string(API.LLVMGetTarget(convert(API.LLVMModuleRef, mod)))
+target!(mod::LLVMModule, triple) = API.LLVMSetTarget(convert(API.LLVMModuleRef, mod), triple)
 
-datalayout(mod::LLVMModule) = unsafe_string(API.LLVMGetDataLayout(mod.handle))
-datalayout!(mod::LLVMModule, layout) = API.LLVMSetDataLayout(mod.handle, layout)
+datalayout(mod::LLVMModule) = unsafe_string(API.LLVMGetDataLayout(convert(API.LLVMModuleRef, mod)))
+datalayout!(mod::LLVMModule, layout) = API.LLVMSetDataLayout(convert(API.LLVMModuleRef, mod), layout)
 
-inline_asm!(mod::LLVMModule, asm::String) = API.LLVMSetModuleInlineAsm(mod.handle, asm)
+inline_asm!(mod::LLVMModule, asm::String) = API.LLVMSetModuleInlineAsm(convert(API.LLVMModuleRef, mod), asm)
 
-context(mod::LLVMModule) = Context(API.LLVMGetModuleContext(mod.handle))
+context(mod::LLVMModule) = Context(API.LLVMGetModuleContext(convert(API.LLVMModuleRef, mod)))
 
 
 ## type iteration
@@ -44,13 +42,13 @@ end
 types(mod::LLVMModule) = ModuleTypeIterator(mod)
 
 function haskey(types::ModuleTypeIterator, name::String)
-    return API.LLVMGetTypeByName(types.mod.handle, name) != C_NULL
+    return API.LLVMGetTypeByName(convert(API.LLVMModuleRef, types.mod), name) != C_NULL
 end
 
 function get(types::ModuleTypeIterator, name::String)
-    ptr = API.LLVMGetTypeByName(types.mod.handle, name)
-    ptr == C_NULL && throw(KeyError(name))
-    return LLVMType(ptr)
+    ref = API.LLVMGetTypeByName(convert(API.LLVMModuleRef, types.mod), name)
+    ref == C_NULL && throw(KeyError(name))
+    return dynamic_convert(LLVMType, ref)
 end
 
 
@@ -67,19 +65,19 @@ end
 metadata(mod::LLVMModule) = ModuleMetadataIterator(mod)
 
 function haskey(md::ModuleMetadataIterator, name::String)
-    return API.LLVMGetNamedMetadataNumOperands(md.mod.handle, name) != 0
+    return API.LLVMGetNamedMetadataNumOperands(convert(API.LLVMModuleRef, md.mod), name) != 0
 end
 
 function get(md::ModuleMetadataIterator, name::String)
-    nops = API.LLVMGetNamedMetadataNumOperands(md.mod.handle, name)
+    nops = API.LLVMGetNamedMetadataNumOperands(convert(API.LLVMModuleRef, md.mod), name)
     nops == 0 && throw(KeyError(name))
     ops = Vector{API.LLVMValueRef}(nops)
-    API.LLVMGetNamedMetadataOperands(md.mod.handle, name, ops)
-    return map(t->Value(t), ops)
+    API.LLVMGetNamedMetadataOperands(convert(API.LLVMModuleRef, md.mod), name, ops)
+    return map(t->dynamic_convert(Value, t), ops)
 end
 
 add!(md::ModuleMetadataIterator, name::String, val::Value) =
-    API.LLVMAddNamedMetadataOperand(md.mod.handle, name, val.handle)
+    API.LLVMAddNamedMetadataOperand(convert(API.LLVMModuleRef, md.mod), name, convert(API.LLVMValueRef, val))
 
 
 ## function iteration
@@ -96,26 +94,27 @@ end
 functions(mod::LLVMModule) = ModuleFunctionIterator(mod)
 
 function haskey(funcs::ModuleFunctionIterator, name::String)
-    return API.LLVMGetNamedFunction(funcs.mod.handle, name) != C_NULL
+    return API.LLVMGetNamedFunction(convert(API.LLVMModuleRef, funcs.mod), name) != C_NULL
 end
 
 function get(funcs::ModuleFunctionIterator, name::String)
-    ptr = API.LLVMGetNamedFunction(funcs.mod.handle, name)
-    ptr == C_NULL && throw(KeyError(name))
-    return LLVM.Value(ptr)
+    ref = API.LLVMGetNamedFunction(convert(API.LLVMModuleRef, funcs.mod), name)
+    ref == C_NULL && throw(KeyError(name))
+    return LLVMFunction(ref)
 end
 
-add!(funcs::ModuleFunctionIterator, name::String, ftyp::LLVMType) =
-    LLVM.Value(API.LLVMAddFunction(funcs.mod.handle, name, ftyp.handle))
+add!(funcs::ModuleFunctionIterator, name::String, ft::FunctionType) =
+    LLVMFunction(API.LLVMAddFunction(convert(API.LLVMModuleRef, funcs.mod), name, convert(API.LLVMTypeRef, ft)))
 
-start(funcs::ModuleFunctionIterator) = API.LLVMGetFirstFunction(funcs.mod.handle)
+start(funcs::ModuleFunctionIterator) = API.LLVMGetFirstFunction(convert(API.LLVMModuleRef, funcs.mod))
 
 next(funcs::ModuleFunctionIterator, state) =
-    (Value(state), API.LLVMGetNextFunction(state))
+    (LLVMFunction(state), API.LLVMGetNextFunction(state))
 
 done(funcs::ModuleFunctionIterator, state) = state == C_NULL
 
-eltype(funcs::ModuleFunctionIterator) = Value
+eltype(funcs::ModuleFunctionIterator) = LLVMFunction
 
 # NOTE: lacking `endof`, we override `last`
-last(funcs::ModuleFunctionIterator) = LLVM.Value(API.LLVMGetLastFunction(funcs.mod.handle))
+last(funcs::ModuleFunctionIterator) =
+    LLVMFunction(API.LLVMGetLastFunction(convert(API.LLVMModuleRef, funcs.mod)))

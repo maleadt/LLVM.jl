@@ -1,120 +1,179 @@
-export LLVMType, kind, issized, context, show
+import Base: convert
 
-import Base: show
+const LLVMTrue = API.LLVMBool(1)
+const LLVMFalse = API.LLVMBool(0)
 
-immutable LLVMType
-    handle::API.LLVMTypeRef
-
-    LLVMType(handle::API.LLVMTypeRef) = new(handle)
-end
-
-kind(typ::LLVMType) = API.LLVMGetTypeKind(typ.handle)
-issized(typ::LLVMType) = API.LLVMTypeIsSized(typ.handle) == API.LLVMBool(1)
-context(typ::LLVMType) = Context(API.LLVMGetTypeContext(typ.handle))
-
-function show(io::IO, typ::LLVMType)
-    output = unsafe_string(API.LLVMPrintTypeToString(typ.handle))
-    print(io, output)
-end
-
-# TODO: try and model this hierarchy in the Julia type system
-
-
-## integer & floating-point
-
-export width
-
-for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128,
-          :Half, :Float, :Double, :X86FP80, :FP128, :PPCFP128]
-    jlfun = Symbol(T, :Type)
-    apifun = Symbol(:LLVM, jlfun)
-    @eval begin
-        $jlfun() = LLVMType(API.$apifun())
-        $jlfun(ctx::Context) = LLVMType(API.$(Symbol(apifun, :InContext))(ctx.handle))
+function convert(::Type{Bool}, bool::API.LLVMBool)
+    if bool == LLVMTrue
+        return true
+    elseif bool == LLVMFalse
+        return false
+    else
+        throw(ArgumentError("Invalid LLVMBool value $bool"))
     end
 end
 
-width(typ::LLVMType) = API.LLVMGetIntTypeWidth(typ.handle)
+convert(::Type{API.LLVMBool}, bool::Bool) = bool ? LLVMTrue : LLVMFalse
+
+export LLVMTrue, LLVMFalse, LLVMType, kind, issized, context, show
+
+import Base: show
+
+@llvmtype abstract LLVMType
+
+dynamic_convert(::Type{LLVMType}, ref::API.LLVMTypeRef) = identify(ref, API.LLVMGetTypeKind(ref))(ref)
+
+issized(typ::LLVMType) =
+    convert(Bool, API.LLVMTypeIsSized(convert(API.LLVMTypeRef, typ)))
+context(typ::LLVMType) = Context(API.LLVMGetTypeContext(convert(API.LLVMTypeRef, typ)))
+
+function show(io::IO, typ::LLVMType)
+    output = unsafe_string(API.LLVMPrintTypeToString(convert(API.LLVMTypeRef, typ)))
+    print(io, output)
+end
+
+
+## integer
+
+export width
+
+@llvmtype immutable LLVMInteger <: LLVMType end
+
+for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
+    jlfun = Symbol(T, :Type)
+    apifun = Symbol(:LLVM, jlfun)
+    @eval begin
+        $jlfun() = LLVMInteger(API.$apifun())
+        $jlfun(ctx::Context) =
+            LLVMInteger(API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
+    end
+end
+
+width(inttyp::LLVMInteger) = API.LLVMGetIntTypeWidth(convert(API.LLVMTypeRef, inttyp))
+
+
+## floating-point
+
+@llvmtype immutable LLVMFloat <: LLVMType end
+
+for T in [:Half, :Float, :Double, :X86FP80, :FP128, :PPCFP128]
+    jlfun = Symbol(T, :Type)
+    apifun = Symbol(:LLVM, jlfun)
+    @eval begin
+        $jlfun() = LLVMFloat(API.$apifun())
+        $jlfun(ctx::Context) =
+            LLVMFloat(API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
+    end
+end
 
 
 ## function types
 
 export isvararg, return_type, parameters
 
-function FunctionType(rettyp::LLVMType, params::Vector{LLVMType}, vararg::Bool=false)
-    _params = map(t->t.handle, params)
-    return LLVMType(API.LLVMFunctionType(rettyp.handle,
+@llvmtype immutable FunctionType <: LLVMType end
+
+function FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}, vararg::Bool=false)
+    _params = map(t->convert(API.LLVMTypeRef, t), params)
+    return FunctionType(API.LLVMFunctionType(convert(API.LLVMTypeRef, rettyp),
                                          _params, Cuint(length(_params)),
-                                         API.LLVMBool(vararg)))
+                                         convert(API.LLVMBool, vararg)))
 end
 
-isvararg(ft::LLVMType) = API.LLVMIsFunctionVarArg(ft.handle) == API.LLVMBool(1)
+isvararg(ft::FunctionType) =
+    convert(Bool, API.LLVMIsFunctionVarArg(convert(API.LLVMTypeRef, ft)))
 
-return_type(ft::LLVMType) = LLVMType(API.LLVMGetReturnType(ft.handle))
+return_type(ft::FunctionType) =
+    dynamic_convert(LLVMType, API.LLVMGetReturnType(convert(API.LLVMTypeRef, ft)))
 
-function parameters(ft::LLVMType)
-    nparams = API.LLVMCountParamTypes(ft.handle)
+function parameters(ft::FunctionType)
+    nparams = API.LLVMCountParamTypes(convert(API.LLVMTypeRef, ft))
     params = Vector{API.LLVMTypeRef}(nparams)
-    API.LLVMGetParamTypes(ft.handle, params)
-    return map(t->LLVMType(t), params)
+    API.LLVMGetParamTypes(convert(API.LLVMTypeRef, ft), params)
+    return map(t->dynamic_convert(LLVMType, t), params)
 end
+
+
+
+## composite types
+
+@llvmtype abstract CompositeType <: LLVMType
 
 
 ## sequential types
 
 export addrspace
 
+@llvmtype abstract SequentialType <: CompositeType
+
 import Base: length, size, eltype
 
+eltype(typ::SequentialType) =
+    dynamic_convert(LLVMType, API.LLVMGetElementType(convert(API.LLVMTypeRef, typ)))
+
+@llvmtype immutable PointerType <: SequentialType end
+
 function PointerType(eltyp::LLVMType, addrspace=0)
-    return LLVMType(API.LLVMPointerType(eltyp.handle, Cuint(addrspace)))
+    return PointerType(API.LLVMPointerType(convert(API.LLVMTypeRef, eltyp),
+                                           Cuint(addrspace)))
 end
 
-addrspace(ptrtyp::LLVMType) = API.LLVMGetPointerAddressSpace(ptrtyp.handle)
+addrspace(ptrtyp::PointerType) =
+    API.LLVMGetPointerAddressSpace(convert(API.LLVMTypeRef, ptrtyp))
+
+@llvmtype immutable ArrayType <: SequentialType end
 
 function ArrayType(eltyp::LLVMType, count)
-    return LLVMType(API.LLVMArrayType(eltyp.handle, Cuint(count)))
+    return ArrayType(API.LLVMArrayType(convert(API.LLVMTypeRef, eltyp), Cuint(count)))
 end
 
-length(arrtyp::LLVMType) = API.LLVMGetArrayLength(arrtyp.handle)
+length(arrtyp::ArrayType) = API.LLVMGetArrayLength(convert(API.LLVMTypeRef, arrtyp))
+
+@llvmtype immutable VectorType <: SequentialType end
 
 function VectorType(eltyp::LLVMType, count)
-    return LLVMType(API.LLVMVectorType(eltyp.handle, Cuint(count)))
+    return VectorType(API.LLVMVectorType(convert(API.LLVMTypeRef, eltyp), Cuint(count)))
 end
 
-size(vectyp::LLVMType) = API.LLVMGetVectorSize(vectyp.handle)
-
-eltype(typ::LLVMType) = LLVMType(API.LLVMGetElementType(typ.handle))
+size(vectyp::VectorType) = API.LLVMGetVectorSize(convert(API.LLVMTypeRef, vectyp))
 
 
 ## structure types
 
 export name, ispacked, isopaque, elements, elements!
 
+@llvmtype immutable StructType <: SequentialType end
+
 function StructType(name::String, ctx::Context=GlobalContext())
-    return LLVMType(API.LLVMStructCreateNamed(ctx.handle, name))
+    return StructType(API.LLVMStructCreateNamed(convert(API.LLVMContextRef, ctx), name))
 end
 
-function StructType(elems::Vector{LLVMType}, ctx::Context=GlobalContext(), packed::Bool=false)
-    _elems = map(t->t.handle, elems)
+function StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context=GlobalContext(),
+                                 packed::Bool=false)
+    _elems = map(t->convert(API.LLVMTypeRef, t), elems)
 
-    return LLVMType(API.LLVMStructTypeInContext(ctx.handle, _elems, Cuint(length(_elems)),
-                                                API.LLVMBool(packed)))
+    return StructType(API.LLVMStructTypeInContext(convert(API.LLVMContextRef, ctx), _elems,
+                                                  Cuint(length(_elems)),
+                                                  convert(API.LLVMBool, packed)))
 end
 
-name(structtyp::LLVMType) = unsafe_string(API.LLVMGetStructName(structtyp.handle))
-ispacked(structtyp::LLVMType) = API.LLVMIsPackedStruct(structtyp.handle) == API.LLVMBool(1)
-isopaque(structtyp::LLVMType) = API.LLVMIsOpaqueStruct(structtyp.handle) == API.LLVMBool(1)
+name(structtyp::StructType) =
+    unsafe_string(API.LLVMGetStructName(convert(API.LLVMTypeRef, structtyp)))
+ispacked(structtyp::StructType) =
+    convert(Bool, API.LLVMIsPackedStruct(convert(API.LLVMTypeRef, structtyp)))
+isopaque(structtyp::StructType) =
+    convert(Bool, API.LLVMIsOpaqueStruct(convert(API.LLVMTypeRef, structtyp)))
 
-function elements(structtyp::LLVMType)
-    nelems = API.LLVMCountStructElementTypes(structtyp.handle)
+function elements(structtyp::StructType)
+    nelems = API.LLVMCountStructElementTypes(convert(API.LLVMTypeRef, structtyp))
     elems = Vector{API.LLVMTypeRef}(nelems)
-    API.LLVMGetStructElementTypes(structtyp.handle, elems)
-    return map(t->LLVMType(t), elems)
+    API.LLVMGetStructElementTypes(convert(API.LLVMTypeRef, structtyp), elems)
+    return map(t->dynamic_convert(LLVMType, t), elems)
 end
 
-function elements!(structtyp::LLVMType, elems::Vector{LLVMType}, packed::Bool=false)
-    _elems = map(t->t.handle, elems)
+function elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=false)
+    _elems = map(t->convert(API.LLVMTypeRef, t), elems)
 
-    API.LLVMStructSetBody(structtyp.handle, _elems, Cuint(length(_elems)), API.LLVMBool(packed))
+    API.LLVMStructSetBody(convert(API.LLVMTypeRef, structtyp), _elems, Cuint(length(_elems)),
+                          convert(API.LLVMBool, packed))
 end

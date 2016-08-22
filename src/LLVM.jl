@@ -9,6 +9,9 @@ isfile(ext) || error("Unable to load $ext\n\nPlease re-run Pkg.build(\"LLVM\"), 
 include(ext)
 end
 
+
+include("auxiliary.jl")
+
 include("core.jl")
 
 end

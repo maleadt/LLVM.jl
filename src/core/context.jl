@@ -2,12 +2,9 @@
 
 export Context, dispose, GlobalContext
 
-immutable Context
-    handle::API.LLVMContextRef
+@llvmtype immutable Context end
 
-    Context(handle::API.LLVMContextRef) = new(handle)
-    Context() = new(API.LLVMContextCreate())
-end
+Context() = Context(API.LLVMContextCreate())
 
 function Context(f::Function)
     ctx = Context()
@@ -18,6 +15,6 @@ function Context(f::Function)
     end
 end
 
-dispose(ctx::Context) = API.LLVMContextDispose(ctx.handle)
+dispose(ctx::Context) = API.LLVMContextDispose(convert(API.LLVMContextRef, ctx))
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())
