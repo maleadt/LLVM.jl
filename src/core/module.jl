@@ -41,12 +41,12 @@ end
 
 types(mod::LLVMModule) = ModuleTypeIterator(mod)
 
-function haskey(types::ModuleTypeIterator, name::String)
-    return API.LLVMGetTypeByName(convert(API.LLVMModuleRef, types.mod), name) != C_NULL
+function haskey(it::ModuleTypeIterator, name::String)
+    return API.LLVMGetTypeByName(convert(API.LLVMModuleRef, it.mod), name) != C_NULL
 end
 
-function get(types::ModuleTypeIterator, name::String)
-    ref = API.LLVMGetTypeByName(convert(API.LLVMModuleRef, types.mod), name)
+function get(it::ModuleTypeIterator, name::String)
+    ref = API.LLVMGetTypeByName(convert(API.LLVMModuleRef, it.mod), name)
     ref == C_NULL && throw(KeyError(name))
     return dynamic_convert(LLVMType, ref)
 end
@@ -64,20 +64,20 @@ end
 
 metadata(mod::LLVMModule) = ModuleMetadataIterator(mod)
 
-function haskey(md::ModuleMetadataIterator, name::String)
-    return API.LLVMGetNamedMetadataNumOperands(convert(API.LLVMModuleRef, md.mod), name) != 0
+function haskey(it::ModuleMetadataIterator, name::String)
+    return API.LLVMGetNamedMetadataNumOperands(convert(API.LLVMModuleRef, it.mod), name) != 0
 end
 
-function get(md::ModuleMetadataIterator, name::String)
-    nops = API.LLVMGetNamedMetadataNumOperands(convert(API.LLVMModuleRef, md.mod), name)
+function get(it::ModuleMetadataIterator, name::String)
+    nops = API.LLVMGetNamedMetadataNumOperands(convert(API.LLVMModuleRef, it.mod), name)
     nops == 0 && throw(KeyError(name))
     ops = Vector{API.LLVMValueRef}(nops)
-    API.LLVMGetNamedMetadataOperands(convert(API.LLVMModuleRef, md.mod), name, ops)
+    API.LLVMGetNamedMetadataOperands(convert(API.LLVMModuleRef, it.mod), name, ops)
     return map(t->dynamic_convert(Value, t), ops)
 end
 
-add!(md::ModuleMetadataIterator, name::String, val::Value) =
-    API.LLVMAddNamedMetadataOperand(convert(API.LLVMModuleRef, md.mod), name, convert(API.LLVMValueRef, val))
+add!(it::ModuleMetadataIterator, name::String, val::Value) =
+    API.LLVMAddNamedMetadataOperand(convert(API.LLVMModuleRef, it.mod), name, convert(API.LLVMValueRef, val))
 
 
 ## function iteration
@@ -93,28 +93,28 @@ end
 
 functions(mod::LLVMModule) = ModuleFunctionIterator(mod)
 
-function haskey(funcs::ModuleFunctionIterator, name::String)
-    return API.LLVMGetNamedFunction(convert(API.LLVMModuleRef, funcs.mod), name) != C_NULL
+function haskey(it::ModuleFunctionIterator, name::String)
+    return API.LLVMGetNamedFunction(convert(API.LLVMModuleRef, it.mod), name) != C_NULL
 end
 
-function get(funcs::ModuleFunctionIterator, name::String)
-    ref = API.LLVMGetNamedFunction(convert(API.LLVMModuleRef, funcs.mod), name)
+function get(it::ModuleFunctionIterator, name::String)
+    ref = API.LLVMGetNamedFunction(convert(API.LLVMModuleRef, it.mod), name)
     ref == C_NULL && throw(KeyError(name))
     return LLVMFunction(ref)
 end
 
-add!(funcs::ModuleFunctionIterator, name::String, ft::FunctionType) =
-    LLVMFunction(API.LLVMAddFunction(convert(API.LLVMModuleRef, funcs.mod), name, convert(API.LLVMTypeRef, ft)))
+add!(it::ModuleFunctionIterator, name::String, ft::FunctionType) =
+    LLVMFunction(API.LLVMAddFunction(convert(API.LLVMModuleRef, it.mod), name, convert(API.LLVMTypeRef, ft)))
 
-start(funcs::ModuleFunctionIterator) = API.LLVMGetFirstFunction(convert(API.LLVMModuleRef, funcs.mod))
+start(it::ModuleFunctionIterator) = API.LLVMGetFirstFunction(convert(API.LLVMModuleRef, it.mod))
 
-next(funcs::ModuleFunctionIterator, state) =
+next(it::ModuleFunctionIterator, state) =
     (LLVMFunction(state), API.LLVMGetNextFunction(state))
 
-done(funcs::ModuleFunctionIterator, state) = state == C_NULL
+done(it::ModuleFunctionIterator, state) = state == C_NULL
 
-eltype(funcs::ModuleFunctionIterator) = LLVMFunction
+eltype(it::ModuleFunctionIterator) = LLVMFunction
 
 # NOTE: lacking `endof`, we override `last`
-last(funcs::ModuleFunctionIterator) =
-    LLVMFunction(API.LLVMGetLastFunction(convert(API.LLVMModuleRef, funcs.mod)))
+last(it::ModuleFunctionIterator) =
+    LLVMFunction(API.LLVMGetLastFunction(convert(API.LLVMModuleRef, it.mod)))
