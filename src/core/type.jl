@@ -1,21 +1,4 @@
-import Base: convert
-
-const LLVMTrue = API.LLVMBool(1)
-const LLVMFalse = API.LLVMBool(0)
-
-function convert(::Type{Bool}, bool::API.LLVMBool)
-    if bool == LLVMTrue
-        return true
-    elseif bool == LLVMFalse
-        return false
-    else
-        throw(ArgumentError("Invalid LLVMBool value $bool"))
-    end
-end
-
-convert(::Type{API.LLVMBool}, bool::Bool) = bool ? LLVMTrue : LLVMFalse
-
-export LLVMTrue, LLVMFalse, LLVMType, kind, issized, context, show
+export issized, context, show
 
 import Base: show
 
@@ -77,7 +60,7 @@ function FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}, vararg::
     _params = map(t->convert(API.LLVMTypeRef, t), params)
     return FunctionType(API.LLVMFunctionType(convert(API.LLVMTypeRef, rettyp),
                                          _params, Cuint(length(_params)),
-                                         convert(API.LLVMBool, vararg)))
+                                         convert(LLVMBool, vararg)))
 end
 
 isvararg(ft::FunctionType) =
@@ -154,7 +137,7 @@ function StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context=GlobalContext(),
 
     return StructType(API.LLVMStructTypeInContext(convert(API.LLVMContextRef, ctx), _elems,
                                                   Cuint(length(_elems)),
-                                                  convert(API.LLVMBool, packed)))
+                                                  convert(LLVMBool, packed)))
 end
 
 name(structtyp::StructType) =
@@ -175,5 +158,5 @@ function elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed:
     _elems = map(t->convert(API.LLVMTypeRef, t), elems)
 
     API.LLVMStructSetBody(convert(API.LLVMTypeRef, structtyp), _elems, Cuint(length(_elems)),
-                          convert(API.LLVMBool, packed))
+                          convert(LLVMBool, packed))
 end
