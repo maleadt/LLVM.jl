@@ -4,7 +4,18 @@ import Base: show
 
 @llvmtype abstract LLVMType
 
-dynamic_convert(::Type{LLVMType}, ref::API.LLVMTypeRef) = identify(ref, API.LLVMGetTypeKind(ref))(ref)
+dynamic_convert(::Type{LLVMType}, ref::API.LLVMTypeRef) =
+    identify(ref, API.LLVMGetTypeKind(ref))(ref)
+
+@inline function construct{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
+    @static if DEBUG
+        RealT = identify(ref, API.LLVMGetTypeKind(ref))
+        if T != RealT
+            error("invalid conversion of $RealT reference to $T")
+        end
+    end
+    return T(ref)
+end
 
 issized(typ::LLVMType) =
     convert(Bool, API.LLVMTypeIsSized(convert(API.LLVMTypeRef, typ)))
@@ -26,9 +37,9 @@ for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     jlfun = Symbol(T, :Type)
     apifun = Symbol(:LLVM, jlfun)
     @eval begin
-        $jlfun() = LLVMInteger(API.$apifun())
+        $jlfun() = construct(LLVMInteger, API.$apifun())
         $jlfun(ctx::Context) =
-            LLVMInteger(API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
+            construct(LLVMInteger, API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
     end
 end
 
@@ -37,15 +48,18 @@ width(inttyp::LLVMInteger) = API.LLVMGetIntTypeWidth(convert(API.LLVMTypeRef, in
 
 ## floating-point
 
-@llvmtype immutable LLVMFloat <: LLVMType end
-
-for T in [:Half, :Float, :Double, :X86FP80, :FP128, :PPCFP128]
+# NOTE: we don't handle the obscure types here (:X86FP80, :FP128, :PPCFP128),
+#       they would also need special casing as LLVMPPCFP128Type != LLVMPPC_FP128TypeKind
+for T in [:Half, :Float, :Double]
     jlfun = Symbol(T, :Type)
+    apityp = Symbol(:LLVM, T)
     apifun = Symbol(:LLVM, jlfun)
     @eval begin
-        $jlfun() = LLVMFloat(API.$apifun())
+        @llvmtype immutable $apityp <: LLVMType end
+
+        $jlfun() = construct($apityp, API.$apifun())
         $jlfun(ctx::Context) =
-            LLVMFloat(API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
+            construct($apityp, API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
     end
 end
 

@@ -14,9 +14,9 @@ export ConstantInt, ConstantFP
 @llvmtype immutable ConstantInt <: Constant end
 
 ConstantInt(typ::LLVMInteger, val::Integer, signed=false) =
-    ConstantInt(API.LLVMConstInt(convert(API.LLVMTypeRef, typ),
-                                 reinterpret(Culonglong, val),
-                                 convert(LLVMBool, signed)))
+    construct(ConstantInt, API.LLVMConstInt(convert(API.LLVMTypeRef, typ),
+                                            reinterpret(Culonglong, val),
+                                            convert(LLVMBool, signed)))
 
 convert(::Type{UInt}, val::ConstantInt) =
     API.LLVMConstIntGetZExtValue(convert(API.LLVMValueRef, val))
@@ -26,8 +26,8 @@ convert(::Type{Int}, val::ConstantInt) =
 
 @llvmtype immutable ConstantFP <: Constant end
 
-ConstantFP(typ::LLVMFloat, val::Real) =
-    ConstantFP(API.LLVMConstReal(convert(API.LLVMTypeRef, typ), Cdouble(val)))
+ConstantFP(typ::LLVMDouble, val::Real) =
+    construct(ConstantFP, API.LLVMConstReal(convert(API.LLVMTypeRef, typ), Cdouble(val)))
 
 convert(::Type{Float64}, val::ConstantFP) =
     API.LLVMConstRealGetDouble(convert(API.LLVMValueRef, val), Ref{API.LLVMBool}())

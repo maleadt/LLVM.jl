@@ -6,6 +6,16 @@
 dynamic_convert(::Type{Value}, ref::API.LLVMValueRef) =
     identify(ref, API.LLVMGetValueKind(ref))(ref)
 
+@inline function construct{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
+    @static if DEBUG
+        RealT = identify(ref, API.LLVMGetValueKind(ref))
+        if T != RealT
+            error("invalid conversion of $RealT reference to $T")
+        end
+    end
+    return T(ref)
+end
+
 
 ## general APIs
 
