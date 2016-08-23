@@ -100,16 +100,18 @@ end
 function get(it::ModuleFunctionIterator, name::String)
     ref = API.LLVMGetNamedFunction(convert(API.LLVMModuleRef, it.mod), name)
     ref == C_NULL && throw(KeyError(name))
-    return LLVMFunction(ref)
+    return construct(LLVMFunction, ref)
 end
 
 add!(it::ModuleFunctionIterator, name::String, ft::FunctionType) =
-    LLVMFunction(API.LLVMAddFunction(convert(API.LLVMModuleRef, it.mod), name, convert(API.LLVMTypeRef, ft)))
+    construct(LLVMFunction,
+              API.LLVMAddFunction(convert(API.LLVMModuleRef, it.mod), name,
+                                  convert(API.LLVMTypeRef, ft)))
 
 start(it::ModuleFunctionIterator) = API.LLVMGetFirstFunction(convert(API.LLVMModuleRef, it.mod))
 
 next(it::ModuleFunctionIterator, state) =
-    (LLVMFunction(state), API.LLVMGetNextFunction(state))
+    (construct(LLVMFunction,state), API.LLVMGetNextFunction(state))
 
 done(it::ModuleFunctionIterator, state) = state == C_NULL
 
@@ -117,4 +119,4 @@ eltype(it::ModuleFunctionIterator) = LLVMFunction
 
 # NOTE: lacking `endof`, we override `last`
 last(it::ModuleFunctionIterator) =
-    LLVMFunction(API.LLVMGetLastFunction(convert(API.LLVMModuleRef, it.mod)))
+    construct(LLVMFunction, API.LLVMGetLastFunction(convert(API.LLVMModuleRef, it.mod)))

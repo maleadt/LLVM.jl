@@ -39,7 +39,8 @@ for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     @eval begin
         $jlfun() = construct(LLVMInteger, API.$apifun())
         $jlfun(ctx::Context) =
-            construct(LLVMInteger, API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
+            construct(LLVMInteger,
+                      API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
     end
 end
 
@@ -59,7 +60,8 @@ for T in [:Half, :Float, :Double]
 
         $jlfun() = construct($apityp, API.$apifun())
         $jlfun(ctx::Context) =
-            construct($apityp, API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
+            construct($apityp,
+                      API.$(Symbol(apifun, :InContext))(convert(API.LLVMContextRef, ctx)))
     end
 end
 
@@ -171,6 +173,6 @@ end
 function elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=false)
     _elems = map(t->convert(API.LLVMTypeRef, t), elems)
 
-    API.LLVMStructSetBody(convert(API.LLVMTypeRef, structtyp), _elems, Cuint(length(_elems)),
-                          convert(LLVMBool, packed))
+    API.LLVMStructSetBody(convert(API.LLVMTypeRef, structtyp), _elems,
+                          Cuint(length(_elems)), convert(LLVMBool, packed))
 end
