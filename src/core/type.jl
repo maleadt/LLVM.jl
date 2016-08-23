@@ -176,3 +176,18 @@ function elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed:
     API.LLVMStructSetBody(convert(API.LLVMTypeRef, structtyp), _elems,
                           Cuint(length(_elems)), convert(LLVMBool, packed))
 end
+
+
+## other
+
+@llvmtype immutable LLVMVoid <: LLVMType end
+
+VoidType() = construct(LLVMVoid, API.LLVMVoidType())
+VoidType(ctx::Context) =
+    construct(LLVMVoid, API.LLVMVoidTypeInContext(convert(API.LLVMContextRef, ctx)))
+
+@llvmtype immutable LLVMLabel <: LLVMType end
+
+LabelType() = construct(LLVMLabel, API.LLVMLabelType())
+LabelType(ctx::Context) =
+    construct(LLVMLabel, API.LLVMLabelTypeInContext(convert(API.LLVMContextRef, ctx)))

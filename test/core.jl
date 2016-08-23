@@ -15,6 +15,7 @@ Context() do ctx end
 
 ## type
 
+# integer
 let
     typ = LLVM.Int1Type()
     @test context(typ) == global_ctx
@@ -22,7 +23,6 @@ let
 
     show(DevNull, typ)
 end
-
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
 
@@ -33,6 +33,7 @@ Context() do ctx
     @test width(LLVM.Int32Type()) == 32
 end
 
+# function
 Context() do ctx
     x = LLVM.Int1Type(ctx)
     y = [LLVM.Int8Type(ctx), LLVM.Int16Type(ctx)]
@@ -43,6 +44,7 @@ Context() do ctx
     @test parameters(ft) == y
 end
 
+# sequential
 Context() do ctx
     eltyp = LLVM.Int32Type(ctx)
 
@@ -53,7 +55,6 @@ Context() do ctx
     ptrtyp = LLVM.PointerType(eltyp, 1)
     @test addrspace(ptrtyp) == 1
 end
-
 Context() do ctx
     eltyp = LLVM.Int32Type(ctx)
 
@@ -61,7 +62,6 @@ Context() do ctx
     @test eltype(arrtyp) == eltyp
     @test length(arrtyp) == 2
 end
-
 Context() do ctx
     eltyp = LLVM.Int32Type(ctx)
 
@@ -70,6 +70,7 @@ Context() do ctx
     @test size(vectyp) == 2
 end
 
+# structure
 Context() do ctx
     elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]
 
@@ -86,6 +87,12 @@ Context() do ctx
         @test elements(st) == elem
         @test !isopaque(st)
     end
+end
+
+# other
+Context() do ctx
+    LLVM.VoidType()
+    LLVM.LabelType()
 end
 
 
@@ -105,6 +112,9 @@ Context() do ctx
     # TODO: name! and replace_uses! if embedded in module
 end
 
+# constants
+
+# scalar
 Context() do ctx
     t1 = LLVM.Int32Type(ctx)
     c1 = ConstantInt(t1, 1)
