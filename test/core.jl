@@ -127,6 +127,44 @@ Context() do ctx
     @test convert(Float64, c) == 1.1
 end
 
+# function
+Context() do ctx
+    mod = LLVMModule("foo", ctx)
+    ft = LLVM.FunctionType(LLVM.VoidType(), LLVMType[])
+    fn = add!(functions(mod), "bar", ft)    # TODO: ctor with mod?
+
+    show(DevNull, fn)
+
+    @test last(functions(mod)) == fn
+    delete!(fn)
+    @test isempty(functions(mod))
+
+    #personality(fn)
+
+    @test intrinsic_id(fn) == 0
+
+    @test callconv(fn) == LLVM.API.LLVMCCallConv
+    callconv!(fn, LLVM.API.LLVMFastCallConv)
+    @test callconv(fn) == LLVM.API.LLVMFastCallConv
+
+    #LLVM.gc(fn)
+
+    attr = attributes(fn)
+    # @show get(attr)
+
+    dispose(mod)
+end
+
+# global variables
+Context() do ctx
+    mod = LLVMModule("foo", ctx)
+    gv = GlobalVariable(mod, LLVM.Int32Type(), "bar")
+
+    show(DevNull, gv)
+
+    dispose(mod)
+end
+
 
 ## module
 

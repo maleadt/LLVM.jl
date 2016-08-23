@@ -1,4 +1,4 @@
-export issized, context, show
+export LLVMType, issized, context, show
 
 import Base: show
 

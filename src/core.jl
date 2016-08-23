@@ -28,6 +28,8 @@ end
 #       as it is really only used when passing values to the API
 convert(::Type{LLVMBool}, bool::Bool)::API.LLVMBool = bool ? LLVMTrue.val : LLVMFalse.val
 
+# forward-definitions
+@llvmtype immutable LLVMModule end
 
 include("core/context.jl")
 include("core/type.jl")

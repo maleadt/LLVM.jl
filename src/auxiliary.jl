@@ -56,6 +56,7 @@ macro llvmtype(typedef)
     else
         error("malformed type definition: cannot decode type name")
     end
+    debug("Defining LLVM type $typename")
 
     # figure out counterpart LLVM typenames
     function get_api_typename(name::Symbol, tail::Symbol, head=:LLVM)
