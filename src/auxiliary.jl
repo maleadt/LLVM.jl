@@ -48,7 +48,7 @@ macro llvmtype(typedef)
         push!(hierarchy, typename)
 
         isdefined(LLVM, parentname) || error("unknown parent type $parentname")
-        parenttype = @eval $parentname
+        parenttype = eval(parentname)
         while parenttype != Any
             push!(hierarchy, Symbol(parenttype.name.name))
             parenttype = supertype(parenttype)
@@ -76,40 +76,12 @@ macro llvmtype(typedef)
         end
     end
 
-    # if we're dealing with a concrete type, make it usable
-    if typedef.head == :type
-        # add `ref` field containing an opaque pointer
-        unshift!(typedef.args[3].args, :( ref::Ptr{Void} ))
-
-        # handle usage of that ref (ie. converting to and from)
-        #
-        # sometimes a type is referred to by one or more of its parent API ref types,
-        # eg. ConstantInt is represented by a ValueRef (one of its supertypes),
-        # while BasicBlock can be represented by both BasicBlockRef and ValueRef
-        api_hierarchy = filter(t->haskey(apireftypes,t), hierarchy)
-        isempty(api_hierarchy) &&
-            error("no type in $typename's hierarchy ($(join(hierarchy, ", "))) exists in the LLVM API")
-        for api_typename in api_hierarchy
-            apireftype = apireftypes[api_typename]
-
-            # define a constructor accepting this reftype
-            unshift!(typedef.args[3].args, :( $typename(ref::API.$apireftype) = new(ref) ))
-
-            # generate a convert method for extracting this reftype
-            append!(code.args, (quote
-                import Base: convert
-                convert(::Type{API.$apireftype}, obj::$typename) =
-                    convert(API.$apireftype, obj.ref)
-                end).args)
-        end
-    end
-
     # check if there exists an enum to differentiate child types from their common parent
     # and use it to generate a `identify` method for identifying references
     for parentname in hierarchy[2:end]  # eg. LLVMStructTypeKind::StructType->CompositeType->Type
         # parent needs to have a valid ref type
         haskey(apireftypes, parentname) || continue
-        parenttype = @eval $parentname
+        parenttype = eval(parentname)
 
         # try and map a type to its API enum kind value. this isn't always straightforward,
         # eg. FunctionType -> LLVMFunctionTypeKind vs Integer -> LLVMIntegerTypeKind
@@ -144,6 +116,34 @@ macro llvmtype(typedef)
 
         # save this enum kind in the discriminator cache
         push!(code.args, :( discriminators[$parentname][API.$apikind] = $typename ))
+    end
+
+    # if we're dealing with a concrete type, make it usable
+    if typedef.head == :type
+        # add `ref` field containing an opaque pointer
+        unshift!(typedef.args[3].args, :( ref::Ptr{Void} ))
+
+        # handle usage of that ref (ie. converting to and from)
+        #
+        # sometimes a type is referred to by one or more of its parent API ref types,
+        # eg. ConstantInt is represented by a ValueRef (one of its supertypes),
+        # while BasicBlock can be represented by both BasicBlockRef and ValueRef
+        referencable = filter(t->haskey(apireftypes,t), hierarchy)
+        isempty(referencable) &&
+            error("no type in $typename's hierarchy ($(join(hierarchy, ", "))) exists in the LLVM API")
+        for ref_typename in referencable
+            apireftype = apireftypes[ref_typename]
+
+            # define a constructor accepting this reftype
+            unshift!(typedef.args[3].args, :( $typename(ref::API.$apireftype) = new(ref) ))
+
+            # generate a convert method for extracting this reftype
+            append!(code.args, (quote
+                import Base: convert
+                convert(::Type{API.$apireftype}, obj::$typename) =
+                    convert(API.$apireftype, obj.ref)
+                end).args)
+        end
     end
 
     return esc(code)
