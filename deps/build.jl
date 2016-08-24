@@ -6,10 +6,11 @@ const DEBUG = haskey(ENV, "DEBUG")
 include("common.jl")
 include(joinpath(dirname(@__FILE__), "..", "src", "logging.jl"))
 
-libname() = return "libLLVM.so"
+libname() = return ["libLLVM.so"]
 
 function libname(version::VersionNumber)
-    return "libLLVM-$(verstr(version)).so"
+    return ["libLLVM-$(version.major).$(version.minor).so",
+            "libLLVM-$(version.major).$(version.minor).$(version.patch).so"]
 end
 
 function configname(version::VersionNumber)
@@ -64,8 +65,7 @@ for dir in unique(libdirs)
 end
 
 # guess for versioned libraries (as the user might have configured ld.so differently)
-for version in versions
-    name = libname(version)
+for version in versions, name in libname(version)
     debug("Searching for library $name")
     lib = Libdl.dlopen_e(name)
     if lib != C_NULL
@@ -109,15 +109,13 @@ for dir in unique(configdirs)
 
         # check for libraries
         libdir = readchomp(`$config --libdir`)
-        lib = joinpath(libdir, libname(config_version)) # versioned library
-        if ispath(lib)
-            debug("- found v$config_version at $lib")
-            push!(libraries, tuple(lib, config_version))
-        end
-        lib = joinpath(libdir, libname())               # unversioned library
-        if ispath(lib)
-            debug("- found v$config_version at $lib")
-            push!(libraries, tuple(lib, config_version))
+        debug("- contains libraries in v$libdir")
+        for name in [libname(config_version); libname()]
+            lib = joinpath(libdir, name)
+            if ispath(lib)
+                debug("- found v$config_version at $lib")
+                push!(libraries, tuple(lib, config_version))
+            end
         end
     end
 end
