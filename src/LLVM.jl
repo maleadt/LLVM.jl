@@ -10,6 +10,7 @@ include(ext)
 end
 
 
+include("logging.jl")
 include("auxiliary.jl")
 
 include("core.jl")

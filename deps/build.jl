@@ -1,7 +1,10 @@
 using Compat
 import Compat.String
 
+const DEBUG = haskey(ENV, "DEBUG")
+
 include("common.jl")
+include(joinpath(dirname(@__FILE__), "..", "src", "logging.jl"))
 
 libname() = return "libLLVM.so"
 
@@ -25,11 +28,13 @@ end
 
 # versions to consider
 if haskey(ENV, "LLVM_VERSION")
+    debug("Overriding LLVM version requirement to v", ENV["LLVM_VERSION"])
     ismatch(r"^\d.\d$", ENV["LLVM_VERSION"]) || error("invalid version requested (should be MAJOR.MINOR)")
     versions = [VersionNumber(ENV["LLVM_VERSION"])]
 else
     versions = map(lib -> VersionNumber(lib),
                    readdir(joinpath(dirname(@__FILE__), "..", "lib")))
+    debug("Acceptable LLVM versions: ", join(versions, ", "))
 end
 
 libraries = Vector{Tuple{String, VersionNumber}}()
@@ -42,8 +47,9 @@ libraries = Vector{Tuple{String, VersionNumber}}()
 libdirs = [( isdefined(Base, :LIBDIR) ? joinpath(JULIA_HOME, Base.LIBDIR)
                                       : joinpath(JULIA_HOME, "..", "lib") ),
            get(ENV, "LD_LIBRARY_PATH", ""), "/usr", "/usr/lib"]
-for dir in libdirs
+for dir in unique(libdirs)
     isdir(dir) || continue
+    debug("Searching for libraries in $dir")
 
     # discover libraries directly
     for file in readdir(dir), re in [r"libLLVM-(\d).(\d).(\d).so", r"libLLVM-(\d).(\d).so"]
@@ -51,6 +57,7 @@ for dir in libdirs
         if m != nothing
             path = joinpath(dir, file)
             version = VersionNumber(map(s->parse(Int,s), m.captures)...)
+            debug("- found v$version at $path")
             push!(libraries, tuple(path, version))
         end
     end
@@ -59,26 +66,31 @@ end
 # guess for versioned libraries (as the user might have configured ld.so differently)
 for version in versions
     name = libname(version)
+    debug("Searching for library $name")
     lib = Libdl.dlopen_e(name)
     if lib != C_NULL
-        push!(libraries, tuple(Libdl.dlpath(lib), version))
+        path = Libdl.dlpath(lib)
+        debug("- found v$version at $path")
+        push!(libraries, tuple(path, version))
     end
 end
 
 # check llvm-for config binaries in known locations
 configversions = [map(v->Nullable(v), versions)..., Nullable{VersionNumber}()]
 configdirs = [JULIA_HOME, joinpath(JULIA_HOME, "..", "tools"), split(ENV["PATH"], ':')...]
-for dir in configdirs
+for dir in unique(configdirs)
     isdir(dir) || continue
+    debug("Searching for config binaries in $dir")
 
     # first discover llvm-config binaries
     configs = Vector{Tuple{String, Nullable{VersionNumber}}}()
     for file in readdir(dir), re in [r"llvm-config-(\d).(\d).(\d)", r"llvm-config-(\d).(\d)"]
         m = match(re, file)
         if m != nothing
-            config = joinpath(dir, file)
+            path = joinpath(dir, file)
             version = VersionNumber(map(s->parse(Int,s), m.captures)...)
-            push!(configs, tuple(config, Nullable(version)))
+            debug("- found llvm-config at $path")
+            push!(configs, tuple(path, Nullable(version)))
         end
     end
     config = joinpath(dir, "llvm-config")
@@ -86,9 +98,11 @@ for dir in configdirs
 
     # then discover libraries
     for (config, version) in configs
+        debug("Searching for libraries using $config")
         # deal with unversioned llvm-config binaries
         if isnull(version)
             config_version = VersionNumber(readchomp(`$config --version`))
+            debug("- reports LLVM v$config_version")
         else
             config_version = get(version)
         end
@@ -96,9 +110,15 @@ for dir in configdirs
         # check for libraries
         libdir = readchomp(`$config --libdir`)
         lib = joinpath(libdir, libname(config_version)) # versioned library
-        ispath(lib) && push!(libraries, tuple(lib, config_version))
+        if ispath(lib)
+            debug("- found v$config_version at $lib")
+            push!(libraries, tuple(lib, config_version))
+        end
         lib = joinpath(libdir, libname())               # unversioned library
-        ispath(lib) && push!(libraries, tuple(lib, config_version))
+        if ispath(lib)
+            debug("- found v$config_version at $lib")
+            push!(libraries, tuple(lib, config_version))
+        end
     end
 end
 

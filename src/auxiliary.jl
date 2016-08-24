@@ -1,18 +1,5 @@
 # Auxiliary functionality for the LLVM.jl package, not part of the LLVM API itself
 
-const DEBUG = haskey(ENV, "DEBUG")
-"Display a debug message. Only results in actual printing if the TRACE or DEBUG environment
-variable is set."
-@inline function debug(io::IO, msg...; prefix="DEBUG: ", line=true)
-    @static if DEBUG
-        Base.print_with_color(:green, io, prefix, chomp(string(msg...)))
-        if line
-            println(io)
-        end
-    end
-end
-@inline debug(msg...; kwargs...) = debug(STDERR, msg...; kwargs...)
-
 # Macro to deal with type definitions of LLVM API types.
 const apitypes = Dict{Symbol,Symbol}()
 const discriminators = Dict{Symbol, Symbol}()
