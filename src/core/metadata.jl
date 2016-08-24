@@ -24,15 +24,12 @@ end
 
 typealias MDNode MetadataAsValue
 
-function MDNode{T<:Value}(vals::Vector{T})
-    _vals = map(v->ref(Value, v), vals)
-    return MDNode(API.LLVMMDNode(_vals, Cuint(length(vals))))
-end
+MDNode{T<:Value}(vals::Vector{T}) =
+    MDNode(API.LLVMMDNode(ref.([Value], vals), Cuint(length(vals))))
 
-function MDNode{T<:Value}(vals::Vector{T}, ctx::Context)
-    _vals = map(v->ref(Value, v), vals)
-    return MDNode(API.LLVMMDNodeInContext(ref(Context, ctx), _vals, Cuint(length(vals))))
-end
+MDNode{T<:Value}(vals::Vector{T}, ctx::Context) =
+    MDNode(API.LLVMMDNodeInContext(ref(Context, ctx), ref.([Value], vals),
+                                   Cuint(length(vals))))
 
 function operands(md::MDNode)
     nops = API.LLVMGetMDNodeNumOperands(ref(Value, md))

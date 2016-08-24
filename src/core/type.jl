@@ -76,12 +76,10 @@ export isvararg, return_type, parameters
 
 @reftypedef ref=LLVMType kind=LLVMFunctionTypeKind immutable FunctionType <: LLVMType end
 
-function FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}, vararg::Bool=false)
-    _params = map(t->ref(LLVMType, t), params)
-    return FunctionType(API.LLVMFunctionType(ref(LLVMType, rettyp),
-                                         _params, Cuint(length(_params)),
-                                         convert(LLVMBool, vararg)))
-end
+FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}, vararg::Bool=false) =
+    FunctionType(API.LLVMFunctionType(ref(LLVMType, rettyp),
+                                      ref.([LLVMType], params), Cuint(length(params)),
+                                      convert(LLVMBool, vararg)))
 
 isvararg(ft::FunctionType) =
     convert(Bool, API.LLVMIsFunctionVarArg(ref(LLVMType, ft)))
@@ -151,20 +149,14 @@ function StructType(name::String, ctx::Context)
     return StructType(API.LLVMStructCreateNamed(ref(Context, ctx), name))
 end
 
-function StructType{T<:LLVMType}(elems::Vector{T}, packed::Bool=false)
-    _elems = map(t->ref(LLVMType, t), elems)
+StructType{T<:LLVMType}(elems::Vector{T}, packed::Bool=false) =
+    StructType(API.LLVMStructType(ref.([LLVMType], elems), Cuint(length(elems)),
+                                  convert(LLVMBool, packed)))
 
-    return StructType(API.LLVMStructType(_elems, Cuint(length(_elems)),
-                                         convert(LLVMBool, packed)))
-end
-
-function StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context, packed::Bool=false)
-    _elems = map(t->ref(LLVMType, t), elems)
-
-    return StructType(API.LLVMStructTypeInContext(ref(Context, ctx), _elems,
-                                                  Cuint(length(_elems)),
-                                                  convert(LLVMBool, packed)))
-end
+StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context, packed::Bool=false) =
+    StructType(API.LLVMStructTypeInContext(ref(Context, ctx), ref.([LLVMType], elems),
+                                           Cuint(length(elems)),
+                                           convert(LLVMBool, packed)))
 
 name(structtyp::StructType) =
     unsafe_string(API.LLVMGetStructName(ref(LLVMType, structtyp)))
@@ -180,12 +172,9 @@ function elements(structtyp::StructType)
     return map(t->dynamic_construct(LLVMType, t), elems)
 end
 
-function elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=false)
-    _elems = map(t->ref(LLVMType, t), elems)
-
-    API.LLVMStructSetBody(ref(LLVMType, structtyp), _elems,
-                          Cuint(length(_elems)), convert(LLVMBool, packed))
-end
+elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=false) =
+    API.LLVMStructSetBody(ref(LLVMType, structtyp), ref.([LLVMType], elems),
+                          Cuint(length(elems)), convert(LLVMBool, packed))
 
 
 ## other

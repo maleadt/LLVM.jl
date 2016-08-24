@@ -24,10 +24,6 @@ matrix:
   include:
     - os: linux
       env: LLVM_VERSION=3.8
-      julia: 0.4
-      addons: *llvm38linux
-    - os: linux
-      env: LLVM_VERSION=3.8
       julia: 0.5
       addons: *llvm38linux
     - os: linux
