@@ -109,7 +109,7 @@ for dir in unique(configdirs)
 
         # check for libraries
         libdir = readchomp(`$config --libdir`)
-        debug("- contains libraries in v$libdir")
+        debug("- contains libraries in $libdir")
         for name in [libname(config_version); libname()]
             lib = joinpath(libdir, name)
             if ispath(lib)
