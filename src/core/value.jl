@@ -1,7 +1,7 @@
 # The bulk of LLVM's object model consists of values, which comprise a very rich type
 # hierarchy.
 
-@llvmtype abstract Value
+@reftypedef abstract Value
 
 dynamic_convert(::Type{Value}, ref::API.LLVMValueRef) =
     identify(ref, API.LLVMGetValueKind(ref))(ref)
@@ -23,26 +23,26 @@ export Value, name, name!, replace_uses!, isconstant, isundef
 
 import Base: show
 
-typeof(val::Value) = dynamic_convert(LLVMType, API.LLVMTypeOf(convert(API.LLVMValueRef, val)))
+typeof(val::Value) = dynamic_convert(LLVMType, API.LLVMTypeOf(ref(Value, val)))
 
-name(val::Value) = unsafe_string(API.LLVMGetValueName(convert(API.LLVMValueRef, val)))
-name!(val::Value, name::String) = API.LLVMSetValueName(convert(API.LLVMValueRef, val), name)
+name(val::Value) = unsafe_string(API.LLVMGetValueName(ref(Value, val)))
+name!(val::Value, name::String) = API.LLVMSetValueName(ref(Value, val), name)
 
 function show(io::IO, val::Value)
-    output = unsafe_string(API.LLVMPrintValueToString(convert(API.LLVMValueRef, val)))
+    output = unsafe_string(API.LLVMPrintValueToString(ref(Value, val)))
     print(io, output)
 end
 
 replace_uses!(old::Val, new::Val) =
-    API.LLVMReplaceAllUsesWith(convert(API.LLVMValueRef, old),
-                               convert(API.LLVMValueRef, new))
+    API.LLVMReplaceAllUsesWith(ref(Value, old),
+                               ref(Value, new))
 
-isconstant(val::Value) = convert(Bool, API.LLVMIsConstant(convert(API.LLVMValueRef, val)))
+isconstant(val::Value) = convert(Bool, API.LLVMIsConstant(ref(Value, val)))
 
-isundef(val::Value) = convert(Bool, API.LLVMIsUndef(convert(API.LLVMValueRef, val)))
+isundef(val::Value) = convert(Bool, API.LLVMIsUndef(ref(Value, val)))
 
 
-@llvmtype abstract User <: Value
+@reftypedef abstract User <: Value
 
 
 ## constants

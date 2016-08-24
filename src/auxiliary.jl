@@ -22,7 +22,7 @@ end
 #   this type can be represented by
 # - detect API enums identifying objects in flattened object trees,
 #   and provide an `identify` method to get the corresponding Julia type
-macro llvmtype(typedef)
+macro reftypedef(typedef)
     if typedef.head == :abstract
         structure = typedef.args[1]
     elseif typedef.head == :type
@@ -138,10 +138,9 @@ macro llvmtype(typedef)
             # define a constructor accepting this reftype
             unshift!(typedef.args[3].args, :( $typename(ref::API.$apireftype) = new(ref) ))
 
-            # generate a convert method for extracting this reftype
+            # generate a `ref` method for extracting this reftype
             append!(code.args, (quote
-                import Base: convert
-                convert(::Type{API.$apireftype}, obj::$typename) =
+                ref(::Type{$ref_typename}, obj::$typename) =
                     convert(API.$apireftype, obj.ref)
                 end).args)
         end

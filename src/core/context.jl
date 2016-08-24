@@ -2,7 +2,7 @@
 
 export Context, dispose, GlobalContext
 
-@llvmtype immutable Context end
+@reftypedef immutable Context end
 
 Context() = Context(API.LLVMContextCreate())
 
@@ -15,6 +15,6 @@ function Context(f::Function)
     end
 end
 
-dispose(ctx::Context) = API.LLVMContextDispose(convert(API.LLVMContextRef, ctx))
+dispose(ctx::Context) = API.LLVMContextDispose(ref(Context, ctx))
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())

@@ -1,6 +1,6 @@
 # http://llvm.org/docs/doxygen/html/group__LLVMCCoreValueConstant.html
 
-@llvmtype abstract Constant <: User
+@reftypedef abstract Constant <: User
 
 
 ## scalar
@@ -11,26 +11,26 @@ import Base: convert
 
 export ConstantInt, ConstantFP
 
-@llvmtype immutable ConstantInt <: Constant end
+@reftypedef immutable ConstantInt <: Constant end
 
 ConstantInt(typ::LLVMInteger, val::Integer, signed=false) =
-    construct(ConstantInt, API.LLVMConstInt(convert(API.LLVMTypeRef, typ),
+    construct(ConstantInt, API.LLVMConstInt(ref(LLVMType, typ),
                                             reinterpret(Culonglong, val),
                                             convert(LLVMBool, signed)))
 
 convert(::Type{UInt}, val::ConstantInt) =
-    API.LLVMConstIntGetZExtValue(convert(API.LLVMValueRef, val))
+    API.LLVMConstIntGetZExtValue(ref(Value, val))
 convert(::Type{Int}, val::ConstantInt) =
-    API.LLVMConstIntGetSExtValue(convert(API.LLVMValueRef, val))
+    API.LLVMConstIntGetSExtValue(ref(Value, val))
 
 
-@llvmtype immutable ConstantFP <: Constant end
+@reftypedef immutable ConstantFP <: Constant end
 
 ConstantFP(typ::LLVMDouble, val::Real) =
-    construct(ConstantFP, API.LLVMConstReal(convert(API.LLVMTypeRef, typ), Cdouble(val)))
+    construct(ConstantFP, API.LLVMConstReal(ref(LLVMType, typ), Cdouble(val)))
 
 convert(::Type{Float64}, val::ConstantFP) =
-    API.LLVMConstRealGetDouble(convert(API.LLVMValueRef, val), Ref{API.LLVMBool}())
+    API.LLVMConstRealGetDouble(ref(Value, val), Ref{API.LLVMBool}())
 
 
 ## function
@@ -43,24 +43,24 @@ export personality, personality!, callconv, callconv!, gc, gc!, intrinsic_id
 
 # http://llvm.org/docs/doxygen/html/group__LLVMCCoreValueFunction.html
 
-@llvmtype immutable LLVMFunction <: Constant end
+@reftypedef immutable LLVMFunction <: Constant end
 
-delete!(fn::LLVMFunction) = API.LLVMDeleteFunction(convert(API.LLVMValueRef, fn))
+delete!(fn::LLVMFunction) = API.LLVMDeleteFunction(ref(Value, fn))
 
 personality(fn::LLVMFunction) =
-    construct(LLVMFunction, API.LLVMGetPersonalityFn(convert(API.LLVMValueRef, fn)))
+    construct(LLVMFunction, API.LLVMGetPersonalityFn(ref(Value, fn)))
 personality!(fn::LLVMFunction, persfn::LLVMFunction) =
-    API.LLVMSetPersonalityFn(convert(API.LLVMValueRef, fn),
-                             convert(API.LLVMValueRef, persfn))
+    API.LLVMSetPersonalityFn(ref(Value, fn),
+                             ref(Value, persfn))
 
-intrinsic_id(fn::LLVMFunction) = API.LLVMGetIntrinsicID(convert(API.LLVMValueRef, fn))
+intrinsic_id(fn::LLVMFunction) = API.LLVMGetIntrinsicID(ref(Value, fn))
 
-callconv(fn::LLVMFunction) = API.LLVMGetFunctionCallConv(convert(API.LLVMValueRef, fn))
+callconv(fn::LLVMFunction) = API.LLVMGetFunctionCallConv(ref(Value, fn))
 callconv!(fn::LLVMFunction, cc::Integer) =
-    API.LLVMSetFunctionCallConv(convert(API.LLVMValueRef, fn), Cuint(cc))
+    API.LLVMSetFunctionCallConv(ref(Value, fn), Cuint(cc))
 
-gc(fn::LLVMFunction) = unsafe_string(API.LLVMGetGC(convert(API.LLVMValueRef, fn)))
-gc!(fn::LLVMFunction, name::String) = API.LLVMSetGC(convert(API.LLVMValueRef, fn), name)
+gc(fn::LLVMFunction) = unsafe_string(API.LLVMGetGC(ref(Value, fn)))
+gc!(fn::LLVMFunction, name::String) = API.LLVMSetGC(ref(Value, fn), name)
 
 # attributes
 
@@ -73,13 +73,13 @@ end
 attributes(fn::LLVMFunction) = FunctionAttrIterator(fn)
 
 get(it::FunctionAttrIterator) =
-    API.LLVMGetFunctionAttr(convert(API.LLVMValueRef, it.fn))
+    API.LLVMGetFunctionAttr(ref(Value, it.fn))
 
 push!(it::FunctionAttrIterator, attr) =
-    API.LLVMAddFunctionAttr(convert(API.LLVMValueRef, it.fn), attr)
+    API.LLVMAddFunctionAttr(ref(Value, it.fn), attr)
 
 delete!(it::FunctionAttrIterator, attr) =
-    API.LLVMRemoveFunctionAttr(convert(API.LLVMValueRef, it.fn), attr)
+    API.LLVMRemoveFunctionAttr(ref(Value, it.fn), attr)
 
 
 ## global variables
@@ -88,15 +88,15 @@ export GlobalVariable
 
 # http://llvm.org/docs/doxygen/html/group__LLVMCoreValueConstantGlobalVariable.html
 
-@llvmtype immutable GlobalVariable <: Constant end
+@reftypedef immutable GlobalVariable <: Constant end
 
 GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String) =
     construct(GlobalVariable,
-              API.LLVMAddGlobal(convert(API.LLVMModuleRef, mod),
-                                convert(API.LLVMTypeRef, typ), name))
+              API.LLVMAddGlobal(ref(LLVMModule, mod),
+                                ref(LLVMType, typ), name))
 
 GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String, addrspace) =
     construct(GlobalVariable,
-              API.LLVMAddGlobalInAddressSpace(convert(API.LLVMModuleRef, mod),
-                                              convert(API.LLVMTypeRef, typ), name,
+              API.LLVMAddGlobalInAddressSpace(ref(LLVMModule, mod),
+                                              ref(LLVMType, typ), name,
                                               Cuint(addrspace)))
