@@ -8,7 +8,8 @@ import Base: show
 # @reftypedef immutable LLVMModule end
 
 LLVMModule(name::String) = LLVMModule(API.LLVMModuleCreateWithName(name))
-LLVMModule(name::String, ctx::Context) = LLVMModule(API.LLVMModuleCreateWithNameInContext(name, ref(Context, ctx)))
+LLVMModule(name::String, ctx::Context) =
+    LLVMModule(API.LLVMModuleCreateWithNameInContext(name, ref(Context, ctx)))
 LLVMModule(mod::LLVMModule) = LLVMModule(API.LLVMCloneModule(ref(LLVMModule, mod)))
 
 dispose(mod::LLVMModule) = API.LLVMDisposeModule(ref(LLVMModule, mod))
@@ -24,7 +25,8 @@ target!(mod::LLVMModule, triple) = API.LLVMSetTarget(ref(LLVMModule, mod), tripl
 datalayout(mod::LLVMModule) = unsafe_string(API.LLVMGetDataLayout(ref(LLVMModule, mod)))
 datalayout!(mod::LLVMModule, layout) = API.LLVMSetDataLayout(ref(LLVMModule, mod), layout)
 
-inline_asm!(mod::LLVMModule, asm::String) = API.LLVMSetModuleInlineAsm(ref(LLVMModule, mod), asm)
+inline_asm!(mod::LLVMModule, asm::String) =
+    API.LLVMSetModuleInlineAsm(ref(LLVMModule, mod), asm)
 
 context(mod::LLVMModule) = Context(API.LLVMGetModuleContext(ref(LLVMModule, mod)))
 

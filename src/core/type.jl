@@ -147,12 +147,18 @@ export name, ispacked, isopaque, elements, elements!
 
 @reftypedef ref=LLVMType kind=LLVMStructTypeKind immutable StructType <: SequentialType end
 
-function StructType(name::String, ctx::Context=GlobalContext())
+function StructType(name::String, ctx::Context)
     return StructType(API.LLVMStructCreateNamed(ref(Context, ctx), name))
 end
 
-function StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context=GlobalContext(),
-                                 packed::Bool=false)
+function StructType{T<:LLVMType}(elems::Vector{T}, packed::Bool=false)
+    _elems = map(t->ref(LLVMType, t), elems)
+
+    return StructType(API.LLVMStructType(_elems, Cuint(length(_elems)),
+                                         convert(LLVMBool, packed)))
+end
+
+function StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context, packed::Bool=false)
     _elems = map(t->ref(LLVMType, t), elems)
 
     return StructType(API.LLVMStructTypeInContext(ref(Context, ctx), _elems,

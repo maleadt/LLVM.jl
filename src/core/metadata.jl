@@ -9,9 +9,10 @@ export MDString, MDNode, operands
 
 typealias MDString MetadataAsValue
 
-function MDString(val::String, ctx::Context=GlobalContext())
-    return MDString(API.LLVMMDStringInContext(ref(Context, ctx), val, Cuint(length(val))))
-end
+MDString(val::String) = MDString(API.LLVMMDString(val, Cuint(length(val))))
+
+MDString(val::String, ctx::Context) = 
+    MDString(API.LLVMMDStringInContext(ref(Context, ctx), val, Cuint(length(val))))
 
 function convert(::Type{String}, md::MDString)
     len = Ref{Cuint}()
@@ -23,7 +24,12 @@ end
 
 typealias MDNode MetadataAsValue
 
-function MDNode{T<:Value}(vals::Vector{T}, ctx::Context=GlobalContext())
+function MDNode{T<:Value}(vals::Vector{T})
+    _vals = map(v->ref(Value, v), vals)
+    return MDNode(API.LLVMMDNode(_vals, Cuint(length(vals))))
+end
+
+function MDNode{T<:Value}(vals::Vector{T}, ctx::Context)
     _vals = map(v->ref(Value, v), vals)
     return MDNode(API.LLVMMDNodeInContext(ref(Context, ctx), _vals, Cuint(length(vals))))
 end
