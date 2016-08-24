@@ -104,7 +104,7 @@ Context() do ctx
 
     show(DevNull, val)
 
-    @test LLVM.typeof(val) == typ
+    @test llvmtype(val) == typ
     @test name(val) == ""
     @test isconstant(val)
     @test !isundef(val)

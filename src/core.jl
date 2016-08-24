@@ -29,7 +29,7 @@ end
 convert(::Type{LLVMBool}, bool::Bool)::API.LLVMBool = bool ? LLVMTrue.val : LLVMFalse.val
 
 # forward-definitions
-@reftypedef immutable LLVMModule end
+@reftypedef apitype=LLVMModuleRef immutable LLVMModule end
 
 include("core/context.jl")
 include("core/type.jl")

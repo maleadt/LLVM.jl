@@ -2,7 +2,7 @@ import Base: convert
 
 export MDString, MDNode, operands
 
-@reftypedef immutable MetadataAsValue <: Value end
+@reftypedef ref=Value kind=LLVMMetadataAsValueValueKind immutable MetadataAsValue <: Value end
 
 # NOTE: the C API doesn't allow us to differentiate between MD kinds,
 #       all are wrapped by the opaque MetadataAsValue...

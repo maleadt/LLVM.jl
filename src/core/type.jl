@@ -2,17 +2,17 @@ export LLVMType, issized, context, show
 
 import Base: show
 
-@reftypedef abstract LLVMType
+@reftypedef apitype=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
 
 # Construct an unknown type of type object from a type ref.
 dynamic_construct(::Type{LLVMType}, ref::API.LLVMTypeRef) =
-    identify(ref, API.LLVMGetTypeKind(ref))(ref)
+    identify(LLVMType, API.LLVMGetTypeKind(ref))(ref)
 
 # Construct an specific type of type object from a type ref.
 # In debug mode, this checks if the object type matches the underlying ref type.
 @inline function construct{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
     @static if DEBUG
-        RealT = identify(ref, API.LLVMGetTypeKind(ref))
+        RealT = identify(LLVMType, API.LLVMGetTypeKind(ref))
         if T != RealT
             error("invalid conversion of $RealT reference to $T")
         end
@@ -34,7 +34,7 @@ end
 
 export width
 
-@reftypedef immutable LLVMInteger <: LLVMType end
+@reftypedef ref=LLVMType kind=LLVMIntegerTypeKind immutable LLVMInteger <: LLVMType end
 
 for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     jlfun = Symbol(T, :Type)
@@ -58,8 +58,9 @@ for T in [:Half, :Float, :Double]
     jlfun = Symbol(T, :Type)
     apityp = Symbol(:LLVM, T)
     apifun = Symbol(:LLVM, jlfun)
+    enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin
-        @reftypedef immutable $apityp <: LLVMType end
+        @reftypedef ref=LLVMType kind=$enumkind immutable $apityp <: LLVMType end
 
         $jlfun() = construct($apityp, API.$apifun())
         $jlfun(ctx::Context) =
@@ -73,7 +74,7 @@ end
 
 export isvararg, return_type, parameters
 
-@reftypedef immutable FunctionType <: LLVMType end
+@reftypedef ref=LLVMType kind=LLVMFunctionTypeKind immutable FunctionType <: LLVMType end
 
 function FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}, vararg::Bool=false)
     _params = map(t->ref(LLVMType, t), params)
@@ -113,7 +114,7 @@ import Base: length, size, eltype
 eltype(typ::SequentialType) =
     dynamic_construct(LLVMType, API.LLVMGetElementType(ref(LLVMType, typ)))
 
-@reftypedef immutable PointerType <: SequentialType end
+@reftypedef ref=LLVMType kind=LLVMPointerTypeKind immutable PointerType <: SequentialType end
 
 function PointerType(eltyp::LLVMType, addrspace=0)
     return PointerType(API.LLVMPointerType(ref(LLVMType, eltyp),
@@ -123,7 +124,7 @@ end
 addrspace(ptrtyp::PointerType) =
     API.LLVMGetPointerAddressSpace(ref(LLVMType, ptrtyp))
 
-@reftypedef immutable ArrayType <: SequentialType end
+@reftypedef ref=LLVMType kind=LLVMArrayTypeKind immutable ArrayType <: SequentialType end
 
 function ArrayType(eltyp::LLVMType, count)
     return ArrayType(API.LLVMArrayType(ref(LLVMType, eltyp), Cuint(count)))
@@ -131,7 +132,7 @@ end
 
 length(arrtyp::ArrayType) = API.LLVMGetArrayLength(ref(LLVMType, arrtyp))
 
-@reftypedef immutable VectorType <: SequentialType end
+@reftypedef ref=LLVMType kind=LLVMVectorTypeKind immutable VectorType <: SequentialType end
 
 function VectorType(eltyp::LLVMType, count)
     return VectorType(API.LLVMVectorType(ref(LLVMType, eltyp), Cuint(count)))
@@ -144,7 +145,7 @@ size(vectyp::VectorType) = API.LLVMGetVectorSize(ref(LLVMType, vectyp))
 
 export name, ispacked, isopaque, elements, elements!
 
-@reftypedef immutable StructType <: SequentialType end
+@reftypedef ref=LLVMType kind=LLVMStructTypeKind immutable StructType <: SequentialType end
 
 function StructType(name::String, ctx::Context=GlobalContext())
     return StructType(API.LLVMStructCreateNamed(ref(Context, ctx), name))
@@ -183,13 +184,13 @@ end
 
 ## other
 
-@reftypedef immutable LLVMVoid <: LLVMType end
+@reftypedef ref=LLVMType kind=LLVMVoidTypeKind immutable LLVMVoid <: LLVMType end
 
 VoidType() = construct(LLVMVoid, API.LLVMVoidType())
 VoidType(ctx::Context) =
     construct(LLVMVoid, API.LLVMVoidTypeInContext(ref(Context, ctx)))
 
-@reftypedef immutable LLVMLabel <: LLVMType end
+@reftypedef ref=LLVMType kind=LLVMLabelTypeKind immutable LLVMLabel <: LLVMType end
 
 LabelType() = construct(LLVMLabel, API.LLVMLabelType())
 LabelType(ctx::Context) =

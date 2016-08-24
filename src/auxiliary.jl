@@ -1,7 +1,5 @@
 # Auxiliary functionality for the LLVM.jl package, not part of the LLVM API itself
 
-const discriminators = Dict{Type, Dict{Cuint, Type}}()
-
 const DEBUG = haskey(ENV, "DEBUG")
 "Display a debug message. Only results in actual printing if the TRACE or DEBUG environment
 variable is set."
@@ -15,14 +13,15 @@ variable is set."
 end
 @inline debug(msg...; kwargs...) = debug(STDERR, msg...; kwargs...)
 
-# Overly-complex macro to deal with type definitions of LLVM API types.
-# It performs the following tasks:
-# - add a `ref` field to concrete types to contain the API reference pointer
-# - define constructors from and converts to each of the API reference types
-#   this type can be represented by
-# - detect API enums identifying objects in flattened object trees,
-#   and provide an `identify` method to get the corresponding Julia type
-macro reftypedef(typedef)
+# Macro to deal with type definitions of LLVM API types.
+const apitypes = Dict{Symbol,Symbol}()
+const discriminators = Dict{Type, Dict{Cuint, Type}}()
+macro reftypedef(args...)
+    # extract arguments
+    kwargs = args[1:end-1]
+    typedef = args[end]
+
+    # decode type definition
     if typedef.head == :abstract
         structure = typedef.args[1]
     elseif typedef.head == :type
@@ -30,93 +29,62 @@ macro reftypedef(typedef)
     else
         error("argument is not a type definition")
     end
-
-    code = Expr(:block)
-    push!(code.args, typedef)
-
-    # extract name of the type and its parents, if any
-    hierarchy = Symbol[]
     if isa(structure, Symbol)
         # basic type definition
-        push!(hierarchy, structure)
         typename = structure
     elseif isa(structure, Expr) && structure.head == :<:
         # typename <: parentname
         all(e->isa(e,Symbol), structure.args) ||
             error("typedef should consist of plain types, ie. not parametric ones")
-        (typename, parentname) = structure.args
-        push!(hierarchy, typename)
-
-        isdefined(LLVM, parentname) || error("unknown parent type $parentname")
-        parenttype = eval(parentname)
-        while parenttype != Any
-            push!(hierarchy, Symbol(parenttype.name.name))
-            parenttype = supertype(parenttype)
-        end
+        typename = structure.args[1]
     else
         error("malformed type definition: cannot decode type name")
     end
-    debug("Defining LLVM type $typename")
 
-    # figure out counterpart LLVM typenames
-    function get_api_typename(name::Symbol, tail::Symbol, head=:LLVM)
-        # some types start with LLVM in order to avoid clashes with Core (eg. Type, Module)
-        if startswith(string(name), "LLVM")
-            api_name = Symbol(string(name)[5:end])
-        else
-            api_name = name
+    code = Expr(:block)
+    push!(code.args, typedef)
+
+    # decode keyword arguments
+    refs = Symbol[]
+    for kwarg in kwargs
+        if !isa(kwarg, Expr) || kwarg.head != :(=)
+            error("malformed keyword arguments before type definition")
+        end
+        @assert length(kwarg.args) == 2
+        (key, value) = kwarg.args
+        if !isa(key, Symbol) || !isa(value, Symbol)
+            error("key and value in keyword argument should be plain symbols")
         end
 
-        return Symbol(head, api_name, tail)
-    end
-    apireftypes = Dict{Symbol,Symbol}()
-    for link in hierarchy
-        apireftype =  get_api_typename(link, :Ref)
-        if isdefined(API, apireftype)
-            apireftypes[link] = apireftype
-        end
-    end
-
-    # check if there exists an enum to differentiate child types from their common parent
-    # and use it to generate a `identify` method for identifying references
-    for parentname in hierarchy[2:end]  # eg. LLVMStructTypeKind::StructType->CompositeType->Type
-        # parent needs to have a valid ref type
-        haskey(apireftypes, parentname) || continue
-        parenttype = eval(parentname)
-
-        # try and map a type to its API enum kind value. this isn't always straightforward,
-        # eg. FunctionType -> LLVMFunctionTypeKind vs Integer -> LLVMIntegerTypeKind
-        apikind = get_api_typename(typename, :Kind)
-        # NOTE: we don't check for existence of the parent enum,
-        #       but rather check for the child kind
-        if !isdefined(API, apikind)
-            parent_tag = Symbol(string(parentname)[5:end])
-            apikind = get_api_typename(Symbol(typename,
-                                       get_api_typename(parentname, Symbol(), Symbol())),
-                                       :Kind)
-        end
-        isdefined(API, apikind) || continue
-
-        # first time encountering a `kind` for this parent type
-        # --> populate the discriminator cache and define a convert method
-        global discriminators
-        if !haskey(discriminators, parenttype)
-            # first occurrence of a discriminator for the parent type,
-            # so define the `identify` method
-            apireftype = apireftypes[parentname]
+        # enum: define an initial `identify` method
+        if key == :enum && !haskey(discriminators, typename)
             append!(code.args, (quote
-                function identify(::API.$apireftype, id::Cuint)
-                    haskey(discriminators[$parenttype], id) ||
-                        error($(string(apireftype)) * " kind $(Int(id)) has not been registered")
-                    return discriminators[$parenttype][id]
+                discriminators[$(typename)] = Dict{Cuint, Type}()  # TODO: gensym
+                function identify(::Type{$(typename)}, id::Cuint)
+                    haskey(LLVM.discriminators[$(typename)], id) ||
+                        error($(string(value)) * " $(Int(id)) has not been registered")
+                    return LLVM.discriminators[$(typename)][id]
                 end
             end).args)
-
-            discriminators[parenttype] = Dict{Cuint, Type}()
         end
 
-        # save this enum kind in the discriminator cache
-        push!(code.args, :( discriminators[$parentname][API.$apikind] = $typename ))
+        # kind: populate parent's discriminator cache
+        if key == :kind
+            # NOTE: this assumes the parent for which this enum kind is relevant
+            #       is the last ref we processed
+            push!(code.args, :( discriminators[$(last(refs))][API.$value] = $(typename) ))
+        end
+
+        # ref: how this object can be referenced
+        if key == :ref
+            push!(refs, value)
+        end
+
+        # apitype: how this type is referred to in the API (also generates a ref)
+        if key == :apitype
+            apitypes[typename] = value
+            push!(refs, typename)
+        end
     end
 
     # if we're dealing with a concrete type, make it usable
@@ -125,23 +93,22 @@ macro reftypedef(typedef)
         unshift!(typedef.args[3].args, :( ref::Ptr{Void} ))
 
         # handle usage of that ref (ie. converting to and from)
-        #
-        # sometimes a type is referred to by one or more of its parent API ref types,
-        # eg. ConstantInt is represented by a ValueRef (one of its supertypes),
-        # while BasicBlock can be represented by both BasicBlockRef and ValueRef
-        referencable = filter(t->haskey(apireftypes,t), hierarchy)
-        isempty(referencable) &&
-            error("no type in $typename's hierarchy ($(join(hierarchy, ", "))) exists in the LLVM API")
-        for ref_typename in referencable
-            apireftype = apireftypes[ref_typename]
+        if isempty(refs)
+            error("no refs specified for type $(typename)")
+        end
+        for ref in refs
+            if !haskey(apitypes, ref)
+                error("cannot reference $(typename) via $ref which has no registered API type")
+            end
+            apitype = apitypes[ref]
 
             # define a constructor accepting this reftype
-            unshift!(typedef.args[3].args, :( $typename(ref::API.$apireftype) = new(ref) ))
+            unshift!(typedef.args[3].args, :( $(typename)(ref::API.$apitype) = new(ref) ))
 
             # generate a `ref` method for extracting this reftype
             append!(code.args, (quote
-                ref(::Type{$ref_typename}, obj::$typename) =
-                    convert(API.$apireftype, obj.ref)
+                ref(::Type{$ref}, obj::$(typename)) =
+                    convert(API.$apitype, obj.ref)
                 end).args)
         end
     end
