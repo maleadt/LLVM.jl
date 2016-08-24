@@ -15,7 +15,7 @@ end
 
 # Macro to deal with type definitions of LLVM API types.
 const apitypes = Dict{Symbol,Symbol}()
-const discriminators = Dict{Type, Dict{Cuint, Type}}()
+const discriminators = Dict{Symbol, Symbol}()
 macro reftypedef(args...)
     # extract arguments
     kwargs = args[1:end-1]
@@ -58,12 +58,15 @@ macro reftypedef(args...)
 
         # enum: define an initial `identify` method
         if key == :enum && !haskey(discriminators, typename)
+            @gensym discriminator
+            discriminators[typename] = discriminator
+
             append!(code.args, (quote
-                discriminators[$(typename)] = Dict{Cuint, Type}()  # TODO: gensym
+                const $discriminator = Dict{Cuint, Type}()
                 function identify(::Type{$(typename)}, id::Cuint)
-                    haskey(LLVM.discriminators[$(typename)], id) ||
+                    haskey($discriminator, id) ||
                         error($(string(value)) * " $(Int(id)) has not been registered")
-                    return LLVM.discriminators[$(typename)][id]
+                    return $discriminator[id]
                 end
             end).args)
         end
@@ -72,7 +75,8 @@ macro reftypedef(args...)
         if key == :kind
             # NOTE: this assumes the parent for which this enum kind is relevant
             #       is the last ref we processed
-            push!(code.args, :( discriminators[$(last(refs))][API.$value] = $(typename) ))
+            discriminator = discriminators[last(refs)]
+            push!(code.args, :( $discriminator[API.$value] = $(typename) ))
         end
 
         # ref: how this object can be referenced
