@@ -13,10 +13,6 @@ function libname(version::VersionNumber)
             "libLLVM-$(version.major).$(version.minor).$(version.patch).so"]
 end
 
-function configname(version::VersionNumber)
-    return "llvm-config-" * verstr(version)
-end
-
 # This script looks for LLVM installations in a variety of places, and choses one (adhering
 # to LLVM_VERSION, if specified) in the following descending order of priority:
 # - shipped LLVM libraries (only versioned)
