@@ -26,7 +26,7 @@ end
 
 # NOTE: this is a hack, convert(LLVMBool) returns an API.LLVMBool (ie. typealiased Cuint)
 #       as it is really only used when passing values to the API
-convert(::Type{LLVMBool}, bool::Bool)::API.LLVMBool = bool ? LLVMTrue.val : LLVMFalse.val
+convert(::Type{LLVMBool}, bool::Bool) = bool ? LLVMTrue.val : LLVMFalse.val
 
 # forward-definitions
 @reftypedef apitype=LLVMModuleRef immutable LLVMModule end
