@@ -82,7 +82,7 @@ add!(it::ModuleMetadataIterator, name::String, val::Value) =
 
 ## function iteration
 
-export functions, add!
+export functions
 
 import Base: haskey, get,
              start, next, done, eltype, last
@@ -102,11 +102,6 @@ function get(it::ModuleFunctionIterator, name::String)
     objref == C_NULL && throw(KeyError(name))
     return construct(LLVMFunction, objref)
 end
-
-add!(it::ModuleFunctionIterator, name::String, ft::FunctionType) =
-    construct(LLVMFunction,
-              API.LLVMAddFunction(ref(LLVMModule, it.mod), name,
-                                  ref(LLVMType, ft)))
 
 start(it::ModuleFunctionIterator) = API.LLVMGetFirstFunction(ref(LLVMModule, it.mod))
 

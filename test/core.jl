@@ -131,7 +131,7 @@ end
 Context() do ctx
     mod = LLVMModule("foo", ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(), LLVMType[])
-    fn = add!(functions(mod), "bar", ft)    # TODO: ctor with mod?
+    fn = LLVMFunction(mod, "bar", ft)
 
     show(DevNull, fn)
 
@@ -199,7 +199,7 @@ Context() do ctx
 
     st = LLVM.StructType("foo", ctx)
     ft = LLVM.FunctionType(st, [st])
-    add!(functions(mod), "bar", ft)
+    fn = LLVMFunction(mod, "bar", ft)
 
     @test get(types(mod), "foo") == st
     @test !haskey(types(mod), "bar")

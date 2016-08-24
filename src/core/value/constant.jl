@@ -35,15 +35,18 @@ convert(::Type{Float64}, val::ConstantFP) =
 
 ## function
 
-# TODO: ctor from Module
-
 import Base: delete!, get, push!
 
-export personality, personality!, callconv, callconv!, gc, gc!, intrinsic_id
+export LLVMFunction, personality, personality!, callconv, callconv!, gc, gc!, intrinsic_id
 
 # http://llvm.org/docs/doxygen/html/group__LLVMCCoreValueFunction.html
 
 @reftypedef ref=Value kind=LLVMFunctionValueKind immutable LLVMFunction <: Constant end
+
+LLVMFunction(mod::LLVMModule, name::String, ft::FunctionType) =
+    construct(LLVMFunction,
+              API.LLVMAddFunction(ref(LLVMModule, mod), name,
+                                  ref(LLVMType, ft)))
 
 delete!(fn::LLVMFunction) = API.LLVMDeleteFunction(ref(Value, fn))
 
