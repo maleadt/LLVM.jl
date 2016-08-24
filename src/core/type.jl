@@ -4,9 +4,12 @@ import Base: show
 
 @reftypedef abstract LLVMType
 
-dynamic_convert(::Type{LLVMType}, ref::API.LLVMTypeRef) =
+# Construct an unknown type of type object from a type ref.
+dynamic_construct(::Type{LLVMType}, ref::API.LLVMTypeRef) =
     identify(ref, API.LLVMGetTypeKind(ref))(ref)
 
+# Construct an specific type of type object from a type ref.
+# In debug mode, this checks if the object type matches the underlying ref type.
 @inline function construct{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
     @static if DEBUG
         RealT = identify(ref, API.LLVMGetTypeKind(ref))
@@ -83,13 +86,13 @@ isvararg(ft::FunctionType) =
     convert(Bool, API.LLVMIsFunctionVarArg(ref(LLVMType, ft)))
 
 return_type(ft::FunctionType) =
-    dynamic_convert(LLVMType, API.LLVMGetReturnType(ref(LLVMType, ft)))
+    dynamic_construct(LLVMType, API.LLVMGetReturnType(ref(LLVMType, ft)))
 
 function parameters(ft::FunctionType)
     nparams = API.LLVMCountParamTypes(ref(LLVMType, ft))
     params = Vector{API.LLVMTypeRef}(nparams)
     API.LLVMGetParamTypes(ref(LLVMType, ft), params)
-    return map(t->dynamic_convert(LLVMType, t), params)
+    return map(t->dynamic_construct(LLVMType, t), params)
 end
 
 
@@ -108,7 +111,7 @@ export addrspace
 import Base: length, size, eltype
 
 eltype(typ::SequentialType) =
-    dynamic_convert(LLVMType, API.LLVMGetElementType(ref(LLVMType, typ)))
+    dynamic_construct(LLVMType, API.LLVMGetElementType(ref(LLVMType, typ)))
 
 @reftypedef immutable PointerType <: SequentialType end
 
@@ -167,7 +170,7 @@ function elements(structtyp::StructType)
     nelems = API.LLVMCountStructElementTypes(ref(LLVMType, structtyp))
     elems = Vector{API.LLVMTypeRef}(nelems)
     API.LLVMGetStructElementTypes(ref(LLVMType, structtyp), elems)
-    return map(t->dynamic_convert(LLVMType, t), elems)
+    return map(t->dynamic_construct(LLVMType, t), elems)
 end
 
 function elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=false)

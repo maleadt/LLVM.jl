@@ -3,9 +3,12 @@
 
 @reftypedef abstract Value
 
-dynamic_convert(::Type{Value}, ref::API.LLVMValueRef) =
+# Construct an unknown type of value object from a value ref.
+dynamic_construct(::Type{Value}, ref::API.LLVMValueRef) =
     identify(ref, API.LLVMGetValueKind(ref))(ref)
 
+# Construct an specific type of value object from a value ref.
+# In debug mode, this checks if the object type matches the underlying ref type.
 @inline function construct{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
     @static if DEBUG
         RealT = identify(ref, API.LLVMGetValueKind(ref))
@@ -23,7 +26,7 @@ export Value, name, name!, replace_uses!, isconstant, isundef
 
 import Base: show
 
-typeof(val::Value) = dynamic_convert(LLVMType, API.LLVMTypeOf(ref(Value, val)))
+typeof(val::Value) = dynamic_construct(LLVMType, API.LLVMTypeOf(ref(Value, val)))
 
 name(val::Value) = unsafe_string(API.LLVMGetValueName(ref(Value, val)))
 name!(val::Value, name::String) = API.LLVMSetValueName(ref(Value, val), name)
