@@ -8,6 +8,22 @@ Linux: [![Build Status](https://travis-ci.org/maleadt/LLVM.jl.svg?branch=master)
 
 Code Coverage: [![Coverage Status](https://codecov.io/gh/maleadt/LLVM.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/maleadt/LLVM.jl)
 
-This package provides a shallow wrapper around the LLVM C API. The API, wrapped by means of
-[Clang.jl](https://github.com/ihnorton/Clang.jl/), is available in the `LLVM.API` module.
-Higher-level wrappers will be added to the `LLVM` module as the need arises.
+This package provides a shallow wrapper around the LLVM C API.
+
+The entire API, wrapped by means of [Clang.jl](https://github.com/ihnorton/Clang.jl/), is
+available in the `LLVM.API` module. Higher-level wrappers are part of the `LLVM` module, and
+are added as the need arises.
+
+
+Installation
+------------
+
+Version requirements:
+
+* LLVM 3.9 or higher, as older versions do not expose the necessary functionality to
+  identify `Value` objects
+* Julia 0.5 or higher
+
+Either install the package using `Pkg`, or manually run `deps/build.jl` which detects
+available LLVM installations (a version can be pinned by defining the `LLVM_VERSION`
+environment variable). Define the `DEBUG` environment variable for more verbose printing.
