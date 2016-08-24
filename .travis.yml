@@ -1,35 +1,66 @@
 language: julia
-sudo: false
+sudo: required
+dist: trusty
 notifications:
   email: false
 
 addons_shortcuts:
-  addons_llvm38linux: &llvm38linux
+  addons_llvm39linux: &llvm39linux
     apt:
-      sources: [ubuntu-toolchain-r-test, llvm-toolchain-precise-3.8]
-      packages: [llvm-3.8]
-  # TODO: add LLVM 3.9 as soon as the repository whitelisted
-  #       https://github.com/travis-ci/apt-source-whitelist/issues/300
-  # TODO: add LLVM 4.0 as soon as the packages are whitelisted
-  #       https://github.com/travis-ci/apt-package-whitelist/issues/3296
-  #       https://github.com/travis-ci/apt-package-whitelist/pull/3297
-
-before_install:
-  - export LD_LIBRARY_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib/
-  - export PATH=/usr/lib/llvm-${LLVM_VERSION}/bin:$PATH
+      # https://github.com/travis-ci/apt-source-whitelist/issues/300
+      sources: [ubuntu-toolchain-r-test, llvm-toolchain-precise-3.9]
+      packages: [llvm-3.9]
+  addons_llvm40linux: &llvm40linux
+    apt:
+      # https://github.com/travis-ci/apt-package-whitelist/issues/3296
+      # https://github.com/travis-ci/apt-package-whitelist/pull/3297
+      sources: [ubuntu-toolchain-r-test, llvm-toolchain-precise]
+      packages: [llvm-4.0]
 
 # NOTE: Travis does not allow applying a global (eg. julia/os array) to a matrix,
 #       so construct it manually
 matrix:
   include:
     - os: linux
-      env: LLVM_VERSION=3.8
+      env: LLVM_VERSION=3.9
       julia: 0.5
-      addons: *llvm38linux
+      # addons: *llvm39linux
+      before_install:
+      - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main' -y
+      - sudo apt-get update -q
+      - sudo apt-get remove llvm -y
+      - sudo apt-get install llvm-3.9 -y
     - os: linux
-      env: LLVM_VERSION=3.8
+      env: LLVM_VERSION=3.9
       julia: nightly
-      addons: *llvm38linux
+      # addons: *llvm39linux
+      before_install:
+      - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main' -y
+      - sudo apt-get update -q
+      - sudo apt-get remove llvm -y
+      - sudo apt-get install llvm-3.9 -y
+    # - os: linux
+    #   env: LLVM_VERSION=4.0
+    #   julia: 0.5
+    #   # addons: *llvm40linux
+    #   before_install:
+    #   - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    #   - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+    #   - sudo apt-get update -q
+    #   - sudo apt-get remove llvm -y
+    #   - sudo apt-get install llvm-4.0 -y
+    # - os: linux
+    #   env: LLVM_VERSION=4.0
+    #   julia: nightly
+    #   # addons: *llvm40linux
+    #   before_install:
+    #   - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    #   - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+    #   - sudo apt-get update -q
+    #   - sudo apt-get remove llvm -y
+    #   - sudo apt-get install llvm-4.0 -y
 
 after_success:
  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
