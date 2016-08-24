@@ -42,9 +42,9 @@ replace_uses!(old::Val, new::Val) =
     API.LLVMReplaceAllUsesWith(ref(Value, old),
                                ref(Value, new))
 
-isconstant(val::Value) = convert(Bool, API.LLVMIsConstant(ref(Value, val)))
+isconstant(val::Value) = BoolFromLLVM(API.LLVMIsConstant(ref(Value, val)))
 
-isundef(val::Value) = convert(Bool, API.LLVMIsUndef(ref(Value, val)))
+isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(Value, val)))
 
 
 @reftypedef abstract User <: Value

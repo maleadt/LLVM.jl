@@ -16,7 +16,7 @@ export ConstantInt, ConstantFP
 ConstantInt(typ::LLVMInteger, val::Integer, signed=false) =
     construct(ConstantInt, API.LLVMConstInt(ref(LLVMType, typ),
                                             reinterpret(Culonglong, val),
-                                            convert(LLVMBool, signed)))
+                                            BoolToLLVM(signed)))
 
 convert(::Type{UInt}, val::ConstantInt) =
     API.LLVMConstIntGetZExtValue(ref(Value, val))

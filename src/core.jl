@@ -5,31 +5,33 @@
 
 import Base: convert
 
-export LLVMBool, LLVMTrue, LLVMFalse
+export LLVMTrue, LLVMFalse
 
-immutable LLVMBool
-    val::API.LLVMBool
-end
+const LLVMTrue = API.LLVMBool(1)
+const LLVMFalse = API.LLVMBool(0)
 
-const LLVMTrue = LLVMBool(API.LLVMBool(1))
-const LLVMFalse = LLVMBool(API.LLVMBool(0))
+# NOTE: these 2 hacky functions are needed due to LLVMBool aliasing with Cuint,
+#       making it impossible to define converts. A strongly-typed alias would fix this.
 
-function convert(::Type{Bool}, bool::LLVMBool)
-    if bool.val == LLVMTrue.val
+function BoolFromLLVM(bool::API.LLVMBool)
+    if bool == LLVMTrue
         return true
-    elseif bool.val == LLVMFalse.val
+    elseif bool == LLVMFalse
         return false
     else
-        throw(ArgumentError("Invalid LLVMBool value $(bool.val)"))
+        throw(ArgumentError("Invalid LLVMBool value $(bool)"))
     end
 end
 
-# NOTE: this is a hack, convert(LLVMBool) returns an API.LLVMBool (ie. typealiased Cuint)
-#       as it is really only used when passing values to the API
-convert(::Type{LLVMBool}, bool::Bool) = bool ? LLVMTrue.val : LLVMFalse.val
+BoolToLLVM(bool::Bool) = bool ? LLVMTrue : LLVMFalse
 
-# forward-definitions
+
+## forward-definitions
+
 @reftypedef apitype=LLVMModuleRef immutable LLVMModule end
+
+
+## other sources
 
 include("core/context.jl")
 include("core/type.jl")
