@@ -37,18 +37,18 @@ export types
 
 import Base: haskey, get
 
-immutable ModuleTypeIterator
+immutable ModuleTypeSet
     mod::LLVMModule
 end
 
-types(mod::LLVMModule) = ModuleTypeIterator(mod)
+types(mod::LLVMModule) = ModuleTypeSet(mod)
 
-function haskey(it::ModuleTypeIterator, name::String)
-    return API.LLVMGetTypeByName(ref(LLVMModule, it.mod), name) != C_NULL
+function haskey(iter::ModuleTypeSet, name::String)
+    return API.LLVMGetTypeByName(ref(LLVMModule, iter.mod), name) != C_NULL
 end
 
-function get(it::ModuleTypeIterator, name::String)
-    objref = API.LLVMGetTypeByName(ref(LLVMModule, it.mod), name)
+function get(iter::ModuleTypeSet, name::String)
+    objref = API.LLVMGetTypeByName(ref(LLVMModule, iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
     return dynamic_construct(LLVMType, objref)
 end
@@ -56,30 +56,30 @@ end
 
 ## metadata iteration
 
-export metadata, add!
+export metadata
 
-import Base: haskey, get
+import Base: haskey, get, push!
 
-immutable ModuleMetadataIterator
+immutable ModuleMetadataSet
     mod::LLVMModule
 end
 
-metadata(mod::LLVMModule) = ModuleMetadataIterator(mod)
+metadata(mod::LLVMModule) = ModuleMetadataSet(mod)
 
-function haskey(it::ModuleMetadataIterator, name::String)
-    return API.LLVMGetNamedMetadataNumOperands(ref(LLVMModule, it.mod), name) != 0
+function haskey(iter::ModuleMetadataSet, name::String)
+    return API.LLVMGetNamedMetadataNumOperands(ref(LLVMModule, iter.mod), name) != 0
 end
 
-function get(it::ModuleMetadataIterator, name::String)
-    nops = API.LLVMGetNamedMetadataNumOperands(ref(LLVMModule, it.mod), name)
+function get(iter::ModuleMetadataSet, name::String)
+    nops = API.LLVMGetNamedMetadataNumOperands(ref(LLVMModule, iter.mod), name)
     nops == 0 && throw(KeyError(name))
     ops = Vector{API.LLVMValueRef}(nops)
-    API.LLVMGetNamedMetadataOperands(ref(LLVMModule, it.mod), name, ops)
+    API.LLVMGetNamedMetadataOperands(ref(LLVMModule, iter.mod), name, ops)
     return map(t->dynamic_construct(Value, t), ops)
 end
 
-add!(it::ModuleMetadataIterator, name::String, val::Value) =
-    API.LLVMAddNamedMetadataOperand(ref(LLVMModule, it.mod), name, ref(Value, val))
+push!(iter::ModuleMetadataSet, name::String, val::Value) =
+    API.LLVMAddNamedMetadataOperand(ref(LLVMModule, iter.mod), name, ref(Value, val))
 
 
 ## function iteration
@@ -89,31 +89,31 @@ export functions
 import Base: haskey, get,
              start, next, done, eltype, last
 
-immutable ModuleFunctionIterator
+immutable ModuleFunctionSet
     mod::LLVMModule
 end
 
-functions(mod::LLVMModule) = ModuleFunctionIterator(mod)
+functions(mod::LLVMModule) = ModuleFunctionSet(mod)
 
-function haskey(it::ModuleFunctionIterator, name::String)
-    return API.LLVMGetNamedFunction(ref(LLVMModule, it.mod), name) != C_NULL
+function haskey(iter::ModuleFunctionSet, name::String)
+    return API.LLVMGetNamedFunction(ref(LLVMModule, iter.mod), name) != C_NULL
 end
 
-function get(it::ModuleFunctionIterator, name::String)
-    objref = API.LLVMGetNamedFunction(ref(LLVMModule, it.mod), name)
+function get(iter::ModuleFunctionSet, name::String)
+    objref = API.LLVMGetNamedFunction(ref(LLVMModule, iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
     return construct(LLVMFunction, objref)
 end
 
-start(it::ModuleFunctionIterator) = API.LLVMGetFirstFunction(ref(LLVMModule, it.mod))
+start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(LLVMModule, iter.mod))
 
-next(it::ModuleFunctionIterator, state) =
+next(iter::ModuleFunctionSet, state) =
     (construct(LLVMFunction,state), API.LLVMGetNextFunction(state))
 
-done(it::ModuleFunctionIterator, state) = state == C_NULL
+done(iter::ModuleFunctionSet, state) = state == C_NULL
 
-eltype(it::ModuleFunctionIterator) = LLVMFunction
+eltype(iter::ModuleFunctionSet) = LLVMFunction
 
 # NOTE: lacking `endof`, we override `last`
-last(it::ModuleFunctionIterator) =
-    construct(LLVMFunction, API.LLVMGetLastFunction(ref(LLVMModule, it.mod)))
+last(iter::ModuleFunctionSet) =
+    construct(LLVMFunction, API.LLVMGetLastFunction(ref(LLVMModule, iter.mod)))

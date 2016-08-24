@@ -69,20 +69,17 @@ gc!(fn::LLVMFunction, name::String) = API.LLVMSetGC(ref(Value, fn), name)
 
 export attributes
 
-immutable FunctionAttrIterator
+immutable FunctionAttrSet
     fn::LLVMFunction
 end
 
-attributes(fn::LLVMFunction) = FunctionAttrIterator(fn)
+attributes(fn::LLVMFunction) = FunctionAttrSet(fn)
 
-get(it::FunctionAttrIterator) =
-    API.LLVMGetFunctionAttr(ref(Value, it.fn))
+get(iter::FunctionAttrSet) = API.LLVMGetFunctionAttr(ref(Value, iter.fn))
 
-push!(it::FunctionAttrIterator, attr) =
-    API.LLVMAddFunctionAttr(ref(Value, it.fn), attr)
+push!(iter::FunctionAttrSet, attr) = API.LLVMAddFunctionAttr(ref(Value, iter.fn), attr)
 
-delete!(it::FunctionAttrIterator, attr) =
-    API.LLVMRemoveFunctionAttr(ref(Value, it.fn), attr)
+delete!(iter::FunctionAttrSet, attr) = API.LLVMRemoveFunctionAttr(ref(Value, iter.fn), attr)
 
 
 ## global variables
@@ -98,8 +95,7 @@ GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String) =
               API.LLVMAddGlobal(ref(LLVMModule, mod),
                                 ref(LLVMType, typ), name))
 
-GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String, addrspace) =
+GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String, addrspace::Integer) =
     construct(GlobalVariable,
-              API.LLVMAddGlobalInAddressSpace(ref(LLVMModule, mod),
-                                              ref(LLVMType, typ), name,
-                                              Cuint(addrspace)))
+              API.LLVMAddGlobalInAddressSpace(ref(LLVMModule, mod), ref(LLVMType, typ),
+                                              name, Cuint(addrspace)))

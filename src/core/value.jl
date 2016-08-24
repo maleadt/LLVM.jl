@@ -28,6 +28,8 @@ export llvmtype, name, name!, replace_uses!, isconstant, isundef
 
 import Base: show
 
+# TODO: missing LLVMGetValueContext
+
 llvmtype(val::Value) = dynamic_construct(LLVMType, API.LLVMTypeOf(ref(Value, val)))
 
 name(val::Value) = unsafe_string(API.LLVMGetValueName(ref(Value, val)))

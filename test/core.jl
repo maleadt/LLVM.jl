@@ -26,6 +26,19 @@ Context() do ctx end
 
 ## type
 
+Context() do ctx
+    typ = LLVM.Int1Type(ctx)
+    @test LLVM.construct(LLVM.LLVMInteger, LLVM.ref(LLVMType, typ)) == typ
+    if LLVM.DEBUG
+        @test_throws ErrorException LLVM.construct(LLVM.FunctionType, LLVM.ref(LLVMType, typ))
+    end
+
+    @test width(LLVM.Int32Type(ctx)) == 32
+
+    @test issized(LLVM.Int1Type(ctx))
+    @test !issized(LLVM.VoidType(ctx))
+end
+
 # integer
 let
     typ = LLVM.Int1Type()
@@ -36,19 +49,17 @@ let
 end
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
-
-    # type agnostic
-    @test issized(typ)
-
-    # int specific
-    @test width(LLVM.Int32Type()) == 32
+    @test context(typ) == ctx
 end
+
+# floating-point
 
 # function
 Context() do ctx
     x = LLVM.Int1Type(ctx)
     y = [LLVM.Int8Type(ctx), LLVM.Int16Type(ctx)]
     ft = LLVM.FunctionType(x, y)
+    @test context(ft) == ctx
 
     @test !isvararg(ft)
     @test return_type(ft) == x
@@ -61,6 +72,8 @@ Context() do ctx
 
     ptrtyp = LLVM.PointerType(eltyp)
     @test eltype(ptrtyp) == eltyp
+    @test context(ptrtyp) == context(eltyp)
+
     @test addrspace(ptrtyp) == 0
 
     ptrtyp = LLVM.PointerType(eltyp, 1)
@@ -71,6 +84,8 @@ Context() do ctx
 
     arrtyp = LLVM.ArrayType(eltyp, 2)
     @test eltype(arrtyp) == eltyp
+    @test context(arrtyp) == context(eltyp)
+
     @test length(arrtyp) == 2
 end
 Context() do ctx
@@ -78,14 +93,21 @@ Context() do ctx
 
     vectyp = LLVM.VectorType(eltyp, 2)
     @test eltype(vectyp) == eltyp
+    @test context(vectyp) == context(eltyp)
+
     @test size(vectyp) == 2
 end
 
 # structure
+let
+    st = LLVM.StructType([LLVM.VoidType()])
+    @test context(st) == global_ctx
+end
 Context() do ctx
     elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]
 
     let st = LLVM.StructType(elem, ctx)
+        @test context(st) == ctx        
         @test !ispacked(st)
         @test !isopaque(st)
         @test elements(st) == elem
@@ -101,9 +123,21 @@ Context() do ctx
 end
 
 # other
+let
+    typ = LLVM.VoidType()
+    @test context(typ) == global_ctx
+end
 Context() do ctx
-    LLVM.VoidType()
-    LLVM.LabelType()
+    typ = LLVM.VoidType(ctx)
+    @test context(typ) == ctx
+end
+let
+    typ = LLVM.LabelType()
+    @test context(typ) == global_ctx
+end
+Context() do ctx
+    typ = LLVM.LabelType(ctx)
+    @test context(typ) == ctx
 end
 
 
@@ -112,6 +146,11 @@ end
 Context() do ctx
     typ = LLVM.Int32Type(ctx)
     val = ConstantInt(typ, 1)
+
+    @test LLVM.construct(LLVM.ConstantInt, LLVM.ref(Value, val)) == val
+    if LLVM.DEBUG
+        @test_throws ErrorException LLVM.construct(LLVM.LLVMFunction, LLVM.ref(Value, val))
+    end
 
     show(DevNull, val)
 
@@ -208,31 +247,68 @@ Context() do ctx
     datalayout!(mod, dummyLayout)
     @test datalayout(mod) == dummyLayout
 
-    st = LLVM.StructType("foo", ctx)
+    dispose(mod)
+end
+
+# type iteration
+
+# function iteration
+Context() do ctx
+    mod = LLVMModule("SomeModule", ctx)
+
+    st = LLVM.StructType("SomeType", ctx)
     ft = LLVM.FunctionType(st, [st])
-    fn = LLVMFunction(mod, "bar", ft)
+    fn = LLVMFunction(mod, "SomeFunction", ft)
 
-    @test get(types(mod), "foo") == st
-    @test !haskey(types(mod), "bar")
-    @test_throws KeyError get(types(mod), "bar")
+    @test get(types(mod), "SomeType") == st
+    @test !haskey(types(mod), "SomeOtherType")
+    @test_throws KeyError get(types(mod), "SomeOtherType")
 
-    f = get(functions(mod), "bar")
-    @test first(functions(mod)) == f
+    dispose(mod)
+end
+
+# function iteration
+Context() do ctx
+    mod = LLVMModule("SomeModule", ctx)
+
+    st = LLVM.StructType("SomeType", ctx)
+    ft = LLVM.FunctionType(st, [st])
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+
+    fns = functions(mod)
+    @test eltype(fns) == LLVMFunction
+
+    @test get(fns, "SomeFunction") == fn
+    @test first(fns) == fn
     fs = 0
-    for f in functions(mod)
+    for f in fns
         fs += 1
+        @test f == fn
     end
     @test fs == 1
-    @test last(functions(mod)) == f
+    @test last(fns) == fn
 
-    mdit = metadata(mod)
-    md = MDNode([MDString("bar", ctx)], ctx)
-    add!(mdit, "foo", md)
-    @test haskey(mdit, "foo")
-    mds = get(mdit, "foo")
-    @test mds[1] == md
-    @test !haskey(mdit, "bar")
-    @test_throws KeyError get(mdit, "bar")
+    @test !haskey(fns, "SomeOtherFunction")
+    @test_throws KeyError get(fns, "SomeOtherFunction")
+
+    dispose(mod)
+end
+
+# metadata iteration
+Context() do ctx
+    mod = LLVMModule("SomeModule", ctx)
+
+    node = MDNode([MDString("SomeMDString", ctx)], ctx)
+
+    mds = metadata(mod)
+    push!(mds, "SomeMDNode", node)
+
+    @test haskey(mds, "SomeMDNode")
+    nodeval = get(mds, "SomeMDNode")
+    @test nodeval[1] == node
+
+    @test !haskey(mds, "SomeOtherMDNode")
+    @test_throws KeyError get(mds, "SomeOtherMDNode")
 
     dispose(mod)
 end
@@ -240,10 +316,14 @@ end
 
 ## metadata
 
+@test MDString("foo") == MDString("foo", global_ctx)
+
 Context() do ctx
     str = MDString("foo", ctx)
     @test convert(String, str) == "foo"
 end
+
+@test MDNode([MDString("foo")]) == MDNode([MDString("foo", global_ctx)], global_ctx)
 
 Context() do ctx
     str = MDString("foo", ctx)
