@@ -86,8 +86,7 @@ push!(iter::ModuleMetadataSet, name::String, val::Value) =
 
 export functions
 
-import Base: haskey, get,
-             start, next, done, eltype, last
+import Base: haskey, get, start, next, done, eltype, last
 
 immutable ModuleFunctionSet
     mod::LLVMModule
@@ -114,6 +113,40 @@ done(iter::ModuleFunctionSet, state) = state == C_NULL
 
 eltype(iter::ModuleFunctionSet) = LLVMFunction
 
-# NOTE: lacking `endof`, we override `last`
 last(iter::ModuleFunctionSet) =
     construct(LLVMFunction, API.LLVMGetLastFunction(ref(LLVMModule, iter.mod)))
+
+
+# global variable iteration
+
+export globals
+
+import Base: haskey, get, start, next, done, eltype, last
+
+immutable ModuleGlobalSet
+    mod::LLVMModule
+end
+
+globals(mod::LLVMModule) = ModuleGlobalSet(mod)
+
+function haskey(iter::ModuleGlobalSet, name::String)
+    return API.LLVMGetNamedGlobal(ref(LLVMModule, iter.mod), name) != C_NULL
+end
+
+function get(iter::ModuleGlobalSet, name::String)
+    objref = API.LLVMGetNamedGlobal(ref(LLVMModule, iter.mod), name)
+    objref == C_NULL && throw(KeyError(name))
+    return construct(GlobalVariable, objref)
+end
+
+start(iter::ModuleGlobalSet) = API.LLVMGetFirstGlobal(ref(LLVMModule, iter.mod))
+
+next(iter::ModuleGlobalSet, state) =
+    (construct(GlobalVariable,state), API.LLVMGetNextGlobal(state))
+
+done(iter::ModuleGlobalSet, state) = state == C_NULL
+
+eltype(iter::ModuleGlobalSet) = GlobalVariable
+
+last(iter::ModuleGlobalSet) =
+    construct(GlobalVariable, API.LLVMGetLastGlobal(ref(LLVMModule, iter.mod)))

@@ -28,10 +28,15 @@ Context() do ctx end
 
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
+
     @test LLVM.construct(LLVM.LLVMInteger, LLVM.ref(LLVMType, typ)) == typ
     if LLVM.DEBUG
         @test_throws ErrorException LLVM.construct(LLVM.FunctionType, LLVM.ref(LLVMType, typ))
     end
+    @test_throws NullException LLVM.construct(LLVM.FunctionType, LLVM.API.LLVMTypeRef(C_NULL))
+
+    @test LLVM.dynamic_construct(LLVMType, LLVM.ref(LLVMType, typ)) == typ
+    @test_throws NullException LLVM.dynamic_construct(LLVMType, LLVM.API.LLVMTypeRef(C_NULL))
 
     @test width(LLVM.Int32Type(ctx)) == 32
 
@@ -149,8 +154,12 @@ Context() do ctx
 
     @test LLVM.construct(LLVM.ConstantInt, LLVM.ref(Value, val)) == val
     if LLVM.DEBUG
-        @test_throws ErrorException LLVM.construct(LLVM.LLVMFunction, LLVM.ref(Value, val))
+        @test_throws ErrorException LLVM.construct(LLVMFunction, LLVM.ref(Value, val))
     end
+    @test_throws NullException LLVM.construct(LLVMFunction, LLVM.API.LLVMValueRef(C_NULL))
+
+    @test LLVM.dynamic_construct(Value, LLVM.ref(Value, val)) == val
+    @test_throws NullException LLVM.dynamic_construct(Value, LLVM.API.LLVMValueRef(C_NULL))
 
     show(DevNull, val)
 
@@ -207,10 +216,35 @@ end
 
 # global variables
 Context() do ctx
-    mod = LLVMModule("foo", ctx)
-    gv = GlobalVariable(mod, LLVM.Int32Type(), "bar")
+    mod = LLVMModule("SomeModule", ctx)
+    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
     show(DevNull, gv)
+
+    @test_throws NullException initializer(gv)
+    init = ConstantInt(LLVM.Int32Type(), 0)
+    initializer!(gv, init)
+    @test initializer(gv) == init
+
+    @test !isthreadlocal(gv)
+    threadlocal!(gv, true)
+    @test isthreadlocal(gv)
+
+    @test !isconstant(gv)
+    constant!(gv, true)
+    @test isconstant(gv)
+
+    @test !isextinit(gv)
+    extinit!(gv, true)
+    @test isextinit(gv)
+
+    @test threadlocalmode(gv) == LLVM.API.LLVMGeneralDynamicTLSModel
+    threadlocalmode!(gv, LLVM.API.LLVMNotThreadLocal)
+    @test threadlocalmode(gv) == LLVM.API.LLVMNotThreadLocal
+
+    @test last(globals(mod)) == gv
+    delete!(gv)
+    @test isempty(globals(mod))
 
     dispose(mod)
 end
@@ -309,6 +343,31 @@ Context() do ctx
 
     @test !haskey(mds, "SomeOtherMDNode")
     @test_throws KeyError get(mds, "SomeOtherMDNode")
+
+    dispose(mod)
+end
+
+# global iteration
+Context() do ctx
+    mod = LLVMModule("SomeModule", ctx)
+
+    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
+
+    gvs = globals(mod)
+    @test eltype(gvs) == GlobalVariable
+
+    @test get(gvs, "SomeGlobal") == gv
+    @test first(gvs) == gv
+    fs = 0
+    for f in gvs
+        fs += 1
+        @test f == gv
+    end
+    @test fs == 1
+    @test last(gvs) == gv
+
+    @test !haskey(gvs, "SomeOtherGlobal")
+    @test_throws KeyError get(gvs, "SomeOtherGlobal")
 
     dispose(mod)
 end

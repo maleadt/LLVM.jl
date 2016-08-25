@@ -5,12 +5,15 @@ import Base: show
 @reftypedef apitype=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
 
 # Construct an unknown type of type object from a type ref.
-dynamic_construct(::Type{LLVMType}, ref::API.LLVMTypeRef) =
-    identify(LLVMType, API.LLVMGetTypeKind(ref))(ref)
+function dynamic_construct(::Type{LLVMType}, ref::API.LLVMTypeRef)
+    ref == C_NULL && throw(NullException())
+    return identify(LLVMType, API.LLVMGetTypeKind(ref))(ref)
+end
 
 # Construct an specific type of type object from a type ref.
 # In debug mode, this checks if the object type matches the underlying ref type.
 @inline function construct{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
+    ref == C_NULL && throw(NullException())
     @static if DEBUG
         RealT = identify(LLVMType, API.LLVMGetTypeKind(ref))
         if T != RealT

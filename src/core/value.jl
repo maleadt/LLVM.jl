@@ -6,12 +6,15 @@ export Value
 @reftypedef apitype=LLVMValueRef enum=LLVMValueKind abstract Value
 
 # Construct an unknown type of value object from a value ref.
-dynamic_construct(::Type{Value}, ref::API.LLVMValueRef) =
-    identify(Value, API.LLVMGetValueKind(ref))(ref)
+function dynamic_construct(::Type{Value}, ref::API.LLVMValueRef)
+    ref == C_NULL && throw(NullException())
+    return identify(Value, API.LLVMGetValueKind(ref))(ref)
+end
 
 # Construct an specific type of value object from a value ref.
 # In debug mode, this checks if the object type matches the underlying ref type.
 @inline function construct{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
+    ref == C_NULL && throw(NullException())
     @static if DEBUG
         RealT = identify(Value, API.LLVMGetValueKind(ref))
         if T != RealT
@@ -50,6 +53,13 @@ isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(Value, val)))
 
 
 @reftypedef abstract User <: Value
+
+
+## instructions
+
+@reftypedef ref=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
+
+
 
 
 ## constants

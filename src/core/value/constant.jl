@@ -59,7 +59,7 @@ personality!(fn::LLVMFunction, persfn::LLVMFunction) =
 intrinsic_id(fn::LLVMFunction) = API.LLVMGetIntrinsicID(ref(Value, fn))
 
 callconv(fn::LLVMFunction) = API.LLVMGetFunctionCallConv(ref(Value, fn))
-callconv!(fn::LLVMFunction, cc::Integer) =
+callconv!(fn::LLVMFunction, cc) =
     API.LLVMSetFunctionCallConv(ref(Value, fn), Cuint(cc))
 
 gc(fn::LLVMFunction) = unsafe_string(API.LLVMGetGC(ref(Value, fn)))
@@ -68,6 +68,8 @@ gc!(fn::LLVMFunction, name::String) = API.LLVMSetGC(ref(Value, fn), name)
 # attributes
 
 export attributes
+
+import Base: get, push!, delete!
 
 immutable FunctionAttrSet
     fn::LLVMFunction
@@ -84,7 +86,10 @@ delete!(iter::FunctionAttrSet, attr) = API.LLVMRemoveFunctionAttr(ref(Value, ite
 
 ## global variables
 
-export GlobalVariable
+export GlobalVariable, initializer, initializer!, isthreadlocal, threadlocal!,
+       threadlocalmode, threadlocalmode!, isconstant, constant!, isextinit, extinit!
+
+import Base: get, push!, delete!
 
 # http://llvm.org/docs/doxygen/html/group__LLVMCoreValueConstantGlobalVariable.html
 
@@ -99,3 +104,27 @@ GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String, addrspace::Integer)
     construct(GlobalVariable,
               API.LLVMAddGlobalInAddressSpace(ref(LLVMModule, mod), ref(LLVMType, typ),
                                               name, Cuint(addrspace)))
+
+delete!(gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(Value, gv))
+
+initializer(gv::GlobalVariable) =
+  dynamic_construct(Value, API.LLVMGetInitializer(ref(Value, gv)))
+initializer!(gv::GlobalVariable, val::Constant) =
+  API.LLVMSetInitializer(ref(Value, gv), ref(Value, val))
+
+isthreadlocal(gv::GlobalVariable) = BoolFromLLVM(API.LLVMIsThreadLocal(ref(Value, gv)))
+threadlocal!(gv::GlobalVariable, bool) =
+  API.LLVMSetThreadLocal(ref(Value, gv), BoolToLLVM(bool))
+
+isconstant(gv::GlobalVariable) = BoolFromLLVM(API.LLVMIsGlobalConstant(ref(Value, gv)))
+constant!(gv::GlobalVariable, bool) =
+  API.LLVMSetGlobalConstant(ref(Value, gv), BoolToLLVM(bool))
+
+threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(ref(Value, gv))
+threadlocalmode!(gv::GlobalVariable, mode) =
+  API.LLVMSetThreadLocalMode(ref(Value, gv), Cuint(mode))
+
+isextinit(gv::GlobalVariable) =
+  BoolFromLLVM(API.LLVMIsExternallyInitialized(ref(Value, gv)))
+extinit!(gv::GlobalVariable, bool) =
+  API.LLVMSetExternallyInitialized(ref(Value, gv), BoolToLLVM(bool))
