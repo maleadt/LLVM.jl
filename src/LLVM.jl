@@ -17,5 +17,6 @@ include("support.jl")
 include("passregistry.jl")
 include("init.jl")
 include("core.jl")
+include("irbuilder.jl")
 
 end

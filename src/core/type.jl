@@ -78,7 +78,7 @@ export isvararg, return_type, parameters
 
 @reftypedef argtype=LLVMType kind=LLVMFunctionTypeKind immutable FunctionType <: LLVMType end
 
-FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}, vararg::Bool=false) =
+FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Bool=false) =
     FunctionType(API.LLVMFunctionType(ref(LLVMType, rettyp), ref.([LLVMType], params),
                                       Cuint(length(params)), BoolToLLVM(vararg)))
 

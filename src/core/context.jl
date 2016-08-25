@@ -6,6 +6,8 @@ export Context, dispose, GlobalContext
 
 Context() = Context(API.LLVMContextCreate())
 
+dispose(ctx::Context) = API.LLVMContextDispose(ref(Context, ctx))
+
 function Context(f::Function)
     ctx = Context()
     try
@@ -14,7 +16,5 @@ function Context(f::Function)
         dispose(ctx)
     end
 end
-
-dispose(ctx::Context) = API.LLVMContextDispose(ref(Context, ctx))
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())

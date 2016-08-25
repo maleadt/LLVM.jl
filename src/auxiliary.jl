@@ -97,7 +97,7 @@ macro reftypedef(args...)
 
         # handle usage of that ref (ie. converting to and from)
         if isempty(argtypes)
-            error("no argtypes specified for type $(typename)")
+            error("no reftypes or argtypes specified for type $(typename)")
         end
         for argtype in argtypes
             if !haskey(reftypes, argtype)
@@ -108,12 +108,28 @@ macro reftypedef(args...)
             # define a constructor accepting this reftype
             unshift!(typedef.args[3].args, :( $(typename)(ref::API.$reftype) = new(ref) ))
 
-            # generate a `ref` method for extracting this reftype
+            # define a `ref` method for extracting this reftype
             append!(code.args, (quote
                 ref(::Type{$argtype}, obj::$(typename)) =
                     convert(API.$reftype, obj.ref)
                 end).args)
         end
+
+        # define a `null` method for creating an NULL object
+        append!(code.args, (quote
+            null(::Type{$typename}) = $(typename)(nullref($typename))
+            end).args)
+    end
+
+    # define a `nullref` method for creating an NULL ref
+    # TODO: we arbitrarily pick the first reftype here, and probably should disallow
+    #       multi-reftype objects altogether (and special-case BasicBlock)
+    if !isempty(argtypes)
+        argtype = first(argtypes)
+        reftype = reftypes[argtype]
+        append!(code.args, (quote
+            nullref(::Type{$typename}) = convert(API.$reftype, C_NULL)
+            end).args)
     end
 
     return esc(code)

@@ -12,6 +12,15 @@ LLVMModule(mod::LLVMModule) = LLVMModule(API.LLVMCloneModule(ref(LLVMModule, mod
 
 dispose(mod::LLVMModule) = API.LLVMDisposeModule(ref(LLVMModule, mod))
 
+function LLVMModule(f::Function, args...)
+    mod = LLVMModule(args...)
+    try
+        f(mod)
+    finally
+        dispose(mod)
+    end
+end
+
 function show(io::IO, mod::LLVMModule)
     output = unsafe_string(API.LLVMPrintModuleToString(ref(LLVMModule, mod)))
     print(io, output)
@@ -84,7 +93,7 @@ push!(iter::ModuleMetadataSet, name::String, val::Value) =
 
 export functions
 
-import Base: eltype, haskey, get, start, next, done, last
+import Base: eltype, haskey, get, start, next, done, last, collect
 
 immutable ModuleFunctionSet
     mod::LLVMModule
@@ -114,6 +123,15 @@ done(iter::ModuleFunctionSet, state) = state == C_NULL
 last(iter::ModuleFunctionSet) =
     construct(LLVMFunction, API.LLVMGetLastFunction(ref(LLVMModule, iter.mod)))
 
+# NOTE: lacking length(), we need to implement this ourselves
+function collect(iter::ModuleFunctionSet)
+    els = Vector{eltype(iter)}()
+    for el in iter
+        push!(els, el)
+    end
+    return els
+end
+
 
 # global variable iteration
 
@@ -127,7 +145,7 @@ end
 
 globals(mod::LLVMModule) = ModuleGlobalSet(mod)
 
-eltype(iter::ModuleGlobalSet) = GlobalVariable
+eltype(::ModuleGlobalSet) = GlobalVariable
 
 function haskey(iter::ModuleGlobalSet, name::String)
     return API.LLVMGetNamedGlobal(ref(LLVMModule, iter.mod), name) != C_NULL
@@ -141,10 +159,10 @@ end
 
 start(iter::ModuleGlobalSet) = API.LLVMGetFirstGlobal(ref(LLVMModule, iter.mod))
 
-next(iter::ModuleGlobalSet, state) =
+next(::ModuleGlobalSet, state) =
     (construct(GlobalVariable,state), API.LLVMGetNextGlobal(state))
 
-done(iter::ModuleGlobalSet, state) = state == C_NULL
+done(::ModuleGlobalSet, state) = state == C_NULL
 
 last(iter::ModuleGlobalSet) =
     construct(GlobalVariable, API.LLVMGetLastGlobal(ref(LLVMModule, iter.mod)))

@@ -18,5 +18,29 @@ passreg = GlobalPassRegistry()
 
 InitializeCore(passreg)
 include("core.jl")
+include("irbuilder.jl")
+
+InitializeTransformUtils(passreg)
+
+InitializeScalarOpts(passreg)
+
+InitializeObjCARCOpts(passreg)
+
+InitializeVectorization(passreg)
+
+InitializeInstCombine(passreg)
+
+InitializeIPO(passreg)
+
+InitializeInstrumentation(passreg)
+
+InitializeAnalysis(passreg)
+
+InitializeIPA(passreg)
+
+InitializeCodeGen(passreg)
+
+InitializeTarget(passreg)
+
 
 Shutdown()

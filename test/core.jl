@@ -179,7 +179,7 @@ end
 # function
 Context() do ctx
     mod = LLVMModule("foo", ctx)
-    ft = LLVM.FunctionType(LLVM.VoidType(), LLVMType[])
+    ft = LLVM.FunctionType(LLVM.VoidType())
     fn = LLVMFunction(mod, "bar", ft)
 
     show(DevNull, fn)
@@ -275,8 +275,6 @@ Context() do ctx
 end
 
 # type iteration
-
-# function iteration
 Context() do ctx
     mod = LLVMModule("SomeModule", ctx)
 
@@ -301,16 +299,6 @@ Context() do ctx
 
     fns = functions(mod)
     @test eltype(fns) == LLVMFunction
-
-    @test get(fns, "SomeFunction") == fn
-    @test first(fns) == fn
-    fs = 0
-    for f in fns
-        fs += 1
-        @test f == fn
-    end
-    @test fs == 1
-    @test last(fns) == fn
 
     @test !haskey(fns, "SomeOtherFunction")
     @test_throws KeyError get(fns, "SomeOtherFunction")
@@ -381,3 +369,8 @@ Context() do ctx
     @test length(ops) == 1
     @test ops[1] == str
 end
+
+
+## instructions
+
+# TODO: test once instruction ctor is wrappe
