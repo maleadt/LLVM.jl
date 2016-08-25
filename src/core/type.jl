@@ -2,8 +2,6 @@ export LLVMType, issized, context, show
 
 import Base: show
 
-@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
-
 # Construct an unknown type of type object from a type ref.
 function dynamic_construct(::Type{LLVMType}, ref::API.LLVMTypeRef)
     ref == C_NULL && throw(NullException())

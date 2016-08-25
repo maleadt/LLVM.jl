@@ -1,4 +1,4 @@
-@reftypedef ref=LLVMPassRegistryRef immutable PassRegistry end
+@reftypedef reftype=LLVMPassRegistryRef immutable PassRegistry end
 
 export GlobalPassRegistry
 

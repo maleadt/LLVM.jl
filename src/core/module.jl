@@ -5,8 +5,6 @@ export LLVMModule, dispose,
 
 import Base: show
 
-# @reftypedef immutable LLVMModule end
-
 LLVMModule(name::String) = LLVMModule(API.LLVMModuleCreateWithName(name))
 LLVMModule(name::String, ctx::Context) =
     LLVMModule(API.LLVMModuleCreateWithNameInContext(name, ref(Context, ctx)))

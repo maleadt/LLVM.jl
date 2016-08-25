@@ -13,7 +13,7 @@
 #
 # The following is used to wrap the flattened type hierarchy of the LLVM C API in richer
 # Julia types.
-const refs = Dict{Symbol,Symbol}()
+const reftypes = Dict{Symbol,Symbol}()
 const discriminators = Dict{Symbol, Symbol}()
 macro reftypedef(args...)
     # extract arguments
@@ -73,19 +73,19 @@ macro reftypedef(args...)
         # kind: populate parent's discriminator cache
         if key == :kind
             # NOTE: this assumes the parent for which this enum kind is relevant
-            #       is the last ref we processed
+            #       is the last argtype we processed
             discriminator = discriminators[last(argtypes)]
             push!(code.args, :( $discriminator[API.$value] = $(typename) ))
         end
 
-        # passby: how this object is passed to the API
+        # argtype: via which type's ref this object is passed to the API
         if key == :argtype
             push!(argtypes, value)
         end
 
-        # ref: how this type is referred to in the API (also generates a argtype)
-        if key == :ref
-            refs[typename] = value
+        # reftype: how this type is referenced in the API (also generates an argtype)
+        if key == :reftype
+            reftypes[typename] = value
             push!(argtypes, typename)
         end
     end
@@ -99,19 +99,19 @@ macro reftypedef(args...)
         if isempty(argtypes)
             error("no argtypes specified for type $(typename)")
         end
-        for ref in argtypes
-            if !haskey(refs, ref)
-                error("cannot reference $(typename) via $ref which has no registered API type")
+        for argtype in argtypes
+            if !haskey(reftypes, argtype)
+                error("cannot reference $(typename) via $argtype which has no reference type")
             end
-            apitype = refs[ref]
+            reftype = reftypes[argtype]
 
             # define a constructor accepting this reftype
-            unshift!(typedef.args[3].args, :( $(typename)(ref::API.$apitype) = new(ref) ))
+            unshift!(typedef.args[3].args, :( $(typename)(ref::API.$reftype) = new(ref) ))
 
             # generate a `ref` method for extracting this reftype
             append!(code.args, (quote
-                ref(::Type{$ref}, obj::$(typename)) =
-                    convert(API.$apitype, obj.ref)
+                ref(::Type{$argtype}, obj::$(typename)) =
+                    convert(API.$reftype, obj.ref)
                 end).args)
         end
     end
