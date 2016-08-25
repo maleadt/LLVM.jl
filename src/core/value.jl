@@ -3,7 +3,7 @@
 
 export Value
 
-@reftypedef apitype=LLVMValueRef enum=LLVMValueKind abstract Value
+@reftypedef ref=LLVMValueRef enum=LLVMValueKind abstract Value
 
 # Construct an unknown type of value object from a value ref.
 function dynamic_construct(::Type{Value}, ref::API.LLVMValueRef)
@@ -58,7 +58,7 @@ isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(Value, val)))
 
 ## instructions
 
-@reftypedef ref=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
+@reftypedef argtype=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
 
 
 

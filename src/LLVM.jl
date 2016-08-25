@@ -13,6 +13,7 @@ end
 include("logging.jl")
 include("auxiliary.jl")
 
+include("support.jl")
 include("core.jl")
 
 end

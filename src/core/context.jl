@@ -2,7 +2,7 @@
 
 export Context, dispose, GlobalContext
 
-@reftypedef apitype=LLVMContextRef immutable Context end
+@reftypedef ref=LLVMContextRef immutable Context end
 
 Context() = Context(API.LLVMContextCreate())
 
