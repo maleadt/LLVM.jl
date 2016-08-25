@@ -14,6 +14,7 @@ include("logging.jl")
 include("auxiliary.jl")
 
 include("support.jl")
+include("passregistry.jl")
 include("core.jl")
 
 end

@@ -11,6 +11,13 @@ let
 end
 
 
+## pass registry
+
+let
+    GlobalPassRegistry()
+end
+
+
 ## context
 
 global_ctx = GlobalContext()
