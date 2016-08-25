@@ -13,6 +13,7 @@ end
 # Construct an specific type of type object from a type ref.
 # In debug mode, this checks if the object type matches the underlying ref type.
 @inline function construct{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
+    T.abstract && error("Cannot construct an abstract type, use a concrete type instead (use dynamic_construct if unknown)")
     ref == C_NULL && throw(NullException())
     @static if DEBUG
         RealT = identify(LLVMType, API.LLVMGetTypeKind(ref))

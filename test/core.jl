@@ -34,6 +34,7 @@ Context() do ctx
         @test_throws ErrorException LLVM.construct(LLVM.FunctionType, LLVM.ref(LLVMType, typ))
     end
     @test_throws NullException LLVM.construct(LLVM.FunctionType, LLVM.API.LLVMTypeRef(C_NULL))
+    @test_throws ErrorException LLVM.construct(LLVMType, LLVM.API.LLVMTypeRef(C_NULL))
 
     @test LLVM.dynamic_construct(LLVMType, LLVM.ref(LLVMType, typ)) == typ
     @test_throws NullException LLVM.dynamic_construct(LLVMType, LLVM.API.LLVMTypeRef(C_NULL))
@@ -157,6 +158,7 @@ Context() do ctx
         @test_throws ErrorException LLVM.construct(LLVMFunction, LLVM.ref(Value, val))
     end
     @test_throws NullException LLVM.construct(LLVMFunction, LLVM.API.LLVMValueRef(C_NULL))
+    @test_throws ErrorException LLVM.construct(Value, LLVM.API.LLVMValueRef(C_NULL))
 
     @test LLVM.dynamic_construct(Value, LLVM.ref(Value, val)) == val
     @test_throws NullException LLVM.dynamic_construct(Value, LLVM.API.LLVMValueRef(C_NULL))
