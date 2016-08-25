@@ -184,10 +184,6 @@ Context() do ctx
 
     show(DevNull, fn)
 
-    @test last(functions(mod)) == fn
-    delete!(fn)
-    @test isempty(functions(mod))
-
     #personality(fn)
 
     @test intrinsic_id(fn) == 0
@@ -200,6 +196,10 @@ Context() do ctx
 
     attr = attributes(fn)
     # @show get(attr)
+
+    @test last(functions(mod)) == fn
+    unsafe_delete!(mod, fn)
+    @test isempty(functions(mod))
 
     dispose(mod)
 end
@@ -233,7 +233,7 @@ Context() do ctx
     @test threadlocalmode(gv) == LLVM.API.LLVMNotThreadLocal
 
     @test last(globals(mod)) == gv
-    delete!(gv)
+    unsafe_delete!(mod, gv)
     @test isempty(globals(mod))
 
     dispose(mod)

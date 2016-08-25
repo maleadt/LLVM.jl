@@ -35,9 +35,12 @@ convert(::Type{Float64}, val::ConstantFP) =
 
 ## function
 
-import Base: delete!, get, push!
+export LLVMFunction,  unsafe_delete!,
+       personality, personality!,
+       callconv, callconv!,
+       gc, gc!, intrinsic_id
 
-export LLVMFunction, personality, personality!, callconv, callconv!, gc, gc!, intrinsic_id
+import Base: get, push!
 
 # http://llvm.org/docs/doxygen/html/group__LLVMCCoreValueFunction.html
 
@@ -48,7 +51,7 @@ LLVMFunction(mod::LLVMModule, name::String, ft::FunctionType) =
               API.LLVMAddFunction(ref(LLVMModule, mod), name,
                                   ref(LLVMType, ft)))
 
-delete!(fn::LLVMFunction) = API.LLVMDeleteFunction(ref(Value, fn))
+unsafe_delete!(::LLVMModule, fn::LLVMFunction) = API.LLVMDeleteFunction(ref(Value, fn))
 
 personality(fn::LLVMFunction) =
     construct(LLVMFunction, API.LLVMGetPersonalityFn(ref(Value, fn)))
@@ -86,10 +89,14 @@ delete!(iter::FunctionAttrSet, attr) = API.LLVMRemoveFunctionAttr(ref(Value, ite
 
 ## global variables
 
-export GlobalVariable, initializer, initializer!, isthreadlocal, threadlocal!,
-       threadlocalmode, threadlocalmode!, isconstant, constant!, isextinit, extinit!
+export GlobalVariable, unsafe_delete!,
+       initializer, initializer!,
+       isthreadlocal, threadlocal!,
+       threadlocalmode, threadlocalmode!,
+       isconstant, constant!,
+       isextinit, extinit!
 
-import Base: get, push!, delete!
+import Base: get, push!
 
 # http://llvm.org/docs/doxygen/html/group__LLVMCoreValueConstantGlobalVariable.html
 
@@ -105,7 +112,7 @@ GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String, addrspace::Integer)
               API.LLVMAddGlobalInAddressSpace(ref(LLVMModule, mod), ref(LLVMType, typ),
                                               name, Cuint(addrspace)))
 
-delete!(gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(Value, gv))
+unsafe_delete!(::LLVMModule, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(Value, gv))
 
 initializer(gv::GlobalVariable) =
   dynamic_construct(Value, API.LLVMGetInitializer(ref(Value, gv)))
