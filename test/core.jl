@@ -1,23 +1,3 @@
-## support
-
-let
-    @test LLVM.BoolFromLLVM(LLVMTrue) == true
-    @test LLVM.BoolFromLLVM(LLVMFalse) == false
-
-    @test_throws ArgumentError LLVM.BoolFromLLVM(LLVM.API.LLVMBool(2))
-
-    @test LLVM.BoolToLLVM(true) == LLVMTrue
-    @test LLVM.BoolToLLVM(false) == LLVMFalse
-end
-
-
-## pass registry
-
-let
-    GlobalPassRegistry()
-end
-
-
 ## context
 
 global_ctx = GlobalContext()
