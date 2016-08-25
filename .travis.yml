@@ -68,26 +68,51 @@ matrix:
       - sudo apt-get remove llvm -y
       - sudo apt-get install llvm-3.9 -y
     # LLVM 4.0
-    # - os: linux
-    #   env: LLVM_VERSION=4.0
-    #   julia: 0.5
-    #   # addons: *llvm40linux
-    #   before_install:
-    #   - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    #   - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
-    #   - sudo apt-get update -q
-    #   - sudo apt-get remove llvm -y
-    #   - sudo apt-get install llvm-4.0 -y
-    # - os: linux
-    #   env: LLVM_VERSION=4.0
-    #   julia: nightly
-    #   # addons: *llvm40linux
-    #   before_install:
-    #   - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    #   - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
-    #   - sudo apt-get update -q
-    #   - sudo apt-get remove llvm -y
-    #   - sudo apt-get install llvm-4.0 -y
+    - os: linux
+      env: LLVM_VERSION=4.0
+      julia: 0.5
+      # addons: *llvm40linux
+      before_install:
+      - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+      - sudo apt-get update -q
+      - sudo apt-get remove llvm -y
+      - sudo apt-get install llvm-4.0 -y
+    - os: linux
+      env: LLVM_VERSION=4.0
+      julia: nightly
+      # addons: *llvm40linux
+      before_install:
+      - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+      - sudo apt-get update -q
+      - sudo apt-get remove llvm -y
+      - sudo apt-get install llvm-4.0 -y
+    # LLVM 4.0 with LLVM.jl in DEBUG mode
+    - os: linux
+      env:
+        - LLVM_VERSION=4.0
+        - DEBUG=1
+      julia: 0.5
+      # addons: *llvm40linux
+      before_install:
+      - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+      - sudo apt-get update -q
+      - sudo apt-get remove llvm -y
+      - sudo apt-get install llvm-4.0 -y
+    - os: linux
+      env:
+        - LLVM_VERSION=4.0
+        - DEBUG=1
+      julia: nightly
+      # addons: *llvm40linux
+      before_install:
+      - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+      - sudo apt-get update -q
+      - sudo apt-get remove llvm -y
+      - sudo apt-get install llvm-4.0 -y
 
 after_success:
  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
