@@ -27,11 +27,13 @@ callconv(fn::LLVMFunction) = API.LLVMGetFunctionCallConv(ref(Value, fn))
 callconv!(fn::LLVMFunction, cc) =
     API.LLVMSetFunctionCallConv(ref(Value, fn), Cuint(cc))
 
-gc(fn::LLVMFunction) = unsafe_string(API.LLVMGetGC(ref(Value, fn)))
+function gc(fn::LLVMFunction)
+  ptr = API.LLVMGetGC(ref(Value, fn))
+  return ptr==C_NULL ? "" :  unsafe_string(ptr)
+end
 gc!(fn::LLVMFunction, name::String) = API.LLVMSetGC(ref(Value, fn), name)
 
-entry(fn::LLVMFunction) =
-    construct(BasicBlock, API.LLVMGetEntryBasicBlock(ref(Value, fn)))
+entry(fn::LLVMFunction) = BasicBlock(API.LLVMGetEntryBasicBlock(ref(Value, fn)))
 
 # attributes
 
@@ -53,11 +55,11 @@ delete!(iter::FunctionAttrSet, attr) = API.LLVMRemoveFunctionAttr(ref(Value, ite
 
 # parameter iteration
 
+export Argument, parameters
+
+import Base: eltype, getindex, start, next, done, last
+
 @reftypedef argtype=Value kind=LLVMArgumentValueKind immutable Argument <: Value end
-
-export parameters
-
-import Base: eltype, getindex, start, next, done, last, endof, collect
 
 immutable FunctionParameterSet
     fn::LLVMFunction
@@ -65,7 +67,7 @@ end
 
 parameters(fn::LLVMFunction) = FunctionParameterSet(fn)
 
-eltype(::FunctionParameterSet) = BasicBlock
+eltype(::FunctionParameterSet) = Argument
 
 getindex(iter::FunctionParameterSet, i) =
   construct(Argument, API.LLVMGetParam(ref(Value, iter.fn), Cuint(i-1)))
@@ -78,25 +80,15 @@ next(::FunctionParameterSet, state) =
 done(::FunctionParameterSet, state) = state == C_NULL
 
 last(iter::FunctionParameterSet) =
-    construct(Argument, API.LLVMGetLastBasicBlock(ref(Value, iter.fn)))
+    construct(Argument, API.LLVMGetLastParam(ref(Value, iter.fn)))
 
 length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(Value, iter.fn))
-endof(iter::FunctionParameterSet) = length(iter)
-
-# even though we implement the necessary iteration interface for collect to work,
-# there's an optimized API call so we override the function
-function collect(iter::FunctionParameterSet)
-  nparams = length(iter)
-  params = Vector{API.LLVMValueRef}(nparams)
-  API.LLVMGetParams(ref(Value, iter.fn), params)
-  return map(v->construct(Argument, v), params)
-end
 
 # basic block iteration
 
 export blocks
 
-import Base: eltype, start, next, done, last, endof
+import Base: eltype, start, next, done, last, length
 
 immutable FunctionBlockSet
     fn::LLVMFunction
@@ -117,4 +109,3 @@ last(iter::FunctionBlockSet) =
     BasicBlock(API.LLVMGetLastBasicBlock(ref(Value, iter.fn)))
 
 length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(ref(Value, iter.fn))
-endof(iter::FunctionBlockSet) = length(iter)

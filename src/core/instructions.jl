@@ -48,16 +48,18 @@ export isconditional, condition, condition!, default_dest
 isconditional(br::Instruction) = BoolFromLLVM(API.LLVMIsConditional(ref(Value, br)))
 
 condition(br::Instruction) =
-    construct(Instruction, API.LLVMGetCondition(ref(Value, br)))
+    dynamic_construct(Value, API.LLVMGetCondition(ref(Value, br)))
 condition!(br::Instruction, cond::Value) =
-    construct(Instruction, API.LLVMSetCondition(ref(Value, br), ref(Value, cond)))
+    API.LLVMSetCondition(ref(Value, br), ref(Value, cond))
 
 default_dest(switch::Instruction) =
     BasicBlock(API.LLVMGetSwitchDefaultDest(ref(Value, switch)))
 
 # successor iteration
 
-import Base: eltype, getindex, setindex!, length
+export successors
+
+import Base: eltype, getindex, setindex!, start, next, done, length
 
 immutable TerminatorSuccessorSet
     term::Instruction
@@ -70,8 +72,15 @@ eltype(::TerminatorSuccessorSet) = BasicBlock
 getindex(iter::TerminatorSuccessorSet, i) =
     BasicBlock(API.LLVMGetSuccessor(ref(Value, iter.term), Cuint(i-1)))
 
-setindex!(iter::TerminatorSuccessorSet, i, bb::BasicBlock) =
-    BasicBlock(API.LLVMSetSuccessor(ref(Value, iter.term), Cuint(i), ref(BasicBlock, bb)))
+setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
+    API.LLVMSetSuccessor(ref(Value, iter.term), Cuint(i-1), ref(BasicBlock, bb))
+
+start(iter::TerminatorSuccessorSet) = (1,length(iter))
+
+next(iter::TerminatorSuccessorSet, state) =
+    (iter[state[1]], (state[1]+1,state[2]))
+
+done(iter::TerminatorSuccessorSet, state) = (state[1] > state[2])
 
 length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(Value, iter.term))
 

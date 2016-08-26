@@ -26,7 +26,7 @@ delete!(::LLVMFunction, bb::BasicBlock) =
     API.LLVMRemoveBasicBlockFromParent(ref(BasicBlock, bb))
 
 parent(bb::BasicBlock) =
-    construct(LLVMfunction, API.LLVMGetBasicBlockParent(ref(BasicBlock, bb)))
+    construct(LLVMFunction, API.LLVMGetBasicBlockParent(ref(BasicBlock, bb)))
 
 terminator(bb::BasicBlock) =
     construct(Instruction, API.LLVMGetBasicBlockTerminator(ref(BasicBlock, bb)))
@@ -41,7 +41,7 @@ move_after(bb::BasicBlock, pos::BasicBlock) =
 
 export instructions
 
-import Base: eltype, start, next, done, last, collect
+import Base: eltype, start, next, done, last, length
 
 immutable BasicBlockInstructionSet
     bb::BasicBlock
@@ -61,11 +61,11 @@ done(::BasicBlockInstructionSet, state) = state == C_NULL
 last(iter::BasicBlockInstructionSet) =
     construct(Instruction, API.LLVMGetLastInstruction(ref(BasicBlock, iter.bb)))
 
-# NOTE: lacking length(), we need to implement this ourselves
-function collect(iter::BasicBlockInstructionSet)
-    els = Vector{eltype(iter)}()
-    for el in iter
-        push!(els, el)
+# NOTE: this is expensive, but the iteration interface requires it to be implemented
+function length(iter::BasicBlockInstructionSet)
+    count = 0
+    for inst in iter
+        count += 1
     end
-    return els
+    return count
 end

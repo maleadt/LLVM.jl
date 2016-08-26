@@ -47,7 +47,7 @@ debuglocation!(builder::Builder, inst::Instruction) =
 
 ## build methods
 
-export unreachable!, ret!, add!
+export unreachable!, ret!, add!, br!
 
 unreachable!(builder::Builder) =
     construct(Instruction, API.LLVMBuildUnreachable(ref(Builder, builder)))
@@ -61,3 +61,12 @@ ret!(builder::Builder, val::Value) =
 add!(builder::Builder, lhs::Value, rhs::Value, name="") = 
     construct(Instruction, API.LLVMBuildAdd(ref(Builder, builder), ref(Value, lhs),
                                             ref(Value, rhs), name))
+
+br!(builder::Builder, dest::BasicBlock) =
+    construct(Instruction, API.LLVMBuildBr(ref(Builder, builder), ref(BasicBlock, dest)))
+
+br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) = 
+    construct(Instruction, API.LLVMBuildCondBr(ref(Builder, builder),
+                                               ref(Value, ifval),
+                                               ref(BasicBlock, thenbb),
+                                               ref(BasicBlock, elsebb)))

@@ -89,50 +89,6 @@ push!(iter::ModuleMetadataSet, name::String, val::Value) =
     API.LLVMAddNamedMetadataOperand(ref(LLVMModule, iter.mod), name, ref(Value, val))
 
 
-## function iteration
-
-export functions
-
-import Base: eltype, haskey, get, start, next, done, last, collect
-
-immutable ModuleFunctionSet
-    mod::LLVMModule
-end
-
-functions(mod::LLVMModule) = ModuleFunctionSet(mod)
-
-eltype(iter::ModuleFunctionSet) = LLVMFunction
-
-function haskey(iter::ModuleFunctionSet, name::String)
-    return API.LLVMGetNamedFunction(ref(LLVMModule, iter.mod), name) != C_NULL
-end
-
-function get(iter::ModuleFunctionSet, name::String)
-    objref = API.LLVMGetNamedFunction(ref(LLVMModule, iter.mod), name)
-    objref == C_NULL && throw(KeyError(name))
-    return construct(LLVMFunction, objref)
-end
-
-start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(LLVMModule, iter.mod))
-
-next(iter::ModuleFunctionSet, state) =
-    (construct(LLVMFunction,state), API.LLVMGetNextFunction(state))
-
-done(iter::ModuleFunctionSet, state) = state == C_NULL
-
-last(iter::ModuleFunctionSet) =
-    construct(LLVMFunction, API.LLVMGetLastFunction(ref(LLVMModule, iter.mod)))
-
-# NOTE: lacking length(), we need to implement this ourselves
-function collect(iter::ModuleFunctionSet)
-    els = Vector{eltype(iter)}()
-    for el in iter
-        push!(els, el)
-    end
-    return els
-end
-
-
 # global variable iteration
 
 export globals
@@ -166,3 +122,48 @@ done(::ModuleGlobalSet, state) = state == C_NULL
 
 last(iter::ModuleGlobalSet) =
     construct(GlobalVariable, API.LLVMGetLastGlobal(ref(LLVMModule, iter.mod)))
+
+
+
+## function iteration
+
+export functions
+
+import Base: eltype, haskey, get, start, next, done, last, length
+
+immutable ModuleFunctionSet
+    mod::LLVMModule
+end
+
+functions(mod::LLVMModule) = ModuleFunctionSet(mod)
+
+eltype(iter::ModuleFunctionSet) = LLVMFunction
+
+function haskey(iter::ModuleFunctionSet, name::String)
+    return API.LLVMGetNamedFunction(ref(LLVMModule, iter.mod), name) != C_NULL
+end
+
+function get(iter::ModuleFunctionSet, name::String)
+    objref = API.LLVMGetNamedFunction(ref(LLVMModule, iter.mod), name)
+    objref == C_NULL && throw(KeyError(name))
+    return construct(LLVMFunction, objref)
+end
+
+start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(LLVMModule, iter.mod))
+
+next(iter::ModuleFunctionSet, state) =
+    (construct(LLVMFunction,state), API.LLVMGetNextFunction(state))
+
+done(iter::ModuleFunctionSet, state) = state == C_NULL
+
+last(iter::ModuleFunctionSet) =
+    construct(LLVMFunction, API.LLVMGetLastFunction(ref(LLVMModule, iter.mod)))
+
+# NOTE: this is expensive, but the iteration interface requires it to be implemented
+function length(iter::ModuleFunctionSet)
+    count = 0
+    for inst in iter
+        count += 1
+    end
+    return count
+end

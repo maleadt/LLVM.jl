@@ -26,20 +26,6 @@ LLVMModule("SomeModule", ctx) do mod
     retinst = ret!(builder, ConstantInt(LLVM.Int32Type(), 0))
     debuglocation!(builder, retinst)
 
-    @test collect(functions(mod)) == [fn]
-    for f in functions(mod)
-        @test collect(blocks(f)) == [entry]
-        for bb in blocks(f)
-            @test collect(instructions(bb)) == [retinst]
-            for inst in instructions(bb)
-                @test inst == retinst
-            end
-        end
-    end
-    @test last(functions(mod)) == fn
-    @test last(blocks(fn)) == entry
-    @test last(instructions(entry)) == retinst
-
     position!(builder, retinst)
     unrinst = unreachable!(builder)
     @test collect(instructions(entry)) == [unrinst, retinst]

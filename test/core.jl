@@ -204,120 +204,10 @@ Context() do ctx
     threadlocalmode!(gv, LLVM.API.LLVMNotThreadLocal)
     @test threadlocalmode(gv) == LLVM.API.LLVMNotThreadLocal
 
-    @test last(globals(mod)) == gv
+    gvars = globals(mod)
+    @test gv in gvars
     unsafe_delete!(mod, gv)
-    @test isempty(globals(mod))
-
-    dispose(mod)
-end
-
-
-## module
-
-let
-    mod = LLVMModule("foo")
-    @test context(mod) == global_ctx
-
-    dispose(mod)
-end
-
-Context() do ctx
-    mod = LLVMModule("foo", ctx)
-    @test context(mod) == ctx
-
-    clone = LLVMModule(mod)
-    @test mod != clone
-    @test context(clone) == ctx
-    dispose(clone)
-
-    show(DevNull, mod)
-
-    inline_asm!(mod, "nop")
-    @test contains(sprint(io->show(io,mod)), "module asm")
-
-    dummyTarget = "SomeTarget"
-    target!(mod, dummyTarget)
-    @test target(mod) == dummyTarget
-
-    dummyLayout = "e-p:64:64:64"
-    datalayout!(mod, dummyLayout)
-    @test datalayout(mod) == dummyLayout
-
-    dispose(mod)
-end
-
-# type iteration
-Context() do ctx
-    mod = LLVMModule("SomeModule", ctx)
-
-    st = LLVM.StructType("SomeType", ctx)
-    ft = LLVM.FunctionType(st, [st])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
-
-    @test get(types(mod), "SomeType") == st
-    @test !haskey(types(mod), "SomeOtherType")
-    @test_throws KeyError get(types(mod), "SomeOtherType")
-
-    dispose(mod)
-end
-
-# function iteration
-Context() do ctx
-    mod = LLVMModule("SomeModule", ctx)
-
-    st = LLVM.StructType("SomeType", ctx)
-    ft = LLVM.FunctionType(st, [st])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
-
-    fns = functions(mod)
-    @test eltype(fns) == LLVMFunction
-
-    @test !haskey(fns, "SomeOtherFunction")
-    @test_throws KeyError get(fns, "SomeOtherFunction")
-
-    dispose(mod)
-end
-
-# metadata iteration
-Context() do ctx
-    mod = LLVMModule("SomeModule", ctx)
-
-    node = MDNode([MDString("SomeMDString", ctx)], ctx)
-
-    mds = metadata(mod)
-    push!(mds, "SomeMDNode", node)
-
-    @test haskey(mds, "SomeMDNode")
-    nodeval = get(mds, "SomeMDNode")
-    @test nodeval[1] == node
-
-    @test !haskey(mds, "SomeOtherMDNode")
-    @test_throws KeyError get(mds, "SomeOtherMDNode")
-
-    dispose(mod)
-end
-
-# global iteration
-Context() do ctx
-    mod = LLVMModule("SomeModule", ctx)
-
-    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
-
-    gvs = globals(mod)
-    @test eltype(gvs) == GlobalVariable
-
-    @test get(gvs, "SomeGlobal") == gv
-    @test first(gvs) == gv
-    fs = 0
-    for f in gvs
-        fs += 1
-        @test f == gv
-    end
-    @test fs == 1
-    @test last(gvs) == gv
-
-    @test !haskey(gvs, "SomeOtherGlobal")
-    @test_throws KeyError get(gvs, "SomeOtherGlobal")
+    @test isempty(gvars)
 
     dispose(mod)
 end
@@ -342,16 +232,137 @@ Context() do ctx
     @test ops[1] == str
 end
 
+
+## module
+
+let
+    mod = LLVMModule("SomeModule")
+    @test context(mod) == global_ctx
+
+    dispose(mod)
+end
+
+Context() do ctx
+    mod = LLVMModule("SomeModule", ctx)
+    @test context(mod) == ctx
+end
+
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    clone = LLVMModule(mod)
+    @test mod != clone
+    @test context(clone) == ctx
+    dispose(clone)
+
+    show(DevNull, mod)
+
+    inline_asm!(mod, "nop")
+    @test contains(sprint(io->show(io,mod)), "module asm")
+
+    dummyTarget = "SomeTarget"
+    target!(mod, dummyTarget)
+    @test target(mod) == dummyTarget
+
+    dummyLayout = "e-p:64:64:64"
+    datalayout!(mod, dummyLayout)
+    @test datalayout(mod) == dummyLayout
+end
+end
+
+# type iteration
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    st = LLVM.StructType("SomeType", ctx)
+    ft = LLVM.FunctionType(st, [st])
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+
+    @test get(types(mod), "SomeType") == st
+    @test !haskey(types(mod), "SomeOtherType")
+    @test_throws KeyError get(types(mod), "SomeOtherType")
+end
+end
+
+# metadata iteration
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    node = MDNode([MDString("SomeMDString", ctx)], ctx)
+
+    mds = metadata(mod)
+    push!(mds, "SomeMDNode", node)
+
+    @test haskey(mds, "SomeMDNode")
+    nodeval = get(mds, "SomeMDNode")
+    @test nodeval[1] == node
+
+    @test !haskey(mds, "SomeOtherMDNode")
+    @test_throws KeyError get(mds, "SomeOtherMDNode")
+end
+end
+
+# global iteration
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
+
+    gvs = globals(mod)
+    @test eltype(gvs) == GlobalVariable
+
+    @test get(gvs, "SomeGlobal") == gv
+    @test first(gvs) == gv
+    fs = 0
+    for f in gvs
+        fs += 1
+        @test f == gv
+    end
+    @test fs == 1
+    @test last(gvs) == gv
+
+    @test !haskey(gvs, "SomeOtherGlobal")
+    @test_throws KeyError get(gvs, "SomeOtherGlobal")
+end
+end
+
+# function iteration
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    st = LLVM.StructType("SomeType", ctx)
+    ft = LLVM.FunctionType(st, [st])
+
+    dummyfn = LLVMFunction(mod, "SomeFunction", ft)
+    let fns = functions(mod)
+        @test eltype(fns) == LLVMFunction
+
+        @test length(fns) == 1
+
+        @test first(fns) == dummyfn
+        @test last(fns) == dummyfn
+
+        for fn in fns
+            @test fn == dummyfn
+        end
+
+        @test collect(fns) == [dummyfn]
+
+        @test first(fns) == dummyfn
+        @test last(fns) == dummyfn
+
+        @test !haskey(fns, "SomeOtherFunction")
+        @test_throws KeyError get(fns, "SomeOtherFunction")
+    end
+end
+end
+
+
 ## function
 
 Context() do ctx
-    mod = LLVMModule("foo", ctx)
-    ft = LLVM.FunctionType(LLVM.VoidType())
-    fn = LLVMFunction(mod, "bar", ft)
+LLVMModule("SomeModule", ctx) do mod
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type(ctx)])
+    fn = LLVMFunction(mod, "SomeFunction", ft)
 
     show(DevNull, fn)
 
-    #personality(fn)
+    # @show personality(fn)
 
     @test intrinsic_id(fn) == 0
 
@@ -359,19 +370,223 @@ Context() do ctx
     callconv!(fn, LLVM.API.LLVMFastCallConv)
     @test callconv(fn) == LLVM.API.LLVMFastCallConv
 
-    #LLVM.gc(fn)
+    @test LLVM.gc(fn) == ""
+    gc!(fn, "SomeGC")
+    @test LLVM.gc(fn) == "SomeGC"
 
-    attr = attributes(fn)
-    # @show get(attr)
-
-    @test last(functions(mod)) == fn
+    fns = functions(mod)
+    @test fn in fns
     unsafe_delete!(mod, fn)
-    @test isempty(functions(mod))
+    @test isempty(fns)
+end
+end
 
-    dispose(mod)
+# attributes
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+
+    let attrs = attributes(fn)
+        @test get(attrs) == 0
+
+        push!(attrs, LLVM.API.LLVMNoUnwindAttribute)
+        @test get(attrs) == LLVM.API.LLVMNoUnwindAttribute
+
+        push!(attrs, LLVM.API.LLVMNoInlineAttribute)
+        @test get(attrs) == LLVM.API.LLVMNoUnwindAttribute|LLVM.API.LLVMNoInlineAttribute
+
+        delete!(attrs, LLVM.API.LLVMNoUnwindAttribute)
+        @test get(attrs) == LLVM.API.LLVMNoInlineAttribute
+    end
+end
+end
+
+# parameter iteration
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+
+    let params = parameters(fn)
+        @test eltype(params) == Argument
+
+        @test length(params) == 1
+
+        intparam = params[1]
+        @test first(params) == intparam
+        @test last(params) == intparam
+
+        for param in params
+            @test param == intparam
+        end
+
+        @test collect(params) == [intparam]
+    end
+end
+end
+
+# basic block iteration
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+
+    entrybb = BasicBlock(fn, "SomeBasicBlock")
+    @test entry(fn) == entrybb
+    let bbs = blocks(fn)
+        @test eltype(bbs) == BasicBlock
+
+        @test length(bbs) == 1
+
+        @test first(bbs) == entrybb
+        @test last(bbs) == entrybb
+
+        for bb in bbs
+            @test bb == entrybb
+        end
+
+        @test collect(bbs) == [entrybb]
+    end
+end
+end
+
+
+## basic blocks
+
+Builder() do builder
+LLVMModule("SomeModule") do mod
+    ft = LLVM.FunctionType(LLVM.VoidType())
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+    bbs = blocks(fn)
+
+    bb2 = BasicBlock(fn, "SomeOtherBasicBlock")
+    @test LLVM.parent(bb2) == fn
+
+    bb1 = BasicBlock(bb2, "SomeBasicBlock")
+    @test LLVM.parent(bb2) == fn
+
+    @test collect(bbs) == [bb1, bb2]
+
+    move_before(bb2, bb1)
+    @test collect(bbs) == [bb2, bb1]
+
+    move_after(bb2, bb1)
+    @test collect(bbs) == [bb1, bb2]
+
+    @test bb1 in bbs
+    @test bb2 in bbs
+    delete!(fn, bb1)
+    unsafe_delete!(fn, bb2)
+    @test isempty(bbs)
+end
+end
+
+Context() do ctx
+Builder(ctx) do builder
+LLVMModule("SomeModule", ctx) do mod
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+
+    bb2 = BasicBlock(fn, "SomeOtherBasicBlock", ctx)
+    @test LLVM.parent(bb2) == fn
+
+    bb1 = BasicBlock(bb2, "SomeBasicBlock", ctx)
+    @test LLVM.parent(bb2) == fn
+    position!(builder, bb1)
+    brinst = br!(builder, bb2)
+    position!(builder, bb2)
+    retinst = ret!(builder)
+
+    @test terminator(bb1) == brinst
+    @test terminator(bb2) == retinst
+
+    # instruction iteration
+    let insts = instructions(bb1)
+        @test eltype(insts) == Instruction
+
+        @test length(insts) == 1
+
+        @test first(insts) == brinst
+        @test last(insts) == brinst
+
+        for inst in insts
+            @test inst == brinst
+        end
+
+        @test collect(insts) == [brinst]
+    end
+end
+end
 end
 
 
 ## instructions
 
-# TODO: test once instruction ctor is wrapped
+Context() do ctx
+Builder(ctx) do builder
+LLVMModule("SomeModule", ctx) do mod
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int1Type(ctx), LLVM.Int1Type(ctx)])
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+
+    bb1 = BasicBlock(fn, "entry", ctx)
+    bb2 = BasicBlock(fn, "then", ctx)
+    bb3 = BasicBlock(fn, "else", ctx)
+
+    position!(builder, bb1)
+    brinst = br!(builder, parameters(fn)[1], bb2, bb3)
+
+    position!(builder, bb2)
+    retinst = ret!(builder)
+
+    position!(builder, bb3)
+    retinst = ret!(builder)
+
+    # terminators
+
+    @test isconditional(brinst)
+    @test condition(brinst) == parameters(fn)[1]
+    condition!(brinst, parameters(fn)[2])
+    @test condition(brinst) == parameters(fn)[2]
+
+    let succ = successors(terminator(bb1))
+        @test eltype(succ) == BasicBlock
+
+        @test length(succ) == 2
+
+        @test succ[1] == bb2
+        @test succ[2] == bb3
+
+        @test collect(succ) == [bb2, bb3]
+        i = 1
+        for bb in succ
+            @test 1 <= i <= 2
+            if i == 1
+                @test bb == bb2
+            elseif i == 2
+                @test bb == bb3
+            end
+            i += 1
+        end
+
+        succ[2] = bb3
+        @test succ[2] == bb3
+
+        # TODO: collect
+    end
+
+    # general stuff
+
+    @test LLVM.parent(brinst) == bb1
+
+    @test !hasmetadata(brinst)
+    md = MDNode([MDString("foo", ctx)], ctx)
+    metadata!(brinst, 0, md)
+    @test metadata(brinst, 0) == md
+
+    @test brinst in instructions(bb1)
+    unsafe_delete!(bb1, brinst)
+    @test !(brinst in instructions(bb1))
+end
+end
+end
