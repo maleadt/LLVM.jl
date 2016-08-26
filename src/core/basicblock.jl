@@ -1,5 +1,3 @@
-# http://llvm.org/docs/doxygen/html/group__LLVMCCoreValueBasicBlock.html
-
 export BasicBlock, unsafe_delete!,
        parent, terminator,
        move_before, move_after

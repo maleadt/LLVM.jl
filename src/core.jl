@@ -1,7 +1,5 @@
 # Interface to libLLVMCore, which implements the LLVM intermediate representation as well as
 # other related types and utilities.
-#
-# http://llvm.org/docs/doxygen/html/group__LLVMCCore.html
 
 # forward-define outer layers of the type hierarchy
 @reftypedef ref=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType

@@ -6,8 +6,6 @@ export LLVMFunction,  unsafe_delete!,
 
 import Base: get, push!
 
-# http://llvm.org/docs/doxygen/html/group__LLVMCCoreValueFunction.html
-
 LLVMFunction(mod::LLVMModule, name::String, ft::FunctionType) =
     construct(LLVMFunction,
               API.LLVMAddFunction(ref(mod), name,

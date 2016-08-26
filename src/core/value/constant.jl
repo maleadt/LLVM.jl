@@ -1,9 +1,4 @@
-# http://llvm.org/docs/doxygen/html/group__LLVMCCoreValueConstant.html
-
-
 ## scalar
-
-# http://llvm.org/docs/doxygen/html/group__LLVMCCoreValueConstantScalar.html
 
 import Base: convert
 
@@ -41,8 +36,6 @@ export GlobalVariable, unsafe_delete!,
        isextinit, extinit!
 
 import Base: get, push!
-
-# http://llvm.org/docs/doxygen/html/group__LLVMCoreValueConstantGlobalVariable.html
 
 @reftypedef proxy=Value kind=LLVMGlobalVariableValueKind immutable GlobalVariable <: Constant end
 

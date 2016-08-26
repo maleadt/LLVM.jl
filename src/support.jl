@@ -1,5 +1,3 @@
-# http://llvm.org/docs/doxygen/html/group__LLVMCSupportTypes.html
-
 ## bool
 
 import Base: convert
