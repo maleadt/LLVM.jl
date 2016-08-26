@@ -6,7 +6,6 @@ export BasicBlock, unsafe_delete!,
 
 import Base: delete!
 
-@reftypedef reftype=LLVMBasicBlockRef argtype=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 # NOTE: BasicBlock is the only class which can be represented by two ref kinds, which
 #       the @reftypedef macro now plainly emits two `ref` methods for`
 #       This matches the LLVMValueAsBasicBlock/LLVMBasicBlockAsValue behavior.

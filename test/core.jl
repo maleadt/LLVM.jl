@@ -176,34 +176,6 @@ Context() do ctx
     @test convert(Float64, c) == 1.1
 end
 
-# function
-Context() do ctx
-    mod = LLVMModule("foo", ctx)
-    ft = LLVM.FunctionType(LLVM.VoidType())
-    fn = LLVMFunction(mod, "bar", ft)
-
-    show(DevNull, fn)
-
-    #personality(fn)
-
-    @test intrinsic_id(fn) == 0
-
-    @test callconv(fn) == LLVM.API.LLVMCCallConv
-    callconv!(fn, LLVM.API.LLVMFastCallConv)
-    @test callconv(fn) == LLVM.API.LLVMFastCallConv
-
-    #LLVM.gc(fn)
-
-    attr = attributes(fn)
-    # @show get(attr)
-
-    @test last(functions(mod)) == fn
-    unsafe_delete!(mod, fn)
-    @test isempty(functions(mod))
-
-    dispose(mod)
-end
-
 # global variables
 Context() do ctx
     mod = LLVMModule("SomeModule", ctx)
@@ -370,7 +342,36 @@ Context() do ctx
     @test ops[1] == str
 end
 
+## function
+
+Context() do ctx
+    mod = LLVMModule("foo", ctx)
+    ft = LLVM.FunctionType(LLVM.VoidType())
+    fn = LLVMFunction(mod, "bar", ft)
+
+    show(DevNull, fn)
+
+    #personality(fn)
+
+    @test intrinsic_id(fn) == 0
+
+    @test callconv(fn) == LLVM.API.LLVMCCallConv
+    callconv!(fn, LLVM.API.LLVMFastCallConv)
+    @test callconv(fn) == LLVM.API.LLVMFastCallConv
+
+    #LLVM.gc(fn)
+
+    attr = attributes(fn)
+    # @show get(attr)
+
+    @test last(functions(mod)) == fn
+    unsafe_delete!(mod, fn)
+    @test isempty(functions(mod))
+
+    dispose(mod)
+end
+
 
 ## instructions
 
-# TODO: test once instruction ctor is wrappe
+# TODO: test once instruction ctor is wrapped

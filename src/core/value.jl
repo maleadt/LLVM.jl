@@ -3,8 +3,6 @@
 
 export Value
 
-@reftypedef abstract User <: Value
-
 # Construct an unknown type of value object from a value ref.
 function dynamic_construct(::Type{Value}, ref::API.LLVMValueRef)
     ref == C_NULL && throw(NullException())
