@@ -4,13 +4,13 @@
 # http://llvm.org/docs/doxygen/html/group__LLVMCCore.html
 
 # forward-define outer layers of the type hierarchy
-@reftypedef reftype=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
-@reftypedef reftype=LLVMValueRef enum=LLVMValueKind abstract Value
+@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
+@reftypedef ref=LLVMValueRef enum=LLVMValueKind abstract Value
 @reftypedef abstract User <: Value
 @reftypedef abstract Constant <: User
-@reftypedef reftype=LLVMModuleRef immutable LLVMModule end
-@reftypedef argtype=Value kind=LLVMFunctionValueKind immutable LLVMFunction <: Constant end
-@reftypedef argtype=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
+@reftypedef ref=LLVMModuleRef immutable LLVMModule end
+@reftypedef proxy=Value kind=LLVMFunctionValueKind immutable LLVMFunction <: Constant end
+@reftypedef proxy=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 
 # NOTE: simplifying the two-ref types obviates need for a ref(T, obj)
 

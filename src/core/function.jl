@@ -59,7 +59,7 @@ export Argument, parameters
 
 import Base: eltype, getindex, start, next, done, last
 
-@reftypedef argtype=Value kind=LLVMArgumentValueKind immutable Argument <: Value end
+@reftypedef proxy=Value kind=LLVMArgumentValueKind immutable Argument <: Value end
 
 immutable FunctionParameterSet
     fn::LLVMFunction

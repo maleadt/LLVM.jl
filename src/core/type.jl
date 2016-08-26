@@ -36,7 +36,7 @@ end
 
 export width
 
-@reftypedef argtype=LLVMType kind=LLVMIntegerTypeKind immutable LLVMInteger <: LLVMType end
+@reftypedef proxy=LLVMType kind=LLVMIntegerTypeKind immutable LLVMInteger <: LLVMType end
 
 for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     jlfun = Symbol(T, :Type)
@@ -62,7 +62,7 @@ for T in [:Half, :Float, :Double]
     apifun = Symbol(:LLVM, jlfun)
     enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin
-        @reftypedef argtype=LLVMType kind=$enumkind immutable $apityp <: LLVMType end
+        @reftypedef proxy=LLVMType kind=$enumkind immutable $apityp <: LLVMType end
 
         $jlfun() = construct($apityp, API.$apifun())
         $jlfun(ctx::Context) =
@@ -76,7 +76,7 @@ end
 
 export isvararg, return_type, parameters
 
-@reftypedef argtype=LLVMType kind=LLVMFunctionTypeKind immutable FunctionType <: LLVMType end
+@reftypedef proxy=LLVMType kind=LLVMFunctionTypeKind immutable FunctionType <: LLVMType end
 
 FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Bool=false) =
     FunctionType(API.LLVMFunctionType(ref(LLVMType, rettyp), ref.([LLVMType], params),
@@ -113,7 +113,7 @@ import Base: length, size, eltype
 eltype(typ::SequentialType) =
     dynamic_construct(LLVMType, API.LLVMGetElementType(ref(LLVMType, typ)))
 
-@reftypedef argtype=LLVMType kind=LLVMPointerTypeKind immutable PointerType <: SequentialType end
+@reftypedef proxy=LLVMType kind=LLVMPointerTypeKind immutable PointerType <: SequentialType end
 
 function PointerType(eltyp::LLVMType, addrspace=0)
     return PointerType(API.LLVMPointerType(ref(LLVMType, eltyp),
@@ -123,7 +123,7 @@ end
 addrspace(ptrtyp::PointerType) =
     API.LLVMGetPointerAddressSpace(ref(LLVMType, ptrtyp))
 
-@reftypedef argtype=LLVMType kind=LLVMArrayTypeKind immutable ArrayType <: SequentialType end
+@reftypedef proxy=LLVMType kind=LLVMArrayTypeKind immutable ArrayType <: SequentialType end
 
 function ArrayType(eltyp::LLVMType, count)
     return ArrayType(API.LLVMArrayType(ref(LLVMType, eltyp), Cuint(count)))
@@ -131,7 +131,7 @@ end
 
 length(arrtyp::ArrayType) = API.LLVMGetArrayLength(ref(LLVMType, arrtyp))
 
-@reftypedef argtype=LLVMType kind=LLVMVectorTypeKind immutable VectorType <: SequentialType end
+@reftypedef proxy=LLVMType kind=LLVMVectorTypeKind immutable VectorType <: SequentialType end
 
 function VectorType(eltyp::LLVMType, count)
     return VectorType(API.LLVMVectorType(ref(LLVMType, eltyp), Cuint(count)))
@@ -144,7 +144,7 @@ size(vectyp::VectorType) = API.LLVMGetVectorSize(ref(LLVMType, vectyp))
 
 export name, ispacked, isopaque, elements, elements!
 
-@reftypedef argtype=LLVMType kind=LLVMStructTypeKind immutable StructType <: SequentialType end
+@reftypedef proxy=LLVMType kind=LLVMStructTypeKind immutable StructType <: SequentialType end
 
 function StructType(name::String, ctx::Context)
     return StructType(API.LLVMStructCreateNamed(ref(Context, ctx), name))
@@ -179,13 +179,13 @@ elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=fal
 
 ## other
 
-@reftypedef argtype=LLVMType kind=LLVMVoidTypeKind immutable LLVMVoid <: LLVMType end
+@reftypedef proxy=LLVMType kind=LLVMVoidTypeKind immutable LLVMVoid <: LLVMType end
 
 VoidType() = construct(LLVMVoid, API.LLVMVoidType())
 VoidType(ctx::Context) =
     construct(LLVMVoid, API.LLVMVoidTypeInContext(ref(Context, ctx)))
 
-@reftypedef argtype=LLVMType kind=LLVMLabelTypeKind immutable LLVMLabel <: LLVMType end
+@reftypedef proxy=LLVMType kind=LLVMLabelTypeKind immutable LLVMLabel <: LLVMType end
 
 LabelType() = construct(LLVMLabel, API.LLVMLabelType())
 LabelType(ctx::Context) =

@@ -7,7 +7,7 @@ export Builder,
 
 import Base: position, insert!
 
-@reftypedef reftype=LLVMBuilderRef immutable Builder end
+@reftypedef ref=LLVMBuilderRef immutable Builder end
 
 Builder() = Builder(API.LLVMCreateBuilder())
 Builder(ctx::Context) = Builder(API.LLVMCreateBuilderInContext(ref(Context, ctx)))

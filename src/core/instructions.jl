@@ -3,7 +3,7 @@ export Instruction, unsafe_delete!,
        parent,
        predicate_int, predicate_real
 
-@reftypedef argtype=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
+@reftypedef proxy=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
 
 # TODO: it would be nice to re-use the dynamic type reconstruction for instructions,
 #       using the opcode to discriminate. Doesn't work now, because we need to be able to

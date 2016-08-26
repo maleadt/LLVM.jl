@@ -9,7 +9,7 @@ import Base: convert
 
 export ConstantInt, ConstantFP
 
-@reftypedef argtype=Value kind=LLVMConstantIntValueKind immutable ConstantInt <: Constant end
+@reftypedef proxy=Value kind=LLVMConstantIntValueKind immutable ConstantInt <: Constant end
 
 ConstantInt(typ::LLVMInteger, val::Integer, signed=false) =
     construct(ConstantInt, API.LLVMConstInt(ref(LLVMType, typ),
@@ -22,7 +22,7 @@ convert(::Type{Int}, val::ConstantInt) =
     API.LLVMConstIntGetSExtValue(ref(Value, val))
 
 
-@reftypedef argtype=Value kind=LLVMConstantFPValueKind immutable ConstantFP <: Constant end
+@reftypedef proxy=Value kind=LLVMConstantFPValueKind immutable ConstantFP <: Constant end
 
 ConstantFP(typ::LLVMDouble, val::Real) =
     construct(ConstantFP, API.LLVMConstReal(ref(LLVMType, typ), Cdouble(val)))
@@ -44,7 +44,7 @@ import Base: get, push!
 
 # http://llvm.org/docs/doxygen/html/group__LLVMCoreValueConstantGlobalVariable.html
 
-@reftypedef argtype=Value kind=LLVMGlobalVariableValueKind immutable GlobalVariable <: Constant end
+@reftypedef proxy=Value kind=LLVMGlobalVariableValueKind immutable GlobalVariable <: Constant end
 
 GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String) =
     construct(GlobalVariable,
