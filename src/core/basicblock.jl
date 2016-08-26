@@ -6,11 +6,8 @@ export BasicBlock, unsafe_delete!,
 
 import Base: delete!
 
-# NOTE: BasicBlock is the only class which can be represented by two ref kinds, which
-#       the @reftypedef macro now plainly emits two `ref` methods for`
-#       This matches the LLVMValueAsBasicBlock/LLVMBasicBlockAsValue behavior.
-#       If it ever doesn't, we need to provide custom `ref` methods here.
-# TODO: just do it already
+BasicBlock(ref::API.LLVMBasicBlockRef) = BasicBlock(API.LLVMBasicBlockAsValue(ref))
+ref(::Type{BasicBlock}, bb::BasicBlock) = API.LLVMValueAsBasicBlock(ref(Value, bb))
 
 BasicBlock(fn::LLVMFunction, name::String) = 
     BasicBlock(API.LLVMAppendBasicBlock(ref(Value, fn), name))

@@ -44,7 +44,7 @@ macro reftypedef(args...)
     push!(code.args, typedef)
 
     # decode keyword arguments
-    argtypes = Symbol[]
+    argtype = Nullable{Symbol}()
     for kwarg in kwargs
         if !isa(kwarg, Expr) || kwarg.head != :(=)
             error("malformed keyword arguments before type definition")
@@ -72,21 +72,22 @@ macro reftypedef(args...)
 
         # kind: populate parent's discriminator cache
         if key == :kind
-            # NOTE: this assumes the parent for which this enum kind is relevant
-            #       is the last argtype we processed
-            discriminator = discriminators[last(argtypes)]
+            @assert !isnull(argtype)
+            discriminator = discriminators[get(argtype)]
             push!(code.args, :( $discriminator[API.$value] = $(typename) ))
         end
 
         # argtype: via which type's ref this object is passed to the API
         if key == :argtype
-            push!(argtypes, value)
+            @assert isnull(argtype)
+            argtype = Nullable(value)
         end
 
         # reftype: how this type is referenced in the API (also generates an argtype)
         if key == :reftype
             reftypes[typename] = value
-            push!(argtypes, typename)
+            @assert isnull(argtype)
+            argtype = Nullable(typename)
         end
     end
 
@@ -96,21 +97,20 @@ macro reftypedef(args...)
         unshift!(typedef.args[3].args, :( ref::Ptr{Void} ))
 
         # handle usage of that ref (ie. converting to and from)
-        if isempty(argtypes)
-            error("no reftypes or argtypes specified for type $(typename)")
-        end
-        for argtype in argtypes
-            if !haskey(reftypes, argtype)
-                error("cannot reference $(typename) via $argtype which has no reference type")
+        if isnull(argtype)
+            error("no reftype or argtype specified for type $(typename)")
+        else
+            if !haskey(reftypes, get(argtype))
+                error("cannot reference $(typename) via $(get(argtype)) which has no reference type")
             end
-            reftype = reftypes[argtype]
+            reftype = reftypes[get(argtype)]
 
             # define a constructor accepting this reftype
             unshift!(typedef.args[3].args, :( $(typename)(ref::API.$reftype) = new(ref) ))
 
             # define a `ref` method for extracting this reftype
             append!(code.args, (quote
-                ref(::Type{$argtype}, obj::$(typename)) =
+                ref(::Type{$(get(argtype))}, obj::$(typename)) =
                     convert(API.$reftype, obj.ref)
                 end).args)
         end
@@ -122,11 +122,8 @@ macro reftypedef(args...)
     end
 
     # define a `nullref` method for creating an NULL ref
-    # TODO: we arbitrarily pick the first reftype here, and probably should disallow
-    #       multi-reftype objects altogether (and special-case BasicBlock)
-    if !isempty(argtypes)
-        argtype = first(argtypes)
-        reftype = reftypes[argtype]
+    if !isnull(argtype)
+        reftype = reftypes[get(argtype)]
         append!(code.args, (quote
             nullref(::Type{$typename}) = convert(API.$reftype, C_NULL)
             end).args)

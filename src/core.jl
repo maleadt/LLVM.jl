@@ -10,7 +10,7 @@
 @reftypedef abstract Constant <: User
 @reftypedef reftype=LLVMModuleRef immutable LLVMModule end
 @reftypedef argtype=Value kind=LLVMFunctionValueKind immutable LLVMFunction <: Constant end
-@reftypedef reftype=LLVMBasicBlockRef argtype=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
+@reftypedef argtype=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 
 # NOTE: simplifying the two-ref types obviates need for a ref(T, obj)
 
