@@ -57,7 +57,21 @@ macro reftypedef(args...)
             error("key and value in keyword argument should be plain symbols")
         end
 
-        # enum: define an initial `identify` method
+        # ref: how this type is passed to the API
+        #      (also generates an pseudo-proxy for itself)
+        if key == :ref
+            refs[typename] = value
+            @assert isnull(proxy)
+            proxy = Nullable(typename)
+        end
+
+        # proxy: via which type's ref this object is passed to the API
+        if key == :proxy
+            @assert isnull(proxy)
+            proxy = Nullable(value)
+        end
+
+        # enum: define an `identify` method
         if key == :enum && !haskey(discriminators, typename)
             @gensym discriminator
             discriminators[typename] = discriminator
@@ -77,20 +91,6 @@ macro reftypedef(args...)
             @assert !isnull(proxy)
             discriminator = discriminators[get(proxy)]
             push!(code.args, :( $discriminator[API.$value] = $(typename) ))
-        end
-
-        # proxy: via which type's ref this object is passed to the API
-        if key == :proxy
-            @assert isnull(proxy)
-            proxy = Nullable(value)
-        end
-
-        # ref: how this type is passed to the API
-        #      (also generates an pseudo-proxy for itself)
-        if key == :ref
-            refs[typename] = value
-            @assert isnull(proxy)
-            proxy = Nullable(typename)
         end
     end
 
