@@ -17,14 +17,14 @@ Context() do ctx end
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
 
-    @test LLVM.construct(LLVM.LLVMInteger, LLVM.ref(LLVMType, typ)) == typ
+    @test LLVM.construct(LLVM.LLVMInteger, LLVM.ref(typ)) == typ
     if LLVM.DEBUG
-        @test_throws ErrorException LLVM.construct(LLVM.FunctionType, LLVM.ref(LLVMType, typ))
+        @test_throws ErrorException LLVM.construct(LLVM.FunctionType, LLVM.ref(typ))
     end
     @test_throws NullException LLVM.construct(LLVM.FunctionType, LLVM.API.LLVMTypeRef(C_NULL))
     @test_throws ErrorException LLVM.construct(LLVMType, LLVM.API.LLVMTypeRef(C_NULL))
 
-    @test LLVM.dynamic_construct(LLVMType, LLVM.ref(LLVMType, typ)) == typ
+    @test LLVM.dynamic_construct(LLVMType, LLVM.ref(typ)) == typ
     @test_throws NullException LLVM.dynamic_construct(LLVMType, LLVM.API.LLVMTypeRef(C_NULL))
 
     @test width(LLVM.Int32Type(ctx)) == 32
@@ -141,14 +141,14 @@ Context() do ctx
     typ = LLVM.Int32Type(ctx)
     val = ConstantInt(typ, 1)
 
-    @test LLVM.construct(LLVM.ConstantInt, LLVM.ref(Value, val)) == val
+    @test LLVM.construct(LLVM.ConstantInt, LLVM.ref(val)) == val
     if LLVM.DEBUG
-        @test_throws ErrorException LLVM.construct(LLVMFunction, LLVM.ref(Value, val))
+        @test_throws ErrorException LLVM.construct(LLVMFunction, LLVM.ref(val))
     end
     @test_throws NullException LLVM.construct(LLVMFunction, LLVM.API.LLVMValueRef(C_NULL))
     @test_throws ErrorException LLVM.construct(Value, LLVM.API.LLVMValueRef(C_NULL))
 
-    @test LLVM.dynamic_construct(Value, LLVM.ref(Value, val)) == val
+    @test LLVM.dynamic_construct(Value, LLVM.ref(val)) == val
     @test_throws NullException LLVM.dynamic_construct(Value, LLVM.API.LLVMValueRef(C_NULL))
 
     show(DevNull, val)

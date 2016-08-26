@@ -2,6 +2,8 @@
 
 # llvm.org/docs/doxygen/html/group__LLVMCSupportTypes.html
 
+ref(obj) = obj.ref
+
 # LLVM uses a polymorphic type hierarchy which C cannot represent, therefore parameters must
 # be passed as base types.
 #
@@ -100,17 +102,8 @@ macro reftypedef(args...)
             error("$(typename)'s proxy $(get(proxy)) has no ref defined")
         reftype = refs[get(proxy)]
     
-        # add `ref` field containing an opaque pointer
-        unshift!(typedef.args[3].args, :( ref::Ptr{Void} ))
-
-        # define a constructor accepting this reftype
-        unshift!(typedef.args[3].args, :( $(typename)(ref::API.$reftype) = new(ref) ))
-
-        # define a `ref` method for extracting this reftype
-        append!(code.args, (quote
-            ref(::Type{$(get(proxy))}, obj::$(typename)) =
-                convert(API.$reftype, obj.ref)
-            end).args)
+        # add `ref` field containing a typed pointer
+        unshift!(typedef.args[3].args, :( ref::API.$reftype ))
 
         # define a `null` method for creating an NULL object
         append!(code.args, (quote

@@ -12,8 +12,6 @@
 @reftypedef proxy=Value kind=LLVMFunctionValueKind immutable LLVMFunction <: Constant end
 @reftypedef proxy=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 
-# NOTE: simplifying the two-ref types obviates need for a ref(T, obj)
-
 # NOTE: we don't completely stick to the C API's organization here
 
 include("core/context.jl")

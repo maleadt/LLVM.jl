@@ -12,23 +12,23 @@ export ConstantInt, ConstantFP
 @reftypedef proxy=Value kind=LLVMConstantIntValueKind immutable ConstantInt <: Constant end
 
 ConstantInt(typ::LLVMInteger, val::Integer, signed=false) =
-    construct(ConstantInt, API.LLVMConstInt(ref(LLVMType, typ),
+    construct(ConstantInt, API.LLVMConstInt(ref(typ),
                                             reinterpret(Culonglong, val),
                                             BoolToLLVM(signed)))
 
 convert(::Type{UInt}, val::ConstantInt) =
-    API.LLVMConstIntGetZExtValue(ref(Value, val))
+    API.LLVMConstIntGetZExtValue(ref(val))
 convert(::Type{Int}, val::ConstantInt) =
-    API.LLVMConstIntGetSExtValue(ref(Value, val))
+    API.LLVMConstIntGetSExtValue(ref(val))
 
 
 @reftypedef proxy=Value kind=LLVMConstantFPValueKind immutable ConstantFP <: Constant end
 
 ConstantFP(typ::LLVMDouble, val::Real) =
-    construct(ConstantFP, API.LLVMConstReal(ref(LLVMType, typ), Cdouble(val)))
+    construct(ConstantFP, API.LLVMConstReal(ref(typ), Cdouble(val)))
 
 convert(::Type{Float64}, val::ConstantFP) =
-    API.LLVMConstRealGetDouble(ref(Value, val), Ref{API.LLVMBool}())
+    API.LLVMConstRealGetDouble(ref(val), Ref{API.LLVMBool}())
 
 
 ## global variables
@@ -48,34 +48,34 @@ import Base: get, push!
 
 GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String) =
     construct(GlobalVariable,
-              API.LLVMAddGlobal(ref(LLVMModule, mod),
-                                ref(LLVMType, typ), name))
+              API.LLVMAddGlobal(ref(mod),
+                                ref(typ), name))
 
 GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String, addrspace::Integer) =
     construct(GlobalVariable,
-              API.LLVMAddGlobalInAddressSpace(ref(LLVMModule, mod), ref(LLVMType, typ),
+              API.LLVMAddGlobalInAddressSpace(ref(mod), ref(typ),
                                               name, Cuint(addrspace)))
 
-unsafe_delete!(::LLVMModule, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(Value, gv))
+unsafe_delete!(::LLVMModule, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(gv))
 
 initializer(gv::GlobalVariable) =
-  dynamic_construct(Value, API.LLVMGetInitializer(ref(Value, gv)))
+  dynamic_construct(Value, API.LLVMGetInitializer(ref(gv)))
 initializer!(gv::GlobalVariable, val::Constant) =
-  API.LLVMSetInitializer(ref(Value, gv), ref(Value, val))
+  API.LLVMSetInitializer(ref(gv), ref(val))
 
-isthreadlocal(gv::GlobalVariable) = BoolFromLLVM(API.LLVMIsThreadLocal(ref(Value, gv)))
+isthreadlocal(gv::GlobalVariable) = BoolFromLLVM(API.LLVMIsThreadLocal(ref(gv)))
 threadlocal!(gv::GlobalVariable, bool) =
-  API.LLVMSetThreadLocal(ref(Value, gv), BoolToLLVM(bool))
+  API.LLVMSetThreadLocal(ref(gv), BoolToLLVM(bool))
 
-isconstant(gv::GlobalVariable) = BoolFromLLVM(API.LLVMIsGlobalConstant(ref(Value, gv)))
+isconstant(gv::GlobalVariable) = BoolFromLLVM(API.LLVMIsGlobalConstant(ref(gv)))
 constant!(gv::GlobalVariable, bool) =
-  API.LLVMSetGlobalConstant(ref(Value, gv), BoolToLLVM(bool))
+  API.LLVMSetGlobalConstant(ref(gv), BoolToLLVM(bool))
 
-threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(ref(Value, gv))
+threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(ref(gv))
 threadlocalmode!(gv::GlobalVariable, mode) =
-  API.LLVMSetThreadLocalMode(ref(Value, gv), Cuint(mode))
+  API.LLVMSetThreadLocalMode(ref(gv), Cuint(mode))
 
 isextinit(gv::GlobalVariable) =
-  BoolFromLLVM(API.LLVMIsExternallyInitialized(ref(Value, gv)))
+  BoolFromLLVM(API.LLVMIsExternallyInitialized(ref(gv)))
 extinit!(gv::GlobalVariable, bool) =
-  API.LLVMSetExternallyInitialized(ref(Value, gv), BoolToLLVM(bool))
+  API.LLVMSetExternallyInitialized(ref(gv), BoolToLLVM(bool))

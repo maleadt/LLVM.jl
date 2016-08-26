@@ -10,9 +10,9 @@ import Base: position, insert!
 @reftypedef ref=LLVMBuilderRef immutable Builder end
 
 Builder() = Builder(API.LLVMCreateBuilder())
-Builder(ctx::Context) = Builder(API.LLVMCreateBuilderInContext(ref(Context, ctx)))
+Builder(ctx::Context) = Builder(API.LLVMCreateBuilderInContext(ref(ctx)))
 
-dispose(builder::Builder) = API.LLVMDisposeBuilder(ref(Builder, builder))
+dispose(builder::Builder) = API.LLVMDisposeBuilder(ref(builder))
 
 function Builder(f::Function, args...)
     builder = Builder(args...)
@@ -23,26 +23,26 @@ function Builder(f::Function, args...)
     end
 end
 
-position(builder::Builder) = BasicBlock(API.LLVMGetInsertBlock(ref(Builder, builder)))
+position(builder::Builder) = BasicBlock(API.LLVMGetInsertBlock(ref(builder)))
 position!(builder::Builder, inst::Instruction) = 
-    API.LLVMPositionBuilderBefore(ref(Builder, builder), ref(Value, inst))
+    API.LLVMPositionBuilderBefore(ref(builder), ref(inst))
 position!(builder::Builder, bb::BasicBlock) = 
-    API.LLVMPositionBuilderAtEnd(ref(Builder, builder), ref(BasicBlock, bb))
-position!(builder::Builder) = API.LLVMClearInsertionPosition(ref(Builder, builder))
+    API.LLVMPositionBuilderAtEnd(ref(builder), blockref(bb))
+position!(builder::Builder) = API.LLVMClearInsertionPosition(ref(builder))
 
 insert!(builder::Builder, inst::Instruction) =
-    API.LLVMInsertIntoBuilder(ref(Builder, builder), ref(Value, inst))
+    API.LLVMInsertIntoBuilder(ref(builder), ref(inst))
 insert!(builder::Builder, inst::Instruction, name::String) =
-    API.LLVMInsertIntoBuilderWithName(ref(Builder, builder), ref(Value, inst), name)
+    API.LLVMInsertIntoBuilderWithName(ref(builder), ref(inst), name)
 
 debuglocation(builder::Builder) = 
-    construct(MetadataAsValue, API.LLVMGetCurrentDebugLocation(ref(Builder, builder)))
+    construct(MetadataAsValue, API.LLVMGetCurrentDebugLocation(ref(builder)))
 debuglocation!(builder::Builder) = 
-    API.LLVMSetCurrentDebugLocation(ref(Builder, builder), nullref(Value))
+    API.LLVMSetCurrentDebugLocation(ref(builder), nullref(Value))
 debuglocation!(builder::Builder, loc::MetadataAsValue) =
-    API.LLVMSetCurrentDebugLocation(ref(Builder, builder), ref(Value, loc))
+    API.LLVMSetCurrentDebugLocation(ref(builder), ref(loc))
 debuglocation!(builder::Builder, inst::Instruction) =
-    API.LLVMSetInstDebugLocation(ref(Builder, builder), ref(Value, inst))
+    API.LLVMSetInstDebugLocation(ref(builder), ref(inst))
 
 
 ## build methods
@@ -50,23 +50,23 @@ debuglocation!(builder::Builder, inst::Instruction) =
 export unreachable!, ret!, add!, br!
 
 unreachable!(builder::Builder) =
-    construct(Instruction, API.LLVMBuildUnreachable(ref(Builder, builder)))
+    construct(Instruction, API.LLVMBuildUnreachable(ref(builder)))
 
 ret!(builder::Builder) =
-    construct(Instruction, API.LLVMBuildRetVoid(ref(Builder, builder)))
+    construct(Instruction, API.LLVMBuildRetVoid(ref(builder)))
 
 ret!(builder::Builder, val::Value) =
-    construct(Instruction, API.LLVMBuildRet(ref(Builder, builder), ref(Value, val)))
+    construct(Instruction, API.LLVMBuildRet(ref(builder), ref(val)))
 
 add!(builder::Builder, lhs::Value, rhs::Value, name="") = 
-    construct(Instruction, API.LLVMBuildAdd(ref(Builder, builder), ref(Value, lhs),
-                                            ref(Value, rhs), name))
+    construct(Instruction, API.LLVMBuildAdd(ref(builder), ref(lhs),
+                                            ref(rhs), name))
 
 br!(builder::Builder, dest::BasicBlock) =
-    construct(Instruction, API.LLVMBuildBr(ref(Builder, builder), ref(BasicBlock, dest)))
+    construct(Instruction, API.LLVMBuildBr(ref(builder), blockref(dest)))
 
 br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) = 
-    construct(Instruction, API.LLVMBuildCondBr(ref(Builder, builder),
-                                               ref(Value, ifval),
-                                               ref(BasicBlock, thenbb),
-                                               ref(BasicBlock, elsebb)))
+    construct(Instruction, API.LLVMBuildCondBr(ref(builder),
+                                               ref(ifval),
+                                               blockref(thenbb),
+                                               blockref(elsebb)))

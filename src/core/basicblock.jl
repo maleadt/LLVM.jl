@@ -7,31 +7,31 @@ export BasicBlock, unsafe_delete!,
 import Base: delete!
 
 BasicBlock(ref::API.LLVMBasicBlockRef) = BasicBlock(API.LLVMBasicBlockAsValue(ref))
-ref(::Type{BasicBlock}, bb::BasicBlock) = API.LLVMValueAsBasicBlock(ref(Value, bb))
+blockref(bb::BasicBlock) = API.LLVMValueAsBasicBlock(ref(bb))
 
 BasicBlock(fn::LLVMFunction, name::String) = 
-    BasicBlock(API.LLVMAppendBasicBlock(ref(Value, fn), name))
+    BasicBlock(API.LLVMAppendBasicBlock(ref(fn), name))
 BasicBlock(fn::LLVMFunction, name::String, ctx::Context) = 
-    BasicBlock(API.LLVMAppendBasicBlockInContext(ref(Context, ctx), ref(Value, fn), name))
+    BasicBlock(API.LLVMAppendBasicBlockInContext(ref(ctx), ref(fn), name))
 BasicBlock(bb::BasicBlock, name::String) = 
-    BasicBlock(API.LLVMInsertBasicBlock(ref(BasicBlock, bb), name))
+    BasicBlock(API.LLVMInsertBasicBlock(blockref(bb), name))
 BasicBlock(bb::BasicBlock, name::String, ctx::Context) = 
-    BasicBlock(API.LLVMInsertBasicBlockInContext(ref(Context, ctx), ref(BasicBlock, bb), name))
+    BasicBlock(API.LLVMInsertBasicBlockInContext(ref(ctx), blockref(bb), name))
 
-unsafe_delete!(::LLVMFunction, bb::BasicBlock) = API.LLVMDeleteBasicBlock(ref(BasicBlock, bb))
+unsafe_delete!(::LLVMFunction, bb::BasicBlock) = API.LLVMDeleteBasicBlock(blockref(bb))
 delete!(::LLVMFunction, bb::BasicBlock) =
-    API.LLVMRemoveBasicBlockFromParent(ref(BasicBlock, bb))
+    API.LLVMRemoveBasicBlockFromParent(blockref(bb))
 
 parent(bb::BasicBlock) =
-    construct(LLVMFunction, API.LLVMGetBasicBlockParent(ref(BasicBlock, bb)))
+    construct(LLVMFunction, API.LLVMGetBasicBlockParent(blockref(bb)))
 
 terminator(bb::BasicBlock) =
-    construct(Instruction, API.LLVMGetBasicBlockTerminator(ref(BasicBlock, bb)))
+    construct(Instruction, API.LLVMGetBasicBlockTerminator(blockref(bb)))
 
 move_before(bb::BasicBlock, pos::BasicBlock) =
-    API.LLVMMoveBasicBlockBefore(ref(BasicBlock, bb), ref(BasicBlock, pos))
+    API.LLVMMoveBasicBlockBefore(blockref(bb), blockref(pos))
 move_after(bb::BasicBlock, pos::BasicBlock) =
-    API.LLVMMoveBasicBlockAfter(ref(BasicBlock, bb), ref(BasicBlock, pos))
+    API.LLVMMoveBasicBlockAfter(blockref(bb), blockref(pos))
 
 
 ## instruction iteration
@@ -48,7 +48,7 @@ instructions(bb::BasicBlock) = BasicBlockInstructionSet(bb)
 
 eltype(::BasicBlockInstructionSet) = Instruction
 
-start(iter::BasicBlockInstructionSet) = API.LLVMGetFirstInstruction(ref(BasicBlock, iter.bb))
+start(iter::BasicBlockInstructionSet) = API.LLVMGetFirstInstruction(blockref(iter.bb))
 
 next(::BasicBlockInstructionSet, state) =
     (construct(Instruction,state), API.LLVMGetNextInstruction(state))
@@ -56,7 +56,7 @@ next(::BasicBlockInstructionSet, state) =
 done(::BasicBlockInstructionSet, state) = state == C_NULL
 
 last(iter::BasicBlockInstructionSet) =
-    construct(Instruction, API.LLVMGetLastInstruction(ref(BasicBlock, iter.bb)))
+    construct(Instruction, API.LLVMGetLastInstruction(blockref(iter.bb)))
 
 # NOTE: this is expensive, but the iteration interface requires it to be implemented
 function length(iter::BasicBlockInstructionSet)

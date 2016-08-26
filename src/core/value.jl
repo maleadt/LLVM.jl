@@ -32,23 +32,23 @@ import Base: show
 
 # TODO: missing LLVMGetValueContext
 
-llvmtype(val::Value) = dynamic_construct(LLVMType, API.LLVMTypeOf(ref(Value, val)))
+llvmtype(val::Value) = dynamic_construct(LLVMType, API.LLVMTypeOf(ref(val)))
 
-name(val::Value) = unsafe_string(API.LLVMGetValueName(ref(Value, val)))
-name!(val::Value, name::String) = API.LLVMSetValueName(ref(Value, val), name)
+name(val::Value) = unsafe_string(API.LLVMGetValueName(ref(val)))
+name!(val::Value, name::String) = API.LLVMSetValueName(ref(val), name)
 
 function show(io::IO, val::Value)
-    output = unsafe_string(API.LLVMPrintValueToString(ref(Value, val)))
+    output = unsafe_string(API.LLVMPrintValueToString(ref(val)))
     print(io, output)
 end
 
 replace_uses!(old::Val, new::Val) =
-    API.LLVMReplaceAllUsesWith(ref(Value, old),
-                               ref(Value, new))
+    API.LLVMReplaceAllUsesWith(ref(old),
+                               ref(new))
 
-isconstant(val::Value) = BoolFromLLVM(API.LLVMIsConstant(ref(Value, val)))
+isconstant(val::Value) = BoolFromLLVM(API.LLVMIsConstant(ref(val)))
 
-isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(Value, val)))
+isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(val)))
 
 
 ## constants
