@@ -161,6 +161,49 @@ Context() do ctx
     # TODO: name! and replace_uses! if embedded in module
 end
 
+# usage
+
+Context() do ctx
+Builder(ctx) do builder
+LLVMModule("SomeModule", ctx) do mod
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
+    fn = LLVMFunction(mod, "SomeFunction", ft)
+
+    entry = BasicBlock(fn, "entry")
+    position!(builder, entry)
+
+    valueinst1 = add!(builder, parameters(fn)[1],
+                      ConstantInt(LLVM.Int32Type(), 1))
+
+    userinst = add!(builder, valueinst1,
+                    ConstantInt(LLVM.Int32Type(), 1))
+
+    let usepairs = uses(valueinst1)
+        @test eltype(usepairs) == Use
+
+        @test length(usepairs) == 1
+
+        usepair = first(usepairs)
+        @test value(usepair) == valueinst1
+        @test user(usepair) == userinst
+
+        for _usepair in usepairs
+            @test usepair == _usepair
+        end
+
+        @test value.(collect(usepairs)) == [valueinst1]
+        @test user.(collect(usepairs)) == [userinst]
+    end
+
+    valueinst2 = add!(builder, parameters(fn)[1],
+                    ConstantInt(LLVM.Int32Type(), 2))
+
+    replace_uses!(valueinst1, valueinst2)
+    @test user.(collect(uses(valueinst2))) == [userinst]
+end
+end
+end
+
 # constants
 
 # scalar

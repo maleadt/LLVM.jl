@@ -54,3 +54,43 @@ isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(val)))
 ## constants
 
 include("value/constant.jl")
+
+
+## usage
+
+export Use, user, value
+
+@reftypedef ref=LLVMUseRef immutable Use end
+
+user(use::Use) =  dynamic_construct(Value, API.LLVMGetUser(     ref(use)))
+value(use::Use) = dynamic_construct(Value, API.LLVMGetUsedValue(ref(use)))
+
+# use iteration
+
+export uses
+
+import Base: eltype, start, next, done
+
+immutable ValueUseSet
+    val::Value
+end
+
+uses(val::Value) = ValueUseSet(val)
+
+eltype(::ValueUseSet) = Use
+
+start(iter::ValueUseSet) = API.LLVMGetFirstUse(ref(iter.val))
+
+next(::ValueUseSet, state) =
+    (Use(state), API.LLVMGetNextUse(state))
+
+done(::ValueUseSet, state) = state == C_NULL
+
+# NOTE: this is expensive, but the iteration interface requires it to be implemented
+function length(iter::ValueUseSet)
+    count = 0
+    for inst in iter
+        count += 1
+    end
+    return count
+end
