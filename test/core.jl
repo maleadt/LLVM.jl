@@ -101,7 +101,7 @@ Context() do ctx
     elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]
 
     let st = LLVM.StructType(elem, ctx)
-        @test context(st) == ctx        
+        @test context(st) == ctx
         @test !ispacked(st)
         @test !isopaque(st)
         @test elements(st) == elem
@@ -138,10 +138,18 @@ end
 ## value
 
 Context() do ctx
-    typ = LLVM.Int32Type(ctx)
-    val = ConstantInt(typ, 1)
+Builder(ctx) do builder
+LLVMModule("SomeModule", ctx) do mod
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
+    fn = LLVMFunction(mod, "SomeFunction", ft)
 
-    @test LLVM.construct(LLVM.ConstantInt, LLVM.ref(val)) == val
+    entry = BasicBlock(fn, "entry")
+    position!(builder, entry)
+
+    typ = LLVM.Int32Type(ctx)
+    val = alloca!(builder, typ, "foo")
+
+    @test LLVM.construct(LLVM.Instruction, LLVM.ref(val)) == val
     if LLVM.DEBUG
         @test_throws ErrorException LLVM.construct(LLVMFunction, LLVM.ref(val))
     end
@@ -153,12 +161,15 @@ Context() do ctx
 
     show(DevNull, val)
 
-    @test llvmtype(val) == typ
-    @test name(val) == ""
-    @test isconstant(val)
+    @test llvmtype(val) == LLVM.PointerType(typ)
+    @test name(val) == "foo"
+    @test !isconstant(val)
     @test !isundef(val)
 
-    # TODO: name! and replace_uses! if embedded in module
+    name!(val, "bar")
+    @test name(val) == "bar"
+end
+end
 end
 
 # usage
@@ -221,7 +232,7 @@ end
 
 # global variables
 Context() do ctx
-    mod = LLVMModule("SomeModule", ctx)
+LLVMModule("SomeModule", ctx) do mod
     gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
     show(DevNull, gv)
@@ -251,8 +262,15 @@ Context() do ctx
     @test gv in gvars
     unsafe_delete!(mod, gv)
     @test isempty(gvars)
+end
+end
 
-    dispose(mod)
+Context() do ctx
+LLVMModule("SomeModule", ctx) do mod
+    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal", 1)
+
+    @test addrspace(llvmtype(gv)) == 1
+end
 end
 
 
@@ -319,7 +337,9 @@ LLVMModule("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(st, [st])
     fn = LLVMFunction(mod, "SomeFunction", ft)
 
+    @test haskey(types(mod), "SomeType")
     @test get(types(mod), "SomeType") == st
+
     @test !haskey(types(mod), "SomeOtherType")
     @test_throws KeyError get(types(mod), "SomeOtherType")
 end
@@ -345,23 +365,28 @@ end
 # global iteration
 Context() do ctx
 LLVMModule("SomeModule", ctx) do mod
-    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
+    dummygv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
-    gvs = globals(mod)
-    @test eltype(gvs) == GlobalVariable
+    let gvs = globals(mod)
+        @test eltype(gvs) == GlobalVariable
 
-    @test get(gvs, "SomeGlobal") == gv
-    @test first(gvs) == gv
-    fs = 0
-    for f in gvs
-        fs += 1
-        @test f == gv
+        @test length(gvs) == 1
+
+        @test first(gvs) == dummygv
+        @test last(gvs) == dummygv
+
+        for gv in gvs
+            @test gv == dummygv
+        end
+
+        @test collect(gvs) == [dummygv]
+
+        @test haskey(gvs, "SomeGlobal")
+        @test get(gvs, "SomeGlobal") == dummygv
+
+        @test !haskey(gvs, "SomeOtherGlobal")
+        @test_throws KeyError get(gvs, "SomeOtherGlobal")
     end
-    @test fs == 1
-    @test last(gvs) == gv
-
-    @test !haskey(gvs, "SomeOtherGlobal")
-    @test_throws KeyError get(gvs, "SomeOtherGlobal")
 end
 end
 
@@ -386,8 +411,8 @@ LLVMModule("SomeModule", ctx) do mod
 
         @test collect(fns) == [dummyfn]
 
-        @test first(fns) == dummyfn
-        @test last(fns) == dummyfn
+        @test haskey(fns, "SomeFunction")
+        @test get(fns, "SomeFunction") == dummyfn
 
         @test !haskey(fns, "SomeOtherFunction")
         @test_throws KeyError get(fns, "SomeOtherFunction")

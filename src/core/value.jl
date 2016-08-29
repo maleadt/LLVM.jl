@@ -42,7 +42,7 @@ function show(io::IO, val::Value)
     print(io, output)
 end
 
-replace_uses!(old::Val, new::Val) =
+replace_uses!(old::Value, new::Value) =
     API.LLVMReplaceAllUsesWith(ref(old),
                                ref(new))
 

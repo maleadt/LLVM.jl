@@ -89,7 +89,7 @@ push!(iter::ModuleMetadataSet, name::String, val::Value) =
     API.LLVMAddNamedMetadataOperand(ref(iter.mod), name, ref(val))
 
 
-# global variable iteration
+## global variable iteration
 
 export globals
 
@@ -123,6 +123,14 @@ done(::ModuleGlobalSet, state) = state == C_NULL
 last(iter::ModuleGlobalSet) =
     construct(GlobalVariable, API.LLVMGetLastGlobal(ref(iter.mod)))
 
+# NOTE: this is expensive, but the iteration interface requires it to be implemented
+function length(iter::ModuleGlobalSet)
+    count = 0
+    for inst in iter
+        count += 1
+    end
+    return count
+end
 
 
 ## function iteration

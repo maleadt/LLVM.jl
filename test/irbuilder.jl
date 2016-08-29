@@ -8,7 +8,7 @@ end
 
 Context() do ctx
 Builder(ctx) do builder
-LLVMModule("SomeModule", ctx) do mod    
+LLVMModule("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
     fn = LLVMFunction(mod, "SomeFunction", ft)
 
@@ -43,6 +43,13 @@ LLVMModule("SomeModule", ctx) do mod
     retinst2 = Instruction(retinst)
     insert!(builder, retinst2)
     @test collect(instructions(entry)) == [unrinst, addinst, retinst2, retinst]
+
+    allocinst1 = alloca!(builder, LLVM.Int32Type(), "foo")
+    allocinst2 = Instruction(allocinst1)
+    @test name(allocinst2) == ""
+    insert!(builder, allocinst2, "bar")
+    @test name(allocinst2) == "bar"
+    @test collect(instructions(entry)) == [unrinst, addinst, retinst2, allocinst1, allocinst2, retinst]
 
     position!(builder)
 end
