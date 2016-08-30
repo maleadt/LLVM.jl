@@ -23,6 +23,10 @@ include("irbuilder.jl")
 InitializeAnalysis(passreg)
 include("analysis.jl")
 
+InitializeX86Target()
+InitializeX86TargetInfo()
+InitializeX86TargetMC()
+InitializeX86AsmPrinter()
 include("execution.jl")
 
 InitializeTransformUtils(passreg)

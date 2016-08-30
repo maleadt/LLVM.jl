@@ -41,19 +41,49 @@ dispose(val::GenericValue) =
 
 ## execution engine
 
-export link_jit, link_interpreter,
-       ExecutionEngine,
+export ExecutionEngine, Interpreter, JIT,
        run
-
-link_jit() = API.LLVMLinkInMCJIT()
-link_interpreter() = API.LLVMLinkInInterpreter()
 
 @reftypedef ref=LLVMExecutionEngineRef immutable ExecutionEngine end
 
+# NOTE: these takes ownership of the module
 function ExecutionEngine(mod::Module)
     outref = Ref{API.LLVMExecutionEngineRef}()
     outerror = Ref{Cstring}()
-    status = BoolFromLLVM(API.LLVMCreateInterpreterForModule(outref, ref(mod), outerror))
+    status = BoolFromLLVM(API.LLVMCreateExecutionEngineForModule(outref, ref(mod),
+                                                                 outerror))
+
+    if status
+        error = unsafe_string(outerror[])
+        API.LLVMDisposeMessage(outerror[])
+        throw(error)
+    end
+
+    return ExecutionEngine(outref[])
+end
+function Interpreter(mod::Module)
+    API.LLVMLinkInInterpreter()
+
+    outref = Ref{API.LLVMExecutionEngineRef}()
+    outerror = Ref{Cstring}()
+    status = BoolFromLLVM(API.LLVMCreateInterpreterForModule(outref, ref(mod),
+                                                             outerror))
+
+    if status
+        error = unsafe_string(outerror[])
+        API.LLVMDisposeMessage(outerror[])
+        throw(error)
+    end
+
+    return ExecutionEngine(outref[])
+end
+function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault)
+    API.LLVMLinkInMCJIT()
+
+    outref = Ref{API.LLVMExecutionEngineRef}()
+    outerror = Ref{Cstring}()
+    status = BoolFromLLVM(API.LLVMCreateJITCompilerForModule(outref, ref(mod),
+                                                             Cuint(optlevel), outerror))
 
     if status
         error = unsafe_string(outerror[])
@@ -64,6 +94,19 @@ function ExecutionEngine(mod::Module)
     return ExecutionEngine(outref[])
 end
 
-run(engine::ExecutionEngine, fn::Function, args::Vector{GenericValue}) =
+dispose(engine::ExecutionEngine) = API.LLVMDisposeExecutionEngine(ref(engine))
+
+for kind in [:ExecutionEngine, :Interpreter, :JIT]
+    @eval function $kind(f::Core.Function, args...)
+        engine = $kind(args...)
+        try
+            f(engine)
+        finally
+            dispose(engine)
+        end
+    end
+end
+
+run(engine::ExecutionEngine, fn::Function, args::Vector{GenericValue}=GenericValue[]) =
     GenericValue(API.LLVMRunFunction(ref(engine), ref(fn),
                                      Cuint(length(args)), ref.(args)))

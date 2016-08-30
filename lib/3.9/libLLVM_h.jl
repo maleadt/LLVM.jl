@@ -173,46 +173,6 @@ function LLVMInitializeX86Disassembler()
     ccall((:LLVMInitializeX86Disassembler,libllvm),Void,())
 end
 
-function LLVMInitializeAllTargetInfos()
-    ccall((:LLVMInitializeAllTargetInfos,libllvm),Void,())
-end
-
-function LLVMInitializeAllTargets()
-    ccall((:LLVMInitializeAllTargets,libllvm),Void,())
-end
-
-function LLVMInitializeAllTargetMCs()
-    ccall((:LLVMInitializeAllTargetMCs,libllvm),Void,())
-end
-
-function LLVMInitializeAllAsmPrinters()
-    ccall((:LLVMInitializeAllAsmPrinters,libllvm),Void,())
-end
-
-function LLVMInitializeAllAsmParsers()
-    ccall((:LLVMInitializeAllAsmParsers,libllvm),Void,())
-end
-
-function LLVMInitializeAllDisassemblers()
-    ccall((:LLVMInitializeAllDisassemblers,libllvm),Void,())
-end
-
-function LLVMInitializeNativeTarget()
-    ccall((:LLVMInitializeNativeTarget,libllvm),LLVMBool,())
-end
-
-function LLVMInitializeNativeAsmParser()
-    ccall((:LLVMInitializeNativeAsmParser,libllvm),LLVMBool,())
-end
-
-function LLVMInitializeNativeAsmPrinter()
-    ccall((:LLVMInitializeNativeAsmPrinter,libllvm),LLVMBool,())
-end
-
-function LLVMInitializeNativeDisassembler()
-    ccall((:LLVMInitializeNativeDisassembler,libllvm),LLVMBool,())
-end
-
 function LLVMGetModuleDataLayout(M::LLVMModuleRef)
     ccall((:LLVMGetModuleDataLayout,libllvm),LLVMTargetDataRef,(LLVMModuleRef,),M)
 end

@@ -47,7 +47,10 @@ debuglocation!(builder::Builder, inst::Instruction) =
 
 ## build methods
 
-export unreachable!, ret!, add!, br!, alloca!
+# NOTE: sadly we can't use type information for differentiating eg. add! and fadd!,
+#       as an ArgumentKind doesn't show us its inner type
+
+export unreachable!, ret!, add!, fadd!, br!, alloca!
 
 unreachable!(builder::Builder) =
     construct(Instruction, API.LLVMBuildUnreachable(ref(builder)))
@@ -60,6 +63,10 @@ ret!(builder::Builder, val::Value) =
 
 add!(builder::Builder, lhs::Value, rhs::Value, name::String="") =
     construct(Instruction, API.LLVMBuildAdd(ref(builder), ref(lhs),
+                                            ref(rhs), name))
+
+fadd!(builder::Builder, lhs::Value, rhs::Value, name::String="") =
+    construct(Instruction, API.LLVMBuildFAdd(ref(builder), ref(lhs),
                                             ref(rhs), name))
 
 br!(builder::Builder, dest::BasicBlock) =

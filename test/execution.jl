@@ -28,13 +28,18 @@ end
 
 ## execution engine
 
+Context() do ctx
+    mod = LLVM.Module("SomeModule", ctx)
+    ExecutionEngine(mod) do mod end
+end
+
 function emit_sum(ctx::Context)
-    mod = LLVM.Module("sum_module", ctx)
+    mod = LLVM.Module("SomeModule", ctx)
 
     param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
     ret_type = LLVM.FunctionType(LLVM.Int32Type(ctx), param_types)
 
-    sum = LLVM.Function(mod, "sum", ret_type)
+    sum = LLVM.Function(mod, "SomeFunction", ret_type)
 
     entry = BasicBlock(sum, "entry")
 
@@ -47,22 +52,61 @@ function emit_sum(ctx::Context)
         verify(mod)
     end
 
-    return mod, sum
+    return mod
+end
+
+function emit_retint(ctx::Context, val)
+    mod = LLVM.Module("SomeModule", ctx)
+
+    ret_type = LLVM.FunctionType(LLVM.Int32Type(ctx))
+
+    fn = LLVM.Function(mod, "SomeFunction", ret_type)
+
+    entry = BasicBlock(fn, "entry")
+
+    Builder(ctx) do builder
+        position!(builder, entry)
+
+        ret!(builder, ConstantInt(LLVM.Int32Type(ctx), val))
+
+        verify(mod)
+    end
+
+    return mod
 end
 
 Context() do ctx
-    mod, sum = emit_sum(ctx)
-    link_jit()
-
-    engine = ExecutionEngine(mod)
+    mod = emit_sum(ctx)
 
     args = [GenericValue(LLVM.Int32Type(), 1),
             GenericValue(LLVM.Int32Type(), 2)]
 
-    res = LLVM.run(engine, sum, args)
-    @test convert(Int, res) == 3
+    let mod = LLVM.Module(mod)
+        fn = get(functions(mod), "SomeFunction")
+        Interpreter(mod) do engine
+            res = LLVM.run(engine, fn, args)
+            @test convert(Int, res) == 3
+            dispose(res)
+        end
+    end
 
     dispose.(args)
-    dispose(res)
-    dispose(mod)
+
+    let mod = emit_retint(ctx, 42)
+        fn = get(functions(mod), "SomeFunction")
+        JIT(mod) do engine
+            res = LLVM.run(engine, fn)
+            @test convert(Int, res) == 42
+            dispose(res)
+        end
+    end
+
+    let mod = emit_retint(ctx, 42)
+        fn = get(functions(mod), "SomeFunction")
+        ExecutionEngine(mod) do engine
+            res = LLVM.run(engine, fn)
+            @test convert(Int, res) == 42
+            dispose(res)
+        end
+    end
 end

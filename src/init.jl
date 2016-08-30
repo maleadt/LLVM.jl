@@ -25,4 +25,18 @@ InitializeIPA(R::PassRegistry) = API.LLVMInitializeIPA(ref(R))
 InitializeCodeGen(R::PassRegistry) = API.LLVMInitializeCodeGen(ref(R))
 InitializeTarget(R::PassRegistry) = API.LLVMInitializeTarget(ref(R))
 
+# TODO: detect this (without relying on llvm-config)
+for target in [:X86, :NVPTX],
+    component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
+       jl_fname = Symbol(:Initialize, target, component)
+       api_fname = Symbol(:LLVM, jl_fname)
+       @eval begin
+              export $jl_fname
+              $jl_fname() = API.$api_fname()
+       end
+end
+
 Shutdown() = API.LLVMShutdown()
+
+
+[:TargetInfos, :Targets, :TargetMCs, :AsmPrinters, :AsmParsers, :Disassemblers]
