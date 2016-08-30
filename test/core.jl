@@ -177,17 +177,17 @@ end
 Context() do ctx
 Builder(ctx) do builder
 LLVM.Module("SomeModule", ctx) do mod
-    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     entry = BasicBlock(fn, "entry")
     position!(builder, entry)
 
     valueinst1 = add!(builder, parameters(fn)[1],
-                      ConstantInt(LLVM.Int32Type(), 1))
+                      ConstantInt(LLVM.Int32Type(ctx), 1))
 
     userinst = add!(builder, valueinst1,
-                    ConstantInt(LLVM.Int32Type(), 1))
+                    ConstantInt(LLVM.Int32Type(ctx), 1))
 
     let usepairs = uses(valueinst1)
         @test eltype(usepairs) == Use
@@ -207,7 +207,7 @@ LLVM.Module("SomeModule", ctx) do mod
     end
 
     valueinst2 = add!(builder, parameters(fn)[1],
-                    ConstantInt(LLVM.Int32Type(), 2))
+                    ConstantInt(LLVM.Int32Type(ctx), 2))
 
     replace_uses!(valueinst1, valueinst2)
     @test user.(collect(uses(valueinst2))) == [userinst]
@@ -425,7 +425,7 @@ end
 
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
-    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type(ctx)])
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     show(DevNull, fn)
