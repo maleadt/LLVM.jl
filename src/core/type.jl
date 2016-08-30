@@ -54,6 +54,10 @@ width(inttyp::LLVMInteger) = API.LLVMGetIntTypeWidth(ref(inttyp))
 
 ## floating-point
 
+# NOTE: this type doesn't exist in the LLVM API,
+#       we add it for convenience of typechecking generic values (see execution.jl)
+@reftypedef abstract LLVMFloatingPoint <: LLVMType
+
 # NOTE: we don't handle the obscure types here (:X86FP80, :FP128, :PPCFP128),
 #       they would also need special casing as LLVMPPCFP128Type != LLVMPPC_FP128TypeKind
 for T in [:Half, :Float, :Double]
@@ -62,7 +66,7 @@ for T in [:Half, :Float, :Double]
     apifun = Symbol(:LLVM, jlfun)
     enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin
-        @reftypedef proxy=LLVMType kind=$enumkind immutable $apityp <: LLVMType end
+        @reftypedef proxy=LLVMType kind=$enumkind immutable $apityp <: LLVMFloatingPoint end
 
         $jlfun() = construct($apityp, API.$apifun())
         $jlfun(ctx::Context) =

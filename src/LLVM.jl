@@ -19,5 +19,6 @@ include("init.jl")
 include("core.jl")
 include("irbuilder.jl")
 include("analysis.jl")
+include("execution.jl")
 
 end

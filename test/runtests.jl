@@ -23,6 +23,8 @@ include("irbuilder.jl")
 InitializeAnalysis(passreg)
 include("analysis.jl")
 
+include("execution.jl")
+
 InitializeTransformUtils(passreg)
 
 InitializeScalarOpts(passreg)
