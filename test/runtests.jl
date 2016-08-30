@@ -20,6 +20,9 @@ InitializeCore(passreg)
 include("core.jl")
 include("irbuilder.jl")
 
+InitializeAnalysis(passreg)
+include("analysis.jl")
+
 InitializeTransformUtils(passreg)
 
 InitializeScalarOpts(passreg)
@@ -33,8 +36,6 @@ InitializeInstCombine(passreg)
 InitializeIPO(passreg)
 
 InitializeInstrumentation(passreg)
-
-InitializeAnalysis(passreg)
 
 InitializeIPA(passreg)
 
