@@ -58,7 +58,7 @@ ret!(builder::Builder) =
 ret!(builder::Builder, val::Value) =
     construct(Instruction, API.LLVMBuildRet(ref(builder), ref(val)))
 
-add!(builder::Builder, lhs::Value, rhs::Value, name="") = 
+add!(builder::Builder, lhs::Value, rhs::Value, name::String="") =
     construct(Instruction, API.LLVMBuildAdd(ref(builder), ref(lhs),
                                             ref(rhs), name))
 
@@ -71,5 +71,5 @@ br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) =
                                                blockref(thenbb),
                                                blockref(elsebb)))
 
-alloca!(builder::Builder, typ::LLVMType, name::String) =
+alloca!(builder::Builder, typ::LLVMType, name::String="") =
     construct(Instruction, API.LLVMBuildAlloca(ref(builder), ref(typ), name))
