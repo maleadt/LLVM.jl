@@ -1,4 +1,4 @@
-export LLVMFunction,  unsafe_delete!,
+export Function,  unsafe_delete!,
        personality, personality!,
        callconv, callconv!,
        gc, gc!, intrinsic_id,
@@ -6,32 +6,32 @@ export LLVMFunction,  unsafe_delete!,
 
 import Base: get, push!
 
-LLVMFunction(mod::LLVMModule, name::String, ft::FunctionType) =
-    construct(LLVMFunction,
+Function(mod::Module, name::String, ft::FunctionType) =
+    construct(Function,
               API.LLVMAddFunction(ref(mod), name,
                                   ref(ft)))
 
-unsafe_delete!(::LLVMModule, fn::LLVMFunction) = API.LLVMDeleteFunction(ref(fn))
+unsafe_delete!(::Module, fn::Function) = API.LLVMDeleteFunction(ref(fn))
 
-personality(fn::LLVMFunction) =
-    construct(LLVMFunction, API.LLVMGetPersonalityFn(ref(fn)))
-personality!(fn::LLVMFunction, persfn::LLVMFunction) =
+personality(fn::Function) =
+    construct(Function, API.LLVMGetPersonalityFn(ref(fn)))
+personality!(fn::Function, persfn::Function) =
     API.LLVMSetPersonalityFn(ref(fn),
                              ref(persfn))
 
-intrinsic_id(fn::LLVMFunction) = API.LLVMGetIntrinsicID(ref(fn))
+intrinsic_id(fn::Function) = API.LLVMGetIntrinsicID(ref(fn))
 
-callconv(fn::LLVMFunction) = API.LLVMGetFunctionCallConv(ref(fn))
-callconv!(fn::LLVMFunction, cc) =
+callconv(fn::Function) = API.LLVMGetFunctionCallConv(ref(fn))
+callconv!(fn::Function, cc) =
     API.LLVMSetFunctionCallConv(ref(fn), Cuint(cc))
 
-function gc(fn::LLVMFunction)
+function gc(fn::Function)
   ptr = API.LLVMGetGC(ref(fn))
   return ptr==C_NULL ? "" :  unsafe_string(ptr)
 end
-gc!(fn::LLVMFunction, name::String) = API.LLVMSetGC(ref(fn), name)
+gc!(fn::Function, name::String) = API.LLVMSetGC(ref(fn), name)
 
-entry(fn::LLVMFunction) = BasicBlock(API.LLVMGetEntryBasicBlock(ref(fn)))
+entry(fn::Function) = BasicBlock(API.LLVMGetEntryBasicBlock(ref(fn)))
 
 # attributes
 
@@ -40,10 +40,10 @@ export attributes
 import Base: get, push!, delete!
 
 immutable FunctionAttrSet
-    fn::LLVMFunction
+    fn::Function
 end
 
-attributes(fn::LLVMFunction) = FunctionAttrSet(fn)
+attributes(fn::Function) = FunctionAttrSet(fn)
 
 get(iter::FunctionAttrSet) = API.LLVMGetFunctionAttr(ref(iter.fn))
 
@@ -60,10 +60,10 @@ import Base: eltype, getindex, start, next, done, last
 @reftypedef proxy=Value kind=LLVMArgumentValueKind immutable Argument <: Value end
 
 immutable FunctionParameterSet
-    fn::LLVMFunction
+    fn::Function
 end
 
-parameters(fn::LLVMFunction) = FunctionParameterSet(fn)
+parameters(fn::Function) = FunctionParameterSet(fn)
 
 eltype(::FunctionParameterSet) = Argument
 
@@ -89,10 +89,10 @@ export blocks
 import Base: eltype, start, next, done, last, length
 
 immutable FunctionBlockSet
-    fn::LLVMFunction
+    fn::Function
 end
 
-blocks(fn::LLVMFunction) = FunctionBlockSet(fn)
+blocks(fn::Function) = FunctionBlockSet(fn)
 
 eltype(::FunctionBlockSet) = BasicBlock
 

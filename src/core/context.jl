@@ -8,7 +8,7 @@ Context() = Context(API.LLVMContextCreate())
 
 dispose(ctx::Context) = API.LLVMContextDispose(ref(ctx))
 
-function Context(f::Function)
+function Context(f::Core.Function)
     ctx = Context()
     try
         f(ctx)

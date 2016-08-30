@@ -139,9 +139,9 @@ end
 
 Context() do ctx
 Builder(ctx) do builder
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     entry = BasicBlock(fn, "entry")
     position!(builder, entry)
@@ -151,9 +151,9 @@ LLVMModule("SomeModule", ctx) do mod
 
     @test LLVM.construct(LLVM.Instruction, LLVM.ref(val)) == val
     if LLVM.DEBUG
-        @test_throws ErrorException LLVM.construct(LLVMFunction, LLVM.ref(val))
+        @test_throws ErrorException LLVM.construct(LLVM.Function, LLVM.ref(val))
     end
-    @test_throws NullException LLVM.construct(LLVMFunction, LLVM.API.LLVMValueRef(C_NULL))
+    @test_throws NullException LLVM.construct(LLVM.Function, LLVM.API.LLVMValueRef(C_NULL))
     @test_throws ErrorException LLVM.construct(Value, LLVM.API.LLVMValueRef(C_NULL))
 
     @test LLVM.dynamic_construct(Value, LLVM.ref(val)) == val
@@ -176,9 +176,9 @@ end
 
 Context() do ctx
 Builder(ctx) do builder
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     entry = BasicBlock(fn, "entry")
     position!(builder, entry)
@@ -232,7 +232,7 @@ end
 
 # global variables
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
     show(DevNull, gv)
@@ -266,7 +266,7 @@ end
 end
 
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal", 1)
 
     @test addrspace(llvmtype(gv)) == 1
@@ -297,20 +297,20 @@ end
 ## module
 
 let
-    mod = LLVMModule("SomeModule")
+    mod = LLVM.Module("SomeModule")
     @test context(mod) == global_ctx
 
     dispose(mod)
 end
 
 Context() do ctx
-    mod = LLVMModule("SomeModule", ctx)
+    mod = LLVM.Module("SomeModule", ctx)
     @test context(mod) == ctx
 end
 
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
-    clone = LLVMModule(mod)
+LLVM.Module("SomeModule", ctx) do mod
+    clone = LLVM.Module(mod)
     @test mod != clone
     @test context(clone) == ctx
     dispose(clone)
@@ -332,10 +332,10 @@ end
 
 # type iteration
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     st = LLVM.StructType("SomeType", ctx)
     ft = LLVM.FunctionType(st, [st])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     @test haskey(types(mod), "SomeType")
     @test get(types(mod), "SomeType") == st
@@ -347,7 +347,7 @@ end
 
 # metadata iteration
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     node = MDNode([MDString("SomeMDString", ctx)], ctx)
 
     mds = metadata(mod)
@@ -364,7 +364,7 @@ end
 
 # global iteration
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     dummygv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
     let gvs = globals(mod)
@@ -392,13 +392,13 @@ end
 
 # function iteration
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     st = LLVM.StructType("SomeType", ctx)
     ft = LLVM.FunctionType(st, [st])
 
-    dummyfn = LLVMFunction(mod, "SomeFunction", ft)
+    dummyfn = LLVM.Function(mod, "SomeFunction", ft)
     let fns = functions(mod)
-        @test eltype(fns) == LLVMFunction
+        @test eltype(fns) == LLVM.Function
 
         @test length(fns) == 1
 
@@ -424,9 +424,9 @@ end
 ## function
 
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type(ctx)])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     show(DevNull, fn)
 
@@ -451,9 +451,9 @@ end
 
 # attributes
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     let attrs = attributes(fn)
         @test get(attrs) == 0
@@ -472,9 +472,9 @@ end
 
 # parameter iteration
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     let params = parameters(fn)
         @test eltype(params) == Argument
@@ -496,9 +496,9 @@ end
 
 # basic block iteration
 Context() do ctx
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     entrybb = BasicBlock(fn, "SomeBasicBlock")
     @test entry(fn) == entrybb
@@ -523,9 +523,9 @@ end
 ## basic blocks
 
 Builder() do builder
-LLVMModule("SomeModule") do mod
+LLVM.Module("SomeModule") do mod
     ft = LLVM.FunctionType(LLVM.VoidType())
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
     bbs = blocks(fn)
 
     bb2 = BasicBlock(fn, "SomeOtherBasicBlock")
@@ -552,9 +552,9 @@ end
 
 Context() do ctx
 Builder(ctx) do builder
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     bb2 = BasicBlock(fn, "SomeOtherBasicBlock", ctx)
     @test LLVM.parent(bb2) == fn
@@ -593,9 +593,9 @@ end
 
 Context() do ctx
 Builder(ctx) do builder
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int1Type(ctx), LLVM.Int1Type(ctx)])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     bb1 = BasicBlock(fn, "entry", ctx)
     bb2 = BasicBlock(fn, "then", ctx)

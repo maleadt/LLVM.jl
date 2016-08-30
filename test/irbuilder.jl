@@ -8,9 +8,9 @@ end
 
 Context() do ctx
 Builder(ctx) do builder
-LLVMModule("SomeModule", ctx) do mod
+LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
-    fn = LLVMFunction(mod, "SomeFunction", ft)
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
     entry = BasicBlock(fn, "entry")
     position!(builder, entry)

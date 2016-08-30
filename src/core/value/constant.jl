@@ -39,17 +39,17 @@ import Base: get, push!
 
 @reftypedef proxy=Value kind=LLVMGlobalVariableValueKind immutable GlobalVariable <: Constant end
 
-GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String) =
+GlobalVariable(mod::Module, typ::LLVMType, name::String) =
     construct(GlobalVariable,
               API.LLVMAddGlobal(ref(mod),
                                 ref(typ), name))
 
-GlobalVariable(mod::LLVMModule, typ::LLVMType, name::String, addrspace::Integer) =
+GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer) =
     construct(GlobalVariable,
               API.LLVMAddGlobalInAddressSpace(ref(mod), ref(typ),
                                               name, Cuint(addrspace)))
 
-unsafe_delete!(::LLVMModule, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(gv))
+unsafe_delete!(::Module, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(gv))
 
 initializer(gv::GlobalVariable) =
   dynamic_construct(Value, API.LLVMGetInitializer(ref(gv)))

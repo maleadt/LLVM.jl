@@ -1,6 +1,6 @@
 export verify
 
-function verify(mod::LLVMModule)
+function verify(mod::Module)
     message = Ref{Cstring}()
     status = API.LLVMVerifyModule(mod.handle, API.LLVMReturnStatusAction, message)
 

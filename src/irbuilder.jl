@@ -14,7 +14,7 @@ Builder(ctx::Context) = Builder(API.LLVMCreateBuilderInContext(ref(ctx)))
 
 dispose(builder::Builder) = API.LLVMDisposeBuilder(ref(builder))
 
-function Builder(f::Function, args...)
+function Builder(f::Core.Function, args...)
     builder = Builder(args...)
     try
         f(builder)

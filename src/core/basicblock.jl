@@ -7,21 +7,21 @@ import Base: delete!
 BasicBlock(ref::API.LLVMBasicBlockRef) = BasicBlock(API.LLVMBasicBlockAsValue(ref))
 blockref(bb::BasicBlock) = API.LLVMValueAsBasicBlock(ref(bb))
 
-BasicBlock(fn::LLVMFunction, name::String) = 
+BasicBlock(fn::Function, name::String) = 
     BasicBlock(API.LLVMAppendBasicBlock(ref(fn), name))
-BasicBlock(fn::LLVMFunction, name::String, ctx::Context) = 
+BasicBlock(fn::Function, name::String, ctx::Context) = 
     BasicBlock(API.LLVMAppendBasicBlockInContext(ref(ctx), ref(fn), name))
 BasicBlock(bb::BasicBlock, name::String) = 
     BasicBlock(API.LLVMInsertBasicBlock(blockref(bb), name))
 BasicBlock(bb::BasicBlock, name::String, ctx::Context) = 
     BasicBlock(API.LLVMInsertBasicBlockInContext(ref(ctx), blockref(bb), name))
 
-unsafe_delete!(::LLVMFunction, bb::BasicBlock) = API.LLVMDeleteBasicBlock(blockref(bb))
-delete!(::LLVMFunction, bb::BasicBlock) =
+unsafe_delete!(::Function, bb::BasicBlock) = API.LLVMDeleteBasicBlock(blockref(bb))
+delete!(::Function, bb::BasicBlock) =
     API.LLVMRemoveBasicBlockFromParent(blockref(bb))
 
 parent(bb::BasicBlock) =
-    construct(LLVMFunction, API.LLVMGetBasicBlockParent(blockref(bb)))
+    construct(Function, API.LLVMGetBasicBlockParent(blockref(bb)))
 
 terminator(bb::BasicBlock) =
     construct(Instruction, API.LLVMGetBasicBlockTerminator(blockref(bb)))

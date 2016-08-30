@@ -6,8 +6,8 @@
 @reftypedef ref=LLVMValueRef enum=LLVMValueKind abstract Value
 @reftypedef abstract User <: Value
 @reftypedef abstract Constant <: User
-@reftypedef ref=LLVMModuleRef immutable LLVMModule end
-@reftypedef proxy=Value kind=LLVMFunctionValueKind immutable LLVMFunction <: Constant end
+@reftypedef ref=LLVMModuleRef immutable Module end
+@reftypedef proxy=Value kind=LLVMFunctionValueKind immutable Function <: Constant end
 @reftypedef proxy=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 
 # NOTE: we don't completely stick to the C API's organization here

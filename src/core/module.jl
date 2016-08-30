@@ -1,19 +1,19 @@
 # Modules represent the top-level structure in an LLVM program.
 
-export LLVMModule, dispose,
+export Module, dispose,
        target, target!, datalayout, datalayout!, context, inline_asm!
 
 import Base: show
 
-LLVMModule(name::String) = LLVMModule(API.LLVMModuleCreateWithName(name))
-LLVMModule(name::String, ctx::Context) =
-    LLVMModule(API.LLVMModuleCreateWithNameInContext(name, ref(ctx)))
-LLVMModule(mod::LLVMModule) = LLVMModule(API.LLVMCloneModule(ref(mod)))
+Module(name::String) = Module(API.LLVMModuleCreateWithName(name))
+Module(name::String, ctx::Context) =
+    Module(API.LLVMModuleCreateWithNameInContext(name, ref(ctx)))
+Module(mod::Module) = Module(API.LLVMCloneModule(ref(mod)))
 
-dispose(mod::LLVMModule) = API.LLVMDisposeModule(ref(mod))
+dispose(mod::Module) = API.LLVMDisposeModule(ref(mod))
 
-function LLVMModule(f::Function, args...)
-    mod = LLVMModule(args...)
+function Module(f::Core.Function, args...)
+    mod = Module(args...)
     try
         f(mod)
     finally
@@ -21,21 +21,21 @@ function LLVMModule(f::Function, args...)
     end
 end
 
-function show(io::IO, mod::LLVMModule)
+function show(io::IO, mod::Module)
     output = unsafe_string(API.LLVMPrintModuleToString(ref(mod)))
     print(io, output)
 end
 
-target(mod::LLVMModule) = unsafe_string(API.LLVMGetTarget(ref(mod)))
-target!(mod::LLVMModule, triple) = API.LLVMSetTarget(ref(mod), triple)
+target(mod::Module) = unsafe_string(API.LLVMGetTarget(ref(mod)))
+target!(mod::Module, triple) = API.LLVMSetTarget(ref(mod), triple)
 
-datalayout(mod::LLVMModule) = unsafe_string(API.LLVMGetDataLayout(ref(mod)))
-datalayout!(mod::LLVMModule, layout) = API.LLVMSetDataLayout(ref(mod), layout)
+datalayout(mod::Module) = unsafe_string(API.LLVMGetDataLayout(ref(mod)))
+datalayout!(mod::Module, layout) = API.LLVMSetDataLayout(ref(mod), layout)
 
-inline_asm!(mod::LLVMModule, asm::String) =
+inline_asm!(mod::Module, asm::String) =
     API.LLVMSetModuleInlineAsm(ref(mod), asm)
 
-context(mod::LLVMModule) = Context(API.LLVMGetModuleContext(ref(mod)))
+context(mod::Module) = Context(API.LLVMGetModuleContext(ref(mod)))
 
 
 ## type iteration
@@ -45,10 +45,10 @@ export types
 import Base: haskey, get
 
 immutable ModuleTypeSet
-    mod::LLVMModule
+    mod::Module
 end
 
-types(mod::LLVMModule) = ModuleTypeSet(mod)
+types(mod::Module) = ModuleTypeSet(mod)
 
 function haskey(iter::ModuleTypeSet, name::String)
     return API.LLVMGetTypeByName(ref(iter.mod), name) != C_NULL
@@ -68,10 +68,10 @@ export metadata
 import Base: haskey, get, push!
 
 immutable ModuleMetadataSet
-    mod::LLVMModule
+    mod::Module
 end
 
-metadata(mod::LLVMModule) = ModuleMetadataSet(mod)
+metadata(mod::Module) = ModuleMetadataSet(mod)
 
 function haskey(iter::ModuleMetadataSet, name::String)
     return API.LLVMGetNamedMetadataNumOperands(ref(iter.mod), name) != 0
@@ -96,10 +96,10 @@ export globals
 import Base: eltype, haskey, get, start, next, done, last
 
 immutable ModuleGlobalSet
-    mod::LLVMModule
+    mod::Module
 end
 
-globals(mod::LLVMModule) = ModuleGlobalSet(mod)
+globals(mod::Module) = ModuleGlobalSet(mod)
 
 eltype(::ModuleGlobalSet) = GlobalVariable
 
@@ -140,12 +140,12 @@ export functions
 import Base: eltype, haskey, get, start, next, done, last, length
 
 immutable ModuleFunctionSet
-    mod::LLVMModule
+    mod::Module
 end
 
-functions(mod::LLVMModule) = ModuleFunctionSet(mod)
+functions(mod::Module) = ModuleFunctionSet(mod)
 
-eltype(iter::ModuleFunctionSet) = LLVMFunction
+eltype(iter::ModuleFunctionSet) = Function
 
 function haskey(iter::ModuleFunctionSet, name::String)
     return API.LLVMGetNamedFunction(ref(iter.mod), name) != C_NULL
@@ -154,18 +154,18 @@ end
 function get(iter::ModuleFunctionSet, name::String)
     objref = API.LLVMGetNamedFunction(ref(iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
-    return construct(LLVMFunction, objref)
+    return construct(Function, objref)
 end
 
 start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(iter.mod))
 
 next(iter::ModuleFunctionSet, state) =
-    (construct(LLVMFunction,state), API.LLVMGetNextFunction(state))
+    (construct(Function,state), API.LLVMGetNextFunction(state))
 
 done(iter::ModuleFunctionSet, state) = state == C_NULL
 
 last(iter::ModuleFunctionSet) =
-    construct(LLVMFunction, API.LLVMGetLastFunction(ref(iter.mod)))
+    construct(Function, API.LLVMGetLastFunction(ref(iter.mod)))
 
 # NOTE: this is expensive, but the iteration interface requires it to be implemented
 function length(iter::ModuleFunctionSet)
