@@ -24,9 +24,9 @@ function Builder(f::Core.Function, args...)
 end
 
 position(builder::Builder) = BasicBlock(API.LLVMGetInsertBlock(ref(builder)))
-position!(builder::Builder, inst::Instruction) = 
+position!(builder::Builder, inst::Instruction) =
     API.LLVMPositionBuilderBefore(ref(builder), ref(inst))
-position!(builder::Builder, bb::BasicBlock) = 
+position!(builder::Builder, bb::BasicBlock) =
     API.LLVMPositionBuilderAtEnd(ref(builder), blockref(bb))
 position!(builder::Builder) = API.LLVMClearInsertionPosition(ref(builder))
 
@@ -35,9 +35,9 @@ insert!(builder::Builder, inst::Instruction) =
 insert!(builder::Builder, inst::Instruction, name::String) =
     API.LLVMInsertIntoBuilderWithName(ref(builder), ref(inst), name)
 
-debuglocation(builder::Builder) = 
+debuglocation(builder::Builder) =
     construct(MetadataAsValue, API.LLVMGetCurrentDebugLocation(ref(builder)))
-debuglocation!(builder::Builder) = 
+debuglocation!(builder::Builder) =
     API.LLVMSetCurrentDebugLocation(ref(builder), nullref(Value))
 debuglocation!(builder::Builder, loc::MetadataAsValue) =
     API.LLVMSetCurrentDebugLocation(ref(builder), ref(loc))
@@ -65,7 +65,7 @@ add!(builder::Builder, lhs::Value, rhs::Value, name="") =
 br!(builder::Builder, dest::BasicBlock) =
     construct(Instruction, API.LLVMBuildBr(ref(builder), blockref(dest)))
 
-br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) = 
+br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) =
     construct(Instruction, API.LLVMBuildCondBr(ref(builder),
                                                ref(ifval),
                                                blockref(thenbb),
