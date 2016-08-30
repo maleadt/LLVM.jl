@@ -59,10 +59,9 @@ function ExecutionEngine(mod::Module)
         error = unsafe_string(outerror[])
         API.LLVMDisposeMessage(outerror[])
         throw(error)
-    else
-        API.LLVMDisposeMessage(outerror[])
-        return ExecutionEngine(outref[])
     end
+
+    return ExecutionEngine(outref[])
 end
 
 run(engine::ExecutionEngine, fn::Function, args::Vector{GenericValue}) =

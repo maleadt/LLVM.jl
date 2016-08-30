@@ -9,7 +9,5 @@ function verify(mod::Module)
         error = unsafe_string(outerror[])
         API.LLVMDisposeMessage(outerror[])
         throw(error)
-    else
-        API.LLVMDisposeMessage(outerror[])
     end
 end
