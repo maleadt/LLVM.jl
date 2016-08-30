@@ -639,8 +639,6 @@ LLVM.Module("SomeModule", ctx) do mod
 
         succ[2] = bb3
         @test succ[2] == bb3
-
-        # TODO: collect
     end
 
     # general stuff
