@@ -220,9 +220,9 @@ end
 # scalar
 Context() do ctx
     t1 = LLVM.Int32Type(ctx)
-    c1 = ConstantInt(t1, 1)
+    c1 = ConstantInt(t1, UInt(1))
     @test convert(UInt, c1) == 1
-    c2 = ConstantInt(t1, -1, true)
+    c2 = ConstantInt(t1, -1)
     @test convert(Int, c2) == -1
 
     t2 = LLVM.DoubleType(ctx)

@@ -6,13 +6,17 @@ export ConstantInt, ConstantFP
 
 @reftypedef proxy=Value kind=LLVMConstantIntValueKind immutable ConstantInt <: Constant end
 
-ConstantInt(typ::LLVMInteger, val::Integer, signed=false) =
+ConstantInt(typ::LLVMInteger, val::Int) =
     construct(ConstantInt, API.LLVMConstInt(ref(typ),
-                                            reinterpret(Culonglong, val),
-                                            BoolToLLVM(signed)))
+                                            reinterpret(Culonglong, val), LLVMTrue))
+
+ConstantInt(typ::LLVMInteger, val::UInt) =
+    construct(ConstantInt, API.LLVMConstInt(ref(typ),
+                                            reinterpret(Culonglong, val), LLVMFalse))
 
 convert(::Type{UInt}, val::ConstantInt) =
     API.LLVMConstIntGetZExtValue(ref(val))
+
 convert(::Type{Int}, val::ConstantInt) =
     API.LLVMConstIntGetSExtValue(ref(val))
 
