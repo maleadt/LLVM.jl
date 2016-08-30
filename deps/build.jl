@@ -88,14 +88,16 @@ for dir in unique(libdirs)
 end
 
 # guess for versioned libraries (as the user might have configured ld.so differently)
-# NOTE: this will break in ASAN-enabled builds due to RTLD_DEEPBIND being filtered out
-for version in acceptable_versions, name in libname(version)
-    debug("Searching for library $name")
-    lib = Libdl.dlopen_e(name)
-    if lib != C_NULL
-        path = Libdl.dlpath(lib)
-        debug("- found v$version at $path")
-        push!(libraries, tuple(path, version))
+if !haskey(ENV, "JULIA_ASAN")
+    # NOTE: this breaks in ASAN-enabled builds due to RTLD_DEEPBIND being filtered out
+    for version in acceptable_versions, name in libname(version)
+        debug("Searching for library $name")
+        lib = Libdl.dlopen_e(name)
+        if lib != C_NULL
+            path = Libdl.dlpath(lib)
+            debug("- found v$version at $path")
+            push!(libraries, tuple(path, version))
+        end
     end
 end
 
