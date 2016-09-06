@@ -43,11 +43,11 @@ Transforms
 - [ ] LLVMAddArgumentPromotionPass
 - [ ] LLVMAddConstantMergePass
 - [ ] LLVMAddDeadArgEliminationPass
-- [x] LLVMAddFunctionAttrsPass
-- [x] LLVMAddFunctionInliningPass
+- [ ] LLVMAddFunctionAttrsPass
+- [ ] LLVMAddFunctionInliningPass
 - [ ] LLVMAddAlwaysInlinerPass
-- [x] LLVMAddGlobalDCEPass
-- [x] LLVMAddGlobalOptimizerPass
+- [ ] LLVMAddGlobalDCEPass
+- [ ] LLVMAddGlobalOptimizerPass
 - [ ] LLVMAddIPConstantPropagationPass
 - [ ] LLVMAddPruneEHPass
 - [ ] LLVMAddIPSCCPPass
@@ -153,7 +153,7 @@ Core
 - [x] LLVMDisposeModule
 - [ ] LLVMGetModuleIdentifier
 - [ ] LLVMSetModuleIdentifier
-- [x] LLVMGetDataLayoutStr
+- [ ] LLVMGetDataLayoutStr
 - [x] LLVMGetDataLayout
 - [x] LLVMSetDataLayout
 - [x] LLVMGetTarget
@@ -376,12 +376,12 @@ Core
 **Scalar constants**
 
 - [x] LLVMConstInt
-- [x] LLVMConstIntOfArbitraryPrecision
-- [x] LLVMConstIntOfString
-- [x] LLVMConstIntOfStringAndSize
+- [ ] LLVMConstIntOfArbitraryPrecision
+- [ ] LLVMConstIntOfString
+- [ ] LLVMConstIntOfStringAndSize
 - [x] LLVMConstReal
-- [x] LLVMConstRealOfString
-- [x] LLVMConstRealOfStringAndSize
+- [ ] LLVMConstRealOfString
+- [ ] LLVMConstRealOfStringAndSize
 - [x] LLVMConstIntGetZExtValue
 - [x] LLVMConstIntGetSExtValue
 - [x] LLVMConstRealGetDouble
@@ -390,7 +390,7 @@ Core
 
 - [ ] LLVMConstStringInContext
 - [ ] LLVMConstString
-- [x] LLVMIsConstantString
+- [ ] LLVMIsConstantString
 - [ ] LLVMGetAsString
 - [ ] LLVMConstStructInContext
 - [ ] LLVMConstStruct
@@ -448,14 +448,14 @@ Core
 - [ ] LLVMConstFPToUI
 - [ ] LLVMConstFPToSI
 - [ ] LLVMConstPtrToInt
-- [x] LLVMConstIntToPtr
+- [ ] LLVMConstIntToPtr
 - [ ] LLVMConstBitCast
 - [ ] LLVMConstAddrSpaceCast
 - [ ] LLVMConstZExtOrBitCast
 - [ ] LLVMConstSExtOrBitCast
 - [ ] LLVMConstTruncOrBitCast
 - [ ] LLVMConstPointerCast
-- [x] LLVMConstIntCast
+- [ ] LLVMConstIntCast
 - [ ] LLVMConstFPCast
 - [ ] LLVMConstSelect
 - [ ] LLVMConstExtractElement
@@ -534,9 +534,9 @@ Core
 Function parameters:
 
 - [x] LLVMCountParams
-- [x] LLVMGetParams
+- [ ] LLVMGetParams
 - [x] LLVMGetParam
-- [x] LLVMGetParamParent
+- [ ] LLVMGetParamParent
 - [x] LLVMGetFirstParam
 - [x] LLVMGetLastParam
 - [x] LLVMGetNextParam
@@ -737,7 +737,7 @@ Instruction Builders
 - [ ] LLVMBuildPtrToInt
 - [ ] LLVMBuildIntToPtr
 - [ ] LLVMBuildBitCast
-- [x] LLVMBuildAddrSpaceCast
+- [ ] LLVMBuildAddrSpaceCast
 - [ ] LLVMBuildZExtOrBitCast
 - [ ] LLVMBuildSExtOrBitCast
 - [ ] LLVMBuildTruncOrBitCast
@@ -769,7 +769,7 @@ Module Providers
 ----------------
 
 - [ ] LLVMCreateModuleProviderForExistingModule
-- [x] LLVMDisposeModuleProvider
+- [ ] LLVMDisposeModuleProvider
 
 
 
@@ -801,7 +801,7 @@ Pass Managers
 - [ ] LLVMCreateFunctionPassManager
 - [ ] LLVMRunPassManager
 - [ ] LLVMInitializeFunctionPassManager
-- [x] LLVMRunFunctionPassManager
+- [ ] LLVMRunFunctionPassManager
 - [ ] LLVMFinalizeFunctionPassManager
 - [ ] LLVMDisposePassManager
 
@@ -849,7 +849,7 @@ Execution Engine
 - [x] LLVMDisposeExecutionEngine
 - [ ] LLVMRunStaticConstructors
 - [ ] LLVMRunStaticDestructors
-- [x] LLVMRunFunctionAsMain
+- [ ] LLVMRunFunctionAsMain
 - [x] LLVMRunFunction
 - [ ] LLVMFreeMachineCodeForFunction
 - [ ] LLVMAddModule
@@ -858,7 +858,7 @@ Execution Engine
 - [ ] LLVMRecompileAndRelinkFunction
 - [ ] LLVMGetExecutionEngineTargetData
 - [ ] LLVMGetExecutionEngineTargetMachine
-- [x] LLVMAddGlobalMapping
+- [ ] LLVMAddGlobalMapping
 - [ ] LLVMGetPointerToGlobal
 - [ ] LLVMGetGlobalValueAddress
 - [ ] LLVMGetFunctionAddress
@@ -1015,21 +1015,21 @@ Unsorted
 
 - [ ] LLVMGetFirstTarget
 - [ ] LLVMGetNextTarget
-- [x] LLVMGetTargetFromName
-- [x] LLVMGetTargetFromTriple
-- [x] LLVMGetTargetName
-- [x] LLVMGetTargetDescription
+- [ ] LLVMGetTargetFromName
+- [ ] LLVMGetTargetFromTriple
+- [ ] LLVMGetTargetName
+- [ ] LLVMGetTargetDescription
 - [ ] LLVMTargetHasJIT
 - [ ] LLVMTargetHasTargetMachine
 - [ ] LLVMTargetHasAsmBackend
 - [ ] LLVMCreateTargetMachine
 - [ ] LLVMDisposeTargetMachine
-- [x] LLVMGetTargetMachineTarget
-- [x] LLVMGetTargetMachineTriple
-- [x] LLVMGetTargetMachineCPU
-- [x] LLVMGetTargetMachineFeatureString
+- [ ] LLVMGetTargetMachineTarget
+- [ ] LLVMGetTargetMachineTriple
+- [ ] LLVMGetTargetMachineCPU
+- [ ] LLVMGetTargetMachineFeatureString
 - [ ] LLVMCreateTargetDataLayout
-- [x] LLVMSetTargetMachineAsmVerbosity
+- [ ] LLVMSetTargetMachineAsmVerbosity
 - [ ] LLVMTargetMachineEmitToFile
 - [ ] LLVMTargetMachineEmitToMemoryBuffer
 - [ ] LLVMGetDefaultTargetTriple
