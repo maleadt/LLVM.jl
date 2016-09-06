@@ -1,25 +1,19 @@
 # https://pauladamsmith.com/blog/2015/01/how-to-get-started-with-llvm-c-api.html
 
-using LLVM
-
 length(ARGS) == 2 || error("Usage: sum.jl INT INT")
 
+using LLVM
 
 # set-up
-
 mod = LLVM.Module("my_module")
 
 param_types = [LLVM.Int32Type(), LLVM.Int32Type()]
 ret_type = LLVM.FunctionType(LLVM.Int32Type(), param_types)
-
 sum = LLVM.Function(mod, "sum", ret_type)
 
-entry = BasicBlock(sum, "entry")
-
-
 # generate IR
-
 Builder() do builder
+    entry = BasicBlock(sum, "entry")
     position!(builder, entry)
 
     tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
@@ -30,7 +24,6 @@ Builder() do builder
 end
 
 # analysis and execution
-
 ExecutionEngine(mod) do engine
     x, y = parse.([Int], ARGS[1:2])
     args = [GenericValue(LLVM.Int32Type(), x),
