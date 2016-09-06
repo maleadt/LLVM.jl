@@ -11,8 +11,9 @@ Code Coverage: [![Coverage Status](https://codecov.io/gh/maleadt/LLVM.jl/branch/
 This package provides a shallow wrapper around the LLVM C API.
 
 The entire API, wrapped by means of [Clang.jl](https://github.com/ihnorton/Clang.jl/), is
-available in the `LLVM.API` module. Higher-level wrappers are part of the `LLVM` module, and
-are added as the need arises.
+available in the `LLVM.API` submodule. Higher-level wrappers are part of the `LLVM`
+top-level module, and are added as the need arises (see [COVERAGE.md](COVERAGE.md) for a
+list of wrapped functions).
 
 
 Installation
