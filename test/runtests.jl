@@ -23,6 +23,7 @@ include("irbuilder.jl")
 InitializeAnalysis(passreg)
 include("analysis.jl")
 
+include("moduleprovider.jl")
 include("passmanager.jl")
 
 InitializeX86Target()

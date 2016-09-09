@@ -768,8 +768,8 @@ Instruction Builders
 Module Providers
 ----------------
 
-- [ ] LLVMCreateModuleProviderForExistingModule
-- [ ] LLVMDisposeModuleProvider
+- [x] LLVMCreateModuleProviderForExistingModule
+- [x] LLVMDisposeModuleProvider
 
 
 

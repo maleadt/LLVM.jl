@@ -19,6 +19,7 @@ include("init.jl")
 include("core.jl")
 include("irbuilder.jl")
 include("analysis.jl")
+include("moduleprovider.jl")
 include("passmanager.jl")
 include("execution.jl")
 
