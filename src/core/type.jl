@@ -49,6 +49,10 @@ for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     end
 end
 
+IntType(bits::Integer) = construct(IntegerType, API.LLVMIntType(Cuint(bits)))
+IntType(bits::Integer, ctx::Context) =
+    construct(IntegerType, API.LLVMIntTypeInContext(ref(ctx), Cuint(bits)))
+
 width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(ref(inttyp))
 
 

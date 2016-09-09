@@ -27,7 +27,8 @@ Context() do ctx
     @test LLVM.dynamic_construct(LLVMType, LLVM.ref(typ)) == typ
     @test_throws NullException LLVM.dynamic_construct(LLVMType, LLVM.API.LLVMTypeRef(C_NULL))
 
-    @test width(LLVM.Int32Type(ctx)) == 32
+    LLVM.IntType(8)
+    @test width(LLVM.IntType(8, ctx)) == 8
 
     @test issized(LLVM.Int1Type(ctx))
     @test !issized(LLVM.VoidType(ctx))
