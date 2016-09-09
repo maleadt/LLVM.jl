@@ -23,3 +23,10 @@ FunctionPassManager(mod) do fpm
 end
 end
 end
+
+Context() do ctx
+LLVM.Module("SomeModule", ctx) do mod
+FunctionPassManager(ModuleProvider(mod)) do fpm
+end
+end
+end

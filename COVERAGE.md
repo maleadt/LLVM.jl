@@ -798,7 +798,7 @@ Pass Managers
 
 - [x] LLVMCreatePassManager
 - [x] LLVMCreateFunctionPassManagerForModule
-- [ ] LLVMCreateFunctionPassManager
+- [x] LLVMCreateFunctionPassManager
 - [x] LLVMRunPassManager
 - [x] LLVMInitializeFunctionPassManager
 - [x] LLVMRunFunctionPassManager
