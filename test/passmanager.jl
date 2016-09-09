@@ -1,12 +1,12 @@
 let
-    pm = PassManager()
-    dispose(pm)
+    mpm = ModulePassManager()
+    dispose(mpm)
 end
 
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
-PassManager() do pm
-    run!(pm, mod)
+ModulePassManager() do mpm
+    run!(mpm, mod)
 end
 end
 end

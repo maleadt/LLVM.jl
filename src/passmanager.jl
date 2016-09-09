@@ -1,24 +1,31 @@
-export PassManager, run!
+export PassManager, dispose
 
-@reftypedef ref=LLVMPassManagerRef immutable PassManager end
+abstract PassManager
 
-PassManager() = PassManager(API.LLVMCreatePassManager())
+dispose(pm::PassManager) = API.LLVMDisposePassManager(ref(pm))
 
-function PassManager(f::Core.Function, args...)
-    pm = PassManager(args...)
+
+export ModulePassManager, run!
+
+@reftypedef ref=LLVMPassManagerRef immutable ModulePassManager <: PassManager end
+
+ModulePassManager() = ModulePassManager(API.LLVMCreatePassManager())
+
+function ModulePassManager(f::Core.Function, args...)
+    mpm = ModulePassManager(args...)
     try
-        f(pm)
+        f(mpm)
     finally
-        dispose(pm)
+        dispose(mpm)
     end
 end
 
-run!(pm::PassManager, mod::Module) = API.LLVMRunPassManager(ref(pm), ref(mod))
+run!(mpm::ModulePassManager, mod::Module) = API.LLVMRunPassManager(ref(mpm), ref(mod))
 
 
 export FunctionPassManager, run!, initialize!, finalize!
 
-@reftypedef ref=LLVMPassManagerRef immutable FunctionPassManager end
+@reftypedef ref=LLVMPassManagerRef immutable FunctionPassManager <: PassManager end
 
 FunctionPassManager(mod::Module) =
     FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(ref(mod)))
@@ -39,8 +46,3 @@ finalize!(fpm::FunctionPassManager) =
 
 run!(fpm::FunctionPassManager, fun::Function) =
     API.LLVMRunFunctionPassManager(ref(fpm), ref(fun))
-
-
-export dispose
-
-dispose(pm::Union{PassManager,FunctionPassManager}) = API.LLVMDisposePassManager(ref(pm))
