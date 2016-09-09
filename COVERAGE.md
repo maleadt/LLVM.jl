@@ -26,8 +26,8 @@ Analysis
 
 - [x] LLVMVerifyModule
 - [x] LLVMVerifyFunction
-- [ ] LLVMViewFunctionCFG
-- [ ] LLVMViewFunctionCFGOnly
+- [ ] ~~LLVMViewFunctionCFG~~ (debug-specific)
+- [ ] ~~LLVMViewFunctionCFGOnly~~ (debug-specific)
 
 
 
@@ -178,7 +178,7 @@ Core
 - [x] LLVMSetDataLayout
 - [x] LLVMGetTarget
 - [x] LLVMSetTarget
-- [ ] LLVMDumpModule
+- [ ] ~~LLVMDumpModule~~ (we use ToString to implement `show`)
 - [ ] LLVMPrintModuleToFile
 - [x] LLVMPrintModuleToString
 - [x] LLVMSetModuleInlineAsm
@@ -200,7 +200,7 @@ Core
 - [x] LLVMGetTypeKind
 - [x] LLVMTypeIsSized
 - [x] LLVMGetTypeContext
-- [ ] LLVMDumpType
+- [ ] ~~LLVMDumpType~~ (we use ToString to implement `show`)
 - [x] LLVMPrintTypeToString
 
 #### Integer Types
@@ -211,14 +211,14 @@ Core
 - [x] LLVMInt32TypeInContext
 - [x] LLVMInt64TypeInContext
 - [x] LLVMInt128TypeInContext
-- [ ] LLVMIntTypeInContext
+- [x] LLVMIntTypeInContext
 - [x] LLVMInt1Type
 - [x] LLVMInt8Type
 - [x] LLVMInt16Type
 - [x] LLVMInt32Type
 - [x] LLVMInt64Type
 - [x] LLVMInt128Type
-- [ ] LLVMIntType
+- [x] LLVMIntType
 - [x] LLVMGetIntTypeWidth
 
 #### Floating Point Types
