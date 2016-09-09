@@ -6,11 +6,11 @@ import Base: convert
 
 @reftypedef ref=LLVMGenericValueRef immutable GenericValue end
 
-GenericValue(typ::LLVMInteger, N::Int) =
+GenericValue(typ::IntegerType, N::Int) =
     GenericValue(API.LLVMCreateGenericValueOfInt(ref(typ),
                                                  reinterpret(Culonglong, N), LLVMTrue))
 
-GenericValue(typ::LLVMInteger, N::UInt) =
+GenericValue(typ::IntegerType, N::UInt) =
     GenericValue(API.LLVMCreateGenericValueOfInt(ref(typ),
                                                  reinterpret(Culonglong, N), LLVMFalse))
 
@@ -20,7 +20,7 @@ convert(::Type{Int}, val::GenericValue) =
 convert(::Type{UInt}, val::GenericValue) =
     API.LLVMGenericValueToInt(ref(val), LLVMFalse)
 
-GenericValue(typ::LLVMFloatingPoint, N::Float64) =
+GenericValue(typ::FloatingPointType, N::Float64) =
     GenericValue(API.LLVMCreateGenericValueOfFloat(ref(typ), Cdouble(N)))
 
 # NOTE: this ugly-three arg convert is needed to match the C API,

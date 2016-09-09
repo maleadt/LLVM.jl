@@ -17,7 +17,7 @@ Context() do ctx end
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
 
-    @test LLVM.construct(LLVM.LLVMInteger, LLVM.ref(typ)) == typ
+    @test LLVM.construct(LLVM.IntegerType, LLVM.ref(typ)) == typ
     if LLVM.DEBUG
         @test_throws ErrorException LLVM.construct(LLVM.FunctionType, LLVM.ref(typ))
     end

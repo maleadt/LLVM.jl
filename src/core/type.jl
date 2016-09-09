@@ -36,27 +36,27 @@ end
 
 export width
 
-@reftypedef proxy=LLVMType kind=LLVMIntegerTypeKind immutable LLVMInteger <: LLVMType end
+@reftypedef proxy=LLVMType kind=LLVMIntegerTypeKind immutable IntegerType <: LLVMType end
 
 for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     jlfun = Symbol(T, :Type)
     apifun = Symbol(:LLVM, jlfun)
     @eval begin
-        $jlfun() = construct(LLVMInteger, API.$apifun())
+        $jlfun() = construct(IntegerType, API.$apifun())
         $jlfun(ctx::Context) =
-            construct(LLVMInteger,
+            construct(IntegerType,
                       API.$(Symbol(apifun, :InContext))(ref(ctx)))
     end
 end
 
-width(inttyp::LLVMInteger) = API.LLVMGetIntTypeWidth(ref(inttyp))
+width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(ref(inttyp))
 
 
 ## floating-point
 
 # NOTE: this type doesn't exist in the LLVM API,
 #       we add it for convenience of typechecking generic values (see execution.jl)
-@reftypedef abstract LLVMFloatingPoint <: LLVMType
+@reftypedef abstract FloatingPointType <: LLVMType
 
 # NOTE: we don't handle the obscure types here (:X86FP80, :FP128, :PPCFP128),
 #       they would also need special casing as LLVMPPCFP128Type != LLVMPPC_FP128TypeKind
@@ -66,7 +66,7 @@ for T in [:Half, :Float, :Double]
     apifun = Symbol(:LLVM, jlfun)
     enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin
-        @reftypedef proxy=LLVMType kind=$enumkind immutable $apityp <: LLVMFloatingPoint end
+        @reftypedef proxy=LLVMType kind=$enumkind immutable $apityp <: FloatingPointType end
 
         $jlfun() = construct($apityp, API.$apifun())
         $jlfun(ctx::Context) =
@@ -183,14 +183,14 @@ elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=fal
 
 ## other
 
-@reftypedef proxy=LLVMType kind=LLVMVoidTypeKind immutable LLVMVoid <: LLVMType end
+@reftypedef proxy=LLVMType kind=LLVMVoidTypeKind immutable VoidType <: LLVMType end
 
-VoidType() = construct(LLVMVoid, API.LLVMVoidType())
+VoidType() = construct(VoidType, API.LLVMVoidType())
 VoidType(ctx::Context) =
-    construct(LLVMVoid, API.LLVMVoidTypeInContext(ref(ctx)))
+    construct(VoidType, API.LLVMVoidTypeInContext(ref(ctx)))
 
-@reftypedef proxy=LLVMType kind=LLVMLabelTypeKind immutable LLVMLabel <: LLVMType end
+@reftypedef proxy=LLVMType kind=LLVMLabelTypeKind immutable LabelType <: LLVMType end
 
-LabelType() = construct(LLVMLabel, API.LLVMLabelType())
+LabelType() = construct(LabelType, API.LLVMLabelType())
 LabelType(ctx::Context) =
-    construct(LLVMLabel, API.LLVMLabelTypeInContext(ref(ctx)))
+    construct(LabelType, API.LLVMLabelTypeInContext(ref(ctx)))
