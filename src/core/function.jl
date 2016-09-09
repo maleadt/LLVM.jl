@@ -11,27 +11,26 @@ Function(mod::Module, name::String, ft::FunctionType) =
               API.LLVMAddFunction(ref(mod), name,
                                   ref(ft)))
 
-unsafe_delete!(::Module, fn::Function) = API.LLVMDeleteFunction(ref(fn))
+unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(ref(f))
 
-personality(fn::Function) =
-    construct(Function, API.LLVMGetPersonalityFn(ref(fn)))
-personality!(fn::Function, persfn::Function) =
-    API.LLVMSetPersonalityFn(ref(fn),
-                             ref(persfn))
+personality(f::Function) =
+    construct(Function, API.LLVMGetPersonalityFn(ref(f)))
+personality!(f::Function, persfn::Function) =
+    API.LLVMSetPersonalityFn(ref(f), ref(persfn))
 
-intrinsic_id(fn::Function) = API.LLVMGetIntrinsicID(ref(fn))
+intrinsic_id(f::Function) = API.LLVMGetIntrinsicID(ref(f))
 
-callconv(fn::Function) = API.LLVMGetFunctionCallConv(ref(fn))
-callconv!(fn::Function, cc) =
-    API.LLVMSetFunctionCallConv(ref(fn), Cuint(cc))
+callconv(f::Function) = API.LLVMGetFunctionCallConv(ref(f))
+callconv!(f::Function, cc) =
+    API.LLVMSetFunctionCallConv(ref(f), Cuint(cc))
 
-function gc(fn::Function)
-  ptr = API.LLVMGetGC(ref(fn))
+function gc(f::Function)
+  ptr = API.LLVMGetGC(ref(f))
   return ptr==C_NULL ? "" :  unsafe_string(ptr)
 end
-gc!(fn::Function, name::String) = API.LLVMSetGC(ref(fn), name)
+gc!(f::Function, name::String) = API.LLVMSetGC(ref(f), name)
 
-entry(fn::Function) = BasicBlock(API.LLVMGetEntryBasicBlock(ref(fn)))
+entry(f::Function) = BasicBlock(API.LLVMGetEntryBasicBlock(ref(f)))
 
 # attributes
 
@@ -40,16 +39,16 @@ export attributes
 import Base: get, push!, delete!
 
 immutable FunctionAttrSet
-    fn::Function
+    f::Function
 end
 
-attributes(fn::Function) = FunctionAttrSet(fn)
+attributes(f::Function) = FunctionAttrSet(f)
 
-get(iter::FunctionAttrSet) = API.LLVMGetFunctionAttr(ref(iter.fn))
+get(iter::FunctionAttrSet) = API.LLVMGetFunctionAttr(ref(iter.f))
 
-push!(iter::FunctionAttrSet, attr) = API.LLVMAddFunctionAttr(ref(iter.fn), attr)
+push!(iter::FunctionAttrSet, attr) = API.LLVMAddFunctionAttr(ref(iter.f), attr)
 
-delete!(iter::FunctionAttrSet, attr) = API.LLVMRemoveFunctionAttr(ref(iter.fn), attr)
+delete!(iter::FunctionAttrSet, attr) = API.LLVMRemoveFunctionAttr(ref(iter.f), attr)
 
 # parameter iteration
 
@@ -60,17 +59,17 @@ import Base: eltype, getindex, start, next, done, last
 @reftypedef proxy=Value kind=LLVMArgumentValueKind immutable Argument <: Value end
 
 immutable FunctionParameterSet
-    fn::Function
+    f::Function
 end
 
-parameters(fn::Function) = FunctionParameterSet(fn)
+parameters(f::Function) = FunctionParameterSet(f)
 
 eltype(::FunctionParameterSet) = Argument
 
 getindex(iter::FunctionParameterSet, i) =
-  construct(Argument, API.LLVMGetParam(ref(iter.fn), Cuint(i-1)))
+  construct(Argument, API.LLVMGetParam(ref(iter.f), Cuint(i-1)))
 
-start(iter::FunctionParameterSet) = API.LLVMGetFirstParam(ref(iter.fn))
+start(iter::FunctionParameterSet) = API.LLVMGetFirstParam(ref(iter.f))
 
 next(::FunctionParameterSet, state) =
     (construct(Argument, state), API.LLVMGetNextParam(state))
@@ -78,9 +77,9 @@ next(::FunctionParameterSet, state) =
 done(::FunctionParameterSet, state) = state == C_NULL
 
 last(iter::FunctionParameterSet) =
-    construct(Argument, API.LLVMGetLastParam(ref(iter.fn)))
+    construct(Argument, API.LLVMGetLastParam(ref(iter.f)))
 
-length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.fn))
+length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.f))
 
 # basic block iteration
 
@@ -89,14 +88,14 @@ export blocks
 import Base: eltype, start, next, done, last, length
 
 immutable FunctionBlockSet
-    fn::Function
+    f::Function
 end
 
-blocks(fn::Function) = FunctionBlockSet(fn)
+blocks(f::Function) = FunctionBlockSet(f)
 
 eltype(::FunctionBlockSet) = BasicBlock
 
-start(iter::FunctionBlockSet) = API.LLVMGetFirstBasicBlock(ref(iter.fn))
+start(iter::FunctionBlockSet) = API.LLVMGetFirstBasicBlock(ref(iter.f))
 
 next(::FunctionBlockSet, state) =
     (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
@@ -104,6 +103,6 @@ next(::FunctionBlockSet, state) =
 done(::FunctionBlockSet, state) = state == C_NULL
 
 last(iter::FunctionBlockSet) =
-    BasicBlock(API.LLVMGetLastBasicBlock(ref(iter.fn)))
+    BasicBlock(API.LLVMGetLastBasicBlock(ref(iter.f)))
 
-length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(ref(iter.fn))
+length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(ref(iter.f))

@@ -49,5 +49,5 @@ initialize!(fpm::FunctionPassManager) =
 finalize!(fpm::FunctionPassManager) =
     BoolFromLLVM(API.LLVMFinalizeFunctionPassManager(ref(fpm)))
 
-run!(fpm::FunctionPassManager, fun::Function) =
-    API.LLVMRunFunctionPassManager(ref(fpm), ref(fun))
+run!(fpm::FunctionPassManager, f::Function) =
+    API.LLVMRunFunctionPassManager(ref(fpm), ref(f))

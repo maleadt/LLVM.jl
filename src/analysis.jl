@@ -12,8 +12,8 @@ function verify(mod::Module)
     end
 end
 
-function verify(fn::Function)
-    status = BoolFromLLVM(API.LLVMVerifyFunction(ref(fn), API.LLVMReturnStatusAction))
+function verify(f::Function)
+    status = BoolFromLLVM(API.LLVMVerifyFunction(ref(f), API.LLVMReturnStatusAction))
 
     if status
         throw("broken function")

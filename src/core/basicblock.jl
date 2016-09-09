@@ -7,10 +7,10 @@ import Base: delete!
 BasicBlock(ref::API.LLVMBasicBlockRef) = BasicBlock(API.LLVMBasicBlockAsValue(ref))
 blockref(bb::BasicBlock) = API.LLVMValueAsBasicBlock(ref(bb))
 
-BasicBlock(fn::Function, name::String) = 
-    BasicBlock(API.LLVMAppendBasicBlock(ref(fn), name))
-BasicBlock(fn::Function, name::String, ctx::Context) = 
-    BasicBlock(API.LLVMAppendBasicBlockInContext(ref(ctx), ref(fn), name))
+BasicBlock(f::Function, name::String) = 
+    BasicBlock(API.LLVMAppendBasicBlock(ref(f), name))
+BasicBlock(f::Function, name::String, ctx::Context) = 
+    BasicBlock(API.LLVMAppendBasicBlockInContext(ref(ctx), ref(f), name))
 BasicBlock(bb::BasicBlock, name::String) = 
     BasicBlock(API.LLVMInsertBasicBlock(blockref(bb), name))
 BasicBlock(bb::BasicBlock, name::String, ctx::Context) = 

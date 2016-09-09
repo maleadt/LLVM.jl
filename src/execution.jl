@@ -107,6 +107,6 @@ for kind in [:ExecutionEngine, :Interpreter, :JIT]
     end
 end
 
-run(engine::ExecutionEngine, fn::Function, args::Vector{GenericValue}=GenericValue[]) =
-    GenericValue(API.LLVMRunFunction(ref(engine), ref(fn),
+run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =
+    GenericValue(API.LLVMRunFunction(ref(engine), ref(f),
                                      Cuint(length(args)), ref.(args)))
