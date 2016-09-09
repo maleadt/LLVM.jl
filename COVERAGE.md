@@ -1,5 +1,25 @@
-LLVM 3.9 API coverage
-=====================
+LLVM API coverage
+=================
+
+<!--
+
+Find functions in `lib` not mentioned in this document:
+```
+for f in $(grep -ohR "function \w*" lib | cut -d ' ' -f 2) 
+do
+    grep -q $f COVERAGE.md || echo $f
+done
+```
+
+Check functions after modifications:
+```
+for i in $(egrep -ohR 'API\.\w*' src | cut -d . -f 2 | sort | uniq)
+do
+    sed -i "s/\[.\] $i\b/[x] $i/" COVERAGE.md
+done
+```
+
+-->
 
 Analysis
 --------
