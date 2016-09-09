@@ -796,14 +796,14 @@ Pass Registry
 Pass Managers
 -------------
 
-- [ ] LLVMCreatePassManager
-- [ ] LLVMCreateFunctionPassManagerForModule
+- [x] LLVMCreatePassManager
+- [x] LLVMCreateFunctionPassManagerForModule
 - [ ] LLVMCreateFunctionPassManager
-- [ ] LLVMRunPassManager
-- [ ] LLVMInitializeFunctionPassManager
-- [ ] LLVMRunFunctionPassManager
-- [ ] LLVMFinalizeFunctionPassManager
-- [ ] LLVMDisposePassManager
+- [x] LLVMRunPassManager
+- [x] LLVMInitializeFunctionPassManager
+- [x] LLVMRunFunctionPassManager
+- [x] LLVMFinalizeFunctionPassManager
+- [x] LLVMDisposePassManager
 
 
 
