@@ -980,26 +980,26 @@ Object file reading and writing
 Target information
 ------------------
 
-- [ ] LLVMCreateTargetData
-- [ ] LLVMDisposeTargetData
+- [x] LLVMCreateTargetData
+- [x] LLVMDisposeTargetData
 - [ ] LLVMAddTargetLibraryInfo
-- [ ] LLVMCopyStringRepOfTargetData
-- [ ] LLVMByteOrder
-- [ ] LLVMPointerSize
-- [ ] LLVMPointerSizeForAS
-- [ ] LLVMIntPtrType
-- [ ] LLVMIntPtrTypeForAS
-- [ ] LLVMIntPtrTypeInContext
-- [ ] LLVMIntPtrTypeForASInContext
-- [ ] LLVMSizeOfTypeInBits
-- [ ] LLVMStoreSizeOfType
-- [ ] LLVMABISizeOfType
-- [ ] LLVMABIAlignmentOfType
-- [ ] LLVMCallFrameAlignmentOfType
-- [ ] LLVMPreferredAlignmentOfType
-- [ ] LLVMPreferredAlignmentOfGlobal
-- [ ] LLVMElementAtOffset
-- [ ] LLVMOffsetOfElement
+- [x] LLVMCopyStringRepOfTargetData
+- [x] LLVMByteOrder
+- [x] LLVMPointerSize
+- [x] LLVMPointerSizeForAS
+- [x] LLVMIntPtrType
+- [x] LLVMIntPtrTypeForAS
+- [x] LLVMIntPtrTypeInContext
+- [x] LLVMIntPtrTypeForASInContext
+- [x] LLVMSizeOfTypeInBits
+- [x] LLVMStoreSizeOfType
+- [x] LLVMABISizeOfType
+- [x] LLVMABIAlignmentOfType
+- [x] LLVMCallFrameAlignmentOfType
+- [x] LLVMPreferredAlignmentOfType
+- [x] LLVMPreferredAlignmentOfGlobal
+- [x] LLVMElementAtOffset
+- [x] LLVMOffsetOfElement
 
 
 

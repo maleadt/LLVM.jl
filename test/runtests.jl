@@ -51,6 +51,7 @@ InitializeIPA(passreg)
 InitializeCodeGen(passreg)
 
 InitializeTarget(passreg)
+include("target.jl")
 
 
 Shutdown()

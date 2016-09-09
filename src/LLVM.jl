@@ -22,5 +22,6 @@ include("analysis.jl")
 include("moduleprovider.jl")
 include("passmanager.jl")
 include("execution.jl")
+include("target.jl")
 
 end
