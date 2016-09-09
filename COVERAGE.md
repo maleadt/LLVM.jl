@@ -5,7 +5,7 @@ Analysis
 --------
 
 - [x] LLVMVerifyModule
-- [ ] LLVMVerifyFunction
+- [x] LLVMVerifyFunction
 - [ ] LLVMViewFunctionCFG
 - [ ] LLVMViewFunctionCFGOnly
 

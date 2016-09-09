@@ -10,6 +10,7 @@ LLVM.Module("SomeModule", ctx) do mod
     ret!(builder)
 
     @test_throws String verify(mod)
+    @test_throws String verify(fn)
 end
 end
 end
@@ -26,6 +27,7 @@ LLVM.Module("SomeModule", ctx) do mod
     ret!(builder)
 
     verify(mod)
+    verify(fn)
 end
 end
 end
