@@ -150,7 +150,7 @@ size(vectyp::VectorType) = API.LLVMGetVectorSize(ref(vectyp))
 
 ## structure types
 
-export name, ispacked, isopaque, elements, elements!
+export name, ispacked, isopaque, elements!
 
 @reftypedef proxy=LLVMType kind=LLVMStructTypeKind immutable StructType <: SequentialType end
 
@@ -173,16 +173,36 @@ ispacked(structtyp::StructType) =
 isopaque(structtyp::StructType) =
     BoolFromLLVM(API.LLVMIsOpaqueStruct(ref(structtyp)))
 
-function elements(structtyp::StructType)
-    nelems = API.LLVMCountStructElementTypes(ref(structtyp))
-    elems = Vector{API.LLVMTypeRef}(nelems)
-    API.LLVMGetStructElementTypes(ref(structtyp), elems)
-    return map(t->dynamic_construct(LLVMType, t), elems)
-end
-
 elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=false) =
     API.LLVMStructSetBody(ref(structtyp), ref.(elems),
                           Cuint(length(elems)), BoolToLLVM(packed))
+
+# element iteration
+
+export elements
+
+import Base: eltype, getindex, setindex!, start, next, done, length, endof
+
+immutable StructTypeElementSet
+    typ::StructType
+end
+
+elements(typ::StructType) = StructTypeElementSet(typ)
+
+eltype(::StructTypeElementSet) = LLVMType
+
+getindex(iter::StructTypeElementSet, i) =
+    dynamic_construct(LLVMType, API.LLVMStructGetTypeAtIndex(ref(iter.typ), Cuint(i-1)))
+
+start(iter::StructTypeElementSet) = (1,length(iter))
+
+next(iter::StructTypeElementSet, state) =
+    (iter[state[1]], (state[1]+1,state[2]))
+
+done(iter::StructTypeElementSet, state) = (state[1] > state[2])
+
+length(iter::StructTypeElementSet) = API.LLVMCountStructElementTypes(ref(iter.typ))
+endof(iter::StructTypeElementSet) = length(iter)
 
 
 ## other

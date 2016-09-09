@@ -105,14 +105,30 @@ Context() do ctx
         @test context(st) == ctx
         @test !ispacked(st)
         @test !isopaque(st)
-        @test elements(st) == elem
+
+        let elem_it = elements(st)
+            @test eltype(elem_it) == LLVMType
+
+            @test length(elem_it) == length(elem)
+
+            @test first(elem_it) == elem[1]
+            @test last(elem_it) == elem[end]
+
+            i = 1
+            for el in elem_it
+                @test el == elem[i]
+                i += 1
+            end
+
+            @test collect(elem_it) == elem
+        end
     end
 
     let st = LLVM.StructType("foo", ctx)
         @test name(st) == "foo"
         @test isopaque(st)
         elements!(st, elem)
-        @test elements(st) == elem
+        @test collect(elements(st)) == elem
         @test !isopaque(st)
     end
 end
