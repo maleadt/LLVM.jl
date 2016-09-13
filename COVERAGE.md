@@ -253,7 +253,7 @@ Core
 - [x] LLVMStructSetBody
 - [x] LLVMCountStructElementTypes
 - [x] LLVMGetStructElementTypes
-- [ ] LLVMStructGetTypeAtIndex
+- [x] LLVMStructGetTypeAtIndex
 - [x] LLVMIsPackedStruct
 - [x] LLVMIsOpaqueStruct
 
@@ -554,7 +554,7 @@ Core
 Function parameters:
 
 - [x] LLVMCountParams
-- [ ] LLVMGetParams
+- [x] LLVMGetParams
 - [x] LLVMGetParam
 - [ ] LLVMGetParamParent
 - [x] LLVMGetFirstParam

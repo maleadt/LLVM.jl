@@ -54,7 +54,7 @@ delete!(iter::FunctionAttrSet, attr) = API.LLVMRemoveFunctionAttr(ref(iter.f), a
 
 export Argument, parameters
 
-import Base: eltype, getindex, start, next, done, last
+import Base: eltype, getindex, start, next, done, last, length, collect
 
 @reftypedef proxy=Value kind=LLVMArgumentValueKind immutable Argument <: Value end
 
@@ -80,6 +80,13 @@ last(iter::FunctionParameterSet) =
     construct(Argument, API.LLVMGetLastParam(ref(iter.f)))
 
 length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.f))
+
+# NOTE: optimized `collect`
+function collect(iter::FunctionParameterSet)
+    elems = Vector{API.LLVMValueRef}(length(iter))
+    API.LLVMGetParams(ref(iter.f), elems)
+    return map(t->construct(Argument, t), elems)
+end
 
 # basic block iteration
 

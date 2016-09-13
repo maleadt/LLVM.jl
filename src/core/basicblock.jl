@@ -36,7 +36,7 @@ move_after(bb::BasicBlock, pos::BasicBlock) =
 
 export instructions
 
-import Base: eltype, start, next, done, last, length
+import Base: eltype, start, next, done, last, length, collect
 
 immutable BasicBlockInstructionSet
     bb::BasicBlock
@@ -59,8 +59,17 @@ last(iter::BasicBlockInstructionSet) =
 # NOTE: this is expensive, but the iteration interface requires it to be implemented
 function length(iter::BasicBlockInstructionSet)
     count = 0
-    for inst in iter
+    for _ in iter
         count += 1
     end
     return count
+end
+
+# NOTE: `length` is iterating, so avoid `collect` calling it
+function collect(iter::BasicBlockInstructionSet)
+    vals = Vector{eltype(iter)}()
+    for val in iter
+        push!(vals, val)
+    end
+    return vals
 end

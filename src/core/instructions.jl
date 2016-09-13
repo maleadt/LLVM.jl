@@ -59,7 +59,7 @@ default_dest(switch::Instruction) =
 
 export successors
 
-import Base: eltype, getindex, setindex!, start, next, done, length
+import Base: eltype, getindex, setindex!, start, next, done, length, endof
 
 immutable TerminatorSuccessorSet
     term::Instruction
@@ -83,6 +83,7 @@ next(iter::TerminatorSuccessorSet, state) =
 done(iter::TerminatorSuccessorSet, state) = (state[1] > state[2])
 
 length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
+endof(iter::TerminatorSuccessorSet) = length(iter)
 
 
 ## phi nodes

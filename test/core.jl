@@ -643,6 +643,9 @@ LLVM.Module("SomeModule", ctx) do mod
         @test succ[2] == bb3
 
         @test collect(succ) == [bb2, bb3]
+        @test first(succ) == bb2
+        @test last(succ) == bb3
+
         i = 1
         for bb in succ
             @test 1 <= i <= 2

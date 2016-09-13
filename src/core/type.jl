@@ -181,7 +181,7 @@ elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=fal
 
 export elements
 
-import Base: eltype, getindex, setindex!, start, next, done, length, endof
+import Base: eltype, getindex, setindex!, start, next, done, length, endof, collect
 
 immutable StructTypeElementSet
     typ::StructType
@@ -203,6 +203,13 @@ done(iter::StructTypeElementSet, state) = (state[1] > state[2])
 
 length(iter::StructTypeElementSet) = API.LLVMCountStructElementTypes(ref(iter.typ))
 endof(iter::StructTypeElementSet) = length(iter)
+
+# NOTE: optimized `collect`
+function collect(iter::StructTypeElementSet)
+    elems = Vector{API.LLVMTypeRef}(length(iter))
+    API.LLVMGetStructElementTypes(ref(iter.typ), elems)
+    return map(t->dynamic_construct(LLVMType, t), elems)
+end
 
 
 ## other

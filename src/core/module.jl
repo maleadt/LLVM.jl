@@ -93,7 +93,7 @@ push!(iter::ModuleMetadataSet, name::String, val::Value) =
 
 export globals
 
-import Base: eltype, haskey, get, start, next, done, last
+import Base: eltype, haskey, get, start, next, done, last, length, collect
 
 immutable ModuleGlobalSet
     mod::Module
@@ -126,10 +126,19 @@ last(iter::ModuleGlobalSet) =
 # NOTE: this is expensive, but the iteration interface requires it to be implemented
 function length(iter::ModuleGlobalSet)
     count = 0
-    for inst in iter
+    for _ in iter
         count += 1
     end
-    return count
+    count
+end
+
+# NOTE: `length` is iterating, so avoid `collect` calling it
+function collect(iter::ModuleGlobalSet)
+    vals = Vector{eltype(iter)}()
+    for val in iter
+        push!(vals, val)
+    end
+    vals
 end
 
 
@@ -170,8 +179,17 @@ last(iter::ModuleFunctionSet) =
 # NOTE: this is expensive, but the iteration interface requires it to be implemented
 function length(iter::ModuleFunctionSet)
     count = 0
-    for inst in iter
+    for _ in iter
         count += 1
     end
-    return count
+    count
+end
+
+# NOTE: `length` is iterating, so avoid `collect` calling it
+function collect(iter::ModuleFunctionSet)
+    vals = Vector{eltype(iter)}()
+    for val in iter
+        push!(vals, val)
+    end
+    vals
 end
