@@ -65,13 +65,15 @@ function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Void})
 end
 
 function yield_callback(ctx::Context, args::Ptr{Void})
+    # TODO: is this allowed? can we yield out of an active `ccall`?
     yield()
 end
 
 function install_handlers(ctx::Context)
     # set yield callback
     callback = cfunction(yield_callback, Void, Tuple{Context, Ptr{Void}})
-    API.LLVMContextSetYieldCallback(ref(ctx), callback, C_NULL)
+    # NOTE: disabled until proven safe
+    #API.LLVMContextSetYieldCallback(ref(ctx), callback, C_NULL)
 
     # set diagnostic callback
     handler = cfunction(handle_diagnostic, Void, Tuple{API.LLVMDiagnosticInfoRef, Ptr{Void}})
