@@ -42,13 +42,13 @@ Analysis
 Bit Reader
 ----------
 
-- [ ] LLVMParseBitcode
+- [ ] ~~LLVMParseBitcode~~ (deprecated  )
 - [x] LLVMParseBitcode2
-- [ ] LLVMParseBitcodeInContext
+- [ ] ~~LLVMParseBitcodeInContext~~ (deprecated )
 - [x] LLVMParseBitcodeInContext2
-- [ ] LLVMGetBitcodeModuleInContext
+- [ ] ~~LLVMGetBitcodeModuleInContext~~ (deprecated )
 - [ ] LLVMGetBitcodeModuleInContext2
-- [ ] LLVMGetBitcodeModule
+- [ ] ~~LLVMGetBitcodeModule~~ (deprecated  )
 - [ ] LLVMGetBitcodeModule2
 
 
@@ -826,7 +826,7 @@ Pass Managers
 
 - [x] LLVMCreatePassManager
 - [x] LLVMCreateFunctionPassManagerForModule
-- [x] LLVMCreateFunctionPassManager
+- [ ] ~~LLVMCreateFunctionPassManager~~ (deprecated)
 - [x] LLVMRunPassManager
 - [x] LLVMInitializeFunctionPassManager
 - [x] LLVMRunFunctionPassManager

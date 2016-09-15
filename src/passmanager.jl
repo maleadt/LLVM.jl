@@ -27,11 +27,6 @@ export FunctionPassManager, run!, initialize!, finalize!
 
 @reftypedef ref=LLVMPassManagerRef immutable FunctionPassManager <: PassManager end
 
-function FunctionPassManager(mp::ModuleProvider)
-    Base.depwarn("FunctionPassManager(::ModuleProvider) is deprecated, use FunctionPassManager(::Module) instead", :FunctionPassManager)
-    FunctionPassManager(API.LLVMCreateFunctionPassManager(ref(mp)))
-end
-
 FunctionPassManager(mod::Module) =
     FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(ref(mod)))
 
