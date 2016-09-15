@@ -35,9 +35,9 @@ Bit Reader
 ----------
 
 - [ ] LLVMParseBitcode
-- [ ] LLVMParseBitcode2
+- [x] LLVMParseBitcode2
 - [ ] LLVMParseBitcodeInContext
-- [ ] LLVMParseBitcodeInContext2
+- [x] LLVMParseBitcodeInContext2
 - [ ] LLVMGetBitcodeModuleInContext
 - [ ] LLVMGetBitcodeModuleInContext2
 - [ ] LLVMGetBitcodeModule
@@ -49,9 +49,9 @@ Bit Writer
 ----------
 
 - [ ] LLVMWriteBitcodeToFile
-- [ ] LLVMWriteBitcodeToFD
+- [x] LLVMWriteBitcodeToFD
 - [ ] LLVMWriteBitcodeToFileHandle
-- [ ] LLVMWriteBitcodeToMemoryBuffer
+- [x] LLVMWriteBitcodeToMemoryBuffer
 
 
 
