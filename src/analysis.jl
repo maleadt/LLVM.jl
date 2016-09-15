@@ -1,13 +1,13 @@
 export verify
 
 function verify(mod::Module)
-    outerror = Ref{Cstring}()
+    message = Ref{Cstring}()
     status =
-        BoolFromLLVM(API.LLVMVerifyModule(ref(mod), API.LLVMReturnStatusAction, outerror))
+        BoolFromLLVM(API.LLVMVerifyModule(ref(mod), API.LLVMReturnStatusAction, message))
 
     if status
-        error = unsafe_string(outerror[])
-        API.LLVMDisposeMessage(outerror[])
+        error = unsafe_string(message[])
+        API.LLVMDisposeMessage(message[])
         throw(error)
     end
 end
