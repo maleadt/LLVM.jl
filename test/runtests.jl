@@ -19,6 +19,7 @@ passreg = GlobalPassRegistry()
 InitializeCore(passreg)
 include("core.jl")
 include("irbuilder.jl")
+include("buffer.jl")
 
 InitializeAnalysis(passreg)
 include("analysis.jl")

@@ -23,5 +23,6 @@ include("moduleprovider.jl")
 include("passmanager.jl")
 include("execution.jl")
 include("target.jl")
+include("buffer.jl")
 
 end
