@@ -154,13 +154,13 @@ Core
 
 - [x] LLVMContextCreate
 - [x] LLVMGetGlobalContext
-- [ ] LLVMContextSetDiagnosticHandler
+- [x] LLVMContextSetDiagnosticHandler
 - [ ] LLVMContextGetDiagnosticHandler
 - [ ] LLVMContextGetDiagnosticContext
-- [ ] LLVMContextSetYieldCallback
+- [x] LLVMContextSetYieldCallback
 - [x] LLVMContextDispose
-- [ ] LLVMGetDiagInfoDescription
-- [ ] LLVMGetDiagInfoSeverity
+- [x] LLVMGetDiagInfoDescription
+- [x] LLVMGetDiagInfoSeverity
 - [ ] LLVMGetMDKindIDInContext
 - [ ] LLVMGetMDKindID
 
@@ -796,13 +796,13 @@ Module Providers
 Memory Buffers
 --------------
 
-- [ ] LLVMCreateMemoryBufferWithContentsOfFile
+- [x] LLVMCreateMemoryBufferWithContentsOfFile
 - [ ] LLVMCreateMemoryBufferWithSTDIN
 - [ ] LLVMCreateMemoryBufferWithMemoryRange
-- [ ] LLVMCreateMemoryBufferWithMemoryRangeCopy
-- [ ] LLVMGetBufferStart
-- [ ] LLVMGetBufferSize
-- [ ] LLVMDisposeMemoryBuffer
+- [x] LLVMCreateMemoryBufferWithMemoryRangeCopy
+- [x] LLVMGetBufferStart
+- [x] LLVMGetBufferSize
+- [x] LLVMDisposeMemoryBuffer
 
 
 
