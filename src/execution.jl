@@ -56,7 +56,7 @@ function ExecutionEngine(mod::Module)
     if status
         error = unsafe_string(outerror[])
         API.LLVMDisposeMessage(outerror[])
-        throw(error)
+        throw(LLVMException(error))
     end
 
     return ExecutionEngine(outref[])
@@ -72,7 +72,7 @@ function Interpreter(mod::Module)
     if status
         error = unsafe_string(outerror[])
         API.LLVMDisposeMessage(outerror[])
-        throw(error)
+        throw(LLVMException(error))
     end
 
     return ExecutionEngine(outref[])
@@ -88,7 +88,7 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
     if status
         error = unsafe_string(outerror[])
         API.LLVMDisposeMessage(outerror[])
-        throw(error)
+        throw(LLVMException(error))
     end
 
     return ExecutionEngine(outref[])

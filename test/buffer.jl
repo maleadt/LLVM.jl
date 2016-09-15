@@ -3,7 +3,7 @@ let
     dispose(membuf)
 end
 
-@test_throws String MemoryBufferFile("nonexisting")
+@test_throws LLVMException MemoryBufferFile("nonexisting")
 
 MemoryBuffer("SomeContents", "SomeBuffer") do membuf
     @test size(membuf) == length("SomeContents")

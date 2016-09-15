@@ -9,8 +9,8 @@ LLVM.Module("SomeModule", ctx) do mod
 
     ret!(builder)
 
-    @test_throws String verify(mod)
-    @test_throws String verify(fn)
+    @test_throws LLVMException verify(mod)
+    @test_throws LLVMException verify(fn)
 end
 end
 end

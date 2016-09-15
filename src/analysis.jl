@@ -8,7 +8,7 @@ function verify(mod::Module)
     if status
         error = unsafe_string(message[])
         API.LLVMDisposeMessage(message[])
-        throw(error)
+        throw(LLVMException(error))
     end
 end
 
@@ -16,6 +16,6 @@ function verify(f::Function)
     status = BoolFromLLVM(API.LLVMVerifyFunction(ref(f), API.LLVMReturnStatusAction))
 
     if status
-        throw("broken function")
+        throw(LLVMException("broken function"))
     end
 end

@@ -26,7 +26,7 @@ function MemoryBufferFile(path::String)
     if status
         error = unsafe_string(message[])
         API.LLVMDisposeMessage(message[])
-        throw(error)
+        throw(LLVMException(error))
     end
 
     MemoryBuffer(membuf[])
