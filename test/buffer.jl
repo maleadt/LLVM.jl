@@ -6,8 +6,8 @@ end
 @test_throws LLVMException MemoryBufferFile("nonexisting")
 
 MemoryBuffer("SomeContents", "SomeBuffer") do membuf
-    @test size(membuf) == length("SomeContents")
-    @test unsafe_string(start(membuf)) == "SomeContents"
+    @test length(membuf) == length("SomeContents")
+    @test String(convert(Vector{UInt8}, membuf)) == "SomeContents"
 end
 
 mktemp() do path, _

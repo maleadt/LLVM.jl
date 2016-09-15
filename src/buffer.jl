@@ -1,6 +1,6 @@
 export MemoryBuffer, MemoryBufferFile, dispose
 
-import Base: start, size
+import Base: length, pointer, convert
 
 @reftypedef ref=LLVMMemoryBufferRef immutable MemoryBuffer end
 
@@ -43,7 +43,9 @@ end
 
 dispose(membuf::MemoryBuffer) = API.LLVMDisposeMemoryBuffer(ref(membuf))
 
-size(membuf::MemoryBuffer) = API.LLVMGetBufferSize(ref(membuf))
+length(membuf::MemoryBuffer) = API.LLVMGetBufferSize(ref(membuf))
 
-# NOTE: we don't return a string, because we can't access the length
-start(membuf::MemoryBuffer) = convert(Ptr{UInt8}, API.LLVMGetBufferStart(ref(membuf)))
+pointer(membuf::MemoryBuffer) = convert(Ptr{UInt8}, API.LLVMGetBufferStart(ref(membuf)))
+
+convert(::Type{Vector{UInt8}}, membuf::MemoryBuffer) =
+    unsafe_wrap(Array, pointer(membuf), length(membuf))
