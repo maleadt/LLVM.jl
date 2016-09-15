@@ -13,9 +13,17 @@ done
 
 Check functions after modifications:
 ```
-for i in $(egrep -ohR 'API\.\w*' src | cut -d . -f 2 | sort | uniq)
+for f in $(egrep -ohR 'API\.\w*' src | cut -d . -f 2 | sort | uniq)
 do
-    sed -i "s/\[.\] $i\b/[x] $i/" COVERAGE.md
+    sed -i "s/\[.\] ~*$f\b~*/[x] $f/" COVERAGE.md
+done
+```
+
+Make sure all checked functions are actually implemented:
+```
+for f in $(egrep -oh '\[x\] \w*\b' COVERAGE.md | cut -d ' ' -f 2 | sort | uniq)
+do
+    egrep -Rq "API.$f\b" src || echo $f
 done
 ```
 
