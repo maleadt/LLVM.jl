@@ -4,7 +4,7 @@ export TargetData, dispose, add!, convert,
        abi_alignment, frame_alignment, preferred_alignment,
        element_at, offsetof
 
-import Base: sizeof
+import Base: convert, sizeof
 
 @reftypedef ref=LLVMTargetDataRef immutable TargetData end
 
