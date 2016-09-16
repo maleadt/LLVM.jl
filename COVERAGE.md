@@ -171,6 +171,16 @@ Core
 - [x] LLVMGetDiagInfoSeverity
 - [ ] LLVMGetMDKindIDInContext
 - [ ] LLVMGetMDKindID
+- [ ] LLVMGetEnumAttributeKindForName
+- [ ] LLVMGetLastEnumAttributeKind
+- [ ] LLVMCreateEnumAttribute
+- [ ] LLVMGetEnumAttributeKind
+- [ ] LLVMGetEnumAttributeValue
+- [ ] LLVMCreateStringAttribute
+- [ ] LLVMGetStringAttributeKind
+- [ ] LLVMGetStringAttributeValue
+- [ ] LLVMIsEnumAttribute
+- [ ] LLVMIsStringAttribute
 
 
 ### Modules
@@ -630,6 +640,7 @@ Function parameters:
 
 #### Call Sites and Invocations
 
+- [ ] LLVMGetNumArgOperands
 - [x] LLVMSetInstructionCallConv
 - [x] LLVMGetInstructionCallConv
 - [ ] LLVMAddInstrAttribute
@@ -669,6 +680,12 @@ Function parameters:
 - [x] LLVMCountIncoming
 - [x] LLVMGetIncomingValue
 - [x] LLVMGetIncomingBlock
+
+
+#### InsertValue
+
+- [ ] LLVMGetNumIndices
+- [ ] LLVMGetIndices
 
 
 
@@ -790,7 +807,12 @@ Instruction Builders
 - [ ] LLVMBuildFence
 - [ ] LLVMBuildAtomicRMW
 - [ ] LLVMBuildAtomicCmpXchg
-
+- [ ] LLVMIsAtomicSingleThread
+- [ ] LLVMSetAtomicSingleThread
+- [ ] LLVMGetCmpXchgSuccessOrdering
+- [ ] LLVMSetCmpXchgSuccessOrdering
+- [ ] LLVMGetCmpXchgFailureOrdering
+- [ ] LLVMSetCmpXchgFailureOrdering
 
 
 Module Providers
@@ -971,6 +993,31 @@ LTO
 
 
 
+ThinLTO
+-------
+
+- [ ] thinlto_create_codegen
+- [ ] thinlto_codegen_dispose
+- [ ] thinlto_codegen_add_module
+- [ ] thinlto_codegen_process
+- [ ] thinlto_module_get_num_objects
+- [ ] thinlto_module_get_object
+- [ ] thinlto_codegen_set_pic_model
+- [ ] thinlto_codegen_set_cache_dir
+- [ ] thinlto_codegen_set_cache_pruning_interval
+- [ ] thinlto_codegen_set_final_cache_size_relative_to_available_space
+- [ ] thinlto_codegen_set_cache_entry_expiration
+- [ ] thinlto_codegen_set_savetemps_dir
+- [ ] thinlto_codegen_set_cpu
+- [ ] thinlto_codegen_disable_codegen
+- [ ] thinlto_codegen_set_codegen_only
+- [ ] thinlto_debug_options
+- [ ] lto_module_is_thinlto
+- [ ] thinlto_codegen_add_must_preserve_symbol
+- [ ] thinlto_codegen_add_cross_referenced_symbol
+
+
+
 Object file reading and writing
 -------------------------------
 
@@ -1028,6 +1075,9 @@ Target information
 - [x] LLVMPreferredAlignmentOfGlobal
 - [x] LLVMElementAtOffset
 - [x] LLVMOffsetOfElement
+- [ ] LLVMGetModuleDataLayout
+- [ ] LLVMSetModuleDataLayout
+
 
 
 Target machine
@@ -1056,61 +1106,32 @@ Target machine
 - [x] LLVMAddAnalysisPasses
 
 
-Unsorted
---------
+
+IR reader
+---------
+
+- [x] LLVMParseIRInContext
+
+
+
+Linker
+------
+
+- [ ] LLVMLinkModules2
+
+
+
+ErrorHandling
+-------------
 
 - [ ] LLVMInstallFatalErrorHandler
 - [ ] LLVMResetFatalErrorHandler
 - [ ] LLVMEnablePrettyStackTrace
 
-- [ ] LLVMGetModuleDataLayout
-- [ ] LLVMSetModuleDataLayout
 
-- [ ] LLVMGetEnumAttributeKindForName
-- [ ] LLVMGetLastEnumAttributeKind
-- [ ] LLVMCreateEnumAttribute
-- [ ] LLVMGetEnumAttributeKind
-- [ ] LLVMGetEnumAttributeValue
-- [ ] LLVMCreateStringAttribute
-- [ ] LLVMGetStringAttributeKind
-- [ ] LLVMGetStringAttributeValue
-- [ ] LLVMIsEnumAttribute
-- [ ] LLVMIsStringAttribute
 
-- [ ] LLVMGetNumArgOperands
-
-- [ ] LLVMGetNumIndices
-- [ ] LLVMGetIndices
-
-- [ ] LLVMIsAtomicSingleThread
-- [ ] LLVMSetAtomicSingleThread
-- [ ] LLVMGetCmpXchgSuccessOrdering
-- [ ] LLVMSetCmpXchgSuccessOrdering
-- [ ] LLVMGetCmpXchgFailureOrdering
-- [ ] LLVMSetCmpXchgFailureOrdering
-
-- [x] LLVMParseIRInContext
-- [ ] LLVMLinkModules2
-
-- [ ] thinlto_create_codegen
-- [ ] thinlto_codegen_dispose
-- [ ] thinlto_codegen_add_module
-- [ ] thinlto_codegen_process
-- [ ] thinlto_module_get_num_objects
-- [ ] thinlto_module_get_object
-- [ ] thinlto_codegen_set_pic_model
-- [ ] thinlto_codegen_set_cache_dir
-- [ ] thinlto_codegen_set_cache_pruning_interval
-- [ ] thinlto_codegen_set_final_cache_size_relative_to_available_space
-- [ ] thinlto_codegen_set_cache_entry_expiration
-- [ ] thinlto_codegen_set_savetemps_dir
-- [ ] thinlto_codegen_set_cpu
-- [ ] thinlto_codegen_disable_codegen
-- [ ] thinlto_codegen_set_codegen_only
-- [ ] thinlto_debug_options
-- [ ] lto_module_is_thinlto
-- [ ] thinlto_codegen_add_must_preserve_symbol
-- [ ] thinlto_codegen_add_cross_referenced_symbol
+ORC JIT
+-------
 
 - [ ] LLVMOrcCreateInstance
 - [ ] LLVMOrcGetErrorMsg
@@ -1125,6 +1146,12 @@ Unsorted
 - [ ] LLVMOrcRemoveModule
 - [ ] LLVMOrcGetSymbolAddress
 - [ ] LLVMOrcDisposeInstance
+
+
+
+Support
+-------
+
 - [ ] LLVMLoadLibraryPermanently
 - [ ] LLVMParseCommandLineOptions
 - [ ] LLVMSearchForAddressOfSymbol
