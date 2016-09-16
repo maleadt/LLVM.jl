@@ -39,13 +39,13 @@ export width
 @reftypedef proxy=LLVMType kind=LLVMIntegerTypeKind immutable IntegerType <: LLVMType end
 
 for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
-    jlfun = Symbol(T, :Type)
-    apifun = Symbol(:LLVM, jlfun)
+    jl_fname = Symbol(T, :Type)
+    api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
-        $jlfun() = construct(IntegerType, API.$apifun())
-        $jlfun(ctx::Context) =
+        $jl_fname() = construct(IntegerType, API.$api_fname())
+        $jl_fname(ctx::Context) =
             construct(IntegerType,
-                      API.$(Symbol(apifun, :InContext))(ref(ctx)))
+                      API.$(Symbol(api_fname, :InContext))(ref(ctx)))
     end
 end
 
@@ -65,17 +65,17 @@ width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(ref(inttyp))
 # NOTE: we don't handle the obscure types here (:X86FP80, :FP128, :PPCFP128),
 #       they would also need special casing as LLVMPPCFP128Type != LLVMPPC_FP128TypeKind
 for T in [:Half, :Float, :Double]
-    jlfun = Symbol(T, :Type)
-    apityp = Symbol(:LLVM, T)
-    apifun = Symbol(:LLVM, jlfun)
+    jl_fname = Symbol(T, :Type)
+    api_typename = Symbol(:LLVM, T)
+    api_fname = Symbol(:LLVM, jl_fname)
     enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin
-        @reftypedef proxy=LLVMType kind=$enumkind immutable $apityp <: FloatingPointType end
+        @reftypedef proxy=LLVMType kind=$enumkind immutable $api_typename <: FloatingPointType end
 
-        $jlfun() = construct($apityp, API.$apifun())
-        $jlfun(ctx::Context) =
-            construct($apityp,
-                      API.$(Symbol(apifun, :InContext))(ref(ctx)))
+        $jl_fname() = construct($api_typename, API.$api_fname())
+        $jl_fname(ctx::Context) =
+            construct($api_typename,
+                      API.$(Symbol(api_fname, :InContext))(ref(ctx)))
     end
 end
 
