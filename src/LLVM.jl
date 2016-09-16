@@ -24,6 +24,7 @@ include("passmanager.jl")
 include("execution.jl")
 include("buffer.jl")
 include("target.jl")
+include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 

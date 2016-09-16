@@ -806,7 +806,7 @@ Memory Buffers
 
 - [x] LLVMCreateMemoryBufferWithContentsOfFile
 - [ ] LLVMCreateMemoryBufferWithSTDIN
-- [ ] LLVMCreateMemoryBufferWithMemoryRange
+- [x] LLVMCreateMemoryBufferWithMemoryRange
 - [x] LLVMCreateMemoryBufferWithMemoryRangeCopy
 - [x] LLVMGetBufferStart
 - [x] LLVMGetBufferSize
@@ -1089,7 +1089,7 @@ Unsorted
 - [ ] LLVMGetCmpXchgFailureOrdering
 - [ ] LLVMSetCmpXchgFailureOrdering
 
-- [ ] LLVMParseIRInContext
+- [x] LLVMParseIRInContext
 - [ ] LLVMLinkModules2
 
 - [ ] thinlto_create_codegen

@@ -21,6 +21,7 @@ include("core.jl")
 include("irbuilder.jl")
 include("buffer.jl")
 include("bitcode.jl")
+include("ir.jl")
 
 InitializeAnalysis(passreg)
 include("analysis.jl")
