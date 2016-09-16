@@ -186,8 +186,8 @@ Core
 - [x] LLVMSetDataLayout
 - [x] LLVMGetTarget
 - [x] LLVMSetTarget
-- [ ] ~~LLVMDumpModule~~ (we use ToString to implement `show`)
-- [ ] LLVMPrintModuleToFile
+- [ ] ~~LLVMDumpModule~~ (unnecessary, we use `ToString` to power `show`)
+- [ ] ~~LLVMPrintModuleToFile~~ (user can do this himself)
 - [x] LLVMPrintModuleToString
 - [x] LLVMSetModuleInlineAsm
 - [x] LLVMGetModuleContext
@@ -208,7 +208,7 @@ Core
 - [x] LLVMGetTypeKind
 - [x] LLVMTypeIsSized
 - [x] LLVMGetTypeContext
-- [ ] ~~LLVMDumpType~~ (we use ToString to implement `show`)
+- [ ] ~~LLVMDumpType~~ (unnecessary, we use `ToString` to power `show`)
 - [x] LLVMPrintTypeToString
 
 #### Integer Types
@@ -293,7 +293,7 @@ Core
 - [x] LLVMGetValueKind
 - [x] LLVMGetValueName
 - [x] LLVMSetValueName
-- [ ] LLVMDumpValue
+- [ ] ~~LLVMDumpValue~~ (unnecessary, we use `ToString` to power `show`)
 - [x] LLVMPrintValueToString
 - [x] LLVMReplaceAllUsesWith
 - [x] LLVMIsConstant
@@ -1030,16 +1030,8 @@ Target information
 - [x] LLVMOffsetOfElement
 
 
-
-Unsorted
---------
-
-- [ ] LLVMInstallFatalErrorHandler
-- [ ] LLVMResetFatalErrorHandler
-- [ ] LLVMEnablePrettyStackTrace
-
-- [ ] LLVMGetModuleDataLayout
-- [ ] LLVMSetModuleDataLayout
+Target machine
+--------------
 
 - [ ] LLVMGetFirstTarget
 - [ ] LLVMGetNextTarget
@@ -1062,6 +1054,17 @@ Unsorted
 - [ ] LLVMTargetMachineEmitToMemoryBuffer
 - [ ] LLVMGetDefaultTargetTriple
 - [ ] LLVMAddAnalysisPasses
+
+
+Unsorted
+--------
+
+- [ ] LLVMInstallFatalErrorHandler
+- [ ] LLVMResetFatalErrorHandler
+- [ ] LLVMEnablePrettyStackTrace
+
+- [ ] LLVMGetModuleDataLayout
+- [ ] LLVMSetModuleDataLayout
 
 - [ ] LLVMGetEnumAttributeKindForName
 - [ ] LLVMGetLastEnumAttributeKind
