@@ -121,7 +121,7 @@ function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType)
         throw(LLVMException(error))
     end
 
-    return MemoryBuffer(out_membuf[])
+    return convert(Vector{UInt8}, MemoryBuffer(out_membuf[]))
 end
 
 function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType, path::String)

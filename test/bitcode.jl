@@ -1,5 +1,6 @@
-MemoryBuffer("invalid", "invalid") do membuf
-    @test_throws LLVMException parse(LLVM.Module, membuf)
+let
+    invalid_bitcode = convert(Vector{UInt8}, "invalid")
+    @test_throws LLVMException parse(LLVM.Module, invalid_bitcode)
 end
 
 Context() do ctx
@@ -16,17 +17,17 @@ LLVM.Module("SomeModule", ctx) do source_mod
     verify(source_mod)
     
 
-    membuf = convert(MemoryBuffer, source_mod)
+    bitcode = convert(Vector{UInt8}, source_mod)
 
     let
-        mod = parse(LLVM.Module, membuf)
+        mod = parse(LLVM.Module, bitcode)
         verify(mod)
         @test haskey(functions(mod), "SomeFunction")
         dispose(mod)
     end
 
     let
-        mod = parse(LLVM.Module, membuf, ctx)
+        mod = parse(LLVM.Module, bitcode, ctx)
         verify(mod)
         @test haskey(functions(mod), "SomeFunction")
         dispose(mod)
@@ -38,7 +39,7 @@ LLVM.Module("SomeModule", ctx) do source_mod
         flush(io)
         reset(io)
 
-        @test read(io) == convert(Vector{UInt8}, membuf)
+        @test read(io) == bitcode
     end
 end
 end

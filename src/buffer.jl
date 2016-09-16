@@ -4,8 +4,16 @@ import Base: length, pointer, convert
 
 @reftypedef ref=LLVMMemoryBufferRef immutable MemoryBuffer end
 
-MemoryBuffer(data::String, name::String) = MemoryBuffer(
-    API.LLVMCreateMemoryBufferWithMemoryRangeCopy(data, Csize_t(length(data)), name))
+function MemoryBuffer{T<:Union{UInt8,Int8}}(data::Vector{T}, name::String="", copy::Bool=true)
+    ptr = pointer(data)
+    len = Csize_t(length(data))
+    if copy
+        return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRangeCopy(ptr, len, name))
+    else
+        return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRange(ptr, len, name,
+                                                                      BoolToLLVM(false)))
+    end
+end
 
 function MemoryBuffer(f::Core.Function, args...)
     membuf = MemoryBuffer(args...)
