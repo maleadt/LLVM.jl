@@ -1033,27 +1033,27 @@ Target information
 Target machine
 --------------
 
-- [ ] LLVMGetFirstTarget
-- [ ] LLVMGetNextTarget
-- [ ] LLVMGetTargetFromName
-- [ ] LLVMGetTargetFromTriple
-- [ ] LLVMGetTargetName
-- [ ] LLVMGetTargetDescription
-- [ ] LLVMTargetHasJIT
-- [ ] LLVMTargetHasTargetMachine
-- [ ] LLVMTargetHasAsmBackend
-- [ ] LLVMCreateTargetMachine
-- [ ] LLVMDisposeTargetMachine
-- [ ] LLVMGetTargetMachineTarget
-- [ ] LLVMGetTargetMachineTriple
-- [ ] LLVMGetTargetMachineCPU
-- [ ] LLVMGetTargetMachineFeatureString
-- [ ] LLVMCreateTargetDataLayout
-- [ ] LLVMSetTargetMachineAsmVerbosity
-- [ ] LLVMTargetMachineEmitToFile
-- [ ] LLVMTargetMachineEmitToMemoryBuffer
-- [ ] LLVMGetDefaultTargetTriple
-- [ ] LLVMAddAnalysisPasses
+- [x] LLVMGetFirstTarget
+- [x] LLVMGetNextTarget
+- [x] LLVMGetTargetFromName
+- [x] LLVMGetTargetFromTriple
+- [x] LLVMGetTargetName
+- [x] LLVMGetTargetDescription
+- [x] LLVMTargetHasJIT
+- [x] LLVMTargetHasTargetMachine
+- [x] LLVMTargetHasAsmBackend
+- [x] LLVMCreateTargetMachine
+- [x] LLVMDisposeTargetMachine
+- [x] LLVMGetTargetMachineTarget
+- [x] LLVMGetTargetMachineTriple
+- [x] LLVMGetTargetMachineCPU
+- [x] LLVMGetTargetMachineFeatureString
+- [x] LLVMCreateTargetDataLayout
+- [x] LLVMSetTargetMachineAsmVerbosity
+- [x] LLVMTargetMachineEmitToFile
+- [x] LLVMTargetMachineEmitToMemoryBuffer
+- [x] LLVMGetDefaultTargetTriple
+- [x] LLVMAddAnalysisPasses
 
 
 Unsorted
