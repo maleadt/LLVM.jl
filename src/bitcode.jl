@@ -3,24 +3,22 @@
 import Base: parse
 
 function parse(::Type{Module}, membuf::MemoryBuffer)
-    mod = Ref{API.LLVMModuleRef}()
+    out_ref = Ref{API.LLVMModuleRef}()
 
-    status =
-        BoolFromLLVM(API.LLVMParseBitcode2(ref(membuf), mod))
+    status = BoolFromLLVM(API.LLVMParseBitcode2(ref(membuf), out_ref))
     @assert !status # caught by diagnostics handler
 
-    Module(mod[])
+    Module(out_ref[])
 end
 
 function parse(::Type{Module}, membuf::MemoryBuffer, ctx::Context)
-    mod = Ref{API.LLVMModuleRef}()
+    out_ref = Ref{API.LLVMModuleRef}()
 
-    message = Ref{Cstring}()
     status =
-        BoolFromLLVM(API.LLVMParseBitcodeInContext2(ref(ctx), ref(membuf), mod))
+        BoolFromLLVM(API.LLVMParseBitcodeInContext2(ref(ctx), ref(membuf), out_ref))
     @assert !status # caught by diagnostics handler
 
-    Module(mod[])
+    Module(out_ref[])
 end
 
 

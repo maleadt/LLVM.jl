@@ -17,19 +17,19 @@ function MemoryBuffer(f::Core.Function, args...)
 end
 
 function MemoryBufferFile(path::String)
-    membuf = Ref{API.LLVMMemoryBufferRef}()
+    out_ref = Ref{API.LLVMMemoryBufferRef}()
 
-    message = Ref{Cstring}()
+    out_error = Ref{Cstring}()
     status =
-        BoolFromLLVM(API.LLVMCreateMemoryBufferWithContentsOfFile(path, membuf, message))
+        BoolFromLLVM(API.LLVMCreateMemoryBufferWithContentsOfFile(path, out_ref, out_error))
 
     if status
-        error = unsafe_string(message[])
-        API.LLVMDisposeMessage(message[])
+        error = unsafe_string(out_error[])
+        API.LLVMDisposeMessage(out_error[])
         throw(LLVMException(error))
     end
 
-    MemoryBuffer(membuf[])
+    MemoryBuffer(out_ref[])
 end
 
 function MemoryBufferFile(f::Core.Function, args...)

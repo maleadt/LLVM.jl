@@ -48,50 +48,50 @@ export ExecutionEngine, Interpreter, JIT,
 
 # NOTE: these takes ownership of the module
 function ExecutionEngine(mod::Module)
-    outref = Ref{API.LLVMExecutionEngineRef}()
-    outerror = Ref{Cstring}()
-    status = BoolFromLLVM(API.LLVMCreateExecutionEngineForModule(outref, ref(mod),
-                                                                 outerror))
+    out_ref = Ref{API.LLVMExecutionEngineRef}()
+    out_error = Ref{Cstring}()
+    status = BoolFromLLVM(API.LLVMCreateExecutionEngineForModule(out_ref, ref(mod),
+                                                                 out_error))
 
     if status
-        error = unsafe_string(outerror[])
-        API.LLVMDisposeMessage(outerror[])
+        error = unsafe_string(out_error[])
+        API.LLVMDisposeMessage(out_error[])
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(outref[])
+    return ExecutionEngine(out_ref[])
 end
 function Interpreter(mod::Module)
     API.LLVMLinkInInterpreter()
 
-    outref = Ref{API.LLVMExecutionEngineRef}()
-    outerror = Ref{Cstring}()
-    status = BoolFromLLVM(API.LLVMCreateInterpreterForModule(outref, ref(mod),
-                                                             outerror))
+    out_ref = Ref{API.LLVMExecutionEngineRef}()
+    out_error = Ref{Cstring}()
+    status = BoolFromLLVM(API.LLVMCreateInterpreterForModule(out_ref, ref(mod),
+                                                             out_error))
 
     if status
-        error = unsafe_string(outerror[])
-        API.LLVMDisposeMessage(outerror[])
+        error = unsafe_string(out_error[])
+        API.LLVMDisposeMessage(out_error[])
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(outref[])
+    return ExecutionEngine(out_ref[])
 end
 function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault)
     API.LLVMLinkInMCJIT()
 
-    outref = Ref{API.LLVMExecutionEngineRef}()
-    outerror = Ref{Cstring}()
-    status = BoolFromLLVM(API.LLVMCreateJITCompilerForModule(outref, ref(mod),
-                                                             Cuint(optlevel), outerror))
+    out_ref = Ref{API.LLVMExecutionEngineRef}()
+    out_error = Ref{Cstring}()
+    status = BoolFromLLVM(API.LLVMCreateJITCompilerForModule(out_ref, ref(mod),
+                                                             Cuint(optlevel), out_error))
 
     if status
-        error = unsafe_string(outerror[])
-        API.LLVMDisposeMessage(outerror[])
+        error = unsafe_string(out_error[])
+        API.LLVMDisposeMessage(out_error[])
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(outref[])
+    return ExecutionEngine(out_ref[])
 end
 
 dispose(engine::ExecutionEngine) = API.LLVMDisposeExecutionEngine(ref(engine))
