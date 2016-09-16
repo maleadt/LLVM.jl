@@ -40,10 +40,10 @@ simplify_libcalls!(pmb::PassManagerBuilder, val::Bool=true) =
 inliner!(pmb::PassManagerBuilder, threshold::Integer) =
     API.LLVMPassManagerBuilderUseInlinerWithThreshold(ref(pmb), Cuint(threshold))
 
-populate!(pmb::PassManagerBuilder, fpm::FunctionPassManager) =
+populate!(fpm::FunctionPassManager, pmb::PassManagerBuilder) =
     API.LLVMPassManagerBuilderPopulateFunctionPassManager(ref(pmb), ref(fpm))
 
-populate!(pmb::PassManagerBuilder, mpm::ModulePassManager) =
+populate!(mpm::ModulePassManager, pmb::PassManagerBuilder) =
     API.LLVMPassManagerBuilderPopulateModulePassManager(ref(pmb), ref(mpm))
 
 

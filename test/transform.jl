@@ -15,11 +15,11 @@ PassManagerBuilder() do pmb
     Context() do ctx
     LLVM.Module("SomeModule", ctx) do mod
         FunctionPassManager(mod) do fpm
-            populate!(pmb, fpm)
+            populate!(fpm, pmb)
         end
         ModulePassManager() do mpm
-            populate!(pmb, mpm)
-        end    
+            populate!(mpm, pmb)
+        end
     end
     end
 end
