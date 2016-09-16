@@ -337,9 +337,9 @@ LLVM.Module("SomeModule", ctx) do mod
     inline_asm!(mod, "nop")
     @test contains(sprint(io->show(io,mod)), "module asm")
 
-    dummyTarget = "SomeTarget"
-    target!(mod, dummyTarget)
-    @test target(mod) == dummyTarget
+    dummyTriple = "SomeTriple"
+    triple!(mod, dummyTriple)
+    @test triple(mod) == dummyTriple
 
     dummyLayout = "e-p:64:64:64"
     datalayout!(mod, dummyLayout)
