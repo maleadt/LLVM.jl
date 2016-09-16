@@ -56,9 +56,9 @@ Bit Reader
 Bit Writer
 ----------
 
-- [ ] LLVMWriteBitcodeToFile
+- [ ] ~~LLVMWriteBitcodeToFile~~ (unnecessary)
 - [x] LLVMWriteBitcodeToFD
-- [ ] LLVMWriteBitcodeToFileHandle
+- [ ] ~~LLVMWriteBitcodeToFileHandle~~ (unnecessary)
 - [x] LLVMWriteBitcodeToMemoryBuffer
 
 
@@ -68,84 +68,84 @@ Transforms
 
 ### Interprocedural transformations
 
-- [ ] LLVMAddArgumentPromotionPass
-- [ ] LLVMAddConstantMergePass
-- [ ] LLVMAddDeadArgEliminationPass
-- [ ] LLVMAddFunctionAttrsPass
-- [ ] LLVMAddFunctionInliningPass
-- [ ] LLVMAddAlwaysInlinerPass
-- [ ] LLVMAddGlobalDCEPass
-- [ ] LLVMAddGlobalOptimizerPass
-- [ ] LLVMAddIPConstantPropagationPass
-- [ ] LLVMAddPruneEHPass
-- [ ] LLVMAddIPSCCPPass
-- [ ] LLVMAddInternalizePass
-- [ ] LLVMAddStripDeadPrototypesPass
-- [ ] LLVMAddStripSymbolsPass
+- [x] LLVMAddArgumentPromotionPass
+- [x] LLVMAddConstantMergePass
+- [x] LLVMAddDeadArgEliminationPass
+- [x] LLVMAddFunctionAttrsPass
+- [x] LLVMAddFunctionInliningPass
+- [x] LLVMAddAlwaysInlinerPass
+- [x] LLVMAddGlobalDCEPass
+- [x] LLVMAddGlobalOptimizerPass
+- [x] LLVMAddIPConstantPropagationPass
+- [x] LLVMAddPruneEHPass
+- [x] LLVMAddIPSCCPPass
+- [x] LLVMAddInternalizePass
+- [x] LLVMAddStripDeadPrototypesPass
+- [x] LLVMAddStripSymbolsPass
 
 
 ### Pass manager builder
 
-- [ ] LLVMPassManagerBuilderCreate
-- [ ] LLVMPassManagerBuilderDispose
-- [ ] LLVMPassManagerBuilderSetOptLevel
-- [ ] LLVMPassManagerBuilderSetSizeLevel
-- [ ] LLVMPassManagerBuilderSetDisableUnitAtATime
-- [ ] LLVMPassManagerBuilderSetDisableUnrollLoops
-- [ ] LLVMPassManagerBuilderSetDisableSimplifyLibCalls
-- [ ] LLVMPassManagerBuilderUseInlinerWithThreshold
-- [ ] LLVMPassManagerBuilderPopulateFunctionPassManager
-- [ ] LLVMPassManagerBuilderPopulateModulePassManager
+- [x] LLVMPassManagerBuilderCreate
+- [x] LLVMPassManagerBuilderDispose
+- [x] LLVMPassManagerBuilderSetOptLevel
+- [x] LLVMPassManagerBuilderSetSizeLevel
+- [x] LLVMPassManagerBuilderSetDisableUnitAtATime
+- [x] LLVMPassManagerBuilderSetDisableUnrollLoops
+- [x] LLVMPassManagerBuilderSetDisableSimplifyLibCalls
+- [x] LLVMPassManagerBuilderUseInlinerWithThreshold
+- [x] LLVMPassManagerBuilderPopulateFunctionPassManager
+- [x] LLVMPassManagerBuilderPopulateModulePassManager
 - [ ] LLVMPassManagerBuilderPopulateLTOPassManager
 
 
 ### Scalar transformations
 
-- [ ] LLVMAddAggressiveDCEPass
-- [ ] LLVMAddBitTrackingDCEPass
-- [ ] LLVMAddAlignmentFromAssumptionsPass
-- [ ] LLVMAddCFGSimplificationPass
-- [ ] LLVMAddDeadStoreEliminationPass
-- [ ] LLVMAddScalarizerPass
-- [ ] LLVMAddMergedLoadStoreMotionPass
-- [ ] LLVMAddGVNPass
-- [ ] LLVMAddIndVarSimplifyPass
-- [ ] LLVMAddInstructionCombiningPass
-- [ ] LLVMAddJumpThreadingPass
-- [ ] LLVMAddLICMPass
-- [ ] LLVMAddLoopDeletionPass
-- [ ] LLVMAddLoopIdiomPass
-- [ ] LLVMAddLoopRotatePass
-- [ ] LLVMAddLoopRerollPass
-- [ ] LLVMAddLoopUnrollPass
-- [ ] LLVMAddLoopUnswitchPass
-- [ ] LLVMAddMemCpyOptPass
-- [ ] LLVMAddPartiallyInlineLibCallsPass
-- [ ] LLVMAddLowerSwitchPass
-- [ ] LLVMAddPromoteMemoryToRegisterPass
-- [ ] LLVMAddReassociatePass
-- [ ] LLVMAddSCCPPass
-- [ ] LLVMAddScalarReplAggregatesPass
-- [ ] LLVMAddScalarReplAggregatesPassSSA
-- [ ] LLVMAddScalarReplAggregatesPassWithThreshold
-- [ ] LLVMAddSimplifyLibCallsPass
-- [ ] LLVMAddTailCallEliminationPass
-- [ ] LLVMAddConstantPropagationPass
-- [ ] LLVMAddDemoteMemoryToRegisterPass
-- [ ] LLVMAddVerifierPass
-- [ ] LLVMAddCorrelatedValuePropagationPass
-- [ ] LLVMAddEarlyCSEPass
-- [ ] LLVMAddLowerExpectIntrinsicPass
-- [ ] LLVMAddTypeBasedAliasAnalysisPass
-- [ ] LLVMAddScopedNoAliasAAPass
-- [ ] LLVMAddBasicAliasAnalysisPass
+- [x] LLVMAddAggressiveDCEPass
+- [x] LLVMAddBitTrackingDCEPass
+- [x] LLVMAddAlignmentFromAssumptionsPass
+- [x] LLVMAddCFGSimplificationPass
+- [x] LLVMAddDeadStoreEliminationPass
+- [x] LLVMAddScalarizerPass
+- [x] LLVMAddMergedLoadStoreMotionPass
+- [x] LLVMAddGVNPass
+- [x] LLVMAddIndVarSimplifyPass
+- [x] LLVMAddInstructionCombiningPass
+- [x] LLVMAddJumpThreadingPass
+- [x] LLVMAddLICMPass
+- [x] LLVMAddLoopDeletionPass
+- [x] LLVMAddLoopIdiomPass
+- [x] LLVMAddLoopRotatePass
+- [x] LLVMAddLoopRerollPass
+- [x] LLVMAddLoopUnrollPass
+- [x] LLVMAddLoopUnswitchPass
+- [x] LLVMAddMemCpyOptPass
+- [x] LLVMAddPartiallyInlineLibCallsPass
+- [x] LLVMAddLowerSwitchPass
+- [x] LLVMAddPromoteMemoryToRegisterPass
+- [x] LLVMAddReassociatePass
+- [x] LLVMAddSCCPPass
+- [x] LLVMAddScalarReplAggregatesPass
+- [x] LLVMAddScalarReplAggregatesPassSSA
+- [x] LLVMAddScalarReplAggregatesPassWithThreshold
+- [x] LLVMAddSimplifyLibCallsPass
+- [x] LLVMAddTailCallEliminationPass
+- [x] LLVMAddConstantPropagationPass
+- [x] LLVMAddDemoteMemoryToRegisterPass
+- [x] LLVMAddVerifierPass
+- [x] LLVMAddCorrelatedValuePropagationPass
+- [x] LLVMAddEarlyCSEPass
+- [x] LLVMAddLowerExpectIntrinsicPass
+- [x] LLVMAddTypeBasedAliasAnalysisPass
+- [x] LLVMAddScopedNoAliasAAPass
+- [x] LLVMAddBasicAliasAnalysisPass
 
 
 ### Vectorization transformations
 
-- [ ] LLVMAddBBVectorizePass
-- [ ] LLVMAddLoopVectorizePass
-- [ ] LLVMAddSLPVectorizePass
+- [x] LLVMAddBBVectorizePass
+- [x] LLVMAddLoopVectorizePass
+- [x] LLVMAddSLPVectorizePass
 
 
 

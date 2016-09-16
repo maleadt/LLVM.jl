@@ -35,6 +35,7 @@ InitializeX86AsmPrinter()
 include("execution.jl")
 
 InitializeTransformUtils(passreg)
+include("transform.jl")
 
 InitializeScalarOpts(passreg)
 
