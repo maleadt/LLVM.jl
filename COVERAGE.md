@@ -210,7 +210,7 @@ Core
 - [x] LLVMGetFirstFunction
 - [x] LLVMGetLastFunction
 - [x] LLVMGetNextFunction
-- [ ] LLVMGetPreviousFunction
+- [ ] ~~LLVMGetPreviousFunction~~ (not necessary for iteration interface)
 
 
 ### Types

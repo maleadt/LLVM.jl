@@ -37,6 +37,3 @@ for target in [:X86, :NVPTX],
 end
 
 Shutdown() = API.LLVMShutdown()
-
-
-[:TargetInfos, :Targets, :TargetMCs, :AsmPrinters, :AsmParsers, :Disassemblers]
