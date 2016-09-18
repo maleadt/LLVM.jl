@@ -1117,7 +1117,7 @@ IR reader
 Linker
 ------
 
-- [ ] LLVMLinkModules2
+- [x] LLVMLinkModules2
 
 
 

@@ -18,6 +18,7 @@ passreg = GlobalPassRegistry()
 
 InitializeCore(passreg)
 include("core.jl")
+include("linker.jl")
 include("irbuilder.jl")
 include("buffer.jl")
 include("bitcode.jl")
