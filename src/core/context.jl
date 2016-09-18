@@ -28,8 +28,14 @@ GlobalContext() = Context(API.LLVMGetGlobalContext())
 
 export LLVMException
 
+import Base: showerror
+
 immutable LLVMException <: Exception
     info::String
+end
+
+function showerror(io::IO, err::LLVMException)
+    @printf(io, "LLVM error: %s", err.info)
 end
 
 
