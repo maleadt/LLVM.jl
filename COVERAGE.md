@@ -860,9 +860,9 @@ Pass Managers
 Threading
 ---------
 
-- [ ] LLVMStartMultithreaded
-- [ ] LLVMStopMultithreaded
-- [ ] LLVMIsMultithreaded
+- [ ] ~~LLVMStartMultithreaded~~ (deprecated)
+- [ ] ~~LLVMStopMultithreaded~~ (deprecated)
+- [x] LLVMIsMultithreaded
 
 
 

@@ -10,7 +10,8 @@ export InitializeCore,
        InitializeIPA,
        InitializeCodeGen,
        InitializeTarget,
-       Shutdown
+       Shutdown,
+       ismultithreaded
 
 InitializeCore(R::PassRegistry) = API.LLVMInitializeCore(ref(R))
 InitializeTransformUtils(R::PassRegistry) = API.LLVMInitializeTransformUtils(ref(R))
@@ -37,3 +38,5 @@ for target in [:X86, :NVPTX],
 end
 
 Shutdown() = API.LLVMShutdown()
+
+ismultithreaded() = BoolFromLLVM(API.LLVMIsMultithreaded())

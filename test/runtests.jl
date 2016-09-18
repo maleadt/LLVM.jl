@@ -16,6 +16,8 @@ end
 # pass registry
 passreg = GlobalPassRegistry()
 
+ismultithreaded()
+
 InitializeCore(passreg)
 include("core.jl")
 include("linker.jl")
