@@ -6,9 +6,10 @@ export TargetMachine, dispose,
 
 @reftypedef ref=LLVMTargetMachineRef immutable TargetMachine end
 
-TargetMachine(t::Target, triple::String, cpu::String, features::String,
-              optlevel::API.LLVMCodeGenOptLevel, reloc::API.LLVMRelocMode,
-              code::API.LLVMCodeModel) =
+TargetMachine(t::Target, triple::String, cpu::String="", features::String="",
+              optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault,
+              reloc::API.LLVMRelocMode=API.LLVMRelocDefault,
+              code::API.LLVMCodeModel=API.LLVMCodeModelDefault) =
     TargetMachine(API.LLVMCreateTargetMachine(ref(t), triple, cpu, features, optlevel,
                                               reloc, code))
 

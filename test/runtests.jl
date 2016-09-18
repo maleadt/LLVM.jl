@@ -32,6 +32,7 @@ include("analysis.jl")
 include("moduleprovider.jl")
 include("passmanager.jl")
 
+# TODO: host
 InitializeX86Target()
 InitializeX86TargetInfo()
 InitializeX86TargetMC()

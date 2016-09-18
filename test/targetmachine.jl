@@ -2,13 +2,11 @@ host_triple = triple()
 host_t = Target(host_triple)
 
 let
-    tm = TargetMachine(host_t, host_triple, "", "", LLVM.API.LLVMCodeGenLevelDefault,
-                       LLVM.API.LLVMRelocDefault, LLVM.API.LLVMCodeModelDefault)
+    tm = TargetMachine(host_t, host_triple)
     dispose(tm)
 end
 
-TargetMachine(host_t, host_triple, "", "", LLVM.API.LLVMCodeGenLevelDefault,
-              LLVM.API.LLVMRelocDefault, LLVM.API.LLVMCodeModelDefault) do tm
+TargetMachine(host_t, host_triple) do tm
     @test target(tm) == host_t
     @test triple(tm) == host_triple
     @test cpu(tm) == ""
