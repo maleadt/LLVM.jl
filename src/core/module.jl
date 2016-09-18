@@ -1,7 +1,7 @@
 # Modules represent the top-level structure in an LLVM program.
 
 export Module, dispose,
-       triple, triple!, datalayout, datalayout!, context, inline_asm!
+       name, name!, triple, triple!, datalayout, datalayout!, context, inline_asm!
 
 import Base: show
 
@@ -25,6 +25,14 @@ function show(io::IO, mod::Module)
     output = unsafe_string(API.LLVMPrintModuleToString(ref(mod)))
     print(io, output)
 end
+
+function name(mod::Module)
+    out_len = Ref{Csize_t}()
+    ptr = convert(Ptr{UInt8}, API.LLVMGetModuleIdentifier(ref(mod), out_len))
+    return unsafe_string(ptr, out_len[])
+end
+name!(mod::Module, str::String) =
+    API.LLVMSetModuleIdentifier(ref(mod), str, Csize_t(length(str)))
 
 triple(mod::Module) = unsafe_string(API.LLVMGetTarget(ref(mod)))
 triple!(mod::Module, triple) = API.LLVMSetTarget(ref(mod), triple)

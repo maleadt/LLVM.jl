@@ -317,6 +317,10 @@ let
     mod = LLVM.Module("SomeModule")
     @test context(mod) == global_ctx
 
+    @test name(mod) == "SomeModule"
+    name!(mod, "SomeOtherName")
+    @test name(mod) == "SomeOtherName"
+
     dispose(mod)
 end
 

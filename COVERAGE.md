@@ -189,8 +189,8 @@ Core
 - [x] LLVMModuleCreateWithNameInContext
 - [x] LLVMCloneModule
 - [x] LLVMDisposeModule
-- [ ] LLVMGetModuleIdentifier
-- [ ] LLVMSetModuleIdentifier
+- [x] LLVMGetModuleIdentifier
+- [x] LLVMSetModuleIdentifier
 - [ ] ~~LLVMGetDataLayoutStr~~ (use `LLVMGetModuleDataLayout` + convert to String))
 - [ ] ~~LLVMGetDataLayout~~ (deprecated)
 - [x] LLVMSetDataLayout
