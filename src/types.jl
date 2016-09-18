@@ -1,3 +1,10 @@
+## forward declarations
+@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
+@reftypedef ref=LLVMValueRef enum=LLVMValueKind abstract Value
+@reftypedef ref=LLVMModuleRef immutable Module end
+@reftypedef ref=LLVMTargetDataRef immutable DataLayout end
+
+
 ## bool
 
 import Base: convert

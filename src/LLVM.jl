@@ -9,17 +9,10 @@ isfile(ext) || error("Unable to load $ext\n\nPlease re-run Pkg.build(\"LLVM\"), 
 include(ext)
 end
 
-
 include("logging.jl")
 include("auxiliary.jl")
 
-# forward declarations
-@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
-@reftypedef ref=LLVMValueRef enum=LLVMValueKind abstract Value
-@reftypedef ref=LLVMModuleRef immutable Module end
-@reftypedef ref=LLVMTargetDataRef immutable DataLayout end
-
-include("support.jl")
+include("types.jl")
 include("passregistry.jl")
 include("init.jl")
 include("core.jl")
