@@ -191,8 +191,8 @@ Core
 - [x] LLVMDisposeModule
 - [ ] LLVMGetModuleIdentifier
 - [ ] LLVMSetModuleIdentifier
-- [ ] LLVMGetDataLayoutStr
-- [x] LLVMGetDataLayout
+- [ ] ~~LLVMGetDataLayoutStr~~ (use `LLVMGetModuleDataLayout` + convert to String))
+- [ ] ~~LLVMGetDataLayout~~ (deprecated)
 - [x] LLVMSetDataLayout
 - [x] LLVMGetTarget
 - [x] LLVMSetTarget
@@ -1057,7 +1057,7 @@ Target information
 
 - [x] LLVMCreateTargetData
 - [x] LLVMDisposeTargetData
-- [ ] LLVMAddTargetLibraryInfo
+- [ ] ~~LLVMAddTargetLibraryInfo~~ (cannot get hold of TargetLibraryInfo through C API)
 - [x] LLVMCopyStringRepOfTargetData
 - [x] LLVMByteOrder
 - [x] LLVMPointerSize
@@ -1075,8 +1075,8 @@ Target information
 - [x] LLVMPreferredAlignmentOfGlobal
 - [x] LLVMElementAtOffset
 - [x] LLVMOffsetOfElement
-- [ ] LLVMGetModuleDataLayout
-- [ ] LLVMSetModuleDataLayout
+- [x] LLVMGetModuleDataLayout
+- [x] LLVMSetModuleDataLayout
 
 
 

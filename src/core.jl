@@ -1,12 +1,9 @@
 # Interface to libLLVMCore, which implements the LLVM intermediate representation as well as
 # other related types and utilities.
 
-# forward-define outer layers of the type hierarchy
-@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
-@reftypedef ref=LLVMValueRef enum=LLVMValueKind abstract Value
+# forward-declarations
 @reftypedef abstract User <: Value
 @reftypedef abstract Constant <: User
-@reftypedef ref=LLVMModuleRef immutable Module end
 @reftypedef proxy=Value kind=LLVMFunctionValueKind immutable Function <: Constant end
 @reftypedef proxy=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 

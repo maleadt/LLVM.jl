@@ -343,7 +343,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     dummyLayout = "e-p:64:64:64"
     datalayout!(mod, dummyLayout)
-    @test datalayout(mod) == dummyLayout
+    @test convert(String, datalayout(mod)) == dummyLayout
 end
 end
 

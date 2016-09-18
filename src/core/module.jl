@@ -29,8 +29,10 @@ end
 triple(mod::Module) = unsafe_string(API.LLVMGetTarget(ref(mod)))
 triple!(mod::Module, triple) = API.LLVMSetTarget(ref(mod), triple)
 
-datalayout(mod::Module) = unsafe_string(API.LLVMGetDataLayout(ref(mod)))
-datalayout!(mod::Module, layout) = API.LLVMSetDataLayout(ref(mod), layout)
+datalayout(mod::Module) = DataLayout(API.LLVMGetModuleDataLayout(ref(mod)))
+datalayout!(mod::Module, layout::String) = API.LLVMSetDataLayout(ref(mod), layout)
+datalayout!(mod::Module, layout::DataLayout) =
+    API.LLVMSetModuleDataLayout(ref(mod), ref(layout))
 
 inline_asm!(mod::Module, asm::String) =
     API.LLVMSetModuleInlineAsm(ref(mod), asm)

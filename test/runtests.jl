@@ -57,6 +57,8 @@ InitializeCodeGen(passreg)
 
 InitializeTarget(passreg)
 include("target.jl")
+include("targetmachine.jl")
+include("datalayout.jl")
 
 
 Shutdown()

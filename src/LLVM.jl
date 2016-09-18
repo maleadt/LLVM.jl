@@ -13,6 +13,12 @@ end
 include("logging.jl")
 include("auxiliary.jl")
 
+# forward declarations
+@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind abstract LLVMType
+@reftypedef ref=LLVMValueRef enum=LLVMValueKind abstract Value
+@reftypedef ref=LLVMModuleRef immutable Module end
+@reftypedef ref=LLVMTargetDataRef immutable DataLayout end
+
 include("support.jl")
 include("passregistry.jl")
 include("init.jl")
@@ -25,6 +31,8 @@ include("passmanager.jl")
 include("execution.jl")
 include("buffer.jl")
 include("target.jl")
+include("targetmachine.jl")
+include("datalayout.jl")
 include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
