@@ -62,7 +62,7 @@ function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Void})
     elseif sev == API.LLVMDSWarning
         warn(msg)
     elseif sev == API.LLVMDSRemark || sev == API.LLVMDSNote
-        info(msg)
+        debug(msg)
     else
         error("unknown diagnostic severity level $sev")
     end
