@@ -2,6 +2,7 @@
 
 let
     val = GenericValue(LLVM.Int32Type(), -1)
+    @test intwidth(val) == 32
     @test convert(Int, val) == -1
     dispose(val)
 end

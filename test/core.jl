@@ -162,6 +162,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     entry = BasicBlock(fn, "entry")
     position!(builder, entry)
+    @test name(entry) == "entry"
 
     typ = LLVM.Int32Type(ctx)
     val = alloca!(builder, typ, "foo")
@@ -624,6 +625,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     position!(builder, bb1)
     brinst = br!(builder, parameters(fn)[1], bb2, bb3)
+    @test opcode(brinst) == LLVM.API.LLVMBr
 
     position!(builder, bb2)
     retinst = ret!(builder)
@@ -673,6 +675,11 @@ LLVM.Module("SomeModule", ctx) do mod
     md = MDNode([MDString("foo", ctx)], ctx)
     metadata!(brinst, 0, md)
     @test metadata(brinst, 0) == md
+
+    @test retinst in instructions(bb3)
+    delete!(bb3, retinst)
+    @test !(retinst in instructions(bb3))
+    @test opcode(retinst) == LLVM.API.LLVMRet   # make sure retinst is still alive
 
     @test brinst in instructions(bb1)
     unsafe_delete!(bb1, brinst)

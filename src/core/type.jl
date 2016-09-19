@@ -208,7 +208,7 @@ endof(iter::StructTypeElementSet) = length(iter)
 function collect(iter::StructTypeElementSet)
     elems = Vector{API.LLVMTypeRef}(length(iter))
     API.LLVMGetStructElementTypes(ref(iter.typ), elems)
-    return map(t->dynamic_construct(LLVMType, t), elems)
+    return map(el->dynamic_construct(LLVMType, el), elems)
 end
 
 

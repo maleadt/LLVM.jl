@@ -1,7 +1,9 @@
 export Instruction, unsafe_delete!,
        hasmetadata, metadata, metadata!,
-       parent,
+       parent, opcode,
        predicate_int, predicate_real
+
+import Base: delete!
 
 @reftypedef proxy=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
 
@@ -14,6 +16,8 @@ Instruction(inst::Instruction) =
 
 unsafe_delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionEraseFromParent(ref(inst))
+delete!(::BasicBlock, inst::Instruction) =
+    API.LLVMInstructionRemoveFromParent(ref(inst))
 
 hasmetadata(inst::Instruction) = BoolFromLLVM(API.LLVMHasMetadata(ref(inst)))
 
@@ -24,6 +28,8 @@ metadata!(inst::Instruction, kind, node::MetadataAsValue) =
 
 parent(inst::Instruction) =
     BasicBlock(API.LLVMGetInstructionParent(ref(inst)))
+
+opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(ref(inst))
 
 predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(ref(inst))
 predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))

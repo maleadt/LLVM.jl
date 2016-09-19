@@ -529,7 +529,7 @@ Core
 - [x] LLVMGetFirstGlobal
 - [x] LLVMGetLastGlobal
 - [x] LLVMGetNextGlobal
-- [ ] LLVMGetPreviousGlobal
+- [ ] ~~LLVMGetPreviousGlobal~~ (not necessary for iteration interface)
 - [x] LLVMDeleteGlobal
 - [x] LLVMGetInitializer
 - [x] LLVMSetInitializer
@@ -578,7 +578,7 @@ Function parameters:
 - [x] LLVMGetFirstParam
 - [x] LLVMGetLastParam
 - [x] LLVMGetNextParam
-- [ ] LLVMGetPreviousParam
+- [ ] ~~LLVMGetPreviousParam~~ (not necessary for iteration interface)
 - [ ] LLVMAddAttribute
 - [ ] LLVMRemoveAttribute
 - [ ] LLVMGetAttribute
@@ -601,15 +601,15 @@ Function parameters:
 - [x] LLVMBasicBlockAsValue
 - [ ] LLVMValueIsBasicBlock
 - [x] LLVMValueAsBasicBlock
-- [ ] LLVMGetBasicBlockName
+- [x] LLVMGetBasicBlockName
 - [x] LLVMGetBasicBlockParent
 - [x] LLVMGetBasicBlockTerminator
 - [x] LLVMCountBasicBlocks
-- [ ] LLVMGetBasicBlocks
+- [x] LLVMGetBasicBlocks
 - [x] LLVMGetFirstBasicBlock
 - [x] LLVMGetLastBasicBlock
 - [x] LLVMGetNextBasicBlock
-- [ ] LLVMGetPreviousBasicBlock
+- [ ] ~~LLVMGetPreviousBasicBlock~~ (not necessary for iteration interface)
 - [x] LLVMGetEntryBasicBlock
 - [x] LLVMAppendBasicBlockInContext
 - [x] LLVMAppendBasicBlock
@@ -630,10 +630,10 @@ Function parameters:
 - [x] LLVMSetMetadata
 - [x] LLVMGetInstructionParent
 - [x] LLVMGetNextInstruction
-- [ ] LLVMGetPreviousInstruction
-- [ ] LLVMInstructionRemoveFromParent
+- [ ] ~~LLVMGetPreviousInstruction~~ (not necessary for iteration interface)
+- [x] LLVMInstructionRemoveFromParent
 - [x] LLVMInstructionEraseFromParent
-- [ ] LLVMGetInstructionOpcode
+- [x] LLVMGetInstructionOpcode
 - [x] LLVMGetICmpPredicate
 - [x] LLVMGetFCmpPredicate
 - [x] LLVMInstructionClone
@@ -827,7 +827,7 @@ Memory Buffers
 --------------
 
 - [x] LLVMCreateMemoryBufferWithContentsOfFile
-- [ ] LLVMCreateMemoryBufferWithSTDIN
+- [ ] ~~LLVMCreateMemoryBufferWithSTDIN~~ (too specific, can read from STDIN in Julia)
 - [x] LLVMCreateMemoryBufferWithMemoryRange
 - [x] LLVMCreateMemoryBufferWithMemoryRangeCopy
 - [x] LLVMGetBufferStart
@@ -886,7 +886,7 @@ Execution Engine
 - [x] LLVMCreateGenericValueOfInt
 - [x] LLVMCreateGenericValueOfPointer
 - [x] LLVMCreateGenericValueOfFloat
-- [ ] LLVMGenericValueIntWidth
+- [x] LLVMGenericValueIntWidth
 - [x] LLVMGenericValueToInt
 - [x] LLVMGenericValueToPointer
 - [x] LLVMGenericValueToFloat

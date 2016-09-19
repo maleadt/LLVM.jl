@@ -1,6 +1,7 @@
 ## generic value
 
-export GenericValue, dispose
+export GenericValue, dispose,
+       intwidth
 
 import Base: convert
 
@@ -13,6 +14,8 @@ GenericValue(typ::IntegerType, N::Int) =
 GenericValue(typ::IntegerType, N::UInt) =
     GenericValue(API.LLVMCreateGenericValueOfInt(ref(typ),
                                                  reinterpret(Culonglong, N), LLVMFalse))
+
+intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(ref(val))
 
 convert(::Type{Int}, val::GenericValue) =
     reinterpret(Clonglong, API.LLVMGenericValueToInt(ref(val), LLVMTrue))

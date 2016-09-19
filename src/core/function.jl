@@ -85,7 +85,7 @@ length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.f))
 function collect(iter::FunctionParameterSet)
     elems = Vector{API.LLVMValueRef}(length(iter))
     API.LLVMGetParams(ref(iter.f), elems)
-    return map(t->construct(Argument, t), elems)
+    return map(el->construct(Argument, el), elems)
 end
 
 # basic block iteration
@@ -113,3 +113,10 @@ last(iter::FunctionBlockSet) =
     BasicBlock(API.LLVMGetLastBasicBlock(ref(iter.f)))
 
 length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(ref(iter.f))
+
+# NOTE: optimized `collect`
+function collect(iter::FunctionBlockSet)
+    elems = Vector{API.LLVMValueRef}(length(iter))
+    API.LLVMGetBasicBlocks(ref(iter.f), elems)
+    return BasicBlock.(elems)
+end

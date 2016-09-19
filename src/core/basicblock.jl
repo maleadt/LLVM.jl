@@ -1,5 +1,5 @@
 export BasicBlock, unsafe_delete!,
-       parent, terminator,
+       parent, terminator, name,
        move_before, move_after
 
 import Base: delete!
@@ -25,6 +25,9 @@ parent(bb::BasicBlock) =
 
 terminator(bb::BasicBlock) =
     construct(Instruction, API.LLVMGetBasicBlockTerminator(blockref(bb)))
+
+name(bb::BasicBlock) =
+    unsafe_string(API.LLVMGetBasicBlockName(blockref(bb)))
 
 move_before(bb::BasicBlock, pos::BasicBlock) =
     API.LLVMMoveBasicBlockBefore(blockref(bb), blockref(pos))
