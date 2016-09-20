@@ -6,7 +6,7 @@ export Context, dispose, GlobalContext
 
 function Context()
     ctx = Context(API.LLVMContextCreate())
-    install_handlers(ctx)
+    _install_handlers(ctx)
     ctx
 end
 
@@ -75,7 +75,7 @@ function yield_callback(ctx::Context, args::Ptr{Void})
     yield()
 end
 
-function install_handlers(ctx::Context)
+function _install_handlers(ctx::Context)
     # set yield callback
     callback = cfunction(yield_callback, Void, Tuple{Context, Ptr{Void}})
     # NOTE: disabled until proven safe
@@ -87,5 +87,3 @@ function install_handlers(ctx::Context)
 
     return nothing
 end
-
-install_handlers(GlobalContext())    # TODO: in `init` method for precompilation

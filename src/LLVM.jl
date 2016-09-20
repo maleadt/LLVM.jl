@@ -1,3 +1,5 @@
+__precompile__()
+
 module LLVM
 
 using Compat
@@ -29,5 +31,9 @@ include("datalayout.jl")
 include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
+
+function __init__()
+    _install_handlers(GlobalContext())
+end
 
 end
