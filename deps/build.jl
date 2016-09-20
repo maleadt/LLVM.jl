@@ -15,7 +15,7 @@ import Compat.String
 const DEBUG = haskey(ENV, "DEBUG")
 
 include("common.jl")
-include(joinpath(dirname(@__FILE__), "..", "src", "logging.jl"))
+include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
 libname() = return ["libLLVM.so"]
 
@@ -48,6 +48,7 @@ acceptable_versions = [VersionNumber(Base.libllvm_version),
                        v"4.0",
                        v"3.9.0",
                        v"3.8.1", v"3.8.0"]
+sort!(acceptable_versions)
 
 if haskey(ENV, "LLVM_VERSION")
     ismatch(r"^\d.\d$", ENV["LLVM_VERSION"]) || error("invalid version requested (should be MAJOR.MINOR)")
@@ -128,8 +129,9 @@ if !isnull(requested_version)
 end
 
 # versions wrapped
-wrapped_versions = map(lib -> VersionNumber(lib),
-                       readdir(joinpath(dirname(@__FILE__), "..", "lib")))
+wrapped_versions = map(dir->VersionNumber(dir),
+                       filter(path->isdir(joinpath(@__DIR__, "..", "lib", path)),
+                              readdir(joinpath(@__DIR__, "..", "lib"))))
 
 # select matching installation
 matching_llvms = filter(t -> any(v -> vercmp_match(t[3],v), wrapped_versions), llvms)
@@ -149,7 +151,7 @@ end
 info("Selected LLVM v$llvm_version at $(realpath(llvm_library))")
 
 # check if the library is wrapped
-wrapped_libdir = joinpath(dirname(@__FILE__), "..", "lib", verstr(llvm_version))
+wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(llvm_version))
 if isdir(wrapped_libdir)
     wrapper_version = llvm_version
 else
@@ -160,7 +162,7 @@ else
     if !isempty(compatible_wrappers)
         wrapper_version = last(compatible_wrappers)
         warn("LLVM v$llvm_version is not supported, falling back to support for v$wrapper_version (file an issue if there's incompatibilities)")
-        wrapped_libdir = joinpath(dirname(@__FILE__), "..", "lib", verstr(wrapper_version))
+        wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
     end
 end
 isdir(wrapped_libdir) || error("LLVM v$llvm_version is not supported")
@@ -170,22 +172,43 @@ isdir(wrapped_libdir) || error("LLVM v$llvm_version is not supported")
 # Finishing up
 #
 
+llvm_targets = Symbol.(split(readstring(`$llvm_config --targets-built`)))
+
+# build library with extra functions
+libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.so")
+cd(joinpath(@__DIR__, "llvm-extra")) do
+    withenv("LLVM_CONFIG" => llvm_config) do
+        # force a rebuild as the LLVM installation might have changed, undetectably
+        run(`make clean all`)
+    end
+end
+
 llvm_library_mtime = stat(llvm_library).mtime
 
-# write ext.jl
-wrapper_common = joinpath(wrapped_libdir, "libLLVM_common.jl")
-wrapper_header = joinpath(wrapped_libdir, "libLLVM_h.jl")
-open(joinpath(dirname(@__FILE__), "ext.jl"), "w") do fh
-    write(fh, """
-        const libllvm = "$llvm_library"
-        isfile(libllvm) ||
-            error("LLVM library missing, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
-        stat(libllvm).mtime == $llvm_library_mtime ||
-            warn("LLVM library has been modified, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
+libllvm_wrapper_common = joinpath(wrapped_libdir, "libLLVM_common.jl")
+libllvm_wrapper = joinpath(wrapped_libdir, "libLLVM_h.jl")
+libllvm_extra_wrapper = joinpath(wrapped_libdir, "..", "libLLVM_extra.jl")
 
+# write ext.jl
+open(joinpath(@__DIR__, "ext.jl"), "w") do fh
+    write(fh, """
         const llvm_version = v"$llvm_version"
         const wrapper_version = v"$wrapper_version"
 
-        include("$wrapper_common")
-        include("$wrapper_header")""")
+        const llvm_targets = $llvm_targets
+
+
+        isfile("$llvm_library") ||
+            error("LLVM library missing, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
+        stat("$llvm_library").mtime == $llvm_library_mtime ||
+            warn("LLVM library has been modified, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
+        const libllvm = "$llvm_library"
+
+        include("$libllvm_wrapper_common")
+        include("$libllvm_wrapper")
+
+
+        const libllvm_extra = "$libllvm_extra"
+
+        include("$libllvm_extra_wrapper")""")
 end

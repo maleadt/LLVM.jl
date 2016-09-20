@@ -1,42 +1,55 @@
-export InitializeCore,
-       InitializeTransformUtils,
-       InitializeScalarOpts,
-       InitializeObjCARCOpts,
-       InitializeVectorization,
-       InitializeInstCombine,
-       InitializeIPO,
-       InitializeInstrumentation,
-       InitializeAnalysis,
-       InitializeIPA,
-       InitializeCodeGen,
-       InitializeTarget,
-       Shutdown,
+## subsystem initialization
+
+export Shutdown,
        ismultithreaded
 
-InitializeCore(R::PassRegistry) = API.LLVMInitializeCore(ref(R))
-InitializeTransformUtils(R::PassRegistry) = API.LLVMInitializeTransformUtils(ref(R))
-InitializeScalarOpts(R::PassRegistry) = API.LLVMInitializeScalarOpts(ref(R))
-InitializeObjCARCOpts(R::PassRegistry) = API.LLVMInitializeObjCARCOpts(ref(R))
-InitializeVectorization(R::PassRegistry) = API.LLVMInitializeVectorization(ref(R))
-InitializeInstCombine(R::PassRegistry) = API.LLVMInitializeInstCombine(ref(R))
-InitializeIPO(R::PassRegistry) = API.LLVMInitializeIPO(ref(R))
-InitializeInstrumentation(R::PassRegistry) = API.LLVMInitializeInstrumentation(ref(R))
-InitializeAnalysis(R::PassRegistry) = API.LLVMInitializeAnalysis(ref(R))
-InitializeIPA(R::PassRegistry) = API.LLVMInitializeIPA(ref(R))
-InitializeCodeGen(R::PassRegistry) = API.LLVMInitializeCodeGen(ref(R))
-InitializeTarget(R::PassRegistry) = API.LLVMInitializeTarget(ref(R))
-
-# TODO: detect this (without relying on llvm-config)
-for target in [:X86, :NVPTX],
-    component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
-       jl_fname = Symbol(:Initialize, target, component)
+function _define_subsystem_init(subsystem::Symbol)
+       jl_fname = Symbol(:Initialize, subsystem)
        api_fname = Symbol(:LLVM, jl_fname)
        @eval begin
               export $jl_fname
-              $jl_fname() = API.$api_fname()
+              $jl_fname(R::PassRegistry) = API.$api_fname(ref(R))
        end
+end
+
+for subsystem in [:Core, :TransformUtils, :ScalarOpts, :ObjCARCOpts, :Vectorization,
+                  :InstCombine, :IPO, :Instrumentation, :Analysis, :IPA, :CodeGen, :Target]
+    _define_subsystem_init(subsystem)
 end
 
 Shutdown() = API.LLVMShutdown()
 
 ismultithreaded() = BoolFromLLVM(API.LLVMIsMultithreaded())
+
+
+## target initialization
+
+for component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
+    jl_fname = Symbol(:Initialize, :All, component, :s)
+    api_fname = Symbol(:LLVM, jl_fname)
+    @eval begin
+        export $jl_fname
+        $jl_fname() = API.$api_fname
+    end
+end
+
+for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
+    jl_fname = Symbol(:Initialize, :Native, component)
+    api_fname = Symbol(:LLVM, jl_fname)
+    @eval begin
+        export $jl_fname
+        $jl_fname() = BoolFromLLVM(API.$api_fname()) &&
+                      throw(LLVMException($"Could not initialize native $component"))
+    end
+end
+
+for target in API.llvm_targets,
+    component in [:Target, :AsmPrinter, :AsmParser, :Disassembler, :TargetInfo, :TargetMC]
+    jl_fname = Symbol(:Initialize, target, component)
+    api_fname = Symbol(:LLVM, jl_fname)
+
+    @eval begin
+        export $jl_fname
+        $jl_fname() = ccall(($(QuoteNode(api_fname)),API.libllvm), Void, ())
+    end
+end

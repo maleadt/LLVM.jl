@@ -133,46 +133,6 @@ end
 # Julia wrapper for header: llvm-c/Target.h
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
-function LLVMInitializeNVPTXTargetInfo()
-    ccall((:LLVMInitializeNVPTXTargetInfo,libllvm),Void,())
-end
-
-function LLVMInitializeX86TargetInfo()
-    ccall((:LLVMInitializeX86TargetInfo,libllvm),Void,())
-end
-
-function LLVMInitializeNVPTXTarget()
-    ccall((:LLVMInitializeNVPTXTarget,libllvm),Void,())
-end
-
-function LLVMInitializeX86Target()
-    ccall((:LLVMInitializeX86Target,libllvm),Void,())
-end
-
-function LLVMInitializeNVPTXTargetMC()
-    ccall((:LLVMInitializeNVPTXTargetMC,libllvm),Void,())
-end
-
-function LLVMInitializeX86TargetMC()
-    ccall((:LLVMInitializeX86TargetMC,libllvm),Void,())
-end
-
-function LLVMInitializeNVPTXAsmPrinter()
-    ccall((:LLVMInitializeNVPTXAsmPrinter,libllvm),Void,())
-end
-
-function LLVMInitializeX86AsmPrinter()
-    ccall((:LLVMInitializeX86AsmPrinter,libllvm),Void,())
-end
-
-function LLVMInitializeX86AsmParser()
-    ccall((:LLVMInitializeX86AsmParser,libllvm),Void,())
-end
-
-function LLVMInitializeX86Disassembler()
-    ccall((:LLVMInitializeX86Disassembler,libllvm),Void,())
-end
-
 function LLVMGetModuleDataLayout(M::LLVMModuleRef)
     ccall((:LLVMGetModuleDataLayout,libllvm),LLVMTargetDataRef,(LLVMModuleRef,),M)
 end

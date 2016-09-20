@@ -32,11 +32,10 @@ include("analysis.jl")
 include("moduleprovider.jl")
 include("passmanager.jl")
 
-# TODO: host
-InitializeX86Target()
-InitializeX86TargetInfo()
-InitializeX86TargetMC()
-InitializeX86AsmPrinter()
+InitializeNativeTarget()
+InitializeAllTargetInfos()
+InitializeAllTargetMCs()
+InitializeNativeAsmPrinter()
 include("execution.jl")
 
 InitializeTransformUtils(passreg)
