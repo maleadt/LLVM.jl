@@ -21,9 +21,11 @@ Installation
 
 Version requirements:
 
-* LLVM 3.9 or higher, as older versions do not expose the necessary functionality to
-  identify `Value` objects
+* LLVM 3.9 or higher, in full (ie. not only `libLLVM.so`, but also `llvm-config`, headers,
+  etc)
 * Julia 0.5 or higher
+* C++ compiler
+* Editline library (`libedit-dev`, or just `libedit`)
 
 Either install the package using `Pkg`, or manually run `deps/build.jl` which detects
 available LLVM installations (a version can be pinned by defining the `LLVM_VERSION`
