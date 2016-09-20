@@ -3,21 +3,10 @@
 export Shutdown,
        ismultithreaded
 
-function _define_subsystem_init(subsystem::Symbol)
-       jl_fname = Symbol(:Initialize, subsystem)
-       api_fname = Symbol(:LLVM, jl_fname)
-       @eval begin
-              export $jl_fname
-              $jl_fname(R::PassRegistry) = API.$api_fname(ref(R))
-       end
+function Shutdown()
+  exclusive[] || error("Cannot shutdown LLVM without exclusive access")
+  API.LLVMShutdown()
 end
-
-for subsystem in [:Core, :TransformUtils, :ScalarOpts, :ObjCARCOpts, :Vectorization,
-                  :InstCombine, :IPO, :Instrumentation, :Analysis, :IPA, :CodeGen, :Target]
-    _define_subsystem_init(subsystem)
-end
-
-Shutdown() = API.LLVMShutdown()
 
 ismultithreaded() = BoolFromLLVM(API.LLVMIsMultithreaded())
 

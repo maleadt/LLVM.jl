@@ -25,7 +25,6 @@ Version requirements:
   etc)
 * Julia 0.5 or higher
 * C++ compiler
-* Editline library (`libedit-dev`, or just `libedit`)
 
 Either install the package using `Pkg`, or manually run `deps/build.jl` which detects
 available LLVM installations (a version can be pinned by defining the `LLVM_VERSION`

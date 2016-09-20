@@ -9,7 +9,11 @@ OBJECTS = $(SOURCES:.c=.o)
 CPPFLAGS = $(shell $(LLVM_CONFIG) --cppflags)
 CFLAGS = $(shell $(LLVM_CONFIG) --cflags)
 LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags) -Wl,-z,defs
-LDLIBS = $(shell $(LLVM_CONFIG) --system-libs) -ledit
+LDLIBS = -lLLVM $(shell $(LLVM_CONFIG) --system-libs)
+
+# add LLVM's libdir to our RPATH, making sure we only pick up the correct library
+LLVM_LIBDIR=`$(LLVM_CONFIG) --libdir`
+LDFLAGS += "-Wl,-rpath,$(LLVM_LIBDIR)"
 
 # sanitize the cflags llvm-config provides us with
 # (removing C++ specific ones, or flags supported by only Clang or GCC)
@@ -20,10 +24,9 @@ CFLAGS := $(filter-out $(BADFLAGS),$(CFLAGS))
 # NOTE: we create our own version of libLLVM including all of its static libraries.
 #       This isn't necessary per se, but prevents conflicts with loading libLLVM
 #       multiple times (in which case initialization functions can't be called twice)
-STATIC_LIBS = $(shell $(LLVM_CONFIG) --libs)
 CFLAGS += -fPIC
 %.so:
-	$(LINK.cc) -shared $^ $(LDFLAGS) $(LDLIBS) -Wl,--whole-archive $(STATIC_LIBS) -Wl,--no-whole-archive -o $@
+	$(LINK.cc) -shared $^ $(LDFLAGS) $(LDLIBS) -o $@
 
 .PHONY: all
 all: $(TARGET)

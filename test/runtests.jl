@@ -14,11 +14,9 @@ end
 
 
 # pass registry
-passreg = GlobalPassRegistry()
 
 ismultithreaded()
 
-InitializeCore(passreg)
 include("core.jl")
 include("linker.jl")
 include("irbuilder.jl")
@@ -26,7 +24,6 @@ include("buffer.jl")
 include("bitcode.jl")
 include("ir.jl")
 
-InitializeAnalysis(passreg)
 include("analysis.jl")
 
 include("moduleprovider.jl")
@@ -38,29 +35,11 @@ InitializeAllTargetMCs()
 InitializeNativeAsmPrinter()
 include("execution.jl")
 
-InitializeTransformUtils(passreg)
 include("transform.jl")
-
-InitializeScalarOpts(passreg)
-
-InitializeObjCARCOpts(passreg)
-
-InitializeVectorization(passreg)
-
-InitializeInstCombine(passreg)
-
-InitializeIPO(passreg)
-
-InitializeInstrumentation(passreg)
-
-InitializeIPA(passreg)
-
-InitializeCodeGen(passreg)
-
-InitializeTarget(passreg)
 include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 
-
-Shutdown()
+if LLVM.exclusive[]
+    Shutdown()
+end

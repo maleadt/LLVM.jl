@@ -32,7 +32,11 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 
+"Indicates whether this package has exclusive access to the LLVM library."
+const exclusive = Ref{Bool}()
+
 function __init__()
+    exclusive[] = Libdl.dlopen_e(API.libllvm, Libdl.RTLD_NOLOAD) == C_NULL
     _install_handlers(GlobalContext())
 end
 
