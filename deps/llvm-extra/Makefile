@@ -11,10 +11,6 @@ CFLAGS = $(shell $(LLVM_CONFIG) --cflags)
 LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags) -Wl,-z,defs
 LDLIBS = $(shell $(LLVM_CONFIG) --system-libs) -ledit
 
-# add LLVM's libdir to our RPATH, making sure we only pick up the correct library
-LLVM_LIBDIR=`$(LLVM_CONFIG) --libdir`
-LDFLAGS += "-Wl,-rpath,$(LLVM_LIBDIR)"
-
 # sanitize the cflags llvm-config provides us with
 # (removing C++ specific ones, or flags supported by only Clang or GCC)
 BADFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor
