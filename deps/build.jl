@@ -202,7 +202,7 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
             error("LLVM library missing, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
         stat("$llvm_library").mtime == $llvm_library_mtime ||
             warn("LLVM library has been modified, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
-        const libllvm = "$llvm_library"
+        const libllvm = "$libllvm_extra"
 
         include("$libllvm_wrapper_common")
         include("$libllvm_wrapper")
