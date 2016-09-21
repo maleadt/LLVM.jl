@@ -197,18 +197,13 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
 
         const llvm_targets = $llvm_targets
 
-
         isfile("$llvm_library") ||
             error("LLVM library missing, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
         stat("$llvm_library").mtime == $llvm_library_mtime ||
             warn("LLVM library has been modified, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
-        const libllvm = "$libllvm_extra"
 
+        const libllvm = "$libllvm_extra"
         include("$libllvm_wrapper_common")
         include("$libllvm_wrapper")
-
-
-        const libllvm_extra = "$libllvm_extra"
-
         include("$libllvm_extra_wrapper")""")
 end

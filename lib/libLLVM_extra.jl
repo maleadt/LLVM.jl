@@ -1,41 +1,41 @@
 # Julia wrapper for header: llvm-extra/Target.c
 
 function LLVMInitializeAllTargetInfos()
-    ccall((:LLVMExtraInitializeAllTargetInfos,libllvm_extra),Void,())
+    ccall((:LLVMExtraInitializeAllTargetInfos,libllvm),Void,())
 end
 
 function LLVMInitializeAllTargets()
-    ccall((:LLVMExtraInitializeAllTargets,libllvm_extra),Void,())
+    ccall((:LLVMExtraInitializeAllTargets,libllvm),Void,())
 end
 
 function LLVMInitializeAllTargetMCs()
-    ccall((:LLVMExtraInitializeAllTargetMCs,libllvm_extra),Void,())
+    ccall((:LLVMExtraInitializeAllTargetMCs,libllvm),Void,())
 end
 
 function LLVMInitializeAllAsmPrinters()
-    ccall((:LLVMExtraInitializeAllAsmPrinters,libllvm_extra),Void,())
+    ccall((:LLVMExtraInitializeAllAsmPrinters,libllvm),Void,())
 end
 
 function LLVMInitializeAllAsmParsers()
-    ccall((:LLVMExtraInitializeAllAsmParsers,libllvm_extra),Void,())
+    ccall((:LLVMExtraInitializeAllAsmParsers,libllvm),Void,())
 end
 
 function LLVMInitializeAllDisassemblers()
-    ccall((:LLVMExtraInitializeAllDisassemblers,libllvm_extra),Void,())
+    ccall((:LLVMExtraInitializeAllDisassemblers,libllvm),Void,())
 end
 
 function LLVMInitializeNativeTarget()
-    ccall((:LLVMExtraInitializeNativeTarget,libllvm_extra),LLVMBool,())
+    ccall((:LLVMExtraInitializeNativeTarget,libllvm),LLVMBool,())
 end
 
 function LLVMInitializeNativeAsmPrinter()
-    ccall((:LLVMExtraInitializeNativeAsmPrinter,libllvm_extra),LLVMBool,())
+    ccall((:LLVMExtraInitializeNativeAsmPrinter,libllvm),LLVMBool,())
 end
 
 function LLVMInitializeNativeAsmParser()
-    ccall((:LLVMExtraInitializeNativeAsmParser,libllvm_extra),LLVMBool,())
+    ccall((:LLVMExtraInitializeNativeAsmParser,libllvm),LLVMBool,())
 end
 
 function LLVMInitializeNativeDisassembler()
-    ccall((:LLVMExtraInitializeNativeDisassembler,libllvm_extra),LLVMBool,())
+    ccall((:LLVMExtraInitializeNativeDisassembler,libllvm),LLVMBool,())
 end
