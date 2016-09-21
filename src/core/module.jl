@@ -103,7 +103,7 @@ push!(iter::ModuleMetadataSet, name::String, val::Value) =
 
 export globals
 
-import Base: eltype, haskey, get, start, next, done, last, length, collect
+import Base: eltype, haskey, get, start, next, done, last, iteratorsize
 
 immutable ModuleGlobalSet
     mod::Module
@@ -133,30 +133,14 @@ done(::ModuleGlobalSet, state) = state == C_NULL
 last(iter::ModuleGlobalSet) =
     construct(GlobalVariable, API.LLVMGetLastGlobal(ref(iter.mod)))
 
-# NOTE: this is expensive, but the iteration interface requires it to be implemented
-function length(iter::ModuleGlobalSet)
-    count = 0
-    for _ in iter
-        count += 1
-    end
-    count
-end
-
-# NOTE: `length` is iterating, so avoid `collect` calling it
-function collect(iter::ModuleGlobalSet)
-    vals = Vector{eltype(iter)}()
-    for val in iter
-        push!(vals, val)
-    end
-    vals
-end
+iteratorsize(::ModuleGlobalSet) = Base.SizeUnknown()
 
 
 ## function iteration
 
 export functions
 
-import Base: eltype, haskey, get, start, next, done, last, length
+import Base: eltype, haskey, get, start, next, done, iteratorsize
 
 immutable ModuleFunctionSet
     mod::Module
@@ -186,20 +170,4 @@ done(iter::ModuleFunctionSet, state) = state == C_NULL
 last(iter::ModuleFunctionSet) =
     construct(Function, API.LLVMGetLastFunction(ref(iter.mod)))
 
-# NOTE: this is expensive, but the iteration interface requires it to be implemented
-function length(iter::ModuleFunctionSet)
-    count = 0
-    for _ in iter
-        count += 1
-    end
-    count
-end
-
-# NOTE: `length` is iterating, so avoid `collect` calling it
-function collect(iter::ModuleFunctionSet)
-    vals = Vector{eltype(iter)}()
-    for val in iter
-        push!(vals, val)
-    end
-    vals
-end
+iteratorsize(::ModuleFunctionSet) = Base.SizeUnknown()

@@ -39,7 +39,7 @@ move_after(bb::BasicBlock, pos::BasicBlock) =
 
 export instructions
 
-import Base: eltype, start, next, done, last, length, collect
+import Base: eltype, start, next, done, last, iteratorsize
 
 immutable BasicBlockInstructionSet
     bb::BasicBlock
@@ -59,20 +59,4 @@ done(::BasicBlockInstructionSet, state) = state == C_NULL
 last(iter::BasicBlockInstructionSet) =
     construct(Instruction, API.LLVMGetLastInstruction(blockref(iter.bb)))
 
-# NOTE: this is expensive, but the iteration interface requires it to be implemented
-function length(iter::BasicBlockInstructionSet)
-    count = 0
-    for _ in iter
-        count += 1
-    end
-    return count
-end
-
-# NOTE: `length` is iterating, so avoid `collect` calling it
-function collect(iter::BasicBlockInstructionSet)
-    vals = Vector{eltype(iter)}()
-    for val in iter
-        push!(vals, val)
-    end
-    return vals
-end
+iteratorsize(::BasicBlockInstructionSet) = Base.SizeUnknown()

@@ -32,6 +32,8 @@ hasasmparser(t::Target) = BoolFromLLVM(API.LLVMTargetHasAsmBackend(ref(t)))
 
 export targets
 
+import Base: eltype, haskey, get, start, next, done, iteratorsize
+
 immutable TargetSet end
 
 targets() = TargetSet()
@@ -55,20 +57,4 @@ next(::TargetSet, state) =
 
 done(::TargetSet, state) = state == C_NULL
 
-# NOTE: this is expensive, but the iteration interface requires it to be implemented
-function length(iter::TargetSet)
-    count = 0
-    for _ in iter
-        count += 1
-    end
-    count
-end
-
-# NOTE: `length` is iterating, so avoid `collect` calling it
-function collect(iter::TargetSet)
-    vals = Vector{eltype(iter)}()
-    for val in iter
-        push!(vals, val)
-    end
-    vals
-end
+iteratorsize(::TargetSet) = Base.SizeUnknown()

@@ -69,7 +69,7 @@ value(use::Use) = dynamic_construct(Value, API.LLVMGetUsedValue(ref(use)))
 
 export uses
 
-import Base: eltype, start, next, done, length, collect
+import Base: eltype, start, next, done, iteratorsize
 
 immutable ValueUseSet
     val::Value
@@ -86,20 +86,4 @@ next(::ValueUseSet, state) =
 
 done(::ValueUseSet, state) = state == C_NULL
 
-# NOTE: this is expensive, but the iteration interface requires it to be implemented
-function length(iter::ValueUseSet)
-    count = 0
-    for _ in iter
-        count += 1
-    end
-    count
-end
-
-# NOTE: `length` is iterating, so avoid `collect` calling it
-function collect(iter::ValueUseSet)
-    vals = Vector{eltype(iter)}()
-    for val in iter
-        push!(vals, val)
-    end
-    vals
-end
+iteratorsize(::ValueUseSet) = Base.SizeUnknown()

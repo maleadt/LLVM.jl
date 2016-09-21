@@ -20,7 +20,6 @@ let
         @test_throws KeyError get(ts, "invalid")
 
         @test eltype(ts) == Target
-        @test length(ts) > 0
 
         first(ts)
 

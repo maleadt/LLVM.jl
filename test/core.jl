@@ -207,10 +207,9 @@ LLVM.Module("SomeModule", ctx) do mod
     userinst = add!(builder, valueinst1,
                     ConstantInt(LLVM.Int32Type(ctx), 1))
 
+    # use iteration
     let usepairs = uses(valueinst1)
         @test eltype(usepairs) == Use
-
-        @test length(usepairs) == 1
 
         usepair = first(usepairs)
         @test value(usepair) == valueinst1
@@ -384,15 +383,13 @@ LLVM.Module("SomeModule", ctx) do mod
 end
 end
 
-# global iteration
+# global variable iteration
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
     dummygv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
     let gvs = globals(mod)
         @test eltype(gvs) == GlobalVariable
-
-        @test length(gvs) == 1
 
         @test first(gvs) == dummygv
         @test last(gvs) == dummygv
@@ -421,8 +418,6 @@ LLVM.Module("SomeModule", ctx) do mod
     dummyfn = LLVM.Function(mod, "SomeFunction", ft)
     let fns = functions(mod)
         @test eltype(fns) == LLVM.Function
-
-        @test length(fns) == 1
 
         @test first(fns) == dummyfn
         @test last(fns) == dummyfn
@@ -594,8 +589,6 @@ LLVM.Module("SomeModule", ctx) do mod
     # instruction iteration
     let insts = instructions(bb1)
         @test eltype(insts) == Instruction
-
-        @test length(insts) == 1
 
         @test first(insts) == brinst
         @test last(insts) == brinst
