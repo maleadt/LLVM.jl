@@ -31,29 +31,24 @@ InitializeIPA(passreg)
 InitializeCodeGen(passreg)
 InitializeTarget(passreg)
 
+InitializeNativeTarget()
+InitializeAllTargetInfos()
+InitializeAllTargetMCs()
+InitializeNativeAsmPrinter()
+
 include("core.jl")
 include("linker.jl")
 include("irbuilder.jl")
 include("buffer.jl")
 include("bitcode.jl")
 include("ir.jl")
-
 include("analysis.jl")
-
 include("moduleprovider.jl")
 include("passmanager.jl")
-
-InitializeNativeTarget()
-InitializeAllTargetInfos()
-InitializeAllTargetMCs()
-InitializeNativeAsmPrinter()
 include("execution.jl")
-
 include("transform.jl")
 include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 
-if LLVM.API.exclusive[]
-    Shutdown()
-end
+LLVM.API.exclusive && Shutdown()
