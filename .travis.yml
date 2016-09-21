@@ -31,7 +31,7 @@ matrix:
       - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
-      - sudo apt-get install llvm-3.9 libedit-dev -y
+      - sudo apt-get install llvm-3.9 -y
     - os: linux
       env: LLVM_VERSION=3.9
       julia: nightly
@@ -41,7 +41,7 @@ matrix:
       - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
-      - sudo apt-get install llvm-3.9 libedit-dev -y
+      - sudo apt-get install llvm-3.9 -y
     # LLVM 3.9 with LLVM.jl in DEBUG mode
     - os: linux
       env:
@@ -54,7 +54,7 @@ matrix:
       - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
-      - sudo apt-get install llvm-3.9 libedit-dev -y
+      - sudo apt-get install llvm-3.9 -y
     - os: linux
       env:
         - LLVM_VERSION=3.9
@@ -66,7 +66,7 @@ matrix:
       - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
-      - sudo apt-get install llvm-3.9 libedit-dev -y
+      - sudo apt-get install llvm-3.9 -y
     # LLVM 4.0
     - os: linux
       env: LLVM_VERSION=4.0
@@ -77,7 +77,7 @@ matrix:
       - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
-      - sudo apt-get install llvm-4.0 libedit-dev -y
+      - sudo apt-get install llvm-4.0 -y
     - os: linux
       env: LLVM_VERSION=4.0
       julia: nightly
@@ -87,7 +87,7 @@ matrix:
       - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
-      - sudo apt-get install llvm-4.0 libedit-dev -y
+      - sudo apt-get install llvm-4.0 -y
     # LLVM 4.0 with LLVM.jl in DEBUG mode
     - os: linux
       env:
@@ -100,7 +100,7 @@ matrix:
       - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
-      - sudo apt-get install llvm-4.0 libedit-dev -y
+      - sudo apt-get install llvm-4.0 -y
     - os: linux
       env:
         - LLVM_VERSION=4.0
@@ -112,7 +112,7 @@ matrix:
       - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
-      - sudo apt-get install llvm-4.0 libedit-dev -y
+      - sudo apt-get install llvm-4.0 -y
 
 after_success:
  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
