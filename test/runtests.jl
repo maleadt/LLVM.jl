@@ -14,8 +14,22 @@ end
 
 
 # pass registry
+passreg = GlobalPassRegistry()
 
+# initialization
 ismultithreaded()
+InitializeCore(passreg)
+InitializeTransformUtils(passreg)
+InitializeScalarOpts(passreg)
+InitializeObjCARCOpts(passreg)
+InitializeVectorization(passreg)
+InitializeInstCombine(passreg)
+InitializeIPO(passreg)
+InitializeInstrumentation(passreg)
+InitializeAnalysis(passreg)
+InitializeIPA(passreg)
+InitializeCodeGen(passreg)
+InitializeTarget(passreg)
 
 include("core.jl")
 include("linker.jl")

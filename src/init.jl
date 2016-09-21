@@ -10,6 +10,16 @@ end
 
 ismultithreaded() = BoolFromLLVM(API.LLVMIsMultithreaded())
 
+for subsystem in [:Core, :TransformUtils, :ScalarOpts, :ObjCARCOpts, :Vectorization,
+                  :InstCombine, :IPO, :Instrumentation, :Analysis, :IPA, :CodeGen, :Target]
+    jl_fname = Symbol(:Initialize, subsystem)
+    api_fname = Symbol(:LLVM, jl_fname)
+    @eval begin
+        export $jl_fname
+        $jl_fname(R::PassRegistry) = API.$api_fname(ref(R))
+    end
+end
+
 
 ## target initialization
 
