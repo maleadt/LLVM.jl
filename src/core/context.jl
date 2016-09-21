@@ -87,3 +87,12 @@ function _install_handlers(ctx::Context)
 
     return nothing
 end
+
+function handle_error(reason::Cstring)
+    throw(LLVMException(unsafe_string(reason)))
+end
+
+function _install_handlers()
+    handler = cfunction(handle_error, Void, Tuple{Cstring})
+    API.LLVMInstallFatalErrorHandler(handler)
+end

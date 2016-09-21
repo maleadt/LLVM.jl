@@ -39,6 +39,7 @@ function __init__()
     stat(API.lib_path).mtime == API.lib_mtime ||
         warn("LLVM library has been modified, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
 
+    _install_handlers()
     _install_handlers(GlobalContext())
 end
 
