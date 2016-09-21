@@ -192,16 +192,23 @@ libllvm_extra_wrapper = joinpath(wrapped_libdir, "..", "libLLVM_extra.jl")
 # write ext.jl
 open(joinpath(@__DIR__, "ext.jl"), "w") do fh
     write(fh, """
-        const llvm_version = v"$llvm_version"
+        # library properties
+        const lib_version = v"$llvm_version"
+        const lib_path = "$llvm_library"
+        const lib_mtime = $llvm_library_mtime
+
+        # wrapper properties
         const wrapper_version = v"$wrapper_version"
 
-        const llvm_targets = $llvm_targets
+        # check whether this library is loaded right, if it isn't we have exclusive access
+        # allowing destructive operations (like shutting LLVM down).
+        # this check doesn't seem to work in __init__
+        const exclusive = Libdl.dlopen_e(lib_path, Libdl.RTLD_NOLOAD) == C_NULL
 
-        isfile("$llvm_library") ||
-            error("LLVM library missing, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
-        stat("$llvm_library").mtime == $llvm_library_mtime ||
-            warn("LLVM library has been modified, run Pkg.build(\\"LLVM\\") to reconfigure LLVM.jl")
+        # installation properties
+        const targets = $llvm_targets
 
+        # library loading
         const libllvm = "$libllvm_extra"
         include("$libllvm_wrapper_common")
         include("$libllvm_wrapper")

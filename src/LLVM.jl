@@ -32,11 +32,13 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 
-"Indicates whether this package has exclusive access to the LLVM library."
-const exclusive = Ref{Bool}()
-
 function __init__()
-    exclusive[] = Libdl.dlopen_e(API.libllvm, Libdl.RTLD_NOLOAD) == C_NULL
+    debug("Checking validity of $(API.lib_path) (", (API.exclusive?"exclusive":"non-exclusive"), " access)")
+    isfile(API.lib_path) ||
+        error("LLVM library missing, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
+    stat(API.lib_path).mtime == API.lib_mtime ||
+        warn("LLVM library has been modified, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
+
     _install_handlers(GlobalContext())
 end
 

@@ -54,6 +54,6 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 
-if LLVM.exclusive[]
+if LLVM.API.exclusive[]
     Shutdown()
 end
