@@ -2,68 +2,57 @@
 
 #include <llvm/Support/TargetSelect.h>
 
-using namespace llvm;
-
 namespace llvm {
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// The LLVMInitializeAll* functions and friends are defined `static inline`, so we can't
+// bind directly to them (the function body is generated via macro), so here are some
+// wrappers.
 
-/* The LLVMInitializeAll* functions and friends are defined `static inline`, so
- * we can't bind directly to them (the function body is generated via macro),
- * so here are some wrappers.
- */
-
-void LLVMExtraInitializeAllTargetInfos(void) {
+extern "C" void LLVMExtraInitializeAllTargetInfos() {
     InitializeAllTargetInfos();
 }
 
-void LLVMExtraInitializeAllTargets(void) {
+extern "C" void LLVMExtraInitializeAllTargets() {
     InitializeAllTargets();
 }
 
-void LLVMExtraInitializeAllTargetMCs(void) {
+extern "C" void LLVMExtraInitializeAllTargetMCs() {
     InitializeAllTargetMCs();
 }
 
-void LLVMExtraInitializeAllAsmPrinters(void) {
+extern "C" void LLVMExtraInitializeAllAsmPrinters() {
     InitializeAllAsmPrinters();
 }
 
-void LLVMExtraInitializeAllAsmParsers(void) {
+extern "C" void LLVMExtraInitializeAllAsmParsers() {
     InitializeAllAsmParsers();
 }
 
-void LLVMExtraInitializeAllDisassemblers(void) {
+extern "C" void LLVMExtraInitializeAllDisassemblers() {
     InitializeAllDisassemblers();
 }
 
 
-/* These functions return true on failure. */
+// These functions return true on failure.
 
 #ifndef LLVM_NATIVE_TARGET
 #error LLVM_NATIVE_TARGET not defined
 #endif
 
-LLVMBool LLVMExtraInitializeNativeTarget(void) {
+extern "C" LLVMBool LLVMExtraInitializeNativeTarget() {
     return InitializeNativeTarget();
 }
 
-LLVMBool LLVMExtraInitializeNativeAsmParser(void) {
+extern "C" LLVMBool LLVMExtraInitializeNativeAsmParser() {
     return InitializeNativeTargetAsmParser();
 }
 
-LLVMBool LLVMExtraInitializeNativeAsmPrinter(void) {
+extern "C" LLVMBool LLVMExtraInitializeNativeAsmPrinter() {
     return InitializeNativeTargetAsmPrinter();
 }
 
-LLVMBool LLVMExtraInitializeNativeDisassembler(void) {
+extern "C" LLVMBool LLVMExtraInitializeNativeDisassembler() {
     return InitializeNativeTargetDisassembler();
 }
-
-#ifdef __cplusplus
-}
-#endif /* defined(__cplusplus) */
 
 }

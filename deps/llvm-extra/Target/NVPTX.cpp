@@ -10,25 +10,18 @@ namespace llvm {
 extern ModulePass *createNVVMReflectPass();
 extern ModulePass *createNVVMReflectPass(const StringMap<int> &Mapping);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void LLVMExtraAddMVVMReflectPass(LLVMPassManagerRef PM) {
+extern "C" void LLVMExtraAddMVVMReflectPass(LLVMPassManagerRef PM) {
     createNVVMReflectPass();
 }
 
-void LLVMExtraAddMVVMReflectPassWithMapping(LLVMPassManagerRef PM,
-                                            const char** Params, int* Values, size_t Length) {
+extern "C" void LLVMExtraAddMVVMReflectPassWithMapping(LLVMPassManagerRef PM,
+                                                       const char** Params, int* Values,
+                                                       size_t Length) {
     StringMap<int> Mapping;
     for (size_t i = 0; i < Length; i++)
         Mapping[Params[i]] = Values[i];
     createNVVMReflectPass(Mapping);
 }
-
-#ifdef __cplusplus
-}
-#endif /* defined(__cplusplus) */
 
 }
 

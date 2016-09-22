@@ -6,12 +6,9 @@
 
 namespace llvm {
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void LLVMExtraAddInternalizePassWithExportList(LLVMPassManagerRef PM,
-                                               const char** ExportList, size_t Length) {
+extern "C"  void LLVMExtraAddInternalizePassWithExportList(LLVMPassManagerRef PM,
+                                                           const char** ExportList,
+                                                           size_t Length) {
     auto PreserveFobj = [=](const GlobalValue &GV) {
         for (size_t i = 0; i < Length; i++) {
             if (strcmp(ExportList[i], GV.getName().data()) == 0)
@@ -21,9 +18,5 @@ void LLVMExtraAddInternalizePassWithExportList(LLVMPassManagerRef PM,
     };
     unwrap(PM)->add(createInternalizePass(PreserveFobj));
 }
-
-#ifdef __cplusplus
-}
-#endif /* defined(__cplusplus) */
 
 }
