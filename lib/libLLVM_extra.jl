@@ -39,3 +39,10 @@ end
 function LLVMInitializeNativeDisassembler()
     ccall((:LLVMExtraInitializeNativeDisassembler,libllvm),LLVMBool,())
 end
+
+
+# Julia wrapper for header: llvm-extra/Transforms/IPO.h
+
+function LLVMExtraAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
+    ccall((:LLVMExtraAddInternalizePassWithExportList,libllvm),Void,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
+end

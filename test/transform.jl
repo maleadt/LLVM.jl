@@ -86,6 +86,7 @@ ModulePassManager() do pm
     internalize!(pm)
     internalize!(pm, true)
     internalize!(pm, false)
+    internalize!(pm, ["SomeFunction", "SomeOtherFunction"])
 end
 end
 end

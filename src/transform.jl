@@ -125,3 +125,6 @@ export internalize!
 
 internalize!(pm::PassManager, allbutmain::Bool=true) =
     API.LLVMAddInternalizePass(ref(pm), Cuint(BoolToLLVM(allbutmain)))
+
+internalize!(pm::PassManager, exports::Vector{String}) =
+    API.LLVMExtraAddInternalizePassWithExportList(ref(pm), exports, Csize_t(length(exports)))
