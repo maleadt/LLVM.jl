@@ -20,6 +20,11 @@ LDFLAGS += "-Wl,-rpath,$(LLVM_LIBDIR)"
 BADFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor
 CXXFLAGS := $(filter-out $(BADFLAGS),$(CXXFLAGS))
 
+# as we build with -z,defs, we shouldn't use target-specific symbols
+# unless the target is built, so generate preprocessor definitions
+LLVM_TARGETS = $(shell $(LLVM_CONFIG) --targets-built | tr '[:lower:]' '[:upper:]')
+CPPFLAGS += $(addprefix -DTARGET_, $(LLVM_TARGETS))
+
 # shared-library building
 # NOTE: we create our own version of libLLVM including all of its static libraries.
 #       This isn't necessary per se, but prevents conflicts with loading libLLVM
