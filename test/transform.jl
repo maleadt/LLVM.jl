@@ -87,6 +87,11 @@ ModulePassManager() do pm
     internalize!(pm, true)
     internalize!(pm, false)
     internalize!(pm, ["SomeFunction", "SomeOtherFunction"])
+
+    if :NVPTX in LLVM.API.targets
+        nvvm_reflect!(pm)
+        nvvm_reflect!(pm, Dict("foo" => 42))
+    end
 end
 end
 end

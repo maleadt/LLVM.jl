@@ -46,3 +46,14 @@ end
 function LLVMExtraAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
     ccall((:LLVMExtraAddInternalizePassWithExportList,libllvm),Void,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
 end
+
+
+# Julia wrapper for header: llvm-extra/Target/NVPTX.h
+
+function LLVMExtraAddNVVMReflectPass(PM::LLVMPassManagerRef)
+    ccall((:LLVMExtraAddMVVMReflectPass,libllvm),Void,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMExtraAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Values, Length)
+    ccall((:LLVMExtraAddMVVMReflectPassWithMapping,libllvm),Void,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
+end
