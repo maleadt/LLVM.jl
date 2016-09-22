@@ -12,7 +12,7 @@ LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags) -Wl,-z,defs
 LDLIBS = -lLLVM $(shell $(LLVM_CONFIG) --system-libs)
 
 # add LLVM's libdir to our RPATH, making sure we only pick up the correct library
-LLVM_LIBDIR=`$(LLVM_CONFIG) --libdir`
+LLVM_LIBDIR = $(shell $(LLVM_CONFIG) --libdir)
 LDFLAGS += "-Wl,-rpath,$(LLVM_LIBDIR)"
 
 # sanitize the cflags llvm-config provides us with
