@@ -4,6 +4,8 @@
 
 using namespace llvm;
 
+namespace llvm {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -63,3 +65,5 @@ LLVMBool LLVMExtraInitializeNativeDisassembler(void) {
 #ifdef __cplusplus
 }
 #endif /* defined(__cplusplus) */
+
+}

@@ -4,11 +4,11 @@
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Transforms/IPO.h>
 
+namespace llvm {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-using namespace llvm;
 
 void LLVMExtraAddInternalizePassWithExportList(LLVMPassManagerRef PM,
                                                const char** ExportList, size_t Length) {
@@ -25,3 +25,5 @@ void LLVMExtraAddInternalizePassWithExportList(LLVMPassManagerRef PM,
 #ifdef __cplusplus
 }
 #endif /* defined(__cplusplus) */
+
+}
