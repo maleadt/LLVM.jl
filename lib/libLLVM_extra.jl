@@ -1,4 +1,4 @@
-# Julia wrapper for header: llvm-extra/Target.c
+# Julia wrapper for header: llvm-extra/Target.h
 
 function LLVMInitializeAllTargetInfos()
     ccall((:LLVMExtraInitializeAllTargetInfos,libllvm),Void,())

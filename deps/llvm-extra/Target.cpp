@@ -1,4 +1,12 @@
-#include <llvm-c/Target.h>
+#include <llvm-c/Types.h>
+
+#include <llvm/Support/TargetSelect.h>
+
+using namespace llvm;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* The LLVMInitializeAll* functions and friends are defined `static inline`, so
  * we can't bind directly to them (the function body is generated via macro),
@@ -6,27 +14,27 @@
  */
 
 void LLVMExtraInitializeAllTargetInfos(void) {
-    LLVMInitializeAllTargetInfos();
+    InitializeAllTargetInfos();
 }
 
 void LLVMExtraInitializeAllTargets(void) {
-    LLVMInitializeAllTargets();
+    InitializeAllTargets();
 }
 
 void LLVMExtraInitializeAllTargetMCs(void) {
-    LLVMInitializeAllTargetMCs();
+    InitializeAllTargetMCs();
 }
 
 void LLVMExtraInitializeAllAsmPrinters(void) {
-    LLVMInitializeAllAsmPrinters();
+    InitializeAllAsmPrinters();
 }
 
 void LLVMExtraInitializeAllAsmParsers(void) {
-    LLVMInitializeAllAsmParsers();
+    InitializeAllAsmParsers();
 }
 
 void LLVMExtraInitializeAllDisassemblers(void) {
-    LLVMInitializeAllDisassemblers();
+    InitializeAllDisassemblers();
 }
 
 
@@ -37,17 +45,21 @@ void LLVMExtraInitializeAllDisassemblers(void) {
 #endif
 
 LLVMBool LLVMExtraInitializeNativeTarget(void) {
-    return LLVMInitializeNativeTarget();
+    return InitializeNativeTarget();
 }
 
 LLVMBool LLVMExtraInitializeNativeAsmParser(void) {
-    return LLVMInitializeNativeAsmParser();
+    return InitializeNativeTargetAsmParser();
 }
 
 LLVMBool LLVMExtraInitializeNativeAsmPrinter(void) {
-    return LLVMInitializeNativeAsmPrinter();
+    return InitializeNativeTargetAsmPrinter();
 }
 
 LLVMBool LLVMExtraInitializeNativeDisassembler(void) {
-    return LLVMInitializeNativeDisassembler();
+    return InitializeNativeTargetDisassembler();
 }
+
+#ifdef __cplusplus
+}
+#endif /* defined(__cplusplus) */
