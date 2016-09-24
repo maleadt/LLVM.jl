@@ -6,7 +6,7 @@ export DataLayout, dispose,
        abi_alignment, frame_alignment, preferred_alignment,
        element_at, offsetof
 
-import Base: convert, sizeof
+import Base: convert, show, sizeof
 
 DataLayout(rep::String) = DataLayout(API.LLVMCreateTargetData(rep))
 
@@ -25,6 +25,10 @@ dispose(data::DataLayout) = API.LLVMDisposeTargetData(ref(data))
 
 convert(::Type{String}, data::DataLayout) =
     unsafe_string(API.LLVMCopyStringRepOfTargetData(ref(data)))
+
+function show(io::IO, data::DataLayout)
+    @printf(io, "DataLayout(%s)", convert(String, data))
+end
 
 byteorder(data::DataLayout) = API.LLVMByteOrder(ref(data))
 
