@@ -1,7 +1,9 @@
 ## subsystem initialization
 
-export Shutdown,
+export version, Shutdown,
        ismultithreaded
+
+version() = return API.lib_version
 
 function Shutdown()
   API.exclusive || error("Cannot shutdown LLVM without exclusive access")

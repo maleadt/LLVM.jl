@@ -17,6 +17,7 @@ end
 passreg = GlobalPassRegistry()
 
 # initialization
+version()
 ismultithreaded()
 InitializeCore(passreg)
 InitializeTransformUtils(passreg)
