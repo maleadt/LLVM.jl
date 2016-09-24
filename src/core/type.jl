@@ -199,7 +199,7 @@ start(iter::StructTypeElementSet) = (1,length(iter))
 next(iter::StructTypeElementSet, state) =
     (iter[state[1]], (state[1]+1,state[2]))
 
-done(iter::StructTypeElementSet, state) = (state[1] > state[2])
+done(::StructTypeElementSet, state) = (state[1] > state[2])
 
 length(iter::StructTypeElementSet) = API.LLVMCountStructElementTypes(ref(iter.typ))
 endof(iter::StructTypeElementSet) = length(iter)

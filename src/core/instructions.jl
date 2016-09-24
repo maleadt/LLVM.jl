@@ -86,7 +86,7 @@ start(iter::TerminatorSuccessorSet) = (1,length(iter))
 next(iter::TerminatorSuccessorSet, state) =
     (iter[state[1]], (state[1]+1,state[2]))
 
-done(iter::TerminatorSuccessorSet, state) = (state[1] > state[2])
+done(::TerminatorSuccessorSet, state) = (state[1] > state[2])
 
 length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
 endof(iter::TerminatorSuccessorSet) = length(iter)

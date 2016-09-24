@@ -45,17 +45,18 @@ export DiagnosticInfo, severity, message
 
 @reftypedef ref=LLVMDiagnosticInfoRef immutable DiagnosticInfo end
 
-severity(diag::DiagnosticInfo) = API.LLVMGetDiagInfoSeverity(ref(diag))
-message(diag::DiagnosticInfo) = unsafe_string(API.LLVMGetDiagInfoDescription(ref(diag)))
+severity(di::DiagnosticInfo) = API.LLVMGetDiagInfoSeverity(ref(di))
+message(di::DiagnosticInfo) = unsafe_string(API.LLVMGetDiagInfoDescription(ref(di)))
 
 
 ## handlers
 
 function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Void})
-    diag = DiagnosticInfo(diag_ref)
+    di = DiagnosticInfo(diag_ref)
+    @assert args == C_NULL
 
-    sev = severity(diag)
-    msg = message(diag)
+    sev = severity(di)
+    msg = message(di)
 
     if sev == API.LLVMDSError
         throw(LLVMException(msg))
@@ -70,7 +71,10 @@ function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Void})
     return nothing
 end
 
-function yield_callback(ctx::Context, args::Ptr{Void})
+function yield_callback(ctx_ref::API.LLVMContextRef, args::Ptr{Void})
+    ctx = Context(ctx_ref)
+    @assert args == C_NULL
+
     # TODO: is this allowed? can we yield out of an active `ccall`?
     yield()
 end

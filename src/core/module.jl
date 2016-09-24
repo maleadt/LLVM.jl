@@ -148,7 +148,7 @@ end
 
 functions(mod::Module) = ModuleFunctionSet(mod)
 
-eltype(iter::ModuleFunctionSet) = Function
+eltype(::ModuleFunctionSet) = Function
 
 function haskey(iter::ModuleFunctionSet, name::String)
     return API.LLVMGetNamedFunction(ref(iter.mod), name) != C_NULL
@@ -162,10 +162,10 @@ end
 
 start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(iter.mod))
 
-next(iter::ModuleFunctionSet, state) =
+next(::ModuleFunctionSet, state) =
     (construct(Function,state), API.LLVMGetNextFunction(state))
 
-done(iter::ModuleFunctionSet, state) = state == C_NULL
+done(::ModuleFunctionSet, state) = state == C_NULL
 
 last(iter::ModuleFunctionSet) =
     construct(Function, API.LLVMGetLastFunction(ref(iter.mod)))
