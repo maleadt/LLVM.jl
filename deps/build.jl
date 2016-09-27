@@ -179,7 +179,8 @@ libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.so")
 cd(joinpath(@__DIR__, "llvm-extra")) do
     withenv("LLVM_CONFIG" => llvm_config) do
         # force a rebuild as the LLVM installation might have changed, undetectably
-        run(`make clean all`)
+        run(`make clean`)
+        run(`make -j$(Sys.CPU_CORES+1)`)
     end
 end
 
