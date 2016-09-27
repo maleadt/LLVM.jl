@@ -4,34 +4,29 @@
 
 namespace llvm {
 
-// The LLVMInitializeAll* functions and friends are defined `static inline`, so we can't
-// bind directly to them (the function body is generated via macro), so here are some
-// wrappers.
+// The LLVMInitializeAll* functions and friends are defined `static inline`, so
+// we can't bind directly to them (the function body is generated via macro), so
+// here are some wrappers.
 
 extern "C" void LLVMExtraInitializeAllTargetInfos() {
-    InitializeAllTargetInfos();
+  InitializeAllTargetInfos();
 }
 
-extern "C" void LLVMExtraInitializeAllTargets() {
-    InitializeAllTargets();
-}
+extern "C" void LLVMExtraInitializeAllTargets() { InitializeAllTargets(); }
 
-extern "C" void LLVMExtraInitializeAllTargetMCs() {
-    InitializeAllTargetMCs();
-}
+extern "C" void LLVMExtraInitializeAllTargetMCs() { InitializeAllTargetMCs(); }
 
 extern "C" void LLVMExtraInitializeAllAsmPrinters() {
-    InitializeAllAsmPrinters();
+  InitializeAllAsmPrinters();
 }
 
 extern "C" void LLVMExtraInitializeAllAsmParsers() {
-    InitializeAllAsmParsers();
+  InitializeAllAsmParsers();
 }
 
 extern "C" void LLVMExtraInitializeAllDisassemblers() {
-    InitializeAllDisassemblers();
+  InitializeAllDisassemblers();
 }
-
 
 // These functions return true on failure.
 
@@ -40,19 +35,18 @@ extern "C" void LLVMExtraInitializeAllDisassemblers() {
 #endif
 
 extern "C" LLVMBool LLVMExtraInitializeNativeTarget() {
-    return InitializeNativeTarget();
+  return InitializeNativeTarget();
 }
 
 extern "C" LLVMBool LLVMExtraInitializeNativeAsmParser() {
-    return InitializeNativeTargetAsmParser();
+  return InitializeNativeTargetAsmParser();
 }
 
 extern "C" LLVMBool LLVMExtraInitializeNativeAsmPrinter() {
-    return InitializeNativeTargetAsmPrinter();
+  return InitializeNativeTargetAsmPrinter();
 }
 
 extern "C" LLVMBool LLVMExtraInitializeNativeDisassembler() {
-    return InitializeNativeTargetDisassembler();
+  return InitializeNativeTargetDisassembler();
 }
-
 }

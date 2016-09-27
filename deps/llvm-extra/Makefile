@@ -41,3 +41,7 @@ $(TARGET): $(OBJECTS)
 .PHONY: clean
 clean:
 	$(RM) $(TARGET) $(OBJECTS)
+
+.PHONY: format
+format:
+	$(shell $(LLVM_CONFIG) --bindir)/clang-format -style=LLVM -i $(SOURCES)
