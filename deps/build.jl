@@ -133,39 +133,23 @@ wrapped_versions = map(dir->VersionNumber(dir),
                        filter(path->isdir(joinpath(@__DIR__, "..", "lib", path)),
                               readdir(joinpath(@__DIR__, "..", "lib"))))
 
-# select matching installation
+# select wrapper
 matching_llvms = filter(t -> any(v -> vercmp_match(t[3],v), wrapped_versions), llvms)
-
-# select probably compatible installation
 compatible_llvms = filter(t -> any(v -> vercmp_compat(t[3],v), wrapped_versions), llvms)
-
-# select a compatible installation
 if !isempty(matching_llvms)
     (llvm_library, llvm_config, llvm_version) = first(matching_llvms)
+    wrapper_version = llvm_version
 elseif !isempty(compatible_llvms)
     (llvm_library, llvm_config, llvm_version) = first(compatible_llvms)
-    warn("could not find a matching LLVM installation, but did find a v$llvm_version installation which is probably compatible...")
+    compatible_wrappers = filter(v->vercmp_compat(llvm_version, v), wrapped_versions)
+    wrapper_version = last(compatible_wrappers)
+    warn("LLVM v$llvm_version is not supported, falling back to support for v$wrapper_version (file an issue if there's incompatibilities)")
 else
     error("could not find a compatible LLVM installation")
 end
-info("Selected LLVM v$llvm_version at $(realpath(llvm_library))")
 
-# check if the library is wrapped
-wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(llvm_version))
-if isdir(wrapped_libdir)
-    wrapper_version = llvm_version
-else
-    # the selected version is not supported, check for compatible (ie. older) wrapped
-    # headers which are probably compatible (there's no real ABI guarantee though)...
-    debug("No wrapped headers for v$llvm_version found")
-    compatible_wrappers = filter(v->vercmp_compat(llvm_version, v), wrapped_versions)
-    if !isempty(compatible_wrappers)
-        wrapper_version = last(compatible_wrappers)
-        warn("LLVM v$llvm_version is not supported, falling back to support for v$wrapper_version (file an issue if there's incompatibilities)")
-        wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
-    end
-end
-isdir(wrapped_libdir) || error("LLVM v$llvm_version is not supported")
+wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
+@assert isdir(wrapped_libdir)
 
 
 #
