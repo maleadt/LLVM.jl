@@ -28,14 +28,14 @@ optlevel!(pmb::PassManagerBuilder, level::Integer) =
 sizelevel!(pmb::PassManagerBuilder, level::Integer) =
     API.LLVMPassManagerBuilderSetSizeLevel(ref(pmb), Cuint(level))
 
-unit_at_a_time!(pmb::PassManagerBuilder, val::Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableUnitAtATime(ref(pmb), BoolToLLVM(!val))
+unit_at_a_time!(pmb::PassManagerBuilder, flag::Bool=true) =
+    API.LLVMPassManagerBuilderSetDisableUnitAtATime(ref(pmb), BoolToLLVM(!flag))
 
-unroll_loops!(pmb::PassManagerBuilder, val::Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableUnrollLoops(ref(pmb), BoolToLLVM(!val))
+unroll_loops!(pmb::PassManagerBuilder, flag::Bool=true) =
+    API.LLVMPassManagerBuilderSetDisableUnrollLoops(ref(pmb), BoolToLLVM(!flag))
 
-simplify_libcalls!(pmb::PassManagerBuilder, val::Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableSimplifyLibCalls(ref(pmb), BoolToLLVM(!val))
+simplify_libcalls!(pmb::PassManagerBuilder, flag::Bool=true) =
+    API.LLVMPassManagerBuilderSetDisableSimplifyLibCalls(ref(pmb), BoolToLLVM(!flag))
 
 inliner!(pmb::PassManagerBuilder, threshold::Integer) =
     API.LLVMPassManagerBuilderUseInlinerWithThreshold(ref(pmb), Cuint(threshold))
