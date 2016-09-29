@@ -107,7 +107,7 @@ for dir in unique(configdirs)
     end
 end
 
-info("Found $(length(llvms)) LLVM llvms, providing $(length(unique(map(t->t[3],llvms)))) different versions")
+info("Found $(length(llvms)) LLVM installations, providing $(length(unique(map(t->t[3],llvms)))) different versions")
 
 
 #
