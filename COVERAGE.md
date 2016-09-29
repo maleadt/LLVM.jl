@@ -1124,7 +1124,7 @@ Linker
 ErrorHandling
 -------------
 
-- [ ] LLVMInstallFatalErrorHandler
+- [x] LLVMInstallFatalErrorHandler
 - [ ] LLVMResetFatalErrorHandler
 - [ ] LLVMEnablePrettyStackTrace
 
