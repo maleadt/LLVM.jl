@@ -1,4 +1,4 @@
-export Function,  unsafe_delete!,
+export Function, unsafe_delete!,
        personality, personality!,
        callconv, callconv!,
        gc, gc!, intrinsic_id,
