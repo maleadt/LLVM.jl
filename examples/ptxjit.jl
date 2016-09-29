@@ -30,7 +30,7 @@ const cuda_db = [
     v"6.5" => [v"3.7"],
     v"7.0" => [v"5.2"],
     v"7.5" => [v"5.3"],
-    v"8.0" => [v"6.0", v"6.1"]  # NOTE: 6.2 should be supported, but `ptxas` complains
+    v"8.0" => [v"6.0", v"6.1"]  # NOTE: 6.2 should be supported, but the driver rejects it
 ]
 cuda_ver = CUDAdrv.version()
 cuda_support = search(cuda_db, ver -> ver <= cuda_ver)
@@ -50,6 +50,13 @@ libdevice_fn = "libdevice.compute_$(libdevice_ver.major)$(libdevice_ver.minor).1
 
 ## irgen
 
+@target ptx function kernel_vadd(a, b, c)
+    i = (blockIdx().x-1) * blockDim().x + threadIdx().x
+    unsafe_store!(c, unsafe_load(a,i)+unsafe_load(b,i), i)
+
+    return nothing
+end
+
 # check if Julia's LLVM version matches ours
 jl_llvm_ver = VersionNumber(Base.libllvm_version)
 if jl_llvm_ver != llvm_ver
@@ -65,11 +72,22 @@ else
     triple!(mod, "nvptx-nvidia-cuda")
     datalayout!(mod, "e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v16:16:16-v32:32:32-v64:64:64-v128:128:128-n16:32:64")
 end
-# TODO: get this IR by calling into Julia
-entry = "julia_kernel_vadd_64943"
-ir = readstring(joinpath(@__DIR__, "ptxjit.ll"))
+entry = ""
+ir = CUDAnative.module_ir(kernel_vadd, (Ptr{Float32},Ptr{Float32},Ptr{Float32});
+                          strip=false, optimize=false)
 let irmod = parse(LLVM.Module, ir)
     name!(irmod, "parsed")
+
+    # find the entry point
+    # TODO
+    for f in functions(irmod)
+        fn = LLVM.name(f)
+        if startswith(fn, "julia_kernel_vadd_")
+            entry = fn
+            break
+        end
+    end
+    isempty(entry) && error("could not find entry-point function")
 
     triple!(irmod, triple(mod))
     datalayout!(irmod, datalayout(mod))
