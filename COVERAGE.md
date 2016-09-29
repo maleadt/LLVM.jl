@@ -506,20 +506,20 @@ Core
 
 **Global Values**
 
-- [ ] LLVMGetGlobalParent
-- [ ] LLVMIsDeclaration
-- [ ] LLVMGetLinkage
-- [ ] LLVMSetLinkage
-- [ ] LLVMGetSection
-- [ ] LLVMSetSection
-- [ ] LLVMGetVisibility
-- [ ] LLVMSetVisibility
-- [ ] LLVMGetDLLStorageClass
-- [ ] LLVMSetDLLStorageClass
-- [ ] LLVMHasUnnamedAddr
-- [ ] LLVMSetUnnamedAddr
-- [ ] LLVMGetAlignment
-- [ ] LLVMSetAlignment
+- [x] LLVMGetGlobalParent
+- [x] LLVMIsDeclaration
+- [x] LLVMGetLinkage
+- [x] LLVMSetLinkage
+- [x] LLVMGetSection
+- [x] LLVMSetSection
+- [x] LLVMGetVisibility
+- [x] LLVMSetVisibility
+- [x] LLVMGetDLLStorageClass
+- [x] LLVMSetDLLStorageClass
+- [x] LLVMHasUnnamedAddr
+- [x] LLVMSetUnnamedAddr
+- [x] LLVMGetAlignment
+- [x] LLVMSetAlignment
 
 **Global Variables**
 

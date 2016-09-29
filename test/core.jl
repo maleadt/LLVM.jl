@@ -247,6 +247,40 @@ Context() do ctx
     @test convert(Float64, c) == 1.1
 end
 
+# global values
+Context() do ctx
+LLVM.Module("SomeModule", ctx) do mod
+    st = LLVM.StructType("SomeType", ctx)
+    ft = LLVM.FunctionType(st, [st])
+    fn = LLVM.Function(mod, "SomeFunction", ft)
+
+    @test isdeclaration(fn)
+    @test linkage(fn) == LLVM.API.LLVMExternalLinkage
+    linkage!(fn, LLVM.API.LLVMAvailableExternallyLinkage)
+    @test linkage(fn) == LLVM.API.LLVMAvailableExternallyLinkage
+
+    @test section(fn) == ""
+    section!(fn, "SomeSection")
+    @test section(fn) == "SomeSection"
+
+    @test visibility(fn) == LLVM.API.LLVMDefaultVisibility
+    visibility!(fn, LLVM.API.LLVMHiddenVisibility)
+    @test visibility(fn) == LLVM.API.LLVMHiddenVisibility
+
+    @test dllstorage(fn) == LLVM.API.LLVMDefaultStorageClass
+    dllstorage!(fn, LLVM.API.LLVMDLLImportStorageClass)
+    @test dllstorage(fn) == LLVM.API.LLVMDLLImportStorageClass
+
+    @test !unnamed_addr(fn)
+    unnamed_addr!(fn, true)
+    @test unnamed_addr(fn)
+
+    @test alignment(fn) == 0
+    alignment!(fn, 4)
+    @test alignment(fn) == 4
+end
+end
+
 # global variables
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod

@@ -4,7 +4,9 @@
 # forward-declarations
 @reftypedef abstract User <: Value
 @reftypedef abstract Constant <: User
-@reftypedef proxy=Value kind=LLVMFunctionValueKind immutable Function <: Constant end
+@reftypedef abstract GlobalValue <: Constant
+@reftypedef abstract GlobalObject <: GlobalValue
+@reftypedef proxy=Value kind=LLVMFunctionValueKind immutable Function <: GlobalObject end
 @reftypedef proxy=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 
 # NOTE: we don't completely stick to the C API's organization here
