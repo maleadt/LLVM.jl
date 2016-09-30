@@ -24,7 +24,7 @@ Builder() do builder
 end
 
 # analysis and execution
-ExecutionEngine(mod) do engine
+Interpreter(mod) do engine
     x, y = parse.([Int], ARGS[1:2])
     args = [GenericValue(LLVM.Int32Type(), x),
             GenericValue(LLVM.Int32Type(), y)]
