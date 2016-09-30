@@ -57,3 +57,35 @@ end
 function LLVMExtraAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Values, Length)
     ccall((:LLVMExtraAddMVVMReflectPassWithMapping,libllvm),Void,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
 end
+
+
+# Julia wrapper for header: llvm-extra/IR/Pass.h
+
+type LLVMOpaquePass
+end
+
+typealias LLVMPassRef Ptr{LLVMOpaquePass}
+
+function LLVMExtraAddPass(PM::LLVMPassManagerRef, P::LLVMPassRef)
+    ccall((:LLVMExtraAddPass,libllvm),Void,
+        (LLVMPassManagerRef, LLVMPassRef),
+        PM, P)
+end
+
+function LLVMExtraCreateModulePass(Name, Callback, Data)
+    ccall((:LLVMExtraCreateModulePass,libllvm),LLVMPassRef,
+        (Cstring, Ptr{Void}, Ptr{Void}),
+        Name, Callback, Data)
+end
+
+function LLVMExtraCreateFunctionPass(Name, Callback, Data)
+    ccall((:LLVMExtraCreateFunctionPass,libllvm),LLVMPassRef,
+        (Cstring, Ptr{Void}, Ptr{Void}),
+        Name, Callback, Data)
+end
+
+function LLVMExtraCreateBasicBlockPass(Name, Callback, Data)
+    ccall((:LLVMExtraCreateBasicBlockPass,libllvm),LLVMPassRef,
+        (Cstring, Ptr{Void}, Ptr{Void}),
+        Name, Callback, Data)
+end
