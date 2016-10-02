@@ -3,13 +3,13 @@ using Base.Test
 
 # types
 let
-    @test LLVM.BoolFromLLVM(LLVMTrue) == true
-    @test LLVM.BoolFromLLVM(LLVMFalse) == false
+    @test LLVM.BoolFromLLVM(LLVM.True) == true
+    @test LLVM.BoolFromLLVM(LLVM.False) == false
 
     @test_throws ArgumentError LLVM.BoolFromLLVM(LLVM.API.LLVMBool(2))
 
-    @test LLVM.BoolToLLVM(true) == LLVMTrue
-    @test LLVM.BoolToLLVM(false) == LLVMFalse
+    @test LLVM.BoolToLLVM(true) == LLVM.True
+    @test LLVM.BoolToLLVM(false) == LLVM.False
 end
 
 

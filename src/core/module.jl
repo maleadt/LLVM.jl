@@ -1,7 +1,10 @@
 # Modules represent the top-level structure in an LLVM program.
 
-export Module, dispose,
-       name, name!, triple, triple!, datalayout, datalayout!, context, inline_asm!
+export dispose,
+       name, name!,
+       triple, triple!,
+       datalayout, datalayout!,
+       context, inline_asm!
 
 import Base: show
 

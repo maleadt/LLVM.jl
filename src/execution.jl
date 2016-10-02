@@ -9,19 +9,19 @@ import Base: convert
 
 GenericValue(typ::IntegerType, N::Int) =
     GenericValue(API.LLVMCreateGenericValueOfInt(ref(typ),
-                                                 reinterpret(Culonglong, N), LLVMTrue))
+                                                 reinterpret(Culonglong, N), True))
 
 GenericValue(typ::IntegerType, N::UInt) =
     GenericValue(API.LLVMCreateGenericValueOfInt(ref(typ),
-                                                 reinterpret(Culonglong, N), LLVMFalse))
+                                                 reinterpret(Culonglong, N), False))
 
 intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(ref(val))
 
 convert(::Type{Int}, val::GenericValue) =
-    reinterpret(Clonglong, API.LLVMGenericValueToInt(ref(val), LLVMTrue))
+    reinterpret(Clonglong, API.LLVMGenericValueToInt(ref(val), True))
 
 convert(::Type{UInt}, val::GenericValue) =
-    API.LLVMGenericValueToInt(ref(val), LLVMFalse)
+    API.LLVMGenericValueToInt(ref(val), False)
 
 GenericValue(typ::FloatingPointType, N::Float64) =
     GenericValue(API.LLVMCreateGenericValueOfFloat(ref(typ), Cdouble(N)))
