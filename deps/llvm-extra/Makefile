@@ -25,6 +25,20 @@ CXXFLAGS := $(filter-out $(BADFLAGS),$(CXXFLAGS))
 LLVM_TARGETS = $(shell $(LLVM_CONFIG) --targets-built | tr '[:lower:]' '[:upper:]')
 CPPFLAGS += $(addprefix -DTARGET_, $(LLVM_TARGETS))
 
+# try to detect LLVM's C++ ABI, and configure GLIBC accordingly
+# NOTE: this is best-effort, as the target compiler might just not support the new ABI
+OBJDUMP := $(shell command -v objdump 2> /dev/null)
+ifdef OBJDUMP
+CXX11_SYMBOLS=$(shell objdump -tT "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
+ifeq ($(CXX11_SYMBOLS),)
+CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+else
+CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=1
+endif
+else
+$(warning "objdump not available, cannot detect C++11 ABI")
+endif
+
 # shared-library building
 # NOTE: we create our own version of libLLVM including all of its static libraries.
 #       This isn't necessary per se, but prevents conflicts with loading libLLVM

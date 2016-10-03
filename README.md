@@ -32,3 +32,37 @@ environment variable).
 
 If installation fails, re-run using the `DEBUG` environment variable set to `1` (as well as
 running Julia with `--compilecache=no`), and attach that output to a bug report.
+
+
+Troubleshooting
+---------------
+
+### Building `llvm-extra` fails due to C++11 ABI issues
+
+The build step might fail at building the `llvm-extra` wrapper with errors like the
+following:
+
+```
+IR/Pass.o:(.data.rel.ro._ZTVN4llvm15JuliaModulePassE[_ZTVN4llvm15JuliaModulePassE]+0x40): undefined reference to `llvm::ModulePass::createPrinterPass(llvm::raw_ostream&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) const'
+IR/Pass.o:(.data.rel.ro._ZTVN4llvm17JuliaFunctionPassE[_ZTVN4llvm17JuliaFunctionPassE]+0x40): undefined reference to `llvm::FunctionPass::createPrinterPass(llvm::raw_ostream&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) const'
+IR/Pass.o:(.data.rel.ro._ZTVN4llvm19JuliaBasicBlockPassE[_ZTVN4llvm19JuliaBasicBlockPassE]+0x40): undefined reference to `llvm::BasicBlockPass::createPrinterPass(llvm::raw_ostream&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) const'
+collect2: error: ld returned 1 exit status
+```
+
+```
+IR/Pass.o:(.data.rel.ro._ZTVN4llvm15JuliaModulePassE[_ZTVN4llvm15JuliaModulePassE]+0x40): undefined reference to `llvm::ModulePass::createPrinterPass(llvm::raw_ostream&, std::string const&) const'
+IR/Pass.o:(.data.rel.ro._ZTVN4llvm17JuliaFunctionPassE[_ZTVN4llvm17JuliaFunctionPassE]+0x40): undefined reference to `llvm::FunctionPass::createPrinterPass(llvm::raw_ostream&, std::string const&) const'
+IR/Pass.o:(.data.rel.ro._ZTVN4llvm19JuliaBasicBlockPassE[_ZTVN4llvm19JuliaBasicBlockPassE]+0x40): undefined reference to `llvm::BasicBlockPass::createPrinterPass(llvm::raw_ostream&, std::string const&) const'
+collect2: error: ld returned 1 exit status
+```
+
+These indicate a mismatch between the C++ ABI of the LLVM library (more specifically, caused
+by [the C++11 ABI change](https://gcc.gnu.org/wiki/Cxx11AbiCompatibility)), and what your
+compiler selects by default. The `Makefile` in this package tries to detect any C++11 ABI
+symbols in the selected LLVM library and configures GLIBC accordingly, but this detection
+might fail when `objdump` is not available on your system, or might not help if the target
+compiler doesn't support said ABI.
+
+Most if these issues can be fixed by using the same compiler LLVM was build with to compile
+`llvm-extra`. You can override the selected compiler by defining the `CC` and `CXX`
+environment variables, eg. `CC=clang CXX=clang++ julia -e 'Pkg.build("LLVM")'`.
