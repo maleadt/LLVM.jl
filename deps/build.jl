@@ -158,10 +158,19 @@ wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
 
 llvm_targets = Symbol.(split(readstring(`$llvm_config --targets-built`)))
 
+# location of julia-config.jl
+julia_cmd = Base.julia_cmd()
+julia = julia_cmd.exec[1]
+isfile(julia) || error("could not find Julia executable from command $julia_cmd")
+julia_config = joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl")
+isfile(julia_config) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
+
 # build library with extra functions
 libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.so")
 cd(joinpath(@__DIR__, "llvm-extra")) do
-    withenv("LLVM_CONFIG" => llvm_config, "LLVM_LIBRARY" => llvm_library) do
+    withenv("CALLED_FROM_JULIA" => 1,
+            "LLVM_CONFIG" => llvm_config, "LLVM_LIBRARY" => llvm_library,
+            "JULIA_CONFIG" => julia_config, "JULIA" => julia) do
         # force a rebuild as the LLVM installation might have changed, undetectably
         run(`make clean`)
         run(`make -j$(Sys.CPU_CORES+1)`)

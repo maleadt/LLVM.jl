@@ -38,7 +38,7 @@ insert!(builder::Builder, inst::Instruction, name::String) =
 debuglocation(builder::Builder) =
     construct(MetadataAsValue, API.LLVMGetCurrentDebugLocation(ref(builder)))
 debuglocation!(builder::Builder) =
-    API.LLVMSetCurrentDebugLocation(ref(builder), nullref(Value))
+    API.LLVMSetCurrentDebugLocation(ref(builder), ref(Value, C_NULL))
 debuglocation!(builder::Builder, loc::MetadataAsValue) =
     API.LLVMSetCurrentDebugLocation(ref(builder), ref(loc))
 debuglocation!(builder::Builder, inst::Instruction) =

@@ -4,6 +4,8 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Function.h>
 
+#include <julia.h>
+
 using namespace llvm::legacy;
 
 namespace llvm {
@@ -30,23 +32,31 @@ char& CreatePassID(const char* Name) {
 // Module pass
 //
 
-typedef LLVMBool (*ModulePassCallback)(LLVMModuleRef M, void*);
-
 class JuliaModulePass : public ModulePass {
 public:
-  JuliaModulePass(const char *Name, ModulePassCallback Callback, void* Data)
-      : ModulePass(CreatePassID(Name)), Callback(Callback), Data(Data) {}
+  JuliaModulePass(const char *Name, jl_value_t* Callback)
+      : ModulePass(CreatePassID(Name)), Callback(Callback) {}
 
-  bool runOnModule(Module &M) { return Callback(wrap(&M), Data); }
+  bool runOnModule(Module &M) {
+      jl_value_t **argv;
+      JL_GC_PUSHARGS(argv, 2);
+      argv[0] = Callback;
+      argv[1] = jl_box_voidpointer(wrap(&M));
+
+      jl_value_t *ret = jl_apply(argv, 2);
+      bool changed = jl_unbox_bool(ret);
+
+      JL_GC_POP();
+      return changed;
+  }
 
 private:
-  ModulePassCallback Callback;
-  void* Data;
+  jl_value_t* Callback;
 };
 
 extern "C" LLVMPassRef
-LLVMExtraCreateModulePass(const char *Name, ModulePassCallback Callback, void* Data) {
-  return wrap(new JuliaModulePass(Name, Callback, Data));
+LLVMExtraCreateModulePass(const char *Name, jl_value_t* Callback) {
+  return wrap(new JuliaModulePass(Name, Callback));
 }
 
 
@@ -54,23 +64,31 @@ LLVMExtraCreateModulePass(const char *Name, ModulePassCallback Callback, void* D
 // Function pass
 //
 
-typedef LLVMBool (*FunctionPassCallback)(LLVMValueRef Fn, void*);
-
 class JuliaFunctionPass : public FunctionPass {
 public:
-  JuliaFunctionPass(const char *Name, FunctionPassCallback Callback, void* Data)
-      : FunctionPass(CreatePassID(Name)), Callback(Callback), Data(Data) {}
+  JuliaFunctionPass(const char *Name, jl_value_t* Callback)
+      : FunctionPass(CreatePassID(Name)), Callback(Callback) {}
 
-  bool runOnFunction(Function &Fn) { return Callback(wrap(&Fn), Data); }
+  bool runOnFunction(Function &Fn) {
+      jl_value_t **argv;
+      JL_GC_PUSHARGS(argv, 2);
+      argv[0] = Callback;
+      argv[1] = jl_box_voidpointer(wrap(&Fn));
+
+      jl_value_t *ret = jl_apply(argv, 2);
+      bool changed = jl_unbox_bool(ret);
+
+      JL_GC_POP();
+      return changed;
+  }
 
 private:
-  FunctionPassCallback Callback;
-  void* Data;
+  jl_value_t* Callback;
 };
 
 extern "C" LLVMPassRef
-LLVMExtraCreateFunctionPass(const char *Name, FunctionPassCallback Callback, void* Data) {
-  return wrap(new JuliaFunctionPass(Name, Callback, Data));
+LLVMExtraCreateFunctionPass(const char *Name, jl_value_t* Callback) {
+  return wrap(new JuliaFunctionPass(Name, Callback));
 }
 
 
@@ -78,23 +96,31 @@ LLVMExtraCreateFunctionPass(const char *Name, FunctionPassCallback Callback, voi
 // BasicBlock pass
 //
 
-typedef LLVMBool (*BasicBlockPassCallback)(LLVMBasicBlockRef BB, void*);
-
 class JuliaBasicBlockPass : public BasicBlockPass {
 public:
-  JuliaBasicBlockPass(const char *Name, BasicBlockPassCallback Callback, void* Data)
-      : BasicBlockPass(CreatePassID(Name)), Callback(Callback), Data(Data) {}
+  JuliaBasicBlockPass(const char *Name, jl_value_t* Callback)
+      : BasicBlockPass(CreatePassID(Name)), Callback(Callback) {}
 
-  bool runOnBasicBlock(BasicBlock &BB) { return Callback(wrap(&BB), Data); }
+  bool runOnBasicBlock(BasicBlock &BB) {
+      jl_value_t **argv;
+      JL_GC_PUSHARGS(argv, 2);
+      argv[0] = Callback;
+      argv[1] = jl_box_voidpointer(wrap(&BB));
+
+      jl_value_t *ret = jl_apply(argv, 2);
+      bool changed = jl_unbox_bool(ret);
+
+      JL_GC_POP();
+      return changed;
+  }
 
 private:
-  BasicBlockPassCallback Callback;
-  void* Data;
+  jl_value_t* Callback;
 };
 
 extern "C" LLVMPassRef
-LLVMExtraCreateBasicBlockPass(const char *Name, BasicBlockPassCallback Callback, void* Data) {
-  return wrap(new JuliaBasicBlockPass(Name, Callback, Data));
+LLVMExtraCreateBasicBlockPass(const char *Name, jl_value_t* Callback) {
+  return wrap(new JuliaBasicBlockPass(Name, Callback));
 }
 
 }

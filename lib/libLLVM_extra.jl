@@ -72,22 +72,22 @@ function LLVMExtraAddPass(PM::LLVMPassManagerRef, P::LLVMPassRef)
         PM, P)
 end
 
-function LLVMExtraCreateModulePass(Name, Callback, Data)
+function LLVMExtraCreateModulePass(Name, Callback)
     ccall((:LLVMExtraCreateModulePass,libllvm),LLVMPassRef,
-        (Cstring, Ptr{Void}, Ptr{Void}),
-        Name, Callback, Data)
+        (Cstring, Any),
+        Name, Callback)
 end
 
-function LLVMExtraCreateFunctionPass(Name, Callback, Data)
+function LLVMExtraCreateFunctionPass(Name, Callback)
     ccall((:LLVMExtraCreateFunctionPass,libllvm),LLVMPassRef,
-        (Cstring, Ptr{Void}, Ptr{Void}),
-        Name, Callback, Data)
+        (Cstring, Any),
+        Name, Callback)
 end
 
-function LLVMExtraCreateBasicBlockPass(Name, Callback, Data)
+function LLVMExtraCreateBasicBlockPass(Name, Callback)
     ccall((:LLVMExtraCreateBasicBlockPass,libllvm),LLVMPassRef,
-        (Cstring, Ptr{Void}, Ptr{Void}),
-        Name, Callback, Data)
+        (Cstring, Any),
+        Name, Callback)
 end
 
 

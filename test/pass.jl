@@ -14,11 +14,11 @@ LLVM.Module("SomeModule", ctx) do mod
 
     # module pass
 
-    function runOnModule(cur_mod::LLVM.Module, mod::LLVM.Module)
+    function runOnModule(cur_mod::LLVM.Module)
         @test cur_mod == mod
         return false
     end
-    pass = ModulePass("SomeModulePass", runOnModule, mod)
+    pass = ModulePass("SomeModulePass", runOnModule)
 
     ModulePassManager() do mpm
         add!(mpm, pass)
@@ -27,11 +27,11 @@ LLVM.Module("SomeModule", ctx) do mod
 
     # function pass
 
-    function runOnFunction(cur_fn::LLVM.Function, fn::LLVM.Function)
+    function runOnFunction(cur_fn::LLVM.Function)
         @test cur_fn == fn
         return false
     end
-    pass = FunctionPass("SomeFunctionPass", runOnFunction, fn)
+    pass = FunctionPass("SomeFunctionPass", runOnFunction)
 
     FunctionPassManager(mod) do fpm
         add!(fpm, pass)
@@ -40,11 +40,11 @@ LLVM.Module("SomeModule", ctx) do mod
 
     # basic block pass
 
-    function runOnBasicBlock(cur_bb::BasicBlock, bb::BasicBlock)
+    function runOnBasicBlock(cur_bb::BasicBlock)
         @test cur_bb == bb
         return false
     end
-    pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock, bb)
+    pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
 
     FunctionPassManager(mod) do fpm
         add!(fpm, pass)

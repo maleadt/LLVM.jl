@@ -104,18 +104,13 @@ macro reftypedef(args...)
     
         # add `ref` field containing a typed pointer
         unshift!(typedef.args[3].args, :( ref::API.$reftype ))
-
-        # define a `null` method for creating an NULL object
-        append!(code.args, (quote
-            null(::Type{$typename}) = $(typename)(nullref($typename))
-            end).args)
     end
 
-    # define a `nullref` method for creating an NULL ref
+    # define a `ref` method for creating a ref from a pointer
     if !isnull(proxy)
         reftype = refs[get(proxy)]
         append!(code.args, (quote
-            nullref(::Type{$typename}) = convert(API.$reftype, C_NULL)
+            ref(::Type{$typename}, ptr::Ptr) = convert(API.$reftype, ptr)
             end).args)
     end
 

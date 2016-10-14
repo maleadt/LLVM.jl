@@ -1,10 +1,15 @@
-ifndef LLVM_CONFIG
-$(error LLVM_CONFIG is not set)
+ifndef CALLED_FROM_JULIA
+$(error This Makefile can only be invoked from Julia)
 endif
 
 TARGET  = libLLVM_extra.so
 SOURCES = $(shell find -name '*.cpp')
 OBJECTS = $(SOURCES:.cpp=.o)
+
+
+#
+# LLVM flags
+#
 
 CPPFLAGS = $(shell $(LLVM_CONFIG) --cppflags)
 CXXFLAGS = $(shell $(LLVM_CONFIG) --cxxflags)
@@ -38,6 +43,20 @@ endif
 else
 $(warning "objdump not available, cannot detect C++11 ABI")
 endif
+
+
+#
+# Julia flags
+#
+
+CXXFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --cflags)
+LDFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --ldflags)
+LDLIBS += $(shell $(JULIA) $(JULIA_CONFIG) --ldlibs)
+
+
+#
+# Build
+#
 
 # shared-library building
 # NOTE: we create our own version of libLLVM including all of its static libraries.

@@ -2,8 +2,6 @@ export Pass
 
 abstract Pass
 
-# NOTE: we pass 'data' arguments because closures aren't c-callable yet
-
 
 #
 # Module passes
@@ -11,19 +9,19 @@ abstract Pass
 
 export ModulePass
 
-@reftypedef ref=LLVMPassRef immutable ModulePass <: Pass end
+@reftypedef ref=LLVMPassRef immutable ModulePass <: Pass
+    root::Any
 
-function ModulePass(name, runner, data)
-    function compat_runner(ref::API.LLVMModuleRef, data)::API.LLVMBool
-        mod = LLVM.Module(ref)
-        return BoolToLLVM(runner(mod, unsafe_pointer_to_objref(data)))
+    function ModulePass(name, runner)
+        function callback(ptr::Ptr{Void})::Bool
+            mod = LLVM.Module(ref(LLVM.Module, ptr))
+            return runner(mod)::Bool
+        end
+
+        return new(API.LLVMExtraCreateModulePass(name, callback), callback)
     end
-    compat_callback = cfunction(compat_runner, API.LLVMBool,
-                                Tuple{API.LLVMModuleRef, Ptr{Void}})
-
-    return ModulePass(API.LLVMExtraCreateModulePass(name, compat_callback,
-                                                    pointer_from_objref(data)))
 end
+
 
 
 #
@@ -32,18 +30,17 @@ end
 
 export FunctionPass
 
-@reftypedef ref=LLVMPassRef immutable FunctionPass <: Pass end
+@reftypedef ref=LLVMPassRef immutable FunctionPass <: Pass
+    root::Any
 
-function FunctionPass(name, runner, data)
-    function compat_runner(ref::API.LLVMValueRef, data)::API.LLVMBool
-        fn = construct(LLVM.Function, ref)
-        return BoolToLLVM(runner(fn, unsafe_pointer_to_objref(data)))
+    function FunctionPass(name, runner)
+        function callback(ptr::Ptr{Void})::Bool
+            fn = construct(LLVM.Function, ref(LLVM.Function, ptr))
+            return runner(fn)::Bool
+        end
+
+        return new(API.LLVMExtraCreateFunctionPass(name, callback), callback)
     end
-    compat_callback = cfunction(compat_runner, API.LLVMBool,
-                                Tuple{API.LLVMValueRef, Ptr{Void}})
-
-    return FunctionPass(API.LLVMExtraCreateFunctionPass(name, compat_callback,
-                                                        pointer_from_objref(data)))
 end
 
 
@@ -53,16 +50,16 @@ end
 
 export BasicBlockPass
 
-@reftypedef ref=LLVMPassRef immutable BasicBlockPass <: Pass end
+@reftypedef ref=LLVMPassRef immutable BasicBlockPass <: Pass
+    root::Any
 
-function BasicBlockPass(name, runner, data)
-    function compat_runner(ref::API.LLVMBasicBlockRef, data)::API.LLVMBool
-        bb = BasicBlock(ref)
-        return BoolToLLVM(runner(bb, unsafe_pointer_to_objref(data)))
+    function BasicBlockPass(name, runner)
+        function callback(ptr::Ptr{Void})::Bool
+            bb = BasicBlock(ref(BasicBlock, ptr))
+            return runner(bb)::Bool
+        end
+
+        return new(API.LLVMExtraCreateBasicBlockPass(name, callback), callback)
     end
-    compat_callback = cfunction(compat_runner, API.LLVMBool,
-                                Tuple{API.LLVMBasicBlockRef, Ptr{Void}})
-
-    return BasicBlockPass(API.LLVMExtraCreateBasicBlockPass(name, compat_callback,
-                                                            pointer_from_objref(data)))
 end
+
