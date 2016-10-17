@@ -237,10 +237,16 @@ end
 # scalar
 Context() do ctx
     t1 = LLVM.Int32Type(ctx)
-    c1 = ConstantInt(t1, UInt(1))
+    c1 = ConstantInt(t1, UInt32(1))
     @test convert(UInt, c1) == 1
-    c2 = ConstantInt(t1, -1)
+    c2 = ConstantInt(t1, Int32(-1))
     @test convert(Int, c2) == -1
+
+    # construction from wider ints
+    c3 = ConstantInt(t1, UInt(1))
+    @test convert(UInt, c3) == 1
+    c4 = ConstantInt(t1, -1)
+    @test convert(Int, c4) == -1
 
     t2 = LLVM.DoubleType(ctx)
     c = ConstantFP(t2, 1.1)
