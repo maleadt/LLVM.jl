@@ -409,6 +409,8 @@ end
 # metadata iteration
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
+    DEBUG_METADATA_VERSION()
+
     node = MDNode([MDString("SomeMDString", ctx)], ctx)
 
     mds = metadata(mod)

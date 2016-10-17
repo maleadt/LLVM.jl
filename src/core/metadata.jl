@@ -1,6 +1,6 @@
 import Base: convert
 
-export MDString, MDNode, operands
+export DEBUG_METADATA_VERSION, MDString, MDNode, operands
 
 @reftypedef proxy=Value kind=LLVMMetadataAsValueValueKind immutable MetadataAsValue <: Value end
 
@@ -20,6 +20,9 @@ function convert(::Type{String}, md::MDString)
     ptr == C_NULL && throw(ArgumentError("invalid metadata, not a MDString?"))
     return unsafe_string(convert(Ptr{Int8}, ptr), len[])
 end
+
+# TODO: make this init-time constant
+DEBUG_METADATA_VERSION() = API.LLVMGetDebugMDVersion()
 
 
 typealias MDNode MetadataAsValue

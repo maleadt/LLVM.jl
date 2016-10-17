@@ -89,3 +89,10 @@ function LLVMExtraCreateBasicBlockPass(Name, Callback, Data)
         (Cstring, Ptr{Void}, Ptr{Void}),
         Name, Callback, Data)
 end
+
+
+# Julia wrapper for header: llvm-extra/IR/Metadata.h
+
+function LLVMGetDebugMDVersion()
+    ccall((:LLVMGetDebugMDVersion,libllvm),Cuint,())
+end
