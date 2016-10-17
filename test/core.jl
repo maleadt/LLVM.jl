@@ -202,10 +202,10 @@ LLVM.Module("SomeModule", ctx) do mod
     position!(builder, entry)
 
     valueinst1 = add!(builder, parameters(fn)[1],
-                      ConstantInt(LLVM.Int32Type(ctx), 1))
+                      ConstantInt(Int32(1), ctx))
 
     userinst = add!(builder, valueinst1,
-                    ConstantInt(LLVM.Int32Type(ctx), 1))
+                    ConstantInt(Int32(1), ctx))
 
     # use iteration
     let usepairs = uses(valueinst1)
@@ -224,7 +224,7 @@ LLVM.Module("SomeModule", ctx) do mod
     end
 
     valueinst2 = add!(builder, parameters(fn)[1],
-                    ConstantInt(LLVM.Int32Type(ctx), 2))
+                    ConstantInt(Int32(2), ctx))
 
     replace_uses!(valueinst1, valueinst2)
     @test user.(collect(uses(valueinst2))) == [userinst]
@@ -236,17 +236,31 @@ end
 
 # scalar
 Context() do ctx
-    t1 = LLVM.Int32Type(ctx)
-    c1 = ConstantInt(t1, UInt32(1))
-    @test convert(UInt, c1) == 1
-    c2 = ConstantInt(t1, Int32(-1))
-    @test convert(Int, c2) == -1
+    ## integer constants
 
-    # construction from wider ints
-    c3 = ConstantInt(t1, UInt(1))
-    @test convert(UInt, c3) == 1
-    c4 = ConstantInt(t1, -1)
-    @test convert(Int, c4) == -1
+    # manual construction of small values
+    let
+        typ = LLVM.Int32Type(ctx)
+        constval = ConstantInt(typ, -1)
+        @test convert(Int, constval) == -1
+        @test convert(UInt32, constval) == typemax(UInt32)
+    end
+
+    # manual construction of large values
+    let
+        typ = LLVM.Int64Type(ctx)
+        constval = ConstantInt(typ, BigInt(2)^100-1)
+        @test convert(Int, constval) == -1
+    end
+
+    # automatic construction
+    let
+        constval = ConstantInt(UInt32(1))
+        @test convert(UInt, constval) == 1
+    end
+
+
+    ## floating point constants
 
     t2 = LLVM.DoubleType(ctx)
     c = ConstantFP(t2, 1.1)
@@ -295,7 +309,7 @@ LLVM.Module("SomeModule", ctx) do mod
     show(DevNull, gv)
 
     @test_throws NullException initializer(gv)
-    init = ConstantInt(LLVM.Int32Type(), 0)
+    init = ConstantInt(Int32(0))
     initializer!(gv, init)
     @test initializer(gv) == init
 

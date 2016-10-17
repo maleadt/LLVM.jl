@@ -6,23 +6,37 @@ export ConstantInt, ConstantFP
 
 @reftypedef proxy=Value kind=LLVMConstantIntValueKind immutable ConstantInt <: Constant end
 
-function ConstantInt{T<:Signed}(typ::IntegerType, val::T)
+# NOTE: fixed set for dispatch, and because we can't rely on sizeof(T)==width(T)
+typealias SmallInteger Union{Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64}
+function ConstantInt{T<:SmallInteger}(typ::IntegerType, val::T, signed=false)
     wideval = convert(Int, val)
-    return construct(ConstantInt,
-                     API.LLVMConstInt(ref(typ), reinterpret(Culonglong, wideval), True))
+    bits = reinterpret(Culonglong, wideval)
+    return construct(ConstantInt, API.LLVMConstInt(ref(typ), bits, BoolToLLVM(signed)))
 end
 
-function ConstantInt{T<:Unsigned}(typ::IntegerType, val::T)
-    wideval = convert(UInt, val)
+function ConstantInt{T<:Integer}(typ::IntegerType, val::T, signed=false)
+    valbits = ceil(Int, log2(abs(val))) + 1
+    numwords = ceil(Int, valbits / 64)
+    words = Vector{Culonglong}(numwords)
+    for i in 1:numwords
+        words[i] = (val >> 64(i-1)) % Culonglong
+    end
     return construct(ConstantInt,
-                     API.LLVMConstInt(ref(typ), reinterpret(Culonglong, wideval), False))
+                     API.LLVMConstIntOfArbitraryPrecision(ref(typ), Cuint(numwords), words))
 end
 
-convert(::Type{UInt}, val::ConstantInt) =
-    API.LLVMConstIntGetZExtValue(ref(val))
+# NOTE: fixed set where sizeof(T) does match the numerical width
+typealias SizeableIntegers Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
+function ConstantInt{T<:Integer}(val::T, ctx::Context=GlobalContext())
+    typ = IntType(sizeof(T)*8, ctx)
+    return ConstantInt(typ, val, T<:Signed)
+end
 
-convert(::Type{Int}, val::ConstantInt) =
-    API.LLVMConstIntGetSExtValue(ref(val))
+convert{T<:Unsigned}(::Type{T}, val::ConstantInt) =
+    convert(T, API.LLVMConstIntGetZExtValue(ref(val)))
+
+convert{T<:Signed}(::Type{T}, val::ConstantInt) =
+    convert(T, API.LLVMConstIntGetSExtValue(ref(val)))
 
 
 @reftypedef proxy=Value kind=LLVMConstantFPValueKind immutable ConstantFP <: Constant end
