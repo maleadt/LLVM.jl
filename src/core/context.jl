@@ -98,5 +98,10 @@ end
 
 function _install_handlers()
     handler = cfunction(handle_error, Void, Tuple{Cstring})
+
+    # NOTE: LLVM doesn't support re-installing the error handler, which happens when we
+    #       `reload("LLVM")`, so reset it instead. This isn't correct, as the installed
+    #       handler might not have been ours. Ideally we'd have module finalizers...
+    API.LLVMResetFatalErrorHandler()
     API.LLVMInstallFatalErrorHandler(handler)
 end
