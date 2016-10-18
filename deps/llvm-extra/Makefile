@@ -25,6 +25,12 @@ LDFLAGS += "-Wl,-rpath,$(LLVM_LIBDIR)"
 BADFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor
 CXXFLAGS := $(filter-out $(BADFLAGS),$(CXXFLAGS))
 
+# handle RTTI flags
+HAS_RTTI=$(shell $(LLVM_CONFIG) --has-rtti)
+ifneq ($(HAS_RTTI),"YES")
+CXXFLAGS += -fno-rtti
+endif
+
 # as we build with -z,defs, we shouldn't use target-specific symbols
 # unless the target is built, so generate preprocessor definitions
 LLVM_TARGETS = $(shell $(LLVM_CONFIG) --targets-built | tr '[:lower:]' '[:upper:]')
