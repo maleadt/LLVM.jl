@@ -14,11 +14,12 @@ OBJECTS = $(SOURCES:.cpp=.o)
 CPPFLAGS = $(shell $(LLVM_CONFIG) --cppflags)
 CXXFLAGS = $(shell $(LLVM_CONFIG) --cxxflags)
 LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags) -Wl,-z,defs
-LDLIBS = -lLLVM $(shell $(LLVM_CONFIG) --system-libs)
+LDLIBS = $(shell $(LLVM_CONFIG) --system-libs)
 
-# add LLVM's libdir to our RPATH, making sure we only pick up the correct library
-LLVM_LIBDIR = $(shell $(LLVM_CONFIG) --libdir)
-LDFLAGS += "-Wl,-rpath,$(LLVM_LIBDIR)"
+# specify a specific rpath and library name to mare sure we pick up the correct library
+# NOTE: this doesn't use llvm-config, but uses the LLVM_LIBRARY variable passed by build.jl
+LDLIBS += -l:$(notdir $(LLVM_LIBRARY))
+LDFLAGS += "-Wl,-rpath,$(dir $(LLVM_LIBRARY))"
 
 # sanitize the cflags llvm-config provides us with
 # (removing C++ specific ones, or flags supported by only Clang or GCC)

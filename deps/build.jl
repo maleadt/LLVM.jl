@@ -17,8 +17,6 @@ const DEBUG = haskey(ENV, "DEBUG")
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
-libname() = return ["libLLVM.so"]
-
 function libname(version::VersionNumber)
     return ["libLLVM-$(version.major).$(version.minor).so",
             "libLLVM-$(version.major).$(version.minor).$(version.patch).so"]
@@ -37,6 +35,9 @@ end
 # NOTE: we only look for llvm-config binaries as we need to compile sources with additional
 # API calls. If this isn't necessary anymore, we can also look for plain llvm_library libraries.
 # This functionality was present in an early version of this file.
+#
+# NOTE: we also refuse to link against unversioned LLVM library files (even though
+# `llvm-config` told us the version), as that might conflict with files in the Julia dist.
 
 llvms = Vector{Tuple{String, String, VersionNumber}}()
 
@@ -97,7 +98,7 @@ for dir in unique(configdirs)
         # check for libraries
         libdir = readchomp(`$config --libdir`)
         debug("... contains libraries in $libdir")
-        for name in [libname(config_version); libname()]
+        for name in libname(config_version)
             lib = joinpath(libdir, name)
             if ispath(lib)
                 debug("- found v$config_version at $lib")
