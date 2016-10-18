@@ -9,6 +9,15 @@ module API
 ext = joinpath(dirname(@__FILE__), "..", "deps", "ext.jl")
 isfile(ext) || error("Unable to load $ext\n\nPlease re-run Pkg.build(\"LLVM\"), and restart Julia.")
 include(ext)
+
+# check whether the chosen LLVM is loaded already, ie. before having loaded it via `ccall`.
+# if it isn't, we have exclusive access, allowing destructive operations (like shutting LLVM
+# down).
+#
+# this check doesn't work in `__init__` because in the case of precompilation the
+# deserializer already loads the library.
+const exclusive = Libdl.dlopen_e(lib_path, Libdl.RTLD_NOLOAD) == C_NULL
+
 end
 
 include("logging.jl")

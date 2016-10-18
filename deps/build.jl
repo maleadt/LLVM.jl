@@ -201,11 +201,6 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         # wrapper properties
         const wrapper_version = v"$wrapper_version"
 
-        # check whether this library is loaded right, if it isn't we have exclusive access
-        # allowing destructive operations (like shutting LLVM down).
-        # this check doesn't seem to work in __init__
-        const exclusive = Libdl.dlopen_e(lib_path, Libdl.RTLD_NOLOAD) == C_NULL
-
         # installation properties
         const targets = $llvm_targets
 
