@@ -13,7 +13,7 @@ OBJECTS = $(SOURCES:.cpp=.o)
 
 CPPFLAGS = $(shell $(LLVM_CONFIG) --cppflags)
 CXXFLAGS = $(shell $(LLVM_CONFIG) --cxxflags)
-LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags) -Wl,-z,defs
+LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags)
 LDLIBS = $(shell $(LLVM_CONFIG) --system-libs)
 
 # specify a specific rpath and library name to mare sure we pick up the correct library
@@ -65,10 +65,9 @@ LDLIBS += $(shell $(JULIA) $(JULIA_CONFIG) --ldlibs)
 # Build
 #
 
+LDFLAGS += -Wl,-z,defs
+
 # shared-library building
-# NOTE: we create our own version of libLLVM including all of its static libraries.
-#       This isn't necessary per se, but prevents conflicts with loading libLLVM
-#       multiple times (in which case initialization functions can't be called twice)
 CXXFLAGS += -fPIC
 %.so:
 	$(LINK.cc) -shared $^ $(LDFLAGS) $(LDLIBS) -o $@
