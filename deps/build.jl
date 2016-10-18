@@ -1,7 +1,7 @@
 # This script looks for LLVM installations and selects one based on the compatibility with
 # available wrappers.
 #
-# This is somewhat convoluted, as we can find llvm_library in a variety of places using different
+# This is somewhat convoluted, as we can find LLVM in a variety of places using different
 # mechanisms, while version matching needs to consider API compatibility.
 #
 # Environment variables influencing this process:
@@ -34,7 +34,7 @@ end
 # - system-wide llvm-config binaries (first versioned, then unversioned)
 #
 # NOTE: we only look for llvm-config binaries as we need to compile sources with additional
-# API calls. If this isn't necessary anymore, we can also look for plain llvm_library libraries.
+# API calls. If this isn't necessary anymore, we can also look for plain LLVM libraries.
 # This functionality was present in an early version of this file.
 #
 # NOTE: we also refuse to link against unversioned LLVM library files (even though
