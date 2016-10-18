@@ -18,8 +18,9 @@ include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
 function libname(version::VersionNumber)
-    return ["libLLVM-$(version.major).$(version.minor).so",
-            "libLLVM-$(version.major).$(version.minor).$(version.patch).so"]
+    prerelease = join(version.prerelease)
+    return ["libLLVM-$(version.major).$(version.minor)$prerelease.so",
+            "libLLVM-$(version.major).$(version.minor).$(version.patch)$prerelease.so"]
 end
 
 
@@ -95,14 +96,19 @@ for dir in unique(configdirs)
             config_version = get(version)
         end
 
+        # prerelease versions have an "svn" tag
+        library_versions = [config_version,
+                            VersionNumber(config_version.major, config_version.minor,
+                                          config_version.patch, ("svn",))]
+
         # check for libraries
         libdir = readchomp(`$config --libdir`)
         debug("... contains libraries in $libdir")
-        for name in libname(config_version)
+        for library_version in library_versions, name in libname(library_version)
             lib = joinpath(libdir, name)
             if ispath(lib)
-                debug("- found v$config_version at $lib")
-                push!(llvms, tuple(lib, config, config_version))
+                debug("- found v$library_version at $lib")
+                push!(llvms, tuple(lib, config, library_version))
             end
         end
     end
