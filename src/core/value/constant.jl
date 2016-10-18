@@ -8,13 +8,13 @@ export ConstantInt, ConstantFP
 
 # NOTE: fixed set for dispatch, and because we can't rely on sizeof(T)==width(T)
 typealias SmallInteger Union{Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64}
-function ConstantInt{T<:SmallInteger}(typ::IntegerType, val::T, signed=false)
+function ConstantInt(typ::IntegerType, val::SmallInteger, signed=false)
     wideval = convert(Int, val)
     bits = reinterpret(Culonglong, wideval)
     return construct(ConstantInt, API.LLVMConstInt(ref(typ), bits, BoolToLLVM(signed)))
 end
 
-function ConstantInt{T<:Integer}(typ::IntegerType, val::T, signed=false)
+function ConstantInt(typ::IntegerType, val::Integer, signed=false)
     valbits = ceil(Int, log2(abs(val))) + 1
     numwords = ceil(Int, valbits / 64)
     words = Vector{Culonglong}(numwords)
@@ -26,8 +26,8 @@ function ConstantInt{T<:Integer}(typ::IntegerType, val::T, signed=false)
 end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
-typealias SizeableIntegers Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
-function ConstantInt{T<:Integer}(val::T, ctx::Context=GlobalContext())
+typealias SizeableInteger Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
+function ConstantInt{T<:SizeableInteger}(val::T, ctx::Context=GlobalContext())
     typ = IntType(sizeof(T)*8, ctx)
     return ConstantInt(typ, val, T<:Signed)
 end
