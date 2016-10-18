@@ -175,8 +175,7 @@ isfile(julia_config) || error("could not find julia-config.jl relative to $(JULI
 # build library with extra functions
 libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.so")
 cd(joinpath(@__DIR__, "llvm-extra")) do
-    withenv("CALLED_FROM_JULIA" => 1,
-            "LLVM_CONFIG" => llvm_config, "LLVM_LIBRARY" => llvm_library,
+    withenv("LLVM_CONFIG" => llvm_config, "LLVM_LIBRARY" => llvm_library,
             "JULIA_CONFIG" => julia_config, "JULIA" => julia) do
         # force a rebuild as the LLVM installation might have changed, undetectably
         run(`make clean`)

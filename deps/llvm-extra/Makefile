@@ -1,6 +1,5 @@
-ifndef CALLED_FROM_JULIA
-$(error This Makefile can only be invoked from Julia)
-endif
+# NOTE: this Makefile is only to be invoked from build.jl
+#       if running manually, make sure you provide all required environment variables
 
 TARGET  = libLLVM_extra.so
 SOURCES = $(shell find -name '*.cpp')
@@ -81,6 +80,7 @@ $(TARGET): $(OBJECTS)
 clean:
 	$(RM) $(TARGET) $(OBJECTS)
 
+CLANG_FORMAT ?= $(shell $(LLVM_CONFIG) --bindir)/clang-format
 .PHONY: format
 format:
-	$(shell $(LLVM_CONFIG) --bindir)/clang-format -style=LLVM -i $(SOURCES)
+	$(CLANG_FORMAT) -style=LLVM -i $(SOURCES)
