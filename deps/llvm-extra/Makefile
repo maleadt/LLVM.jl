@@ -1,8 +1,16 @@
 # NOTE: this Makefile is only to be invoked from build.jl
 #       if running manually, make sure you provide all required environment variables
 
-TARGET  = libLLVM_extra.so
-SOURCES = $(shell find -name '*.cpp')
+UNAME = $(shell uname)
+
+ifeq ($(UNAME), Darwin)
+	SLIB = dylib
+else
+	SLIB = so
+endif
+
+TARGET  = libLLVM_extra.$(SLIB)
+SOURCES = $(shell find . -name '*.cpp')
 OBJECTS = $(SOURCES:.cpp=.o)
 
 
@@ -40,7 +48,8 @@ CPPFLAGS += $(addprefix -DTARGET_, $(LLVM_TARGETS))
 # NOTE: this is best-effort, as the target compiler might just not support the new ABI
 OBJDUMP := $(shell command -v objdump 2> /dev/null)
 ifdef OBJDUMP
-CXX11_SYMBOLS=$(shell objdump -tT "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
+# CXX11_SYMBOLS=$(shell objdump -tT "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
+CXX11_SYMBOLS=$(shell otool -tV "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
 ifeq ($(CXX11_SYMBOLS),)
 CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
 else
@@ -64,11 +73,18 @@ LDLIBS += $(shell $(JULIA) $(JULIA_CONFIG) --ldlibs)
 # Build
 #
 
-LDFLAGS += -Wl,-z,defs
+ifeq ($(UNAME), Darwin)
+	#LDFLAGS += -Wl
+else
+	LDFLAGS += -Wl,-z,defs
+endif
 
 # shared-library building
 CXXFLAGS += -fPIC
 %.so:
+	$(LINK.cc) -shared $^ $(LDFLAGS) $(LDLIBS) -o $@
+
+%.dylib:
 	$(LINK.cc) -shared $^ $(LDFLAGS) $(LDLIBS) -o $@
 
 .PHONY: all

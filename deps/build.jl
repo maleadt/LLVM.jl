@@ -17,10 +17,13 @@ const DEBUG = haskey(ENV, "DEBUG")
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
+libext = is_apple() ? "dylib" : "so"
+
 function libname(version::VersionNumber)
     prerelease = join(version.prerelease)
-    return ["libLLVM-$(version.major).$(version.minor)$prerelease.so",
-            "libLLVM-$(version.major).$(version.minor).$(version.patch)$prerelease.so"]
+    return ["libLLVM.$libext",
+            "libLLVM-$(version.major).$(version.minor)$prerelease.$libext",
+            "libLLVM-$(version.major).$(version.minor).$(version.patch)$prerelease.$libext"]
 end
 
 
@@ -73,11 +76,11 @@ for dir in unique(configdirs)
 
     # first discover llvm-config binaries
     configs = Vector{Tuple{String, Nullable{VersionNumber}}}()
-    for file in readdir(dir), re in [r"llvm-config-(\d).(\d).(\d)", r"llvm-config-(\d).(\d)"]
-        m = match(re, file)
+    for file in readdir(dir)
+        m = match(r"llvm-config", file)
         if m != nothing
             path = joinpath(dir, file)
-            version = VersionNumber(map(s->parse(Int,s), m.captures)...)
+            version = VersionNumber(strip(readstring(`$path --version`)))
             debug("- found llvm-config at $path")
             push!(configs, tuple(path, Nullable(version)))
         end
@@ -173,7 +176,7 @@ julia_config = joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl")
 isfile(julia_config) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
 
 # build library with extra functions
-libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.so")
+libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.$libext")
 cd(joinpath(@__DIR__, "llvm-extra")) do
     withenv("LLVM_CONFIG" => llvm_config, "LLVM_LIBRARY" => llvm_library,
             "JULIA_CONFIG" => julia_config, "JULIA" => julia) do
