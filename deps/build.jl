@@ -82,28 +82,19 @@ for dir in unique(configdirs)
     debug("Searching for config binaries in $dir")
 
     # first discover llvm-config binaries
-    configs = Vector{Tuple{String, Nullable{VersionNumber}}}()
+    configs = Vector{Tuple{String, VersionNumber}}()
     for file in readdir(dir)
         if startswith(file, "llvm-config")
             path = joinpath(dir, file)
             version = VersionNumber(strip(readstring(`$path --version`)))
             debug("- found llvm-config at $path")
-            push!(configs, tuple(path, Nullable(version)))
+            push!(configs, tuple(path, version))
         end
     end
-    config = joinpath(dir, "llvm-config")
-    ispath(config) && push!(configs, tuple(config, Nullable{VersionNumber}()))
 
     # then discover libraries
-    for (config, version) in configs
-        debug("Searching for libraries using $config")
-        # deal with unversioned llvm-config binaries
-        if isnull(version)
-            config_version = VersionNumber(readchomp(`$config --version`))
-            debug("... reports LLVM v$config_version")
-        else
-            config_version = get(version)
-        end
+    for (config, config_version) in configs
+        debug("Searching for libraries using $config reporting $config_version")
 
         # prerelease versions have an "svn" tag
         library_versions = [config_version,
@@ -114,10 +105,13 @@ for dir in unique(configdirs)
         libdir = readchomp(`$config --libdir`)
         debug("... contains libraries in $libdir")
         for library_version in library_versions, name in libname(library_version)
+            # NOTE: library_version is only used to find the library file names,
+            #       the actual version is assumed to be what `llvm-config` reported
             lib = joinpath(libdir, name)
-            if ispath(lib)
-                debug("- found v$library_version at $lib")
-                push!(llvms, tuple(lib, config, library_version))
+            entry = tuple(lib, config, config_version)
+            if ispath(lib) && !(entry in llvms)
+                debug("- found v$config_version at $lib")
+                push!(llvms, entry)
             end
         end
     end
