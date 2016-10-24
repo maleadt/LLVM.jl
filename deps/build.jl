@@ -17,10 +17,20 @@ const DEBUG = haskey(ENV, "DEBUG")
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
+const libext = is_apple() ? "dylib" : "so"
+
 function libname(version::VersionNumber)
-    prerelease = join(version.prerelease)
-    return ["libLLVM-$(version.major).$(version.minor)$prerelease.so",
-            "libLLVM-$(version.major).$(version.minor).$(version.patch)$prerelease.so"]
+    @static if is_apple()
+        # macOS dylibs are versioned already
+        return ["libLLVM.dylib"]
+    elseif is_linux()
+        # Linux DSO's aren't versioned, so only use versioned filenames
+        prerelease = join(version.prerelease)
+        return ["libLLVM-$(version.major).$(version.minor)$prerelease.so",
+                "libLLVM-$(version.major).$(version.minor).$(version.patch)$prerelease.so"]
+    else
+        error("Unknown OS")
+    end
 end
 
 
@@ -72,29 +82,19 @@ for dir in unique(configdirs)
     debug("Searching for config binaries in $dir")
 
     # first discover llvm-config binaries
-    configs = Vector{Tuple{String, Nullable{VersionNumber}}}()
-    for file in readdir(dir), re in [r"llvm-config-(\d).(\d).(\d)", r"llvm-config-(\d).(\d)"]
-        m = match(re, file)
-        if m != nothing
+    configs = Vector{Tuple{String, VersionNumber}}()
+    for file in readdir(dir)
+        if startswith(file, "llvm-config")
             path = joinpath(dir, file)
-            version = VersionNumber(map(s->parse(Int,s), m.captures)...)
+            version = VersionNumber(strip(readstring(`$path --version`)))
             debug("- found llvm-config at $path")
-            push!(configs, tuple(path, Nullable(version)))
+            push!(configs, tuple(path, version))
         end
     end
-    config = joinpath(dir, "llvm-config")
-    ispath(config) && push!(configs, tuple(config, Nullable{VersionNumber}()))
 
     # then discover libraries
-    for (config, version) in configs
-        debug("Searching for libraries using $config")
-        # deal with unversioned llvm-config binaries
-        if isnull(version)
-            config_version = VersionNumber(readchomp(`$config --version`))
-            debug("... reports LLVM v$config_version")
-        else
-            config_version = get(version)
-        end
+    for (config, config_version) in configs
+        debug("Searching for libraries using $config reporting $config_version")
 
         # prerelease versions have an "svn" tag
         library_versions = [config_version,
@@ -105,10 +105,13 @@ for dir in unique(configdirs)
         libdir = readchomp(`$config --libdir`)
         debug("... contains libraries in $libdir")
         for library_version in library_versions, name in libname(library_version)
+            # NOTE: library_version is only used to find the library file names,
+            #       the actual version is assumed to be what `llvm-config` reported
             lib = joinpath(libdir, name)
-            if ispath(lib)
-                debug("- found v$library_version at $lib")
-                push!(llvms, tuple(lib, config, library_version))
+            entry = tuple(lib, config, config_version)
+            if ispath(lib) && !(entry in llvms)
+                debug("- found v$config_version at $lib")
+                push!(llvms, entry)
             end
         end
     end
@@ -158,6 +161,11 @@ end
 wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
 @assert isdir(wrapped_libdir)
 
+# sanity check: open the library
+# NOTE: can't do this because LLVM 3.9 can link against libLTO (see Makefile workaround)
+# debug("Opening library")
+# Libdl.dlopen(llvm_library)
+
 
 #
 # Finishing up
@@ -173,7 +181,7 @@ julia_config = joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl")
 isfile(julia_config) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
 
 # build library with extra functions
-libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.so")
+libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.$libext")
 cd(joinpath(@__DIR__, "llvm-extra")) do
     withenv("LLVM_CONFIG" => llvm_config, "LLVM_LIBRARY" => llvm_library,
             "JULIA_CONFIG" => julia_config, "JULIA" => julia) do
@@ -182,6 +190,10 @@ cd(joinpath(@__DIR__, "llvm-extra")) do
         run(`make -j$(Sys.CPU_CORES+1)`)
     end
 end
+
+# sanity check: open the library
+debug("Opening wrapper library")
+Libdl.dlopen(libllvm_extra)
 
 llvm_library_mtime = stat(llvm_library).mtime
 
