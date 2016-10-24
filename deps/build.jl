@@ -167,6 +167,11 @@ end
 wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
 @assert isdir(wrapped_libdir)
 
+# sanity check: open the library
+# NOTE: can't do this because LLVM 3.9 can link against libLTO (see Makefile workaround)
+# debug("Opening library")
+# Libdl.dlopen(llvm_library)
+
 
 #
 # Finishing up
@@ -191,6 +196,10 @@ cd(joinpath(@__DIR__, "llvm-extra")) do
         run(`make -j$(Sys.CPU_CORES+1)`)
     end
 end
+
+# sanity check: open the library
+debug("Opening wrapper library")
+Libdl.dlopen(libllvm_extra)
 
 llvm_library_mtime = stat(llvm_library).mtime
 
@@ -218,6 +227,3 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         include("$libllvm_wrapper")
         include("$libllvm_extra_wrapper")""")
 end
-
-# final sanity check: open the library
-Libdl.dlopen(llvm_library)

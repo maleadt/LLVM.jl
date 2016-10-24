@@ -27,6 +27,20 @@ LDFLAGS += "-Wl,-rpath,$(dir $(LLVM_LIBRARY))"
 ifeq ($(UNAME), Darwin)
   # macOS dylibs are versioned already
   LDLIBS += -lLLVM
+
+  # some LLVM libraries erroneously link against libLTO (D25865), provided by Julia too.
+  # however, for some reason loading libLLVM only picks up / prioritizes the Julia RPATH,
+  # loading the wrong version of libLTO. workaround: load the correct libLTO ourselves now.
+  # NOTE: I haven't seen this arise on Linux, but might very well happen there too.
+  OTOOL := $(shell command -v otool 2> /dev/null)
+  ifdef OTOOL
+    LIBLTO=$(shell $(OTOOL) -L "$(LLVM_LIBRARY)" | grep "libLTO")
+    ifneq ($(LIBLTO),)
+      LDLIBS += -lLTO
+    endif
+  else
+    $(error otool not available)
+  endif
 else
   # specify the versioned library name to make sure we pick up the correct one
   LDLIBS += -l:$(notdir $(LLVM_LIBRARY))
@@ -53,10 +67,10 @@ CPPFLAGS += $(addprefix -DTARGET_, $(LLVM_TARGETS))
 NM := $(shell command -v nm 2> /dev/null)
 ifdef NM
   ifeq ($(UNAME),Linux)
-    CXX11_SYMBOLS=$(shell nm -D "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
+    CXX11_SYMBOLS=$(shell $(NM) -D "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
   endif
   ifeq ($(UNAME),Darwin)
-    CXX11_SYMBOLS=$(shell nm -g "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
+    CXX11_SYMBOLS=$(shell $(NM) -g "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
   endif
   ifeq ($(CXX11_SYMBOLS),)
     CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
@@ -64,7 +78,7 @@ ifdef NM
     CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=1
   endif
 else
-  $(warning "nm not available, cannot detect C++11 ABI")
+  $(warning nm not available, cannot detect C++11 ABI)
 endif
 
 
