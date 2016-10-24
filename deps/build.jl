@@ -17,13 +17,20 @@ const DEBUG = haskey(ENV, "DEBUG")
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
-libext = is_apple() ? "dylib" : "so"
+const libext = is_apple() ? "dylib" : "so"
 
 function libname(version::VersionNumber)
-    prerelease = join(version.prerelease)
-    return ["libLLVM.$libext",
-            "libLLVM-$(version.major).$(version.minor)$prerelease.$libext",
-            "libLLVM-$(version.major).$(version.minor).$(version.patch)$prerelease.$libext"]
+    @static if is_apple()
+        # macOS dylibs are versioned already
+        return ["libLLVM.dylib"]
+    elseif is_linux()
+        # Linux DSO's aren't versioned, so only use versioned filenames
+        prerelease = join(version.prerelease)
+        return ["libLLVM-$(version.major).$(version.minor)$prerelease.so",
+                "libLLVM-$(version.major).$(version.minor).$(version.patch)$prerelease.so"]
+    else
+        error("Unknown OS")
+    end
 end
 
 
@@ -77,8 +84,7 @@ for dir in unique(configdirs)
     # first discover llvm-config binaries
     configs = Vector{Tuple{String, Nullable{VersionNumber}}}()
     for file in readdir(dir)
-        m = match(r"llvm-config", file)
-        if m != nothing
+        if startswith(file, "llvm-config")
             path = joinpath(dir, file)
             version = VersionNumber(strip(readstring(`$path --version`)))
             debug("- found llvm-config at $path")
@@ -212,3 +218,6 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         include("$libllvm_wrapper")
         include("$libllvm_extra_wrapper")""")
 end
+
+# final sanity check: open the library
+Libdl.dlopen(llvm_library)

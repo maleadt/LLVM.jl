@@ -1,12 +1,12 @@
 # NOTE: this Makefile is only to be invoked from build.jl
 #       if running manually, make sure you provide all required environment variables
 
-UNAME = $(shell uname)
+UNAME = $(shell uname -s)
 
 ifeq ($(UNAME), Darwin)
-	SLIB = dylib
+  SLIB := dylib
 else
-	SLIB = so
+  SLIB := so
 endif
 
 TARGET  = libLLVM_extra.$(SLIB)
@@ -23,10 +23,14 @@ CXXFLAGS = $(shell $(LLVM_CONFIG) --cxxflags)
 LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags)
 LDLIBS = $(shell $(LLVM_CONFIG) --system-libs)
 
-# specify a specific rpath and library name to mare sure we pick up the correct library
-# NOTE: this doesn't use llvm-config, but uses the LLVM_LIBRARY variable passed by build.jl
-LDLIBS += -l:$(notdir $(LLVM_LIBRARY))
 LDFLAGS += "-Wl,-rpath,$(dir $(LLVM_LIBRARY))"
+ifeq ($(UNAME), Darwin)
+  # macOS dylibs are versioned already
+  LDLIBS += -lLLVM
+else
+  # specify the versioned library name to make sure we pick up the correct one
+  LDLIBS += -l:$(notdir $(LLVM_LIBRARY))
+endif
 
 # sanitize the cflags llvm-config provides us with
 # (removing C++ specific ones, or flags supported by only Clang or GCC)
@@ -46,17 +50,21 @@ CPPFLAGS += $(addprefix -DTARGET_, $(LLVM_TARGETS))
 
 # try to detect LLVM's C++ ABI, and configure GLIBC accordingly
 # NOTE: this is best-effort, as the target compiler might just not support the new ABI
-OBJDUMP := $(shell command -v objdump 2> /dev/null)
-ifdef OBJDUMP
-# CXX11_SYMBOLS=$(shell objdump -tT "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
-CXX11_SYMBOLS=$(shell otool -tV "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
-ifeq ($(CXX11_SYMBOLS),)
-CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+NM := $(shell command -v nm 2> /dev/null)
+ifdef NM
+  ifeq ($(UNAME),Linux)
+    CXX11_SYMBOLS=$(shell nm -D "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
+  endif
+  ifeq ($(UNAME),Darwin)
+    CXX11_SYMBOLS=$(shell nm -g "$(LLVM_LIBRARY)" | grep -E "(_cxx11|B5cxx11)")
+  endif
+  ifeq ($(CXX11_SYMBOLS),)
+    CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+  else
+    CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=1
+  endif
 else
-CPPFLAGS += -D_GLIBCXX_USE_CXX11_ABI=1
-endif
-else
-$(warning "objdump not available, cannot detect C++11 ABI")
+  $(warning "nm not available, cannot detect C++11 ABI")
 endif
 
 
@@ -73,18 +81,13 @@ LDLIBS += $(shell $(JULIA) $(JULIA_CONFIG) --ldlibs)
 # Build
 #
 
-ifeq ($(UNAME), Darwin)
-	#LDFLAGS += -Wl
-else
-	LDFLAGS += -Wl,-z,defs
+ifneq ($(UNAME), Darwin)
+  LDFLAGS += -Wl,-z,defs
 endif
 
 # shared-library building
 CXXFLAGS += -fPIC
-%.so:
-	$(LINK.cc) -shared $^ $(LDFLAGS) $(LDLIBS) -o $@
-
-%.dylib:
+%.$(SLIB):
 	$(LINK.cc) -shared $^ $(LDFLAGS) $(LDLIBS) -o $@
 
 .PHONY: all
