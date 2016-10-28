@@ -88,18 +88,13 @@ endif
 
 CXXFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --cflags)
 LDFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --ldflags)
-LDLIBS += $(shell $(JULIA) $(JULIA_CONFIG) --ldlibs)
+# NOTE: we don't use the --ldlibs as we don't want to link against libjulia,
+#       relying on the fact that the library will be loaded when opening libLLVM_extra.
 
 
 #
 # Build
 #
-
-ifneq ($(UNAME), Darwin)					# macOS doesn't support this option!?
-ifeq ($(filter -fsanitize=%,$(CXXFLAGS)),)	# ASAN isn't linked
-  LDFLAGS += -Wl,-z,defs
-endif
-endif
 
 # shared-library building
 CXXFLAGS += -fPIC

@@ -180,13 +180,6 @@ isfile(julia) || error("could not find Julia executable from command $julia_cmd"
 julia_config = joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl")
 isfile(julia_config) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
 
-# location of libjulia
-julia_library = if ccall(:jl_is_debugbuild, Cint, ()) != 0
-    abspath(Libdl.dlpath("libjulia-debug"))
-else
-    abspath(Libdl.dlpath("libjulia"))
-end
-
 # build library with extra functions
 libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.$libext")
 cd(joinpath(@__DIR__, "llvm-extra")) do
@@ -215,9 +208,6 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         const libllvm_version = v"$llvm_version"
         const libllvm_path = "$llvm_library"
         const libllvm_mtime = $llvm_library_mtime
-
-        # Julia library properties
-        const libjulia_path = "$julia_library"
 
         # wrapper properties
         const wrapper_version = v"$wrapper_version"
