@@ -10,13 +10,29 @@ ext = joinpath(dirname(@__FILE__), "..", "deps", "ext.jl")
 isfile(ext) || error("Unable to load $ext\n\nPlease re-run Pkg.build(\"LLVM\"), and restart Julia.")
 include(ext)
 
+# check validity of LLVM and Julia libraries
+#
+# NOTE: these checks are precompile-incompatible (because they check whether loading our
+#       LLVM wrapper library might fail) as the deserializer already loads the library.
+#       They also need to happen before loading the library (which might fail),
+#       so we put it here rather than in __init__.
+isfile(libllvm_path) ||
+    error("LLVM library missing, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
+julia_library = if ccall(:jl_is_debugbuild, Cint, ()) != 0
+    abspath(Libdl.dlpath("libjulia-debug"))
+else
+    abspath(Libdl.dlpath("libjulia"))
+end
+julia_library == libjulia_path ||   # loading 2 instances of libjulia fails horribly
+    error("Using a different Julia instance, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
+
 # check whether the chosen LLVM is loaded already, ie. before having loaded it via `ccall`.
 # if it isn't, we have exclusive access, allowing destructive operations (like shutting LLVM
 # down).
 #
 # this check doesn't work in `__init__` because in the case of precompilation the
 # deserializer already loads the library.
-const exclusive = Libdl.dlopen_e(lib_path, Libdl.RTLD_NOLOAD) == C_NULL
+const exclusive = Libdl.dlopen_e(libllvm_path, Libdl.RTLD_NOLOAD) == C_NULL
 
 end
 
@@ -43,10 +59,9 @@ include("bitcode.jl")
 include("transform.jl")
 
 function __init__()
-    debug("Checking validity of $(API.lib_path) (", (API.exclusive?"exclusive":"non-exclusive"), " access)")
-    isfile(API.lib_path) ||
-        error("LLVM library missing, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
-    stat(API.lib_path).mtime == API.lib_mtime ||
+    # check validity of LLVM library
+    debug("Checking validity of $(API.libllvm_path) (", (API.exclusive?"exclusive":"non-exclusive"), " access)")
+    stat(API.libllvm_path).mtime == API.libllvm_mtime ||
         warn("LLVM library has been modified, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
 
     _install_handlers()

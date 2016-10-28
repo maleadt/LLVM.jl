@@ -66,3 +66,19 @@ compiler doesn't support said ABI.
 Most if these issues can be fixed by using the same compiler LLVM was build with to compile
 `llvm-extra`. You can override the selected compiler by defining the `CC` and `CXX`
 environment variables, eg. `CC=clang CXX=clang++ julia -e 'Pkg.build("LLVM")'`.
+
+
+### Loading LLVM.jl segfaults or asserts in LLVM
+
+The assertion could be `Two passes with the same argument (-LowerSIMDLoop) attempted to be
+registered!`, or really any other one indicating global state got reinitialized.
+
+This typically indicates that `libjulia` got loaded twice, trampling over
+already-initialized global state of the LLVM library. This is most likely due to the
+`libLLVM_extra` wrapper being linked to a different `libjulia`, eg. after having switched
+from a release to a debug build of Julia. We cannot detect this situation, as the
+deserializer eagerly reloads the wrapper library, pulling in the second `libjulia` before
+any code is executed.
+
+To fix this, re-build LLVM.jl to recompile the wrapper library, automatically linking
+against the correct `libjulia`.

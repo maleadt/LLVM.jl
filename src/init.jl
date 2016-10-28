@@ -3,7 +3,7 @@
 export version, Shutdown,
        ismultithreaded
 
-version() = return API.lib_version
+version() = return API.libllvm_version
 
 function Shutdown()
   API.exclusive || error("Cannot shutdown LLVM without exclusive access")
