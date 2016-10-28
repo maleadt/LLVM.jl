@@ -48,7 +48,7 @@ endif
 
 # sanitize the cflags llvm-config provides us with
 # (removing C++ specific ones, or flags supported by only Clang or GCC)
-BADFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor
+BADFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor -gline-tables-only
 CXXFLAGS := $(filter-out $(BADFLAGS),$(CXXFLAGS))
 
 # handle RTTI flags
@@ -95,8 +95,10 @@ LDLIBS += $(shell $(JULIA) $(JULIA_CONFIG) --ldlibs)
 # Build
 #
 
-ifneq ($(UNAME), Darwin)
+ifneq ($(UNAME), Darwin)					# macOS doesn't support this option!?
+ifeq ($(filter -fsanitize=%,$(CXXFLAGS)),)	# ASAN isn't linked
   LDFLAGS += -Wl,-z,defs
+endif
 endif
 
 # shared-library building
