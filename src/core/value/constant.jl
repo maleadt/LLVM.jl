@@ -129,3 +129,11 @@ isextinit(gv::GlobalVariable) =
   BoolFromLLVM(API.LLVMIsExternallyInitialized(ref(gv)))
 extinit!(gv::GlobalVariable, bool) =
   API.LLVMSetExternallyInitialized(ref(gv), BoolToLLVM(bool))
+
+
+## expressions
+
+export ConstantExpr
+
+@reftypedef proxy=Value kind=LLVMConstantExprValueKind immutable ConstantExpr <: Constant end
+
