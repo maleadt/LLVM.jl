@@ -102,7 +102,7 @@ function parameters(ft::FunctionType)
     nparams = API.LLVMCountParamTypes(ref(ft))
     params = Vector{API.LLVMTypeRef}(nparams)
     API.LLVMGetParamTypes(ref(ft), params)
-    return map(t->LLVMType(t), params)
+    return LLVMType.(params)
 end
 
 
@@ -210,7 +210,7 @@ endof(iter::StructTypeElementSet) = length(iter)
 function collect(iter::StructTypeElementSet)
     elems = Vector{API.LLVMTypeRef}(length(iter))
     API.LLVMGetStructElementTypes(ref(iter.typ), elems)
-    return map(el->LLVMType(el), elems)
+    return LLVMType.(elems)
 end
 
 

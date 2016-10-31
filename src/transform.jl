@@ -72,7 +72,7 @@ function define_transforms(transforms)
             push!(groups, SubString(str, i, j))
             i = j+1
         end
-        jl_fname = Symbol(join(map(s -> lowercase(s), groups), '_'), '!')
+        jl_fname = Symbol(join(lowercase.(groups), '_'), '!')
 
         @eval begin
             export $jl_fname

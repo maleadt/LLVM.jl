@@ -95,7 +95,7 @@ function get(iter::ModuleMetadataSet, name::String)
     nops == 0 && throw(KeyError(name))
     ops = Vector{API.LLVMValueRef}(nops)
     API.LLVMGetNamedMetadataOperands(ref(iter.mod), name, ops)
-    return map(t->Value(t), ops)
+    return Value.(ops)
 end
 
 push!(iter::ModuleMetadataSet, name::String, val::Value) =
