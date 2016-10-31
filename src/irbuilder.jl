@@ -47,10 +47,10 @@ debuglocation!(builder::Builder, inst::Instruction) =
 
 ## build methods
 
-# NOTE: sadly we can't use type information for differentiating eg. add! and fadd!,
-#       as an ArgumentKind doesn't show us its inner type
+# NOTE: we can't use type information for differentiating eg. add! and fadd! based on args,
+#       as ArgumentKind (LLVM's way of referring to contained function arguments) is untyped
 
-export unreachable!, ret!, add!, fadd!, br!, alloca!
+export unreachable!, ret!, add!, fadd!, br!, alloca!, call!
 
 unreachable!(builder::Builder) =
     construct(Instruction, API.LLVMBuildUnreachable(ref(builder)))
@@ -80,3 +80,7 @@ br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) =
 
 alloca!(builder::Builder, typ::LLVMType, name::String="") =
     construct(Instruction, API.LLVMBuildAlloca(ref(builder), ref(typ), name))
+
+call!(builder::Builder, fn::LLVM.Function, args::Vector{Value}=Value[], name::String="") =
+    construct(Instruction, API.LLVMBuildCall(ref(builder), ref(fn), ref.(args),
+                                             Cuint(length(args)), name))

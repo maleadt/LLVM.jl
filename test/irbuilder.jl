@@ -51,6 +51,9 @@ LLVM.Module("SomeModule", ctx) do mod
     @test name(allocinst2) == "bar"
     @test collect(instructions(entry)) == [unrinst, addinst, retinst2, allocinst1, allocinst2, retinst]
 
+    trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
+    call!(builder, trap)
+
     position!(builder)
 end
 end
