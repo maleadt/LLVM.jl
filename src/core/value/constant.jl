@@ -11,7 +11,7 @@ typealias SmallInteger Union{Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, U
 function ConstantInt(typ::IntegerType, val::SmallInteger, signed=false)
     wideval = convert(Int, val)
     bits = reinterpret(Culonglong, wideval)
-    return construct(ConstantInt, API.LLVMConstInt(ref(typ), bits, BoolToLLVM(signed)))
+    return ConstantInt(API.LLVMConstInt(ref(typ), bits, BoolToLLVM(signed)))
 end
 
 function ConstantInt(typ::IntegerType, val::Integer, signed=false)
@@ -21,7 +21,7 @@ function ConstantInt(typ::IntegerType, val::Integer, signed=false)
     for i in 1:numwords
         words[i] = (val >> 64(i-1)) % Culonglong
     end
-    return construct(ConstantInt,
+    return ConstantInt(
                      API.LLVMConstIntOfArbitraryPrecision(ref(typ), Cuint(numwords), words))
 end
 
@@ -42,7 +42,7 @@ convert{T<:Signed}(::Type{T}, val::ConstantInt) =
 @reftypedef proxy=Value kind=LLVMConstantFPValueKind immutable ConstantFP <: Constant end
 
 ConstantFP(typ::LLVMDouble, val::Real) =
-    construct(ConstantFP, API.LLVMConstReal(ref(typ), Cdouble(val)))
+    ConstantFP(API.LLVMConstReal(ref(typ), Cdouble(val)))
 
 convert(::Type{Float64}, val::ConstantFP) =
     API.LLVMConstRealGetDouble(ref(val), Ref{API.LLVMBool}())
@@ -100,14 +100,11 @@ import Base: get, push!
 @reftypedef proxy=Value kind=LLVMGlobalVariableValueKind immutable GlobalVariable <: GlobalObject end
 
 GlobalVariable(mod::Module, typ::LLVMType, name::String) =
-    construct(GlobalVariable,
-              API.LLVMAddGlobal(ref(mod),
-                                ref(typ), name))
+    GlobalVariable(API.LLVMAddGlobal(ref(mod), ref(typ), name))
 
 GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer) =
-    construct(GlobalVariable,
-              API.LLVMAddGlobalInAddressSpace(ref(mod), ref(typ),
-                                              name, Cuint(addrspace)))
+    GlobalVariable( API.LLVMAddGlobalInAddressSpace(ref(mod), ref(typ),
+                                                    name, Cuint(addrspace)))
 
 unsafe_delete!(::Module, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(gv))
 

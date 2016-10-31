@@ -47,6 +47,7 @@ macro reftypedef(args...)
 
     # decode keyword arguments
     proxy = Nullable{Symbol}()
+    kind = Nullable{Symbol}()
     for kwarg in kwargs
         if !isa(kwarg, Expr) || kwarg.head != :(=)
             error("malformed keyword arguments before type definition")
@@ -89,6 +90,7 @@ macro reftypedef(args...)
         # kind: populate parent's discriminator cache
         if key == :kind
             @assert !isnull(proxy)
+            kind = Nullable(value)
             discriminator = discriminators[get(proxy)]
             push!(code.args, :( $discriminator[API.$value] = $(typename) ))
         end
@@ -104,6 +106,23 @@ macro reftypedef(args...)
     
         # add `ref` field containing a typed pointer
         unshift!(typedef.args[3].args, :( ref::API.$reftype ))
+
+        # if we have a `kind` field, we expect the proxy to have an identify method taking
+        # an untyped ref. use it to define a checking-constructor (verifying the type)
+        if !isnull(kind)
+            push!(typedef.args[3].args, :(
+                function $typename(ref::API.$reftype)
+                    ref == C_NULL && throw(NullException())
+                    @static if DEBUG
+                        effective = identify($(get(proxy)), ref)
+                        if effective != $typename
+                            error("invalid conversion of $effective reference to ", $typename)
+                        end
+                    end
+                    return new(ref)
+                end
+            ))
+        end
     end
 
     # define a `ref` method for creating a ref from a pointer

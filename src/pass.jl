@@ -35,7 +35,7 @@ export FunctionPass
 
     function FunctionPass(name, runner)
         function callback(ptr::Ptr{Void})::Bool
-            fn = construct(LLVM.Function, ref(LLVM.Function, ptr))
+            fn = LLVM.Function(ref(LLVM.Function, ptr))
             return runner(fn)::Bool
         end
 

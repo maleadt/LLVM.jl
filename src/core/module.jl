@@ -123,18 +123,18 @@ end
 function get(iter::ModuleGlobalSet, name::String)
     objref = API.LLVMGetNamedGlobal(ref(iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
-    return construct(GlobalVariable, objref)
+    return GlobalVariable(objref)
 end
 
 start(iter::ModuleGlobalSet) = API.LLVMGetFirstGlobal(ref(iter.mod))
 
 next(::ModuleGlobalSet, state) =
-    (construct(GlobalVariable,state), API.LLVMGetNextGlobal(state))
+    (GlobalVariable(state), API.LLVMGetNextGlobal(state))
 
 done(::ModuleGlobalSet, state) = state == C_NULL
 
 last(iter::ModuleGlobalSet) =
-    construct(GlobalVariable, API.LLVMGetLastGlobal(ref(iter.mod)))
+    GlobalVariable(API.LLVMGetLastGlobal(ref(iter.mod)))
 
 iteratorsize(::ModuleGlobalSet) = Base.SizeUnknown()
 
@@ -160,17 +160,17 @@ end
 function get(iter::ModuleFunctionSet, name::String)
     objref = API.LLVMGetNamedFunction(ref(iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
-    return construct(Function, objref)
+    return Function(objref)
 end
 
 start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(iter.mod))
 
 next(::ModuleFunctionSet, state) =
-    (construct(Function,state), API.LLVMGetNextFunction(state))
+    (Function(state), API.LLVMGetNextFunction(state))
 
 done(::ModuleFunctionSet, state) = state == C_NULL
 
 last(iter::ModuleFunctionSet) =
-    construct(Function, API.LLVMGetLastFunction(ref(iter.mod)))
+    Function(API.LLVMGetLastFunction(ref(iter.mod)))
 
 iteratorsize(::ModuleFunctionSet) = Base.SizeUnknown()

@@ -36,13 +36,13 @@ pointersize(data::DataLayout) = API.LLVMPointerSize(ref(data))
 pointersize(data::DataLayout, addrspace::Integer) =
     API.LLVMPointerSizeForAS(ref(data), Cuint(addrspace))
 
-intptr(data::DataLayout) = construct(IntegerType, API.LLVMIntPtrType(ref(data)))
+intptr(data::DataLayout) = IntegerType(API.LLVMIntPtrType(ref(data)))
 intptr(data::DataLayout, addrspace::Integer) =
-    construct(IntegerType, API.LLVMIntPtrTypeForAS(ref(data), Cuint(addrspace)))
+    IntegerType(API.LLVMIntPtrTypeForAS(ref(data), Cuint(addrspace)))
 intptr(data::DataLayout, ctx::Context) =
-    construct(IntegerType, API.LLVMIntPtrTypeInContext(ref(ctx), ref(data)))
+    IntegerType(API.LLVMIntPtrTypeInContext(ref(ctx), ref(data)))
 intptr(data::DataLayout, addrspace::Integer, ctx::Context) =
-    construct(IntegerType, API.LLVMIntPtrTypeForASInContext(ref(ctx), ref(data),
+    IntegerType(API.LLVMIntPtrTypeForASInContext(ref(ctx), ref(data),
                                                             Cuint(addrspace)))
 
 sizeof(data::DataLayout, typ::LLVMType) =

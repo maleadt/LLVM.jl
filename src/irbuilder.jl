@@ -36,7 +36,7 @@ insert!(builder::Builder, inst::Instruction, name::String) =
     API.LLVMInsertIntoBuilderWithName(ref(builder), ref(inst), name)
 
 debuglocation(builder::Builder) =
-    construct(MetadataAsValue, API.LLVMGetCurrentDebugLocation(ref(builder)))
+    MetadataAsValue(API.LLVMGetCurrentDebugLocation(ref(builder)))
 debuglocation!(builder::Builder) =
     API.LLVMSetCurrentDebugLocation(ref(builder), ref(Value, C_NULL))
 debuglocation!(builder::Builder, loc::MetadataAsValue) =
@@ -53,34 +53,34 @@ debuglocation!(builder::Builder, inst::Instruction) =
 export unreachable!, ret!, add!, fadd!, br!, alloca!, call!
 
 unreachable!(builder::Builder) =
-    construct(Instruction, API.LLVMBuildUnreachable(ref(builder)))
+    Instruction(API.LLVMBuildUnreachable(ref(builder)))
 
 ret!(builder::Builder) =
-    construct(Instruction, API.LLVMBuildRetVoid(ref(builder)))
+    Instruction(API.LLVMBuildRetVoid(ref(builder)))
 
 ret!(builder::Builder, val::Value) =
-    construct(Instruction, API.LLVMBuildRet(ref(builder), ref(val)))
+    Instruction(API.LLVMBuildRet(ref(builder), ref(val)))
 
 add!(builder::Builder, lhs::Value, rhs::Value, name::String="") =
-    construct(Instruction, API.LLVMBuildAdd(ref(builder), ref(lhs),
+    Instruction(API.LLVMBuildAdd(ref(builder), ref(lhs),
                                             ref(rhs), name))
 
 fadd!(builder::Builder, lhs::Value, rhs::Value, name::String="") =
-    construct(Instruction, API.LLVMBuildFAdd(ref(builder), ref(lhs),
+    Instruction(API.LLVMBuildFAdd(ref(builder), ref(lhs),
                                             ref(rhs), name))
 
 br!(builder::Builder, dest::BasicBlock) =
-    construct(Instruction, API.LLVMBuildBr(ref(builder), blockref(dest)))
+    Instruction(API.LLVMBuildBr(ref(builder), blockref(dest)))
 
 br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) =
-    construct(Instruction, API.LLVMBuildCondBr(ref(builder),
+    Instruction(API.LLVMBuildCondBr(ref(builder),
                                                ref(ifval),
                                                blockref(thenbb),
                                                blockref(elsebb)))
 
 alloca!(builder::Builder, typ::LLVMType, name::String="") =
-    construct(Instruction, API.LLVMBuildAlloca(ref(builder), ref(typ), name))
+    Instruction(API.LLVMBuildAlloca(ref(builder), ref(typ), name))
 
 call!(builder::Builder, fn::LLVM.Function, args::Vector{Value}=Value[], name::String="") =
-    construct(Instruction, API.LLVMBuildCall(ref(builder), ref(fn), ref.(args),
+    Instruction(API.LLVMBuildCall(ref(builder), ref(fn), ref.(args),
                                              Cuint(length(args)), name))

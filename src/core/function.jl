@@ -7,22 +7,17 @@ export unsafe_delete!,
 import Base: get, push!
 
 Function(mod::Module, name::String, ft::FunctionType) =
-    construct(Function,
-              API.LLVMAddFunction(ref(mod), name,
-                                  ref(ft)))
+    Function(API.LLVMAddFunction(ref(mod), name, ref(ft)))
 
 unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(ref(f))
 
-personality(f::Function) =
-    construct(Function, API.LLVMGetPersonalityFn(ref(f)))
-personality!(f::Function, persfn::Function) =
-    API.LLVMSetPersonalityFn(ref(f), ref(persfn))
+personality(f::Function) = Function(API.LLVMGetPersonalityFn(ref(f)))
+personality!(f::Function, persfn::Function) = API.LLVMSetPersonalityFn(ref(f), ref(persfn))
 
 intrinsic_id(f::Function) = API.LLVMGetIntrinsicID(ref(f))
 
 callconv(f::Function) = API.LLVMGetFunctionCallConv(ref(f))
-callconv!(f::Function, cc) =
-    API.LLVMSetFunctionCallConv(ref(f), Cuint(cc))
+callconv!(f::Function, cc) = API.LLVMSetFunctionCallConv(ref(f), Cuint(cc))
 
 function gc(f::Function)
   ptr = API.LLVMGetGC(ref(f))
@@ -67,17 +62,17 @@ parameters(f::Function) = FunctionParameterSet(f)
 eltype(::FunctionParameterSet) = Argument
 
 getindex(iter::FunctionParameterSet, i) =
-  construct(Argument, API.LLVMGetParam(ref(iter.f), Cuint(i-1)))
+  Argument(API.LLVMGetParam(ref(iter.f), Cuint(i-1)))
 
 start(iter::FunctionParameterSet) = API.LLVMGetFirstParam(ref(iter.f))
 
 next(::FunctionParameterSet, state) =
-    (construct(Argument, state), API.LLVMGetNextParam(state))
+    (Argument(state), API.LLVMGetNextParam(state))
 
 done(::FunctionParameterSet, state) = state == C_NULL
 
 last(iter::FunctionParameterSet) =
-    construct(Argument, API.LLVMGetLastParam(ref(iter.f)))
+    Argument(API.LLVMGetLastParam(ref(iter.f)))
 
 length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.f))
 
@@ -85,7 +80,7 @@ length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.f))
 function collect(iter::FunctionParameterSet)
     elems = Vector{API.LLVMValueRef}(length(iter))
     API.LLVMGetParams(ref(iter.f), elems)
-    return map(el->construct(Argument, el), elems)
+    return map(el->Argument(el), elems)
 end
 
 # basic block iteration

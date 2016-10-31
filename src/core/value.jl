@@ -3,27 +3,15 @@
 
 export Value
 
-# Construct an unknown type of value object from a value ref.
-function dynamic_construct(::Type{Value}, ref::API.LLVMValueRef)
+# Pseudo-constructor, creating a object <: Value from a value ref
+function Value(ref::API.LLVMValueRef)
     ref == C_NULL && throw(NullException())
     return identify(Value, API.LLVMGetValueKind(ref))(ref)
 end
 
-Value(ref::API.LLVMValueRef) = dynamic_construct(Value, ref)
-
-# Construct an specific type of value object from a value ref.
-# In debug mode, this checks if the object type matches the underlying ref type.
-@inline function construct{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
-    T.abstract && error("Cannot construct an abstract type, use a concrete type instead (use dynamic_construct if unknown)")
-    ref == C_NULL && throw(NullException())
-    @static if DEBUG
-        RealT = identify(Value, API.LLVMGetValueKind(ref))
-        if T != RealT
-            error("invalid conversion of $RealT reference to $T")
-        end
-    end
-    return T(ref)
-end
+# this method is used by `@reftype` to generate a checking constructor
+identify(::Type{Value}, ref::API.LLVMValueRef) =
+    identify(Value, API.LLVMGetValueKind(ref))
 
 
 ## general APIs

@@ -12,7 +12,7 @@ import Base: delete!
 #       convert to Instruction refs, and that machinery doesn't apply to abstract types.
 
 Instruction(inst::Instruction) =
-    construct(Instruction, API.LLVMInstructionClone(ref(inst)))
+    Instruction(API.LLVMInstructionClone(ref(inst)))
 
 unsafe_delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionEraseFromParent(ref(inst))
@@ -22,7 +22,7 @@ delete!(::BasicBlock, inst::Instruction) =
 hasmetadata(inst::Instruction) = BoolFromLLVM(API.LLVMHasMetadata(ref(inst)))
 
 metadata(inst::Instruction, kind) =
-    construct(MetadataAsValue, API.LLVMGetMetadata(ref(inst), Cuint(kind)))
+    MetadataAsValue(API.LLVMGetMetadata(ref(inst), Cuint(kind)))
 metadata!(inst::Instruction, kind, node::MetadataAsValue) =
     API.LLVMSetMetadata(ref(inst), Cuint(kind), ref(node))
 
@@ -109,7 +109,7 @@ incoming(phi::Instruction) = PhiIncomingSet(phi)
 eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
 
 getindex(iter::PhiIncomingSet, i) =
-    tuple(construct(Value, API.LLVMGetIncomingValue(ref(iter.phi), Cuint(i-1))),
+    tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), Cuint(i-1))),
                 BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), Cuint(i-1))))
 
 function append!(iter::PhiIncomingSet, args::Vector{Tuple{Value, BasicBlock}})

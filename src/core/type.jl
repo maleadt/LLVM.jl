@@ -2,27 +2,15 @@ export LLVMType, issized, context, show
 
 import Base: show
 
-# Construct an unknown type of type object from a type ref.
-function dynamic_construct(::Type{LLVMType}, ref::API.LLVMTypeRef)
+# Pseudo-constructor, creating a object <: LLVMType from a type ref
+function LLVMType(ref::API.LLVMTypeRef)
     ref == C_NULL && throw(NullException())
     return identify(LLVMType, API.LLVMGetTypeKind(ref))(ref)
 end
 
-LLVMType(ref::API.LLVMTypeRef) = dynamic_construct(LLVMType, ref)
-
-# Construct an specific type of type object from a type ref.
-# In debug mode, this checks if the object type matches the underlying ref type.
-@inline function construct{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
-    T.abstract && error("Cannot construct an abstract type, use a concrete type instead (use dynamic_construct if unknown)")
-    ref == C_NULL && throw(NullException())
-    @static if DEBUG
-        RealT = identify(LLVMType, API.LLVMGetTypeKind(ref))
-        if T != RealT
-            error("invalid conversion of $RealT reference to $T")
-        end
-    end
-    return T(ref)
-end
+# this method is used by `@reftype` to generate a checking constructor
+identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
+    identify(LLVMType, API.LLVMGetTypeKind(ref))
 
 issized(typ::LLVMType) =
     BoolFromLLVM(API.LLVMTypeIsSized(ref(typ)))
@@ -44,16 +32,16 @@ for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     jl_fname = Symbol(T, :Type)
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
-        $jl_fname() = construct(IntegerType, API.$api_fname())
+        $jl_fname() = IntegerType(API.$api_fname())
         $jl_fname(ctx::Context) =
-            construct(IntegerType,
+            IntegerType(
                       API.$(Symbol(api_fname, :InContext))(ref(ctx)))
     end
 end
 
-IntType(bits::Integer) = construct(IntegerType, API.LLVMIntType(Cuint(bits)))
+IntType(bits::Integer) = IntegerType(API.LLVMIntType(Cuint(bits)))
 IntType(bits::Integer, ctx::Context) =
-    construct(IntegerType, API.LLVMIntTypeInContext(ref(ctx), Cuint(bits)))
+    IntegerType(API.LLVMIntTypeInContext(ref(ctx), Cuint(bits)))
 
 width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(ref(inttyp))
 
@@ -74,10 +62,9 @@ for T in [:Half, :Float, :Double]
     @eval begin
         @reftypedef proxy=LLVMType kind=$enumkind immutable $api_typename <: FloatingPointType end
 
-        $jl_fname() = construct($api_typename, API.$api_fname())
+        $jl_fname() = $api_typename(API.$api_fname())
         $jl_fname(ctx::Context) =
-            construct($api_typename,
-                      API.$(Symbol(api_fname, :InContext))(ref(ctx)))
+            $api_typename(API.$(Symbol(api_fname, :InContext))(ref(ctx)))
     end
 end
 
@@ -218,12 +205,12 @@ end
 
 @reftypedef proxy=LLVMType kind=LLVMVoidTypeKind immutable VoidType <: LLVMType end
 
-VoidType() = construct(VoidType, API.LLVMVoidType())
+VoidType() = VoidType(API.LLVMVoidType())
 VoidType(ctx::Context) =
-    construct(VoidType, API.LLVMVoidTypeInContext(ref(ctx)))
+    VoidType(API.LLVMVoidTypeInContext(ref(ctx)))
 
 @reftypedef proxy=LLVMType kind=LLVMLabelTypeKind immutable LabelType <: LLVMType end
 
-LabelType() = construct(LabelType, API.LLVMLabelType())
+LabelType() = LabelType(API.LLVMLabelType())
 LabelType(ctx::Context) =
-    construct(LabelType, API.LLVMLabelTypeInContext(ref(ctx)))
+    LabelType(API.LLVMLabelTypeInContext(ref(ctx)))

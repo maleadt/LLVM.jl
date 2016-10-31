@@ -16,16 +16,17 @@ Context() do ctx end
 
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
+    @test typeof(LLVM.ref(typ)) == LLVM.API.LLVMTypeRef                 # untyped
 
-    @test LLVM.construct(LLVM.IntegerType, LLVM.ref(typ)) == typ
+    @test typeof(LLVM.IntegerType(LLVM.ref(typ))) == LLVM.IntegerType   # type reconstructed
     if LLVM.DEBUG
-        @test_throws ErrorException LLVM.construct(LLVM.FunctionType, LLVM.ref(typ))
+        @test_throws ErrorException LLVM.FunctionType(LLVM.ref(typ))    # wrong type
     end
-    @test_throws NullException LLVM.construct(LLVM.FunctionType, LLVM.API.LLVMTypeRef(C_NULL))
-    @test_throws ErrorException LLVM.construct(LLVMType, LLVM.API.LLVMTypeRef(C_NULL))
+    @test_throws NullException LLVM.FunctionType(LLVM.API.LLVMTypeRef(C_NULL))
 
-    @test LLVM.dynamic_construct(LLVMType, LLVM.ref(typ)) == typ
-    @test_throws NullException LLVM.dynamic_construct(LLVMType, LLVM.API.LLVMTypeRef(C_NULL))
+    @test typeof(LLVM.ref(typ)) == LLVM.API.LLVMTypeRef
+    @test typeof(LLVMType(LLVM.ref(typ))) == LLVM.IntegerType           # type reconstructed
+    @test_throws NullException LLVMType(LLVM.API.LLVMTypeRef(C_NULL))
 
     LLVM.IntType(8)
     @test width(LLVM.IntType(8, ctx)) == 8
@@ -166,16 +167,16 @@ LLVM.Module("SomeModule", ctx) do mod
 
     typ = LLVM.Int32Type(ctx)
     val = alloca!(builder, typ, "foo")
+    @test typeof(LLVM.ref(val)) == LLVM.API.LLVMValueRef                # untyped
 
-    @test LLVM.construct(LLVM.Instruction, LLVM.ref(val)) == val
+    @test typeof(LLVM.Instruction(LLVM.ref(val))) == LLVM.Instruction   # type reconstructed
     if LLVM.DEBUG
-        @test_throws ErrorException LLVM.construct(LLVM.Function, LLVM.ref(val))
+        @test_throws ErrorException LLVM.Function(LLVM.ref(val))        # wrong
     end
-    @test_throws NullException LLVM.construct(LLVM.Function, LLVM.API.LLVMValueRef(C_NULL))
-    @test_throws ErrorException LLVM.construct(Value, LLVM.API.LLVMValueRef(C_NULL))
+    @test_throws NullException LLVM.Function(LLVM.API.LLVMValueRef(C_NULL))
 
-    @test LLVM.dynamic_construct(Value, LLVM.ref(val)) == val
-    @test_throws NullException LLVM.dynamic_construct(Value, LLVM.API.LLVMValueRef(C_NULL))
+    @test typeof(Value(LLVM.ref(val))) == LLVM.Instruction              # type reconstructed
+    @test_throws NullException Value(LLVM.API.LLVMValueRef(C_NULL))
 
     show(DevNull, val)
 

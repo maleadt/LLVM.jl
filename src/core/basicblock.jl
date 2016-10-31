@@ -20,11 +20,9 @@ unsafe_delete!(::Function, bb::BasicBlock) = API.LLVMDeleteBasicBlock(blockref(b
 delete!(::Function, bb::BasicBlock) =
     API.LLVMRemoveBasicBlockFromParent(blockref(bb))
 
-parent(bb::BasicBlock) =
-    construct(Function, API.LLVMGetBasicBlockParent(blockref(bb)))
+parent(bb::BasicBlock) = Function(API.LLVMGetBasicBlockParent(blockref(bb)))
 
-terminator(bb::BasicBlock) =
-    construct(Instruction, API.LLVMGetBasicBlockTerminator(blockref(bb)))
+terminator(bb::BasicBlock) = Instruction(API.LLVMGetBasicBlockTerminator(blockref(bb)))
 
 name(bb::BasicBlock) =
     unsafe_string(API.LLVMGetBasicBlockName(blockref(bb)))
@@ -52,11 +50,11 @@ eltype(::BasicBlockInstructionSet) = Instruction
 start(iter::BasicBlockInstructionSet) = API.LLVMGetFirstInstruction(blockref(iter.bb))
 
 next(::BasicBlockInstructionSet, state) =
-    (construct(Instruction,state), API.LLVMGetNextInstruction(state))
+    (Instruction(state), API.LLVMGetNextInstruction(state))
 
 done(::BasicBlockInstructionSet, state) = state == C_NULL
 
 last(iter::BasicBlockInstructionSet) =
-    construct(Instruction, API.LLVMGetLastInstruction(blockref(iter.bb)))
+    Instruction(API.LLVMGetLastInstruction(blockref(iter.bb)))
 
 iteratorsize(::BasicBlockInstructionSet) = Base.SizeUnknown()
