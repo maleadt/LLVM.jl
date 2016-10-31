@@ -9,6 +9,8 @@ function dynamic_construct(::Type{Value}, ref::API.LLVMValueRef)
     return identify(Value, API.LLVMGetValueKind(ref))(ref)
 end
 
+Value(ref::API.LLVMValueRef) = dynamic_construct(Value, ref)
+
 # Construct an specific type of value object from a value ref.
 # In debug mode, this checks if the object type matches the underlying ref type.
 @inline function construct{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
@@ -32,7 +34,7 @@ import Base: show
 
 # TODO: missing LLVMGetValueContext
 
-llvmtype(val::Value) = dynamic_construct(LLVMType, API.LLVMTypeOf(ref(val)))
+llvmtype(val::Value) = LLVMType(API.LLVMTypeOf(ref(val)))
 
 name(val::Value) = unsafe_string(API.LLVMGetValueName(ref(val)))
 name!(val::Value, name::String) = API.LLVMSetValueName(ref(val), name)
@@ -62,8 +64,8 @@ export Use, user, value
 
 @reftypedef ref=LLVMUseRef immutable Use end
 
-user(use::Use) =  dynamic_construct(Value, API.LLVMGetUser(     ref(use)))
-value(use::Use) = dynamic_construct(Value, API.LLVMGetUsedValue(ref(use)))
+user(use::Use) =  Value(API.LLVMGetUser(     ref(use)))
+value(use::Use) = Value(API.LLVMGetUsedValue(ref(use)))
 
 # use iteration
 

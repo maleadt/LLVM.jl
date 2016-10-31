@@ -70,7 +70,7 @@ end
 function get(iter::ModuleTypeSet, name::String)
     objref = API.LLVMGetTypeByName(ref(iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
-    return dynamic_construct(LLVMType, objref)
+    return LLVMType(objref)
 end
 
 
@@ -95,7 +95,7 @@ function get(iter::ModuleMetadataSet, name::String)
     nops == 0 && throw(KeyError(name))
     ops = Vector{API.LLVMValueRef}(nops)
     API.LLVMGetNamedMetadataOperands(ref(iter.mod), name, ops)
-    return map(t->dynamic_construct(Value, t), ops)
+    return map(t->Value(t), ops)
 end
 
 push!(iter::ModuleMetadataSet, name::String, val::Value) =

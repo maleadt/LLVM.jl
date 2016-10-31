@@ -112,7 +112,7 @@ GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer) =
 unsafe_delete!(::Module, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(gv))
 
 initializer(gv::GlobalVariable) =
-  dynamic_construct(Value, API.LLVMGetInitializer(ref(gv)))
+  Value(API.LLVMGetInitializer(ref(gv)))
 initializer!(gv::GlobalVariable, val::Constant) =
   API.LLVMSetInitializer(ref(gv), ref(val))
 

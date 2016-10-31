@@ -54,7 +54,7 @@ export isconditional, condition, condition!, default_dest
 isconditional(br::Instruction) = BoolFromLLVM(API.LLVMIsConditional(ref(br)))
 
 condition(br::Instruction) =
-    dynamic_construct(Value, API.LLVMGetCondition(ref(br)))
+    Value(API.LLVMGetCondition(ref(br)))
 condition!(br::Instruction, cond::Value) =
     API.LLVMSetCondition(ref(br), ref(cond))
 

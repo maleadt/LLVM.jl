@@ -38,5 +38,5 @@ function operands(md::MDNode)
     nops = API.LLVMGetMDNodeNumOperands(ref(md))
     ops = Vector{API.LLVMValueRef}(nops)
     API.LLVMGetMDNodeOperands(ref(md), ops)
-    return map(v->dynamic_construct(Value, v), ops)
+    return map(v->Value(v), ops)
 end

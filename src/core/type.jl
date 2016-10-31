@@ -8,6 +8,8 @@ function dynamic_construct(::Type{LLVMType}, ref::API.LLVMTypeRef)
     return identify(LLVMType, API.LLVMGetTypeKind(ref))(ref)
 end
 
+LLVMType(ref::API.LLVMTypeRef) = dynamic_construct(LLVMType, ref)
+
 # Construct an specific type of type object from a type ref.
 # In debug mode, this checks if the object type matches the underlying ref type.
 @inline function construct{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
@@ -94,13 +96,13 @@ isvararg(ft::FunctionType) =
     BoolFromLLVM(API.LLVMIsFunctionVarArg(ref(ft)))
 
 return_type(ft::FunctionType) =
-    dynamic_construct(LLVMType, API.LLVMGetReturnType(ref(ft)))
+    LLVMType(API.LLVMGetReturnType(ref(ft)))
 
 function parameters(ft::FunctionType)
     nparams = API.LLVMCountParamTypes(ref(ft))
     params = Vector{API.LLVMTypeRef}(nparams)
     API.LLVMGetParamTypes(ref(ft), params)
-    return map(t->dynamic_construct(LLVMType, t), params)
+    return map(t->LLVMType(t), params)
 end
 
 
@@ -119,7 +121,7 @@ export addrspace
 import Base: length, size, eltype
 
 eltype(typ::SequentialType) =
-    dynamic_construct(LLVMType, API.LLVMGetElementType(ref(typ)))
+    LLVMType(API.LLVMGetElementType(ref(typ)))
 
 @reftypedef proxy=LLVMType kind=LLVMPointerTypeKind immutable PointerType <: SequentialType end
 
@@ -192,7 +194,7 @@ elements(typ::StructType) = StructTypeElementSet(typ)
 eltype(::StructTypeElementSet) = LLVMType
 
 getindex(iter::StructTypeElementSet, i) =
-    dynamic_construct(LLVMType, API.LLVMStructGetTypeAtIndex(ref(iter.typ), Cuint(i-1)))
+    LLVMType(API.LLVMStructGetTypeAtIndex(ref(iter.typ), Cuint(i-1)))
 
 start(iter::StructTypeElementSet) = (1,length(iter))
 
@@ -208,7 +210,7 @@ endof(iter::StructTypeElementSet) = length(iter)
 function collect(iter::StructTypeElementSet)
     elems = Vector{API.LLVMTypeRef}(length(iter))
     API.LLVMGetStructElementTypes(ref(iter.typ), elems)
-    return map(el->dynamic_construct(LLVMType, el), elems)
+    return map(el->LLVMType(el), elems)
 end
 
 
