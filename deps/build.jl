@@ -12,8 +12,6 @@
 using Compat
 import Compat.String
 
-const DEBUG = haskey(ENV, "DEBUG")
-
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
@@ -219,5 +217,6 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         const libllvm = "$libllvm_extra"
         include("$libllvm_wrapper_common")
         include("$libllvm_wrapper")
-        include("$libllvm_extra_wrapper")""")
+        include("$libllvm_extra_wrapper")
+        """)
 end

@@ -17,7 +17,7 @@ include(ext)
 # this check doesn't work in `__init__` because in the case of precompilation the
 # deserializer already loads the library.
 isfile(libllvm_path) ||
-    error("LLVM library missing, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
+    error("LLVM library missing. Please re-run Pkg.build(\"LLVM\") and restart Julia.")
 const exclusive = Libdl.dlopen_e(libllvm_path, Libdl.RTLD_NOLOAD) == C_NULL
 
 end
@@ -48,7 +48,7 @@ function __init__()
     # check validity of LLVM library
     debug("Checking validity of $(API.libllvm_path) (", (API.exclusive?"exclusive":"non-exclusive"), " access)")
     stat(API.libllvm_path).mtime == API.libllvm_mtime ||
-        warn("LLVM library has been modified, run Pkg.build(\"LLVM\") to reconfigure LLVM.jl")
+        warn("LLVM library has been modified. Please re-run Pkg.build(\"LLVM\") and restart Julia.")
 
     _install_handlers()
     _install_handlers(GlobalContext())
