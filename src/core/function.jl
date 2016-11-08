@@ -29,21 +29,53 @@ entry(f::Function) = BasicBlock(API.LLVMGetEntryBasicBlock(ref(f)))
 
 # attributes
 
-export attributes
+export function_attributes, parameter_attributes, return_attributes
 
-import Base: get, push!, delete!
+import Base: collect, push!, delete!
 
 immutable FunctionAttrSet
     f::Function
+    idx::API.LLVMAttributeIndex
+
+    FunctionAttrSet(f::Function, idx::Cint) =
+      new(f, reinterpret(API.LLVMAttributeIndex, idx))
 end
 
-attributes(f::Function) = FunctionAttrSet(f)
+function_attributes(f::Function) = FunctionAttrSet(f, API.LLVMAttributeFunctionIndex)
+parameter_attributes(f::Function, idx::Integer) = FunctionAttrSet(f, Cint(idx))
+return_attributes(f::Function) = FunctionAttrSet(f, API.LLVMAttributeReturnIndex)
 
-get(iter::FunctionAttrSet) = API.LLVMGetFunctionAttr(ref(iter.f))
+eltype(::FunctionAttrSet) = Attribute
 
-push!(iter::FunctionAttrSet, attr) = API.LLVMAddFunctionAttr(ref(iter.f), attr)
+function collect(iter::FunctionAttrSet)
+    elems = Vector{API.LLVMAttributeRef}(length(iter))
+    if length(iter) > 0
+      # FIXME: this prevents a nullptr ref in LLVM similar to D26392
+      API.LLVMGetAttributesAtIndex(ref(iter.f), iter.idx, elems)
+    end
+    return Attribute.(elems)
+end
 
-delete!(iter::FunctionAttrSet, attr) = API.LLVMRemoveFunctionAttr(ref(iter.f), attr)
+push!(iter::FunctionAttrSet, attr::Attribute) =
+    API.LLVMAddAttributeAtIndex(ref(iter.f), iter.idx, ref(attr))
+
+delete!(iter::FunctionAttrSet, attr::EnumAttribute) =
+    API.LLVMRemoveEnumAttributeAtIndex(ref(iter.f), iter.idx, kind(attr))
+
+function delete!(iter::FunctionAttrSet, attr::StringAttribute)
+    k = kind(attr)
+    API.LLVMRemoveStringAttributeAtIndex(ref(iter.f), iter.idx, k, Cuint(length(k)))
+end
+
+function length(iter::FunctionAttrSet)
+    # FIXME: apt nightlies report themselves as v"4.0" instead of "4.0-svn"
+    #        alternatively, make the revision number part of the version string?
+    @static if version() <= v"4.0"
+        API.LLVMGetAttributeCountAtIndex_D26392(ref(iter.f), iter.idx)
+    else
+        API.LLVMGetAttributeCountAtIndex(ref(iter.f), iter.idx)
+    end
+end
 
 # parameter iteration
 
