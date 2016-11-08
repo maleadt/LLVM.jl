@@ -96,3 +96,14 @@ end
 function LLVMGetDebugMDVersion()
     ccall((:LLVMGetDebugMDVersion,libllvm),Cuint,())
 end
+
+
+# Julia wrapper for header: llvm-extra/IR/Core.h
+
+function LLVMGetAttributeCountAtIndex_D26392(F::LLVMValueRef,Idx::LLVMAttributeIndex)
+    ccall((:LLVMGetAttributeCountAtIndex_D26392,libllvm),UInt32,(LLVMValueRef,LLVMAttributeIndex),F,Idx)
+end
+
+function LLVMGetCallSiteAttributeCount_D26392(C::LLVMValueRef,Idx::LLVMAttributeIndex)
+    ccall((:LLVMGetCallSiteAttributeCount_D26392,libllvm),UInt32,(LLVMValueRef,LLVMAttributeIndex),C,Idx)
+end

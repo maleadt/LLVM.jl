@@ -99,9 +99,9 @@ end
 
 dispose(engine::ExecutionEngine) = API.LLVMDisposeExecutionEngine(ref(engine))
 
-for kind in [:ExecutionEngine, :Interpreter, :JIT]
-    @eval function $kind(f::Core.Function, args...)
-        engine = $kind(args...)
+for x in [:ExecutionEngine, :Interpreter, :JIT]
+    @eval function $x(f::Core.Function, args...)
+        engine = $x(args...)
         try
             f(engine)
         finally

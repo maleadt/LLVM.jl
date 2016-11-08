@@ -529,17 +529,40 @@ LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    let attrs = attributes(fn)
-        @test get(attrs) == 0
+    let attrs = function_attributes(fn)
+        @test eltype(attrs) == Attribute
 
-        push!(attrs, LLVM.API.LLVMNoUnwindAttribute)
-        @test get(attrs) == LLVM.API.LLVMNoUnwindAttribute
+        @test length(attrs) == 0
 
-        push!(attrs, LLVM.API.LLVMNoInlineAttribute)
-        @test get(attrs) == LLVM.API.LLVMNoUnwindAttribute|LLVM.API.LLVMNoInlineAttribute
+        a1 = EnumAttribute("sspreq")
+        @test kind(a1) != 0
+        @test value(a1) == 0
+        push!(attrs, a1)
+        @test collect(attrs) == [a1]
 
-        delete!(attrs, LLVM.API.LLVMNoUnwindAttribute)
-        @test get(attrs) == LLVM.API.LLVMNoInlineAttribute
+        delete!(attrs, a1)
+        @test length(attrs) == 0
+
+        a2 = StringAttribute("nounwind")
+        @test kind(a2) == "nounwind"
+        @test value(a2) == ""
+        push!(attrs, a2)
+        @test collect(attrs) == [a2]
+
+        delete!(attrs, a2)
+        @test length(attrs) == 0
+    end
+
+    for i in 1:length(parameters(fn))
+        let attrs = parameter_attributes(fn, i)
+            @test eltype(attrs) == Attribute
+            @test length(attrs) == 0
+        end
+    end
+
+    let attrs = return_attributes(fn)
+        @test eltype(attrs) == Attribute
+        @test length(attrs) == 0
     end
 end
 end
