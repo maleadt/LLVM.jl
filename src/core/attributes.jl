@@ -33,7 +33,7 @@ end
 ## enum attribute
 
 # NOTE: the AttrKind enum is not exported in the C API,
-#       so we don't expose a way to expose EnumAttributes from their raw enum value
+#       so we don't expose a way to construct EnumAttribute from its raw enum value
 #       (which also would conflict with the inner ref constructor)
 function EnumAttribute(kind::String, value::Integer=0, ctx::Context=GlobalContext())
     enum_kind = API.LLVMGetEnumAttributeKindForName(kind, Csize_t(length(kind)))
