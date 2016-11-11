@@ -151,9 +151,6 @@ matrix:
 after_success:
  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
 
-before_deploy:
-  - export LIBLLVM_EXTRA=$(ls deps/llvm-extra/libLLVM_extra*)
-  - echo "Deploying $LIBLLVM_EXTRA to GitHub releases"
 deploy:
     provider: releases
     api_key:
@@ -161,6 +158,6 @@ deploy:
     skip_cleanup: true
     overwrite: true
     file_glob: true
-    file: "${LIBLLVM_EXTRA}"
+    file: deps/llvm-extra/libLLVM_extra*
     on:
         tags: true
