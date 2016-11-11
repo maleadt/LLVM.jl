@@ -23,7 +23,9 @@ matrix:
   include:
     # LLVM 3.9 on Linux
     - os: linux
-      env: LLVM_VERSION=3.9
+      env:
+        - LLVM_VERSION=3.9
+        - LLVM_EXTRA_BUILD=1
       julia: 0.5
       # addons: *llvm39linux
       before_install:
@@ -33,7 +35,9 @@ matrix:
       - sudo apt-get remove llvm -y
       - sudo apt-get install llvm-3.9 -y
     - os: linux
-      env: LLVM_VERSION=3.9
+      env:
+        - LLVM_VERSION=3.9
+        - LLVM_EXTRA_BUILD=1
       julia: nightly
       # addons: *llvm39linux
       before_install:
@@ -47,6 +51,7 @@ matrix:
       env:
         - LLVM_VERSION=3.9
         - DEBUG=1
+        - LLVM_EXTRA_BUILD=1
       julia: 0.5
       # addons: *llvm39linux
       before_install:
@@ -59,6 +64,7 @@ matrix:
       env:
         - LLVM_VERSION=3.9
         - DEBUG=1
+        - LLVM_EXTRA_BUILD=1
       julia: nightly
       # addons: *llvm39linux
       before_install:
@@ -69,7 +75,9 @@ matrix:
       - sudo apt-get install llvm-3.9 -y
     # LLVM 4.0 on Linux
     - os: linux
-      env: LLVM_VERSION=4.0
+      env:
+        - LLVM_VERSION=4.0
+        - LLVM_EXTRA_BUILD=1
       julia: 0.5
       # addons: *llvm40linux
       before_install:
@@ -79,7 +87,9 @@ matrix:
       - sudo apt-get remove llvm -y
       - sudo apt-get install llvm-4.0 -y
     - os: linux
-      env: LLVM_VERSION=4.0
+      env:
+        - LLVM_VERSION=4.0
+        - LLVM_EXTRA_BUILD=1
       julia: nightly
       # addons: *llvm40linux
       before_install:
@@ -93,6 +103,7 @@ matrix:
       env:
         - LLVM_VERSION=4.0
         - DEBUG=1
+        - LLVM_EXTRA_BUILD=1
       julia: 0.5
       # addons: *llvm40linux
       before_install:
@@ -105,6 +116,7 @@ matrix:
       env:
         - LLVM_VERSION=4.0
         - DEBUG=1
+        - LLVM_EXTRA_BUILD=1
       julia: nightly
       # addons: *llvm40linux
       before_install:
@@ -152,8 +164,7 @@ after_success:
  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
 
 before_deploy:
-  - export LIBLLVM_EXTRA=$(ls deps/llvm-extra/libLLVM_extra*)
-  - echo "Deploying $LIBLLVM_EXTRA to GitHub releases"
+  - export PKGDIR=$(julia -e 'println(Pkg.dir("LLVM"))')
 deploy:
     provider: releases
     api_key:
@@ -161,6 +172,7 @@ deploy:
     skip_cleanup: true
     overwrite: true
     file_glob: true
-    file: "${LIBLLVM_EXTRA}"
+    file: ${PKGDIR}/deps/llvm-extra/libLLVM_extra*
     on:
         tags: true
+        condition: $LLVM_EXTRA_BUILD = 1

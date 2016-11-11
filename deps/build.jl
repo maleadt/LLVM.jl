@@ -12,6 +12,8 @@
 using Compat
 import Compat.String
 
+using JSON
+
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
@@ -37,6 +39,8 @@ immutable Toolchain
     version::VersionNumber
     config::Nullable{String}
 end
+
+verbose_run(cmd) = (println(cmd); run(cmd))
 
 
 #
@@ -138,6 +142,7 @@ llvms = unique(x -> realpath(x.path), llvms)
 info("Found $(length(llvms)) unique LLVM installations")
 
 
+
 #
 # LLVM selection
 #
@@ -171,11 +176,9 @@ if isempty(matching_llvms)
         error("could not find a compatible LLVM installation")
     else
         warn("could not find a matching LLVM installation, falling back on probably-compatible ones")
-        llvms = compatible_llvms
     end
-else
-    llvms = [matching_llvms; compatible_llvms]
 end
+llvms = [matching_llvms; compatible_llvms]
 
 
 #
@@ -190,33 +193,141 @@ isfile(get(julia.config)) || error("could not find julia-config.jl relative to $
 
 
 #
-# Build
+# Build extra library
 #
 
-# at this point, we require `llvm-config` for building
-filter!(x->!isnull(x.config), llvms)
-isempty(llvms) && error("could not find LLVM installation providing llvm-config (required to build libLLVM_extra)")
+# after this step, we'll have decided on a LLVM toolchain to use,
+# and have a built and linked extras library
+llvm = nothing
+libllvm_extra = nothing
 
-# pick the first version and run with it (we should be able to build with all of them)
-llvm = first(llvms)
-info("Building for LLVM v$(llvm.version) at $(llvm.path) using $(get(llvm.config))")
+libllvm_extra_name(llvm, julia) =
+    "libLLVM_extra-$(verstr(llvm.version))_$(verstr(julia.version)).$libext"
 
-# build library with extra functions
-libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra-$(verstr(llvm.version))@$(verstr(julia.version)).$libext")
-cd(joinpath(@__DIR__, "llvm-extra")) do
-    withenv("LLVM_CONFIG" => get(llvm.config),
-            "LLVM_LIBRARY" => llvm.path, "LLVM_VERSION" => verstr(llvm.version),
-            "JULIA_CONFIG" => get(julia.config),
-            "JULIA_BINARY" => julia.path, "JULIA_VERSION" => verstr(julia.version)) do
-        # force a rebuild as the LLVM installation might have changed, undetectably
-        run(`make clean`)
-        run(`make -j$(Sys.CPU_CORES+1)`)
+const libllvm_extra_build = haskey(ENV, "LLVM_EXTRA_BUILD")
+
+function finalize(unlinked::String, llvm)
+    debug("Finalizing $unlinked")
+
+    debug("- linking against $(llvm.path)")
+    if is_apple()
+        # macOS dylibs are versioned already
+        ld_libname = "LLVM"
+    else
+        # specify the versioned library name to make sure we pick up the correct one
+        ld_libname = ":$(basename(llvm.path))"
+    end
+    ld_dir = dirname(llvm.path)
+    linked = joinpath(dirname(unlinked), "linked-" * basename(unlinked))
+    verbose_run(`ld -o $linked -shared $unlinked -rpath $ld_dir -L $ld_dir -l$ld_libname`)
+
+    debug("- opening the library")
+    Libdl.dlopen(linked)
+
+    return linked
+end
+
+
+## download binary release
+
+info("Looking for compatible binary version of LLVM extras library")
+
+# find out the version tag of this package
+function package_tag()
+    pkg_version = Pkg.installed("LLVM")
+    if pkg_version != nothing
+        tag = "v$(pkg_version)"
+        debug("Package tag via package manager: $tag")
+    else
+        dir = joinpath(@__DIR__, "..")
+        commit = readchomp(`git -C $dir rev-parse HEAD`)
+        tag = readchomp(`git -C $dir name-rev --tags --name-only $commit`)
+        tag == "undefined" && return nothing
+        debug("Package tag via Git: $tag")
+    end
+
+    return tag
+end
+
+# download the list of GitHub releases for this package
+package_releases() =
+    download("https://api.github.com/repos/maleadt/LLVM.jl/releases") |> readstring |> JSON.parse
+
+# download the list of assets linked to a GitHub release (identified by its tag)
+function package_assets(tag)
+    releases = package_releases()
+    filter!(r->r["tag_name"] == tag, releases)
+    length(releases) == 0 && throw("could not find release $tag")
+    @assert length(releases) == 1
+
+    assets = releases[1]["assets"]
+    isempty(assets) && throw("release $tag does not have any asset")
+
+    return Dict(map(a->a["name"] => a["browser_download_url"], assets))
+end
+
+# download the list of compatible binary assets providing libLLVM_extra
+function libllvm_extra_assets()
+    assets = package_assets(package_tag())
+
+    usable_assets = Vector{Tuple{Toolchain,String}}()
+    for (name,url) in assets, llvm in llvms
+        if name == libllvm_extra_name(llvm,julia)
+            push!(usable_assets, tuple(llvm,url))
+        end
+    end
+
+    isempty(usable_assets) && error("could not find relevant LLVM extras library asset")
+    return usable_assets
+end
+
+if !libllvm_extra_build
+    try
+        (llvm, url) = first(libllvm_extra_assets())
+        name = libllvm_extra_name(llvm,julia)
+        debug("Downloading $name from $url")
+
+        libllvm_extra = joinpath(@__DIR__, "llvm-extra", name)
+        download(url, libllvm_extra)
+
+        libllvm_extra = finalize(libllvm_extra, llvm)
+    catch e
+        msg = sprint(io->showerror(io, e))
+        warn("could not use binary version of LLVM extras library: $msg")
+        libllvm_extra = nothing
     end
 end
 
-# sanity check: open the library
-debug("Opening wrapper library")
-Libdl.dlopen(libllvm_extra)
+
+## source build
+
+if libllvm_extra == nothing
+    info("Performing source build of LLVM extras library")
+
+    # at this point, we require `llvm-config` for building
+    filter!(x->!isnull(x.config), llvms)
+    isempty(llvms) && error("could not find LLVM installation providing llvm-config")
+
+    # pick the first version and run with it (we should be able to build with all of them)
+    llvm = first(llvms)
+    debug("Building for LLVM v$(llvm.version) at $(llvm.path) using $(get(llvm.config))")
+
+    # build library with extra functions
+    libllvm_extra = joinpath(@__DIR__, "llvm-extra", libllvm_extra_name(llvm, julia))
+    cd(joinpath(@__DIR__, "llvm-extra")) do
+        withenv("LLVM_CONFIG" => get(llvm.config),
+                "LLVM_LIBRARY" => llvm.path, "LLVM_VERSION" => verstr(llvm.version),
+                "JULIA_CONFIG" => get(julia.config),
+                "JULIA_BINARY" => julia.path, "JULIA_VERSION" => verstr(julia.version)) do
+            # force a rebuild as the LLVM installation might have changed, undetectably
+            verbose_run(`make clean`)
+            verbose_run(`make -j$(Sys.CPU_CORES+1)`)
+        end
+    end
+
+    libllvm_extra = finalize(libllvm_extra, llvm)
+end
+
 
 
 #
