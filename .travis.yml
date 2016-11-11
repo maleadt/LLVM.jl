@@ -150,3 +150,17 @@ matrix:
 
 after_success:
  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
+
+before_deploy:
+  - export LIBLLVM_EXTRA=$(ls deps/llvm-extra/libLLVM_extra*)
+  - echo "Deploying $LIBLLVM_EXTRA to GitHub releases"
+deploy:
+    provider: releases
+    api_key:
+        secure: jsbhiVs6Nthgd0pvxK4/t/58l+eBUQapsIT/XIBpooKVhBUdlsZGothhPc+8Uv8kkAwvgm1Q5FJsvZzXnUHErW7jFLSXAclmiEtalio3TdOePlP3BEn5tmnsjlI3xNUpuJokCQdH7OPNrL+LrROK5Gs4z1s1yV0olaTVBRutXjszy/ckUIEtERMr8zcdYUg03ZsRDNaU3WZed/BH3pNbZBdjetAosrS4uZfwvBVWcmP/mdmgFcoYBQ7W5CXbhf6LOVl6KCkdAxd5jm/CR5d12u3piY2q/UzktJDmTfY25vyCoZAMbdekzUu1xdNvW8ITvVdXqWhgtl2k+VRHOUMbZdHtF6u50bckAuPN/SzdME8iQ+lMP/aEh+11ai+GH9Oa2gc0kzLU10/XbgYtTrpGh8HDkJDeN6iPUDPz7js+VNDpVhscWznPFYyOCzsbnRPECCinUXeB2j6IHL/bLv/fZaq4EWsATl/Jhd/vgVMvYJeU/sIONRTtSEMiX5dfFbDTY1yJSbae80FLd7wB4D2g3ymqHPF1uM3e581FRSWY/7iNvdejR4+/4CPsIT7JOyUti1bRJrvY35wueNpteY18A5oQa1I8hIoqC1mhkVRZ4WsTTLHlZXjRDMlThTr528RqS2FzFZVcnN5IxpAGq0GtnuxiNm5hbEhhnsv9Jc9w8F4=
+    skip_cleanup: true
+    overwrite: true
+    file_glob: true
+    file: "${LIBLLVM_EXTRA}"
+    on:
+        tags: true
