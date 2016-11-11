@@ -71,8 +71,8 @@ endif
 # Julia flags
 #
 
-CXXFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --cflags)
-LDFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --ldflags)
+CXXFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --cflags)
+LDFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --ldflags)
 # NOTE: we don't use the --ldlibs as we don't want to link against libjulia,
 #       relying on the fact that the library will be loaded when opening libLLVM_extra.
 
@@ -87,7 +87,7 @@ else
   SLIB := so
 endif
 
-TARGET  = libLLVM_extra-$(LLVM_VERSION).$(SLIB)
+TARGET  = libLLVM_extra-$(LLVM_VERSION)@$(JULIA_VERSION).$(SLIB)
 SOURCES = $(shell find . -name '*.cpp')
 OBJECTS = $(SOURCES:.cpp=.o)
 

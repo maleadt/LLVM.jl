@@ -32,6 +32,12 @@ function libname(version::VersionNumber)
     end
 end
 
+immutable Toolchain
+    path::String
+    version::VersionNumber
+    config::Nullable{String}
+end
+
 
 #
 # Versions
@@ -64,14 +70,8 @@ debug("Acceptable LLVM versions: ", join(acceptable_versions, ", "))
 
 
 #
-# Discovery
+# LLVM discovery
 #
-
-immutable Toolchain
-    config::Nullable{String}
-    library::String
-    version::VersionNumber
-end
 llvms = Vector{Toolchain}()
 
 # returns vector of Tuple{path::String, VersionNumber}
@@ -111,7 +111,7 @@ for libdir in libdirs
     libraries = find_libllvm(libdir, acceptable_versions)
 
     for (library, version) in libraries
-        push!(llvms, Toolchain(Nullable{String}(), library, version))
+        push!(llvms, Toolchain(library, version, Nullable{String}()))
     end
 end
 
@@ -127,19 +127,19 @@ for dir in unique(configdirs)
         libraries = find_libllvm(libdir, [version])
 
         for (library, _) in libraries
-            push!(llvms, Toolchain(config, library, version))
+            push!(llvms, Toolchain(library, version, config))
         end
     end
 end
 
 # prune
-llvms = unique(x -> realpath(x.library), llvms)
+llvms = unique(x -> realpath(x.path), llvms)
 
 info("Found $(length(llvms)) unique LLVM installations")
 
 
 #
-# Selection
+# LLVM selection
 #
 
 # First consider installations with a major and minor version matching wrapped headers (see
@@ -179,6 +179,17 @@ end
 
 
 #
+# Julia discovery
+#
+
+julia_cmd = Base.julia_cmd()
+julia = Toolchain(julia_cmd.exec[1], Base.VERSION,
+                  joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl"))
+isfile(julia.path) || error("could not find Julia binary from command $julia_cmd")
+isfile(get(julia.config)) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
+
+
+#
 # Build
 #
 
@@ -188,21 +199,15 @@ isempty(llvms) && error("could not find LLVM installation providing llvm-config 
 
 # pick the first version and run with it (we should be able to build with all of them)
 llvm = first(llvms)
-info("Building for LLVM v$(llvm.version) at $(llvm.library) using $(get(llvm.config))")
-
-# location of julia-config.jl
-julia_cmd = Base.julia_cmd()
-julia = julia_cmd.exec[1]
-isfile(julia) || error("could not find Julia executable from command $julia_cmd")
-julia_config = joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl")
-isfile(julia_config) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
+info("Building for LLVM v$(llvm.version) at $(llvm.path) using $(get(llvm.config))")
 
 # build library with extra functions
-libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra-$(verstr(llvm.version)).$libext")
+libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra-$(verstr(llvm.version))@$(verstr(julia.version)).$libext")
 cd(joinpath(@__DIR__, "llvm-extra")) do
     withenv("LLVM_CONFIG" => get(llvm.config),
-            "LLVM_LIBRARY" => llvm.library, "LLVM_VERSION" => verstr(llvm.version),
-            "JULIA_CONFIG" => julia_config, "JULIA" => julia) do
+            "LLVM_LIBRARY" => llvm.path, "LLVM_VERSION" => verstr(llvm.version),
+            "JULIA_CONFIG" => get(julia.config),
+            "JULIA_BINARY" => julia.path, "JULIA_VERSION" => verstr(julia.version)) do
         # force a rebuild as the LLVM installation might have changed, undetectably
         run(`make clean`)
         run(`make -j$(Sys.CPU_CORES+1)`)
@@ -220,7 +225,7 @@ Libdl.dlopen(libllvm_extra)
 
 # gather libLLVM information
 llvm_targets = Symbol.(split(readstring(`$(get(llvm.config)) --targets-built`)))
-llvm_library_mtime = stat(llvm.library).mtime
+llvm_library_mtime = stat(llvm.path).mtime
 
 # select a wrapper
 if llvm.version in wrapped_versions
@@ -243,7 +248,7 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
     write(fh, """
         # LLVM library properties
         const libllvm_version = v"$(llvm.version)"
-        const libllvm_path = "$(llvm.library)"
+        const libllvm_path = "$(llvm.path)"
         const libllvm_mtime = $llvm_library_mtime
 
         # wrapper properties
