@@ -3,16 +3,6 @@
 
 UNAME = $(shell uname -s)
 
-ifeq ($(UNAME), Darwin)
-  SLIB := dylib
-else
-  SLIB := so
-endif
-
-TARGET  = libLLVM_extra.$(SLIB)
-SOURCES = $(shell find . -name '*.cpp')
-OBJECTS = $(SOURCES:.cpp=.o)
-
 
 #
 # LLVM flags
@@ -90,6 +80,16 @@ LDFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --ldflags)
 #
 # Build
 #
+
+ifeq ($(UNAME), Darwin)
+  SLIB := dylib
+else
+  SLIB := so
+endif
+
+TARGET  = libLLVM_extra-$(LLVM_VERSION).$(SLIB)
+SOURCES = $(shell find . -name '*.cpp')
+OBJECTS = $(SOURCES:.cpp=.o)
 
 # shared-library building
 CXXFLAGS += -fPIC

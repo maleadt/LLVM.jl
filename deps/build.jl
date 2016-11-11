@@ -160,7 +160,7 @@ wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
 @assert isdir(wrapped_libdir)
 
 # sanity check: open the library
-# NOTE: can't do this because LLVM 3.9 can link against libLTO (see Makefile workaround)
+# NOTE: can't do this because LLVM 3.9 might link against libLTO (see Makefile workaround)
 # debug("Opening library")
 # Libdl.dlopen(llvm_library)
 
@@ -171,6 +171,9 @@ wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
 
 llvm_targets = Symbol.(split(readstring(`$llvm_config --targets-built`)))
 
+# don't include the patch number in the compatibility version string
+llvm_verstr = "$(llvm_version.major).$(llvm_version.minor)"
+
 # location of julia-config.jl
 julia_cmd = Base.julia_cmd()
 julia = julia_cmd.exec[1]
@@ -179,9 +182,10 @@ julia_config = joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl")
 isfile(julia_config) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
 
 # build library with extra functions
-libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra.$libext")
+libllvm_extra = joinpath(@__DIR__, "llvm-extra", "libLLVM_extra-$(llvm_verstr).$libext")
 cd(joinpath(@__DIR__, "llvm-extra")) do
-    withenv("LLVM_CONFIG" => llvm_config, "LLVM_LIBRARY" => llvm_library,
+    withenv("LLVM_CONFIG" => llvm_config,
+            "LLVM_LIBRARY" => llvm_library, "LLVM_VERSION" => llvm_verstr,
             "JULIA_CONFIG" => julia_config, "JULIA" => julia) do
         # force a rebuild as the LLVM installation might have changed, undetectably
         run(`make clean`)
