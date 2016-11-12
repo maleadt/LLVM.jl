@@ -43,39 +43,11 @@ end
 verbose_run(cmd) = (println(cmd); run(cmd))
 
 
-#
-# Versions
-#
-
-# LLVM versions to look for.
-#
-# Note that this list can be incomplete, as we'll still look for unversioned llvm-config
-# binaries which may yield different versions.
-acceptable_versions = [VersionNumber(Base.libllvm_version),
-                       v"4.0",
-                       v"3.9.0",
-                       v"3.8.1", v"3.8.0"]
-sort!(acceptable_versions)
-
-if haskey(ENV, "LLVM_VERSION")
-    ismatch(r"^\d.\d$", ENV["LLVM_VERSION"]) ||
-        error("invalid version requested (should be MAJOR.MINOR)")
-    requested_version = Nullable(VersionNumber(ENV["LLVM_VERSION"]))
-
-    # NOTE: even though we'll only consider the requested version,
-    #       still look for others as it may be useful for debugging purposes
-    push!(acceptable_versions, get(requested_version))
-else
-    requested_version = Nullable{VersionNumber}()
-end
-
-debug("Acceptable LLVM versions: ", join(acceptable_versions, ", "))
-
-
 
 #
 # LLVM discovery
 #
+
 llvms = Vector{Toolchain}()
 
 # returns vector of Tuple{path::String, VersionNumber}
@@ -109,10 +81,10 @@ function find_llvmconfig(dir::String)
     return configs
 end
 
-# check for versioned LLVM libraries in known locations
+# check for bundled LLVM libraries
 libdirs = [joinpath(JULIA_HOME, "..", "lib", "julia")]
 for libdir in libdirs
-    libraries = find_libllvm(libdir, acceptable_versions)
+    libraries = find_libllvm(libdir, [VersionNumber(Base.libllvm_version)])
 
     for (library, version) in libraries
         push!(llvms, Toolchain(library, version, Nullable{String}()))
@@ -156,9 +128,13 @@ info("Found $(length(llvms)) unique LLVM installations")
 vercmp_match  = (a,b) -> a.major==b.major &&  a.minor==b.minor
 vercmp_compat = (a,b) -> a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 
-if !isnull(requested_version)
-    info("Overriding selection to match v$(get(requested_version))")
-    llvms = filter(t->vercmp_match(t.version,get(requested_version)), llvms)
+if haskey(ENV, "LLVM_VERSION")
+    ismatch(r"^\d.\d$", ENV["LLVM_VERSION"]) ||
+        error("invalid version requested (should be MAJOR.MINOR)")
+    requested_version = VersionNumber(ENV["LLVM_VERSION"])
+
+    info("Overriding selection to match v$(requested_version)")
+    llvms = filter(t->vercmp_match(t.version,requested_version), llvms)
 end
 
 # versions wrapped
