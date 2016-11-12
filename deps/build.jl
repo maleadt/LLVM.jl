@@ -232,13 +232,18 @@ end
 
 info("Looking for compatible binary version of LLVM extras library")
 
-# find out the tag of the current state of this package
-function package_tag()
-    dir = joinpath(@__DIR__, "..")
-    commit = readchomp(`git -C $dir rev-parse HEAD`)
-    tag = readchomp(`git -C $dir name-rev --tags --name-only $commit`)
-    debug("Git package tag: $tag (at $commit)")
-    tag == "undefined" && error("could not find current tag")
+# find out the current release tag
+function release_tag()
+    if haskey(ENV, "RELEASE_TAG")
+        tag = ENV["RELEASE_TAG"]
+        debug("Overriding release tag to '$tag'")
+    else
+        dir = joinpath(@__DIR__, "..")
+        commit = readchomp(`git -C $dir rev-parse HEAD`)
+        tag = readchomp(`git -C $dir name-rev --tags --name-only $commit`)
+        debug("Detected release tag '$tag' (at commit $commit)")
+        tag == "undefined" && error("could not find current tag")
+    end
 
     return tag
 end
@@ -262,7 +267,7 @@ end
 
 # download the list of compatible binary assets providing libLLVM_extra
 function libllvm_extra_assets()
-    assets = package_assets(package_tag())
+    assets = package_assets(release_tag())
 
     usable_assets = Vector{Tuple{Toolchain,String}}()
     for (name,url) in assets, llvm in llvms
