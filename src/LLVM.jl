@@ -6,6 +6,13 @@ using Compat
 import Compat.String
 
 module API
+
+macro apicall(fun, ret, argtypes, args...)
+    return quote
+        ccall(($fun,libllvm), $ret,$argtypes, $(args...))
+    end
+end
+
 ext = joinpath(dirname(@__FILE__), "..", "deps", "ext.jl")
 isfile(ext) || error("Unable to load $ext\n\nPlease re-run Pkg.build(\"LLVM\"), and restart Julia.")
 include(ext)
