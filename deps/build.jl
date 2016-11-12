@@ -232,19 +232,13 @@ end
 
 info("Looking for compatible binary version of LLVM extras library")
 
-# find out the version tag of this package
+# find out the tag of the current state of this package
 function package_tag()
-    pkg_version = Pkg.installed("LLVM")
-    if pkg_version != nothing
-        tag = "v$(pkg_version)"
-        debug("Package tag via package manager: $tag")
-    else
-        dir = joinpath(@__DIR__, "..")
-        commit = readchomp(`git -C $dir rev-parse HEAD`)
-        tag = readchomp(`git -C $dir name-rev --tags --name-only $commit`)
-        tag == "undefined" && return nothing
-        debug("Package tag via Git: $tag")
-    end
+    dir = joinpath(@__DIR__, "..")
+    commit = readchomp(`git -C $dir rev-parse HEAD`)
+    tag = readchomp(`git -C $dir name-rev --tags --name-only $commit`)
+    debug("Git package tag: $tag (at $commit)")
+    tag == "undefined" && error("could not find current tag")
 
     return tag
 end
