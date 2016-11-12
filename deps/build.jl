@@ -4,10 +4,25 @@
 # This is somewhat convoluted, as we can find LLVM in a variety of places using different
 # mechanisms, while version matching needs to consider API compatibility.
 #
-# Environment variables influencing this process:
-#   DEBUG=1                     print debug information
-#   LLVM_VERSION=$MAJOR.$MINOR  only consider using a specific LLVM version
-#                               (which still needs to be compatible)
+# Several environment variables can influence this process:
+
+# from logging.jl: DEBUG=1 to enable debug output
+
+# force the LLVM version to use (still needs to be discoverable and compatible)
+const force_llvm_version = Nullable{VersionNumber}(get(ENV, "FORCE_LLVM_VERSION", nothing))
+
+# force a certain release tag to be used (for downloading binary assets from GitHub)
+const force_release = Nullable{String}(get(ENV, "FORCE_RELEASE", nothing))
+
+# force a source build of the LLVM extras library
+const force_llvmextra_build = haskey(ENV, "FORCE_LLVMEXTRA_BUILD")
+
+# TODO: USE_SYSTEM_LLVM
+
+
+#
+# Auxiliary
+#
 
 using Compat
 import Compat.String
@@ -42,6 +57,11 @@ end
 
 verbose_run(cmd) = (println(cmd); run(cmd))
 
+
+
+#
+# Parse arguments
+#
 
 
 #
@@ -128,13 +148,9 @@ info("Found $(length(llvms)) unique LLVM installations")
 vercmp_match  = (a,b) -> a.major==b.major &&  a.minor==b.minor
 vercmp_compat = (a,b) -> a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 
-if haskey(ENV, "LLVM_VERSION")
-    ismatch(r"^\d.\d$", ENV["LLVM_VERSION"]) ||
-        error("invalid version requested (should be MAJOR.MINOR)")
-    requested_version = VersionNumber(ENV["LLVM_VERSION"])
-
-    info("Overriding selection to match v$(requested_version)")
-    llvms = filter(t->vercmp_match(t.version,requested_version), llvms)
+if !isnull(force_llvm_version)
+    warn("Forcing LLVM version at $(get(force_llvm_version))")
+    llvms = filter(t->vercmp_match(t.version,get(force_llvm_version)), llvms)
 end
 
 # versions wrapped
@@ -175,12 +191,10 @@ isfile(get(julia.config)) || error("could not find julia-config.jl relative to $
 # after this step, we'll have decided on a LLVM toolchain to use,
 # and have a built and linked extras library
 llvm = nothing
-libllvm_extra = nothing
+llvmextra = nothing
 
-libllvm_extra_name(llvm, julia) =
+llvmextra_asset(llvm, julia) =
     "libLLVM_extra-$(verstr(llvm.version))_$(verstr(julia.version)).$libext"
-
-const libllvm_extra_build = haskey(ENV, "LLVM_EXTRA_BUILD")
 
 function finalize(unlinked::String, llvm)
     debug("Finalizing $unlinked")
@@ -210,14 +224,14 @@ info("Looking for compatible binary version of LLVM extras library")
 
 # find out the current release tag
 function release_tag()
-    if haskey(ENV, "RELEASE_TAG")
-        tag = ENV["RELEASE_TAG"]
-        debug("Overriding release tag to '$tag'")
+    if !isnull(force_release)
+        tag = get(force_release)
+        warn("Forcing release tag to $tag")
     else
         dir = joinpath(@__DIR__, "..")
         commit = readchomp(`git -C $dir rev-parse HEAD`)
         tag = readchomp(`git -C $dir name-rev --tags --name-only $commit`)
-        debug("Detected release tag '$tag' (at commit $commit)")
+        debug("Detected release tag $tag (at commit $commit)")
         tag == "undefined" && error("could not find current tag")
     end
 
@@ -242,12 +256,12 @@ function package_assets(tag)
 end
 
 # download the list of compatible binary assets providing libLLVM_extra
-function libllvm_extra_assets()
+function llvmextra_assets()
     assets = package_assets(release_tag())
 
     usable_assets = Vector{Tuple{Toolchain,String}}()
     for (name,url) in assets, llvm in llvms
-        if name == libllvm_extra_name(llvm,julia)
+        if name == llvmextra_asset(llvm,julia)
             push!(usable_assets, tuple(llvm,url))
         end
     end
@@ -256,27 +270,29 @@ function libllvm_extra_assets()
     return usable_assets
 end
 
-if !libllvm_extra_build
+if force_llvmextra_build
+    warn("Forcing source build of LLVM extras library")
+else
     try
-        (llvm, url) = first(libllvm_extra_assets())
-        name = libllvm_extra_name(llvm,julia)
+        (llvm, url) = first(llvmextra_assets())
+        name = llvmextra_asset(llvm,julia)
         debug("Downloading $name from $url")
 
-        libllvm_extra = joinpath(@__DIR__, "llvm-extra", name)
-        download(url, libllvm_extra)
+        llvmextra = joinpath(@__DIR__, "llvm-extra", name)
+        download(url, llvmextra)
 
-        libllvm_extra = finalize(libllvm_extra, llvm)
+        llvmextra = finalize(llvmextra, llvm)
     catch e
         msg = sprint(io->showerror(io, e))
         warn("could not use binary version of LLVM extras library: $msg")
-        libllvm_extra = nothing
+        llvmextra = nothing
     end
 end
 
 
 ## source build
 
-if libllvm_extra == nothing
+if llvmextra == nothing
     info("Performing source build of LLVM extras library")
 
     # at this point, we require `llvm-config` for building
@@ -288,7 +304,7 @@ if libllvm_extra == nothing
     debug("Building for LLVM v$(llvm.version) at $(llvm.path) using $(get(llvm.config))")
 
     # build library with extra functions
-    libllvm_extra = joinpath(@__DIR__, "llvm-extra", libllvm_extra_name(llvm, julia))
+    llvmextra = joinpath(@__DIR__, "llvm-extra", llvmextra_asset(llvm, julia))
     cd(joinpath(@__DIR__, "llvm-extra")) do
         withenv("LLVM_CONFIG" => get(llvm.config),
                 "LLVM_LIBRARY" => llvm.path, "LLVM_VERSION" => verstr(llvm.version),
@@ -300,7 +316,7 @@ if libllvm_extra == nothing
         end
     end
 
-    libllvm_extra = finalize(libllvm_extra, llvm)
+    llvmextra = finalize(llvmextra, llvm)
 end
 
 
@@ -327,7 +343,7 @@ wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
 # gather wrapper information
 libllvm_wrapper_common = joinpath(wrapped_libdir, "libLLVM_common.jl")
 libllvm_wrapper = joinpath(wrapped_libdir, "libLLVM_h.jl")
-libllvm_extra_wrapper = joinpath(wrapped_libdir, "..", "libLLVM_extra.jl")
+llvmextra_wrapper = joinpath(wrapped_libdir, "..", "libLLVM_extra.jl")
 
 # write ext.jl
 open(joinpath(@__DIR__, "ext.jl"), "w") do fh
@@ -338,7 +354,7 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         const libllvm_mtime = $llvm_library_mtime
 
         # LLVM extras library properties
-        const libllvm_extra_path = "$libllvm_extra"
+        const libllvm_extra_path = "$llvmextra"
 
         # wrapper properties
         const wrapper_version = v"$wrapper_version"
@@ -349,6 +365,6 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         # library loading
         include("$libllvm_wrapper_common")
         include("$libllvm_wrapper")
-        include("$libllvm_extra_wrapper")
+        include("$llvmextra_wrapper")
         """)
 end

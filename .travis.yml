@@ -24,8 +24,8 @@ matrix:
     # LLVM 3.9 on Linux
     - os: linux
       env:
-        - LLVM_VERSION=3.9
-        - LLVM_EXTRA_BUILD=1
+        - FORCE_LLVM_VERSION=3.9
+        - FORCE_LLVMEXTRA_BUILD=1
       julia: 0.5
       # addons: *llvm39linux
       before_install:
@@ -36,8 +36,8 @@ matrix:
       - sudo apt-get install llvm-3.9 -y
     - os: linux
       env:
-        - LLVM_VERSION=3.9
-        - LLVM_EXTRA_BUILD=1
+        - FORCE_LLVM_VERSION=3.9
+        - FORCE_LLVMEXTRA_BUILD=1
       julia: nightly
       # addons: *llvm39linux
       before_install:
@@ -49,9 +49,9 @@ matrix:
     # LLVM 3.9 on Linux, DEBUG mode
     - os: linux
       env:
-        - LLVM_VERSION=3.9
+        - FORCE_LLVM_VERSION=3.9
         - DEBUG=1
-        - LLVM_EXTRA_BUILD=1
+        - FORCE_LLVMEXTRA_BUILD=1
       julia: 0.5
       # addons: *llvm39linux
       before_install:
@@ -62,9 +62,9 @@ matrix:
       - sudo apt-get install llvm-3.9 -y
     - os: linux
       env:
-        - LLVM_VERSION=3.9
+        - FORCE_LLVM_VERSION=3.9
         - DEBUG=1
-        - LLVM_EXTRA_BUILD=1
+        - FORCE_LLVMEXTRA_BUILD=1
       julia: nightly
       # addons: *llvm39linux
       before_install:
@@ -76,8 +76,8 @@ matrix:
     # LLVM 4.0 on Linux
     - os: linux
       env:
-        - LLVM_VERSION=4.0
-        - LLVM_EXTRA_BUILD=1
+        - FORCE_LLVM_VERSION=4.0
+        - FORCE_LLVMEXTRA_BUILD=1
       julia: 0.5
       # addons: *llvm40linux
       before_install:
@@ -88,8 +88,8 @@ matrix:
       - sudo apt-get install llvm-4.0 -y
     - os: linux
       env:
-        - LLVM_VERSION=4.0
-        - LLVM_EXTRA_BUILD=1
+        - FORCE_LLVM_VERSION=4.0
+        - FORCE_LLVMEXTRA_BUILD=1
       julia: nightly
       # addons: *llvm40linux
       before_install:
@@ -101,9 +101,9 @@ matrix:
     # LLVM 4.0 on Linux, DEBUG mode
     - os: linux
       env:
-        - LLVM_VERSION=4.0
+        - FORCE_LLVM_VERSION=4.0
         - DEBUG=1
-        - LLVM_EXTRA_BUILD=1
+        - FORCE_LLVMEXTRA_BUILD=1
       julia: 0.5
       # addons: *llvm40linux
       before_install:
@@ -114,9 +114,9 @@ matrix:
       - sudo apt-get install llvm-4.0 -y
     - os: linux
       env:
-        - LLVM_VERSION=4.0
+        - FORCE_LLVM_VERSION=4.0
         - DEBUG=1
-        - LLVM_EXTRA_BUILD=1
+        - FORCE_LLVMEXTRA_BUILD=1
       julia: nightly
       # addons: *llvm40linux
       before_install:
@@ -127,14 +127,14 @@ matrix:
       - sudo apt-get install llvm-4.0 -y
     # # LLVM 3.9 on macOS
     # - os: osx
-    #   env: LLVM_VERSION=3.9
+    #   env: FORCE_LLVM_VERSION=3.9
     #   julia: 0.5
     #   before_install:
     #   - wget http://llvm.org/releases/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
     #   - tar -xvf clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
     #   - export PATH=$PATH:$PWD/clang+llvm-3.9.0-x86_64-apple-darwin/bin/
     # - os: osx
-    #   env: LLVM_VERSION=3.9
+    #   env: FORCE_LLVM_VERSION=3.9
     #   julia: nightly
     #   before_install:
     #   - wget http://llvm.org/releases/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
@@ -143,7 +143,7 @@ matrix:
     # # LLVM 3.9 on macOS, DEBUG mode
     # - os: osx
     #   env:
-    #     - LLVM_VERSION=3.9
+    #     - FORCE_LLVM_VERSION=3.9
     #     - DEBUG=1
     #   julia: 0.5
     #   before_install:
@@ -152,7 +152,7 @@ matrix:
     #   - export PATH=$PATH:$PWD/clang+llvm-3.9.0-x86_64-apple-darwin/bin/
     # - os: osx
     #   env:
-    #     - LLVM_VERSION=3.9
+    #     - FORCE_LLVM_VERSION=3.9
     #     - DEBUG=1
     #   julia: nightly
     #   before_install:
@@ -175,4 +175,4 @@ deploy:
     file: ${PKGDIR}/deps/llvm-extra/libLLVM_extra*
     on:
         tags: true
-        condition: $LLVM_EXTRA_BUILD = 1
+        condition: $FORCE_LLVMEXTRA_BUILD = 1
