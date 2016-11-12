@@ -163,13 +163,6 @@ matching_llvms   = filter(t -> any(v -> vercmp_match(t.version,v), wrapped_versi
 compatible_llvms = filter(t -> !in(t, matching_llvms) && 
                                any(v -> vercmp_compat(t.version,v), wrapped_versions), llvms)
 
-if isempty(matching_llvms)
-    if isempty(compatible_llvms)
-        error("could not find a compatible LLVM installation")
-    else
-        warn("could not find a matching LLVM installation, falling back on probably-compatible ones")
-    end
-end
 llvms = [matching_llvms; compatible_llvms]
 
 
@@ -220,7 +213,7 @@ end
 
 ## download binary release
 
-info("Looking for compatible binary version of LLVM extras library")
+info("Looking for precompiled version of LLVM extras library")
 
 # find out the current release tag
 function release_tag()
@@ -324,6 +317,8 @@ end
 #
 # Finishing up
 #
+
+llvm in matching_llvms || warn("Selected LLVM version v$(llvm.version) is unsupported")
 
 # gather libLLVM information
 llvm_targets = Symbol.(split(readstring(`$(get(llvm.config)) --targets-built`)))
