@@ -71,7 +71,7 @@ else
   SLIB := so
 endif
 
-TARGET  = libLLVM_extra-$(LLVM_VERSION)_$(JULIA_VERSION).$(SLIB)
+TARGET  = libLLVM_extra.$(SLIB)
 SOURCES = $(shell find . -name '*.cpp')
 OBJECTS = $(SOURCES:.cpp=.o)
 

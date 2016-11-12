@@ -8,7 +8,7 @@
 
 # from logging.jl: define DEBUG to enable debug output
 
-# set FORCE_LLVM_VERSION to force the LLVM version to use
+# set FORCE_LLVM_VERSION to force an LLVM version to use
 # (still needs to be discoverable and compatible)
 const force_llvm_version = Nullable{VersionNumber}(get(ENV, "FORCE_LLVM_VERSION", nothing))
 
@@ -16,8 +16,8 @@ const force_llvm_version = Nullable{VersionNumber}(get(ENV, "FORCE_LLVM_VERSION"
 # (for downloading binary assets from GitHub)
 const force_release = Nullable{String}(get(ENV, "FORCE_RELEASE", nothing))
 
-# define FORCE_LLVMEXTRA_BUILD to force a source build of the LLVM extras library
-const force_llvmextra_build = haskey(ENV, "FORCE_LLVMEXTRA_BUILD")
+# define FORCE_BUILD to force a source build of the LLVM extras library
+const force_build = haskey(ENV, "FORCE_BUILD")
 
 # define USE_SYSTEM_LLVM to allow using non-bundled versions of LLVM
 const use_system_llvm = haskey(ENV, "USE_SYSTEM_LLVM")
@@ -33,12 +33,15 @@ import Compat.String
 
 using JSON
 
+using ZipFile
+
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
 const libext = is_apple() ? "dylib" : "so"
 
-function libname(version::VersionNumber)
+# possible names for libLLVM given a LLVM version number
+function llvm_libnames(version::VersionNumber)
     @static if is_apple()
         # macOS dylibs are versioned already
         return ["libLLVM.dylib"]
@@ -53,11 +56,20 @@ function libname(version::VersionNumber)
     end
 end
 
+# name for libLLVM_extra
+llvmextra_libname = "libLLVM_extra.$libext"
+
 immutable Toolchain
     path::String
     version::VersionNumber
     config::Nullable{String}
 end
+
+# name of the binary asset package
+function bindeps_filename(llvm::Toolchain, julia::Toolchain)
+    return "bindeps_llvm$(verstr(llvm.version))_julia$(verstr(julia.version)).zip"
+end
+
 
 verbose_run(cmd) = (println(cmd); run(cmd))
 
@@ -75,7 +87,7 @@ llvms = Vector{Toolchain}()
 function find_libllvm(dir::String, versions::Vector{VersionNumber})
     debug("Looking for libLLVM in $dir")
     libraries = Vector{Tuple{String, VersionNumber}}()
-    for version in versions, name in libname(version)
+    for version in versions, name in llvm_libnames(version)
         lib = joinpath(dir, name)
         if ispath(lib)
             debug("- v$version at $lib")
@@ -181,7 +193,8 @@ julia_cmd = Base.julia_cmd()
 julia = Toolchain(julia_cmd.exec[1], Base.VERSION,
                   joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl"))
 isfile(julia.path) || error("could not find Julia binary from command $julia_cmd")
-isfile(get(julia.config)) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
+isfile(get(julia.config)) ||
+    error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
 
 
 
@@ -192,13 +205,11 @@ isfile(get(julia.config)) || error("could not find julia-config.jl relative to $
 # after this step, we'll have decided on a LLVM toolchain to use,
 # and have a built and linked extras library
 llvm = nothing
-llvmextra = nothing
+llvmextra = joinpath(@__DIR__, "llvm-extra", llvmextra_libname)
 
-llvmextra_asset(llvm, julia) =
-    "libLLVM_extra-$(verstr(llvm.version))_$(verstr(julia.version)).$libext"
-
-function finalize(unlinked::String, llvm)
-    debug("Finalizing $unlinked")
+function link(src::String, llvm)
+    debug("Finalizing $src")
+    srcdir, srcfile = splitdir(src)
 
     debug("- linking against $(llvm.path)")
     if is_apple()
@@ -209,13 +220,34 @@ function finalize(unlinked::String, llvm)
         ld_libname = ":$(basename(llvm.path))"
     end
     ld_dir = dirname(llvm.path)
-    linked = joinpath(dirname(unlinked), "linked-" * basename(unlinked))
-    verbose_run(`ld -o $linked -shared $unlinked -rpath $ld_dir -L $ld_dir -l$ld_libname`)
+
+    dst = joinpath(srcdir, "linked-" * srcfile)
+    verbose_run(`ld -o $dst -shared $src -rpath $ld_dir -L $ld_dir -l$ld_libname`)
 
     debug("- opening the library")
-    Libdl.dlopen(linked)
+    Libdl.dlopen(dst)
 
-    return linked
+    return dst
+end
+
+function create_bindeps(llvm::Toolchain, julia::Toolchain)
+    name = bindeps_filename(llvm, julia)
+    w = ZipFile.Writer(joinpath(@__DIR__, name))
+    f = ZipFile.addfile(w, llvmextra_libname)
+    write(f, read(llvmextra))
+    close(w)
+end
+
+function extract_bindeps(name::String)
+    r = ZipFile.Reader(name)
+    for f in r.files
+        if f.name == llvmextra_libname
+            write(llvmextra, read(f))
+        else
+            error("Unknown file in bindeps archive: $(f.name)")
+        end
+    end
+    close(r)
 end
 
 
@@ -224,7 +256,7 @@ end
 info("Looking for precompiled version of LLVM extras library")
 
 # find out the current release tag
-function release_tag()
+function pkg_tag()
     if !isnull(force_release)
         tag = get(force_release)
         warn("Forcing release tag to $tag")
@@ -240,60 +272,59 @@ function release_tag()
 end
 
 # download the list of GitHub releases for this package
-package_releases() =
+pkg_releases() =
     download("https://api.github.com/repos/maleadt/LLVM.jl/releases") |> readstring |> JSON.parse
 
 # download the list of assets linked to a GitHub release (identified by its tag)
-function package_assets(tag)
-    releases = package_releases()
+function pkg_assets(tag)
+    releases = pkg_releases()
     filter!(r->r["tag_name"] == tag, releases)
     length(releases) == 0 && throw("could not find release $tag")
     @assert length(releases) == 1
 
     assets = releases[1]["assets"]
-    isempty(assets) && throw("release $tag does not have any asset")
+    isempty(assets) && throw("release $tag does not have any assets")
 
     return Dict(map(a->a["name"] => a["browser_download_url"], assets))
 end
 
-# download the list of compatible binary assets providing libLLVM_extra
-function llvmextra_assets()
-    assets = package_assets(release_tag())
+# get the link for a compatible bindeps package
+function get_bindeps()
+    assets = pkg_assets(pkg_tag())
 
     usable_assets = Vector{Tuple{Toolchain,String}}()
     for (name,url) in assets, llvm in llvms
-        if name == llvmextra_asset(llvm,julia)
+        if name == bindeps_filename(llvm,julia)
             push!(usable_assets, tuple(llvm,url))
         end
     end
 
-    isempty(usable_assets) && error("could not find relevant LLVM extras library asset")
-    return usable_assets
+    isempty(usable_assets) && error("could not find matching bindeps package")
+    @assert length(usable_assets) == 1
+    return usable_assets[1]
 end
 
-if force_llvmextra_build
+if force_build
     warn("Forcing source build of LLVM extras library")
 else
     try
-        (llvm, url) = first(llvmextra_assets())
-        name = llvmextra_asset(llvm,julia)
-        debug("Downloading $name from $url")
+        (llvm, url) = get_bindeps()
+        debug("Downloading $url")
 
-        llvmextra = joinpath(@__DIR__, "llvm-extra", name)
-        download(url, llvmextra)
-
-        llvmextra = finalize(llvmextra, llvm)
+        archive = download(url)
+        extract_bindeps(archive)
+        llvmextra = link(llvmextra, llvm)
     catch e
         msg = sprint(io->showerror(io, e))
         warn("could not use precompiled version of LLVM extras library: $msg")
-        llvmextra = nothing
+        llvm = nothing
     end
 end
 
 
 ## source build
 
-if llvmextra == nothing
+if !isfile(llvmextra) || llvm == nothing
     info("Performing source build of LLVM extras library")
 
     # at this point, we require `llvm-config` for building
@@ -305,20 +336,21 @@ if llvmextra == nothing
     debug("Building for LLVM v$(llvm.version) at $(llvm.path) using $(get(llvm.config))")
 
     # build library with extra functions
-    llvmextra = joinpath(@__DIR__, "llvm-extra", llvmextra_asset(llvm, julia))
     cd(joinpath(@__DIR__, "llvm-extra")) do
-        withenv("LLVM_CONFIG" => get(llvm.config),
-                "LLVM_LIBRARY" => llvm.path, "LLVM_VERSION" => verstr(llvm.version),
-                "JULIA_CONFIG" => get(julia.config),
-                "JULIA_BINARY" => julia.path, "JULIA_VERSION" => verstr(julia.version)) do
+        withenv("LLVM_CONFIG" => get(llvm.config), "LLVM_LIBRARY" => llvm.path,
+                "JULIA_CONFIG" => get(julia.config), "JULIA_BINARY" => julia.path,) do
             # force a rebuild as the LLVM installation might have changed, undetectably
             verbose_run(`make clean`)
             verbose_run(`make -j$(Sys.CPU_CORES+1)`)
         end
     end
 
-    llvmextra = finalize(llvmextra, llvm)
+    create_bindeps(llvm, julia)
+    llvmextra = link(llvmextra, llvm)
 end
+
+@assert llvm != nothing
+@assert isfile(llvmextra)
 
 
 

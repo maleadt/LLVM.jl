@@ -25,7 +25,7 @@ matrix:
     - os: linux
       env:
         - FORCE_LLVM_VERSION=3.9
-        - FORCE_LLVMEXTRA_BUILD=1
+        - FORCE_BUILD=1
         - USE_SYSTEM_LLVM=1
       julia: 0.5
       # addons: *llvm39linux
@@ -38,7 +38,7 @@ matrix:
     - os: linux
       env:
         - FORCE_LLVM_VERSION=3.9
-        - FORCE_LLVMEXTRA_BUILD=1
+        - FORCE_BUILD=1
         - USE_SYSTEM_LLVM=1
       julia: nightly
       # addons: *llvm39linux
@@ -53,7 +53,7 @@ matrix:
       env:
         - FORCE_LLVM_VERSION=3.9
         - DEBUG=1
-        - FORCE_LLVMEXTRA_BUILD=1
+        - FORCE_BUILD=1
         - USE_SYSTEM_LLVM=1
       julia: 0.5
       # addons: *llvm39linux
@@ -67,7 +67,7 @@ matrix:
       env:
         - FORCE_LLVM_VERSION=3.9
         - DEBUG=1
-        - FORCE_LLVMEXTRA_BUILD=1
+        - FORCE_BUILD=1
         - USE_SYSTEM_LLVM=1
       julia: nightly
       # addons: *llvm39linux
@@ -81,7 +81,7 @@ matrix:
     - os: linux
       env:
         - FORCE_LLVM_VERSION=4.0
-        - FORCE_LLVMEXTRA_BUILD=1
+        - FORCE_BUILD=1
         - USE_SYSTEM_LLVM=1
       julia: 0.5
       # addons: *llvm40linux
@@ -94,7 +94,7 @@ matrix:
     - os: linux
       env:
         - FORCE_LLVM_VERSION=4.0
-        - FORCE_LLVMEXTRA_BUILD=1
+        - FORCE_BUILD=1
         - USE_SYSTEM_LLVM=1
       julia: nightly
       # addons: *llvm40linux
@@ -109,7 +109,7 @@ matrix:
       env:
         - FORCE_LLVM_VERSION=4.0
         - DEBUG=1
-        - FORCE_LLVMEXTRA_BUILD=1
+        - FORCE_BUILD=1
         - USE_SYSTEM_LLVM=1
       julia: 0.5
       # addons: *llvm40linux
@@ -123,7 +123,7 @@ matrix:
       env:
         - FORCE_LLVM_VERSION=4.0
         - DEBUG=1
-        - FORCE_LLVMEXTRA_BUILD=1
+        - FORCE_BUILD=1
         - USE_SYSTEM_LLVM=1
       julia: nightly
       # addons: *llvm40linux
@@ -180,7 +180,7 @@ deploy:
     skip_cleanup: true
     overwrite: true
     file_glob: true
-    file: ${PKGDIR}/deps/llvm-extra/libLLVM_extra*
+    file: ${PKGDIR}/deps/bindeps_*
     on:
         tags: true
-        condition: $FORCE_LLVMEXTRA_BUILD = 1
+        condition: $FORCE_BUILD = 1
