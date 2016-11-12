@@ -5,12 +5,58 @@ module LLVM
 using Compat
 import Compat.String
 
+include("logging.jl")
+include("auxiliary.jl")
+
 module API
 
-macro apicall(fun, ret, argtypes, args...)
-    return quote
-        ccall(($fun,libllvm), $ret,$argtypes, $(args...))
+using LLVM: debug, DEBUG, trace, TRACE, repr_indented
+
+# TODO: put this in package
+macro apicall(f, rettyp, argtyps, args...)
+    # Escape the tuple of arguments, making sure it is evaluated in caller scope
+    # (there doesn't seem to be inline syntax like `$(esc(argtyps))` for this)
+    esc_args = [esc(arg) for arg in args]
+
+    blk = Expr(:block)
+
+    if !isa(f, Expr) || f.head != :quote
+        error("first argument to @apicall should be a symbol")
     end
+
+    # Print the function name & arguments
+    @static if TRACE
+        push!(blk.args, :(trace($(sprint(Base.show_unquoted,f.args[1])*"("); line=false)))
+        i=length(args)
+        for arg in args
+            i-=1
+            sep = (i>0 ? ", " : "")
+
+            # TODO: we should only do this if evaluating `arg` has no side effects
+            push!(blk.args, :(trace(repr_indented($(esc(arg))), $sep;
+                  prefix=$(sprint(Base.show_unquoted,arg))*"=", line=false)))
+        end
+        push!(blk.args, :(trace(""; prefix=") =", line=false)))
+    end
+
+    # Generate the actual call
+    @gensym ret
+    push!(blk.args, quote
+        $ret = ccall(($f, libllvm), $rettyp,
+                     $(esc(argtyps)), $(esc_args...))
+    end)
+
+    # Print the results
+    @static if TRACE
+        push!(blk.args, :(trace($ret; prefix=" ")))
+    end
+
+    # Return the result
+    push!(blk.args, quote
+        $ret
+    end)
+
+    return blk
 end
 
 ext = joinpath(dirname(@__FILE__), "..", "deps", "ext.jl")
@@ -28,9 +74,6 @@ isfile(libllvm_path) ||
 const exclusive = Libdl.dlopen_e(libllvm_path, Libdl.RTLD_NOLOAD) == C_NULL
 
 end
-
-include("logging.jl")
-include("auxiliary.jl")
 
 include("types.jl")
 include("passregistry.jl")
@@ -56,6 +99,8 @@ function __init__()
     debug("Checking validity of $(API.libllvm_path) (", (API.exclusive?"exclusive":"non-exclusive"), " access)")
     stat(API.libllvm_path).mtime == API.libllvm_mtime ||
         warn("LLVM library has been modified. Please re-run Pkg.build(\"LLVM\") and restart Julia.")
+
+    __init_logging__()
 
     _install_handlers()
     _install_handlers(GlobalContext())
