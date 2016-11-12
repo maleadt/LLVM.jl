@@ -337,6 +337,9 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         const libllvm_path = "$(llvm.path)"
         const libllvm_mtime = $llvm_library_mtime
 
+        # LLVM extras library properties
+        const libllvm_extra_path = "$libllvm_extra"
+
         # wrapper properties
         const wrapper_version = v"$wrapper_version"
 
@@ -344,7 +347,6 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         const targets = $llvm_targets
 
         # library loading
-        const libllvm = "$libllvm_extra"
         include("$libllvm_wrapper_common")
         include("$libllvm_wrapper")
         include("$libllvm_extra_wrapper")
