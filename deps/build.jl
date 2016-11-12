@@ -1,23 +1,27 @@
 # This script looks for LLVM installations and selects one based on the compatibility with
-# available wrappers.
+# available wrappers. This is somewhat convoluted, as we can find LLVM in a variety of
+# places using different mechanisms, while version matching needs to consider API
+# compatibility. In addition, we need to build an extras library with additional functions,
+# which we also try to download a precompiled version of.
 #
-# This is somewhat convoluted, as we can find LLVM in a variety of places using different
-# mechanisms, while version matching needs to consider API compatibility.
-#
-# Several environment variables can influence this process:
+# Several environment variables can change the behavior of this script:
 
-# from logging.jl: DEBUG=1 to enable debug output
+# from logging.jl: define DEBUG to enable debug output
 
-# force the LLVM version to use (still needs to be discoverable and compatible)
+# set FORCE_LLVM_VERSION to force the LLVM version to use
+# (still needs to be discoverable and compatible)
 const force_llvm_version = Nullable{VersionNumber}(get(ENV, "FORCE_LLVM_VERSION", nothing))
 
-# force a certain release tag to be used (for downloading binary assets from GitHub)
+# set FORCE_RELEASE to force a certain release tag to be used
+# (for downloading binary assets from GitHub)
 const force_release = Nullable{String}(get(ENV, "FORCE_RELEASE", nothing))
 
-# force a source build of the LLVM extras library
+# define FORCE_LLVMEXTRA_BUILD to force a source build of the LLVM extras library
 const force_llvmextra_build = haskey(ENV, "FORCE_LLVMEXTRA_BUILD")
 
-# TODO: USE_SYSTEM_LLVM
+# define USE_SYSTEM_LLVM to allow using non-bundled versions of LLVM
+const use_system_llvm = haskey(ENV, "USE_SYSTEM_LLVM")
+
 
 
 #
@@ -57,11 +61,8 @@ end
 
 verbose_run(cmd) = (println(cmd); run(cmd))
 
+const base_llvm_version = VersionNumber(Base.libllvm_version)
 
-
-#
-# Parse arguments
-#
 
 
 #
@@ -104,7 +105,7 @@ end
 # check for bundled LLVM libraries
 libdirs = [joinpath(JULIA_HOME, "..", "lib", "julia")]
 for libdir in libdirs
-    libraries = find_libllvm(libdir, [VersionNumber(Base.libllvm_version)])
+    libraries = find_libllvm(libdir, [base_llvm_version])
 
     for (library, version) in libraries
         push!(llvms, Toolchain(library, version, Nullable{String}()))
@@ -112,7 +113,10 @@ for libdir in libdirs
 end
 
 # check for llvm-config binaries in known locations
-configdirs = [JULIA_HOME, joinpath(JULIA_HOME, "..", "tools"), split(ENV["PATH"], ':')...]
+configdirs = [JULIA_HOME, joinpath(JULIA_HOME, "..", "tools")]
+if use_system_llvm
+    append!(configdirs, [split(ENV["PATH"], ':')...])
+end
 for dir in unique(configdirs)
     isdir(dir) || continue
     configs = find_llvmconfig(dir)
@@ -151,6 +155,9 @@ vercmp_compat = (a,b) -> a.major>b.major  || (a.major==b.major && a.minor>=b.min
 if !isnull(force_llvm_version)
     warn("Forcing LLVM version at $(get(force_llvm_version))")
     llvms = filter(t->vercmp_match(t.version,get(force_llvm_version)), llvms)
+elseif !use_system_llvm
+    warn("Only considering bundled LLVM v$base_llvm_version")
+    llvms = filter(t->vercmp_match(t.version,base_llvm_version), llvms)
 end
 
 # versions wrapped
@@ -175,6 +182,7 @@ julia = Toolchain(julia_cmd.exec[1], Base.VERSION,
                   joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl"))
 isfile(julia.path) || error("could not find Julia binary from command $julia_cmd")
 isfile(get(julia.config)) || error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
+
 
 
 #
@@ -277,7 +285,7 @@ else
         llvmextra = finalize(llvmextra, llvm)
     catch e
         msg = sprint(io->showerror(io, e))
-        warn("could not use binary version of LLVM extras library: $msg")
+        warn("could not use precompiled version of LLVM extras library: $msg")
         llvmextra = nothing
     end
 end
