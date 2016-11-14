@@ -81,9 +81,6 @@ LDFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --ldflags)
 # Build
 #
 
-# we like symbols
-CXXFLAGS += -g
-
 ifeq ($(UNAME), Darwin)
   SLIB := dylib
 else

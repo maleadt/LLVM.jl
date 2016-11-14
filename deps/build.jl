@@ -1,8 +1,5 @@
-# This script looks for LLVM installations and selects one based on the compatibility with
-# available wrappers. This is somewhat convoluted, as we can find LLVM in a variety of
-# places using different mechanisms, while version matching needs to consider API
-# compatibility. In addition, we need to build an extras library with additional functions,
-# which we also try to download a precompiled version of.
+# This script discovers available LLVM toolchains, selects suitable ones based on API
+# compatibility with available wrappers, and builds a library with additional API functions.
 #
 # Several environment variables can change the behavior of this script:
 
@@ -13,7 +10,6 @@ const override_llvm_version = Nullable{VersionNumber}(get(ENV, "LLVM_VER", nothi
 
 # define USE_SYSTEM_LLVM to allow using non-bundled versions of LLVM
 const use_system_llvm = haskey(ENV, "USE_SYSTEM_LLVM")
-
 
 
 #
@@ -56,7 +52,6 @@ end
 verbose_run(cmd) = (println(cmd); run(cmd))
 
 const base_llvm_version = VersionNumber(Base.libllvm_version)
-
 
 
 #
@@ -134,7 +129,6 @@ llvms = unique(x -> realpath(x.path), llvms)
 info("Found $(length(llvms)) unique LLVM installations")
 
 
-
 #
 # LLVM selection
 #
@@ -154,7 +148,7 @@ if !isnull(override_llvm_version)
 elseif !use_system_llvm
     # NOTE: only match versions here, as `!use_system_llvm` implies we've only searched
     #       bundled directories
-    warn("Only considering bundled LLVM v$base_llvm_version")
+    warn("Only considering bundled LLVM v$base_llvm_version (define USE_SYSTEM_LLVM=1 to override)")
     llvms = filter(t->vercmp_match(t.version,base_llvm_version), llvms)
 end
 
@@ -183,7 +177,6 @@ isfile(get(julia.config)) ||
     error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
 
 
-
 #
 # Build extras library
 #
@@ -209,7 +202,6 @@ cd(joinpath(@__DIR__, "llvm-extra")) do
         verbose_run(`make -j$(Sys.CPU_CORES+1)`)
     end
 end
-
 
 
 #
