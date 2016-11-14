@@ -13,9 +13,28 @@ CXXFLAGS = $(shell $(LLVM_CONFIG) --cxxflags)
 LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags)
 LDLIBS = $(shell $(LLVM_CONFIG) --system-libs)
 
-# NOTE: we don't link against libLLVM for the resulting library to be portable
-#       (ie. not tied to a specific name/location of libLLVM)
-#       a linked version is created by build.jl
+LDFLAGS += "-Wl,-rpath,$(dir $(LLVM_LIBRARY))"
+ifeq ($(UNAME), Darwin)
+  # macOS dylibs are versioned already
+  LDLIBS += -lLLVM
+
+  # some LLVM libraries erroneously link against libLTO (D25865), provided by Julia too.
+  # however, for some reason loading libLLVM only picks up / prioritizes the Julia RPATH,
+  # loading the wrong version of libLTO. workaround: load the correct libLTO ourselves now.
+  # NOTE: I haven't seen this arise on Linux, but might very well happen there too.
+  OTOOL := $(shell command -v otool 2> /dev/null)
+  ifdef OTOOL
+    LIBLTO=$(shell $(OTOOL) -L "$(LLVM_LIBRARY)" | grep "libLTO")
+    ifneq ($(LIBLTO),)
+      LDLIBS += -lLTO
+    endif
+  else
+    $(error otool not available)
+  endif
+else
+  # specify the versioned library name to make sure we pick up the correct one
+  LDLIBS += -l:$(notdir $(LLVM_LIBRARY))
+endif
 
 # sanitize the cflags llvm-config provides us with
 # (removing C++ specific ones, or flags supported by only Clang or GCC)
