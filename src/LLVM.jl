@@ -5,26 +5,12 @@ module LLVM
 using Compat
 import Compat.String
 
-module API
-ext = joinpath(dirname(@__FILE__), "..", "deps", "ext.jl")
-isfile(ext) || error("Unable to load $ext\n\nPlease re-run Pkg.build(\"LLVM\"), and restart Julia.")
-include(ext)
-
-# check whether the chosen LLVM is loaded already, ie. before having loaded it via `ccall`.
-# if it isn't, we have exclusive access, allowing destructive operations (like shutting LLVM
-# down).
-#
-# this check doesn't work in `__init__` because in the case of precompilation the
-# deserializer already loads the library.
-isfile(libllvm_path) ||
-    error("LLVM library missing. Please re-run Pkg.build(\"LLVM\") and restart Julia.")
-const exclusive = Libdl.dlopen_e(libllvm_path, Libdl.RTLD_NOLOAD) == C_NULL
-
-end
-
+# auxiliary functionality
 include("logging.jl")
-include("auxiliary.jl")
+include("util.jl")
+include("api.jl")
 
+# libLLVM wrapping
 include("types.jl")
 include("passregistry.jl")
 include("init.jl")
@@ -49,6 +35,9 @@ function __init__()
     debug("Checking validity of $(API.libllvm_path) (", (API.exclusive?"exclusive":"non-exclusive"), " access)")
     stat(API.libllvm_path).mtime == API.libllvm_mtime ||
         warn("LLVM library has been modified. Please re-run Pkg.build(\"LLVM\") and restart Julia.")
+
+    __init_logging__()
+   __init_api__()
 
     _install_handlers()
     _install_handlers(GlobalContext())

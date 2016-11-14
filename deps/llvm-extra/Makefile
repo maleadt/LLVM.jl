@@ -3,16 +3,6 @@
 
 UNAME = $(shell uname -s)
 
-ifeq ($(UNAME), Darwin)
-  SLIB := dylib
-else
-  SLIB := so
-endif
-
-TARGET  = libLLVM_extra.$(SLIB)
-SOURCES = $(shell find . -name '*.cpp')
-OBJECTS = $(SOURCES:.cpp=.o)
-
 
 #
 # LLVM flags
@@ -57,11 +47,6 @@ ifneq ($(HAS_RTTI),"YES")
 CXXFLAGS += -fno-rtti
 endif
 
-# as we build with -z,defs, we shouldn't use target-specific symbols
-# unless the target is built, so generate preprocessor definitions
-LLVM_TARGETS = $(shell $(LLVM_CONFIG) --targets-built | tr '[:lower:]' '[:upper:]')
-CPPFLAGS += $(addprefix -DTARGET_, $(LLVM_TARGETS))
-
 # try to detect LLVM's C++ ABI, and configure GLIBC accordingly
 # NOTE: this is best-effort, as the target compiler might just not support the new ABI
 NM := $(shell command -v nm 2> /dev/null)
@@ -86,15 +71,28 @@ endif
 # Julia flags
 #
 
-CXXFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --cflags)
-LDFLAGS += $(shell $(JULIA) $(JULIA_CONFIG) --ldflags)
-# NOTE: we don't use the --ldlibs as we don't want to link against libjulia,
-#       relying on the fact that the library will be loaded when opening libLLVM_extra.
+CXXFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --cflags)
+LDFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --ldflags)
+
+# NOTE: we don't link against libjulia as it will be loaded when dlopen'ing this library
 
 
 #
 # Build
 #
+
+# we like symbols
+CXXFLAGS += -g
+
+ifeq ($(UNAME), Darwin)
+  SLIB := dylib
+else
+  SLIB := so
+endif
+
+TARGET  = libLLVM_extra.$(SLIB)
+SOURCES = $(shell find . -name '*.cpp')
+OBJECTS = $(SOURCES:.cpp=.o)
 
 # shared-library building
 CXXFLAGS += -fPIC

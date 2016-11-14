@@ -103,7 +103,7 @@ macro reftypedef(args...)
         haskey(refs, get(proxy)) ||
             error("$(typename)'s proxy $(get(proxy)) has no ref defined")
         reftype = refs[get(proxy)]
-    
+
         # add `ref` field containing a typed pointer
         unshift!(typedef.args[3].args, :( ref::API.$reftype ))
 

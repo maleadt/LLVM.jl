@@ -51,6 +51,6 @@ for target in API.targets,
 
     @eval begin
         export $jl_fname
-        $jl_fname() = ccall(($(QuoteNode(api_fname)),API.libllvm), Void, ())
+        $jl_fname() = API.@apicall($(QuoteNode(api_fname)), Void, ())
     end
 end
