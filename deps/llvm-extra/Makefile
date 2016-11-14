@@ -47,8 +47,8 @@ ifneq ($(HAS_RTTI),"YES")
 CXXFLAGS += -fno-rtti
 endif
 
-# as we build with -z,defs, we shouldn't use target-specific symbols
-# unless the target is built, so generate preprocessor definitions
+# we shouldn't use target-specific symbols unless the target is built,
+# so generate preprocessor definitions
 LLVM_TARGETS = $(shell $(LLVM_CONFIG) --targets-built | tr '[:lower:]' '[:upper:]')
 CPPFLAGS += $(addprefix -DTARGET_, $(LLVM_TARGETS))
 
@@ -80,6 +80,14 @@ CXXFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --cflags)
 LDFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --ldflags)
 
 # NOTE: we don't link against libjulia as it will be loaded when dlopen'ing this library
+
+# as a consequence, the library will contain undefined references to Julia functions,
+# which macOS tools don't like
+JULIA_FUNCTIONS = jl_get_ptls_states jl_box_voidpointer jl_unbox_bool jl_apply_generic
+COMMA := ,
+ifeq ($(UNAME), Darwin)
+  LDFLAGS += $(addprefix -Wl$(COMMA)-U$(COMMA)_,$(JULIA_FUNCTIONS))
+endif
 
 
 #
