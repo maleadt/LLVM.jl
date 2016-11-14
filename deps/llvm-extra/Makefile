@@ -19,8 +19,9 @@ ifeq ($(UNAME), Darwin)
   LDLIBS += -lLLVM
 
   # some LLVM libraries erroneously link against libLTO (D25865), provided by Julia too.
-  # however, for some reason loading libLLVM only picks up / prioritizes the Julia RPATH,
-  # loading the wrong version of libLTO. workaround: load the correct libLTO ourselves now.
+  # however, loading libLLVM only picks up / prioritizes the Julia RPATH, loading the
+  # wrong version of libLTO. workaround: link against the correct libLTO ourselves.
+  #
   # NOTE: I haven't seen this arise on Linux, but might very well happen there too.
   OTOOL := $(shell command -v otool 2> /dev/null)
   ifdef OTOOL
@@ -31,6 +32,9 @@ ifeq ($(UNAME), Darwin)
   else
     $(error otool not available)
   endif
+
+  # NOTE: we wouldn't need the above hack, or the rpath additions,
+  #       if libLLVM/libLTO had a proper `install_path` set-up
 else
   # specify the versioned library name to make sure we pick up the correct one
   LDLIBS += -l:$(notdir $(LLVM_LIBRARY))
@@ -103,6 +107,10 @@ endif
 TARGET  = libLLVM_extra.$(SLIB)
 SOURCES = $(shell find . -name '*.cpp')
 OBJECTS = $(SOURCES:.cpp=.o)
+
+ifeq ($(UNAME), Darwin)
+$(TARGET): LDFLAGS += -install_name $(ROOT_DIR)/$(TARGET)
+endif
 
 # shared-library building
 CXXFLAGS += -fPIC
