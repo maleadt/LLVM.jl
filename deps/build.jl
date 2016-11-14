@@ -203,6 +203,10 @@ cd(joinpath(@__DIR__, "llvm-extra")) do
     end
 end
 
+# sanity check: open the library
+debug("Opening $llvmextra")
+Libdl.dlopen(llvmextra, Libdl.RTLD_LOCAL | Libdl.RTLD_DEEPBIND | Libdl.RTLD_NOW)
+
 
 #
 # Finishing up

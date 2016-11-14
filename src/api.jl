@@ -67,5 +67,5 @@ const exclusive = Libdl.dlopen_e(libllvm_path, Libdl.RTLD_NOLOAD) == C_NULL
 end
 
 function __init_api__()
-    API.libllvm[] = Libdl.dlopen(API.libllvm_extra_path, Libdl.RTLD_LAZY | Libdl.RTLD_DEEPBIND)
+    API.libllvm[] = Libdl.dlopen(API.libllvm_extra_path, Libdl.RTLD_LOCAL | Libdl.RTLD_DEEPBIND)
 end
