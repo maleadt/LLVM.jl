@@ -19,8 +19,9 @@ ifeq ($(UNAME), Darwin)
   LDLIBS += -lLLVM
 
   # some LLVM libraries erroneously link against libLTO (D25865), provided by Julia too.
-  # however, for some reason loading libLLVM only picks up / prioritizes the Julia RPATH,
-  # loading the wrong version of libLTO. workaround: load the correct libLTO ourselves now.
+  # however, loading libLLVM only picks up / prioritizes the Julia RPATH, loading the
+  # wrong version of libLTO. workaround: link against the correct libLTO ourselves.
+  #
   # NOTE: I haven't seen this arise on Linux, but might very well happen there too.
   OTOOL := $(shell command -v otool 2> /dev/null)
   ifdef OTOOL
@@ -31,6 +32,9 @@ ifeq ($(UNAME), Darwin)
   else
     $(error otool not available)
   endif
+
+  # NOTE: we wouldn't need the above hack, or the rpath additions,
+  #       if libLLVM/libLTO had a proper `install_path` set-up
 else
   # specify the versioned library name to make sure we pick up the correct one
   LDLIBS += -l:$(notdir $(LLVM_LIBRARY))
@@ -46,6 +50,11 @@ HAS_RTTI=$(shell $(LLVM_CONFIG) --has-rtti)
 ifneq ($(HAS_RTTI),"YES")
 CXXFLAGS += -fno-rtti
 endif
+
+# we shouldn't use target-specific symbols unless the target is built,
+# so generate preprocessor definitions
+LLVM_TARGETS = $(shell $(LLVM_CONFIG) --targets-built | tr '[:lower:]' '[:upper:]')
+CPPFLAGS += $(addprefix -DTARGET_, $(LLVM_TARGETS))
 
 # try to detect LLVM's C++ ABI, and configure GLIBC accordingly
 # NOTE: this is best-effort, as the target compiler might just not support the new ABI
@@ -76,6 +85,14 @@ LDFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --ldflags)
 
 # NOTE: we don't link against libjulia as it will be loaded when dlopen'ing this library
 
+# as a consequence, the library will contain undefined references to Julia functions,
+# which macOS tools don't like
+JULIA_FUNCTIONS = jl_get_ptls_states jl_box_voidpointer jl_unbox_bool jl_apply_generic
+COMMA := ,
+ifeq ($(UNAME), Darwin)
+  LDFLAGS += $(addprefix -Wl$(COMMA)-U$(COMMA)_,$(JULIA_FUNCTIONS))
+endif
+
 
 #
 # Build
@@ -90,6 +107,10 @@ endif
 TARGET  = libLLVM_extra.$(SLIB)
 SOURCES = $(shell find . -name '*.cpp')
 OBJECTS = $(SOURCES:.cpp=.o)
+
+ifeq ($(UNAME), Darwin)
+$(TARGET): LDFLAGS += -install_name $(ROOT_DIR)/$(TARGET)
+endif
 
 # shared-library building
 CXXFLAGS += -fPIC

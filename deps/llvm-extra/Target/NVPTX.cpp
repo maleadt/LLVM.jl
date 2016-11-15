@@ -1,3 +1,5 @@
+#ifdef TARGET_NVPTX
+
 #include <llvm-c/Types.h>
 
 #include <llvm/IR/LegacyPassManager.h>
@@ -22,3 +24,5 @@ extern "C" void LLVMExtraAddMVVMReflectPassWithMapping(LLVMPassManagerRef PM,
   createNVVMReflectPass(Mapping);
 }
 }
+
+#endif /* defined(TARGET_NVPTX) */
