@@ -217,10 +217,12 @@ cd(joinpath(@__DIR__, "llvm-extra")) do
     end
 end
 
-# sanity check: see if LLVM is opened already
-if !use_system_llvm
-    @assert(Libdl.dlopen_e(llvm.path, Libdl.RTLD_NOLOAD) != C_NULL,
-            "supposedly-bundled LLVM should have been loaded already (run with TRACE=1 and file an issue)")
+# sanity check: in the case of a bundled LLVM the library should be loaded by Julia already,
+#               while a system-provided LLVM shouldn't
+llvm_exclusive = Libdl.dlopen_e(llvm.path, Libdl.RTLD_NOLOAD) == C_NULL
+if use_system_llvm != llvm_exclusive
+    @assert(Libdl.dlopen_e(llvm.path, Libdl.RTLD_NOLOAD) == C_NULL,
+            "exclusive access mode does not match requested type of LLVM library (run with TRACE=1 and file an issue)")
 end
 
 # sanity check: open the library
@@ -269,6 +271,7 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         const wrapper_version = v"$wrapper_version"
 
         # installation properties
+        const exclusive = $llvm_exclusive
         const targets = $llvm_targets
 
         # library loading
