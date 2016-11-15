@@ -24,13 +24,16 @@ Version requirements:
 * LLVM 3.9 or higher, in full (ie. not only `libLLVM.so`, but also `llvm-config`, headers,
   etc)
 * Julia 0.5 or higher
-* C++ compiler
+* C++ compiler, and possibly some development headers (like `libz1`, `zlib1g-dev` on many
+  popular Linux distributions)
 
-Either install the package using `Pkg`, or manually run `deps/build.jl` which detects
-available LLVM installations (a version can be pinned by defining the `LLVM_VERSION`
-environment variable).
+Either install the package using `Pkg`, or manually clone it and run `deps/build.jl` which
+detects available LLVM installations and builds a library with additional API functions. The
+best matching installation of LLVM will be selected, but any version can be forced by
+setting the `LLVM_VER` environment variable at build time. The script will only load LLVM
+libraries bundled with Julia, but that can be overridden by defining `USE_SYSTEM_LLVM`.
 
-If installation fails, re-run using the `DEBUG` environment variable set to `1` (as well as
+If installation fails, re-run with the `DEBUG` environment variable set to `1` (as well as
 running Julia with `--compilecache=no`), and attach that output to a bug report.
 
 
