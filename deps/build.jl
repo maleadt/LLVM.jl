@@ -3,7 +3,7 @@
 #
 # Several environment variables can change the behavior of this script:
 
-# from logging.jl: define DEBUG to enable debug output
+# from logging.jl: define DEBUG or TRACE to enable verbose output
 
 # set LLVM_VER to force an LLVM version (still needs to be discoverable and compatible)
 const override_llvm_version = Nullable{VersionNumber}(get(ENV, "LLVM_VER", nothing))
