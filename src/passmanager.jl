@@ -4,7 +4,7 @@ export PassManager,
 abstract PassManager
 
 add!(pm::PassManager, pass::Pass) =
-    API.LLVMExtraAddPass(ref(pm), ref(pass))
+    API.LLVMAddPass(ref(pm), ref(pass))
 
 dispose(pm::PassManager) = API.LLVMDisposePassManager(ref(pm))
 

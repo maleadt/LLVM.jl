@@ -4,7 +4,7 @@
 
 namespace llvm {
 
-extern "C" unsigned int LLVMGetDebugMDVersion() {
+extern "C" unsigned int LLVMExtraGetDebugMDVersion() {
   return DEBUG_METADATA_VERSION;
 }
 }

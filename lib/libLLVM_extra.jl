@@ -43,18 +43,18 @@ end
 
 # Julia wrapper for header: llvm-extra/Transforms/IPO.h
 
-function LLVMExtraAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
+function LLVMAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
     @apicall(:LLVMExtraAddInternalizePassWithExportList,Void,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
 end
 
 
 # Julia wrapper for header: llvm-extra/Target/NVPTX.h
 
-function LLVMExtraAddNVVMReflectPass(PM::LLVMPassManagerRef)
+function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
     @apicall(:LLVMExtraAddMVVMReflectPass,Void,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMExtraAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Values, Length)
+function LLVMAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Values, Length)
     @apicall(:LLVMExtraAddMVVMReflectPassWithMapping,Void,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
 end
 
@@ -66,25 +66,25 @@ end
 
 typealias LLVMPassRef Ptr{LLVMOpaquePass}
 
-function LLVMExtraAddPass(PM::LLVMPassManagerRef, P::LLVMPassRef)
+function LLVMAddPass(PM::LLVMPassManagerRef, P::LLVMPassRef)
     @apicall(:LLVMExtraAddPass,Void,
         (LLVMPassManagerRef, LLVMPassRef),
         PM, P)
 end
 
-function LLVMExtraCreateModulePass(Name, Callback)
+function LLVMCreateModulePass(Name, Callback)
     @apicall(:LLVMExtraCreateModulePass,LLVMPassRef,
         (Cstring, Any),
         Name, Callback)
 end
 
-function LLVMExtraCreateFunctionPass(Name, Callback)
+function LLVMCreateFunctionPass(Name, Callback)
     @apicall(:LLVMExtraCreateFunctionPass,LLVMPassRef,
         (Cstring, Any),
         Name, Callback)
 end
 
-function LLVMExtraCreateBasicBlockPass(Name, Callback)
+function LLVMCreateBasicBlockPass(Name, Callback)
     @apicall(:LLVMExtraCreateBasicBlockPass,LLVMPassRef,
         (Cstring, Any),
         Name, Callback)
@@ -94,7 +94,7 @@ end
 # Julia wrapper for header: llvm-extra/IR/Metadata.h
 
 function LLVMGetDebugMDVersion()
-    @apicall(:LLVMGetDebugMDVersion,Cuint,())
+    @apicall(:LLVMExtraGetDebugMDVersion,Cuint,())
 end
 
 

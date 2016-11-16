@@ -127,16 +127,16 @@ internalize!(pm::PassManager, allbutmain::Bool=true) =
     API.LLVMAddInternalizePass(ref(pm), Cuint(BoolToLLVM(allbutmain)))
 
 internalize!(pm::PassManager, exports::Vector{String}) =
-    API.LLVMExtraAddInternalizePassWithExportList(ref(pm), exports, Csize_t(length(exports)))
+    API.LLVMAddInternalizePassWithExportList(ref(pm), exports, Csize_t(length(exports)))
 
 
 ## target-specific transformations
 
 export nvvm_reflect!
 
-nvvm_reflect!(pm::PassManager) = API.LLVMExtraAddNVVMReflectPass(ref(pm))
+nvvm_reflect!(pm::PassManager) = API.LLVMAddNVVMReflectPass(ref(pm))
 
 nvvm_reflect!(pm::PassManager, params::Dict{String,Int}) =
-    API.LLVMExtraAddNVVMReflectPassWithMapping(ref(pm), collect(keys(params)),
+    API.LLVMAddNVVMReflectPassWithMapping(ref(pm), collect(keys(params)),
                                                collect(values(params)),
                                                Csize_t(length(params)))
