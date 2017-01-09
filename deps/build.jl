@@ -31,7 +31,6 @@ end
 #
 
 using Compat
-import Compat.String
 
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
@@ -74,8 +73,8 @@ const base_llvm_version = VersionNumber(Base.libllvm_version)
 
 llvms = Vector{Toolchain}()
 
-# returns vector of Tuple{path::String, VersionNumber}
-function find_libllvm(dir::String, versions::Vector{VersionNumber})
+# returns vector of Tuple{path::AbstractString, VersionNumber}
+function find_libllvm(dir::AbstractString, versions::Vector{VersionNumber})
     debug("Looking for libLLVM in $dir")
     libraries = Vector{Tuple{String, VersionNumber}}()
     for version in versions, name in llvm_libnames(version)
@@ -89,8 +88,8 @@ function find_libllvm(dir::String, versions::Vector{VersionNumber})
     return libraries
 end
 
-# returns vector of Tuple{path::String, VersionNumber}
-function find_llvmconfig(dir::String)
+# returns vector of Tuple{path::AbstractString, VersionNumber}
+function find_llvmconfig(dir::AbstractString)
     debug("Looking for llvm-config in $dir")
     configs = Vector{Tuple{String, VersionNumber}}()
     for file in readdir(dir)
@@ -188,7 +187,7 @@ julia = Toolchain(julia_cmd.exec[1], Base.VERSION,
                   joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl"))
 isfile(julia.path) || error("could not find Julia binary from command $julia_cmd")
 isfile(get(julia.config)) ||
-    error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-source builds are only supported on Julia 0.6+)")
+    error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-tree builds are only supported on Julia 0.6+)")
 
 
 #
