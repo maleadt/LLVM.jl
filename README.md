@@ -33,6 +33,12 @@ best matching installation of LLVM will be selected, but any version can be forc
 setting the `LLVM_VER` environment variable at build time. The script will only load LLVM
 libraries bundled with Julia, but that can be overridden by defining `USE_SYSTEM_LLVM`.
 
+**IMPORTANT NOTE**: `USE_SYSTEM_LLVM` is an experimental option, and not supported on all
+platforms. Meanwhile, even though Julia 0.5 is supported, the bundled LLVM 3.7 is not
+compatible with LLVM.jl. The best option is to build Julia 0.6 from source, which results in
+a compatible LLVM 3.9 without the dangers of `USE_SYSTEM_LLVM`. Binary versions of Julia 0.6
+are not yet compatible because they don't provide the necessary build artifacts.
+
 If installation fails, re-run with the `DEBUG` environment variable set to `1` (as well as
 running Julia with `--compilecache=no`), and attach that output to a bug report.
 
