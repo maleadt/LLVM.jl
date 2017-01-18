@@ -135,8 +135,3 @@ internalize!(pm::PassManager, exports::Vector{String}) =
 export nvvm_reflect!
 
 nvvm_reflect!(pm::PassManager) = API.LLVMAddNVVMReflectPass(ref(pm))
-
-nvvm_reflect!(pm::PassManager, params::Dict{String,Int}) =
-    API.LLVMAddNVVMReflectPassWithMapping(ref(pm), collect(keys(params)),
-                                               collect(values(params)),
-                                               Csize_t(length(params)))
