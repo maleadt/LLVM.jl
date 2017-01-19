@@ -35,7 +35,7 @@ using Compat
 include("common.jl")
 include(joinpath(@__DIR__, "..", "src", "logging.jl"))
 
-const libext = is_apple() ? "dylib" : "so"
+const libext = is_apple() ? "dylib" : is_windows() ? "dll" : "so"
 
 # possible names for libLLVM given a LLVM version number
 function llvm_libnames(version::VersionNumber)
@@ -48,6 +48,8 @@ function llvm_libnames(version::VersionNumber)
                 "libLLVM-$(version.major).$(version.minor).$(version.patch)svn.so",
                 "libLLVM-$(version.major).$(version.minor).so",
                 "libLLVM-$(version.major).$(version.minor)svn.so"]
+    elseif is_windows()
+        ["LLVM.dll"]
     else
         error("Unknown OS")
     end
@@ -107,7 +109,11 @@ end
 # check for bundled LLVM libraries
 # NOTE: as we only build the extras library from source, these libraries will never be used,
 #       but leave this code here as it may be used if we figure out how to provide bindeps
-libdirs = [joinpath(JULIA_HOME, "..", "lib", "julia")]
+libdirs = if is_windows()
+    [JULIA_HOME]
+else
+    [joinpath(JULIA_HOME, "..", "lib", "julia")]
+end
 for libdir in libdirs
     libraries = find_libllvm(libdir, [base_llvm_version])
 
@@ -172,7 +178,7 @@ wrapped_versions = map(dir->VersionNumber(dir),
 
 # select wrapper
 matching_llvms   = filter(t -> any(v -> vercmp_match(t.version,v), wrapped_versions), llvms)
-compatible_llvms = filter(t -> !in(t, matching_llvms) && 
+compatible_llvms = filter(t -> !in(t, matching_llvms) &&
                                any(v -> vercmp_compat(t.version,v), wrapped_versions), llvms)
 
 llvms = [matching_llvms; compatible_llvms]
@@ -183,8 +189,15 @@ llvms = [matching_llvms; compatible_llvms]
 #
 
 julia_cmd = Base.julia_cmd()
-julia = Toolchain(julia_cmd.exec[1], Base.VERSION,
-                  joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl"))
+path = if is_windows()
+    julia_cmd.exec[1] * ".exe"
+else
+    julia_cmd.exec[1]
+end
+julia = Toolchain(
+    path, Base.VERSION,
+    joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl")
+)
 isfile(julia.path) || error("could not find Julia binary from command $julia_cmd")
 isfile(get(julia.config)) ||
     error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-tree builds are only supported on Julia 0.6+)")
@@ -199,6 +212,7 @@ info("Performing source build of LLVM extras library")
 llvmextra = joinpath(@__DIR__, "llvm-extra", llvmextra_libname)
 
 # at this point, we require `llvm-config` for building
+println(llvms)
 filter!(x->!isnull(x.config), llvms)
 isempty(llvms) && error("could not find LLVM installation providing llvm-config")
 
