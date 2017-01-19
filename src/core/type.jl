@@ -143,7 +143,7 @@ export name, ispacked, isopaque, elements!
 
 @reftypedef proxy=LLVMType kind=LLVMStructTypeKind immutable StructType <: SequentialType end
 
-function StructType(name::String, ctx::Context)
+function StructType(name::String, ctx::Context=GlobalContext())
     return StructType(API.LLVMStructCreateNamed(ref(ctx), name))
 end
 

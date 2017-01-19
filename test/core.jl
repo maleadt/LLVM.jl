@@ -98,6 +98,9 @@ end
 let
     st = LLVM.StructType([LLVM.VoidType()])
     @test context(st) == global_ctx
+
+    st2 = LLVM.StructType("foo")
+    @test context(st2) == global_ctx
 end
 Context() do ctx
     elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]
