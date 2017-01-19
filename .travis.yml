@@ -14,7 +14,7 @@ addons_shortcuts:
     apt:
       # https://github.com/travis-ci/apt-package-whitelist/issues/3296
       # https://github.com/travis-ci/apt-package-whitelist/pull/3297
-      sources: [ubuntu-toolchain-r-test, llvm-toolchain-precise]
+      sources: [ubuntu-toolchain-r-test, llvm-toolchain-precise-4.0]
       packages: [llvm-4.0]
 
 # NOTE: Travis does not allow applying a global (eg. julia/os array) to a matrix,
@@ -82,7 +82,7 @@ matrix:
       # addons: *llvm40linux
       before_install:
       - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
       - sudo apt-get install llvm-4.0 -y
@@ -94,7 +94,7 @@ matrix:
       # addons: *llvm40linux
       before_install:
       - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
       - sudo apt-get install llvm-4.0 -y
@@ -108,7 +108,7 @@ matrix:
       # addons: *llvm40linux
       before_install:
       - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
       - sudo apt-get install llvm-4.0 -y
@@ -121,7 +121,7 @@ matrix:
       # addons: *llvm40linux
       before_install:
       - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main' -y
+      - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main' -y
       - sudo apt-get update -q
       - sudo apt-get remove llvm -y
       - sudo apt-get install llvm-4.0 -y
