@@ -44,12 +44,15 @@ LLVM.Module("SomeModule", ctx) do mod
     insert!(builder, retinst2)
     @test collect(instructions(entry)) == [unrinst, addinst, retinst2, retinst]
 
+    position!(builder, retinst)
+    icmpinst = icmp!(builder, LLVM.API.LLVMIntEQ, addinst, ConstantInt(LLVM.Int32Type(), 1))
+
     allocinst1 = alloca!(builder, LLVM.Int32Type(), "foo")
     allocinst2 = Instruction(allocinst1)
     @test name(allocinst2) == ""
     insert!(builder, allocinst2, "bar")
     @test name(allocinst2) == "bar"
-    @test collect(instructions(entry)) == [unrinst, addinst, retinst2, allocinst1, allocinst2, retinst]
+    @test collect(instructions(entry)) == [unrinst, addinst, retinst2, icmpinst, allocinst1, allocinst2, retinst]
 
     trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
     call!(builder, trap)

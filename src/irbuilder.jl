@@ -50,7 +50,7 @@ debuglocation!(builder::Builder, inst::Instruction) =
 # NOTE: we can't use type information for differentiating eg. add! and fadd! based on args,
 #       as ArgumentKind (LLVM's way of referring to contained function arguments) is untyped
 
-export unreachable!, ret!, add!, fadd!, br!, alloca!, call!
+export unreachable!, ret!, add!, fadd!, icmp!, br!, alloca!, call!
 
 unreachable!(builder::Builder) =
     Instruction(API.LLVMBuildUnreachable(ref(builder)))
@@ -68,6 +68,10 @@ add!(builder::Builder, lhs::Value, rhs::Value, name::String="") =
 fadd!(builder::Builder, lhs::Value, rhs::Value, name::String="") =
     Instruction(API.LLVMBuildFAdd(ref(builder), ref(lhs),
                                             ref(rhs), name))
+
+icmp!(builder::Builder, op::API.LLVMIntPredicate, rhs::Value,
+	lhs::Value, name::String="") = 
+	Instruction(API.LLVMBuildICmp(ref(builder), op, ref(rhs), ref(lhs), name))
 
 br!(builder::Builder, dest::BasicBlock) =
     Instruction(API.LLVMBuildBr(ref(builder), blockref(dest)))
