@@ -90,7 +90,6 @@ ModulePassManager() do pm
 
     if :NVPTX in LLVM.API.targets
         nvvm_reflect!(pm)
-        nvvm_reflect!(pm, Dict("foo" => 42))
     end
 end
 end

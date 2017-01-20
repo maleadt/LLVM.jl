@@ -42,7 +42,7 @@ endif
 
 # sanitize the cflags llvm-config provides us with
 # (removing C++ specific ones, or flags supported by only Clang or GCC)
-BADFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor -gline-tables-only
+BADFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor -gline-tables-only -Wstring-conversion
 CXXFLAGS := $(filter-out $(BADFLAGS),$(CXXFLAGS))
 
 # handle RTTI flags

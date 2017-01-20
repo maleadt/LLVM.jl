@@ -67,7 +67,21 @@ linkage(val::GlobalValue) = API.LLVMGetLinkage(ref(val))
 linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
     API.LLVMSetLinkage(ref(val), Cuint(linkage))
 
-section(val::GlobalValue) = unsafe_string(API.LLVMGetSection(ref(val)))
+function section(val::GlobalValue)
+  #=
+  The following started to fail on LLVM 4.0:
+    Context() do ctx
+      LLVM.Module("SomeModule", ctx) do mod
+        st = LLVM.StructType("SomeType", ctx)
+        ft = LLVM.FunctionType(st, [st])
+        fn = LLVM.Function(mod, "SomeFunction", ft)
+        section(fn) == ""
+      end
+      end
+  =#
+  section_ptr = API.LLVMGetSection(ref(val))
+  return section_ptr != C_NULL ? unsafe_string(section_ptr) : ""
+end
 section!(val::GlobalValue, sec::String) = API.LLVMSetSection(ref(val), sec)
 
 visibility(val::GlobalValue) = API.LLVMGetVisibility(ref(val))
