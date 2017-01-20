@@ -3025,8 +3025,8 @@ function lto_module_create_from_fd(fd::Cint,path,file_size::Csize_t)
     @apicall(:lto_module_create_from_fd,lto_module_t,(Cint,Cstring,Csize_t),fd,path,file_size)
 end
 
-function lto_module_create_from_fd_at_offset(fd::Cint,path,file_size::Csize_t,map_size::Csize_t,offset::Csize_t)
-    @apicall(:lto_module_create_from_fd_at_offset,lto_module_t,(Cint,Cstring,Csize_t,Csize_t,Csize_t),fd,path,file_size,map_size,offset)
+function lto_module_create_from_fd_at_offset(fd::Cint,path,file_size::Csize_t,map_size::Csize_t,offset::off_t)
+    @apicall(:lto_module_create_from_fd_at_offset,lto_module_t,(Cint,Cstring,Csize_t,Csize_t,off_t),fd,path,file_size,map_size,offset)
 end
 
 function lto_module_dispose(mod::lto_module_t)

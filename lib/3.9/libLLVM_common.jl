@@ -542,6 +542,7 @@ const LLVMLinkerDestroySource = (UInt32)(0)
 const LLVMLinkerPreserveSource_Removed = (UInt32)(1)
 # end enum LLVMLinkerMode
 
+typealias off_t  Csize_t
 typealias llvm_lto_t Ptr{Void}
 
 # begin enum llvm_lto_status_t
