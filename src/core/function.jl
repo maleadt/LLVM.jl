@@ -36,13 +36,10 @@ import Base: collect, push!, delete!
 immutable FunctionAttrSet
     f::Function
     idx::API.LLVMAttributeIndex
-
-    FunctionAttrSet(f::Function, idx::Cint) =
-      new(f, reinterpret(API.LLVMAttributeIndex, idx))
 end
 
 function_attributes(f::Function) = FunctionAttrSet(f, API.LLVMAttributeFunctionIndex)
-parameter_attributes(f::Function, idx::Integer) = FunctionAttrSet(f, Cint(idx))
+parameter_attributes(f::Function, idx::Integer) = FunctionAttrSet(f, API.LLVMAttributeIndex(idx))
 return_attributes(f::Function) = FunctionAttrSet(f, API.LLVMAttributeReturnIndex)
 
 eltype(::FunctionAttrSet) = Attribute
