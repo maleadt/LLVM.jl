@@ -16,6 +16,7 @@ top-level module, and are added as the need arises (see [COVERAGE.md](COVERAGE.m
 list of wrapped functions).
 
 
+
 Installation
 ------------
 
@@ -27,24 +28,57 @@ Version requirements:
 * C++ compiler, and possibly some development headers (like `libz1`, `zlib1g-dev` on many
   popular Linux distributions)
 
-Either install the package using `Pkg`, or manually clone it and run `deps/build.jl` which
-detects available LLVM installations and builds a library with additional API functions. The
-best matching installation of LLVM will be selected, but any version can be forced by
-setting the `LLVM_VER` environment variable at build time. The script will only load LLVM
-libraries bundled with Julia, but that can be overridden by defining `USE_SYSTEM_LLVM`.
+```
+Pkg.add("LLVM")
+Pkg.test("LLVM")
+```
+
+The build step (executed by `Pkg.add`) detects available LLVM installations and builds a
+library with additional API functions. The best matching installation of LLVM will be
+selected, but any version can be forced by setting the `LLVM_VER` environment variable at
+build time. The script will only load LLVM libraries bundled with Julia, but that can be
+overridden by defining `USE_SYSTEM_LLVM`.
 
 **IMPORTANT NOTE**: `USE_SYSTEM_LLVM` is an experimental option, and not supported on all
 platforms. Meanwhile, even though Julia 0.5 is supported, the bundled LLVM 3.7 is not
 compatible with LLVM.jl. The best option is to build Julia 0.6 from source, which results in
-a compatible LLVM 3.9 without the dangers of `USE_SYSTEM_LLVM`. Binary versions of Julia 0.6
-are not yet compatible because they don't provide the necessary build artifacts.
+a compatible LLVM 3.9 without the dangers of `USE_SYSTEM_LLVM`. **Do not** `make install`
+Julia, but run it from the folder you've compiled it in. Binary versions of Julia 0.6 are
+not yet compatible because they don't provide the necessary build artifacts.
 
-If installation fails, re-run with the `DEBUG` environment variable set to `1` (as well as
-running Julia with `--compilecache=no`), and attach that output to a bug report.
+If installation fails, re-run the failing steps with the `DEBUG` environment variable set to
+`1` and attach that output to a bug report:
+
+```
+$ DEBUG=1 julia
+julia> Pkg.build("LLVM")
+...
+```
+
 
 
 Troubleshooting
 ---------------
+
+You can enable verbose logging using two environment variables:
+
+* `DEBUG`: if set, enable additional (possibly costly) run-time checks, and some more
+  verbose output
+* `TRACE`: if set, the `DEBUG` level will be activated, in addition with a trace of every
+  call to the underlying library
+
+In order to avoid run-time cost for checking the log level, these flags are implemented by
+means of global constants. As a result, you **need to run Julia with precompilation
+disabled** if you want to modify these flags:
+
+```
+$ TRACE=1 julia --compilecache=no examples/sum.jl 1 2
+TRACE: LLVM.jl is running in trace mode, this will generate a lot of additional output
+...
+```
+
+Enabling colors with `--color=yes` is also recommended as it color-codes the output.
+
 
 ### Building `llvm-extra` fails due to C++11 ABI issues
 
