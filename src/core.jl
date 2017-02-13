@@ -2,10 +2,10 @@
 # other related types and utilities.
 
 # forward-declarations
-@reftypedef abstract User <: Value
-@reftypedef abstract Constant <: User
-@reftypedef abstract GlobalValue <: Constant
-@reftypedef abstract GlobalObject <: GlobalValue
+@reftypedef @compat abstract type User <: Value end
+@reftypedef @compat abstract type Constant <: User end
+@reftypedef @compat abstract type GlobalValue <: Constant end
+@reftypedef @compat abstract type GlobalObject <: GlobalValue end
 @reftypedef proxy=Value kind=LLVMFunctionValueKind immutable Function <: GlobalObject end
 @reftypedef proxy=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 
