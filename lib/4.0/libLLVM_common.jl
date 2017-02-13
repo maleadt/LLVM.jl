@@ -2,94 +2,94 @@
 
 using Compat
 
-typealias LLVMFatalErrorHandler Ptr{Void}
+const LLVMFatalErrorHandler = Ptr{Void}
 
-typealias LLVMBool Cint
+const LLVMBool = Cint
 
 type LLVMOpaqueMemoryBuffer
 end
 
-typealias LLVMMemoryBufferRef Ptr{LLVMOpaqueMemoryBuffer}
+const LLVMMemoryBufferRef = Ptr{LLVMOpaqueMemoryBuffer}
 
 type LLVMOpaqueContext
 end
 
-typealias LLVMContextRef Ptr{LLVMOpaqueContext}
+const LLVMContextRef = Ptr{LLVMOpaqueContext}
 
 type LLVMOpaqueModule
 end
 
-typealias LLVMModuleRef Ptr{LLVMOpaqueModule}
+const LLVMModuleRef = Ptr{LLVMOpaqueModule}
 
 type LLVMOpaqueType
 end
 
-typealias LLVMTypeRef Ptr{LLVMOpaqueType}
+const LLVMTypeRef = Ptr{LLVMOpaqueType}
 
 type LLVMOpaqueValue
 end
 
-typealias LLVMValueRef Ptr{LLVMOpaqueValue}
+const LLVMValueRef = Ptr{LLVMOpaqueValue}
 
 type LLVMOpaqueBasicBlock
 end
 
-typealias LLVMBasicBlockRef Ptr{LLVMOpaqueBasicBlock}
+const LLVMBasicBlockRef = Ptr{LLVMOpaqueBasicBlock}
 
 type LLVMOpaqueBuilder
 end
 
-typealias LLVMBuilderRef Ptr{LLVMOpaqueBuilder}
+const LLVMBuilderRef = Ptr{LLVMOpaqueBuilder}
 
 type LLVMOpaqueModuleProvider
 end
 
-typealias LLVMModuleProviderRef Ptr{LLVMOpaqueModuleProvider}
+const LLVMModuleProviderRef = Ptr{LLVMOpaqueModuleProvider}
 
 type LLVMOpaquePassManager
 end
 
-typealias LLVMPassManagerRef Ptr{LLVMOpaquePassManager}
+const LLVMPassManagerRef = Ptr{LLVMOpaquePassManager}
 
 type LLVMOpaquePassRegistry
 end
 
-typealias LLVMPassRegistryRef Ptr{LLVMOpaquePassRegistry}
+const LLVMPassRegistryRef = Ptr{LLVMOpaquePassRegistry}
 
 type LLVMOpaqueUse
 end
 
-typealias LLVMUseRef Ptr{LLVMOpaqueUse}
+const LLVMUseRef = Ptr{LLVMOpaqueUse}
 
 type LLVMOpaqueAttributeRef
 end
 
-typealias LLVMAttributeRef Ptr{LLVMOpaqueAttributeRef}
+const LLVMAttributeRef = Ptr{LLVMOpaqueAttributeRef}
 
 type LLVMOpaqueDiagnosticInfo
 end
 
-typealias LLVMDiagnosticInfoRef Ptr{LLVMOpaqueDiagnosticInfo}
+const LLVMDiagnosticInfoRef = Ptr{LLVMOpaqueDiagnosticInfo}
 
 type LLVMOpaqueObjectFile
 end
 
-typealias LLVMObjectFileRef Ptr{LLVMOpaqueObjectFile}
+const LLVMObjectFileRef = Ptr{LLVMOpaqueObjectFile}
 
 type LLVMOpaqueSectionIterator
 end
 
-typealias LLVMSectionIteratorRef Ptr{LLVMOpaqueSectionIterator}
+const LLVMSectionIteratorRef = Ptr{LLVMOpaqueSectionIterator}
 
 type LLVMOpaqueSymbolIterator
 end
 
-typealias LLVMSymbolIteratorRef Ptr{LLVMOpaqueSymbolIterator}
+const LLVMSymbolIteratorRef = Ptr{LLVMOpaqueSymbolIterator}
 
 type LLVMOpaqueRelocationIterator
 end
 
-typealias LLVMRelocationIteratorRef Ptr{LLVMOpaqueRelocationIterator}
+const LLVMRelocationIteratorRef = Ptr{LLVMOpaqueRelocationIterator}
 
 # Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## TargetInfo ( void ) ;
 # Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## Target ( void ) ;
@@ -105,7 +105,7 @@ typealias LLVMRelocationIteratorRef Ptr{LLVMOpaqueRelocationIterator}
 # Skipping MacroDefinition: LLVM_DISASSEMBLER ( TargetName ) LLVMInitialize ## TargetName ## Disassembler ( ) ;
 
 # begin enum LLVMByteOrdering
-typealias LLVMByteOrdering UInt32
+const LLVMByteOrdering = UInt32
 const LLVMBigEndian = (UInt32)(0)
 const LLVMLittleEndian = (UInt32)(1)
 # end enum LLVMByteOrdering
@@ -113,25 +113,25 @@ const LLVMLittleEndian = (UInt32)(1)
 type LLVMOpaqueTargetData
 end
 
-typealias LLVMTargetDataRef Ptr{LLVMOpaqueTargetData}
+const LLVMTargetDataRef = Ptr{LLVMOpaqueTargetData}
 
 type LLVMOpaqueTargetLibraryInfotData
 end
 
-typealias LLVMTargetLibraryInfoRef Ptr{LLVMOpaqueTargetLibraryInfotData}
+const LLVMTargetLibraryInfoRef = Ptr{LLVMOpaqueTargetLibraryInfotData}
 
 type LLVMOpaqueTargetMachine
 end
 
-typealias LLVMTargetMachineRef Ptr{LLVMOpaqueTargetMachine}
+const LLVMTargetMachineRef = Ptr{LLVMOpaqueTargetMachine}
 
 type LLVMTarget
 end
 
-typealias LLVMTargetRef Ptr{LLVMTarget}
+const LLVMTargetRef = Ptr{LLVMTarget}
 
 # begin enum LLVMCodeGenOptLevel
-typealias LLVMCodeGenOptLevel UInt32
+const LLVMCodeGenOptLevel = UInt32
 const LLVMCodeGenLevelNone = (UInt32)(0)
 const LLVMCodeGenLevelLess = (UInt32)(1)
 const LLVMCodeGenLevelDefault = (UInt32)(2)
@@ -139,7 +139,7 @@ const LLVMCodeGenLevelAggressive = (UInt32)(3)
 # end enum LLVMCodeGenOptLevel
 
 # begin enum LLVMRelocMode
-typealias LLVMRelocMode UInt32
+const LLVMRelocMode = UInt32
 const LLVMRelocDefault = (UInt32)(0)
 const LLVMRelocStatic = (UInt32)(1)
 const LLVMRelocPIC = (UInt32)(2)
@@ -147,7 +147,7 @@ const LLVMRelocDynamicNoPic = (UInt32)(3)
 # end enum LLVMRelocMode
 
 # begin enum LLVMCodeModel
-typealias LLVMCodeModel UInt32
+const LLVMCodeModel = UInt32
 const LLVMCodeModelDefault = (UInt32)(0)
 const LLVMCodeModelJITDefault = (UInt32)(1)
 const LLVMCodeModelSmall = (UInt32)(2)
@@ -157,13 +157,13 @@ const LLVMCodeModelLarge = (UInt32)(5)
 # end enum LLVMCodeModel
 
 # begin enum LLVMCodeGenFileType
-typealias LLVMCodeGenFileType UInt32
+const LLVMCodeGenFileType = UInt32
 const LLVMAssemblyFile = (UInt32)(0)
 const LLVMObjectFile = (UInt32)(1)
 # end enum LLVMCodeGenFileType
 
 # begin enum LLVMVerifierFailureAction
-typealias LLVMVerifierFailureAction UInt32
+const LLVMVerifierFailureAction = UInt32
 const LLVMAbortProcessAction = (UInt32)(0)
 const LLVMPrintMessageAction = (UInt32)(1)
 const LLVMReturnStatusAction = (UInt32)(2)
@@ -173,7 +173,7 @@ const LLVMReturnStatusAction = (UInt32)(2)
 # Skipping MacroDefinition: LLVM_DECLARE_VALUE_CAST ( name ) LLVMValueRef LLVMIsA ## name ( LLVMValueRef Val ) ;
 
 # begin enum LLVMOpcode
-typealias LLVMOpcode UInt32
+const LLVMOpcode = UInt32
 const LLVMRet = (UInt32)(1)
 const LLVMBr = (UInt32)(2)
 const LLVMSwitch = (UInt32)(3)
@@ -241,7 +241,7 @@ const LLVMCatchSwitch = (UInt32)(65)
 # end enum LLVMOpcode
 
 # begin enum LLVMTypeKind
-typealias LLVMTypeKind UInt32
+const LLVMTypeKind = UInt32
 const LLVMVoidTypeKind = (UInt32)(0)
 const LLVMHalfTypeKind = (UInt32)(1)
 const LLVMFloatTypeKind = (UInt32)(2)
@@ -262,7 +262,7 @@ const LLVMTokenTypeKind = (UInt32)(16)
 # end enum LLVMTypeKind
 
 # begin enum LLVMLinkage
-typealias LLVMLinkage UInt32
+const LLVMLinkage = UInt32
 const LLVMExternalLinkage = (UInt32)(0)
 const LLVMAvailableExternallyLinkage = (UInt32)(1)
 const LLVMLinkOnceAnyLinkage = (UInt32)(2)
@@ -283,21 +283,21 @@ const LLVMLinkerPrivateWeakLinkage = (UInt32)(16)
 # end enum LLVMLinkage
 
 # begin enum LLVMVisibility
-typealias LLVMVisibility UInt32
+const LLVMVisibility = UInt32
 const LLVMDefaultVisibility = (UInt32)(0)
 const LLVMHiddenVisibility = (UInt32)(1)
 const LLVMProtectedVisibility = (UInt32)(2)
 # end enum LLVMVisibility
 
 # begin enum LLVMDLLStorageClass
-typealias LLVMDLLStorageClass UInt32
+const LLVMDLLStorageClass = UInt32
 const LLVMDefaultStorageClass = (UInt32)(0)
 const LLVMDLLImportStorageClass = (UInt32)(1)
 const LLVMDLLExportStorageClass = (UInt32)(2)
 # end enum LLVMDLLStorageClass
 
 # begin enum LLVMCallConv
-typealias LLVMCallConv UInt32
+const LLVMCallConv = UInt32
 const LLVMCCallConv = (UInt32)(0)
 const LLVMFastCallConv = (UInt32)(8)
 const LLVMColdCallConv = (UInt32)(9)
@@ -308,7 +308,7 @@ const LLVMX86FastcallCallConv = (UInt32)(65)
 # end enum LLVMCallConv
 
 # begin enum LLVMValueKind
-typealias LLVMValueKind UInt32
+const LLVMValueKind = UInt32
 const LLVMArgumentValueKind = (UInt32)(0)
 const LLVMBasicBlockValueKind = (UInt32)(1)
 const LLVMMemoryUseValueKind = (UInt32)(2)
@@ -337,7 +337,7 @@ const LLVMInstructionValueKind = (UInt32)(24)
 # end enum LLVMValueKind
 
 # begin enum LLVMIntPredicate
-typealias LLVMIntPredicate UInt32
+const LLVMIntPredicate = UInt32
 const LLVMIntEQ = (UInt32)(32)
 const LLVMIntNE = (UInt32)(33)
 const LLVMIntUGT = (UInt32)(34)
@@ -351,7 +351,7 @@ const LLVMIntSLE = (UInt32)(41)
 # end enum LLVMIntPredicate
 
 # begin enum LLVMRealPredicate
-typealias LLVMRealPredicate UInt32
+const LLVMRealPredicate = UInt32
 const LLVMRealPredicateFalse = (UInt32)(0)
 const LLVMRealOEQ = (UInt32)(1)
 const LLVMRealOGT = (UInt32)(2)
@@ -371,13 +371,13 @@ const LLVMRealPredicateTrue = (UInt32)(15)
 # end enum LLVMRealPredicate
 
 # begin enum LLVMLandingPadClauseTy
-typealias LLVMLandingPadClauseTy UInt32
+const LLVMLandingPadClauseTy = UInt32
 const LLVMLandingPadCatch = (UInt32)(0)
 const LLVMLandingPadFilter = (UInt32)(1)
 # end enum LLVMLandingPadClauseTy
 
 # begin enum LLVMThreadLocalMode
-typealias LLVMThreadLocalMode UInt32
+const LLVMThreadLocalMode = UInt32
 const LLVMNotThreadLocal = (UInt32)(0)
 const LLVMGeneralDynamicTLSModel = (UInt32)(1)
 const LLVMLocalDynamicTLSModel = (UInt32)(2)
@@ -386,7 +386,7 @@ const LLVMLocalExecTLSModel = (UInt32)(4)
 # end enum LLVMThreadLocalMode
 
 # begin enum LLVMAtomicOrdering
-typealias LLVMAtomicOrdering UInt32
+const LLVMAtomicOrdering = UInt32
 const LLVMAtomicOrderingNotAtomic = (UInt32)(0)
 const LLVMAtomicOrderingUnordered = (UInt32)(1)
 const LLVMAtomicOrderingMonotonic = (UInt32)(2)
@@ -397,7 +397,7 @@ const LLVMAtomicOrderingSequentiallyConsistent = (UInt32)(7)
 # end enum LLVMAtomicOrdering
 
 # begin enum LLVMAtomicRMWBinOp
-typealias LLVMAtomicRMWBinOp UInt32
+const LLVMAtomicRMWBinOp = UInt32
 const LLVMAtomicRMWBinOpXchg = (UInt32)(0)
 const LLVMAtomicRMWBinOpAdd = (UInt32)(1)
 const LLVMAtomicRMWBinOpSub = (UInt32)(2)
@@ -412,7 +412,7 @@ const LLVMAtomicRMWBinOpUMin = (UInt32)(10)
 # end enum LLVMAtomicRMWBinOp
 
 # begin enum LLVMDiagnosticSeverity
-typealias LLVMDiagnosticSeverity UInt32
+const LLVMDiagnosticSeverity = UInt32
 const LLVMDSError = (UInt32)(0)
 const LLVMDSWarning = (UInt32)(1)
 const LLVMDSRemark = (UInt32)(2)
@@ -420,13 +420,13 @@ const LLVMDSNote = (UInt32)(3)
 # end enum LLVMDiagnosticSeverity
 
 # begin enum LLVMAttributeIndex
-typealias LLVMAttributeIndex UInt32
+const LLVMAttributeIndex = UInt32
 const LLVMAttributeReturnIndex = (UInt32)(0)
 const LLVMAttributeFunctionIndex = reinterpret(UInt32, Int32(-1))
 # end enum LLVMAttributeIndex
 
-typealias LLVMDiagnosticHandler Ptr{Void}
-typealias LLVMYieldCallback Ptr{Void}
+const LLVMDiagnosticHandler = Ptr{Void}
+const LLVMYieldCallback = Ptr{Void}
 
 const LLVMDisassembler_VariantKind_None = 0
 const LLVMDisassembler_VariantKind_ARM_HI16 = 1
@@ -460,8 +460,8 @@ const LLVMDisassembler_Option_AsmPrinterVariant = 4
 const LLVMDisassembler_Option_SetInstrComments = 8
 const LLVMDisassembler_Option_PrintLatency = 16
 
-typealias LLVMDisasmContextRef Ptr{Void}
-typealias LLVMOpInfoCallback Ptr{Void}
+const LLVMDisasmContextRef = Ptr{Void}
+const LLVMOpInfoCallback = Ptr{Void}
 
 type LLVMOpInfoSymbol1
     Present::UInt64
@@ -476,22 +476,22 @@ type LLVMOpInfo1
     VariantKind::UInt64
 end
 
-typealias LLVMSymbolLookupCallback Ptr{Void}
+const LLVMSymbolLookupCallback = Ptr{Void}
 
 type LLVMOpaqueGenericValue
 end
 
-typealias LLVMGenericValueRef Ptr{LLVMOpaqueGenericValue}
+const LLVMGenericValueRef = Ptr{LLVMOpaqueGenericValue}
 
 type LLVMOpaqueExecutionEngine
 end
 
-typealias LLVMExecutionEngineRef Ptr{LLVMOpaqueExecutionEngine}
+const LLVMExecutionEngineRef = Ptr{LLVMOpaqueExecutionEngine}
 
 type LLVMOpaqueMCJITMemoryManager
 end
 
-typealias LLVMMCJITMemoryManagerRef Ptr{LLVMOpaqueMCJITMemoryManager}
+const LLVMMCJITMemoryManagerRef = Ptr{LLVMOpaqueMCJITMemoryManager}
 
 type LLVMMCJITCompilerOptions
     OptLevel::UInt32
@@ -501,22 +501,22 @@ type LLVMMCJITCompilerOptions
     MCJMM::LLVMMCJITMemoryManagerRef
 end
 
-typealias LLVMMemoryManagerAllocateCodeSectionCallback Ptr{Void}
-typealias LLVMMemoryManagerAllocateDataSectionCallback Ptr{Void}
-typealias LLVMMemoryManagerFinalizeMemoryCallback Ptr{Void}
-typealias LLVMMemoryManagerDestroyCallback Ptr{Void}
+const LLVMMemoryManagerAllocateCodeSectionCallback = Ptr{Void}
+const LLVMMemoryManagerAllocateDataSectionCallback = Ptr{Void}
+const LLVMMemoryManagerFinalizeMemoryCallback = Ptr{Void}
+const LLVMMemoryManagerDestroyCallback = Ptr{Void}
 
 # begin enum LLVMLinkerMode
-typealias LLVMLinkerMode UInt32
+const LLVMLinkerMode = UInt32
 const LLVMLinkerDestroySource = (UInt32)(0)
 const LLVMLinkerPreserveSource_Removed = (UInt32)(1)
 # end enum LLVMLinkerMode
 
-typealias off_t  Csize_t
-typealias llvm_lto_t Ptr{Void}
+const off_t  = Csize_t
+const llvm_lto_t = Ptr{Void}
 
 # begin enum llvm_lto_status_t
-typealias llvm_lto_status_t UInt32
+const llvm_lto_status_t = UInt32
 const LLVM_LTO_UNKNOWN = (UInt32)(0)
 const LLVM_LTO_OPT_SUCCESS = (UInt32)(1)
 const LLVM_LTO_READ_SUCCESS = (UInt32)(2)
@@ -531,10 +531,10 @@ const LLVM_LTO_NULL_OBJECT = (UInt32)(9)
 
 const LTO_API_VERSION = 21
 
-typealias lto_bool_t Bool
+const lto_bool_t = Bool
 
 # begin enum lto_symbol_attributes
-typealias lto_symbol_attributes UInt32
+const lto_symbol_attributes = UInt32
 const LTO_SYMBOL_ALIGNMENT_MASK = (UInt32)(31)
 const LTO_SYMBOL_PERMISSIONS_MASK = (UInt32)(224)
 const LTO_SYMBOL_PERMISSIONS_CODE = (UInt32)(160)
@@ -557,13 +557,13 @@ const LTO_SYMBOL_ALIAS = (UInt32)(32768)
 # end enum lto_symbol_attributes
 
 # begin enum lto_debug_model
-typealias lto_debug_model UInt32
+const lto_debug_model = UInt32
 const LTO_DEBUG_MODEL_NONE = (UInt32)(0)
 const LTO_DEBUG_MODEL_DWARF = (UInt32)(1)
 # end enum lto_debug_model
 
 # begin enum lto_codegen_model
-typealias lto_codegen_model UInt32
+const lto_codegen_model = UInt32
 const LTO_CODEGEN_PIC_MODEL_STATIC = (UInt32)(0)
 const LTO_CODEGEN_PIC_MODEL_DYNAMIC = (UInt32)(1)
 const LTO_CODEGEN_PIC_MODEL_DYNAMIC_NO_PIC = (UInt32)(2)
@@ -573,27 +573,27 @@ const LTO_CODEGEN_PIC_MODEL_DEFAULT = (UInt32)(3)
 type LLVMOpaqueLTOModule
 end
 
-typealias lto_module_t Ptr{LLVMOpaqueLTOModule}
+const lto_module_t = Ptr{LLVMOpaqueLTOModule}
 
 type LLVMOpaqueLTOCodeGenerator
 end
 
-typealias lto_code_gen_t Ptr{LLVMOpaqueLTOCodeGenerator}
+const lto_code_gen_t = Ptr{LLVMOpaqueLTOCodeGenerator}
 
 type LLVMOpaqueThinLTOCodeGenerator
 end
 
-typealias thinlto_code_gen_t Ptr{LLVMOpaqueThinLTOCodeGenerator}
+const thinlto_code_gen_t = Ptr{LLVMOpaqueThinLTOCodeGenerator}
 
 # begin enum lto_codegen_diagnostic_severity_t
-typealias lto_codegen_diagnostic_severity_t UInt32
+const lto_codegen_diagnostic_severity_t = UInt32
 const LTO_DS_ERROR = (UInt32)(0)
 const LTO_DS_WARNING = (UInt32)(1)
 const LTO_DS_REMARK = (UInt32)(3)
 const LTO_DS_NOTE = (UInt32)(2)
 # end enum lto_codegen_diagnostic_severity_t
 
-typealias lto_diagnostic_handler_t Ptr{Void}
+const lto_diagnostic_handler_t = Ptr{Void}
 
 type LTOObjectBuffer
     Buffer::Cstring
@@ -603,14 +603,14 @@ end
 type LLVMOrcOpaqueJITStack
 end
 
-typealias LLVMOrcJITStackRef Ptr{LLVMOrcOpaqueJITStack}
-typealias LLVMOrcModuleHandle UInt32
-typealias LLVMOrcTargetAddress UInt64
-typealias LLVMOrcSymbolResolverFn Ptr{Void}
-typealias LLVMOrcLazyCompileCallbackFn Ptr{Void}
+const LLVMOrcJITStackRef = Ptr{LLVMOrcOpaqueJITStack}
+const LLVMOrcModuleHandle = UInt32
+const LLVMOrcTargetAddress = UInt64
+const LLVMOrcSymbolResolverFn = Ptr{Void}
+const LLVMOrcLazyCompileCallbackFn = Ptr{Void}
 
 # begin enum LLVMOrcErrorCode
-typealias LLVMOrcErrorCode UInt32
+const LLVMOrcErrorCode = UInt32
 const LLVMOrcErrSuccess = (UInt32)(0)
 const LLVMOrcErrGeneric = (UInt32)(1)
 # end enum LLVMOrcErrorCode
@@ -618,4 +618,4 @@ const LLVMOrcErrGeneric = (UInt32)(1)
 type LLVMOpaquePassManagerBuilder
 end
 
-typealias LLVMPassManagerBuilderRef Ptr{LLVMOpaquePassManagerBuilder}
+const LLVMPassManagerBuilderRef = Ptr{LLVMOpaquePassManagerBuilder}

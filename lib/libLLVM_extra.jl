@@ -64,7 +64,7 @@ end
 type LLVMOpaquePass
 end
 
-typealias LLVMPassRef Ptr{LLVMOpaquePass}
+const LLVMPassRef = Ptr{LLVMOpaquePass}
 
 function LLVMAddPass(PM::LLVMPassManagerRef, P::LLVMPassRef)
     @apicall(:LLVMExtraAddPass,Void,

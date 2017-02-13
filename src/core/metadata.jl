@@ -7,7 +7,7 @@ export DEBUG_METADATA_VERSION, MDString, MDNode, operands
 # NOTE: the C API doesn't allow us to differentiate between MD kinds,
 #       all are wrapped by the opaque MetadataAsValue...
 
-typealias MDString MetadataAsValue
+const MDString = MetadataAsValue
 
 MDString(val::String) = MDString(API.LLVMMDString(val, Cuint(length(val))))
 
@@ -25,7 +25,7 @@ end
 DEBUG_METADATA_VERSION() = API.LLVMGetDebugMDVersion()
 
 
-typealias MDNode MetadataAsValue
+const MDNode = MetadataAsValue
 
 MDNode{T<:Value}(vals::Vector{T}) =
     MDNode(API.LLVMMDNode(ref.(vals), Cuint(length(vals))))
