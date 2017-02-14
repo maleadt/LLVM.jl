@@ -50,7 +50,7 @@ width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(ref(inttyp))
 
 # NOTE: this type doesn't exist in the LLVM API,
 #       we add it for convenience of typechecking generic values (see execution.jl)
-@reftypedef abstract FloatingPointType <: LLVMType
+@reftypedef @compat abstract type FloatingPointType <: LLVMType end
 
 # NOTE: we don't handle the obscure types here (:X86FP80, :FP128, :PPCFP128),
 #       they would also need special casing as LLVMPPCFP128Type != LLVMPPC_FP128TypeKind
@@ -96,14 +96,14 @@ end
 
 ## composite types
 
-@reftypedef abstract CompositeType <: LLVMType
+@reftypedef @compat abstract type CompositeType <: LLVMType end
 
 
 ## sequential types
 
 export addrspace
 
-@reftypedef abstract SequentialType <: CompositeType
+@reftypedef @compat abstract type SequentialType <: CompositeType end
 
 import Base: length, size, eltype
 

@@ -1,6 +1,6 @@
 export Pass
 
-abstract Pass
+@compat abstract type Pass end
 
 
 #

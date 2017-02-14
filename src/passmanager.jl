@@ -1,7 +1,7 @@
 export PassManager,
        add!, dispose
 
-abstract PassManager
+@compat abstract type PassManager end
 
 add!(pm::PassManager, pass::Pass) =
     API.LLVMAddPass(ref(pm), ref(pass))

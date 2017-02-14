@@ -7,7 +7,7 @@ export ConstantInt, ConstantFP
 @reftypedef proxy=Value kind=LLVMConstantIntValueKind immutable ConstantInt <: Constant end
 
 # NOTE: fixed set for dispatch, and because we can't rely on sizeof(T)==width(T)
-typealias SmallInteger Union{Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64}
+const SmallInteger = Union{Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64}
 function ConstantInt(typ::IntegerType, val::SmallInteger, signed=false)
     wideval = convert(Int, val)
     bits = reinterpret(Culonglong, wideval)
@@ -26,7 +26,7 @@ function ConstantInt(typ::IntegerType, val::Integer, signed=false)
 end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
-typealias SizeableInteger Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
+const SizeableInteger = Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
 function ConstantInt{T<:SizeableInteger}(val::T, ctx::Context=GlobalContext())
     typ = IntType(sizeof(T)*8, ctx)
     return ConstantInt(typ, val, T<:Signed)

@@ -5,7 +5,7 @@ export Attribute,
        EnumAttribute, StringAttribute,
        kind, value
 
-@reftypedef ref=LLVMAttributeRef abstract Attribute
+@reftypedef ref=LLVMAttributeRef @compat abstract type Attribute end
 
 @reftypedef proxy=Attribute immutable EnumAttribute <: Attribute end
 

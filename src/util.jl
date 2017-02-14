@@ -23,6 +23,10 @@ macro reftypedef(args...)
     typedef = args[end]
 
     # decode type definition
+    if typedef.head == :macrocall
+        # handle `@compat` prefixing 0.6-style type declarations
+        typedef = macroexpand(typedef)
+    end
     if typedef.head == :abstract
         structure = typedef.args[1]
     elseif typedef.head == :type
