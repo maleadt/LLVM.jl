@@ -3,10 +3,10 @@
 export version, Shutdown,
        ismultithreaded
 
-version() = return API.libllvm_version
+version() = return libllvm_version
 
 function Shutdown()
-  API.exclusive || error("Cannot shutdown LLVM without exclusive access")
+  libllvm_exclusive || error("Cannot shutdown LLVM without exclusive access")
   API.LLVMShutdown()
 end
 
@@ -44,7 +44,7 @@ for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
     end
 end
 
-for target in API.targets,
+for target in llvm_targets,
     component in [:Target, :AsmPrinter, :AsmParser, :Disassembler, :TargetInfo, :TargetMC]
     jl_fname = Symbol(:Initialize, target, component)
     api_fname = Symbol(:LLVM, jl_fname)

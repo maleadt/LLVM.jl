@@ -53,4 +53,4 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 
-LLVM.API.exclusive && Shutdown()
+LLVM.libllvm_exclusive && Shutdown()

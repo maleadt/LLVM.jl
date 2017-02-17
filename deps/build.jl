@@ -33,7 +33,7 @@ end
 using Compat
 
 include("common.jl")
-include(joinpath(@__DIR__, "..", "src", "logging.jl"))
+include(joinpath(@__DIR__, "..", "src", "util", "logging.jl"))
 
 const libext = is_apple() ? "dylib" : "so"
 
@@ -190,6 +190,7 @@ isfile(get(julia.config)) ||
     error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-tree builds are only supported on Julia 0.6+)")
 
 
+
 #
 # Build extras library
 #
@@ -247,13 +248,7 @@ else
     wrapper_version = last(compatible_wrappers)
     debug("Will be using wrapper v$(verstr(wrapper_version)) for libLLVM v$(llvm.version)")
 end
-wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(wrapper_version))
-@assert isdir(wrapped_libdir)
-
-# gather wrapper information
-libllvm_wrapper_common = joinpath(wrapped_libdir, "libLLVM_common.jl")
-libllvm_wrapper = joinpath(wrapped_libdir, "libLLVM_h.jl")
-llvmextra_wrapper = joinpath(wrapped_libdir, "..", "libLLVM_extra.jl")
+wrapper = verstr(wrapper_version)
 
 # write ext.jl
 open(joinpath(@__DIR__, "ext.jl"), "w") do fh
@@ -262,20 +257,15 @@ open(joinpath(@__DIR__, "ext.jl"), "w") do fh
         const libllvm_version = v"$(llvm.version)"
         const libllvm_path = "$(llvm.path)"
         const libllvm_mtime = $llvm_library_mtime
+        const libllvm_exclusive = $llvm_exclusive
 
         # LLVM extras library properties
         const libllvm_extra_path = "$llvmextra"
 
         # wrapper properties
-        const wrapper_version = v"$wrapper_version"
+        const wrapper = "$wrapper"
 
-        # installation properties
-        const exclusive = $llvm_exclusive
-        const targets = $llvm_targets
-
-        # library loading
-        include("$libllvm_wrapper_common")
-        include("$libllvm_wrapper")
-        include("$llvmextra_wrapper")
+        # LLVM toolchain properties
+        const llvm_targets = $llvm_targets
         """)
 end

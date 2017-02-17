@@ -5,12 +5,25 @@ module LLVM
 using Compat
 import Compat.String
 
-# auxiliary functionality
-include("logging.jl")
-include("util.jl")
-include("api.jl")
+ext = joinpath(dirname(@__FILE__), "..", "deps", "ext.jl")
+isfile(ext) || error("Unable to load $ext\n\nPlease re-run Pkg.build(\"LLVM\"), and restart Julia.")
+include(ext)
 
-# libLLVM wrapping
+include("util/logging.jl")
+include("util/types.jl")
+
+include("base.jl")
+
+module API
+using Compat
+using LLVM: @apicall, wrapper
+wrapper_dir = joinpath(@__DIR__, "..", "lib", wrapper)
+include(joinpath(wrapper_dir, "libLLVM_common.jl"))
+include(joinpath(wrapper_dir, "libLLVM_h.jl"))
+include(joinpath(wrapper_dir, "..", "libLLVM_extra.jl"))
+end
+
+# LLVM API wrappers
 include("types.jl")
 include("passregistry.jl")
 include("init.jl")
@@ -32,12 +45,12 @@ include("transform.jl")
 
 function __init__()
     # check validity of LLVM library
-    debug("Checking validity of $(API.libllvm_path) (", (API.exclusive?"exclusive":"non-exclusive"), " access)")
-    stat(API.libllvm_path).mtime == API.libllvm_mtime ||
+    debug("Checking validity of $libllvm_path (", (libllvm_exclusive?"exclusive":"non-exclusive"), " access)")
+    stat(libllvm_path).mtime == libllvm_mtime ||
         warn("LLVM library has been modified. Please re-run Pkg.build(\"LLVM\") and restart Julia.")
 
     __init_logging__()
-   __init_api__()
+    libllvm[] = Libdl.dlopen(libllvm_extra_path, Libdl.RTLD_LOCAL | Libdl.RTLD_DEEPBIND)
 
     _install_handlers()
     _install_handlers(GlobalContext())
