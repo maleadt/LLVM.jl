@@ -216,20 +216,50 @@ try
         wrapper_version = last(compatible_wrappers)
         debug("Will be using wrapper v$(verstr(wrapper_version)) for libLLVM v$(libllvm.version)")
     end
-    wrapper = verstr(wrapper_version)
+    llvmjl_wrapper = verstr(wrapper_version)
+
+
+    #
+    # Detect changes
+    #
 
     # gather libLLVM information
-    llvm_targets = Symbol.(split(readstring(`$(get(libllvm.config)) --targets-built`)))
+    libllvm_targets = Symbol.(split(readstring(`$(get(libllvm.config)) --targets-built`)))
+
+    # gather LLVM.jl information
+    llvmjl_hash =
+        try
+            cd(joinpath(@__DIR__, "..")) do
+                chomp(readstring(`git rev-parse HEAD`))
+            end
+        catch e
+            warning("could not find package git hash")
+            # NOTE: we don't explicitly check for llvmjl_hash==nothing, because
+            #       it will imply that llvmjl_dirty=true, causing us to rebuild anyway
+            nothing
+        end
+    llvmjl_dirty =
+        try
+            cd(joinpath(@__DIR__, "..")) do
+                length(chomp(readstring(`git diff --shortstat`))) > 0
+            end
+        catch e
+            warning("could not find package git status")
+            true
+        end
 
     # check if anything has changed (to prevent unnecessary recompilation)
-    if isfile(ext)
+    if llvmjl_dirty
+        debug("Package is dirty, rebuilding")
+    elseif isfile(ext)
         debug("Checking existing ext.jl...")
         @eval module Previous; include($ext); end
         if  Previous.libllvm_version == libllvm.version &&
             Previous.libllvm_path    == libllvm.path &&
             Previous.libllvm_mtime   == libllvm.mtime &&
-            Previous.wrapper         == wrapper &&
-            Previous.llvm_targets    == llvm_targets
+            Previous.libllvm_targets == libllvm_targets &&
+            Previous.llvmjl_wrapper  == llvmjl_wrapper &&
+           (Previous.llvmjl_hash     == llvmjl_hash)
             info("LLVM.jl has already been built for this toolchain, no need to rebuild")
             exit(0)
         end
@@ -256,8 +286,8 @@ try
 
     # sanity check: in the case of a bundled LLVM the library should be loaded by Julia already,
     #               while a system-provided LLVM shouldn't
-    llvm_exclusive = Libdl.dlopen_e(libllvm.path, Libdl.RTLD_NOLOAD) == C_NULL
-    if use_system_llvm != llvm_exclusive
+    libllvm_exclusive = Libdl.dlopen_e(libllvm.path, Libdl.RTLD_NOLOAD) == C_NULL
+    if use_system_llvm != libllvm_exclusive
         @assert(Libdl.dlopen_e(libllvm.path, Libdl.RTLD_NOLOAD) == C_NULL,
                 "exclusive access mode does not match requested type of LLVM library (run with TRACE=1 and file an issue)")
     end
@@ -278,16 +308,15 @@ try
             const libllvm_version = v"$(libllvm.version)"
             const libllvm_path = "$(libllvm.path)"
             const libllvm_mtime = $(libllvm.mtime)
-            const libllvm_exclusive = $llvm_exclusive
+            const libllvm_exclusive = $libllvm_exclusive
+            const libllvm_targets = $libllvm_targets
 
             # LLVM extras library properties
             const libllvm_extra_path = "$libllvm_extra"
 
-            # wrapper properties
-            const wrapper = "$wrapper"
-
-            # LLVM toolchain properties
-            const llvm_targets = $llvm_targets
+            # package properties
+            const llvmjl_wrapper = "$llvmjl_wrapper"
+            const llvmjl_hash = "$llvmjl_hash"
             """)
     end
 catch e

@@ -44,7 +44,7 @@ for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
     end
 end
 
-for target in llvm_targets,
+for target in libllvm_targets,
     component in [:Target, :AsmPrinter, :AsmParser, :Disassembler, :TargetInfo, :TargetMC]
     jl_fname = Symbol(:Initialize, target, component)
     api_fname = Symbol(:LLVM, jl_fname)

@@ -16,11 +16,11 @@ include("base.jl")
 
 module API
 using Compat
-using LLVM: @apicall, wrapper
-wrapper_dir = joinpath(@__DIR__, "..", "lib", wrapper)
-include(joinpath(wrapper_dir, "libLLVM_common.jl"))
-include(joinpath(wrapper_dir, "libLLVM_h.jl"))
-include(joinpath(wrapper_dir, "..", "libLLVM_extra.jl"))
+using LLVM: @apicall, llvmjl_wrapper
+libdir = joinpath(@__DIR__, "..", "lib", llvmjl_wrapper)
+include(joinpath(libdir, "libLLVM_common.jl"))
+include(joinpath(libdir, "libLLVM_h.jl"))
+include(joinpath(libdir, "..", "libLLVM_extra.jl"))
 end
 
 # LLVM API wrappers
