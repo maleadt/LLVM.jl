@@ -261,7 +261,7 @@ try
             Previous.llvmjl_wrapper  == llvmjl_wrapper &&
            (Previous.llvmjl_hash     == llvmjl_hash)
             info("LLVM.jl has already been built for this toolchain, no need to rebuild")
-            exit(0)
+            return
         end
     end
 
