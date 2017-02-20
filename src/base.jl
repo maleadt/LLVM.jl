@@ -1,8 +1,12 @@
-module API
+# Basic library functionality
 
-using LLVM: debug, DEBUG, trace, TRACE, repr_indented
+
+#
+# API call wrapper
+#
 
 const libllvm = Ref{Ptr{Void}}()
+
 # TODO: put this in package
 macro apicall(f, rettyp, argtyps, args...)
     # Escape the tuple of arguments, making sure it is evaluated in caller scope
@@ -33,7 +37,7 @@ macro apicall(f, rettyp, argtyps, args...)
     # Generate the actual call
     @gensym ret
     push!(blk.args, quote
-        $ret = ccall(Libdl.dlsym(libllvm[], $f), $rettyp,
+        $ret = ccall(Libdl.dlsym(libllvm[], $f), $(esc(rettyp)),
                      $(esc(argtyps)), $(esc_args...))
     end)
 
@@ -48,14 +52,4 @@ macro apicall(f, rettyp, argtyps, args...)
     end)
 
     return blk
-end
-
-ext = joinpath(dirname(@__FILE__), "..", "deps", "ext.jl")
-isfile(ext) || error("Unable to load $ext\n\nPlease re-run Pkg.build(\"LLVM\"), and restart Julia.")
-include(ext)
-
-end
-
-function __init_api__()
-    API.libllvm[] = Libdl.dlopen(API.libllvm_extra_path, Libdl.RTLD_LOCAL | Libdl.RTLD_DEEPBIND)
 end

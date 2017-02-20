@@ -88,7 +88,7 @@ ModulePassManager() do pm
     internalize!(pm, false)
     internalize!(pm, ["SomeFunction", "SomeOtherFunction"])
 
-    if :NVPTX in LLVM.API.targets
+    if :NVPTX in LLVM.libllvm_targets
         nvvm_reflect!(pm)
     end
 end

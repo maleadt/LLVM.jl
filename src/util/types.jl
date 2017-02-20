@@ -1,4 +1,4 @@
-# Auxiliary functionality for the LLVM.jl package, not part of the LLVM API itself
+# Defining types in the LLVM type hierarchy
 
 # llvm.org/docs/doxygen/html/group__LLVMCSupportTypes.html
 
