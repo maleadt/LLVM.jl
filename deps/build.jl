@@ -152,8 +152,8 @@ try
     # LLVM selection
     #
 
-    # First consider installations with a major and minor version matching wrapped headers (see
-    # the `lib` folder) are considered first. If no such installation have been found, consider
+    # First consider installations with a major and minor version matching wrapped headers
+    # (see the `lib` folder). If no such installation have been found, consider
     # probably-compatible versions (ie. for which we have an older set of wrapped headers).
     #
     # If the user requested a specific version, only ever consider that version.
@@ -235,7 +235,7 @@ try
         catch e
             warning("could not find package git hash")
             # NOTE: we don't explicitly check for llvmjl_hash==nothing, because
-            #       it will imply that llvmjl_dirty=true, causing us to rebuild anyway
+            #       it will imply that llvmjl_dirty=true, making us rebuild anyway
             nothing
         end
     llvmjl_dirty =
