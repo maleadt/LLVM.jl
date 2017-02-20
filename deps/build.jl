@@ -33,7 +33,7 @@ immutable Toolchain
     mtime::Float64
 
     Toolchain(path, version) =
-        new(path, version, Nullable{String}(),stat(path).mtime)
+        new(path, version, Nullable{String}(), stat(path).mtime)
     Toolchain(path, version, config) =
         new(path, version, Nullable{String}(config), stat(path).mtime)
 end
@@ -252,7 +252,7 @@ try
     if llvmjl_dirty
         debug("Package is dirty, rebuilding")
     elseif isfile(ext)
-        debug("Checking existing ext.jl...")
+        debug("Checking validity of existing ext.jl...")
         @eval module Previous; include($ext); end
         if  Previous.libllvm_version == libllvm.version &&
             Previous.libllvm_path    == libllvm.path &&
@@ -319,8 +319,8 @@ try
             const llvmjl_hash = "$llvmjl_hash"
             """)
     end
-catch e
+catch ex
     # if anything goes wrong, wipe the existing ext.jl to prevent the package from loading
     rm(ext; force=true)
-    rethrow(e)
+    rethrow(ex)
 end
