@@ -30,7 +30,7 @@ for component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Dis
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
         export $jl_fname
-        $jl_fname() = API.$api_fname
+        $jl_fname() = API.$api_fname()
     end
 end
 
