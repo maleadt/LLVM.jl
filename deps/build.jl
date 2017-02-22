@@ -254,12 +254,12 @@ try
     elseif isfile(ext)
         debug("Checking validity of existing ext.jl...")
         @eval module Previous; include($ext); end
-        if  Previous.libllvm_version == libllvm.version &&
-            Previous.libllvm_path    == libllvm.path &&
-            Previous.libllvm_mtime   == libllvm.mtime &&
-            Previous.libllvm_targets == libllvm_targets &&
-            Previous.llvmjl_wrapper  == llvmjl_wrapper &&
-           (Previous.llvmjl_hash     == llvmjl_hash)
+        if  isdefined(Previous, :libllvm_version) && Previous.libllvm_version == libllvm.version &&
+            isdefined(Previous, :libllvm_path)    && Previous.libllvm_path == libllvm.path &&
+            isdefined(Previous, :libllvm_mtime)   && Previous.libllvm_mtime == libllvm.mtime &&
+            isdefined(Previous, :libllvm_targets) && Previous.libllvm_targets == libllvm_targets &&
+            isdefined(Previous, :llvmjl_wrapper)  && Previous.llvmjl_wrapper == llvmjl_wrapper &&
+            isdefined(Previous, :llvmjl_hash)     && Previous.llvmjl_hash == llvmjl_hash
             info("LLVM.jl has already been built for this toolchain, no need to rebuild")
             return
         end
