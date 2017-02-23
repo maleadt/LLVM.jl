@@ -59,6 +59,6 @@ config = first(ARGS)
 ispath(config) || error("llvm-config at $config is't a valid path")
 
 version = VersionNumber(readchomp(`$config --version`))
-wrapped_libdir = joinpath(dirname(@__FILE__), "..", "lib", verstr(version))
+wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(version))
 
 wrap(config, wrapped_libdir)

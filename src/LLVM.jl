@@ -5,8 +5,8 @@ module LLVM
 using Compat
 import Compat.String
 
-ext = joinpath(dirname(@__FILE__), "..", "deps", "ext.jl")
-isfile(ext) || error("Unable to load $ext\n\nPlease run Pkg.build(\"LLVM\"), and restart Julia.")
+const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
+isfile(ext) || error("Unable to load $ext\n\nPlease run Pkg.build(\"LLVM\") and restart Julia.")
 include(ext)
 
 include("util/logging.jl")
