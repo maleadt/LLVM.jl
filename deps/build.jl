@@ -199,8 +199,15 @@ try
     julia = Toolchain(julia_cmd.exec[1], Base.VERSION,
                       joinpath(JULIA_HOME, "..", "share", "julia", "julia-config.jl"))
     isfile(julia.path) || error("could not find Julia binary from command $julia_cmd")
-    isfile(get(julia.config)) ||
-        error("could not find julia-config.jl relative to $(JULIA_HOME) (note that in-tree builds are only supported on Julia 0.6+)")
+    if !isfile(get(julia.config)) && julia.version.minor == 5
+        # HACK for 0.5: non-installed builds are incomplete (see JuliaLang/julia#19002)
+        #               so we include those in-tree paths here
+        root = joinpath(JULIA_HOME, "..", "..")
+        julia = Toolchain(julia.path, julia.version, joinpath(root, "contrib", "julia-config.jl"))
+        ENV["EXTRA_CXXFLAGS"] = join(
+            map(dir->"-I"*joinpath(root, dir), ["src", "src/support", "usr/include"]), " ")
+    end
+    isfile(get(julia.config)) || error("could not find julia-config.jl relative to $(JULIA_HOME)")
 
 
     #
