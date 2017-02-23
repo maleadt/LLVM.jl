@@ -98,6 +98,8 @@ endif
 # Build
 #
 
+CXXFLAGS += $(EXTRA_CXXFLAGS)
+
 ifeq ($(UNAME), Darwin)
   SLIB := dylib
 else
