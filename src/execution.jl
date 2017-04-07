@@ -1,5 +1,8 @@
 ## generic value
 
+# TODO: this is a _very_ ugly wrapper, but hard to improve since we can't deduce the type
+#       of a GenericValue, and need to pass concrete LLVM type objects to the API
+
 export GenericValue, dispose,
        intwidth
 
@@ -7,39 +10,40 @@ import Base: convert
 
 @reftypedef ref=LLVMGenericValueRef immutable GenericValue end
 
-GenericValue(typ::IntegerType, N::Int) =
-    GenericValue(API.LLVMCreateGenericValueOfInt(ref(typ),
-                                                 reinterpret(Culonglong, N), True))
+GenericValue(typ::IntegerType, N::Signed) =
+    GenericValue(
+        API.LLVMCreateGenericValueOfInt(ref(typ),
+                                        reinterpret(Culonglong, convert(Int64, N)), True))
 
-GenericValue(typ::IntegerType, N::UInt) =
-    GenericValue(API.LLVMCreateGenericValueOfInt(ref(typ),
-                                                 reinterpret(Culonglong, N), False))
+GenericValue(typ::IntegerType, N::Unsigned) =
+    GenericValue(
+        API.LLVMCreateGenericValueOfInt(ref(typ),
+                                        reinterpret(Culonglong, convert(UInt64, N)), False))
 
 intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(ref(val))
 
-convert(::Type{Int}, val::GenericValue) =
-    reinterpret(Clonglong, API.LLVMGenericValueToInt(ref(val), True))
+convert{T<:Signed}(::Type{T}, val::GenericValue) =
+    convert(T, reinterpret(Clonglong, API.LLVMGenericValueToInt(ref(val), True)))
 
-convert(::Type{UInt}, val::GenericValue) =
-    API.LLVMGenericValueToInt(ref(val), False)
+convert{T<:Unsigned}(::Type{T}, val::GenericValue) =
+    convert(T, API.LLVMGenericValueToInt(ref(val), False))
 
-GenericValue(typ::FloatingPointType, N::Float64) =
-    GenericValue(API.LLVMCreateGenericValueOfFloat(ref(typ), Cdouble(N)))
+GenericValue(typ::FloatingPointType, N::AbstractFloat) =
+    GenericValue(API.LLVMCreateGenericValueOfFloat(ref(typ), convert(Cdouble, N)))
 
 # NOTE: this ugly-three arg convert is needed to match the C API,
 #       which uses the type to call the correct C++ function.
 
-convert(::Type{Float64}, val::GenericValue, typ::LLVMType) =
-    API.LLVMGenericValueToFloat(ref(typ), ref(val))
+convert{T<:AbstractFloat}(::Type{T}, val::GenericValue, typ::LLVMType) =
+    convert(T, API.LLVMGenericValueToFloat(ref(typ), ref(val)))
 
-GenericValue{T}(ptr::Ptr{T}) =
+GenericValue(ptr::Ptr) =
     GenericValue(API.LLVMCreateGenericValueOfPointer(convert(Ptr{Void}, ptr)))
 
 convert{T}(::Type{Ptr{T}}, val::GenericValue) =
     convert(Ptr{T}, API.LLVMGenericValueToPointer(ref(val)))
 
-dispose(val::GenericValue) =
-    API.LLVMDisposeGenericValue(ref(val))
+dispose(val::GenericValue) = API.LLVMDisposeGenericValue(ref(val))
 
 
 ## execution engine
