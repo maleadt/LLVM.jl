@@ -1,3 +1,5 @@
+@testset "transform" begin
+
 let
     pmb = PassManagerBuilder()
     dispose(pmb)
@@ -93,4 +95,6 @@ ModulePassManager() do pm
     end
 end
 end
+end
+
 end

@@ -1,8 +1,9 @@
 using LLVM
 using Base.Test
 
-# types
-let
+@testset "LLVM" begin
+
+@testset "types" begin
     @test LLVM.BoolFromLLVM(LLVM.True) == true
     @test LLVM.BoolFromLLVM(LLVM.False) == false
 
@@ -13,29 +14,29 @@ let
 end
 
 
-# pass registry
-passreg = GlobalPassRegistry()
+@testset "pass registry" begin
+    passreg = GlobalPassRegistry()
 
-# initialization
-version()
-ismultithreaded()
-InitializeCore(passreg)
-InitializeTransformUtils(passreg)
-InitializeScalarOpts(passreg)
-InitializeObjCARCOpts(passreg)
-InitializeVectorization(passreg)
-InitializeInstCombine(passreg)
-InitializeIPO(passreg)
-InitializeInstrumentation(passreg)
-InitializeAnalysis(passreg)
-InitializeIPA(passreg)
-InitializeCodeGen(passreg)
-InitializeTarget(passreg)
+    version()
+    ismultithreaded()
+    InitializeCore(passreg)
+    InitializeTransformUtils(passreg)
+    InitializeScalarOpts(passreg)
+    InitializeObjCARCOpts(passreg)
+    InitializeVectorization(passreg)
+    InitializeInstCombine(passreg)
+    InitializeIPO(passreg)
+    InitializeInstrumentation(passreg)
+    InitializeAnalysis(passreg)
+    InitializeIPA(passreg)
+    InitializeCodeGen(passreg)
+    InitializeTarget(passreg)
 
-InitializeNativeTarget()
-InitializeAllTargetInfos()
-InitializeAllTargetMCs()
-InitializeNativeAsmPrinter()
+    InitializeNativeTarget()
+    InitializeAllTargetInfos()
+    InitializeAllTargetMCs()
+    InitializeNativeAsmPrinter()
+end
 
 include("core.jl")
 include("linker.jl")
@@ -54,3 +55,5 @@ include("targetmachine.jl")
 include("datalayout.jl")
 
 LLVM.libllvm_exclusive && Shutdown()
+
+end

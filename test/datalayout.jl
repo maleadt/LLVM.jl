@@ -1,3 +1,5 @@
+@testset "datalayout" begin
+
 Context() do ctx
 DataLayout("E-p:32:32-f128:128:128") do data
     @test convert(String, data) == "E-p:32:32-f128:128:128"
@@ -28,4 +30,6 @@ DataLayout("E-p:32:32-f128:128:128") do data
         @test offsetof(data, st, 1) == 4
     end
 end
+end
+
 end

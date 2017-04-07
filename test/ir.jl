@@ -1,3 +1,5 @@
+@testset "ir" begin
+
 let
     invalid_ir = "invalid"
     @test_throws LLVMException parse(LLVM.Module, invalid_ir)
@@ -34,4 +36,6 @@ LLVM.Module("SomeModule", ctx) do source_mod
     end
 end
 end
+end
+
 end

@@ -1,3 +1,5 @@
+@testset "buffer" begin
+
 data = convert(Vector{UInt8}, "SomeData")
 
 let
@@ -25,4 +27,6 @@ mktemp() do path, _
 
     MemoryBufferFile(path) do membuf
     end
+end
+
 end

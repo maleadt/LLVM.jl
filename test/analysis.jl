@@ -1,3 +1,5 @@
+@testset "analysis" begin
+
 Context() do ctx
 Builder(ctx) do builder
 LLVM.Module("SomeModule", ctx) do mod
@@ -30,4 +32,6 @@ LLVM.Module("SomeModule", ctx) do mod
     verify(fn)
 end
 end
+end
+
 end

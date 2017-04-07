@@ -1,4 +1,6 @@
-## generic value
+@testset "execution" begin
+
+@testset "generic values" begin
 
 let
     val = GenericValue(LLVM.Int32Type(), -1)
@@ -26,8 +28,10 @@ let
     dispose(val)
 end
 
+end
 
-## execution engine
+
+@testset "execution engine" begin
 
 Context() do ctx
     mod = LLVM.Module("SomeModule", ctx)
@@ -110,4 +114,8 @@ Context() do ctx
             dispose(res)
         end
     end
+end
+
+end
+
 end
