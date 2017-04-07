@@ -56,4 +56,6 @@ include("datalayout.jl")
 
 LLVM.libllvm_exclusive && Shutdown()
 
+include("examples.jl")
+
 end
