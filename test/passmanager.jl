@@ -1,3 +1,5 @@
+@testset "passmanager" begin
+
 let
     mpm = ModulePassManager()
     dispose(mpm)
@@ -22,4 +24,6 @@ FunctionPassManager(mod) do fpm
     @test !finalize!(fpm)
 end
 end
+end
+
 end

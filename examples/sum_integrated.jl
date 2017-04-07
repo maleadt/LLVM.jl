@@ -1,8 +1,14 @@
 # same as `sum.jl`, but reusing the Julia compiler to compile and execute the IR
 
-length(ARGS) == 2 || error("Usage: sum.jl INT INT")
-
 using LLVM
+LLVM.libllvm_exclusive && exit() # cannot run this example if we have our own copy of LLVM
+
+if length(ARGS) == 2
+    x, y = parse.([Int32], ARGS[1:2])
+else
+    x = Int32(1)
+    y = Int32(2)
+end
 
 jlctx = LLVM.Context(cglobal(:jl_LLVMContext, Void))
 
@@ -29,5 +35,4 @@ end
 # make Julia compile and execute the function
 push!(function_attributes(sum), EnumAttribute("alwaysinline"))
 call_sum(x, y) = Base.llvmcall(LLVM.ref(sum), Int32, Tuple{Int32, Int32}, x, y)
-x, y = parse.([Int32], ARGS[1:2])
 @show call_sum(x, y)

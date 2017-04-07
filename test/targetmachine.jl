@@ -1,3 +1,5 @@
+@testset "targetmachine" begin
+
 host_triple = triple()
 host_t = Target(host_triple)
 
@@ -49,4 +51,6 @@ TargetMachine(host_t, host_triple) do tm
     end
 
     DataLayout(tm)
+end
+
 end

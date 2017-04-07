@@ -1,4 +1,6 @@
-## generic value
+@testset "execution" begin
+
+@testset "generic values" begin
 
 let
     val = GenericValue(LLVM.Int32Type(), -1)
@@ -9,12 +11,21 @@ end
 
 let
     val = GenericValue(LLVM.Int32Type(), UInt(1))
+    @test convert(Int, val) == 1
     @test convert(UInt, val) == 1
     dispose(val)
 end
 
 let
+    val = GenericValue(LLVM.DoubleType(), Float32(1.1))
+    @test convert(Float32, val, LLVM.DoubleType()) == Float32(1.1)
+    @test convert(Float64, val, LLVM.DoubleType()) == Float64(Float32(1.1))
+    dispose(val)
+end
+
+let
     val = GenericValue(LLVM.DoubleType(), 1.1)
+    @test convert(Float32, val, LLVM.DoubleType()) == Float32(1.1)
     @test convert(Float64, val, LLVM.DoubleType()) == 1.1
     dispose(val)
 end
@@ -26,8 +37,10 @@ let
     dispose(val)
 end
 
+end
 
-## execution engine
+
+@testset "execution engine" begin
 
 Context() do ctx
     mod = LLVM.Module("SomeModule", ctx)
@@ -110,4 +123,8 @@ Context() do ctx
             dispose(res)
         end
     end
+end
+
+end
+
 end

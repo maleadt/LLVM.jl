@@ -1,3 +1,5 @@
+@testset "bitcode" begin
+
 let
     invalid_bitcode = convert(Vector{UInt8}, "invalid")
     @test_throws LLVMException parse(LLVM.Module, invalid_bitcode)
@@ -43,4 +45,6 @@ LLVM.Module("SomeModule", ctx) do source_mod
     end
 end
 end
+end
+
 end

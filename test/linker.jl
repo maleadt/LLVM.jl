@@ -1,3 +1,5 @@
+@testset "linker" begin
+
 Context() do ctx
 Builder(ctx) do builder
     mod1 = let
@@ -30,4 +32,6 @@ Builder(ctx) do builder
     @test haskey(functions(mod1), "SomeFunction")
     @test haskey(functions(mod1), "SomeOtherFunction")
 end
+end
+
 end

@@ -1,3 +1,5 @@
+@testset "moduleprovider" begin
+
 Context() do ctx
 let
     mod = LLVM.Module("SomeModule", ctx)
@@ -13,4 +15,6 @@ let
 
     end
 end
+end
+
 end

@@ -1,5 +1,8 @@
-## context
+@testset "core" begin
 
+@testset "context" begin
+
+global global_ctx
 global_ctx = GlobalContext()
 local_ctx = Context()
 
@@ -11,8 +14,10 @@ end
 
 Context() do ctx end
 
+end
 
-## type
+
+@testset "type" begin
 
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
@@ -39,13 +44,14 @@ end
 let
     typ = LLVM.Int1Type()
     @test context(typ) == global_ctx
-    @test LLVM.Int1Type(local_ctx) != typ
 
     show(DevNull, typ)
-end
-Context() do ctx
-    typ = LLVM.Int1Type(ctx)
-    @test context(typ) == ctx
+
+    Context() do ctx
+        typ2 = LLVM.Int1Type(ctx)
+        @test context(typ2) == ctx
+        @test typ2 != typ
+    end
 end
 
 # floating-point
@@ -155,8 +161,10 @@ Context() do ctx
     @test context(typ) == ctx
 end
 
+end
 
-## value
+
+@testset "value" begin
 
 Context() do ctx
 Builder(ctx) do builder
@@ -240,7 +248,7 @@ end
 
 # scalar
 Context() do ctx
-    ## integer constants
+    @testset "integer constants" begin
 
     # manual construction of small values
     let
@@ -263,12 +271,16 @@ Context() do ctx
         @test convert(UInt, constval) == 1
     end
 
+    end
 
-    ## floating point constants
+
+    @testset "floating point constants" begin
 
     t2 = LLVM.DoubleType(ctx)
     c = ConstantFP(t2, 1.1)
     @test convert(Float64, c) == 1.1
+
+    end
 end
 
 # global values
@@ -348,8 +360,10 @@ LLVM.Module("SomeModule", ctx) do mod
 end
 end
 
+end
 
-## metadata
+
+@testset "metadata" begin
 
 @test MDString("foo") == MDString("foo", global_ctx)
 
@@ -368,8 +382,10 @@ Context() do ctx
     @test ops[1] == str
 end
 
+end
 
-## module
+
+@testset "module" begin
 
 let
     mod = LLVM.Module("SomeModule")
@@ -497,8 +513,10 @@ LLVM.Module("SomeModule", ctx) do mod
 end
 end
 
+end
 
-## function
+
+@testset "function" begin
 
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
@@ -619,8 +637,10 @@ LLVM.Module("SomeModule", ctx) do mod
 end
 end
 
+end
 
-## basic blocks
+
+@testset "basic blocks" begin
 
 Builder() do builder
 LLVM.Module("SomeModule") do mod
@@ -686,8 +706,10 @@ end
 end
 end
 
+end
 
-## instructions
+
+@testset "instructions" begin
 
 Context() do ctx
 Builder(ctx) do builder
@@ -762,4 +784,8 @@ LLVM.Module("SomeModule", ctx) do mod
     @test !(brinst in instructions(bb1))
 end
 end
+end
+
+end
+
 end

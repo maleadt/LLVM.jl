@@ -1,4 +1,4 @@
-let
+@testset "target" begin
     @test_throws LLVMException Target("invalid")
 
     host_triple = triple()

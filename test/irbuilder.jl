@@ -1,3 +1,5 @@
+@testset "irbuilder" begin
+
 let
     builder = Builder()
     dispose(builder)
@@ -60,4 +62,6 @@ LLVM.Module("SomeModule", ctx) do mod
     position!(builder)
 end
 end
+end
+
 end
