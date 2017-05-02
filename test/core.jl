@@ -555,23 +555,33 @@ LLVM.Module("SomeModule", ctx) do mod
 
         @test length(attrs) == 0
 
-        a1 = EnumAttribute("sspreq")
-        @test kind(a1) != 0
-        @test value(a1) == 0
-        push!(attrs, a1)
-        @test collect(attrs) == [a1]
+        let attr = EnumAttribute("sspreq", 0, ctx)
+            @test kind(attr) != 0
+            @test value(attr) == 0
+            push!(attrs, attr)
+            @test collect(attrs) == [attr]
 
-        delete!(attrs, a1)
-        @test length(attrs) == 0
+            delete!(attrs, attr)
+            @test length(attrs) == 0
+        end
 
-        a2 = StringAttribute("nounwind")
-        @test kind(a2) == "nounwind"
-        @test value(a2) == ""
-        push!(attrs, a2)
-        @test collect(attrs) == [a2]
+        let attr = EnumAttribute("sspreq")
+            @test value(attr) == 0
+        end
 
-        delete!(attrs, a2)
-        @test length(attrs) == 0
+        let attr = StringAttribute("nounwind", "", ctx)
+            @test kind(attr) == "nounwind"
+            @test value(attr) == ""
+            push!(attrs, attr)
+            @test collect(attrs) == [attr]
+
+            delete!(attrs, attr)
+            @test length(attrs) == 0
+        end
+
+        let attr = StringAttribute("nounwind")
+            @test value(attr) == ""
+        end
     end
 
     for i in 1:length(parameters(fn))
