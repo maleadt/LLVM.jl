@@ -107,3 +107,10 @@ end
 function LLVMGetCallSiteAttributeCount_D26392(C::LLVMValueRef,Idx::LLVMAttributeIndex)
     @apicall(:LLVMGetCallSiteAttributeCount_D26392,UInt32,(LLVMValueRef,LLVMAttributeIndex),C,Idx)
 end
+
+
+# Julia wrapper for header: llvm-extra/IR/Value.h
+
+function LLVMGetValueContext(V::LLVMValueRef)
+    @apicall(:LLVMGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
+end

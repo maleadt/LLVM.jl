@@ -16,11 +16,9 @@ identify(::Type{Value}, ref::API.LLVMValueRef) =
 
 ## general APIs
 
-export llvmtype, name, name!, replace_uses!, isconstant, isundef
+export llvmtype, name, name!, replace_uses!, isconstant, isundef, context
 
 import Base: show
-
-# TODO: missing LLVMGetValueContext
 
 llvmtype(val::Value) = LLVMType(API.LLVMTypeOf(ref(val)))
 
@@ -39,6 +37,8 @@ replace_uses!(old::Value, new::Value) =
 isconstant(val::Value) = BoolFromLLVM(API.LLVMIsConstant(ref(val)))
 
 isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(val)))
+
+context(val::Value) = Context(API.LLVMGetValueContext(ref(val)))
 
 
 ## constants
