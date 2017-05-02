@@ -178,6 +178,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     typ = LLVM.Int32Type(ctx)
     val = alloca!(builder, typ, "foo")
+    @test context(val) == ctx
     @test typeof(LLVM.ref(val)) == LLVM.API.LLVMValueRef                # untyped
 
     @test typeof(LLVM.Instruction(LLVM.ref(val))) == LLVM.Instruction   # type reconstructed
