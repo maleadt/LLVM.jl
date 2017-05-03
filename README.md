@@ -4,13 +4,6 @@ LLVM C API wrapper
 <!-- [![LLVM](http://pkg.julialang.org/badges/LLVM_0.4.svg)](http://pkg.julialang.org/?pkg=LLVM&ver=0.4) -->
 <!-- [![LLVM](http://pkg.julialang.org/badges/LLVM_0.5.svg)](http://pkg.julialang.org/?pkg=LLVM&ver=0.5) -->
 
-**[Build status](https://ci.maleadt.net/buildbot/julia/waterfall?tag=LLVM)** (Linux x86-64):
-
-|              | Julia 0.5 | Julia 0.6 |
-| ------------ |:---------:|:---------:|
-| **LLVM 3.9** | [![](https://ci.maleadt.net/buildbot/julia/png?builder=LLVM.jl:%20Julia%200.5,%20system%20LLVM%203.9%20(x86-64))](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.5%2C%20system%20LLVM%203.9%20%28x86-64%29) | [![](https://ci.maleadt.net/buildbot/julia/png?builder=LLVM.jl:%20Julia%20master,%20embedded%20LLVM%203.9%20(x86-64))](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%20master%2C%20embedded%20LLVM%203.9%20%28x86-64%29) |
-| **LLVM 4.0** | [![](https://ci.maleadt.net/buildbot/julia/png?builder=LLVM.jl:%20Julia%200.5,%20system%20LLVM%204.0%20(x86-64))](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.5%2C%20system%20LLVM%204.0%20%28x86-64%29) | [![](https://ci.maleadt.net/buildbot/julia/png?builder=LLVM.jl:%20Julia%20master,%20system%20LLVM%204.0%20(x86-64))](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%20master%2C%20system%20LLVM%204.0%20%28x86-64%29) |
-
 **Code coverage**: [![Coverage Status](https://codecov.io/gh/maleadt/LLVM.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/maleadt/LLVM.jl)
 
 This package provides a shallow wrapper around the LLVM C API.
