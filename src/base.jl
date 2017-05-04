@@ -7,49 +7,13 @@
 
 const libllvm = Ref{Ptr{Void}}()
 
-# TODO: put this in package
-macro apicall(f, rettyp, argtyps, args...)
-    # Escape the tuple of arguments, making sure it is evaluated in caller scope
-    # (there doesn't seem to be inline syntax like `$(esc(argtyps))` for this)
-    esc_args = [esc(arg) for arg in args]
-
-    blk = Expr(:block)
-
-    if !isa(f, Expr) || f.head != :quote
+macro apicall(fun, rettyp, argtypes, args...)
+    if !isa(fun, Expr) || fun.head != :quote
         error("first argument to @apicall should be a symbol")
     end
 
-    # Print the function name & arguments
-    @static if TRACE
-        push!(blk.args, :(trace($(sprint(Base.show_unquoted,f.args[1])*"("); line=false)))
-        i=length(args)
-        for arg in args
-            i-=1
-            sep = (i>0 ? ", " : "")
-
-            # TODO: we should only do this if evaluating `arg` has no side effects
-            push!(blk.args, :(trace(repr_indented($(esc(arg))), $sep;
-                  prefix=$(sprint(Base.show_unquoted,arg))*"=", line=false)))
-        end
-        push!(blk.args, :(trace(""; prefix=") =", line=false)))
+    return quote
+        @logging_ccall($fun, Libdl.dlsym(libllvm[], $fun),
+                       $(esc(rettyp)), $(esc(argtypes)), $(map(esc, args)...))
     end
-
-    # Generate the actual call
-    @gensym ret
-    push!(blk.args, quote
-        $ret = ccall(Libdl.dlsym(libllvm[], $f), $(esc(rettyp)),
-                     $(esc(argtyps)), $(esc_args...))
-    end)
-
-    # Print the results
-    @static if TRACE
-        push!(blk.args, :(trace($ret; prefix=" ")))
-    end
-
-    # Return the result
-    push!(blk.args, quote
-        $ret
-    end)
-
-    return blk
 end
