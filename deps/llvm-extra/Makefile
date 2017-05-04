@@ -9,9 +9,13 @@ UNAME = $(shell uname -s)
 #
 
 CPPFLAGS = $(shell $(LLVM_CONFIG) --cppflags)
-CXXFLAGS = $(shell $(LLVM_CONFIG) --cxxflags)
 LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags)
 LDLIBS = $(shell $(LLVM_CONFIG) --system-libs)
+
+LLVM_CXXFLAGS = $(shell $(LLVM_CONFIG) --cxxflags)
+# filter out Clang/GCC specific options
+BAD_LLVM_CXXFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor -gline-tables-only -Wstring-conversion
+CXXFLAGS = $(filter-out $(BAD_LLVM_CXXFLAGS),$(LLVM_CXXFLAGS))
 
 LDFLAGS += "-Wl,-rpath,$(dir $(LLVM_LIBRARY))"
 ifeq ($(UNAME), Darwin)
@@ -39,11 +43,6 @@ else
   # specify the versioned library name to make sure we pick up the correct one
   LDLIBS += -l:$(notdir $(LLVM_LIBRARY))
 endif
-
-# sanitize the cflags llvm-config provides us with
-# (removing C++ specific ones, or flags supported by only Clang or GCC)
-BADFLAGS = -Wcovered-switch-default -fcolor-diagnostics -Wdelete-non-virtual-dtor -gline-tables-only -Wstring-conversion
-CXXFLAGS := $(filter-out $(BADFLAGS),$(CXXFLAGS))
 
 # handle RTTI flags
 HAS_RTTI=$(shell $(LLVM_CONFIG) --has-rtti)
@@ -80,8 +79,12 @@ endif
 # Julia flags
 #
 
-CXXFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --cflags)
 LDFLAGS += $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --ldflags)
+
+JULIA_CXXFLAGS = $(shell $(JULIA_BINARY) $(JULIA_CONFIG) --cflags)
+# filter out Julia's -std, which is C specific.
+BAD_JULIA_CXXFLAGS=-std=%
+CXXFLAGS += $(filter-out $(BAD_JULIA_CXXFLAGS),$(JULIA_CXXFLAGS))
 
 # NOTE: we don't link against libjulia as it will be loaded when dlopen'ing this library
 
