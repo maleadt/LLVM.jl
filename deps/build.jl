@@ -47,26 +47,27 @@ try
     include("common.jl")
     include(joinpath(@__DIR__, "..", "src", "util", "logging.jl"))
 
-    const libext = is_apple() ? "dylib" : "so"
-
     # possible names for libLLVM given a LLVM version number
     function llvm_libnames(version::VersionNumber)
-        @static if is_apple()
-            # macOS dylibs are versioned already
-            return ["libLLVM.dylib"]
-        elseif is_linux()
+        if is_linux()
             # Linux DSO's aren't versioned, so only use versioned filenames
             return ["libLLVM-$(version.major).$(version.minor).$(version.patch).so",
                     "libLLVM-$(version.major).$(version.minor).$(version.patch)svn.so",
                     "libLLVM-$(version.major).$(version.minor).so",
                     "libLLVM-$(version.major).$(version.minor)svn.so"]
+        elseif is_apple()
+            # macOS are versioned
+            return ["libLLVM.dylib"]
+        elseif is_windows()
+            # windows are versioned
+            return ["LLVM.dll"]
         else
             error("Unknown OS")
         end
     end
 
     # name for libLLVM_extra
-    llvmextra_libname = "libLLVM_extra.$libext"
+    llvmextra_libname = "libLLVM_extra.$(Libdl.dlext)"
 
     verbose_run(cmd) = (println(cmd); run(cmd))
 
@@ -113,7 +114,11 @@ try
     # check for bundled LLVM libraries
     # NOTE: as we only build the extras library from source, these libraries will never be used,
     #       but leave this code here as it may be used if we figure out how to provide bindeps
-    libdirs = [joinpath(JULIA_HOME, "..", "lib", "julia")]
+    libdirs = if is_windows()
+        [JULIA_HOME]
+    else
+        [joinpath(JULIA_HOME, "..", "lib", "julia")]
+    end
     for libdir in libdirs
         libraries = find_libllvm(libdir, [base_llvm_version])
 
@@ -178,7 +183,7 @@ try
 
     # select wrapper
     matching_llvms   = filter(t -> any(v -> vercmp_match(t.version,v), wrapped_versions), libllvms)
-    compatible_llvms = filter(t -> !in(t, matching_llvms) && 
+    compatible_llvms = filter(t -> !in(t, matching_llvms) &&
                                    any(v -> vercmp_compat(t.version,v), wrapped_versions), libllvms)
 
     libllvms = [matching_llvms; compatible_llvms]

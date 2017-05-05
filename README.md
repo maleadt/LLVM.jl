@@ -84,6 +84,12 @@ TRACE: LLVM.jl is running in trace mode, this will generate a lot of additional 
 
 Enabling colors with `--color=yes` is also recommended as it color-codes the output.
 
+### Windows support from a binary build (experimental)
+https://bintray.com/artifact/download/tkelman/generic/llvm-3.9.1-x86_64-w64-mingw32-juliadeps-r04.7z
+- extract using 7z
+- copy llvm-contrib.exe from the usr/tools directory to JULIA_HOME
+- copy libLLVM.dll either from the usr/bin directory or JULIA_HOME to the directory JULIA_HOME/../lib directory
+	(necessary because llvm-config.exe --libdir reports that this the library directory)
 
 ### Building `llvm-extra` fails due to C++11 ABI issues
 
