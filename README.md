@@ -90,7 +90,7 @@ https://bintray.com/artifact/download/tkelman/generic/llvm-3.9.1-x86_64-w64-ming
 - copy llvm-contrib.exe from the usr/tools directory to JULIA_HOME
 - copy libLLVM.dll either from the usr/bin directory or JULIA_HOME to the directory JULIA_HOME/../lib directory
 	(necessary because llvm-config.exe --libdir reports that this the library directory)
-
+- copy the contents of the usr/lib  (except for the cmake folder) to the JULIA_HOME/../lib directory
 ### Building `llvm-extra` fails due to C++11 ABI issues
 
 The build step might fail at building the `llvm-extra` wrapper with errors like the
