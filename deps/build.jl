@@ -38,14 +38,14 @@ immutable Toolchain
         new(path, version, Nullable{String}(config), stat(path).mtime)
 end
 
-const ext = joinpath(@__DIR__, "ext.jl")
+const ext = joinpath(pwd(), "ext.jl")
 try
     #
     # Auxiliary
     #
 
     include("common.jl")
-    include(joinpath(@__DIR__, "..", "src", "util", "logging.jl"))
+    include(joinpath(pwd(), "..", "src", "util", "logging.jl"))
 
     # possible names for libLLVM given a LLVM version number
     function llvm_libnames(version::VersionNumber)
@@ -178,8 +178,8 @@ try
 
     # versions wrapped
     wrapped_versions = map(dir->VersionNumber(dir),
-                           filter(path->isdir(joinpath(@__DIR__, "..", "lib", path)),
-                                  readdir(joinpath(@__DIR__, "..", "lib"))))
+                           filter(path->isdir(joinpath(pwd(), "..", "lib", path)),
+                                  readdir(joinpath(pwd(), "..", "lib"))))
 
     # select wrapper
     matching_llvms   = filter(t -> any(v -> vercmp_match(t.version,v), wrapped_versions), libllvms)
@@ -241,7 +241,7 @@ try
     # gather LLVM.jl information
     llvmjl_hash =
         try
-            cd(joinpath(@__DIR__, "..")) do
+            cd(joinpath(pwd(), "..")) do
                 chomp(readstring(`git rev-parse HEAD`))
             end
         catch e
@@ -252,7 +252,7 @@ try
         end
     llvmjl_dirty =
         try
-            cd(joinpath(@__DIR__, "..")) do
+            cd(joinpath(pwd(), "..")) do
                 length(chomp(readstring(`git diff --shortstat`))) > 0
             end
         catch e
@@ -285,10 +285,10 @@ try
     info("Performing source build of LLVM extras library")
     debug("Building for LLVM v$(libllvm.version) at $(libllvm.path) using $(get(libllvm.config))")
 
-    libllvm_extra = joinpath(@__DIR__, "llvm-extra", llvmextra_libname)
+    libllvm_extra = joinpath(pwd(), "llvm-extra", llvmextra_libname)
 
     include("make.jl")
-    build(libllvm,julia)
+    build(libllvm, julia, joinpath(pwd(), "llvm-extra"))
 
     # sanity check: in the case of a bundled LLVM the library should be loaded by Julia already,
     #               while a system-provided LLVM shouldn't
