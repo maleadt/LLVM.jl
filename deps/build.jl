@@ -287,17 +287,10 @@ try
 
     libllvm_extra = joinpath(@__DIR__, "llvm-extra", llvmextra_libname)
 
-    cd(joinpath(@__DIR__, "llvm-extra")) do
-        withenv("LLVM_CONFIG" => get(libllvm.config), "LLVM_LIBRARY" => libllvm.path,
-                "JULIA_CONFIG" => get(julia.config), "JULIA_BINARY" => julia.path,) do
-            # force a rebuild as the LLVM installation might have changed, undetectably
-            verbose_run(`make clean`)
-            verbose_run(`make -j$(Sys.CPU_CORES+1)`)
-        end
-    end
+    include("make.jl")
 
-    # sanity check: in the case of a bundled LLVM the library should be loaded by Julia already,
-    #               while a system-provided LLVM shouldn't
+#     # sanity check: in the case of a bundled LLVM the library should be loaded by Julia already,
+#     #               while a system-provided LLVM shouldn't
     libllvm_exclusive = Libdl.dlopen_e(libllvm.path, Libdl.RTLD_NOLOAD) == C_NULL
     if use_system_llvm != libllvm_exclusive
         @assert(Libdl.dlopen_e(libllvm.path, Libdl.RTLD_NOLOAD) == C_NULL,
@@ -318,13 +311,13 @@ try
         write(fh, """
             # LLVM library properties
             const libllvm_version = v"$(libllvm.version)"
-            const libllvm_path = "$(libllvm.path)"
+            const libllvm_path = "$(escape_string(libllvm.path))"
             const libllvm_mtime = $(libllvm.mtime)
             const libllvm_exclusive = $libllvm_exclusive
             const libllvm_targets = $libllvm_targets
 
             # LLVM extras library properties
-            const libllvm_extra_path = "$libllvm_extra"
+            const libllvm_extra_path = "$(escape_string(libllvm_extra))"
 
             # package properties
             const llvmjl_wrapper = "$llvmjl_wrapper"
