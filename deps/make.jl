@@ -61,6 +61,8 @@ end
 ## MAKE
 ##################################
 
+function build(libllvm, julia)
+
 LLVM_CONFIG = get(libllvm.config)
 LLVM_LIBRARY = libllvm.path
 JULIA_CONFIG = get(julia.config)
@@ -139,4 +141,6 @@ for object in OBJECTS
     run(`$cc -shared $LDFLAGS $LDLIBS -o $object`)
 end
 
-cp(joinpath(@__DIR__,"llvm-extra","Target.$(Libdl.dlext)"), joinpath(@__DIR__,"llvm-extra","$TARGET"))
+run(`$cc -shared $OBJECTS $LDFLAGS $LDLIBS -o $(joinpath(@__DIR__,"llvm-extra",TARGET))`)
+
+end

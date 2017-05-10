@@ -288,9 +288,10 @@ try
     libllvm_extra = joinpath(@__DIR__, "llvm-extra", llvmextra_libname)
 
     include("make.jl")
+    build(libllvm,julia)
 
-#     # sanity check: in the case of a bundled LLVM the library should be loaded by Julia already,
-#     #               while a system-provided LLVM shouldn't
+    # sanity check: in the case of a bundled LLVM the library should be loaded by Julia already,
+    #               while a system-provided LLVM shouldn't
     libllvm_exclusive = Libdl.dlopen_e(libllvm.path, Libdl.RTLD_NOLOAD) == C_NULL
     if use_system_llvm != libllvm_exclusive
         @assert(Libdl.dlopen_e(libllvm.path, Libdl.RTLD_NOLOAD) == C_NULL,

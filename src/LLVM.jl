@@ -3,7 +3,7 @@ __precompile__()
 module LLVM
 
 using Compat
-import Compat.String
+using Compat.String
 
 const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
 isfile(ext) || error("Unable to load $ext\n\nPlease run Pkg.build(\"LLVM\") and restart Julia.")
