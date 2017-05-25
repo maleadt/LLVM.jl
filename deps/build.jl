@@ -38,35 +38,36 @@ immutable Toolchain
         new(path, version, Nullable{String}(config), stat(path).mtime)
 end
 
-const ext = joinpath(@__DIR__, "ext.jl")
+const ext = joinpath(pwd(), "ext.jl")
 try
     #
     # Auxiliary
     #
 
     include("common.jl")
-    include(joinpath(@__DIR__, "..", "src", "util", "logging.jl"))
-
-    const libext = is_apple() ? "dylib" : "so"
+    include(joinpath(pwd(), "..", "src", "util", "logging.jl"))
 
     # possible names for libLLVM given a LLVM version number
     function llvm_libnames(version::VersionNumber)
-        @static if is_apple()
-            # macOS dylibs are versioned already
-            return ["libLLVM.dylib"]
-        elseif is_linux()
+        if is_linux()
             # Linux DSO's aren't versioned, so only use versioned filenames
             return ["libLLVM-$(version.major).$(version.minor).$(version.patch).so",
                     "libLLVM-$(version.major).$(version.minor).$(version.patch)svn.so",
                     "libLLVM-$(version.major).$(version.minor).so",
                     "libLLVM-$(version.major).$(version.minor)svn.so"]
+        elseif is_apple()
+            # macOS are versioned
+            return ["libLLVM.dylib"]
+        elseif is_windows()
+            # windows are versioned
+            return ["LLVM.dll"]
         else
             error("Unknown OS")
         end
     end
 
     # name for libLLVM_extra
-    llvmextra_libname = "libLLVM_extra.$libext"
+    llvmextra_libname = "libLLVM_extra.$(Libdl.dlext)"
 
     verbose_run(cmd) = (println(cmd); run(cmd))
 
@@ -113,7 +114,11 @@ try
     # check for bundled LLVM libraries
     # NOTE: as we only build the extras library from source, these libraries will never be used,
     #       but leave this code here as it may be used if we figure out how to provide bindeps
-    libdirs = [joinpath(JULIA_HOME, "..", "lib", "julia")]
+    libdirs = if is_windows()
+        [JULIA_HOME]
+    else
+        [joinpath(JULIA_HOME, "..", "lib", "julia")]
+    end
     for libdir in libdirs
         libraries = find_libllvm(libdir, [base_llvm_version])
 
@@ -173,12 +178,12 @@ try
 
     # versions wrapped
     wrapped_versions = map(dir->VersionNumber(dir),
-                           filter(path->isdir(joinpath(@__DIR__, "..", "lib", path)),
-                                  readdir(joinpath(@__DIR__, "..", "lib"))))
+                           filter(path->isdir(joinpath(pwd(), "..", "lib", path)),
+                                  readdir(joinpath(pwd(), "..", "lib"))))
 
     # select wrapper
     matching_llvms   = filter(t -> any(v -> vercmp_match(t.version,v), wrapped_versions), libllvms)
-    compatible_llvms = filter(t -> !in(t, matching_llvms) && 
+    compatible_llvms = filter(t -> !in(t, matching_llvms) &&
                                    any(v -> vercmp_compat(t.version,v), wrapped_versions), libllvms)
 
     libllvms = [matching_llvms; compatible_llvms]
@@ -236,7 +241,7 @@ try
     # gather LLVM.jl information
     llvmjl_hash =
         try
-            cd(joinpath(@__DIR__, "..")) do
+            cd(joinpath(pwd(), "..")) do
                 chomp(readstring(`git rev-parse HEAD`))
             end
         catch e
@@ -247,7 +252,7 @@ try
         end
     llvmjl_dirty =
         try
-            cd(joinpath(@__DIR__, "..")) do
+            cd(joinpath(pwd(), "..")) do
                 length(chomp(readstring(`git diff --shortstat`))) > 0
             end
         catch e
@@ -280,16 +285,10 @@ try
     info("Performing source build of LLVM extras library")
     debug("Building for LLVM v$(libllvm.version) at $(libllvm.path) using $(get(libllvm.config))")
 
-    libllvm_extra = joinpath(@__DIR__, "llvm-extra", llvmextra_libname)
+    libllvm_extra = joinpath(pwd(), "llvm-extra", llvmextra_libname)
 
-    cd(joinpath(@__DIR__, "llvm-extra")) do
-        withenv("LLVM_CONFIG" => get(libllvm.config), "LLVM_LIBRARY" => libllvm.path,
-                "JULIA_CONFIG" => get(julia.config), "JULIA_BINARY" => julia.path,) do
-            # force a rebuild as the LLVM installation might have changed, undetectably
-            verbose_run(`make clean`)
-            verbose_run(`make -j$(Sys.CPU_CORES+1)`)
-        end
-    end
+    include("make.jl")
+    build(libllvm, julia, joinpath(pwd(), "llvm-extra"))
 
     # sanity check: in the case of a bundled LLVM the library should be loaded by Julia already,
     #               while a system-provided LLVM shouldn't
@@ -313,13 +312,13 @@ try
         write(fh, """
             # LLVM library properties
             const libllvm_version = v"$(libllvm.version)"
-            const libllvm_path = "$(libllvm.path)"
+            const libllvm_path = "$(escape_string(libllvm.path))"
             const libllvm_mtime = $(libllvm.mtime)
             const libllvm_exclusive = $libllvm_exclusive
             const libllvm_targets = $libllvm_targets
 
             # LLVM extras library properties
-            const libllvm_extra_path = "$libllvm_extra"
+            const libllvm_extra_path = "$(escape_string(libllvm_extra))"
 
             # package properties
             const llvmjl_wrapper = "$llvmjl_wrapper"
