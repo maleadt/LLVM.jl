@@ -1,8 +1,18 @@
 LLVM C API wrapper
 ==================
 
-<!-- [![LLVM](http://pkg.julialang.org/badges/LLVM_0.4.svg)](http://pkg.julialang.org/?pkg=LLVM&ver=0.4) -->
-<!-- [![LLVM](http://pkg.julialang.org/badges/LLVM_0.5.svg)](http://pkg.julialang.org/?pkg=LLVM&ver=0.5) -->
+**Build status**: 
+
+- LLVM 3.9: 
+[![](https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.5%2C%20system%20LLVM%203.9%20%28x86-64%29&badge=Julia%20v0.5)](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.5%2C%20system%20LLVM%203.9%20%28x86-64%29)
+[![](https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%203.9%20%28x86-64%29&badge=Julia%20v0.6)](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%203.9%20%28x86-64%29)
+- LLVM 4.0: 
+[![](https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%204.0%20%28x86-64%29&badge=Julia%20v0.6)](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%204.0%20%28x86-64%29)
+- LLVM 5.0: 
+[![](https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%205.0%20%28x86-64%29&badge=Julia%20v0.6)](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%205.0%20%28x86-64%29)
+- embedded:
+[![](https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.6%2C%20embedded%20LLVM%20%28x86-64%29&badge=Julia%20v0.6)](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.6%2C%20embedded%20LLVM%20%28x86-64%29)
+[![](https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%20master%2C%20embedded%20LLVM%20%28x86-64%29&badge=Julia%20master)](https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%20master%2C%20embedded%20LLVM%20%28x86-64%29)
 
 **Code coverage**: [![Coverage Status](https://codecov.io/gh/maleadt/LLVM.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/maleadt/LLVM.jl)
 
