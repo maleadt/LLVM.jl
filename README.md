@@ -37,9 +37,9 @@ LLVM C API wrapper
 [buildbot-master-url]: https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%20master%2C%20embedded%20LLVM%20%28x86-64%29
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: http://juliagpu.github.io/LLVM.jl/stable
+[docs-stable-url]: http://maleadt.github.io/LLVM.jl/stable
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: http://juliagpu.github.io/LLVM.jl/latest
+[docs-latest-url]: http://maleadt.github.io/LLVM.jl/latest
 
 [coverage-img]: https://codecov.io/gh/maleadt/LLVM.jl/coverage.svg
 [coverage-url]: https://codecov.io/gh/maleadt/LLVM.jl
