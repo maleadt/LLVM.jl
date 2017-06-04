@@ -1,6 +1,9 @@
+haskey(ENV, "ONLY_LOAD") && exit()
+
 using LLVM
-using Compat
 using Base.Test
+
+using Compat
 
 @testset "LLVM" begin
 

@@ -6,8 +6,18 @@ using Compat
 import Compat.String
 
 const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
-isfile(ext) || error("Unable to load $ext\n\nPlease run Pkg.build(\"LLVM\") and restart Julia.")
-include(ext)
+if isfile(ext)
+    include(ext)
+elseif haskey(ENV, "ONLY_LOAD")
+    # special mode where the package is loaded without requiring a successful build.
+    # this is useful for loading in unsupported environments, eg. Travis + Documenter.jl
+    warn("Only loading the package, without activating any functionality.")
+    const libllvm_version = v"4.0"
+    const libllvm_targets = Symbol[]
+    const llvmjl_wrapper = "4.0"
+else
+    error("Unable to load $ext\n\nPlease run Pkg.build(\"LLVM\") and restart Julia.")
+end
 
 include("util/logging.jl")
 include("util/types.jl")
@@ -44,6 +54,8 @@ include("bitcode.jl")
 include("transform.jl")
 
 function __init__()
+    haskey(ENV, "ONLY_LOAD") && return
+
     # check validity of LLVM library
     debug("Checking validity of $libllvm_path (", (libllvm_exclusive?"exclusive":"non-exclusive"), " access)")
     stat(libllvm_path).mtime == libllvm_mtime ||
