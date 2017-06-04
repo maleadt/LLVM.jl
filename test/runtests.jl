@@ -1,6 +1,9 @@
+haskey(ENV, "ONLY_LOAD") && exit()
+
 using LLVM
-using Compat
 using Base.Test
+
+using Compat
 
 @testset "LLVM" begin
 
@@ -58,5 +61,6 @@ include("datalayout.jl")
 LLVM.libllvm_exclusive && Shutdown()
 
 include("examples.jl")
+include("documentation.jl")
 
 end
