@@ -46,22 +46,3 @@ $ DEBUG=1 julia
 julia> Pkg.build("LLVM")
 ...
 ```
-
-
-## Manual Outline
-
-```@contents
-Pages = [
-    "man/usage.md",
-    "man/troubleshooting.md"
-]
-```
-
-
-## Library Outline
-
-```@contents
-Pages = [
-    "lib/api.md"
-]
-```
