@@ -25,22 +25,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#Manual-Outline-1",
-    "page": "Home",
-    "title": "Manual Outline",
-    "category": "section",
-    "text": "Pages = [\n    \"man/usage.md\",\n    \"man/troubleshooting.md\"\n]"
-},
-
-{
-    "location": "index.html#Library-Outline-1",
-    "page": "Home",
-    "title": "Library Outline",
-    "category": "section",
-    "text": "Pages = [\n    \"lib/api.md\"\n]"
-},
-
-{
     "location": "man/usage.html#",
     "page": "Usage",
     "title": "Usage",
