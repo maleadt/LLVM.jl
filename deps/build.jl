@@ -163,12 +163,12 @@ try
 
     if !isnull(override_llvm_version)
         warn("Forcing LLVM version at $(get(override_llvm_version))")
-        libllvms = filter(t->vercmp_match(t.version,get(override_llvm_version)), libllvms)
+        filter!(t->vercmp_match(t.version,get(override_llvm_version)), libllvms)
     elseif !use_system_llvm
         # NOTE: only match versions here, as `!use_system_llvm` implies we've only searched
         #       bundled directories
         warn("Only considering bundled LLVM v$base_llvm_version (define USE_SYSTEM_LLVM=1 to override)")
-        libllvms = filter(t->vercmp_match(t.version,base_llvm_version), libllvms)
+        filter!(t->vercmp_match(t.version,base_llvm_version), libllvms)
     end
 
     # versions wrapped
