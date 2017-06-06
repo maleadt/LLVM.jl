@@ -158,8 +158,8 @@ try
     #
     # If the user requested a specific version, only ever consider that version.
 
-    vercmp_match  = (a,b) -> a.major==b.major &&  a.minor==b.minor
-    vercmp_compat = (a,b) -> a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
+    vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
+    vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 
     if !isnull(override_llvm_version)
         warn("Forcing LLVM version at $(get(override_llvm_version))")
