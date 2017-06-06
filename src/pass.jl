@@ -2,6 +2,12 @@ export Pass
 
 @compat abstract type Pass end
 
+@inline function check_access()
+    if libllvm_system
+        error("LLVM passes are not supported with a system-provided LLVM library")
+    end
+end
+
 
 #
 # Module passes
@@ -18,6 +24,7 @@ export ModulePass
             return runner(mod)::Bool
         end
 
+        check_access()
         return new(API.LLVMCreateModulePass(name, callback), callback)
     end
 end
@@ -39,6 +46,7 @@ export FunctionPass
             return runner(fn)::Bool
         end
 
+        check_access()
         return new(API.LLVMCreateFunctionPass(name, callback), callback)
     end
 end
@@ -59,6 +67,7 @@ export BasicBlockPass
             return runner(bb)::Bool
         end
 
+        check_access()
         return new(API.LLVMCreateBasicBlockPass(name, callback), callback)
     end
 end

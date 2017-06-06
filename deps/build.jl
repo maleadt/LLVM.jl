@@ -9,20 +9,6 @@ const override_llvm_version = Nullable{VersionNumber}(get(ENV, "LLVM_VER", nothi
 
 # define USE_SYSTEM_LLVM to allow using non-bundled versions of LLVM
 const use_system_llvm = haskey(ENV, "USE_SYSTEM_LLVM")
-if use_system_llvm && is_apple()
-    # on macOS, some lookups from the system libLLVM resolve in the libLLVM loaded by Julia
-    # (shouldn't RTLD_DEEPBIND prevent this?), which obviously messes up things:
-    #
-    # frame 0: libsystem_malloc.dylib  malloc_error_break
-    # frame 1: libsystem_malloc.dylib  free
-    # frame 2: libLLVM-3.7.dylib       llvm::DenseMapBase<...>*)
-    # frame 3: libLLVM-3.7.dylib       unsigned int llvm::DFSPass<...>::NodeType*, unsigned int)
-    # frame 4: libLLVM-3.7.dylib       void llvm::Calculate<...>&, llvm::Function&)
-    # frame 5: libLLVM.dylib           (anonymous namespace)::Verifier::verify(llvm::Function const&)
-    # frame 6: libLLVM.dylib           llvm::verifyModule(llvm::Module const&, llvm::raw_ostream*, bool*)
-    # frame 7: libLLVM.dylib           LLVMVerifyModule
-    error("USE_SYSTEM_LLVM is not supported on macOS")
-end
 
 using Compat
 
@@ -158,17 +144,26 @@ try
     #
     # If the user requested a specific version, only ever consider that version.
 
-    vercmp_match  = (a,b) -> a.major==b.major &&  a.minor==b.minor
-    vercmp_compat = (a,b) -> a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
+    vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
+    vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 
+    # bundled/system selection
+    is_subdir(sub, dir) = startswith(normpath(sub), normpath(dir))
+    if use_system_llvm
+        # NOTE: we only need to handle this case, as `!use_system_llvm` implies
+        #       we've only searched bundled directories
+        filter!(t->!is_subdir(t.path, dirname(JULIA_HOME)), libllvms)
+    end
+
+    # version selection
     if !isnull(override_llvm_version)
         warn("Forcing LLVM version at $(get(override_llvm_version))")
-        libllvms = filter(t->vercmp_match(t.version,get(override_llvm_version)), libllvms)
+        filter!(t->vercmp_match(t.version,get(override_llvm_version)), libllvms)
     elseif !use_system_llvm
-        # NOTE: only match versions here, as `!use_system_llvm` implies we've only searched
-        #       bundled directories
+        # a bundled LLVM should already match base_llvm_version,
+        # but there might be multiple built LLVM libraries present
         warn("Only considering bundled LLVM v$base_llvm_version (define USE_SYSTEM_LLVM=1 to override)")
-        libllvms = filter(t->vercmp_match(t.version,base_llvm_version), libllvms)
+        filter!(t->vercmp_match(t.version,base_llvm_version), libllvms)
     end
 
     # versions wrapped
@@ -299,10 +294,6 @@ try
                 "exclusive access mode does not match requested type of LLVM library (run with TRACE=1 and file an issue)")
     end
 
-    # sanity check: open the library
-    debug("Opening $libllvm_extra")
-    Libdl.dlopen(libllvm_extra, Libdl.RTLD_LOCAL | Libdl.RTLD_DEEPBIND | Libdl.RTLD_NOW)
-
 
     #
     # Finishing up
@@ -315,7 +306,7 @@ try
             const libllvm_version = v"$(libllvm.version)"
             const libllvm_path = "$(libllvm.path)"
             const libllvm_mtime = $(libllvm.mtime)
-            const libllvm_exclusive = $libllvm_exclusive
+            const libllvm_system = $use_system_llvm
             const libllvm_targets = $libllvm_targets
 
             # LLVM extras library properties

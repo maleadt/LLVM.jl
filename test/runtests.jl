@@ -58,9 +58,9 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 
-LLVM.libllvm_exclusive && Shutdown()
-
 include("examples.jl")
 include("documentation.jl")
+
+LLVM.libllvm_system && Shutdown()
 
 end

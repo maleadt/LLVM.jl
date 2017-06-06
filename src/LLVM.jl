@@ -53,16 +53,36 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 
+if is_linux()
+    @compat const Lmid = Clong
+    const LM_ID_BASE = 0
+    const LM_ID_NEWLM = -1
+    const RTLD_LAZY = 1
+    function dlmopen(linkmap::Lmid, library::String, flags::Integer=RTLD_LAZY)
+        handle = ccall((:dlmopen, :libdl), Ptr{Void}, (Lmid, Cstring, Cint), linkmap, library, flags)
+        if handle == C_NULL
+            error(unsafe_string(ccall((:dlerror, :libdl), Cstring, ())))
+        end
+        return handle
+    end
+end
+
 function __init__()
     haskey(ENV, "ONLY_LOAD") && return
 
     # check validity of LLVM library
-    debug("Checking validity of $libllvm_path (", (libllvm_exclusive?"exclusive":"non-exclusive"), " access)")
+    debug("Checking validity of ", (libllvm_system?"system":"bundled"), " library at $libllvm_path")
     stat(libllvm_path).mtime == libllvm_mtime ||
         warn("LLVM library has been modified. Please re-run Pkg.build(\"LLVM\") and restart Julia.")
 
     __init_logging__()
-    libllvm[] = Libdl.dlopen(libllvm_extra_path, Libdl.RTLD_LOCAL | Libdl.RTLD_DEEPBIND)
+    if !libllvm_system
+        libllvm[] = Libdl.dlopen(libllvm_extra_path)
+    elseif is_linux()
+        libllvm[] = dlmopen(LM_ID_NEWLM, libllvm_extra_path)
+    else
+        error("System LLVM mode only supported on Linux")
+    end
 
     _install_handlers()
     _install_handlers(GlobalContext())
