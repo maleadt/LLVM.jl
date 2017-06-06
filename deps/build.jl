@@ -161,12 +161,21 @@ try
     vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
     vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 
+    # bundled/system selection
+    is_subdir(sub, dir) = startswith(normpath(sub), normpath(dir))
+    if use_system_llvm
+        # NOTE: we only need to handle this case, as `!use_system_llvm` implies
+        #       we've only searched bundled directories
+        filter!(t->!is_subdir(t.path, dirname(JULIA_HOME)), libllvms)
+    end
+
+    # version selection
     if !isnull(override_llvm_version)
         warn("Forcing LLVM version at $(get(override_llvm_version))")
         filter!(t->vercmp_match(t.version,get(override_llvm_version)), libllvms)
     elseif !use_system_llvm
-        # NOTE: only match versions here, as `!use_system_llvm` implies we've only searched
-        #       bundled directories
+        # a bundled LLVM should already match base_llvm_version,
+        # but there might be multiple built LLVM libraries present
         warn("Only considering bundled LLVM v$base_llvm_version (define USE_SYSTEM_LLVM=1 to override)")
         filter!(t->vercmp_match(t.version,base_llvm_version), libllvms)
     end
