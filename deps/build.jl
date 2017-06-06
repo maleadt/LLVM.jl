@@ -308,10 +308,6 @@ try
                 "exclusive access mode does not match requested type of LLVM library (run with TRACE=1 and file an issue)")
     end
 
-    # sanity check: open the library
-    debug("Opening $libllvm_extra")
-    Libdl.dlopen(libllvm_extra, Libdl.RTLD_LOCAL | Libdl.RTLD_DEEPBIND | Libdl.RTLD_NOW)
-
 
     #
     # Finishing up
@@ -324,7 +320,7 @@ try
             const libllvm_version = v"$(libllvm.version)"
             const libllvm_path = "$(libllvm.path)"
             const libllvm_mtime = $(libllvm.mtime)
-            const libllvm_exclusive = $libllvm_exclusive
+            const libllvm_system = $use_system_llvm
             const libllvm_targets = $libllvm_targets
 
             # LLVM extras library properties

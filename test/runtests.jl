@@ -61,6 +61,6 @@ include("datalayout.jl")
 include("examples.jl")
 include("documentation.jl")
 
-LLVM.libllvm_exclusive && Shutdown()
+LLVM.libllvm_system && Shutdown()
 
 end

@@ -6,7 +6,7 @@ export version, Shutdown,
 version() = return libllvm_version
 
 function Shutdown()
-  libllvm_exclusive || error("Cannot shutdown LLVM without exclusive access")
+  libllvm_system || error("Cannot shutdown LLVM without exclusive access")
   API.LLVMShutdown()
 end
 

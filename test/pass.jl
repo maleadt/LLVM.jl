@@ -20,11 +20,16 @@ LLVM.Module("SomeModule", ctx) do mod
         @test cur_mod == mod
         return false
     end
-    pass = ModulePass("SomeModulePass", runOnModule)
 
-    ModulePassManager() do mpm
-        add!(mpm, pass)
-        run!(mpm, mod)
+    if LLVM.libllvm_system
+        @test_throws ErrorException ModulePass("SomeModulePass", runOnModule)
+    else
+        pass = ModulePass("SomeModulePass", runOnModule)
+
+        ModulePassManager() do mpm
+            add!(mpm, pass)
+            run!(mpm, mod)
+        end
     end
 
     # function pass
@@ -33,11 +38,16 @@ LLVM.Module("SomeModule", ctx) do mod
         @test cur_fn == fn
         return false
     end
-    pass = FunctionPass("SomeFunctionPass", runOnFunction)
 
-    FunctionPassManager(mod) do fpm
-        add!(fpm, pass)
-        run!(fpm, fn)
+    if LLVM.libllvm_system
+        @test_throws ErrorException FunctionPass("SomeFunctionPass", runOnFunction)
+    else
+        pass = FunctionPass("SomeFunctionPass", runOnFunction)
+
+        FunctionPassManager(mod) do fpm
+            add!(fpm, pass)
+            run!(fpm, fn)
+        end
     end
 
     # basic block pass
@@ -46,11 +56,16 @@ LLVM.Module("SomeModule", ctx) do mod
         @test cur_bb == bb
         return false
     end
-    pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
 
-    FunctionPassManager(mod) do fpm
-        add!(fpm, pass)
-        run!(fpm, fn)
+    if LLVM.libllvm_system
+        @test_throws ErrorException BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
+    else
+        pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
+
+        FunctionPassManager(mod) do fpm
+            add!(fpm, pass)
+            run!(fpm, fn)
+        end
     end
 end
 end

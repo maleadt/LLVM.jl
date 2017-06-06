@@ -1,7 +1,7 @@
 # same as `sum.jl`, but reusing the Julia compiler to compile and execute the IR
 
 using LLVM
-LLVM.libllvm_exclusive && exit() # cannot run this example if we have our own copy of LLVM
+LLVM.libllvm_system && exit() # cannot run this example if we have our own copy of LLVM
 
 if length(ARGS) == 2
     x, y = parse.([Int32], ARGS[1:2])
