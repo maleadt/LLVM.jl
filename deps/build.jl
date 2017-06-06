@@ -9,20 +9,6 @@ const override_llvm_version = Nullable{VersionNumber}(get(ENV, "LLVM_VER", nothi
 
 # define USE_SYSTEM_LLVM to allow using non-bundled versions of LLVM
 const use_system_llvm = haskey(ENV, "USE_SYSTEM_LLVM")
-if use_system_llvm && is_apple()
-    # on macOS, some lookups from the system libLLVM resolve in the libLLVM loaded by Julia
-    # (shouldn't RTLD_DEEPBIND prevent this?), which obviously messes up things:
-    #
-    # frame 0: libsystem_malloc.dylib  malloc_error_break
-    # frame 1: libsystem_malloc.dylib  free
-    # frame 2: libLLVM-3.7.dylib       llvm::DenseMapBase<...>*)
-    # frame 3: libLLVM-3.7.dylib       unsigned int llvm::DFSPass<...>::NodeType*, unsigned int)
-    # frame 4: libLLVM-3.7.dylib       void llvm::Calculate<...>&, llvm::Function&)
-    # frame 5: libLLVM.dylib           (anonymous namespace)::Verifier::verify(llvm::Function const&)
-    # frame 6: libLLVM.dylib           llvm::verifyModule(llvm::Module const&, llvm::raw_ostream*, bool*)
-    # frame 7: libLLVM.dylib           LLVMVerifyModule
-    error("USE_SYSTEM_LLVM is not supported on macOS")
-end
 
 using Compat
 
