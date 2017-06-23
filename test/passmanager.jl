@@ -8,7 +8,7 @@ end
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
 ModulePassManager() do mpm
-    run!(mpm, mod)
+    @test !run!(mpm, mod)
 end
 end
 end
@@ -20,7 +20,7 @@ FunctionPassManager(mod) do fpm
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     @test !initialize!(fpm)
-    run!(fpm, fn)
+    @test !run!(fpm, fn)
     @test !finalize!(fpm)
 end
 end

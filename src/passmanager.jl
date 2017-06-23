@@ -28,7 +28,8 @@ function ModulePassManager(f::Core.Function, args...)
     end
 end
 
-run!(mpm::ModulePassManager, mod::Module) = API.LLVMRunPassManager(ref(mpm), ref(mod))
+run!(mpm::ModulePassManager, mod::Module) =
+    LLVM.BoolFromLLVM(API.LLVMRunPassManager(ref(mpm), ref(mod)))
 
 
 
@@ -59,4 +60,4 @@ finalize!(fpm::FunctionPassManager) =
     BoolFromLLVM(API.LLVMFinalizeFunctionPassManager(ref(fpm)))
 
 run!(fpm::FunctionPassManager, f::Function) =
-    API.LLVMRunFunctionPassManager(ref(fpm), ref(f))
+    LLVM.BoolFromLLVM(API.LLVMRunFunctionPassManager(ref(fpm), ref(f)))
