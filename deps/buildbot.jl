@@ -9,6 +9,8 @@ end
 const target = ARGS[1]
 isdir(target) || mkdir(target)
 
+debug("Performing buildbot build for LLVM.jl from $(pwd())")
+
 libllvms = discover_llvm()
 llvmjl_wrappers = discover_wrappers()
 julia = discover_julia()

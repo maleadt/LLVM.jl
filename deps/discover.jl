@@ -25,12 +25,12 @@ end
 
 # returns vector of Tuple{path::AbstractString, VersionNumber}
 function find_libllvm(dir::AbstractString, versions::Vector{VersionNumber})
-    debug("Looking for libLLVM in $dir")
+    trace("Looking for llvm in $(shortpath(dir))")
     libraries = Vector{Tuple{String, VersionNumber}}()
     for version in versions, name in llvm_libnames(version)
         lib = joinpath(dir, name)
         if ispath(lib)
-            debug("- v$version at $lib")
+            trace("- v$version at $(shortpath(lib))")
             push!(libraries, tuple(lib, version))
         end
     end
@@ -40,13 +40,13 @@ end
 
 # returns vector of Tuple{path::AbstractString, VersionNumber}
 function find_llvmconfig(dir::AbstractString)
-    debug("Looking for llvm-config in $dir")
+    trace("Looking for llvm-config in $(shortpath(dir))")
     configs = Vector{Tuple{String, VersionNumber}}()
     for file in readdir(dir)
         if startswith(file, "llvm-config")
             path = joinpath(dir, file)
             version = VersionNumber(strip(readstring(`$path --version`)))
-            debug("- $version at $path")
+            trace("- $version at $(shortpath(path))")
             push!(configs, tuple(path, version))
         end
     end
@@ -54,28 +54,23 @@ function find_llvmconfig(dir::AbstractString)
     return configs
 end
 
-function discover_llvm()
-    libllvms = Vector{Toolchain}()
+function discover_llvm(libdirs, configdirs)
+    debug("Discovering LLVM libraries in $(join(shortpath.(libdirs), ", ")), and configs in $(join(shortpath.(configdirs), ", "))")
+    llvms = Vector{Toolchain}()
 
     # check for bundled LLVM libraries
     # NOTE: as we only build the extras library from source, these libraries will never be
     #       used, but leave this code here as it may be used if we figure out how to provide
     #       bindeps
-    libdirs = [joinpath(JULIA_HOME, "..", "lib", "julia")]
-    for libdir in libdirs
+    for libdir in unique(libdirs)
         libraries = find_libllvm(libdir, [base_llvm_version])
 
         for (library, version) in libraries
-            push!(libllvms, Toolchain(library, version))
+            push!(llvms, Toolchain(library, version))
         end
     end
 
     # check for llvm-config binaries in known locations
-    if use_system_llvm
-        configdirs = [split(ENV["PATH"], ':')...]
-    else
-        configdirs = [JULIA_HOME, joinpath(JULIA_HOME, "..", "tools")]
-    end
     for dir in unique(configdirs)
         isdir(dir) || continue
         configs = find_llvmconfig(dir)
@@ -86,15 +81,37 @@ function discover_llvm()
             libraries = find_libllvm(libdir, [version])
 
             for (library, _) in libraries
-                push!(libllvms, Toolchain(library, version, config))
+                push!(llvms, Toolchain(library, version, config))
             end
         end
     end
 
     # prune
-    libllvms = unique(x -> realpath(x.path), libllvms)
+    llvms = unique(x -> realpath(x.path), llvms)
 
-    return libllvms
+    debug("Discovered LLVM toolchains: ", join(llvms, ", "))
+
+    return llvms
+end
+
+function discover_llvm()
+    # look for bundled LLVM toolchains relative to JULIA_HOME
+    bundled_llvms =
+        discover_llvm([joinpath(JULIA_HOME, "..", "lib", "julia")],
+                       [JULIA_HOME, joinpath(JULIA_HOME, "..", "tools")])
+    for llvm in bundled_llvms
+        llvm.props[:bundled] = true
+    end
+
+    # look for system LLVM toolchains in the PATH
+    system_llvms =
+        discover_llvm([],
+                      [split(ENV["PATH"], ':')...])
+    for llvm in system_llvms
+        llvm.props[:bundled] = false
+    end
+
+    return [bundled_llvms; system_llvms]
 end
 
 
@@ -143,15 +160,15 @@ function discover()
 end
 
 if realpath(joinpath(pwd(), PROGRAM_FILE)) == realpath(@__FILE__)
-    libllvms, wrappers, julia = discover()
+    llvms, wrappers, julia = discover()
 
-    println("LLVM libraries:")
-    for libllvm in libllvms
-        println("- ", libllvm)
+    println("LLVM toolchains:")
+    for llvm in llvms
+        println("- ", llvm)
     end
     println()
 
-    println("Wrapped LLVM versions:")
+    println("LLVM wrappers:")
     for wrapper in wrappers
         println("- ", wrapper)
     end

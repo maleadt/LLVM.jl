@@ -16,33 +16,42 @@ vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 #
 # If the user requested a specific version, only ever consider that version.
 
-function select_llvm(libllvms, wrapped_versions)
+function select_llvm(llvms, wrappers)
+    debug("Selecting LLVM from libraries $(join(llvms, ", ")) and wrappers $(join(wrappers, ", "))")
+    # type selection (bundled or not)
+    if !use_system_llvm
+        filter!(t->t.props[:bundled] == true, llvms)
+
+        # a bundled LLVM should already match base_llvm_version,
+        # but there might be multiple built LLVM libraries present
+        filter!(t->vercmp_match(t.version,base_llvm_version), llvms)
+    else
+        filter!(t->t.props[:bundled] == false, llvms)
+    end
+
     # version selection
     if !isnull(override_llvm_version)
         warn("Forcing LLVM version at $(get(override_llvm_version))")
-        filter!(t->vercmp_match(t.version,get(override_llvm_version)), libllvms)
-    elseif !use_system_llvm
-        # a bundled LLVM should already match base_llvm_version,
-        # but there might be multiple built LLVM libraries present
-        filter!(t->vercmp_match(t.version,base_llvm_version), libllvms)
+        filter!(t->vercmp_match(t.version,get(override_llvm_version)), llvms)
     end
 
     # select wrapper
-    matching_llvms   = filter(t -> any(v -> vercmp_match(t.version,v), wrapped_versions), libllvms)
+    matching_llvms   = filter(t -> any(v -> vercmp_match(t.version,v), wrappers), llvms)
     compatible_llvms = filter(t -> !in(t, matching_llvms) && 
-                                   any(v -> vercmp_compat(t.version,v), wrapped_versions), libllvms)
+                                   any(v -> vercmp_compat(t.version,v), wrappers), llvms)
 
-    libllvms = [matching_llvms; compatible_llvms]
+    llvms = [matching_llvms; compatible_llvms]
 
     # we will require `llvm-config` for building
-    filter!(x->!isnull(x.config), libllvms)
-    isempty(libllvms) && error("could not find LLVM installation providing llvm-config")
+    filter!(x->!isnull(x.config), llvms)
+    isempty(llvms) && error("could not find LLVM installation providing llvm-config")
 
     # pick the first version and run with it (we should be able to build with all of them)
-    libllvm = first(libllvms)
-    libllvm in matching_llvms || warn("Selected LLVM version v$(libllvm.version) is unsupported")
+    llvm = first(llvms)
+    debug("Selected LLVM $llvm")
+    llvm in matching_llvms || warn("Selected LLVM version v$(llvm.version) is unsupported")
 
-    return libllvm
+    return llvm
 end
 
 
@@ -50,16 +59,18 @@ end
 # Wrapper selection
 #
 
-function select_wrapper(libllvm, wrapped_versions)
-    if libllvm.version in wrapped_versions
-        wrapper_version = libllvm.version
-    else
-        compatible_wrappers = filter(v->vercmp_compat(libllvm.version, v), wrapped_versions)
-        wrapper_version = last(compatible_wrappers)
-        debug("Will be using wrapper v$(verstr(wrapper_version)) for libLLVM v$(libllvm.version)")
-    end
+function select_wrapper(llvm, wrappers)
+    debug("Selecting wrapper for $llvm out of wrappers $(join(wrappers, ", "))")
 
-    return verstr(wrapper_version)
+    if llvm.version in wrappers
+        wrapper = llvm.version
+    else
+        compatible_wrappers = filter(v->vercmp_compat(llvm.version, v), wrappers)
+        wrapper = last(compatible_wrappers)
+    end
+    debug("Selected wrapper $(verstr(wrapper)) for LLVM $llvm")
+
+    return verstr(wrapper)
 end
 
 
@@ -68,16 +79,16 @@ end
 #
 
 function select()
-    libllvms, llvmjl_wrappers, julia = discover()
+    llvms, wrappers, julia = discover()
 
-    libllvm = select_llvm(libllvms, llvmjl_wrappers)
+    llvm = select_llvm(llvms, wrappers)
 
-    return libllvm, select_wrapper(libllvm, llvmjl_wrappers)
+    return llvm, select_wrapper(llvm, wrappers)
 end
 
 if realpath(joinpath(pwd(), PROGRAM_FILE)) == realpath(@__FILE__)
-    libllvm, llvmjl_wrapper = select()
+    llvm, wrapper = select()
 
-    println("LLVM library: $libllvm")
-    println("LLVM wrapper: $llvmjl_wrapper")
+    println("LLVM toolchain: $llvm")
+    println("LLVM wrapper: $wrapper")
 end

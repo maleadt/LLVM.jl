@@ -32,18 +32,23 @@ immutable Toolchain
     version::VersionNumber
     config::Nullable{String}
     mtime::Float64
+    props::Dict{Symbol,Any}
 
     Toolchain(path, version) =
-        new(path, version, Nullable{String}(), stat(path).mtime)
+        new(path, version, Nullable{String}(), stat(path).mtime, Dict{Symbol,Any}())
     Toolchain(path, version, config) =
-        new(path, version, Nullable{String}(config), stat(path).mtime)
+        new(path, version, Nullable{String}(config), stat(path).mtime, Dict{Symbol,Any}())
 end
 
 function shortpath(path)
-    paths = [path, abspath(path), relpath(path)]
+    paths = [path, abspath(path), relpath(String(path))]    # TODO: relpath(::SubString)
     first(sort(paths, by=length))
 end
 
 function Base.show(io::IO, toolchain::Toolchain)
-    print(io, toolchain.version, " at ", shortpath(toolchain.path))
+    props = join(["$key: $value" for (key,value) in toolchain.props], ", ")
+    if length(props) > 0
+        props = " ($props)"
+    end
+    print(io, toolchain.version, " at ", shortpath(toolchain.path), props)
 end
