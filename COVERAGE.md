@@ -398,10 +398,10 @@ Core
 
 #### User value
 
-- [ ] LLVMGetOperand
+- [x] LLVMGetOperand
 - [ ] LLVMGetOperandUse
-- [ ] LLVMSetOperand
-- [ ] LLVMGetNumOperands
+- [x] LLVMSetOperand
+- [x] LLVMGetNumOperands
 
 #### Constants
 

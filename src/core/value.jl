@@ -41,6 +41,11 @@ isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(val)))
 context(val::Value) = Context(API.LLVMGetValueContext(ref(val)))
 
 
+## user values
+
+include("value/user.jl")
+
+
 ## constants
 
 include("value/constant.jl")
