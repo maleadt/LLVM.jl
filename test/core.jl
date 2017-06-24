@@ -245,6 +245,32 @@ end
 end
 end
 
+# users
+
+Context() do ctx
+    # operand iteration
+    mod = parse(LLVM.Module,  """
+        define void @fun(i32) {
+        top:
+          %1 = add i32 %0, 1
+          ret void
+        }""", ctx)
+    fun = get(functions(mod), "fun")
+
+    for (i, instr) in enumerate(instructions(first(blocks(fun))))
+        ops = operands(instr)
+        @test eltype(ops) == Value
+        if i == 1
+            @test length(ops) == 2
+            @test ops[1] == first(parameters(fun))
+            @test ops[2] == ConstantInt(LLVM.Int32Type(ctx), 1)
+        elseif i == 2
+            @test length(ops) == 0
+            @test collect(ops) == []
+        end
+    end
+end
+
 # constants
 
 # scalar

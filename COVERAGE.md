@@ -171,16 +171,16 @@ Core
 - [x] LLVMGetDiagInfoSeverity
 - [ ] LLVMGetMDKindIDInContext
 - [ ] LLVMGetMDKindID
-- [ ] LLVMGetEnumAttributeKindForName
+- [x] LLVMGetEnumAttributeKindForName
 - [ ] LLVMGetLastEnumAttributeKind
-- [ ] LLVMCreateEnumAttribute
-- [ ] LLVMGetEnumAttributeKind
-- [ ] LLVMGetEnumAttributeValue
-- [ ] LLVMCreateStringAttribute
-- [ ] LLVMGetStringAttributeKind
-- [ ] LLVMGetStringAttributeValue
-- [ ] LLVMIsEnumAttribute
-- [ ] LLVMIsStringAttribute
+- [x] LLVMCreateEnumAttribute
+- [x] LLVMGetEnumAttributeKind
+- [x] LLVMGetEnumAttributeValue
+- [x] LLVMCreateStringAttribute
+- [x] LLVMGetStringAttributeKind
+- [x] LLVMGetStringAttributeValue
+- [x] LLVMIsEnumAttribute
+- [x] LLVMIsStringAttribute
 
 
 ### Modules
@@ -398,10 +398,10 @@ Core
 
 #### User value
 
-- [ ] LLVMGetOperand
+- [x] LLVMGetOperand
 - [ ] LLVMGetOperandUse
-- [ ] LLVMSetOperand
-- [ ] LLVMGetNumOperands
+- [x] LLVMSetOperand
+- [x] LLVMGetNumOperands
 
 #### Constants
 
@@ -414,7 +414,7 @@ Core
 **Scalar constants**
 
 - [x] LLVMConstInt
-- [ ] LLVMConstIntOfArbitraryPrecision
+- [x] LLVMConstIntOfArbitraryPrecision
 - [ ] LLVMConstIntOfString
 - [ ] LLVMConstIntOfStringAndSize
 - [x] LLVMConstReal
@@ -558,13 +558,13 @@ Core
 - [x] LLVMGetGC
 - [x] LLVMSetGC
 - [x] LLVMAddFunctionAttr
-- [ ] LLVMAddAttributeAtIndex
-- [ ] LLVMGetAttributeCountAtIndex
-- [ ] LLVMGetAttributesAtIndex
+- [x] LLVMAddAttributeAtIndex
+- [x] LLVMGetAttributeCountAtIndex
+- [x] LLVMGetAttributesAtIndex
 - [ ] LLVMGetEnumAttributeAtIndex
 - [ ] LLVMGetStringAttributeAtIndex
-- [ ] LLVMRemoveEnumAttributeAtIndex
-- [ ] LLVMRemoveStringAttributeAtIndex
+- [x] LLVMRemoveEnumAttributeAtIndex
+- [x] LLVMRemoveStringAttributeAtIndex
 - [ ] LLVMAddTargetDependentFunctionAttr
 - [x] LLVMGetFunctionAttr
 - [x] LLVMRemoveFunctionAttr
@@ -790,10 +790,10 @@ Instruction Builders
 - [ ] LLVMBuildPointerCast
 - [ ] LLVMBuildIntCast
 - [ ] LLVMBuildFPCast
-- [ ] LLVMBuildICmp
+- [x] LLVMBuildICmp
 - [ ] LLVMBuildFCmp
 - [ ] LLVMBuildPhi
-- [ ] LLVMBuildCall
+- [x] LLVMBuildCall
 - [ ] LLVMBuildSelect
 - [ ] LLVMBuildVAArg
 - [ ] LLVMBuildExtractElement
@@ -1125,7 +1125,7 @@ ErrorHandling
 -------------
 
 - [x] LLVMInstallFatalErrorHandler
-- [ ] LLVMResetFatalErrorHandler
+- [x] LLVMResetFatalErrorHandler
 - [ ] LLVMEnablePrettyStackTrace
 
 
