@@ -3,7 +3,10 @@
 export version, Shutdown,
        ismultithreaded
 
-version() = return libllvm_version
+function version()
+    LLVM.configured || error("LLVM.jl has not been configured.")
+    return libllvm_version
+end
 
 function Shutdown()
   libllvm_system || error("Cannot shutdown LLVM without exclusive access")

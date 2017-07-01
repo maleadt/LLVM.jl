@@ -6,17 +6,16 @@ using Compat
 import Compat.String
 
 const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
-if isfile(ext)
+const configured = if isfile(ext)
     include(ext)
-elseif haskey(ENV, "ONLY_LOAD")
-    # special mode where the package is loaded without requiring a successful build.
-    # this is useful for loading in unsupported environments, eg. Travis + Documenter.jl
-    warn("Only loading the package, without activating any functionality.")
-    const libllvm_version = v"4.0"
-    const libllvm_targets = Symbol[]
-    const llvmjl_wrapper = "4.0"
+    true
 else
-    error("Unable to load $ext\n\nPlease run Pkg.build(\"LLVM\") and restart Julia.")
+    # enable LLVM.jl to be loaded when the build failed, simplifying downstream use.
+    # remove this when we have proper support for conditional modules.
+    const libllvm_targets = Symbol[]
+    const libllvm_path = nothing
+    const llvmjl_wrapper = "4.0"
+    false
 end
 
 include("util/logging.jl")
@@ -68,14 +67,19 @@ if is_linux()
 end
 
 function __init__()
-    haskey(ENV, "ONLY_LOAD") && return
+    __init_logging__()
+
+    if !configured
+        warn("LLVM.jl has not been configured, and will not work properly.")
+        warn("Please run Pkg.build(\"LLVM\") and restart Julia.")
+        return
+    end
 
     # check validity of LLVM library
     debug("Checking validity of ", (libllvm_system?"system":"bundled"), " library at $libllvm_path")
     stat(libllvm_path).mtime == libllvm_mtime ||
-        warn("LLVM library has been modified. Please re-run Pkg.build(\"LLVM\") and restart Julia.")
+        warn("LLVM library has been modified. Please run Pkg.build(\"LLVM\") and restart Julia.")
 
-    __init_logging__()
     if !libllvm_system
         libllvm[] = Libdl.dlopen(libllvm_extra_path)
     elseif is_linux()
