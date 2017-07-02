@@ -22,6 +22,9 @@ Requirements:
 
 ```
 Pkg.add("LLVM")
+using LLVM
+
+# optionally
 Pkg.test("LLVM")
 ```
 
@@ -41,6 +44,11 @@ $ DEBUG=1 julia
 julia> Pkg.build("LLVM")
 ...
 ```
+
+Even if the build fails, LLVM.jl should always be loadable. This simplifies use by
+downstream packages, until there is proper language support for conditional modules. You can
+check whether the package has been built properly by inspecting the `LLVM.configured` global
+variable.
 
 
 ### System-provided LLVM
