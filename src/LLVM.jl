@@ -53,7 +53,7 @@ include("bitcode.jl")
 include("transform.jl")
 
 if is_linux()
-    @compat const Lmid = Clong
+    const Lmid = Clong
     const LM_ID_BASE = 0
     const LM_ID_NEWLM = -1
     const RTLD_LAZY = 1
