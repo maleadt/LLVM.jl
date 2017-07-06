@@ -1,10 +1,12 @@
+# generate LLVM wrappers
+
 using Clang.cindex
 using Clang.wrap_c
 
 using Compat
 import Compat.String
 
-include("common.jl")
+include("util.jl")
 
 function wrap(config, destdir)
     info("Wrapping LLVM C API at $destdir")
