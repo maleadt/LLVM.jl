@@ -67,6 +67,9 @@ LLVM.Module("SomeModule", ctx) do mod
     callinst2 = call!(builder, assume, [ConstantInt(LLVM.Int1Type(ctx), 1)])
     @test contains(string(callinst2), "call void @llvm.assume(i1 true)")
 
+    gepinst = gep!(builder, allocinst1, [ConstantInt(LLVM.Int32Type(), 0)])
+    @test contains(string(gepinst), "getelementptr i32, i32* %foo, i32 0")
+
     position!(builder)
 end
 end
