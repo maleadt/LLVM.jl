@@ -59,6 +59,11 @@ LLVM.Module("SomeModule", ctx) do mod
     trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
     call!(builder, trap)
 
+    assume = LLVM.Function(mod, "llvm.assume",
+                           LLVM.FunctionType(LLVM.VoidType(ctx),
+                                             [LLVM.Int1Type(ctx)]))
+    call!(builder, assume, [ConstantInt(LLVM.Int1Type(ctx), 1)])
+
     position!(builder)
 end
 end

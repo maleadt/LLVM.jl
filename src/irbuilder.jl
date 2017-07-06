@@ -85,6 +85,8 @@ br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) =
 alloca!(builder::Builder, typ::LLVMType, name::String="") =
     Instruction(API.LLVMBuildAlloca(ref(builder), ref(typ), name))
 
-call!(builder::Builder, fn::LLVM.Function, args::Vector{Value}=Value[], name::String="") =
+function call!(builder::Builder, fn::LLVM.Function, args::Vector=Value[], name::String="")
+    @assert all(v->isa(v,Value), args)
     Instruction(API.LLVMBuildCall(ref(builder), ref(fn), ref.(args),
-                                             Cuint(length(args)), name))
+                                  Cuint(length(args)), name))
+end
