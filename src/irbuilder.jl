@@ -50,7 +50,7 @@ debuglocation!(builder::Builder, inst::Instruction) =
 # NOTE: we can't use type information for differentiating eg. add! and fadd! based on args,
 #       as ArgumentKind (LLVM's way of referring to contained function arguments) is untyped
 
-export unreachable!, ret!, add!, fadd!, icmp!, br!, alloca!, call!
+export unreachable!, ret!, add!, fadd!, icmp!, br!, alloca!, call!, gep!
 
 unreachable!(builder::Builder) =
     Instruction(API.LLVMBuildUnreachable(ref(builder)))
@@ -85,6 +85,13 @@ br!(builder::Builder, ifval::Value, thenbb::BasicBlock, elsebb::BasicBlock) =
 alloca!(builder::Builder, typ::LLVMType, name::String="") =
     Instruction(API.LLVMBuildAlloca(ref(builder), ref(typ), name))
 
-call!(builder::Builder, fn::LLVM.Function, args::Vector{Value}=Value[], name::String="") =
+function call!(builder::Builder, fn::LLVM.Function, args::Vector=Value[], name::String="")
+    @assert all(v->isa(v,Value), args)
     Instruction(API.LLVMBuildCall(ref(builder), ref(fn), ref.(args),
-                                             Cuint(length(args)), name))
+                                  Cuint(length(args)), name))
+end
+
+function gep!(builder::Builder, ptr::Value, indices::Vector, name::String="")
+    @assert all(v->isa(v,Value), indices)
+    Instruction(API.LLVMBuildGEP(ref(builder), ref(ptr), ref.(indices), Cuint(length(indices)), name))
+end
