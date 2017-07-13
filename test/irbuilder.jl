@@ -73,6 +73,9 @@ LLVM.Module("SomeModule", ctx) do mod
     storeinst = store!(builder, ConstantInt(LLVM.Int32Type(), 0), allocinst1)
     @test contains(string(storeinst), "store i32 0, i32* %foo")
 
+    castinst = bitcast!(builder, addinst, LLVM.FloatType(), "SomeCast")
+    @test contains(string(castinst), "bitcast i32 %SomeAddition to float")
+
     position!(builder)
 end
 end
