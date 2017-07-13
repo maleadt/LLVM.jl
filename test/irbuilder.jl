@@ -70,6 +70,9 @@ LLVM.Module("SomeModule", ctx) do mod
     gepinst = gep!(builder, allocinst1, [ConstantInt(LLVM.Int32Type(), 0)])
     @test contains(string(gepinst), "getelementptr i32, i32* %foo, i32 0")
 
+    storeinst = store!(builder, ConstantInt(LLVM.Int32Type(), 0), allocinst1)
+    @test contains(string(storeinst), "store i32 0, i32* %foo")
+
     position!(builder)
 end
 end
