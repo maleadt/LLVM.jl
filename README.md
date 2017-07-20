@@ -6,35 +6,35 @@ LLVM C API wrapper
 **Build status**: 
 
 - LLVM 3.9: 
-[![][buildbot-0.5-llvm39-img]][buildbot-0.5-llvm39-url]
-[![][buildbot-0.6-llvm39-img]][buildbot-0.6-llvm39-url]
+[![][buildbot-julia05-llvm39-img]][buildbot-julia05-llvm39-url]
+[![][buildbot-julia06-llvm39-img]][buildbot-julia06-llvm39-url]
 - LLVM 4.0: 
-[![][buildbot-0.6-llvm40-img]][buildbot-0.6-llvm40-url]
+[![][buildbot-julia06-llvm40-img]][buildbot-julia06-llvm40-url]
 - LLVM 5.0: 
-[![][buildbot-0.6-llvm50-img]][buildbot-0.6-llvm50-url]
+[![][buildbot-julia06-llvm50-img]][buildbot-julia06-llvm50-url]
 - embedded:
-[![][buildbot-0.6-img]][buildbot-0.6-url]
-[![][buildbot-master-img]][buildbot-master-url]
+[![][buildbot-julia06-img]][buildbot-julia06-url]
+[![][buildbot-juliadev-img]][buildbot-juliadev-url]
 
 **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
 **Code coverage**: [![][coverage-img]][coverage-url]
 
-[buildbot-0.5-llvm39-img]: https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.5%2C%20system%20LLVM%203.9%20%28x86-64%29&badge=Julia%20v0.5
-[buildbot-0.5-llvm39-url]: https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.5%2C%20system%20LLVM%203.9%20%28x86-64%29
-[buildbot-0.6-llvm39-img]: https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%203.9%20%28x86-64%29&badge=Julia%20v0.6
-[buildbot-0.6-llvm39-url]: https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%203.9%20%28x86-64%29
+[buildbot-julia05-llvm39-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia05-llvm39-x86-64bit&name=julia%200.5
+[buildbot-julia05-llvm39-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia05-llvm39-x86-64bit
+[buildbot-julia06-llvm39-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-llvm39-x86-64bit&name=julia%200.6
+[buildbot-julia06-llvm39-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-llvm39-x86-64bit
 
-[buildbot-0.6-llvm40-img]: https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%204.0%20%28x86-64%29&badge=Julia%20v0.6
-[buildbot-0.6-llvm40-url]: https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%204.0%20%28x86-64%29
+[buildbot-julia06-llvm40-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-llvm40-x86-64bit&name=julia%200.6
+[buildbot-julia06-llvm40-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-llvm40-x86-64bit
 
-[buildbot-0.6-llvm50-img]: https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%205.0%20%28x86-64%29&badge=Julia%20v0.6
-[buildbot-0.6-llvm50-url]: https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.6%2C%20system%20LLVM%205.0%20%28x86-64%29
+[buildbot-julia06-llvm50-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-llvm50-x86-64bit&name=julia%200.6
+[buildbot-julia06-llvm50-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-llvm50-x86-64bit
 
-[buildbot-0.6-img]: https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%200.6%2C%20embedded%20LLVM%20%28x86-64%29&badge=Julia%20v0.6
-[buildbot-0.6-url]: https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%200.6%2C%20embedded%20LLVM%20%28x86-64%29
-[buildbot-master-img]: https://ci.maleadt.net/buildbot/julia/badge.svg?builder=LLVM.jl%3A%20Julia%20master%2C%20embedded%20LLVM%20%28x86-64%29&badge=Julia%20master
-[buildbot-master-url]: https://ci.maleadt.net/buildbot/julia/builders/LLVM.jl%3A%20Julia%20master%2C%20embedded%20LLVM%20%28x86-64%29
+[buildbot-julia06-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-x86-64bit&name=julia%200.6
+[buildbot-julia06-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-x86-64bit
+[buildbot-juliadev-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-juliadev-x86-64bit&name=julia%20dev
+[buildbot-juliadev-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-juliadev-x86-64bit
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: http://maleadt.github.io/LLVM.jl/stable
