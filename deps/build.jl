@@ -94,6 +94,14 @@ try
             const llvmjl_hash    = "$llvmjl_hash"
             """)
     end
+
+    # refresh the compile cache
+    # NOTE: we need to do this manually, as the package will load & precompile after
+    #       not having loaded a nonexistent ext.jl in the case of a failed build,
+    #       causing it not to precompile after a subsequent successful build.
+    Base.compilecache("LLVM")
+
+    return
 catch ex
     # if anything goes wrong, wipe the existing ext.jl to prevent the package from loading
     rm(ext; force=true)
