@@ -59,7 +59,9 @@ if LLVM.configured
     include("datalayout.jl")
 
     include("examples.jl")
-    include("documentation.jl")
+    if parse(Bool, get(ENV, "DOCTEST", "false"))
+        include("documentation.jl")
+    end
 
     LLVM.libllvm_system && Shutdown()
 else
