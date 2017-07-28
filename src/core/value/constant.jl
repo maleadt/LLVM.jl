@@ -1,3 +1,22 @@
+export null, all_ones, UndefValue, PointerNull
+
+null(typ::LLVMType) = Value(API.LLVMConstNull(ref(typ)))
+
+all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(ref(typ)))
+
+Base.isnull(val::Value) = BoolFromLLVM(API.LLVMIsNull(ref(val)))
+
+
+@reftypedef proxy=Value kind=LLVMUndefValueValueKind immutable UndefValue <: User end
+
+UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(ref(typ)))
+
+
+@reftypedef proxy=Value kind=LLVMConstantPointerNullValueKind immutable PointerNull <: User end
+
+PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
+
+
 ## scalar
 
 import Base: convert

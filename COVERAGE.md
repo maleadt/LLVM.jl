@@ -405,11 +405,11 @@ Core
 
 #### Constants
 
-- [ ] LLVMConstNull
-- [ ] LLVMConstAllOnes
-- [ ] LLVMGetUndef
-- [ ] LLVMIsNull
-- [ ] LLVMConstPointerNull
+- [x] LLVMConstNull
+- [x] LLVMConstAllOnes
+- [x] LLVMGetUndef
+- [x] LLVMIsNull
+- [x] LLVMConstPointerNull
 
 **Scalar constants**
 

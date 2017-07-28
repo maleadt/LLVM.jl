@@ -273,6 +273,31 @@ end
 
 # constants
 
+Context() do ctx
+    @testset "constants" begin
+
+    typ = LLVM.Int32Type(ctx)
+    ptrtyp = LLVM.PointerType(typ)
+
+    let val = null(typ)
+        @test isnull(val)
+    end
+
+    let val = all_ones(typ)
+        @test !isnull(val)
+    end
+
+    let val = PointerNull(ptrtyp)
+        @test isnull(val)
+    end
+
+    let val = UndefValue(typ)
+        @test isundef(val)
+    end
+
+    end
+end
+
 # scalar
 Context() do ctx
     @testset "integer constants" begin
