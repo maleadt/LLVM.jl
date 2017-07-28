@@ -14,9 +14,9 @@ LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    entry = BasicBlock(fn, "entry")
-    position!(builder, entry)
-    @assert position(builder) == entry
+    entrybb = BasicBlock(fn, "entry")
+    position!(builder, entrybb)
+    @assert position(builder) == entrybb
 
     loc = debuglocation(builder)
     md = MDNode([MDString("SomeMDString", ctx)], ctx)
@@ -25,62 +25,37 @@ LLVM.Module("SomeModule", ctx) do mod
     debuglocation!(builder)
     @test debuglocation(builder) == loc
 
-    retinst = ret!(builder, ConstantInt(LLVM.Int32Type(), 0))
-    debuglocation!(builder, retinst)
+    ## WIP
 
-    position!(builder, retinst)
-    unrinst = unreachable!(builder)
-    @test collect(instructions(entry)) == [unrinst, retinst]
+    check(inst, str) = @test contains(string(inst), str)
 
-    unsafe_delete!(entry, retinst)
-    @test collect(instructions(entry)) == [unrinst]
-    position!(builder, entry)
-    retinst = ret!(builder)
-    @test collect(instructions(entry)) == [unrinst, retinst]
+    retinst1 = ret!(builder)
+    check(retinst1, "ret void")
+    debuglocation!(builder, retinst1)
 
-    position!(builder, retinst)
-    addinst = add!(builder, parameters(fn)[1],
-                   ConstantInt(LLVM.Int32Type(), 1), "SomeAddition")
-    @test collect(instructions(entry)) == [unrinst, addinst, retinst]
-    retinst2 = Instruction(retinst)
-    insert!(builder, retinst2)
-    @test collect(instructions(entry)) == [unrinst, addinst, retinst2, retinst]
+    retinst2 = ret!(builder, ConstantInt(LLVM.Int32Type(ctx), 0))
+    check(retinst2, "ret i32 0")
 
-    position!(builder, retinst)
-    icmpinst = icmp!(builder, LLVM.API.LLVMIntEQ, addinst, ConstantInt(LLVM.Int32Type(), 1))
+    retinst3 = ret!(builder, Value[])
+    check(retinst3, "ret void undef")
 
-    allocinst1 = alloca!(builder, LLVM.Int32Type(), "foo")
-    allocinst2 = Instruction(allocinst1)
-    @test name(allocinst2) == ""
-    insert!(builder, allocinst2, "bar")
-    @test name(allocinst2) == "bar"
-    @test collect(instructions(entry)) == [unrinst, addinst, retinst2, icmpinst,
-                                           allocinst1, allocinst2, retinst]
+    thenbb = BasicBlock(fn, "then")
+    elsebb = BasicBlock(fn, "else")
 
-    trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
-    callinst1 = call!(builder, trap)
-    @test contains(string(callinst1), "call void @llvm.trap()")
+    brinst1 = br!(builder, thenbb)
+    check(brinst1, "br label %then")
 
-    assume = LLVM.Function(mod, "llvm.assume",
-                           LLVM.FunctionType(LLVM.VoidType(ctx),
-                                             [LLVM.Int1Type(ctx)]))
-    callinst2 = call!(builder, assume, [ConstantInt(LLVM.Int1Type(ctx), 1)])
-    @test contains(string(callinst2), "call void @llvm.assume(i1 true)")
+    condinst = isnull!(builder, parameters(fn)[1], "cond")
+    brinst2 = br!(builder, condinst, thenbb, elsebb)
+    check(brinst2, "br i1 %cond, label %then, label %else")
 
-    gepinst = gep!(builder, allocinst1, [ConstantInt(LLVM.Int32Type(), 0)], "SomeGepInst")
-    @test contains(string(gepinst), "getelementptr i32, i32* %foo, i32 0")
+    resumeinst = resume!(builder, UndefValue(LLVM.Int32Type(ctx)))
+    check(resumeinst, "resume i32 undef")
 
-    storeinst = store!(builder, ConstantInt(LLVM.Int32Type(), 0), allocinst1)
-    @test contains(string(storeinst), "store i32 0, i32* %foo")
+    unreachableinst = unreachable!(builder)
+    check(unreachableinst, "unreachable")
 
-    castinst = bitcast!(builder, addinst, LLVM.FloatType(), "SomeCast")
-    @test contains(string(castinst), "bitcast i32 %SomeAddition to float")
-
-    addrspacecastinst = addrspacecast!(builder, allocinst1, LLVM.PointerType(llvmtype(allocinst1), 1), "SomeAddrSpaceCast")
-    @test contains(string(addrspacecastinst), "addrspacecast i32* %foo to i32* addrspace(1)*")
-
-    loadinst = load!(builder, gepinst, "SomeLoad")
-    @test contains(string(loadinst), "load i32, i32* %SomeGepInst")
+    # TODO: needs many more tests
 
     position!(builder)
 end
