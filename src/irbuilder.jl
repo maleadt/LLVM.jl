@@ -52,6 +52,9 @@ debuglocation!(builder::Builder, inst::Instruction) =
 # - auto `ref(...)` using `@generated deref` for API calling
 #   (cfr. `cconvert` for `ccall`)
 
+# NOTE: the return values for these operations are, according to the C API, always a Value.
+#       however, the C++ API learns us that we can be more strict.
+
 export ret!, br!, switch!, indirectbr!, invoke!, resume!, unreachable!,
 
        binop!, add!, nswadd!, nuwadd!, fadd!, sub!, nswsub!, nuwsub!, fsub!, mul!, nswmul!,
@@ -112,106 +115,106 @@ unreachable!(builder::Builder) =
 # binary operations
 
 binop!(builder::Builder, Op::API.LLVMOpcode, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildBinOp(ref(builder), Op, ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildBinOp(ref(builder), Op, ref(LHS), ref(RHS), Name))
 
 add!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildAdd(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildAdd(ref(builder), ref(LHS), ref(RHS), Name))
 
 nswadd!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildNSWAdd(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildNSWAdd(ref(builder), ref(LHS), ref(RHS), Name))
 
 nuwadd!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildNUWAdd(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildNUWAdd(ref(builder), ref(LHS), ref(RHS), Name))
 
 fadd!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildFAdd(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildFAdd(ref(builder), ref(LHS), ref(RHS), Name))
 
 sub!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildSub(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildSub(ref(builder), ref(LHS), ref(RHS), Name))
 
 nswsub!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildNSWSub(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildNSWSub(ref(builder), ref(LHS), ref(RHS), Name))
 
 nuwsub!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildNUWSub(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildNUWSub(ref(builder), ref(LHS), ref(RHS), Name))
 
 fsub!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildFSub(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildFSub(ref(builder), ref(LHS), ref(RHS), Name))
 
 mul!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildMul(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildMul(ref(builder), ref(LHS), ref(RHS), Name))
 
 nswmul!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildNSWMul(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildNSWMul(ref(builder), ref(LHS), ref(RHS), Name))
 
 nuwmul!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildNUWMul(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildNUWMul(ref(builder), ref(LHS), ref(RHS), Name))
 
 fmul!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildFMul(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildFMul(ref(builder), ref(LHS), ref(RHS), Name))
 
 udiv!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildUDiv(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildUDiv(ref(builder), ref(LHS), ref(RHS), Name))
 
 sdiv!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildSDiv(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildSDiv(ref(builder), ref(LHS), ref(RHS), Name))
 
 exactsdiv!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildExactSDiv(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildExactSDiv(ref(builder), ref(LHS), ref(RHS), Name))
 
 fdiv!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildFDiv(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildFDiv(ref(builder), ref(LHS), ref(RHS), Name))
 
 urem!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildURem(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildURem(ref(builder), ref(LHS), ref(RHS), Name))
 
 srem!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildSRem(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildSRem(ref(builder), ref(LHS), ref(RHS), Name))
 
 frem!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildFRem(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildFRem(ref(builder), ref(LHS), ref(RHS), Name))
 
 
 # bitwise binary operations
 
 shl!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildShl(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildShl(ref(builder), ref(LHS), ref(RHS), Name))
 
 lshr!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildLShr(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildLShr(ref(builder), ref(LHS), ref(RHS), Name))
 
 ashr!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildAShr(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildAShr(ref(builder), ref(LHS), ref(RHS), Name))
 
 and!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildAnd(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildAnd(ref(builder), ref(LHS), ref(RHS), Name))
 
 or!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildOr(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildOr(ref(builder), ref(LHS), ref(RHS), Name))
 
 xor!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildXor(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildXor(ref(builder), ref(LHS), ref(RHS), Name))
 
 
 # vector operations
 
 extract_element!(builder::Builder, VecVal::Value, Index::Value, Name::String="") =
-    Instruction(API.LLVMBuildExtractElement(ref(builder), ref(VecVal), ref(Index), Name))
+    Value(API.LLVMBuildExtractElement(ref(builder), ref(VecVal), ref(Index), Name))
 
 insert_element!(builder::Builder, VecVal::Value, EltVal::Value, Index::Value, Name::String="") =
-    Instruction(API.LLVMBuildInsertElement(ref(builder), ref(VecVal), ref(EltVal), ref(Index), Name))
+    Value(API.LLVMBuildInsertElement(ref(builder), ref(VecVal), ref(EltVal), ref(Index), Name))
 
 shuffle_vector!(builder::Builder, V1::Value, V2::Value, Mask::Value, Name::String="") =
-    Instruction(API.LLVMBuildShuffleVector(ref(builder), ref(V1), ref(V2), ref(Mask), Name))
+    Value(API.LLVMBuildShuffleVector(ref(builder), ref(V1), ref(V2), ref(Mask), Name))
 
 
 # aggregate operations
 
 extract_value!(builder::Builder, AggVal::Value, Index, Name::String="") =
-    Instruction(API.LLVMBuildExtractValue(ref(builder), ref(AggVal), Cuint(Index), Name))
+    Value(API.LLVMBuildExtractValue(ref(builder), ref(AggVal), Cuint(Index), Name))
 
 insert_value!(builder::Builder, AggVal::Value, EltVal::Value, Index, Name::String="") =
-    Instruction(API.LLVMBuildInsertValue(ref(builder), ref(AggVal), ref(EltVal), Cuint(Index), Name))
+    Value(API.LLVMBuildInsertValue(ref(builder), ref(AggVal), ref(EltVal), Cuint(Index), Name))
 
 
 # memory access and addressing operations
@@ -247,91 +250,91 @@ atomic_cmpxchg!(builder::Builder, Ptr::Value, Cmp::Value, New::Value, SuccessOrd
     Instruction(API.LLVMBuildAtomicCmpXchg(ref(builder), ref(Ptr), ref(Cmp), ref(New), SuccessOrdering,FailureOrdering, BoolToLLVM(SingleThread)))
 
 gep!{T<:Value}(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") =
-    Instruction(API.LLVMBuildGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))
+    Value(API.LLVMBuildGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))
 
 inbounds_gep!{T<:Value}(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") =
-    Instruction(API.LLVMBuildInBoundsGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))
+    Value(API.LLVMBuildInBoundsGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))
 
 struct_gep!(builder::Builder, Pointer::Value, Idx, Name::String="") =
-    Instruction(API.LLVMBuildStructGEP(ref(builder), ref(Pointer), Cuint(Idx), Name))
+    Value(API.LLVMBuildStructGEP(ref(builder), ref(Pointer), Cuint(Idx), Name))
 
 
 # conversion operations
 
 trunc!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildTrunc(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildTrunc(ref(builder), ref(Val), ref(DestTy), Name))
 
 zext!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildZExt(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildZExt(ref(builder), ref(Val), ref(DestTy), Name))
 
 sext!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildSExt(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildSExt(ref(builder), ref(Val), ref(DestTy), Name))
 
 fptoui!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildFPToUI(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildFPToUI(ref(builder), ref(Val), ref(DestTy), Name))
 
 fptosi!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildFPToSI(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildFPToSI(ref(builder), ref(Val), ref(DestTy), Name))
 
 uitofp!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildUIToFP(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildUIToFP(ref(builder), ref(Val), ref(DestTy), Name))
 
 sitofp!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildSIToFP(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildSIToFP(ref(builder), ref(Val), ref(DestTy), Name))
 
 fptrunc!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildFPTrunc(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildFPTrunc(ref(builder), ref(Val), ref(DestTy), Name))
 
 fpext!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildFPExt(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildFPExt(ref(builder), ref(Val), ref(DestTy), Name))
 
 ptrtoint!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildPtrToInt(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildPtrToInt(ref(builder), ref(Val), ref(DestTy), Name))
 
 inttoptr!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildIntToPtr(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildIntToPtr(ref(builder), ref(Val), ref(DestTy), Name))
 
 bitcast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildBitCast(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildBitCast(ref(builder), ref(Val), ref(DestTy), Name))
 
 addrspacecast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildAddrSpaceCast(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildAddrSpaceCast(ref(builder), ref(Val), ref(DestTy), Name))
 
 zextorbitcast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildZExtOrBitCast(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildZExtOrBitCast(ref(builder), ref(Val), ref(DestTy), Name))
 
 sextorbitcast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildSExtOrBitCast(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildSExtOrBitCast(ref(builder), ref(Val), ref(DestTy), Name))
 
 truncorbitcast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildTruncOrBitCast(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildTruncOrBitCast(ref(builder), ref(Val), ref(DestTy), Name))
 
 cast!(builder::Builder, Op::API.LLVMOpcode, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildCast(ref(builder), Op, ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildCast(ref(builder), Op, ref(Val), ref(DestTy), Name))
 
 pointercast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildPointerCast(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildPointerCast(ref(builder), ref(Val), ref(DestTy), Name))
 
 intcast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildIntCast(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildIntCast(ref(builder), ref(Val), ref(DestTy), Name))
 
 fpcast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Instruction(API.LLVMBuildFPCast(ref(builder), ref(Val), ref(DestTy), Name))
+    Value(API.LLVMBuildFPCast(ref(builder), ref(Val), ref(DestTy), Name))
 
 
 # other operations
 
 icmp!(builder::Builder, Op::API.LLVMIntPredicate, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildICmp(ref(builder), Op, ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildICmp(ref(builder), Op, ref(LHS), ref(RHS), Name))
 
 fcmp!(builder::Builder, Op::API.LLVMRealPredicate, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildFCmp(ref(builder), Op, ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildFCmp(ref(builder), Op, ref(LHS), ref(RHS), Name))
 
 phi!(builder::Builder, Ty::LLVMType, Name::String="") =
     Instruction(API.LLVMBuildPhi(ref(builder), ref(Ty), Name))
 
 select!(builder::Builder, If::Value, Then::Value, Else::Value, Name::String="") =
-    Instruction(API.LLVMBuildSelect(ref(builder), ref(If), ref(Then), ref(Else), Name))
+    Value(API.LLVMBuildSelect(ref(builder), ref(If), ref(Then), ref(Else), Name))
 
 call!{T<:Value}(builder::Builder, Fn::Value, Args::Vector{T}=Value[], Name::String="") =
     Instruction(API.LLVMBuildCall(ref(builder), ref(Fn), ref.(Args), Cuint(length(Args)), Name))
@@ -343,34 +346,34 @@ landingpad!(builder::Builder, Ty::LLVMType, PersFn::Value, NumClauses::Integer, 
     Instruction(API.LLVMBuildLandingPad(ref(builder), ref(Ty), ref(PersFn), Cuint(NumClauses), Name))
 
 neg!(builder::Builder, V::Value, Name::String="") =
-    Instruction(API.LLVMBuildNeg(ref(builder), ref(V), Name))
+    Value(API.LLVMBuildNeg(ref(builder), ref(V), Name))
 
 nswneg!(builder::Builder, V::Value, Name::String="") =
-    Instruction(API.LLVMBuildNSWNeg(ref(builder), ref(V), Name))
+    Value(API.LLVMBuildNSWNeg(ref(builder), ref(V), Name))
 
 nuwneg!(builder::Builder, V::Value, Name::String="") =
-    Instruction(API.LLVMBuildNUWNeg(ref(builder), ref(V), Name))
+    Value(API.LLVMBuildNUWNeg(ref(builder), ref(V), Name))
 
 fneg!(builder::Builder, V::Value, Name::String="") =
-    Instruction(API.LLVMBuildFNeg(ref(builder), ref(V), Name))
+    Value(API.LLVMBuildFNeg(ref(builder), ref(V), Name))
 
 not!(builder::Builder, V::Value, Name::String="") =
-    Instruction(API.LLVMBuildNot(ref(builder), ref(V), Name))
+    Value(API.LLVMBuildNot(ref(builder), ref(V), Name))
 
 
 # other build methods
 
 globalstring!(builder::Builder, Str::String, Name::String="") =
-    GlobalVariable(API.LLVMBuildGlobalString(ref(builder), Str, Name))
+    Value(API.LLVMBuildGlobalString(ref(builder), Str, Name))
 
 globalstring_ptr!(builder::Builder, Str::String, Name::String="") =
-    Instruction(API.LLVMBuildGlobalStringPtr(ref(builder), Str, Name))
+    Value(API.LLVMBuildGlobalStringPtr(ref(builder), Str, Name))
 
 isnull!(builder::Builder, Val::Value, Name::String="") =
-    Instruction(API.LLVMBuildIsNull(ref(builder), ref(Val), Name))
+    Value(API.LLVMBuildIsNull(ref(builder), ref(Val), Name))
 
 isnotnull!(builder::Builder, Val::Value, Name::String="") =
-    Instruction(API.LLVMBuildIsNotNull(ref(builder), ref(Val), Name))
+    Value(API.LLVMBuildIsNotNull(ref(builder), ref(Val), Name))
 
 ptrdiff!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
-    Instruction(API.LLVMBuildPtrDiff(ref(builder), ref(LHS), ref(RHS), Name))
+    Value(API.LLVMBuildPtrDiff(ref(builder), ref(LHS), ref(RHS), Name))
