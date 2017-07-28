@@ -707,14 +707,14 @@ Instruction Builders
 - [x] LLVMSetInstDebugLocation
 - [x] LLVMBuildRetVoid
 - [x] LLVMBuildRet
-- [ ] LLVMBuildAggregateRet
+- [x] LLVMBuildAggregateRet
 - [x] LLVMBuildBr
 - [x] LLVMBuildCondBr
-- [ ] LLVMBuildSwitch
-- [ ] LLVMBuildIndirectBr
-- [ ] LLVMBuildInvoke
-- [ ] LLVMBuildLandingPad
-- [ ] LLVMBuildResume
+- [x] LLVMBuildSwitch
+- [x] LLVMBuildIndirectBr
+- [x] LLVMBuildInvoke
+- [x] LLVMBuildLandingPad
+- [x] LLVMBuildResume
 - [x] LLVMBuildUnreachable
 - [ ] LLVMAddCase
 - [ ] LLVMAddDestination
@@ -724,89 +724,89 @@ Instruction Builders
 - [ ] LLVMIsCleanup
 - [ ] LLVMSetCleanup
 - [x] LLVMBuildAdd
-- [ ] LLVMBuildNSWAdd
-- [ ] LLVMBuildNUWAdd
+- [x] LLVMBuildNSWAdd
+- [x] LLVMBuildNUWAdd
 - [x] LLVMBuildFAdd
-- [ ] LLVMBuildSub
-- [ ] LLVMBuildNSWSub
-- [ ] LLVMBuildNUWSub
-- [ ] LLVMBuildFSub
-- [ ] LLVMBuildMul
-- [ ] LLVMBuildNSWMul
-- [ ] LLVMBuildNUWMul
-- [ ] LLVMBuildFMul
-- [ ] LLVMBuildUDiv
-- [ ] LLVMBuildSDiv
-- [ ] LLVMBuildExactSDiv
-- [ ] LLVMBuildFDiv
-- [ ] LLVMBuildURem
-- [ ] LLVMBuildSRem
-- [ ] LLVMBuildFRem
-- [ ] LLVMBuildShl
-- [ ] LLVMBuildLShr
-- [ ] LLVMBuildAShr
-- [ ] LLVMBuildAnd
-- [ ] LLVMBuildOr
-- [ ] LLVMBuildXor
-- [ ] LLVMBuildBinOp
-- [ ] LLVMBuildNeg
-- [ ] LLVMBuildNSWNeg
-- [ ] LLVMBuildNUWNeg
-- [ ] LLVMBuildFNeg
-- [ ] LLVMBuildNot
-- [ ] LLVMBuildMalloc
-- [ ] LLVMBuildArrayMalloc
+- [x] LLVMBuildSub
+- [x] LLVMBuildNSWSub
+- [x] LLVMBuildNUWSub
+- [x] LLVMBuildFSub
+- [x] LLVMBuildMul
+- [x] LLVMBuildNSWMul
+- [x] LLVMBuildNUWMul
+- [x] LLVMBuildFMul
+- [x] LLVMBuildUDiv
+- [x] LLVMBuildSDiv
+- [x] LLVMBuildExactSDiv
+- [x] LLVMBuildFDiv
+- [x] LLVMBuildURem
+- [x] LLVMBuildSRem
+- [x] LLVMBuildFRem
+- [x] LLVMBuildShl
+- [x] LLVMBuildLShr
+- [x] LLVMBuildAShr
+- [x] LLVMBuildAnd
+- [x] LLVMBuildOr
+- [x] LLVMBuildXor
+- [x] LLVMBuildBinOp
+- [x] LLVMBuildNeg
+- [x] LLVMBuildNSWNeg
+- [x] LLVMBuildNUWNeg
+- [x] LLVMBuildFNeg
+- [x] LLVMBuildNot
+- [x] LLVMBuildMalloc
+- [x] LLVMBuildArrayMalloc
 - [x] LLVMBuildAlloca
-- [ ] LLVMBuildArrayAlloca
-- [ ] LLVMBuildFree
-- [ ] LLVMBuildLoad
-- [ ] LLVMBuildStore
-- [ ] LLVMBuildGEP
-- [ ] LLVMBuildInBoundsGEP
-- [ ] LLVMBuildStructGEP
-- [ ] LLVMBuildGlobalString
-- [ ] LLVMBuildGlobalStringPtr
+- [x] LLVMBuildArrayAlloca
+- [x] LLVMBuildFree
+- [x] LLVMBuildLoad
+- [x] LLVMBuildStore
+- [x] LLVMBuildGEP
+- [x] LLVMBuildInBoundsGEP
+- [x] LLVMBuildStructGEP
+- [x] LLVMBuildGlobalString
+- [x] LLVMBuildGlobalStringPtr
 - [ ] LLVMGetVolatile
 - [ ] LLVMSetVolatile
 - [ ] LLVMGetOrdering
 - [ ] LLVMSetOrdering
-- [ ] LLVMBuildTrunc
-- [ ] LLVMBuildZExt
-- [ ] LLVMBuildSExt
-- [ ] LLVMBuildFPToUI
-- [ ] LLVMBuildFPToSI
-- [ ] LLVMBuildUIToFP
-- [ ] LLVMBuildSIToFP
-- [ ] LLVMBuildFPTrunc
-- [ ] LLVMBuildFPExt
-- [ ] LLVMBuildPtrToInt
-- [ ] LLVMBuildIntToPtr
-- [ ] LLVMBuildBitCast
-- [ ] LLVMBuildAddrSpaceCast
-- [ ] LLVMBuildZExtOrBitCast
-- [ ] LLVMBuildSExtOrBitCast
-- [ ] LLVMBuildTruncOrBitCast
-- [ ] LLVMBuildCast
-- [ ] LLVMBuildPointerCast
-- [ ] LLVMBuildIntCast
-- [ ] LLVMBuildFPCast
+- [x] LLVMBuildTrunc
+- [x] LLVMBuildZExt
+- [x] LLVMBuildSExt
+- [x] LLVMBuildFPToUI
+- [x] LLVMBuildFPToSI
+- [x] LLVMBuildUIToFP
+- [x] LLVMBuildSIToFP
+- [x] LLVMBuildFPTrunc
+- [x] LLVMBuildFPExt
+- [x] LLVMBuildPtrToInt
+- [x] LLVMBuildIntToPtr
+- [x] LLVMBuildBitCast
+- [x] LLVMBuildAddrSpaceCast
+- [x] LLVMBuildZExtOrBitCast
+- [x] LLVMBuildSExtOrBitCast
+- [x] LLVMBuildTruncOrBitCast
+- [x] LLVMBuildCast
+- [x] LLVMBuildPointerCast
+- [x] LLVMBuildIntCast
+- [x] LLVMBuildFPCast
 - [x] LLVMBuildICmp
-- [ ] LLVMBuildFCmp
-- [ ] LLVMBuildPhi
+- [x] LLVMBuildFCmp
+- [x] LLVMBuildPhi
 - [x] LLVMBuildCall
-- [ ] LLVMBuildSelect
-- [ ] LLVMBuildVAArg
-- [ ] LLVMBuildExtractElement
-- [ ] LLVMBuildInsertElement
-- [ ] LLVMBuildShuffleVector
-- [ ] LLVMBuildExtractValue
-- [ ] LLVMBuildInsertValue
-- [ ] LLVMBuildIsNull
-- [ ] LLVMBuildIsNotNull
-- [ ] LLVMBuildPtrDiff
-- [ ] LLVMBuildFence
-- [ ] LLVMBuildAtomicRMW
-- [ ] LLVMBuildAtomicCmpXchg
+- [x] LLVMBuildSelect
+- [x] LLVMBuildVAArg
+- [x] LLVMBuildExtractElement
+- [x] LLVMBuildInsertElement
+- [x] LLVMBuildShuffleVector
+- [x] LLVMBuildExtractValue
+- [x] LLVMBuildInsertValue
+- [x] LLVMBuildIsNull
+- [x] LLVMBuildIsNotNull
+- [x] LLVMBuildPtrDiff
+- [x] LLVMBuildFence
+- [x] LLVMBuildAtomicRMW
+- [x] LLVMBuildAtomicCmpXchg
 - [ ] LLVMIsAtomicSingleThread
 - [ ] LLVMSetAtomicSingleThread
 - [ ] LLVMGetCmpXchgSuccessOrdering
