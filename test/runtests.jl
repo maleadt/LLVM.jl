@@ -59,8 +59,10 @@ if LLVM.configured
     include("datalayout.jl")
 
     include("examples.jl")
-    if parse(Bool, get(ENV, "DOCTEST", "false"))
+    if "Documenter" in keys(Pkg.installed())
         include("documentation.jl")
+    else
+        warn("Documenter.jl not installed, skipping documentation tests.")
     end
 
     LLVM.libllvm_system && Shutdown()
