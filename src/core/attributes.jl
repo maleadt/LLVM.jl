@@ -16,9 +16,9 @@ export Attribute,
 
 function Attribute(ref::API.LLVMAttributeRef)
     ref == C_NULL && throw(NullException())
-    if BoolFromLLVM(API.LLVMIsEnumAttribute(ref))
+    if convert(Core.Bool, API.LLVMIsEnumAttribute(ref))
         return EnumAttribute(ref)
-    elseif BoolFromLLVM(API.LLVMIsStringAttribute(ref))
+    elseif convert(Core.Bool, API.LLVMIsStringAttribute(ref))
         return StringAttribute(ref)
     else
         error("unknown attribute kind")

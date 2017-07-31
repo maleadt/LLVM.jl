@@ -6,7 +6,7 @@ function parse{T<:Union{UInt8,Int8}}(::Type{Module}, data::Vector{T})
     membuf = MemoryBuffer(data, "", false)
     out_ref = Ref{API.LLVMModuleRef}()
 
-    status = BoolFromLLVM(API.LLVMParseBitcode2(ref(membuf), out_ref))
+    status = convert(Core.Bool, API.LLVMParseBitcode2(ref(membuf), out_ref))
     @assert !status # caught by diagnostics handler
 
     Module(out_ref[])
@@ -16,7 +16,7 @@ function parse{T<:Union{UInt8,Int8}}(::Type{Module}, data::Vector{T}, ctx::Conte
     membuf = MemoryBuffer(data, "", false)
     out_ref = Ref{API.LLVMModuleRef}()
 
-    status = BoolFromLLVM(API.LLVMParseBitcodeInContext2(ref(ctx), ref(membuf), out_ref))
+    status = convert(Core.Bool, API.LLVMParseBitcodeInContext2(ref(ctx), ref(membuf), out_ref))
     @assert !status # caught by diagnostics handler
 
     Module(out_ref[])
@@ -28,7 +28,7 @@ end
 import Base: write, convert
 
 write(io::IOStream, mod::Module) =
-    API.LLVMWriteBitcodeToFD(ref(mod), Cint(fd(io)), BoolToLLVM(false), BoolToLLVM(true))
+    API.LLVMWriteBitcodeToFD(ref(mod), Cint(fd(io)), convert(Bool, false), convert(Bool, true))
 
 convert(::Type{MemoryBuffer}, mod::Module) = MemoryBuffer(
     API.LLVMWriteBitcodeToMemoryBuffer(ref(mod)))

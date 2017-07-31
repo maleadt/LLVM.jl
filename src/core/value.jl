@@ -34,9 +34,9 @@ replace_uses!(old::Value, new::Value) =
     API.LLVMReplaceAllUsesWith(ref(old),
                                ref(new))
 
-isconstant(val::Value) = BoolFromLLVM(API.LLVMIsConstant(ref(val)))
+isconstant(val::Value) = convert(Core.Bool, API.LLVMIsConstant(ref(val)))
 
-isundef(val::Value) = BoolFromLLVM(API.LLVMIsUndef(ref(val)))
+isundef(val::Value) = convert(Core.Bool, API.LLVMIsUndef(ref(val)))
 
 context(val::Value) = Context(API.LLVMGetValueContext(ref(val)))
 

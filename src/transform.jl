@@ -28,14 +28,14 @@ optlevel!(pmb::PassManagerBuilder, level::Integer) =
 sizelevel!(pmb::PassManagerBuilder, level::Integer) =
     API.LLVMPassManagerBuilderSetSizeLevel(ref(pmb), Cuint(level))
 
-unit_at_a_time!(pmb::PassManagerBuilder, flag::Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableUnitAtATime(ref(pmb), BoolToLLVM(!flag))
+unit_at_a_time!(pmb::PassManagerBuilder, flag::Core.Bool=true) =
+    API.LLVMPassManagerBuilderSetDisableUnitAtATime(ref(pmb), convert(Bool, !flag))
 
-unroll_loops!(pmb::PassManagerBuilder, flag::Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableUnrollLoops(ref(pmb), BoolToLLVM(!flag))
+unroll_loops!(pmb::PassManagerBuilder, flag::Core.Bool=true) =
+    API.LLVMPassManagerBuilderSetDisableUnrollLoops(ref(pmb), convert(Bool, !flag))
 
-simplify_libcalls!(pmb::PassManagerBuilder, flag::Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableSimplifyLibCalls(ref(pmb), BoolToLLVM(!flag))
+simplify_libcalls!(pmb::PassManagerBuilder, flag::Core.Bool=true) =
+    API.LLVMPassManagerBuilderSetDisableSimplifyLibCalls(ref(pmb), convert(Bool, !flag))
 
 inliner!(pmb::PassManagerBuilder, threshold::Integer) =
     API.LLVMPassManagerBuilderUseInlinerWithThreshold(ref(pmb), Cuint(threshold))
@@ -123,8 +123,8 @@ define_transforms([
 
 export internalize!
 
-internalize!(pm::PassManager, allbutmain::Bool=true) =
-    API.LLVMAddInternalizePass(ref(pm), Cuint(BoolToLLVM(allbutmain)))
+internalize!(pm::PassManager, allbutmain::Core.Bool=true) =
+    API.LLVMAddInternalizePass(ref(pm), Cuint(convert(Bool, allbutmain)))
 
 internalize!(pm::PassManager, exports::Vector{String}) =
     API.LLVMAddInternalizePassWithExportList(ref(pm), exports, Csize_t(length(exports)))

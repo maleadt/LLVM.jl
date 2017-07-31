@@ -4,14 +4,14 @@ import Base: length, pointer, convert
 
 @reftypedef ref=LLVMMemoryBufferRef immutable MemoryBuffer end
 
-function MemoryBuffer{T<:Union{UInt8,Int8}}(data::Vector{T}, name::String="", copy::Bool=true)
+function MemoryBuffer{T<:Union{UInt8,Int8}}(data::Vector{T}, name::String="", copy::Core.Bool=true)
     ptr = pointer(data)
     len = Csize_t(length(data))
     if copy
         return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRangeCopy(ptr, len, name))
     else
         return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRange(ptr, len, name,
-                                                                      BoolToLLVM(false)))
+                                                                      convert(Bool, false)))
     end
 end
 
@@ -29,7 +29,7 @@ function MemoryBufferFile(path::String)
 
     out_error = Ref{Cstring}()
     status =
-        BoolFromLLVM(API.LLVMCreateMemoryBufferWithContentsOfFile(path, out_ref, out_error))
+        convert(Core.Bool, API.LLVMCreateMemoryBufferWithContentsOfFile(path, out_ref, out_error))
 
     if status
         error = unsafe_string(out_error[])

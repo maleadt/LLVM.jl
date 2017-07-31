@@ -13,7 +13,7 @@ function Shutdown()
   API.LLVMShutdown()
 end
 
-ismultithreaded() = BoolFromLLVM(API.LLVMIsMultithreaded())
+ismultithreaded() = convert(Core.Bool, API.LLVMIsMultithreaded())
 
 for subsystem in [:Core, :TransformUtils, :ScalarOpts, :ObjCARCOpts, :Vectorization,
                   :InstCombine, :IPO, :Instrumentation, :Analysis, :IPA, :CodeGen, :Target]
@@ -42,7 +42,7 @@ for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
         export $jl_fname
-        $jl_fname() = BoolFromLLVM(API.$api_fname()) &&
+        $jl_fname() = convert(Core.Bool, API.$api_fname()) &&
                       throw(LLVMException($"Could not initialize native $component"))
     end
 end

@@ -13,7 +13,7 @@ identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
     identify(LLVMType, API.LLVMGetTypeKind(ref))
 
 issized(typ::LLVMType) =
-    BoolFromLLVM(API.LLVMTypeIsSized(ref(typ)))
+    convert(Core.Bool, API.LLVMTypeIsSized(ref(typ)))
 context(typ::LLVMType) = Context(API.LLVMGetTypeContext(ref(typ)))
 
 function show(io::IO, typ::LLVMType)
@@ -75,12 +75,12 @@ export isvararg, return_type, parameters
 
 @reftypedef proxy=LLVMType kind=LLVMFunctionTypeKind immutable FunctionType <: LLVMType end
 
-FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Bool=false) =
+FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Core.Bool=false) =
     FunctionType(API.LLVMFunctionType(ref(rettyp), ref.(params),
-                                      Cuint(length(params)), BoolToLLVM(vararg)))
+                                      Cuint(length(params)), convert(Bool, vararg)))
 
 isvararg(ft::FunctionType) =
-    BoolFromLLVM(API.LLVMIsFunctionVarArg(ref(ft)))
+    convert(Core.Bool, API.LLVMIsFunctionVarArg(ref(ft)))
 
 return_type(ft::FunctionType) =
     LLVMType(API.LLVMGetReturnType(ref(ft)))
@@ -147,24 +147,24 @@ function StructType(name::String, ctx::Context=GlobalContext())
     return StructType(API.LLVMStructCreateNamed(ref(ctx), name))
 end
 
-StructType{T<:LLVMType}(elems::Vector{T}, packed::Bool=false) =
+StructType{T<:LLVMType}(elems::Vector{T}, packed::Core.Bool=false) =
     StructType(API.LLVMStructType(ref.(elems), Cuint(length(elems)),
-                                  BoolToLLVM(packed)))
+                                  convert(Bool, packed)))
 
-StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context, packed::Bool=false) =
+StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context, packed::Core.Bool=false) =
     StructType(API.LLVMStructTypeInContext(ref(ctx), ref.(elems),
-                                           Cuint(length(elems)), BoolToLLVM(packed)))
+                                           Cuint(length(elems)), convert(Bool, packed)))
 
 name(structtyp::StructType) =
     unsafe_string(API.LLVMGetStructName(ref(structtyp)))
 ispacked(structtyp::StructType) =
-    BoolFromLLVM(API.LLVMIsPackedStruct(ref(structtyp)))
+    convert(Core.Bool, API.LLVMIsPackedStruct(ref(structtyp)))
 isopaque(structtyp::StructType) =
-    BoolFromLLVM(API.LLVMIsOpaqueStruct(ref(structtyp)))
+    convert(Core.Bool, API.LLVMIsOpaqueStruct(ref(structtyp)))
 
-elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Bool=false) =
+elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Core.Bool=false) =
     API.LLVMStructSetBody(ref(structtyp), ref.(elems),
-                          Cuint(length(elems)), BoolToLLVM(packed))
+                          Cuint(length(elems)), convert(Bool, packed))
 
 # element iteration
 
