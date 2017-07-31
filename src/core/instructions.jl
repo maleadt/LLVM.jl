@@ -5,7 +5,7 @@ export Instruction, unsafe_delete!,
 
 import Base: delete!
 
-# @reftypedef Instruction in src/core.jl
+# @reftypedef Instruction in src/core/value/constant.jl
 
 # TODO: it would be nice to re-use the dynamic type reconstruction for instructions,
 #       using the opcode to discriminate. Doesn't work now, because we need to be able to

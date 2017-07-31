@@ -1,11 +1,3 @@
-## forward declarations
-# TODO: LLVM.Type once JuliaLang/Julia#18756 is backported
-@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind @compat abstract type LLVMType end
-@reftypedef ref=LLVMValueRef enum=LLVMValueKind @compat abstract type Value end
-@reftypedef ref=LLVMModuleRef immutable Module end
-@reftypedef ref=LLVMTargetDataRef immutable DataLayout end
-
-
 ## bool
 
 import Base: convert
