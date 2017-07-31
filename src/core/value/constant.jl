@@ -115,8 +115,9 @@ unnamed_addr(val::GlobalValue) = BoolFromLLVM(API.LLVMHasUnnamedAddr(ref(val)))
 unnamed_addr!(val::GlobalValue, flag::Bool) =
     API.LLVMSetUnnamedAddr(ref(val), BoolToLLVM(flag))
 
-alignment(val::GlobalValue) = API.LLVMGetAlignment(ref(val))
-alignment!(val::GlobalValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), Cuint(bytes))
+const AlignedValue = Union{GlobalValue,Instruction}   # load, store, alloca
+alignment(val::AlignedValue) = API.LLVMGetAlignment(ref(val))
+alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), Cuint(bytes))
 
 
 ## global variables

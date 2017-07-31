@@ -34,8 +34,6 @@ LLVM.Module("SomeModule", ctx) do mod
     debuglocation!(builder)
     @test debuglocation(builder) == loc
 
-    ## WIP
-
     retinst1 = ret!(builder)
     @check_ir retinst1 "ret void"
     debuglocation!(builder, retinst1)
@@ -162,6 +160,8 @@ LLVM.Module("SomeModule", ctx) do mod
 
     loadinst = load!(builder, ptr1)
     @check_ir loadinst "load i32, i32* %4"
+    alignment!(loadinst, 4)
+    @test alignment(loadinst) == 4
 
     storeinst = store!(builder, int1, ptr1)
     @check_ir storeinst "store i32 %0, i32* %4"

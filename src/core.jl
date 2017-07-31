@@ -6,6 +6,7 @@
 @reftypedef @compat abstract type Constant <: User end
 @reftypedef @compat abstract type GlobalValue <: Constant end
 @reftypedef @compat abstract type GlobalObject <: GlobalValue end
+@reftypedef proxy=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
 @reftypedef proxy=Value kind=LLVMFunctionValueKind immutable Function <: GlobalObject end
 @reftypedef proxy=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
 
