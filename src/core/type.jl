@@ -2,6 +2,8 @@ export LLVMType, issized, context, show
 
 import Base: show
 
+@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind @compat abstract type LLVMType end
+
 # Pseudo-constructor, creating a object <: LLVMType from a type ref
 function LLVMType(ref::API.LLVMTypeRef)
     ref == C_NULL && throw(NullException())

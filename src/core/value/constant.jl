@@ -17,6 +17,12 @@ UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(ref(typ)))
 PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
 
 
+@reftypedef @compat abstract type Constant <: User end
+
+# forward declarations
+@reftypedef ref=LLVMModuleRef immutable Module end
+@reftypedef proxy=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
+
 ## scalar
 
 import Base: convert
@@ -69,6 +75,8 @@ convert(::Type{Float64}, val::ConstantFP) =
 
 ## global values
 
+@reftypedef @compat abstract type GlobalValue <: Constant end
+
 export GlobalValue,
        parent, isdeclaration,
        linkage, linkage!,
@@ -115,11 +123,14 @@ unnamed_addr(val::GlobalValue) = convert(Core.Bool, API.LLVMHasUnnamedAddr(ref(v
 unnamed_addr!(val::GlobalValue, flag::Core.Bool) =
     API.LLVMSetUnnamedAddr(ref(val), convert(Bool, flag))
 
-alignment(val::GlobalValue) = API.LLVMGetAlignment(ref(val))
-alignment!(val::GlobalValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), Cuint(bytes))
+const AlignedValue = Union{GlobalValue,Instruction}   # load, store, alloca
+alignment(val::AlignedValue) = API.LLVMGetAlignment(ref(val))
+alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), Cuint(bytes))
 
 
 ## global variables
+
+@reftypedef @compat abstract type GlobalObject <: GlobalValue end
 
 export GlobalVariable, unsafe_delete!,
        initializer, initializer!,

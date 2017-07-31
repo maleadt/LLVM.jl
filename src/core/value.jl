@@ -3,6 +3,8 @@
 
 export Value
 
+@reftypedef ref=LLVMValueRef enum=LLVMValueKind @compat abstract type Value end
+
 # Pseudo-constructor, creating a object <: Value from a value ref
 function Value(ref::API.LLVMValueRef)
     ref == C_NULL && throw(NullException())

@@ -8,6 +8,8 @@ export DataLayout, dispose,
 
 import Base: convert, show, sizeof
 
+# forward @reftypedef DataLayout in src/module.jl
+
 DataLayout(rep::String) = DataLayout(API.LLVMCreateTargetData(rep))
 
 DataLayout(tm::TargetMachine) = DataLayout(API.LLVMCreateTargetDataLayout(ref(tm)))

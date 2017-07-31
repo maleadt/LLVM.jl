@@ -6,6 +6,8 @@ export unsafe_delete!,
 
 import Base: get, push!
 
+# @reftypedef Function in src/core/basicblock.jl
+
 Function(mod::Module, name::String, ft::FunctionType) =
     Function(API.LLVMAddFunction(ref(mod), name, ref(ft)))
 
