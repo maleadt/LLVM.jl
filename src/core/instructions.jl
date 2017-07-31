@@ -19,7 +19,7 @@ unsafe_delete!(::BasicBlock, inst::Instruction) =
 delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionRemoveFromParent(ref(inst))
 
-hasmetadata(inst::Instruction) = BoolFromLLVM(API.LLVMHasMetadata(ref(inst)))
+hasmetadata(inst::Instruction) = convert(Core.Bool, API.LLVMHasMetadata(ref(inst)))
 
 metadata(inst::Instruction, kind) =
     MetadataAsValue(API.LLVMGetMetadata(ref(inst), Cuint(kind)))
@@ -44,14 +44,14 @@ callconv(inst::Instruction) = API.LLVMGetInstructionCallConv(ref(inst))
 callconv!(inst::Instruction, cc) =
     API.LLVMSetInstructionCallConv(ref(inst), Cuint(cc))
 
-istailcall(inst::Instruction) = BoolFromLLVM(API.LLVMIsTailCall(ref(inst)))
-tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(ref(inst), BoolToLLVM(bool))
+istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(ref(inst)))
+tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(ref(inst), convert(Bool, bool))
 
 ## terminators
 
 export isconditional, condition, condition!, default_dest
 
-isconditional(br::Instruction) = BoolFromLLVM(API.LLVMIsConditional(ref(br)))
+isconditional(br::Instruction) = convert(Core.Bool, API.LLVMIsConditional(ref(br)))
 
 condition(br::Instruction) =
     Value(API.LLVMGetCondition(ref(br)))

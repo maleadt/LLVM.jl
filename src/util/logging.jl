@@ -7,7 +7,7 @@ raw_println(msg::AbstractString...) = raw_print(msg..., "\n")
 
 # safe version of `Base.print_with_color`, switching to raw I/O before finalizers are run
 # (see `atexit` in `__init_logging__`)
-const after_exit = Ref{Bool}(false)
+const after_exit = Ref{Core.Core.Bool}(false)
 function safe_print_with_color(color::Union{Int, Symbol}, io::IO, msg::AbstractString...)
     if after_exit[]
         raw_print(msg...)

@@ -240,14 +240,14 @@ load!(builder::Builder, PointerVal::Value, Name::String="") =
 store!(builder::Builder, Val::Value, Ptr::Value) =
     Instruction(API.LLVMBuildStore(ref(builder), ref(Val), ref(Ptr)))
 
-fence!(builder::Builder, ordering::API.LLVMAtomicOrdering, singleThread::Bool=false, Name::String="") =
-    Instruction(API.LLVMBuildFence(ref(builder), ordering, BoolToLLVM(singleThread), Name))
+fence!(builder::Builder, ordering::API.LLVMAtomicOrdering, singleThread::Core.Bool=false, Name::String="") =
+    Instruction(API.LLVMBuildFence(ref(builder), ordering, convert(Bool, singleThread), Name))
 
-atomic_rmw!(builder::Builder, op::API.LLVMAtomicRMWBinOp, PTR::Value, Val::Value, ordering::API.LLVMAtomicOrdering, singleThread::Bool) =
-    Instruction(API.LLVMBuildAtomicRMW(ref(builder), op, ref(PTR), ref(Val), ordering, BoolToLLVM(singleThread)))
+atomic_rmw!(builder::Builder, op::API.LLVMAtomicRMWBinOp, PTR::Value, Val::Value, ordering::API.LLVMAtomicOrdering, singleThread::Core.Bool) =
+    Instruction(API.LLVMBuildAtomicRMW(ref(builder), op, ref(PTR), ref(Val), ordering, convert(Bool, singleThread)))
 
-atomic_cmpxchg!(builder::Builder, Ptr::Value, Cmp::Value, New::Value, SuccessOrdering::API.LLVMAtomicOrdering, FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Bool) =
-    Instruction(API.LLVMBuildAtomicCmpXchg(ref(builder), ref(Ptr), ref(Cmp), ref(New), SuccessOrdering,FailureOrdering, BoolToLLVM(SingleThread)))
+atomic_cmpxchg!(builder::Builder, Ptr::Value, Cmp::Value, New::Value, SuccessOrdering::API.LLVMAtomicOrdering, FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Core.Bool) =
+    Instruction(API.LLVMBuildAtomicCmpXchg(ref(builder), ref(Ptr), ref(Cmp), ref(New), SuccessOrdering,FailureOrdering, convert(Bool, SingleThread)))
 
 gep!{T<:Value}(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") =
     Value(API.LLVMBuildGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))

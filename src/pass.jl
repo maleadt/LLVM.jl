@@ -19,9 +19,9 @@ export ModulePass
     root::Any
 
     function ModulePass(name, runner)
-        function callback(ptr::Ptr{Void})::Bool
+        function callback(ptr::Ptr{Void})::Core.Bool
             mod = LLVM.Module(ref(LLVM.Module, ptr))
-            return runner(mod)::Bool
+            return runner(mod)::Core.Bool
         end
 
         check_access()
@@ -41,9 +41,9 @@ export FunctionPass
     root::Any
 
     function FunctionPass(name, runner)
-        function callback(ptr::Ptr{Void})::Bool
+        function callback(ptr::Ptr{Void})::Core.Bool
             fn = LLVM.Function(ref(LLVM.Function, ptr))
-            return runner(fn)::Bool
+            return runner(fn)::Core.Bool
         end
 
         check_access()
@@ -62,9 +62,9 @@ export BasicBlockPass
     root::Any
 
     function BasicBlockPass(name, runner)
-        function callback(ptr::Ptr{Void})::Bool
+        function callback(ptr::Ptr{Void})::Core.Bool
             bb = BasicBlock(ref(BasicBlock, ptr))
-            return runner(bb)::Bool
+            return runner(bb)::Core.Bool
         end
 
         check_access()

@@ -57,7 +57,7 @@ export ExecutionEngine, Interpreter, JIT,
 function ExecutionEngine(mod::Module)
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = BoolFromLLVM(API.LLVMCreateExecutionEngineForModule(out_ref, ref(mod),
+    status = convert(Core.Bool, API.LLVMCreateExecutionEngineForModule(out_ref, ref(mod),
                                                                  out_error))
 
     if status
@@ -73,7 +73,7 @@ function Interpreter(mod::Module)
 
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = BoolFromLLVM(API.LLVMCreateInterpreterForModule(out_ref, ref(mod),
+    status = convert(Core.Bool, API.LLVMCreateInterpreterForModule(out_ref, ref(mod),
                                                              out_error))
 
     if status
@@ -89,7 +89,7 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
 
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = BoolFromLLVM(API.LLVMCreateJITCompilerForModule(out_ref, ref(mod),
+    status = convert(Core.Bool, API.LLVMCreateJITCompilerForModule(out_ref, ref(mod),
                                                              Cuint(optlevel), out_error))
 
     if status

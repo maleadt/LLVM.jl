@@ -9,7 +9,7 @@ export Target,
 function Target(triple::String)
     out_ref = Ref{API.LLVMTargetRef}()
     out_error = Ref{Cstring}()
-    status = BoolFromLLVM(API.LLVMGetTargetFromTriple(triple, out_ref, out_error))
+    status = convert(Core.Bool, API.LLVMGetTargetFromTriple(triple, out_ref, out_error))
 
     if status
         error = unsafe_string(out_error[])
@@ -24,9 +24,9 @@ name(t::Target) = unsafe_string(API.LLVMGetTargetName(ref(t)))
 
 description(t::Target) = unsafe_string(API.LLVMGetTargetDescription(ref(t)))
 
-hasjit(t::Target) = BoolFromLLVM(API.LLVMTargetHasJIT(ref(t)))
-hastargetmachine(t::Target) = BoolFromLLVM(API.LLVMTargetHasTargetMachine(ref(t)))
-hasasmparser(t::Target) = BoolFromLLVM(API.LLVMTargetHasAsmBackend(ref(t)))
+hasjit(t::Target) = convert(Core.Bool, API.LLVMTargetHasJIT(ref(t)))
+hastargetmachine(t::Target) = convert(Core.Bool, API.LLVMTargetHasTargetMachine(ref(t)))
+hasasmparser(t::Target) = convert(Core.Bool, API.LLVMTargetHasAsmBackend(ref(t)))
 
 # target iteration
 

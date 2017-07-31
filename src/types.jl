@@ -8,15 +8,16 @@
 
 ## bool
 
-import Base: convert
-
 const True = API.LLVMBool(1)
 const False = API.LLVMBool(0)
 
-# NOTE: these 2 hacky functions are needed due to LLVMBool aliasing with Cuint,
-#       making it impossible to define converts. A strongly-typed alias would fix this.
+immutable Bool
+    bool::Core.Bool
+end
 
-function BoolFromLLVM(bool::API.LLVMBool)
+Base.convert(::Type{Bool}, bool::Core.Bool) = bool ? True : False
+
+function Base.convert(::Type{Core.Bool}, bool::API.LLVMBool)
     if bool == True
         return true
     elseif bool == False
@@ -25,5 +26,3 @@ function BoolFromLLVM(bool::API.LLVMBool)
         throw(ArgumentError("Invalid LLVMBool value $(bool)"))
     end
 end
-
-BoolToLLVM(bool::Bool) = bool ? True : False

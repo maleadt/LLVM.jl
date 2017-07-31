@@ -8,13 +8,13 @@ using Compat
 include("util.jl")
 
 @testset "types" begin
-    @test LLVM.BoolFromLLVM(LLVM.True) == true
-    @test LLVM.BoolFromLLVM(LLVM.False) == false
+    @test convert(Bool, LLVM.True) == true
+    @test convert(Bool, LLVM.False) == false
 
-    @test_throws ArgumentError LLVM.BoolFromLLVM(LLVM.API.LLVMBool(2))
+    @test_throws ArgumentError LLVM.convert(Bool, LLVM.API.LLVMBool(2))
 
-    @test LLVM.BoolToLLVM(true) == LLVM.True
-    @test LLVM.BoolToLLVM(false) == LLVM.False
+    @test convert(LLVM.Bool, true) == LLVM.True
+    @test convert(LLVM.Bool, false) == LLVM.False
 end
 
 if LLVM.configured

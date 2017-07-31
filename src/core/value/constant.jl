@@ -4,7 +4,7 @@ null(typ::LLVMType) = Value(API.LLVMConstNull(ref(typ)))
 
 all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(ref(typ)))
 
-Base.isnull(val::Value) = BoolFromLLVM(API.LLVMIsNull(ref(val)))
+Base.isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(ref(val)))
 
 
 @reftypedef proxy=Value kind=LLVMUndefValueValueKind immutable UndefValue <: User end
@@ -30,7 +30,7 @@ const SmallInteger = Union{Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UIn
 function ConstantInt(typ::IntegerType, val::SmallInteger, signed=false)
     wideval = convert(Int, val)
     bits = reinterpret(Culonglong, wideval)
-    return ConstantInt(API.LLVMConstInt(ref(typ), bits, BoolToLLVM(signed)))
+    return ConstantInt(API.LLVMConstInt(ref(typ), bits, convert(Bool, signed)))
 end
 
 function ConstantInt(typ::IntegerType, val::Integer, signed=false)
@@ -80,7 +80,7 @@ export GlobalValue,
 
 parent(val::GlobalValue) = LLVM.Module(API.LLVMGetGlobalParent(ref(val)))
 
-isdeclaration(val::GlobalValue) = BoolFromLLVM(API.LLVMIsDeclaration(ref(val)))
+isdeclaration(val::GlobalValue) = convert(Core.Bool, API.LLVMIsDeclaration(ref(val)))
 
 linkage(val::GlobalValue) = API.LLVMGetLinkage(ref(val))
 linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
@@ -111,9 +111,9 @@ dllstorage(val::GlobalValue) = API.LLVMGetDLLStorageClass(ref(val))
 dllstorage!(val::GlobalValue, storage::API.LLVMDLLStorageClass) =
     API.LLVMSetDLLStorageClass(ref(val), Cuint(storage))
 
-unnamed_addr(val::GlobalValue) = BoolFromLLVM(API.LLVMHasUnnamedAddr(ref(val)))
-unnamed_addr!(val::GlobalValue, flag::Bool) =
-    API.LLVMSetUnnamedAddr(ref(val), BoolToLLVM(flag))
+unnamed_addr(val::GlobalValue) = convert(Core.Bool, API.LLVMHasUnnamedAddr(ref(val)))
+unnamed_addr!(val::GlobalValue, flag::Core.Bool) =
+    API.LLVMSetUnnamedAddr(ref(val), convert(Bool, flag))
 
 alignment(val::GlobalValue) = API.LLVMGetAlignment(ref(val))
 alignment!(val::GlobalValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), Cuint(bytes))
@@ -146,22 +146,22 @@ initializer(gv::GlobalVariable) =
 initializer!(gv::GlobalVariable, val::Constant) =
   API.LLVMSetInitializer(ref(gv), ref(val))
 
-isthreadlocal(gv::GlobalVariable) = BoolFromLLVM(API.LLVMIsThreadLocal(ref(gv)))
+isthreadlocal(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsThreadLocal(ref(gv)))
 threadlocal!(gv::GlobalVariable, bool) =
-  API.LLVMSetThreadLocal(ref(gv), BoolToLLVM(bool))
+  API.LLVMSetThreadLocal(ref(gv), convert(Bool, bool))
 
-isconstant(gv::GlobalVariable) = BoolFromLLVM(API.LLVMIsGlobalConstant(ref(gv)))
+isconstant(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsGlobalConstant(ref(gv)))
 constant!(gv::GlobalVariable, bool) =
-  API.LLVMSetGlobalConstant(ref(gv), BoolToLLVM(bool))
+  API.LLVMSetGlobalConstant(ref(gv), convert(Bool, bool))
 
 threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(ref(gv))
 threadlocalmode!(gv::GlobalVariable, mode) =
   API.LLVMSetThreadLocalMode(ref(gv), Cuint(mode))
 
 isextinit(gv::GlobalVariable) =
-  BoolFromLLVM(API.LLVMIsExternallyInitialized(ref(gv)))
+  convert(Core.Bool, API.LLVMIsExternallyInitialized(ref(gv)))
 extinit!(gv::GlobalVariable, bool) =
-  API.LLVMSetExternallyInitialized(ref(gv), BoolToLLVM(bool))
+  API.LLVMSetExternallyInitialized(ref(gv), convert(Bool, bool))
 
 
 ## expressions
