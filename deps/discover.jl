@@ -25,12 +25,12 @@ end
 
 # returns vector of Tuple{path::AbstractString, VersionNumber}
 function find_libllvm(dir::AbstractString, versions::Vector{VersionNumber})
-    trace("Looking for llvm in $(shortpath(dir))")
+    trace("Looking for libllvm in $dir")
     libraries = Vector{Tuple{String, VersionNumber}}()
     for version in versions, name in llvm_libnames(version)
         lib = joinpath(dir, name)
         if ispath(lib)
-            trace("- v$version at $(shortpath(lib))")
+            trace("- v$version at $lib")
             push!(libraries, tuple(lib, version))
         end
     end
@@ -40,13 +40,13 @@ end
 
 # returns vector of Tuple{path::AbstractString, VersionNumber}
 function find_llvmconfig(dir::AbstractString)
-    trace("Looking for llvm-config in $(shortpath(dir))")
+    trace("Looking for llvm-config in $dir")
     configs = Vector{Tuple{String, VersionNumber}}()
     for file in readdir(dir)
         if startswith(file, "llvm-config")
             path = joinpath(dir, file)
             version = VersionNumber(strip(readstring(`$path --version`)))
-            trace("- $version at $(shortpath(path))")
+            trace("- $version at $path")
             push!(configs, tuple(path, version))
         end
     end
@@ -55,7 +55,7 @@ function find_llvmconfig(dir::AbstractString)
 end
 
 function discover_llvm(libdirs, configdirs)
-    debug("Discovering LLVM libraries in $(join(shortpath.(libdirs), ", ")), and configs in $(join(shortpath.(configdirs), ", "))")
+    debug("Discovering LLVM libraries in $(join(libdirs, ", ")), and configs in $(join(configdirs, ", "))")
     llvms = Vector{Toolchain}()
 
     # check for bundled LLVM libraries
