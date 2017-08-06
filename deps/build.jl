@@ -3,7 +3,7 @@
 include("compile.jl")
 
 const ext = joinpath(@__DIR__, "ext.jl")
-const ext_bak = joinpath(ext, ".bak")
+const ext_bak = ext * ".bak"
 
 function main()
     debug("Performing package build for LLVM.jl from $(pwd())")
