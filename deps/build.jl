@@ -3,8 +3,11 @@
 include("compile.jl")
 
 const ext = joinpath(@__DIR__, "ext.jl")
-try
+const ext_bak = joinpath(ext, ".bak")
+
+function main()
     debug("Performing package build for LLVM.jl from $(pwd())")
+    ispath(ext) && mv(ext, ext_bak)
 
     llvms = discover_llvm()
     wrappers = discover_wrappers()
@@ -46,9 +49,9 @@ try
     # check if anything has changed (to prevent unnecessary recompilation)
     if llvmjl_dirty
         debug("Package is dirty, rebuilding")
-    elseif isfile(ext)
+    elseif isfile(ext_bak)
         debug("Checking validity of existing ext.jl...")
-        @eval module Previous; include($ext); end
+        @eval module Previous; include($ext_bak); end
         if  isdefined(Previous, :libllvm_version) && Previous.libllvm_version == llvm.version &&
             isdefined(Previous, :libllvm_path)    && Previous.libllvm_path == llvm.path &&
             isdefined(Previous, :libllvm_mtime)   && Previous.libllvm_mtime == llvm.mtime &&
@@ -56,6 +59,7 @@ try
             isdefined(Previous, :wrapper)         && Previous.wrapper == wrapper &&
             isdefined(Previous, :llvmjl_hash)     && Previous.llvmjl_hash == llvmjl_hash
             info("LLVM.jl has already been built for this toolchain, no need to rebuild")
+            mv(ext_bak, ext)
             return
         end
     end
@@ -102,8 +106,6 @@ try
     Base.compilecache("LLVM")
 
     return
-catch ex
-    # if anything goes wrong, wipe the existing ext.jl to prevent the package from loading
-    rm(ext; force=true)
-    rethrow(ex)
 end
+
+main()
