@@ -29,7 +29,7 @@ macro reftypedef(args...)
     end
     if typedef.head == :abstract
         structure = typedef.args[1]
-    elseif typedef.head == :type
+    elseif typedef.head == :type || typedef.head == :struct
         structure = typedef.args[2]
     else
         error("argument is not a type definition")
@@ -101,7 +101,7 @@ macro reftypedef(args...)
     end
 
     # if we're dealing with a concrete type, make it usable
-    if typedef.head == :type
+    if typedef.head == :type || typedef.head == :struct
         isnull(proxy) &&
             error("no ref or proxy specified for type $(typename)")
         haskey(refs, get(proxy)) ||
