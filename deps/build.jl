@@ -7,7 +7,7 @@ const ext_bak = ext * ".bak"
 
 function main()
     debug("Performing package build for LLVM.jl from $(pwd())")
-    ispath(ext) && mv(ext, ext_bak)
+    ispath(ext) && mv(ext, ext_bak; remove_destination=true)
 
     llvms = discover_llvm()
     wrappers = discover_wrappers()
