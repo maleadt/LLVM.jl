@@ -47,8 +47,8 @@ function wrap(config, destdir)
     context = wrap_c.init(;
                           output_file = "$destdir/libLLVM_h.jl",
                           common_file = "$destdir/libLLVM_common.jl",
-                          clang_includes = convert(Vector{Compat.ASCIIString}, clang_includes),
-                          clang_args = convert(Vector{Compat.ASCIIString}, clang_extraargs),
+                          clang_includes = convert(Vector{String}, clang_includes),
+                          clang_args = convert(Vector{String}, clang_extraargs),
                           header_library = x->:libllvm,
                           header_wrapped = (top,cursor)->contains(cursor, "include/llvm") )
 
