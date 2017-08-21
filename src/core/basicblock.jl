@@ -13,7 +13,6 @@ identify(::Type{Value}, ::Val{API.LLVMBasicBlockValueKind}) = BasicBlock
 @checked immutable Function <: GlobalObject
     ref::reftype(GlobalObject)
 end
-identify(::Type{Value}, ::Val{API.LLVMFunctionValueKind}) = Function
 
 BasicBlock(ref::API.LLVMBasicBlockRef) = BasicBlock(API.LLVMBasicBlockAsValue(ref))
 blockref(bb::BasicBlock) = API.LLVMValueAsBasicBlock(ref(bb))

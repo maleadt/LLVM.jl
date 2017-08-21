@@ -26,14 +26,12 @@ PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
 @compat abstract type Constant <: User end
 
 # forward declarations
-immutable Module
-  ref::API.LLVMModuleRef
+@checked immutable Module
+    ref::API.LLVMModuleRef
 end
-reftype(::Type{Module}) = API.LLVMModuleRef
 @checked immutable Instruction <: User
     ref::reftype(User)
 end
-identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
 
 ## scalar
 
@@ -79,9 +77,8 @@ convert{T<:Signed}(::Type{T}, val::ConstantInt) =
     convert(T, API.LLVMConstIntGetSExtValue(ref(val)))
 
 
-immutable ConstantFP <: Constant
+@checked immutable ConstantFP <: Constant
     ref::reftype(Constant)
-    ConstantFP(ref::reftype(Constant)) = (check(ConstantFP, ref); new(ref))
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
 
@@ -160,9 +157,8 @@ export GlobalVariable, unsafe_delete!,
 
 import Base: get, push!
 
-immutable GlobalVariable <: GlobalObject
+@checked immutable GlobalVariable <: GlobalObject
     ref::reftype(GlobalObject)
-    GlobalVariable(ref::reftype(GlobalObject)) = (check(GlobalVariable, ref); new(ref))
 end
 identify(::Type{Value}, ::Val{API.LLVMGlobalVariableValueKind}) = GlobalVariable
 
@@ -202,9 +198,8 @@ extinit!(gv::GlobalVariable, bool) =
 
 export ConstantExpr
 
-immutable ConstantExpr <: Constant
+@checked immutable ConstantExpr <: Constant
     ref::reftype(Constant)
-    ConstantExpr(ref::reftype(Constant)) = (check(ConstantExpr, ref); new(ref))
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
 

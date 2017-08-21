@@ -7,6 +7,7 @@ export unsafe_delete!,
 import Base: get, push!
 
 # forward declaration of Function in src/core/basicblock.jl
+identify(::Type{Value}, ::Val{API.LLVMFunctionValueKind}) = Function
 
 Function(mod::Module, name::String, ft::FunctionType) =
     Function(API.LLVMAddFunction(ref(mod), name, ref(ft)))
