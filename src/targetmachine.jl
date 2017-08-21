@@ -4,7 +4,10 @@ export TargetMachine, dispose,
        target, triple, cpu, features, asm_verbosity!,
        emit, populate!
 
-@reftypedef ref=LLVMTargetMachineRef immutable TargetMachine end
+@checked immutable TargetMachine
+    ref::API.LLVMTargetMachineRef
+end
+reftype(::Type{TargetMachine}) = API.LLVMTargetMachineRef
 
 TargetMachine(t::Target, triple::String, cpu::String="", features::String="",
               optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault,

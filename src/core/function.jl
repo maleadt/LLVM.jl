@@ -6,7 +6,7 @@ export unsafe_delete!,
 
 import Base: get, push!
 
-# @reftypedef Function in src/core/basicblock.jl
+# forward declaration of Function in src/core/basicblock.jl
 
 Function(mod::Module, name::String, ft::FunctionType) =
     Function(API.LLVMAddFunction(ref(mod), name, ref(ft)))
@@ -82,7 +82,10 @@ export Argument, parameters
 
 import Base: eltype, getindex, start, next, done, last, length, collect
 
-@reftypedef proxy=Value kind=LLVMArgumentValueKind immutable Argument <: Value end
+@checked immutable Argument <: Value
+    ref::reftype(Value)
+end
+identify(::Type{Value}, ::Val{API.LLVMArgumentValueKind}) = Argument
 
 immutable FunctionParameterSet
     f::Function

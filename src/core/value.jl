@@ -3,17 +3,31 @@
 
 export Value
 
-@reftypedef ref=LLVMValueRef enum=LLVMValueKind @compat abstract type Value end
+@compat abstract type Value end
+reftype{T<:Value}(::Type{T}) = API.LLVMValueRef
+kindtype{T<:Value}(::Type{T}) = API.LLVMTypeKind
 
-# Pseudo-constructor, creating a object <: Value from a value ref
-function Value(ref::API.LLVMValueRef)
-    ref == C_NULL && throw(NullException())
-    return identify(Value, API.LLVMGetValueKind(ref))(ref)
+identify(::Type{Value}, ref::API.LLVMValueRef) =
+    identify(Value, Val{API.LLVMGetValueKind(ref)}())
+identify{T}(::Type{Value}, ::Val{T}) = error("Unknown value $T")
+
+@inline function check{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
+    ref==C_NULL && throw(NullException())
+    @static if DEBUG
+        T′ = identify(Value, ref)
+        if T != T′
+            error("invalid conversion of $T′ value reference to $T")
+        end
+    end
 end
 
-# this method is used by `@reftype` to generate a checking constructor
-identify(::Type{Value}, ref::API.LLVMValueRef) =
-    identify(Value, API.LLVMGetValueKind(ref))
+# Pseudo-constructor, creating a concretely typed object from an abstract value ref
+function Value(ref::API.LLVMValueRef)
+    ref == C_NULL && throw(NullException())
+    T = identify(Value, ref)
+    return T(ref)
+end
+
 
 
 ## general APIs
@@ -57,7 +71,10 @@ include("value/constant.jl")
 
 export Use, user, value
 
-@reftypedef ref=LLVMUseRef immutable Use end
+@checked immutable Use
+    ref::API.LLVMUseRef
+end
+reftype(::Type{Use}) = API.LLVMUseRef
 
 user(use::Use) =  Value(API.LLVMGetUser(     ref(use)))
 value(use::Use) = Value(API.LLVMGetUsedValue(ref(use)))

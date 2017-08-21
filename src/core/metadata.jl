@@ -2,7 +2,10 @@ import Base: convert
 
 export DEBUG_METADATA_VERSION, MDString, MDNode, operands
 
-@reftypedef proxy=Value kind=LLVMMetadataAsValueValueKind immutable MetadataAsValue <: Value end
+@checked immutable MetadataAsValue <: Value
+    ref::reftype(Value)
+end
+identify(::Type{Value}, ::Val{API.LLVMMetadataAsValueValueKind}) = MetadataAsValue
 
 # NOTE: the C API doesn't allow us to differentiate between MD kinds,
 #       all are wrapped by the opaque MetadataAsValue...

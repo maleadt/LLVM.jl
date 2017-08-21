@@ -2,17 +2,30 @@ export LLVMType, issized, context, show
 
 import Base: show
 
-@reftypedef ref=LLVMTypeRef enum=LLVMTypeKind @compat abstract type LLVMType end
+@compat abstract type LLVMType end
+reftype{T<:LLVMType}(::Type{T}) = API.LLVMTypeRef
+kindtype{T<:LLVMType}(::Type{T}) = API.LLVMTypeKind
 
-# Pseudo-constructor, creating a object <: LLVMType from a type ref
-function LLVMType(ref::API.LLVMTypeRef)
-    ref == C_NULL && throw(NullException())
-    return identify(LLVMType, API.LLVMGetTypeKind(ref))(ref)
+identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
+    identify(LLVMType, Val{API.LLVMGetTypeKind(ref)}())
+identify{T}(::Type{LLVMType}, ::Val{T}) = error("Unknown type $T")
+
+@inline function check{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
+    ref==C_NULL && throw(NullException())
+    @static if DEBUG
+        T′ = identify(LLVMType, ref)
+        if T != T′
+            error("invalid conversion of $T′ type reference to $T")
+        end
+    end
 end
 
-# this method is used by `@reftype` to generate a checking constructor
-identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
-    identify(LLVMType, API.LLVMGetTypeKind(ref))
+# Pseudo-constructor, creating a concretely typed object from an abstract type ref
+function LLVMType(ref::API.LLVMTypeRef)
+    ref == C_NULL && throw(NullException())
+    T = identify(LLVMType, ref)
+    return T(ref)
+end
 
 issized(typ::LLVMType) =
     convert(Core.Bool, API.LLVMTypeIsSized(ref(typ)))
@@ -28,7 +41,10 @@ end
 
 export width
 
-@reftypedef proxy=LLVMType kind=LLVMIntegerTypeKind immutable IntegerType <: LLVMType end
+@checked immutable IntegerType <: LLVMType
+    ref::reftype(LLVMType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMIntegerTypeKind}) = IntegerType
 
 for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     jl_fname = Symbol(T, :Type)
@@ -52,7 +68,7 @@ width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(ref(inttyp))
 
 # NOTE: this type doesn't exist in the LLVM API,
 #       we add it for convenience of typechecking generic values (see execution.jl)
-@reftypedef @compat abstract type FloatingPointType <: LLVMType end
+ @compat abstract type FloatingPointType <: LLVMType end
 
 # NOTE: we don't handle the obscure types here (:X86FP80, :FP128, :PPCFP128),
 #       they would also need special casing as LLVMPPCFP128Type != LLVMPPC_FP128TypeKind
@@ -62,7 +78,10 @@ for T in [:Half, :Float, :Double]
     api_fname = Symbol(:LLVM, jl_fname)
     enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin
-        @reftypedef proxy=LLVMType kind=$enumkind immutable $api_typename <: FloatingPointType end
+        @checked immutable $api_typename <: FloatingPointType
+            ref::reftype(FloatingPointType)
+        end
+        identify(::Type{LLVMType}, ::Val{API.$enumkind}) = $api_typename
 
         $jl_fname() = $api_typename(API.$api_fname())
         $jl_fname(ctx::Context) =
@@ -75,7 +94,10 @@ end
 
 export isvararg, return_type, parameters
 
-@reftypedef proxy=LLVMType kind=LLVMFunctionTypeKind immutable FunctionType <: LLVMType end
+@checked immutable FunctionType <: LLVMType
+    ref::reftype(LLVMType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMFunctionTypeKind}) = FunctionType
 
 FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Core.Bool=false) =
     FunctionType(API.LLVMFunctionType(ref(rettyp), ref.(params),
@@ -98,21 +120,24 @@ end
 
 ## composite types
 
-@reftypedef @compat abstract type CompositeType <: LLVMType end
+@compat abstract type CompositeType <: LLVMType end
 
 
 ## sequential types
 
 export addrspace
 
-@reftypedef @compat abstract type SequentialType <: CompositeType end
+@compat abstract type SequentialType <: CompositeType end
 
 import Base: length, size, eltype
 
 eltype(typ::SequentialType) =
     LLVMType(API.LLVMGetElementType(ref(typ)))
 
-@reftypedef proxy=LLVMType kind=LLVMPointerTypeKind immutable PointerType <: SequentialType end
+@checked immutable PointerType <: SequentialType
+    ref::reftype(SequentialType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMPointerTypeKind}) = PointerType
 
 function PointerType(eltyp::LLVMType, addrspace=0)
     return PointerType(API.LLVMPointerType(ref(eltyp),
@@ -122,7 +147,10 @@ end
 addrspace(ptrtyp::PointerType) =
     API.LLVMGetPointerAddressSpace(ref(ptrtyp))
 
-@reftypedef proxy=LLVMType kind=LLVMArrayTypeKind immutable ArrayType <: SequentialType end
+@checked immutable ArrayType <: SequentialType
+    ref::reftype(SequentialType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMArrayTypeKind}) = ArrayType
 
 function ArrayType(eltyp::LLVMType, count)
     return ArrayType(API.LLVMArrayType(ref(eltyp), Cuint(count)))
@@ -130,7 +158,10 @@ end
 
 length(arrtyp::ArrayType) = API.LLVMGetArrayLength(ref(arrtyp))
 
-@reftypedef proxy=LLVMType kind=LLVMVectorTypeKind immutable VectorType <: SequentialType end
+@checked immutable VectorType <: SequentialType
+    ref::reftype(SequentialType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMVectorTypeKind}) = VectorType
 
 function VectorType(eltyp::LLVMType, count)
     return VectorType(API.LLVMVectorType(ref(eltyp), Cuint(count)))
@@ -143,7 +174,10 @@ size(vectyp::VectorType) = API.LLVMGetVectorSize(ref(vectyp))
 
 export name, ispacked, isopaque, elements!
 
-@reftypedef proxy=LLVMType kind=LLVMStructTypeKind immutable StructType <: SequentialType end
+@checked immutable StructType <: SequentialType
+    ref::reftype(SequentialType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMStructTypeKind}) = StructType
 
 function StructType(name::String, ctx::Context=GlobalContext())
     return StructType(API.LLVMStructCreateNamed(ref(ctx), name))
@@ -205,13 +239,19 @@ end
 
 ## other
 
-@reftypedef proxy=LLVMType kind=LLVMVoidTypeKind immutable VoidType <: LLVMType end
+@checked immutable VoidType <: LLVMType
+    ref::reftype(LLVMType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMVoidTypeKind}) = VoidType
 
 VoidType() = VoidType(API.LLVMVoidType())
 VoidType(ctx::Context) =
     VoidType(API.LLVMVoidTypeInContext(ref(ctx)))
 
-@reftypedef proxy=LLVMType kind=LLVMLabelTypeKind immutable LabelType <: LLVMType end
+@checked immutable LabelType <: LLVMType
+    ref::reftype(LLVMType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMLabelTypeKind}) = LabelType
 
 LabelType() = LabelType(API.LLVMLabelType())
 LabelType(ctx::Context) =

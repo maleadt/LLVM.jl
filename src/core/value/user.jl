@@ -1,6 +1,6 @@
 ## user values (<: llvm::User)
 
-@reftypedef @compat abstract type User <: Value end
+@compat abstract type User <: Value end
 
 # operand iteration
 

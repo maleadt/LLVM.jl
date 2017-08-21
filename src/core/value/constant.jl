@@ -7,21 +7,33 @@ all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(ref(typ)))
 Base.isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(ref(val)))
 
 
-@reftypedef proxy=Value kind=LLVMUndefValueValueKind immutable UndefValue <: User end
+@checked immutable UndefValue <: User
+    ref::reftype(User)
+end
+identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
 
 UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(ref(typ)))
 
 
-@reftypedef proxy=Value kind=LLVMConstantPointerNullValueKind immutable PointerNull <: User end
+@checked immutable PointerNull <: User
+    ref::reftype(User)
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNull
 
 PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
 
 
-@reftypedef @compat abstract type Constant <: User end
+@compat abstract type Constant <: User end
 
 # forward declarations
-@reftypedef ref=LLVMModuleRef immutable Module end
-@reftypedef proxy=Value kind=LLVMInstructionValueKind immutable Instruction <: User end
+immutable Module
+  ref::API.LLVMModuleRef
+end
+reftype(::Type{Module}) = API.LLVMModuleRef
+@checked immutable Instruction <: User
+    ref::reftype(User)
+end
+identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
 
 ## scalar
 
@@ -29,7 +41,10 @@ import Base: convert
 
 export ConstantInt, ConstantFP
 
-@reftypedef proxy=Value kind=LLVMConstantIntValueKind immutable ConstantInt <: Constant end
+@checked immutable ConstantInt <: Constant
+    ref::reftype(Constant)
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantIntValueKind}) = ConstantInt
 
 # NOTE: fixed set for dispatch, and because we can't rely on sizeof(T)==width(T)
 const SmallInteger = Union{Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64}
@@ -64,7 +79,11 @@ convert{T<:Signed}(::Type{T}, val::ConstantInt) =
     convert(T, API.LLVMConstIntGetSExtValue(ref(val)))
 
 
-@reftypedef proxy=Value kind=LLVMConstantFPValueKind immutable ConstantFP <: Constant end
+immutable ConstantFP <: Constant
+    ref::reftype(Constant)
+    ConstantFP(ref::reftype(Constant)) = (check(ConstantFP, ref); new(ref))
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
 
 ConstantFP(typ::LLVMDouble, val::Real) =
     ConstantFP(API.LLVMConstReal(ref(typ), Cdouble(val)))
@@ -75,7 +94,7 @@ convert(::Type{Float64}, val::ConstantFP) =
 
 ## global values
 
-@reftypedef @compat abstract type GlobalValue <: Constant end
+@compat abstract type GlobalValue <: Constant end
 
 export GlobalValue,
        parent, isdeclaration,
@@ -130,7 +149,7 @@ alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), C
 
 ## global variables
 
-@reftypedef @compat abstract type GlobalObject <: GlobalValue end
+@compat abstract type GlobalObject <: GlobalValue end
 
 export GlobalVariable, unsafe_delete!,
        initializer, initializer!,
@@ -141,7 +160,11 @@ export GlobalVariable, unsafe_delete!,
 
 import Base: get, push!
 
-@reftypedef proxy=Value kind=LLVMGlobalVariableValueKind immutable GlobalVariable <: GlobalObject end
+immutable GlobalVariable <: GlobalObject
+    ref::reftype(GlobalObject)
+    GlobalVariable(ref::reftype(GlobalObject)) = (check(GlobalVariable, ref); new(ref))
+end
+identify(::Type{Value}, ::Val{API.LLVMGlobalVariableValueKind}) = GlobalVariable
 
 GlobalVariable(mod::Module, typ::LLVMType, name::String) =
     GlobalVariable(API.LLVMAddGlobal(ref(mod), ref(typ), name))
@@ -179,5 +202,9 @@ extinit!(gv::GlobalVariable, bool) =
 
 export ConstantExpr
 
-@reftypedef proxy=Value kind=LLVMConstantExprValueKind immutable ConstantExpr <: Constant end
+immutable ConstantExpr <: Constant
+    ref::reftype(Constant)
+    ConstantExpr(ref::reftype(Constant)) = (check(ConstantExpr, ref); new(ref))
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
 

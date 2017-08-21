@@ -2,7 +2,10 @@
 
 export Context, dispose, GlobalContext
 
-@reftypedef ref=LLVMContextRef immutable Context end
+@checked immutable Context
+    ref::API.LLVMContextRef
+end
+reftype(::Type{Context}) = API.LLVMContextRef
 
 function Context()
     ctx = Context(API.LLVMContextCreate())
@@ -43,7 +46,10 @@ end
 
 export DiagnosticInfo, severity, message
 
-@reftypedef ref=LLVMDiagnosticInfoRef immutable DiagnosticInfo end
+@checked immutable DiagnosticInfo
+    ref::API.LLVMDiagnosticInfoRef
+end
+reftype(::Type{DiagnosticInfo}) = API.LLVMDiagnosticInfoRef
 
 severity(di::DiagnosticInfo) = API.LLVMGetDiagInfoSeverity(ref(di))
 message(di::DiagnosticInfo) = unsafe_string(API.LLVMGetDiagInfoDescription(ref(di)))

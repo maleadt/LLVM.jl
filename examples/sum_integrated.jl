@@ -10,7 +10,8 @@ else
     y = Int32(2)
 end
 
-jlctx = LLVM.Context(cglobal(:jl_LLVMContext, Void))
+const jlctx = LLVM.Context(convert(LLVM.API.LLVMContextRef,
+                                   cglobal(:jl_LLVMContext, Void)))
 
 # set-up
 mod = LLVM.Module("my_module", jlctx)

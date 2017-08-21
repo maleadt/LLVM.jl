@@ -3,7 +3,8 @@
 using LLVM
 LLVM.libllvm_system && exit() # cannot run this example if we have our own copy of LLVM
 
-const jlctx = LLVM.Context(cglobal(:jl_LLVMContext, Void))
+const jlctx = LLVM.Context(convert(LLVM.API.LLVMContextRef,
+                                   cglobal(:jl_LLVMContext, Void)))
 
 # pointer wrapper type for which we'll build our own low-level intrinsics
 immutable CustomPtr{T}

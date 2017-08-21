@@ -2,6 +2,7 @@ export PassManager,
        add!, dispose
 
 @compat abstract type PassManager end
+reftype{T<:PassManager}(::Type{T}) = API.LLVMPassManagerRef
 
 add!(pm::PassManager, pass::Pass) =
     API.LLVMAddPass(ref(pm), ref(pass))
@@ -15,7 +16,9 @@ dispose(pm::PassManager) = API.LLVMDisposePassManager(ref(pm))
 
 export ModulePassManager, run!
 
-@reftypedef ref=LLVMPassManagerRef immutable ModulePassManager <: PassManager end
+@checked immutable ModulePassManager <: PassManager
+    ref::reftype(PassManager)
+end
 
 ModulePassManager() = ModulePassManager(API.LLVMCreatePassManager())
 
@@ -40,7 +43,9 @@ run!(mpm::ModulePassManager, mod::Module) =
 export FunctionPassManager,
        initialize!, finalize!, run!
 
-@reftypedef ref=LLVMPassManagerRef immutable FunctionPassManager <: PassManager end
+@checked immutable FunctionPassManager <: PassManager
+    ref::reftype(PassManager)
+end
 
 FunctionPassManager(mod::Module) =
     FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(ref(mod)))

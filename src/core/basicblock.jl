@@ -4,10 +4,16 @@ export BasicBlock, unsafe_delete!,
 
 import Base: delete!
 
-@reftypedef proxy=Value kind=LLVMBasicBlockValueKind immutable BasicBlock <: Value end
+@checked immutable BasicBlock <: Value
+    ref::reftype(Value)
+end
+identify(::Type{Value}, ::Val{API.LLVMBasicBlockValueKind}) = BasicBlock
 
 # forward declarations
-@reftypedef proxy=Value kind=LLVMFunctionValueKind immutable Function <: GlobalObject end
+@checked immutable Function <: GlobalObject
+    ref::reftype(GlobalObject)
+end
+identify(::Type{Value}, ::Val{API.LLVMFunctionValueKind}) = Function
 
 BasicBlock(ref::API.LLVMBasicBlockRef) = BasicBlock(API.LLVMBasicBlockAsValue(ref))
 blockref(bb::BasicBlock) = API.LLVMValueAsBasicBlock(ref(bb))
