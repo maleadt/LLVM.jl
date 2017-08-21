@@ -2,8 +2,18 @@
 
 # llvm.org/docs/doxygen/html/group__LLVMCSupportTypes.html
 
+immutable Bug <: Exception
+    msg::AbstractString
+end
+
+function Base.showerror(io::IO, err::Bug)
+    @printf(io, "%s; this is probably a bug, please file an issue", err.msg)
+end
+
+bug(msgs...) = throw(Bug(join(msgs...)))
+
 # traits
-reftype(t::Type) = error("No reference type defined for $t")
+reftype(t::Type) = bug("No reference type defined for $t")
 
 # abstract implementations
 ref(obj) = obj.ref

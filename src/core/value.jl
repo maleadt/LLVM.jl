@@ -8,7 +8,7 @@ reftype{T<:Value}(::Type{T}) = API.LLVMValueRef
 
 identify(::Type{Value}, ref::API.LLVMValueRef) =
     identify(Value, Val{API.LLVMGetValueKind(ref)}())
-identify{K}(::Type{Value}, ::Val{K}) = error("Unknown value kind $K")
+identify{K}(::Type{Value}, ::Val{K}) = bug("Unknown value kind $K")
 
 @inline function check{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
     ref==C_NULL && throw(NullException())

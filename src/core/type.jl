@@ -7,7 +7,7 @@ reftype{T<:LLVMType}(::Type{T}) = API.LLVMTypeRef
 
 identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
     identify(LLVMType, Val{API.LLVMGetTypeKind(ref)}())
-identify{K}(::Type{LLVMType}, ::Val{K}) = error("Unknown type kind $K")
+identify{K}(::Type{LLVMType}, ::Val{K}) = bug("Unknown type kind $K")
 
 @inline function check{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
     ref==C_NULL && throw(NullException())
