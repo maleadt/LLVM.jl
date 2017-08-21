@@ -4,7 +4,10 @@ export Target,
        name, description,
        hasjit, hastargetmachine, hasasmparser
 
-@reftypedef ref=LLVMTargetRef immutable Target end
+@checked immutable Target
+    ref::API.LLVMTargetRef
+end
+reftype(::Type{Target}) = API.LLVMTargetRef
 
 function Target(triple::String)
     out_ref = Ref{API.LLVMTargetRef}()

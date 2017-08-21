@@ -1,4 +1,7 @@
-@reftypedef ref=LLVMPassRegistryRef immutable PassRegistry end
+@checked immutable PassRegistry
+    ref::API.LLVMPassRegistryRef
+end
+reftype(::Type{PassRegistry}) = API.LLVMPassRegistryRef
 
 export GlobalPassRegistry
 

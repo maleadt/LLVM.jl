@@ -5,7 +5,8 @@ export Instruction, unsafe_delete!,
 
 import Base: delete!
 
-# @reftypedef Instruction in src/core/value/constant.jl
+# forward definition of Instruction in src/core/value/constant.jl
+identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
 
 # TODO: it would be nice to re-use the dynamic type reconstruction for instructions,
 #       using the opcode to discriminate. Doesn't work now, because we need to be able to

@@ -2,7 +2,10 @@ export MemoryBuffer, MemoryBufferFile, dispose
 
 import Base: length, pointer, convert
 
-@reftypedef ref=LLVMMemoryBufferRef immutable MemoryBuffer end
+@checked immutable MemoryBuffer
+    ref::API.LLVMMemoryBufferRef
+end
+reftype(::Type{MemoryBuffer}) = API.LLVMMemoryBufferRef
 
 function MemoryBuffer{T<:Union{UInt8,Int8}}(data::Vector{T}, name::String="", copy::Core.Bool=true)
     ptr = pointer(data)

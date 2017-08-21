@@ -7,7 +7,10 @@ export Builder,
 
 import Base: position, insert!
 
-@reftypedef ref=LLVMBuilderRef immutable Builder end
+@checked immutable Builder
+    ref::API.LLVMBuilderRef
+end
+reftype(::Type{Builder}) = API.LLVMBuilderRef
 
 Builder() = Builder(API.LLVMCreateBuilder())
 Builder(ctx::Context) = Builder(API.LLVMCreateBuilderInContext(ref(ctx)))
@@ -38,7 +41,7 @@ insert!(builder::Builder, inst::Instruction, name::String) =
 debuglocation(builder::Builder) =
     MetadataAsValue(API.LLVMGetCurrentDebugLocation(ref(builder)))
 debuglocation!(builder::Builder) =
-    API.LLVMSetCurrentDebugLocation(ref(builder), ref(Value, C_NULL))
+    API.LLVMSetCurrentDebugLocation(ref(builder), convert(API.LLVMValueRef, C_NULL))
 debuglocation!(builder::Builder, loc::MetadataAsValue) =
     API.LLVMSetCurrentDebugLocation(ref(builder), ref(loc))
 debuglocation!(builder::Builder, inst::Instruction) =

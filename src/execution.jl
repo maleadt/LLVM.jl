@@ -8,7 +8,10 @@ export GenericValue, dispose,
 
 import Base: convert
 
-@reftypedef ref=LLVMGenericValueRef immutable GenericValue end
+@checked immutable GenericValue
+    ref::API.LLVMGenericValueRef
+end
+reftype(::Type{GenericValue}) = API.LLVMGenericValueRef
 
 GenericValue(typ::IntegerType, N::Signed) =
     GenericValue(
@@ -51,7 +54,10 @@ dispose(val::GenericValue) = API.LLVMDisposeGenericValue(ref(val))
 export ExecutionEngine, Interpreter, JIT,
        run
 
-@reftypedef ref=LLVMExecutionEngineRef immutable ExecutionEngine end
+@checked immutable ExecutionEngine
+    ref::API.LLVMExecutionEngineRef
+end
+reftype(::Type{ExecutionEngine}) = API.LLVMExecutionEngineRef
 
 # NOTE: these takes ownership of the module
 function ExecutionEngine(mod::Module)

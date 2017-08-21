@@ -8,10 +8,13 @@ export dispose,
 
 import Base: show
 
-# forward @reftypedef Module in src/core/value/constant.jl
+# forward definition of Module in src/core/value/constant.jl
+reftype(::Type{Module}) = API.LLVMModuleRef
 
 # forward declarations
-@reftypedef ref=LLVMTargetDataRef immutable DataLayout end
+@checked immutable DataLayout
+    ref::API.LLVMTargetDataRef
+end
 
 Module(name::String) = Module(API.LLVMModuleCreateWithName(name))
 Module(name::String, ctx::Context) =

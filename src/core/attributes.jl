@@ -5,11 +5,16 @@ export Attribute,
        EnumAttribute, StringAttribute,
        kind, value
 
-@reftypedef ref=LLVMAttributeRef @compat abstract type Attribute end
+@compat abstract type Attribute end
+reftype{T<:Attribute}(::Type{T}) = API.LLVMAttributeRef
 
-@reftypedef proxy=Attribute immutable EnumAttribute <: Attribute end
+@checked immutable EnumAttribute <: Attribute
+    ref::reftype(Attribute)
+end
 
-@reftypedef proxy=Attribute immutable StringAttribute <: Attribute end
+@checked immutable StringAttribute <: Attribute
+    ref::reftype(Attribute)
+end
 
 # TODO: make @reftype's identify mechanism flexible enough to cover cases like this one,
 #       and not only Value and Type

@@ -1,6 +1,7 @@
 export Pass
 
 @compat abstract type Pass end
+reftype{T<:Pass}(::Type{T}) = API.LLVMPassRef
 
 @inline function check_access()
     if libllvm_system
@@ -15,12 +16,13 @@ end
 
 export ModulePass
 
-@reftypedef ref=LLVMPassRef immutable ModulePass <: Pass
+@checked immutable ModulePass <: Pass
+    ref::reftype(Pass)
     root::Any
 
-    function ModulePass(name, runner)
+    function ModulePass(name::String, runner::Core.Function)
         function callback(ptr::Ptr{Void})::Core.Bool
-            mod = LLVM.Module(ref(LLVM.Module, ptr))
+            mod = LLVM.Module(convert(reftype(Module), ptr))
             return runner(mod)::Core.Bool
         end
 
@@ -37,12 +39,13 @@ end
 
 export FunctionPass
 
-@reftypedef ref=LLVMPassRef immutable FunctionPass <: Pass
+@checked immutable FunctionPass <: Pass
+    ref::reftype(Pass)
     root::Any
 
-    function FunctionPass(name, runner)
+    function FunctionPass(name::String, runner::Core.Function)
         function callback(ptr::Ptr{Void})::Core.Bool
-            fn = LLVM.Function(ref(LLVM.Function, ptr))
+            fn = LLVM.Function(convert(reftype(Function), ptr))
             return runner(fn)::Core.Bool
         end
 
@@ -58,12 +61,13 @@ end
 
 export BasicBlockPass
 
-@reftypedef ref=LLVMPassRef immutable BasicBlockPass <: Pass
+@checked immutable BasicBlockPass <: Pass
+    ref::reftype(Pass)
     root::Any
 
-    function BasicBlockPass(name, runner)
+    function BasicBlockPass(name::String, runner::Core.Function)
         function callback(ptr::Ptr{Void})::Core.Bool
-            bb = BasicBlock(ref(BasicBlock, ptr))
+            bb = BasicBlock(convert(reftype(BasicBlock), ptr))
             return runner(bb)::Core.Bool
         end
 
