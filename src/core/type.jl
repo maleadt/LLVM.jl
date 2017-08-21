@@ -4,7 +4,6 @@ import Base: show
 
 @compat abstract type LLVMType end
 reftype{T<:LLVMType}(::Type{T}) = API.LLVMTypeRef
-kindtype{T<:LLVMType}(::Type{T}) = API.LLVMTypeKind
 
 identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
     identify(LLVMType, Val{API.LLVMGetTypeKind(ref)}())

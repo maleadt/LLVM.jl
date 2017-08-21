@@ -89,6 +89,7 @@ callconv!(inst::Instruction, cc) =
 istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(ref(inst)))
 tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(ref(inst), convert(Bool, bool))
 
+
 ## terminators
 
 export isconditional, condition, condition!, default_dest

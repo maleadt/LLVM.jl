@@ -5,7 +5,6 @@ export Value
 
 @compat abstract type Value end
 reftype{T<:Value}(::Type{T}) = API.LLVMValueRef
-kindtype{T<:Value}(::Type{T}) = API.LLVMTypeKind
 
 identify(::Type{Value}, ref::API.LLVMValueRef) =
     identify(Value, Val{API.LLVMGetValueKind(ref)}())
