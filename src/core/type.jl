@@ -8,7 +8,7 @@ kindtype{T<:LLVMType}(::Type{T}) = API.LLVMTypeKind
 
 identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
     identify(LLVMType, Val{API.LLVMGetTypeKind(ref)}())
-identify{T}(::Type{LLVMType}, ::Val{T}) = error("Unknown type $T")
+identify{K}(::Type{LLVMType}, ::Val{K}) = error("Unknown type kind $K")
 
 @inline function check{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
     ref==C_NULL && throw(NullException())
@@ -20,7 +20,7 @@ identify{T}(::Type{LLVMType}, ::Val{T}) = error("Unknown type $T")
     end
 end
 
-# Pseudo-constructor, creating a concretely typed object from an abstract type ref
+# Construct a concretely typed type object from an abstract type ref
 function LLVMType(ref::API.LLVMTypeRef)
     ref == C_NULL && throw(NullException())
     T = identify(LLVMType, ref)

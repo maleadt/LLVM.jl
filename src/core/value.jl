@@ -9,7 +9,7 @@ kindtype{T<:Value}(::Type{T}) = API.LLVMTypeKind
 
 identify(::Type{Value}, ref::API.LLVMValueRef) =
     identify(Value, Val{API.LLVMGetValueKind(ref)}())
-identify{T}(::Type{Value}, ::Val{T}) = error("Unknown value $T")
+identify{K}(::Type{Value}, ::Val{K}) = error("Unknown value kind $K")
 
 @inline function check{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
     ref==C_NULL && throw(NullException())
@@ -21,7 +21,7 @@ identify{T}(::Type{Value}, ::Val{T}) = error("Unknown value $T")
     end
 end
 
-# Pseudo-constructor, creating a concretely typed object from an abstract value ref
+# Construct a concretely typed value object from an abstract value ref
 function Value(ref::API.LLVMValueRef)
     ref == C_NULL && throw(NullException())
     T = identify(Value, ref)
