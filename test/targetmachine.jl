@@ -42,10 +42,12 @@ TargetMachine(host_t, host_triple) do tm
     Context() do ctx
     LLVM.Module("SomeModule", ctx) do mod
         FunctionPassManager(mod) do fpm
-            populate!(fpm, tm)
+            add_transform_info!(fpm, tm)
+            add_library_info!(fpm, triple(tm))
         end
         ModulePassManager() do mpm
-            populate!(mpm, tm)
+            add_transform_info!(mpm, tm)
+            add_library_info!(mpm, triple(tm))
         end
     end
     end

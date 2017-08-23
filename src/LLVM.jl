@@ -52,6 +52,8 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 
+include("deprecated.jl")
+
 if is_linux()
     const Lmid = Clong
     const LM_ID_BASE = 0
