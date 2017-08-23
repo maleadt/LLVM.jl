@@ -181,13 +181,13 @@ LLVM.Module("SomeModule", ctx) do mod
     @test context(val) == ctx
     @test typeof(LLVM.ref(val)) == LLVM.API.LLVMValueRef                # untyped
 
-    @test typeof(LLVM.Instruction(LLVM.ref(val))) == LLVM.Instruction   # type reconstructed
+    @test typeof(LLVM.Instruction(LLVM.ref(val))) == LLVM.AllocaInst    # type reconstructed
     if LLVM.DEBUG
         @test_throws ErrorException LLVM.Function(LLVM.ref(val))        # wrong
     end
     @test_throws NullException LLVM.Function(LLVM.API.LLVMValueRef(C_NULL))
 
-    @test typeof(Value(LLVM.ref(val))) == LLVM.Instruction              # type reconstructed
+    @test typeof(Value(LLVM.ref(val))) == LLVM.AllocaInst              # type reconstructed
     @test_throws NullException Value(LLVM.API.LLVMValueRef(C_NULL))
 
     show(DevNull, val)

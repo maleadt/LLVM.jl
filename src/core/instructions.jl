@@ -8,9 +8,26 @@ import Base: delete!
 # forward definition of Instruction in src/core/value/constant.jl
 identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
 
-# TODO: it would be nice to re-use the dynamic type reconstruction for instructions,
-#       using the opcode to discriminate. Doesn't work now, because we need to be able to
-#       convert to Instruction refs, and that machinery doesn't apply to abstract types.
+identify(::Type{Instruction}, ref::API.LLVMValueRef) =
+    identify(Instruction, Val{API.LLVMGetInstructionOpcode(ref)}())
+identify{K}(::Type{Instruction}, ::Val{K}) = bug("Unknown instruction kind $K")
+
+@inline function check{T<:Instruction}(::Type{T}, ref::API.LLVMValueRef)
+    ref==C_NULL && throw(NullException())
+    @static if DEBUG
+        T′ = identify(Instruction, ref)
+        if T != T′
+            error("invalid conversion of $T′ instruction reference to $T")
+        end
+    end
+end
+
+# Construct a concretely typed instruction object from an abstract value ref
+function Instruction(ref::API.LLVMValueRef)
+    ref == C_NULL && throw(NullException())
+    T = identify(Instruction, ref)
+    return T(ref)
+end
 
 Instruction(inst::Instruction) =
     Instruction(API.LLVMInstructionClone(ref(inst)))
@@ -36,6 +53,30 @@ predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(ref(inst))
 predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
 
 
+## instruction types
+
+const opcodes = [:Ret, :Br, :Switch, :IndirectBr, :Invoke, :Unreachable, :Add, :FAdd, :Sub,
+                 :FSub, :Mul, :FMul, :UDiv, :SDiv, :FDiv, :URem, :SRem, :FRem, :Shl, :LShr,
+                 :AShr, :And, :Or, :Xor, :Alloca, :Load, :Store, :GetElementPtr, :Trunc,
+                 :ZExt, :SExt, :FPToUI, :FPToSI, :UIToFP, :SIToFP, :FPTrunc, :FPExt,
+                 :PtrToInt, :IntToPtr, :BitCast, :AddrSpaceCast, :ICmp, :FCmp, :PHI, :Call,
+                 :Select, :UserOp1, :UserOp2, :VAArg, :ExtractElement, :InsertElement,
+                 :ShuffleVector, :ExtractValue, :InsertValue, :Fence, :AtomicCmpXchg,
+                 :AtomicRMW, :Resume, :LandingPad, :CleanupRet, :CatchRet, :CatchPad,
+                 :CleanupPad, :CatchSwitch]
+
+for op in opcodes
+    typename = Symbol(op, :Inst)
+    enum = Symbol(:LLVM, op)
+    @eval begin
+        @checked immutable $typename <: Instruction
+            ref::reftype(Instruction)
+        end
+        identify(::Type{Instruction}, ::Val{API.$enum}) = $typename
+    end
+end
+
+
 ## call sites and invocations
 
 export callconv, callconv!,
@@ -47,6 +88,7 @@ callconv!(inst::Instruction, cc) =
 
 istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(ref(inst)))
 tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(ref(inst), convert(Bool, bool))
+
 
 ## terminators
 

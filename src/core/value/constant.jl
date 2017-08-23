@@ -29,9 +29,7 @@ PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
 @checked immutable Module
     ref::API.LLVMModuleRef
 end
-@checked immutable Instruction <: User
-    ref::reftype(User)
-end
+@compat abstract type Instruction <: User end
 
 ## scalar
 
