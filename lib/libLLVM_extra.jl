@@ -48,6 +48,13 @@ function LLVMAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList
 end
 
 
+# Julia wrapper for header: llvm-extra/Target/Target.h
+
+function LLVMAddTargetLibraryInfoByTriple(Triple, PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddTargetLibraryInfoByTiple,Void,(Cstring, LLVMPassManagerRef), Triple, PM)
+end
+
+
 # Julia wrapper for header: llvm-extra/Target/NVPTX.h
 
 function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)

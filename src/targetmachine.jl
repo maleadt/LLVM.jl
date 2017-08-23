@@ -2,7 +2,7 @@
 
 export TargetMachine, dispose,
        target, triple, cpu, features, asm_verbosity!,
-       emit, populate!
+       emit, add_transform_info!, add_library_info!
 
 @checked immutable TargetMachine
     ref::API.LLVMTargetMachineRef
@@ -66,4 +66,7 @@ function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType,
     return nothing
 end
 
-populate!(pm::PassManager, tm::TargetMachine) = API.LLVMAddAnalysisPasses(ref(tm), ref(pm))
+add_transform_info!(pm::PassManager, tm::TargetMachine) =
+    API.LLVMAddAnalysisPasses(ref(tm), ref(pm))
+add_library_info!(pm::PassManager, triple::String) =
+    API.LLVMAddTargetLibraryInfoByTriple(triple, ref(pm))
