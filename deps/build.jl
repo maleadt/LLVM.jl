@@ -55,8 +55,8 @@ function main()
         if  isdefined(Previous, :libllvm_version) && Previous.libllvm_version == llvm.version &&
             isdefined(Previous, :libllvm_path)    && Previous.libllvm_path == llvm.path &&
             isdefined(Previous, :libllvm_mtime)   && Previous.libllvm_mtime == llvm.mtime &&
-            isdefined(Previous, :llvm_targets)    && Previous.llvm_targets == llvm_targets &&
-            isdefined(Previous, :wrapper)         && Previous.wrapper == wrapper &&
+            isdefined(Previous, :libllvm_targets) && Previous.libllvm_targets == llvm_targets &&
+            isdefined(Previous, :llvmjl_wrapper)  && Previous.llvmjl_wrapper == wrapper &&
             isdefined(Previous, :llvmjl_hash)     && Previous.llvmjl_hash == llvmjl_hash
             info("LLVM.jl has already been built for this toolchain, no need to rebuild")
             mv(ext_bak, ext)
