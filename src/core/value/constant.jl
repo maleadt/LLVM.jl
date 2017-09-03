@@ -31,6 +31,7 @@ PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
 end
 @compat abstract type Instruction <: User end
 
+
 ## scalar
 
 import Base: convert
@@ -85,6 +86,27 @@ ConstantFP(typ::LLVMDouble, val::Real) =
 
 convert(::Type{Float64}, val::ConstantFP) =
     API.LLVMConstRealGetDouble(ref(val), Ref{API.LLVMBool}())
+
+
+## constant expressions
+
+export ConstantExpr, InlineAsm
+
+@checked immutable ConstantExpr <: Constant
+    ref::reftype(Constant)
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
+
+@checked immutable InlineAsm <: Constant
+    ref::reftype(Constant)
+end
+identify(::Type{Value}, ::Val{API.LLVMInlineAsmValueKind}) = InlineAsm
+
+InlineAsm(typ::FunctionType, asm::String, constraints::String,
+          side_effects::Core.Bool, align_stack::Core.Bool=false) =
+    InlineAsm(API.LLVMConstInlineAsm(ref(typ), asm, constraints,
+                                     convert(Bool, side_effects),
+                                     convert(Bool, align_stack)))
 
 
 ## global values
@@ -190,14 +212,4 @@ isextinit(gv::GlobalVariable) =
   convert(Core.Bool, API.LLVMIsExternallyInitialized(ref(gv)))
 extinit!(gv::GlobalVariable, bool) =
   API.LLVMSetExternallyInitialized(ref(gv), convert(Bool, bool))
-
-
-## expressions
-
-export ConstantExpr
-
-@checked immutable ConstantExpr <: Constant
-    ref::reftype(Constant)
-end
-identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
 

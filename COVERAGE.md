@@ -501,7 +501,7 @@ Core
 - [ ] LLVMConstShuffleVector
 - [ ] LLVMConstExtractValue
 - [ ] LLVMConstInsertValue
-- [ ] LLVMConstInlineAsm
+- [x] LLVMConstInlineAsm
 - [ ] LLVMBlockAddress
 
 **Global Values**

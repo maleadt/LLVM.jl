@@ -9,3 +9,9 @@ function julia_cmd(cmd)
         $cmd
     `
 end
+
+macro check_ir(inst, str)
+    quote
+        @test contains(string($(esc(inst))), $(esc(str)))
+    end
+end

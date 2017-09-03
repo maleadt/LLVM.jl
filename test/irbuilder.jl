@@ -1,9 +1,3 @@
-macro check_ir(inst, str)
-    quote
-        @test contains(string($(esc(inst))), $(esc(str)))
-    end
-end
-
 @testset "irbuilder" begin
 
 let
