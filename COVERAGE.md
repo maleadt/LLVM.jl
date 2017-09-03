@@ -653,7 +653,7 @@ Function parameters:
 - [ ] LLVMGetCallSiteStringAttribute
 - [ ] LLVMRemoveCallSiteEnumAttribute
 - [ ] LLVMRemoveCallSiteStringAttribute
-- [ ] LLVMGetCalledValue
+- [x] LLVMGetCalledValue
 - [x] LLVMIsTailCall
 - [x] LLVMSetTailCall
 
