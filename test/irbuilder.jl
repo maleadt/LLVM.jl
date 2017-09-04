@@ -1,9 +1,3 @@
-macro check_ir(inst, str)
-    quote
-        @test contains(string($(esc(inst))), $(esc(str)))
-    end
-end
-
 @testset "irbuilder" begin
 
 let
@@ -255,6 +249,7 @@ LLVM.Module("SomeModule", ctx) do mod
     trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
     callinst = call!(builder, trap)
     @check_ir callinst "call void @llvm.trap()"
+    @test called_value(callinst) == trap
 
     neginst = neg!(builder, int1)
     @check_ir neginst "sub i32 0, %0"

@@ -501,7 +501,7 @@ Core
 - [ ] LLVMConstShuffleVector
 - [ ] LLVMConstExtractValue
 - [ ] LLVMConstInsertValue
-- [ ] LLVMConstInlineAsm
+- [x] LLVMConstInlineAsm
 - [ ] LLVMBlockAddress
 
 **Global Values**
@@ -653,7 +653,7 @@ Function parameters:
 - [ ] LLVMGetCallSiteStringAttribute
 - [ ] LLVMRemoveCallSiteEnumAttribute
 - [ ] LLVMRemoveCallSiteStringAttribute
-- [ ] LLVMGetCalledValue
+- [x] LLVMGetCalledValue
 - [x] LLVMIsTailCall
 - [x] LLVMSetTailCall
 

@@ -80,7 +80,8 @@ end
 ## call sites and invocations
 
 export callconv, callconv!,
-       istailcall, tailcall!
+       istailcall, tailcall!,
+       called_value
 
 callconv(inst::Instruction) = API.LLVMGetInstructionCallConv(ref(inst))
 callconv!(inst::Instruction, cc) =
@@ -88,6 +89,8 @@ callconv!(inst::Instruction, cc) =
 
 istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(ref(inst)))
 tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(ref(inst), convert(Bool, bool))
+
+called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(ref( inst)))
 
 
 ## terminators

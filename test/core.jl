@@ -335,6 +335,20 @@ Context() do ctx
     end
 end
 
+# constant expressions
+Context() do ctx
+    @testset "constant expressions" begin
+
+    # inline assembly
+    let
+        ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+        asm = InlineAsm(ft, "nop", "", false)
+        @check_ir asm "void ()* asm \"nop\", \"\""
+    end
+
+    end
+end
+
 # global values
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
