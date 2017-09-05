@@ -3,17 +3,24 @@
 using BinDeps2
 using SHA
 
-include("compile.jl")
+mkpath(joinpath(pwd(), "downloads"))
 
-# Define what we're downloading, where we're putting it
-src_repo = "https://github.com/JuliaLang/julia"
-src_commit = Base.GIT_VERSION_INFO.commit
+# Define what sources we're dealing with
+src_path = joinpath(pwd(), "downloads")
+julia_repo = "https://github.com/JuliaLang/julia"
+julia_commit = Base.GIT_VERSION_INFO.commit
+llvm_src = joinpath(@__DIR__, "llvm-extra")
 
-# First, download the source, store it in ./downloads/
-src_path = joinpath(pwd(), "downloads", "julia")
-try mkpath(dirname(src_path)) end
-src_repo = LibGit2.clone(src_repo, src_path)
-LibGit2.checkout!(src_repo, src_commit)
+# First, download the Julia source, store it in ./downloads/julia/
+info("Fetching Julia")
+julia_path = joinpath(src_path, "julia")
+# julia_repo = LibGit2.clone(julia_repo, julia_path)
+# LibGit2.checkout!(julia_repo, julia_commit)
+
+# Then, copy the libLLVM-extra sources to ./downloads/llvm-extra/
+info("Fetching libLLVM-extra")
+llvm_path = joinpath(src_path, "llvm-extra")
+# cp(llvm_src, llvm_path)
 
 # Our build products will go into ./products
 out_path = joinpath(pwd(), "products")
@@ -24,10 +31,12 @@ mkpath(out_path)
 products = Dict()
 for platform in supported_platforms()
     target = platform_triplet(platform)
+    info("Building for $target")
 
     # We build in a platform-specific directory
+    mkpath(joinpath(pwd(), "build"))
     build_path = joinpath(pwd(), "build", target)
-    try mkpath(build_path) end
+    run(`cp -a $src_path $build_path`) # JuliaLang/julia#20925
 
     cd(build_path) do
         # For each build, create a temporary prefix we'll install into, then package up
@@ -37,10 +46,10 @@ for platform in supported_platforms()
 
             # We build using the typical autoconf incantation
             steps = [
-                `make -C $src_path/deps install-llvm -j$(min(Sys.CPU_CORES + 1,8))`
+                `make -C julia/deps install-llvm -j$(min(Sys.CPU_CORES + 1,8))`
             ]
 
-            dep = Dependency(src_name, [libllvm_extra], steps, platform, prefix)
+            dep = Dependency("libLLVM-extra", [libllvm_extra], steps, platform, prefix)
             build(dep; verbose=true)
 
             # Once we're built up, go ahead and package this prefix out
