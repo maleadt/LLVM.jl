@@ -9,10 +9,37 @@ julia:
 notifications:
   email: false
 
+git:
+  depth: 99999999
+
 env:
   global:
     - DOCUMENTER_DEBUG=true
 
+services:
+  - docker
+env:
+  DOCKER_IMAGE: staticfloat/julia_workerbase:crossbuild-x64
+before_script:
+  - docker pull $DOCKER_IMAGE
+  - julia -e 'Pkg.clone("https://github.com/staticfloat/BinaryProvider.jl")'
+  - julia -e 'Pkg.clone("https://github.com/staticfloat/BinDeps2.jl"); Pkg.build()'
+
+script:
+  - julia devel/buildbot.jl
+
 after_success:
   - julia -e 'Pkg.add("Documenter")'
   - julia -e 'cd(Pkg.dir("LLVM")); include(joinpath("docs", "make.jl"))'
+
+deploy:
+  provider: releases
+  api_key:
+  api_key:
+    secure: FquPqMzUcFiRP4L8KFjsWJR6ARQW2rXnrnAxcWpHa3OBAfBFxIZMs/HTiJRyQX4rAin8O2ZI+9eQCM0CmxiIa+m+ha7AkZsVOGbK5BYitmPpVQ1mhnVFrkjb/zUW9FMa+s+zcuC95qLPXjH+cKh/DULjOKlLgj4ATSkWplMx3g6I3wjocngI++QUSEM6KqPvCjJUMOSOzfAdkkDuCQXEreRP6JSEgZIu9+amDCRn7uSA4hnFZ4C5TvWi40qsiSTfEsVqvMdOysC3zXs9EgYCeEpm3xZYgzWyK8rwNk251H5/r4oIlNWW5DjGMHgjhIXs0BiiAn0CHwVxCqVcY2wrayE7ju6pTc9h9RzuSXgkoM4mUrIBAMq0TaAzB+tHYhjVrBQ10dDc4UsxSs0dTbZmo5WA8W9/5sjAmdhYWungKt8DiQeYpNc79llmB22xkXThLr8SdQ7C6jYkzgadrcMdxsyhJ3auyAUcdURZYncko2I7ivtfDjtNz7v4eQbxkG1GN8W+pzUwdZ2rYNOMxtg7F3FeaoLY9ev1MjGbL6OeOfj5VPmHWI5i7es5fA6kT90x4u1YM+w3CAoYLpM6j91eZfa6HLH3TwAo0hvFBP8sCvMZb1lx1Ol1uKeSnWzsn/YIWyAAD6PiTUIj9Mn6cxeCEKRzDdU4ykDwWrn5YtU3omc=
+  file_glob: true
+  file: products/*.tar.gz
+  skip_cleanup: true
+  on:
+    repo: maleadt/LLVM.jl
+    tags: true
