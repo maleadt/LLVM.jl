@@ -5,6 +5,16 @@ using SHA
 
 include("compile.jl")
 
+# Define what we're downloading, where we're putting it
+src_repo = "https://github.com/JuliaLang/julia"
+src_commit = Base.GIT_VERSION_INFO.commit
+
+# First, download the source, store it in ./downloads/
+src_path = joinpath(pwd(), "downloads", "julia")
+try mkpath(dirname(src_path)) end
+src_repo = LibGit2.clone(src_repo, src_path)
+LibGit2.checkout!(src_repo, src_commit)
+
 # Our build products will go into ./products
 out_path = joinpath(pwd(), "products")
 rm(out_path; force=true, recursive=true)
@@ -22,23 +32,15 @@ for platform in supported_platforms()
     cd(build_path) do
         # For each build, create a temporary prefix we'll install into, then package up
         temp_prefix() do prefix
-            # Unpack the source into our build directory
-            unpack(src_path, build_path; verbose=true)
-
             # We expect these outputs from our build steps
             libllvm_extra = LibraryResult(joinpath(libdir(prefix), "libLLVM_extra"))
 
             # We build using the typical autoconf incantation
             steps = [
-                # We pass `--host=$(target)` to tell configure we want to cross-compile
-                # We pass `--prefix=/` because BinDeps2 has already set the `$DESTDIR`
-                # environment variable, so we don't need to tell configure where to install
-                `./nettle-$(src_vers)/configure --host=$(target) --prefix=/`,
-                `make -j$(min(Sys.CPU_CORES + 1,8))`,
-                `make install`
+                `make -C $src_path/deps install-llvm -j$(min(Sys.CPU_CORES + 1,8))`
             ]
 
-            dep = Dependency(src_name, [libnettle], steps, platform, prefix)
+            dep = Dependency(src_name, [libllvm_extra], steps, platform, prefix)
             build(dep; verbose=true)
 
             # Once we're built up, go ahead and package this prefix out

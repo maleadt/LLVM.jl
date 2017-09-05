@@ -26,7 +26,7 @@ before_script:
   - julia -e 'Pkg.clone("https://github.com/staticfloat/BinDeps2.jl"); Pkg.build()'
 
 script:
-  - julia devel/buildbot.jl
+  - julia deps/buildbot.jl
 
 after_success:
   - julia -e 'Pkg.add("Documenter")'
