@@ -37,12 +37,43 @@ unsafe_delete!(::BasicBlock, inst::Instruction) =
 delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionRemoveFromParent(ref(inst))
 
+
+## metadata
+
+@enum(MD, MD_dbg = 0,
+          MD_tbaa = 1,
+          MD_prof = 2,
+          MD_fpmath = 3,
+          MD_range = 4,
+          MD_tbaa_struct = 5,
+          MD_invariant_load = 6,
+          MD_alias_scope = 7,
+          MD_noalias = 8,
+          MD_nontemporal = 9,
+          MD_mem_parallel_loop_access = 10,
+          MD_nonnull = 11,
+          MD_dereferenceable = 12,
+          MD_dereferenceable_or_null = 13,
+          MD_make_implicit = 14,
+          MD_unpredictable = 15,
+          MD_invariant_group = 16,
+          MD_align = 17,
+          MD_loop = 18,
+          MD_type = 19,
+          MD_section_prefix = 20,
+          MD_absolute_symbol = 21,
+          MD_associated = 22)
+
 hasmetadata(inst::Instruction) = convert(Core.Bool, API.LLVMHasMetadata(ref(inst)))
 
-metadata(inst::Instruction, kind) =
+hasmetadata(inst::Instruction, kind::MD) = API.LLVMGetMetadata(ref(inst), Cuint(kind)) != C_NULL
+
+metadata(inst::Instruction, kind::MD) =
     MetadataAsValue(API.LLVMGetMetadata(ref(inst), Cuint(kind)))
-metadata!(inst::Instruction, kind, node::MetadataAsValue) =
+metadata!(inst::Instruction, kind::MD, node::MetadataAsValue) =
     API.LLVMSetMetadata(ref(inst), Cuint(kind), ref(node))
+metadata!(inst::Instruction, kind::MD) =
+    API.LLVMSetMetadata(ref(inst), Cuint(kind), convert(reftype(MetadataAsValue), C_NULL))
 
 parent(inst::Instruction) =
     BasicBlock(API.LLVMGetInstructionParent(ref(inst)))
