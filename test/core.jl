@@ -846,9 +846,16 @@ LLVM.Module("SomeModule", ctx) do mod
     @test LLVM.parent(brinst) == bb1
 
     @test !hasmetadata(brinst)
-    md = MDNode([MDString("foo", ctx)], ctx)
-    metadata!(brinst, 0, md)
-    @test metadata(brinst, 0) == md
+    @test !hasmetadata(brinst, LLVM.MD_dbg)
+    md = MDNode([MDString("whatever", ctx)], ctx)
+    metadata!(brinst, LLVM.MD_dbg, md)
+    @test metadata(brinst, LLVM.MD_dbg) == md
+    @test hasmetadata(brinst)
+    @test hasmetadata(brinst, LLVM.MD_dbg)
+    @test !hasmetadata(brinst, LLVM.MD_tbaa)
+    metadata!(brinst, LLVM.MD_dbg)
+    @test !hasmetadata(brinst)
+    @test !hasmetadata(brinst, LLVM.MD_dbg)
 
     @test retinst in instructions(bb3)
     delete!(bb3, retinst)
