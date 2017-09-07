@@ -1,5 +1,3 @@
-import Base: convert
-
 export DEBUG_METADATA_VERSION, MDString, MDNode, operands
 
 @checked immutable MetadataAsValue <: Value
@@ -17,7 +15,7 @@ MDString(val::String) = MDString(API.LLVMMDString(val, Cuint(length(val))))
 MDString(val::String, ctx::Context) = 
     MDString(API.LLVMMDStringInContext(ref(ctx), val, Cuint(length(val))))
 
-function convert(::Type{String}, md::MDString)
+function Base.convert(::Type{String}, md::MDString)
     len = Ref{Cuint}()
     ptr = API.LLVMGetMDString(ref(md), len)
     ptr == C_NULL && throw(ArgumentError("invalid metadata, not a MDString?"))

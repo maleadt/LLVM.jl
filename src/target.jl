@@ -35,29 +35,27 @@ hasasmparser(t::Target) = convert(Core.Bool, API.LLVMTargetHasAsmBackend(ref(t))
 
 export targets
 
-import Base: eltype, haskey, get, start, next, done, iteratorsize
-
 immutable TargetSet end
 
 targets() = TargetSet()
 
-eltype(::TargetSet) = Target
+Base.eltype(::TargetSet) = Target
 
-function haskey(::TargetSet, name::String)
+function Base.haskey(::TargetSet, name::String)
     return API.LLVMGetTargetFromName(name) != C_NULL
 end
 
-function get(::TargetSet, name::String)
+function Base.get(::TargetSet, name::String)
     objref = API.LLVMGetTargetFromName(name)
     objref == C_NULL && throw(KeyError(name))
     return Target(objref)
 end
 
-start(::TargetSet) = API.LLVMGetFirstTarget()
+Base.start(::TargetSet) = API.LLVMGetFirstTarget()
 
-next(::TargetSet, state) =
+Base.next(::TargetSet, state) =
     (Target(state), API.LLVMGetNextTarget(state))
 
-done(::TargetSet, state) = state == C_NULL
+Base.done(::TargetSet, state) = state == C_NULL
 
-iteratorsize(::TargetSet) = Base.SizeUnknown()
+Base.iteratorsize(::TargetSet) = Base.SizeUnknown()

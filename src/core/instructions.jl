@@ -3,8 +3,6 @@ export Instruction, unsafe_delete!,
        parent, opcode,
        predicate_int, predicate_real
 
-import Base: delete!
-
 # forward definition of Instruction in src/core/value/constant.jl
 identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
 
@@ -34,7 +32,7 @@ Instruction(inst::Instruction) =
 
 unsafe_delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionEraseFromParent(ref(inst))
-delete!(::BasicBlock, inst::Instruction) =
+Base.delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionRemoveFromParent(ref(inst))
 
 parent(inst::Instruction) =
@@ -153,31 +151,30 @@ default_dest(switch::Instruction) =
 
 export successors
 
-import Base: eltype, getindex, setindex!, start, next, done, length, endof
-
 immutable TerminatorSuccessorSet
     term::Instruction
 end
 
 successors(term::Instruction) = TerminatorSuccessorSet(term)
 
-eltype(::TerminatorSuccessorSet) = BasicBlock
+Base.eltype(::TerminatorSuccessorSet) = BasicBlock
 
-getindex(iter::TerminatorSuccessorSet, i) =
+Base.getindex(iter::TerminatorSuccessorSet, i) =
     BasicBlock(API.LLVMGetSuccessor(ref(iter.term), Cuint(i-1)))
 
-setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
+Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
     API.LLVMSetSuccessor(ref(iter.term), Cuint(i-1), blockref(bb))
 
-start(iter::TerminatorSuccessorSet) = (1,length(iter))
+Base.start(iter::TerminatorSuccessorSet) = (1,length(iter))
 
-next(iter::TerminatorSuccessorSet, state) =
+Base.next(iter::TerminatorSuccessorSet, state) =
     (iter[state[1]], (state[1]+1,state[2]))
 
-done(::TerminatorSuccessorSet, state) = (state[1] > state[2])
+Base.done(::TerminatorSuccessorSet, state) = (state[1] > state[2])
 
-length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
-endof(iter::TerminatorSuccessorSet) = length(iter)
+Base.length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
+
+Base.endof(iter::TerminatorSuccessorSet) = length(iter)
 
 
 ## phi nodes
@@ -186,24 +183,22 @@ endof(iter::TerminatorSuccessorSet) = length(iter)
 
 export PhiIncomingSet
 
-import Base: eltype, getindex, append!, length
-
 immutable PhiIncomingSet
     phi::Instruction
 end
 
 incoming(phi::Instruction) = PhiIncomingSet(phi)
 
-eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
+Base.eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
 
-getindex(iter::PhiIncomingSet, i) =
+Base.getindex(iter::PhiIncomingSet, i) =
     tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), Cuint(i-1))),
                 BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), Cuint(i-1))))
 
-function append!(iter::PhiIncomingSet, args::Vector{Tuple{Value, BasicBlock}})
+function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{Value, BasicBlock}})
     vals, blocks = zip(args...)
     API.LLVMAddIncoming(ref(iter.phi), ref.(vals),
                         ref.(blocks), length(args))
 end
 
-length(iter::PhiIncomingSet) = API.LLVMCountIncoming(ref(iter.phi))
+Base.length(iter::PhiIncomingSet) = API.LLVMCountIncoming(ref(iter.phi))

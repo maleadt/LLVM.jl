@@ -1,7 +1,5 @@
 export LLVMType, issized, context, show
 
-import Base: show
-
 @compat abstract type LLVMType end
 reftype{T<:LLVMType}(::Type{T}) = API.LLVMTypeRef
 
@@ -30,7 +28,7 @@ issized(typ::LLVMType) =
     convert(Core.Bool, API.LLVMTypeIsSized(ref(typ)))
 context(typ::LLVMType) = Context(API.LLVMGetTypeContext(ref(typ)))
 
-function show(io::IO, typ::LLVMType)
+function Base.show(io::IO, typ::LLVMType)
     output = unsafe_string(API.LLVMPrintTypeToString(ref(typ)))
     print(io, output)
 end
@@ -128,10 +126,8 @@ export addrspace
 
 @compat abstract type SequentialType <: CompositeType end
 
-import Base: length, size, eltype
+Base.eltype(typ::SequentialType) = LLVMType(API.LLVMGetElementType(ref(typ)))
 
-eltype(typ::SequentialType) =
-    LLVMType(API.LLVMGetElementType(ref(typ)))
 
 @checked immutable PointerType <: SequentialType
     ref::reftype(SequentialType)
@@ -146,6 +142,7 @@ end
 addrspace(ptrtyp::PointerType) =
     API.LLVMGetPointerAddressSpace(ref(ptrtyp))
 
+
 @checked immutable ArrayType <: SequentialType
     ref::reftype(SequentialType)
 end
@@ -155,7 +152,8 @@ function ArrayType(eltyp::LLVMType, count)
     return ArrayType(API.LLVMArrayType(ref(eltyp), Cuint(count)))
 end
 
-length(arrtyp::ArrayType) = API.LLVMGetArrayLength(ref(arrtyp))
+Base.length(arrtyp::ArrayType) = API.LLVMGetArrayLength(ref(arrtyp))
+
 
 @checked immutable VectorType <: SequentialType
     ref::reftype(SequentialType)
@@ -166,7 +164,7 @@ function VectorType(eltyp::LLVMType, count)
     return VectorType(API.LLVMVectorType(ref(eltyp), Cuint(count)))
 end
 
-size(vectyp::VectorType) = API.LLVMGetVectorSize(ref(vectyp))
+Base.size(vectyp::VectorType) = API.LLVMGetVectorSize(ref(vectyp))
 
 
 ## structure types
@@ -205,31 +203,30 @@ elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Core.Boo
 
 export elements
 
-import Base: eltype, getindex, setindex!, start, next, done, length, endof, collect
-
 immutable StructTypeElementSet
     typ::StructType
 end
 
 elements(typ::StructType) = StructTypeElementSet(typ)
 
-eltype(::StructTypeElementSet) = LLVMType
+Base.eltype(::StructTypeElementSet) = LLVMType
 
-getindex(iter::StructTypeElementSet, i) =
+Base.getindex(iter::StructTypeElementSet, i) =
     LLVMType(API.LLVMStructGetTypeAtIndex(ref(iter.typ), Cuint(i-1)))
 
-start(iter::StructTypeElementSet) = (1,length(iter))
+Base.start(iter::StructTypeElementSet) = (1,length(iter))
 
-next(iter::StructTypeElementSet, state) =
+Base.next(iter::StructTypeElementSet, state) =
     (iter[state[1]], (state[1]+1,state[2]))
 
-done(::StructTypeElementSet, state) = (state[1] > state[2])
+Base.done(::StructTypeElementSet, state) = (state[1] > state[2])
 
-length(iter::StructTypeElementSet) = API.LLVMCountStructElementTypes(ref(iter.typ))
-endof(iter::StructTypeElementSet) = length(iter)
+Base.length(iter::StructTypeElementSet) = API.LLVMCountStructElementTypes(ref(iter.typ))
+
+Base.endof(iter::StructTypeElementSet) = length(iter)
 
 # NOTE: optimized `collect`
-function collect(iter::StructTypeElementSet)
+function Base.collect(iter::StructTypeElementSet)
     elems = Vector{API.LLVMTypeRef}(length(iter))
     API.LLVMGetStructElementTypes(ref(iter.typ), elems)
     return LLVMType.(elems)

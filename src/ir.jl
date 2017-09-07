@@ -1,8 +1,6 @@
 ## reader
 
-import Base: parse
-
-function parse(::Type{Module}, ir::String, ctx::Context=GlobalContext())
+function Base.parse(::Type{Module}, ir::String, ctx::Context=GlobalContext())
     data = convert(Vector{UInt8}, ir)
     membuf = MemoryBuffer(data, "", false)
 
@@ -22,6 +20,4 @@ end
 
 ## writer
 
-import Base: convert
-
-convert(::Type{String}, mod::Module) = unsafe_string(API.LLVMPrintModuleToString(ref(mod)))
+Base.convert(::Type{String}, mod::Module) = unsafe_string(API.LLVMPrintModuleToString(ref(mod)))
