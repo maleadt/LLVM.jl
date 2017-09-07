@@ -96,7 +96,7 @@ Context() do ctx
             GenericValue(LLVM.Int32Type(), 2)]
 
     let mod = LLVM.Module(mod)
-        fn = get(functions(mod), "SomeFunction")
+        fn = functions(mod)["SomeFunction"]
         Interpreter(mod) do engine
             res = LLVM.run(engine, fn, args)
             @test convert(Int, res) == 3
@@ -107,7 +107,7 @@ Context() do ctx
     dispose.(args)
 
     let mod = emit_retint(ctx, 42)
-        fn = get(functions(mod), "SomeFunction")
+        fn = functions(mod)["SomeFunction"]
         JIT(mod) do engine
             res = LLVM.run(engine, fn)
             @test convert(Int, res) == 42
@@ -116,7 +116,7 @@ Context() do ctx
     end
 
     let mod = emit_retint(ctx, 42)
-        fn = get(functions(mod), "SomeFunction")
+        fn = functions(mod)["SomeFunction"]
         ExecutionEngine(mod) do engine
             res = LLVM.run(engine, fn)
             @test convert(Int, res) == 42

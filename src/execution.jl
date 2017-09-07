@@ -6,8 +6,6 @@
 export GenericValue, dispose,
        intwidth
 
-import Base: convert
-
 @checked immutable GenericValue
     ref::API.LLVMGenericValueRef
 end
@@ -25,10 +23,10 @@ GenericValue(typ::IntegerType, N::Unsigned) =
 
 intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(ref(val))
 
-convert{T<:Signed}(::Type{T}, val::GenericValue) =
+Base.convert{T<:Signed}(::Type{T}, val::GenericValue) =
     convert(T, reinterpret(Clonglong, API.LLVMGenericValueToInt(ref(val), True)))
 
-convert{T<:Unsigned}(::Type{T}, val::GenericValue) =
+Base.convert{T<:Unsigned}(::Type{T}, val::GenericValue) =
     convert(T, API.LLVMGenericValueToInt(ref(val), False))
 
 GenericValue(typ::FloatingPointType, N::AbstractFloat) =
@@ -37,13 +35,13 @@ GenericValue(typ::FloatingPointType, N::AbstractFloat) =
 # NOTE: this ugly-three arg convert is needed to match the C API,
 #       which uses the type to call the correct C++ function.
 
-convert{T<:AbstractFloat}(::Type{T}, val::GenericValue, typ::LLVMType) =
+Base.convert{T<:AbstractFloat}(::Type{T}, val::GenericValue, typ::LLVMType) =
     convert(T, API.LLVMGenericValueToFloat(ref(typ), ref(val)))
 
 GenericValue(ptr::Ptr) =
     GenericValue(API.LLVMCreateGenericValueOfPointer(convert(Ptr{Void}, ptr)))
 
-convert{T}(::Type{Ptr{T}}, val::GenericValue) =
+Base.convert{T}(::Type{Ptr{T}}, val::GenericValue) =
     convert(Ptr{T}, API.LLVMGenericValueToPointer(ref(val)))
 
 dispose(val::GenericValue) = API.LLVMDisposeGenericValue(ref(val))

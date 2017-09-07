@@ -33,14 +33,12 @@ end
 
 export llvmtype, name, name!, replace_uses!, isconstant, isundef, context
 
-import Base: show
-
 llvmtype(val::Value) = LLVMType(API.LLVMTypeOf(ref(val)))
 
 name(val::Value) = unsafe_string(API.LLVMGetValueName(ref(val)))
 name!(val::Value, name::String) = API.LLVMSetValueName(ref(val), name)
 
-function show(io::IO, val::Value)
+function Base.show(io::IO, val::Value)
     output = unsafe_string(API.LLVMPrintValueToString(ref(val)))
     print(io, output)
 end
@@ -82,21 +80,19 @@ value(use::Use) = Value(API.LLVMGetUsedValue(ref(use)))
 
 export uses
 
-import Base: eltype, start, next, done, iteratorsize
-
 immutable ValueUseSet
     val::Value
 end
 
 uses(val::Value) = ValueUseSet(val)
 
-eltype(::ValueUseSet) = Use
+Base.eltype(::ValueUseSet) = Use
 
-start(iter::ValueUseSet) = API.LLVMGetFirstUse(ref(iter.val))
+Base.start(iter::ValueUseSet) = API.LLVMGetFirstUse(ref(iter.val))
 
-next(::ValueUseSet, state) =
+Base.next(::ValueUseSet, state) =
     (Use(state), API.LLVMGetNextUse(state))
 
-done(::ValueUseSet, state) = state == C_NULL
+Base.done(::ValueUseSet, state) = state == C_NULL
 
-iteratorsize(::ValueUseSet) = Base.SizeUnknown()
+Base.iteratorsize(::ValueUseSet) = Base.SizeUnknown()

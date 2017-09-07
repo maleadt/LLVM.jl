@@ -2,8 +2,6 @@ export BasicBlock, unsafe_delete!,
        parent, terminator, name,
        move_before, move_after
 
-import Base: delete!
-
 @checked immutable BasicBlock <: Value
     ref::reftype(Value)
 end
@@ -27,7 +25,7 @@ BasicBlock(bb::BasicBlock, name::String, ctx::Context) =
     BasicBlock(API.LLVMInsertBasicBlockInContext(ref(ctx), blockref(bb), name))
 
 unsafe_delete!(::Function, bb::BasicBlock) = API.LLVMDeleteBasicBlock(blockref(bb))
-delete!(::Function, bb::BasicBlock) =
+Base.delete!(::Function, bb::BasicBlock) =
     API.LLVMRemoveBasicBlockFromParent(blockref(bb))
 
 parent(bb::BasicBlock) = Function(API.LLVMGetBasicBlockParent(blockref(bb)))
@@ -47,24 +45,22 @@ move_after(bb::BasicBlock, pos::BasicBlock) =
 
 export instructions
 
-import Base: eltype, start, next, done, last, iteratorsize
-
 immutable BasicBlockInstructionSet
     bb::BasicBlock
 end
 
 instructions(bb::BasicBlock) = BasicBlockInstructionSet(bb)
 
-eltype(::BasicBlockInstructionSet) = Instruction
+Base.eltype(::BasicBlockInstructionSet) = Instruction
 
-start(iter::BasicBlockInstructionSet) = API.LLVMGetFirstInstruction(blockref(iter.bb))
+Base.start(iter::BasicBlockInstructionSet) = API.LLVMGetFirstInstruction(blockref(iter.bb))
 
-next(::BasicBlockInstructionSet, state) =
+Base.next(::BasicBlockInstructionSet, state) =
     (Instruction(state), API.LLVMGetNextInstruction(state))
 
-done(::BasicBlockInstructionSet, state) = state == C_NULL
+Base.done(::BasicBlockInstructionSet, state) = state == C_NULL
 
-last(iter::BasicBlockInstructionSet) =
+Base.last(iter::BasicBlockInstructionSet) =
     Instruction(API.LLVMGetLastInstruction(blockref(iter.bb)))
 
-iteratorsize(::BasicBlockInstructionSet) = Base.SizeUnknown()
+Base.iteratorsize(::BasicBlockInstructionSet) = Base.SizeUnknown()

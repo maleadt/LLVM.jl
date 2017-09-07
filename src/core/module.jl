@@ -6,8 +6,6 @@ export dispose,
        datalayout, datalayout!,
        context, inline_asm!
 
-import Base: show
-
 # forward definition of Module in src/core/value/constant.jl
 reftype(::Type{Module}) = API.LLVMModuleRef
 
@@ -32,7 +30,7 @@ function Module(f::Core.Function, args...)
     end
 end
 
-function show(io::IO, mod::Module)
+function Base.show(io::IO, mod::Module)
     output = unsafe_string(API.LLVMPrintModuleToString(ref(mod)))
     print(io, output)
 end
@@ -63,19 +61,17 @@ context(mod::Module) = Context(API.LLVMGetModuleContext(ref(mod)))
 
 export types
 
-import Base: haskey, get
-
-immutable ModuleTypeSet
+immutable ModuleTypeDict <: Associative{String,LLVMType}
     mod::Module
 end
 
-types(mod::Module) = ModuleTypeSet(mod)
+types(mod::Module) = ModuleTypeDict(mod)
 
-function haskey(iter::ModuleTypeSet, name::String)
+function Base.haskey(iter::ModuleTypeDict, name::String)
     return API.LLVMGetTypeByName(ref(iter.mod), name) != C_NULL
 end
 
-function get(iter::ModuleTypeSet, name::String)
+function Base.getindex(iter::ModuleTypeDict, name::String)
     objref = API.LLVMGetTypeByName(ref(iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
     return LLVMType(objref)
@@ -86,27 +82,25 @@ end
 
 export metadata
 
-import Base: haskey, get, push!
-
-immutable ModuleMetadataSet
+immutable ModuleMetadataDict <: Associative{String,Vector{MetadataAsValue}}
     mod::Module
 end
 
-metadata(mod::Module) = ModuleMetadataSet(mod)
+metadata(mod::Module) = ModuleMetadataDict(mod)
 
-function haskey(iter::ModuleMetadataSet, name::String)
+function Base.haskey(iter::ModuleMetadataDict, name::String)
     return API.LLVMGetNamedMetadataNumOperands(ref(iter.mod), name) != 0
 end
 
-function get(iter::ModuleMetadataSet, name::String)
+function Base.getindex(iter::ModuleMetadataDict, name::String)
     nops = API.LLVMGetNamedMetadataNumOperands(ref(iter.mod), name)
     nops == 0 && throw(KeyError(name))
     ops = Vector{API.LLVMValueRef}(nops)
     API.LLVMGetNamedMetadataOperands(ref(iter.mod), name, ops)
-    return Value.(ops)
+    return MetadataAsValue.(ops)
 end
 
-push!(iter::ModuleMetadataSet, name::String, val::Value) =
+Base.push!(iter::ModuleMetadataDict, name::String, val::Value) =
     API.LLVMAddNamedMetadataOperand(ref(iter.mod), name, ref(val))
 
 
@@ -114,44 +108,42 @@ push!(iter::ModuleMetadataSet, name::String, val::Value) =
 
 export globals
 
-import Base: eltype, haskey, get, start, next, done, last, iteratorsize
-
 immutable ModuleGlobalSet
     mod::Module
 end
 
 globals(mod::Module) = ModuleGlobalSet(mod)
 
-eltype(::ModuleGlobalSet) = GlobalVariable
+Base.eltype(::ModuleGlobalSet) = GlobalVariable
 
-function haskey(iter::ModuleGlobalSet, name::String)
+Base.start(iter::ModuleGlobalSet) = API.LLVMGetFirstGlobal(ref(iter.mod))
+
+Base.next(::ModuleGlobalSet, state) =
+    (GlobalVariable(state), API.LLVMGetNextGlobal(state))
+
+Base.done(::ModuleGlobalSet, state) = state == C_NULL
+
+Base.last(iter::ModuleGlobalSet) =
+    GlobalVariable(API.LLVMGetLastGlobal(ref(iter.mod)))
+
+Base.iteratorsize(::ModuleGlobalSet) = Base.SizeUnknown()
+
+# partial associative interface
+
+function Base.haskey(iter::ModuleGlobalSet, name::String)
     return API.LLVMGetNamedGlobal(ref(iter.mod), name) != C_NULL
 end
 
-function get(iter::ModuleGlobalSet, name::String)
+function Base.getindex(iter::ModuleGlobalSet, name::String)
     objref = API.LLVMGetNamedGlobal(ref(iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
     return GlobalVariable(objref)
 end
 
-start(iter::ModuleGlobalSet) = API.LLVMGetFirstGlobal(ref(iter.mod))
-
-next(::ModuleGlobalSet, state) =
-    (GlobalVariable(state), API.LLVMGetNextGlobal(state))
-
-done(::ModuleGlobalSet, state) = state == C_NULL
-
-last(iter::ModuleGlobalSet) =
-    GlobalVariable(API.LLVMGetLastGlobal(ref(iter.mod)))
-
-iteratorsize(::ModuleGlobalSet) = Base.SizeUnknown()
-
 
 ## function iteration
 
 export functions
-
-import Base: eltype, haskey, get, start, next, done, iteratorsize
 
 immutable ModuleFunctionSet
     mod::Module
@@ -159,26 +151,28 @@ end
 
 functions(mod::Module) = ModuleFunctionSet(mod)
 
-eltype(::ModuleFunctionSet) = Function
+Base.eltype(::ModuleFunctionSet) = Function
 
-function haskey(iter::ModuleFunctionSet, name::String)
+Base.start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(iter.mod))
+
+Base.next(::ModuleFunctionSet, state) =
+    (Function(state), API.LLVMGetNextFunction(state))
+
+Base.done(::ModuleFunctionSet, state) = state == C_NULL
+
+Base.last(iter::ModuleFunctionSet) =
+    Function(API.LLVMGetLastFunction(ref(iter.mod)))
+
+Base.iteratorsize(::ModuleFunctionSet) = Base.SizeUnknown()
+
+# partial associative interface
+
+function Base.haskey(iter::ModuleFunctionSet, name::String)
     return API.LLVMGetNamedFunction(ref(iter.mod), name) != C_NULL
 end
 
-function get(iter::ModuleFunctionSet, name::String)
+function Base.getindex(iter::ModuleFunctionSet, name::String)
     objref = API.LLVMGetNamedFunction(ref(iter.mod), name)
     objref == C_NULL && throw(KeyError(name))
     return Function(objref)
 end
-
-start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(iter.mod))
-
-next(::ModuleFunctionSet, state) =
-    (Function(state), API.LLVMGetNextFunction(state))
-
-done(::ModuleFunctionSet, state) = state == C_NULL
-
-last(iter::ModuleFunctionSet) =
-    Function(API.LLVMGetLastFunction(ref(iter.mod)))
-
-iteratorsize(::ModuleFunctionSet) = Base.SizeUnknown()

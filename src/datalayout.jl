@@ -6,8 +6,6 @@ export DataLayout, dispose,
        abi_alignment, frame_alignment, preferred_alignment,
        element_at, offsetof
 
-import Base: convert, show, sizeof
-
 # forward definition of DataLayout in src/module.jl
 reftype(::Type{DataLayout}) = API.LLVMTargetDataRef
 
@@ -26,10 +24,10 @@ end
 
 dispose(data::DataLayout) = API.LLVMDisposeTargetData(ref(data))
 
-convert(::Type{String}, data::DataLayout) =
+Base.convert(::Type{String}, data::DataLayout) =
     unsafe_string(API.LLVMCopyStringRepOfTargetData(ref(data)))
 
-function show(io::IO, data::DataLayout)
+function Base.show(io::IO, data::DataLayout)
     @printf(io, "DataLayout(%s)", convert(String, data))
 end
 
@@ -48,7 +46,7 @@ intptr(data::DataLayout, addrspace::Integer, ctx::Context) =
     IntegerType(API.LLVMIntPtrTypeForASInContext(ref(ctx), ref(data),
                                                             Cuint(addrspace)))
 
-sizeof(data::DataLayout, typ::LLVMType) =
+Base.sizeof(data::DataLayout, typ::LLVMType) =
     Cuint(API.LLVMSizeOfTypeInBits(ref(data), ref(typ)) / 8)
 storage_size(data::DataLayout, typ::LLVMType) = API.LLVMStoreSizeOfType(ref(data), ref(typ))
 abi_size(data::DataLayout, typ::LLVMType) = API.LLVMABISizeOfType(ref(data), ref(typ))

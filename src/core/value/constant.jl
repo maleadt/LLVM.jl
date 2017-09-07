@@ -34,8 +34,6 @@ end
 
 ## scalar
 
-import Base: convert
-
 export ConstantInt, ConstantFP
 
 @checked immutable ConstantInt <: Constant
@@ -69,10 +67,10 @@ function ConstantInt{T<:SizeableInteger}(val::T, ctx::Context=GlobalContext())
     return ConstantInt(typ, val, T<:Signed)
 end
 
-convert{T<:Unsigned}(::Type{T}, val::ConstantInt) =
+Base.convert{T<:Unsigned}(::Type{T}, val::ConstantInt) =
     convert(T, API.LLVMConstIntGetZExtValue(ref(val)))
 
-convert{T<:Signed}(::Type{T}, val::ConstantInt) =
+Base.convert{T<:Signed}(::Type{T}, val::ConstantInt) =
     convert(T, API.LLVMConstIntGetSExtValue(ref(val)))
 
 
@@ -84,7 +82,7 @@ identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
 ConstantFP(typ::LLVMDouble, val::Real) =
     ConstantFP(API.LLVMConstReal(ref(typ), Cdouble(val)))
 
-convert(::Type{Float64}, val::ConstantFP) =
+Base.convert(::Type{Float64}, val::ConstantFP) =
     API.LLVMConstRealGetDouble(ref(val), Ref{API.LLVMBool}())
 
 
@@ -175,8 +173,6 @@ export GlobalVariable, unsafe_delete!,
        isconstant, constant!,
        isextinit, extinit!
 
-import Base: get, push!
-
 @checked immutable GlobalVariable <: GlobalObject
     ref::reftype(GlobalObject)
 end
@@ -212,4 +208,3 @@ isextinit(gv::GlobalVariable) =
   convert(Core.Bool, API.LLVMIsExternallyInitialized(ref(gv)))
 extinit!(gv::GlobalVariable, bool) =
   API.LLVMSetExternallyInitialized(ref(gv), convert(Bool, bool))
-

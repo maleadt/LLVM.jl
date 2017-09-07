@@ -3,8 +3,6 @@ export Instruction, unsafe_delete!,
        parent, opcode,
        predicate_int, predicate_real
 
-import Base: delete!
-
 # forward definition of Instruction in src/core/value/constant.jl
 identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
 
@@ -34,11 +32,19 @@ Instruction(inst::Instruction) =
 
 unsafe_delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionEraseFromParent(ref(inst))
-delete!(::BasicBlock, inst::Instruction) =
+Base.delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionRemoveFromParent(ref(inst))
 
+parent(inst::Instruction) =
+    BasicBlock(API.LLVMGetInstructionParent(ref(inst)))
 
-## metadata
+opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(ref(inst))
+
+predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(ref(inst))
+predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
+
+
+## metadata iteration
 
 @enum(MD, MD_dbg = 0,
           MD_tbaa = 1,
@@ -64,24 +70,32 @@ delete!(::BasicBlock, inst::Instruction) =
           MD_absolute_symbol = 21,
           MD_associated = 22)
 
-hasmetadata(inst::Instruction) = convert(Core.Bool, API.LLVMHasMetadata(ref(inst)))
+export InstructionMetadataDict
 
-hasmetadata(inst::Instruction, kind::MD) = API.LLVMGetMetadata(ref(inst), Cuint(kind)) != C_NULL
+immutable InstructionMetadataDict <: Associative{MD,MetadataAsValue}
+    inst::Instruction
+end
 
-metadata(inst::Instruction, kind::MD) =
-    MetadataAsValue(API.LLVMGetMetadata(ref(inst), Cuint(kind)))
-metadata!(inst::Instruction, kind::MD, node::MetadataAsValue) =
-    API.LLVMSetMetadata(ref(inst), Cuint(kind), ref(node))
-metadata!(inst::Instruction, kind::MD) =
-    API.LLVMSetMetadata(ref(inst), Cuint(kind), convert(reftype(MetadataAsValue), C_NULL))
+metadata(inst::Instruction) = InstructionMetadataDict(inst)
 
-parent(inst::Instruction) =
-    BasicBlock(API.LLVMGetInstructionParent(ref(inst)))
+Base.isempty(md::InstructionMetadataDict) =
+  !convert(Core.Bool, API.LLVMHasMetadata(ref(md.inst)))
 
-opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(ref(inst))
+Base.haskey(md::InstructionMetadataDict, kind::MD) =
+  API.LLVMGetMetadata(ref(md.inst), Cuint(kind)) != C_NULL
 
-predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(ref(inst))
-predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
+function Base.getindex(md::InstructionMetadataDict, kind::MD)
+    objref = API.LLVMGetMetadata(ref(md.inst), Cuint(kind))
+    objref == C_NULL && throw(KeyError(name))
+    return MetadataAsValue(objref)
+  end
+
+Base.setindex!(md::InstructionMetadataDict, node::MetadataAsValue, kind::MD) =
+    API.LLVMSetMetadata(ref(md.inst), Cuint(kind), ref(node))
+
+Base.delete!(md::InstructionMetadataDict, kind::MD) =
+    API.LLVMSetMetadata(ref(md.inst), Cuint(kind),
+                        convert(reftype(MetadataAsValue), C_NULL))
 
 
 ## instruction types
@@ -142,31 +156,30 @@ default_dest(switch::Instruction) =
 
 export successors
 
-import Base: eltype, getindex, setindex!, start, next, done, length, endof
-
 immutable TerminatorSuccessorSet
     term::Instruction
 end
 
 successors(term::Instruction) = TerminatorSuccessorSet(term)
 
-eltype(::TerminatorSuccessorSet) = BasicBlock
+Base.eltype(::TerminatorSuccessorSet) = BasicBlock
 
-getindex(iter::TerminatorSuccessorSet, i) =
+Base.getindex(iter::TerminatorSuccessorSet, i) =
     BasicBlock(API.LLVMGetSuccessor(ref(iter.term), Cuint(i-1)))
 
-setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
+Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
     API.LLVMSetSuccessor(ref(iter.term), Cuint(i-1), blockref(bb))
 
-start(iter::TerminatorSuccessorSet) = (1,length(iter))
+Base.start(iter::TerminatorSuccessorSet) = (1,length(iter))
 
-next(iter::TerminatorSuccessorSet, state) =
+Base.next(iter::TerminatorSuccessorSet, state) =
     (iter[state[1]], (state[1]+1,state[2]))
 
-done(::TerminatorSuccessorSet, state) = (state[1] > state[2])
+Base.done(::TerminatorSuccessorSet, state) = (state[1] > state[2])
 
-length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
-endof(iter::TerminatorSuccessorSet) = length(iter)
+Base.length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
+
+Base.endof(iter::TerminatorSuccessorSet) = length(iter)
 
 
 ## phi nodes
@@ -175,24 +188,22 @@ endof(iter::TerminatorSuccessorSet) = length(iter)
 
 export PhiIncomingSet
 
-import Base: eltype, getindex, append!, length
-
 immutable PhiIncomingSet
     phi::Instruction
 end
 
 incoming(phi::Instruction) = PhiIncomingSet(phi)
 
-eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
+Base.eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
 
-getindex(iter::PhiIncomingSet, i) =
+Base.getindex(iter::PhiIncomingSet, i) =
     tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), Cuint(i-1))),
                 BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), Cuint(i-1))))
 
-function append!(iter::PhiIncomingSet, args::Vector{Tuple{Value, BasicBlock}})
+function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{Value, BasicBlock}})
     vals, blocks = zip(args...)
     API.LLVMAddIncoming(ref(iter.phi), ref.(vals),
                         ref.(blocks), length(args))
 end
 
-length(iter::PhiIncomingSet) = API.LLVMCountIncoming(ref(iter.phi))
+Base.length(iter::PhiIncomingSet) = API.LLVMCountIncoming(ref(iter.phi))

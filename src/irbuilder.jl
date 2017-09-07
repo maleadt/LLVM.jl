@@ -5,8 +5,6 @@ export Builder,
        position!,
        debuglocation, debuglocation!
 
-import Base: position, insert!
-
 @checked immutable Builder
     ref::API.LLVMBuilderRef
 end
@@ -26,16 +24,16 @@ function Builder(f::Core.Function, args...)
     end
 end
 
-position(builder::Builder) = BasicBlock(API.LLVMGetInsertBlock(ref(builder)))
+Base.position(builder::Builder) = BasicBlock(API.LLVMGetInsertBlock(ref(builder)))
 position!(builder::Builder, inst::Instruction) =
     API.LLVMPositionBuilderBefore(ref(builder), ref(inst))
 position!(builder::Builder, bb::BasicBlock) =
     API.LLVMPositionBuilderAtEnd(ref(builder), blockref(bb))
 position!(builder::Builder) = API.LLVMClearInsertionPosition(ref(builder))
 
-insert!(builder::Builder, inst::Instruction) =
+Base.insert!(builder::Builder, inst::Instruction) =
     API.LLVMInsertIntoBuilder(ref(builder), ref(inst))
-insert!(builder::Builder, inst::Instruction, name::String) =
+Base.insert!(builder::Builder, inst::Instruction, name::String) =
     API.LLVMInsertIntoBuilderWithName(ref(builder), ref(inst), name)
 
 debuglocation(builder::Builder) =
