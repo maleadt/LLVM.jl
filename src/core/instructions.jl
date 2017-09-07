@@ -37,6 +37,14 @@ unsafe_delete!(::BasicBlock, inst::Instruction) =
 delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionRemoveFromParent(ref(inst))
 
+parent(inst::Instruction) =
+    BasicBlock(API.LLVMGetInstructionParent(ref(inst)))
+
+opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(ref(inst))
+
+predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(ref(inst))
+predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
+
 
 ## metadata
 
@@ -64,24 +72,27 @@ delete!(::BasicBlock, inst::Instruction) =
           MD_absolute_symbol = 21,
           MD_associated = 22)
 
-hasmetadata(inst::Instruction) = convert(Core.Bool, API.LLVMHasMetadata(ref(inst)))
+export MetadataDict
 
-hasmetadata(inst::Instruction, kind::MD) = API.LLVMGetMetadata(ref(inst), Cuint(kind)) != C_NULL
+immutable MetadataDict <: Associative{MD,MetadataAsValue}
+    inst::Instruction
+end
 
-metadata(inst::Instruction, kind::MD) =
-    MetadataAsValue(API.LLVMGetMetadata(ref(inst), Cuint(kind)))
-metadata!(inst::Instruction, kind::MD, node::MetadataAsValue) =
-    API.LLVMSetMetadata(ref(inst), Cuint(kind), ref(node))
-metadata!(inst::Instruction, kind::MD) =
-    API.LLVMSetMetadata(ref(inst), Cuint(kind), convert(reftype(MetadataAsValue), C_NULL))
+metadata(inst::Instruction) = MetadataDict(inst)
 
-parent(inst::Instruction) =
-    BasicBlock(API.LLVMGetInstructionParent(ref(inst)))
+Base.isempty(md::MetadataDict) = !convert(Core.Bool, API.LLVMHasMetadata(ref(md.inst)))
 
-opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(ref(inst))
+Base.haskey(md::MetadataDict, kind::MD) =
+  API.LLVMGetMetadata(ref(md.inst), Cuint(kind)) != C_NULL
 
-predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(ref(inst))
-predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
+Base.getindex(md::MetadataDict, kind::MD) =
+    MetadataAsValue(API.LLVMGetMetadata(ref(md.inst), Cuint(kind)))
+
+Base.setindex!(md::MetadataDict, node::MetadataAsValue, kind::MD) =
+    API.LLVMSetMetadata(ref(md.inst), Cuint(kind), ref(node))
+
+Base.delete!(md::MetadataDict, kind::MD) =
+    API.LLVMSetMetadata(ref(md.inst), Cuint(kind), convert(reftype(MetadataAsValue), C_NULL))
 
 
 ## instruction types
