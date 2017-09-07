@@ -44,7 +44,7 @@ predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(ref(inst))
 predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
 
 
-## metadata
+## metadata iteration
 
 @enum(MD, MD_dbg = 0,
           MD_tbaa = 1,
@@ -70,27 +70,32 @@ predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
           MD_absolute_symbol = 21,
           MD_associated = 22)
 
-export MetadataDict
+export InstructionMetadataDict
 
-immutable MetadataDict <: Associative{MD,MetadataAsValue}
+immutable InstructionMetadataDict <: Associative{MD,MetadataAsValue}
     inst::Instruction
 end
 
-metadata(inst::Instruction) = MetadataDict(inst)
+metadata(inst::Instruction) = InstructionMetadataDict(inst)
 
-Base.isempty(md::MetadataDict) = !convert(Core.Bool, API.LLVMHasMetadata(ref(md.inst)))
+Base.isempty(md::InstructionMetadataDict) =
+  !convert(Core.Bool, API.LLVMHasMetadata(ref(md.inst)))
 
-Base.haskey(md::MetadataDict, kind::MD) =
+Base.haskey(md::InstructionMetadataDict, kind::MD) =
   API.LLVMGetMetadata(ref(md.inst), Cuint(kind)) != C_NULL
 
-Base.getindex(md::MetadataDict, kind::MD) =
-    MetadataAsValue(API.LLVMGetMetadata(ref(md.inst), Cuint(kind)))
+function Base.getindex(md::InstructionMetadataDict, kind::MD)
+    objref = API.LLVMGetMetadata(ref(md.inst), Cuint(kind))
+    objref == C_NULL && throw(KeyError(name))
+    return MetadataAsValue(objref)
+  end
 
-Base.setindex!(md::MetadataDict, node::MetadataAsValue, kind::MD) =
+Base.setindex!(md::InstructionMetadataDict, node::MetadataAsValue, kind::MD) =
     API.LLVMSetMetadata(ref(md.inst), Cuint(kind), ref(node))
 
-Base.delete!(md::MetadataDict, kind::MD) =
-    API.LLVMSetMetadata(ref(md.inst), Cuint(kind), convert(reftype(MetadataAsValue), C_NULL))
+Base.delete!(md::InstructionMetadataDict, kind::MD) =
+    API.LLVMSetMetadata(ref(md.inst), Cuint(kind),
+                        convert(reftype(MetadataAsValue), C_NULL))
 
 
 ## instruction types

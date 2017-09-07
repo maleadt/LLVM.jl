@@ -255,7 +255,7 @@ Context() do ctx
           %1 = add i32 %0, 1
           ret void
         }""", ctx)
-    fun = get(functions(mod), "fun")
+    fun = functions(mod)["fun"]
 
     for (i, instr) in enumerate(instructions(first(blocks(fun))))
         ops = operands(instr)
@@ -411,10 +411,11 @@ LLVM.Module("SomeModule", ctx) do mod
     threadlocalmode!(gv, LLVM.API.LLVMNotThreadLocal)
     @test threadlocalmode(gv) == LLVM.API.LLVMNotThreadLocal
 
-    gvars = globals(mod)
-    @test gv in gvars
-    unsafe_delete!(mod, gv)
-    @test isempty(gvars)
+    let gvars = globals(mod)
+        @test gv in gvars
+        unsafe_delete!(mod, gv)
+        @test isempty(gvars)
+    end
 end
 end
 
@@ -498,11 +499,16 @@ LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(st, [st])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    @test haskey(types(mod), "SomeType")
-    @test get(types(mod), "SomeType") == st
+    let ts = types(mod)
+        @test keytype(ts) == String
+        @test valtype(ts) == LLVMType
 
-    @test !haskey(types(mod), "SomeOtherType")
-    @test_throws KeyError get(types(mod), "SomeOtherType")
+        @test haskey(ts, "SomeType")
+        @test ts["SomeType"] == st
+
+        @test !haskey(ts, "SomeOtherType")
+        @test_throws KeyError ts["SomeOtherType"]
+    end
 end
 end
 
@@ -513,15 +519,19 @@ LLVM.Module("SomeModule", ctx) do mod
 
     node = MDNode([MDString("SomeMDString", ctx)], ctx)
 
-    mds = metadata(mod)
-    push!(mds, "SomeMDNode", node)
+    let mds = metadata(mod)
+        @test keytype(mds) == String
+        @test valtype(mds) == Vector{LLVM.MetadataAsValue}
 
-    @test haskey(mds, "SomeMDNode")
-    nodeval = get(mds, "SomeMDNode")
-    @test nodeval[1] == node
+        push!(mds, "SomeMDNode", node)
 
-    @test !haskey(mds, "SomeOtherMDNode")
-    @test_throws KeyError get(mds, "SomeOtherMDNode")
+        @test haskey(mds, "SomeMDNode")
+        mdvals = mds["SomeMDNode"]
+        @test mdvals[1] == node
+
+        @test !haskey(mds, "SomeOtherMDNode")
+        @test_throws KeyError mds["SomeOtherMDNode"]
+    end
 end
 end
 
@@ -531,7 +541,7 @@ LLVM.Module("SomeModule", ctx) do mod
     dummygv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
     let gvs = globals(mod)
-        @test eltype(gvs) == GlobalVariable
+        @test eltype(gvs) == typeof(dummygv)
 
         @test first(gvs) == dummygv
         @test last(gvs) == dummygv
@@ -543,10 +553,10 @@ LLVM.Module("SomeModule", ctx) do mod
         @test collect(gvs) == [dummygv]
 
         @test haskey(gvs, "SomeGlobal")
-        @test get(gvs, "SomeGlobal") == dummygv
+        @test gvs["SomeGlobal"] == dummygv
 
         @test !haskey(gvs, "SomeOtherGlobal")
-        @test_throws KeyError get(gvs, "SomeOtherGlobal")
+        @test_throws KeyError gvs["SomeOtherGlobal"]
     end
 end
 end
@@ -571,10 +581,10 @@ LLVM.Module("SomeModule", ctx) do mod
         @test collect(fns) == [dummyfn]
 
         @test haskey(fns, "SomeFunction")
-        @test get(fns, "SomeFunction") == dummyfn
+        @test fns["SomeFunction"] == dummyfn
 
         @test !haskey(fns, "SomeOtherFunction")
-        @test_throws KeyError get(fns, "SomeOtherFunction")
+        @test_throws KeyError fns["SomeOtherFunction"]
     end
 end
 end
@@ -603,10 +613,11 @@ LLVM.Module("SomeModule", ctx) do mod
     gc!(fn, "SomeGC")
     @test LLVM.gc(fn) == "SomeGC"
 
-    fns = functions(mod)
-    @test fn in fns
-    unsafe_delete!(mod, fn)
-    @test isempty(fns)
+    let fns = functions(mod)
+        @test fn in fns
+        unsafe_delete!(mod, fn)
+        @test isempty(fns)
+    end
 end
 end
 
@@ -846,18 +857,28 @@ LLVM.Module("SomeModule", ctx) do mod
     @test LLVM.parent(brinst) == bb1
 
     # metadata
-    md = metadata(brinst)
-    @test isempty(md)
-    @test !haskey(md, LLVM.MD_dbg)
     mdval = MDNode([MDString("whatever", ctx)], ctx)
-    md[LLVM.MD_dbg] = mdval
-    @test md[LLVM.MD_dbg] == mdval
-    @test !isempty(md)
-    @test haskey(md, LLVM.MD_dbg)
-    @test !haskey(md, LLVM.MD_tbaa)
-    delete!(md, LLVM.MD_dbg)
-    @test isempty(md)
-    @test !haskey(md, LLVM.MD_dbg)
+    let md = metadata(brinst)
+        @test keytype(md) == LLVM.MD
+        @test valtype(md) == LLVM.MetadataAsValue
+
+        @test isempty(md)
+        @test !haskey(md, LLVM.MD_dbg)
+
+        md[LLVM.MD_dbg] = mdval
+        @test md[LLVM.MD_dbg] == mdval
+
+        @test !isempty(md)
+        @test haskey(md, LLVM.MD_dbg)
+
+        @test !haskey(md, LLVM.MD_tbaa)
+        @test_throws KeyError md[LLVM.MD_tbaa]
+
+        delete!(md, LLVM.MD_dbg)
+
+        @test isempty(md)
+        @test !haskey(md, LLVM.MD_dbg)
+    end
 
     @test retinst in instructions(bb3)
     delete!(bb3, retinst)
