@@ -2,24 +2,31 @@
 
 include("select.jl")
 
-# name for libLLVM_extra
 const libext = is_apple() ? "dylib" : "so"
-const extras_name = "libLLVM_extra.$libext"
+
+# properties of the final location of llvm-extra
+const extras_name = "LLVM_extras.$libext"
+const extras_dir = joinpath(Pkg.Dir._pkgroot(), "lib", "v$(VERSION.major).$(VERSION.minor)")
+const extras_path = joinpath(extras_dir, extras_name)
 
 verbose_run(cmd) = (println(cmd); run(cmd))
 
 function compile_extras(llvm, julia)
     debug("Compiling extras library for LLVM $llvm and Julia $julia")
 
-    extras_dir = joinpath(@__DIR__, "llvm-extra")
-    extras_path = joinpath(extras_dir, extras_name)
+    # properties of the in-tree build of llvm-extra
+    extras_src_dir = joinpath(@__DIR__, "llvm-extra")
+    extras_src_path = joinpath(extras_src_dir, "libLLVM_extra.$libext")
 
-    cd(extras_dir) do
+    cd(extras_src_dir) do
         withenv("LLVM_CONFIG"  => get(llvm.config),  "LLVM_LIBRARY" => llvm.path,
                 "JULIA_CONFIG" => get(julia.config), "JULIA_BINARY" => julia.path) do
-            # force a rebuild as the LLVM installation might have changed, undetectably
-            verbose_run(`make clean`)
-            verbose_run(`make -j$(Sys.CPU_CORES+1)`)
+            try
+                verbose_run(`make -j$(Sys.CPU_CORES+1)`)
+                mv(extras_src_path, extras_path; remove_destination=true)
+            finally
+                verbose_run(`make clean`)
+            end
         end
     end
 
@@ -32,8 +39,6 @@ function compile_extras(llvm, julia)
     end
 
     debug("Compiled extra library at $extras_path")
-
-    return extras_path
 end
 
 
