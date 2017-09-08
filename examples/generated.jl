@@ -18,10 +18,16 @@ end
                            (Any, Ptr{Bool}), T, isboxed_ref))
     @assert !isboxed_ref[]
 
+    T_int = LLVM.IntType(sizeof(Int)*8, jlctx)
+    T_ptr = LLVM.PointerType(eltyp)
+
     # create a module & function
     mod = LLVM.Module("llvmcall", jlctx)
-    paramtyps = [LLVM.PointerType(eltyp),
-                 LLVM.IntType(sizeof(Int)*8, jlctx)]
+    if VERSION >= v"0.7.0-DEV.1704"
+        paramtyps = [T_int, T_int]
+    else
+        paramtyps = [T_ptr, T_int]
+    end
     llvmf_typ = LLVM.FunctionType(eltyp, paramtyps)
     llvmf = LLVM.Function(mod, "unsafe_load", llvmf_typ)
 
@@ -30,7 +36,13 @@ end
         entry = BasicBlock(llvmf, "entry", jlctx)
         position!(builder, entry)
 
-        ptr = gep!(builder, parameters(llvmf)[1], [parameters(llvmf)[2]])
+        if VERSION >= v"0.7.0-DEV.1704"
+            ptr = inttoptr!(builder, parameters(llvmf)[1], T_ptr)
+        else
+            ptr = parameters(llvmf)[1]
+        end
+
+        ptr = gep!(builder, ptr, [parameters(llvmf)[2]])
         val = load!(builder, ptr)
         ret!(builder, val)
     end
