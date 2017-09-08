@@ -69,7 +69,7 @@ function main()
         @eval module Previous; include($ext_bak); end
         function globals(mod)
             all_names = names(mod, true)
-            filter(name-> !any(name .== [Symbol(mod), Symbol("#eval"), :eval]), all_names)
+            filter(name-> !any(name .== [module_name(mod), Symbol("#eval"), :eval]), all_names)
         end
         ext_bak_db = Dict{Symbol,Any}(name => getfield(Previous, name)
                                       for name in globals(Previous))
