@@ -2,7 +2,7 @@
 
 # llvm.org/docs/doxygen/html/group__LLVMCSupportTypes.html
 
-immutable Bug <: Exception
+struct Bug <: Exception
     msg::AbstractString
 end
 
@@ -17,7 +17,7 @@ reftype(t::Type) = bug("No reference type defined for $t")
 
 # abstract implementations
 ref(obj) = obj.ref
-identify{T}(::Type{T}, ref) = T(ref)
+identify(::Type{T}, ref) where {T} = T(ref)
 @inline function check(::Type, ref::Ptr)
     ref==C_NULL && throw(NullException())
 end

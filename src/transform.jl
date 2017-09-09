@@ -5,7 +5,7 @@ export PassManagerBuilder, dispose,
        unit_at_a_time!, unroll_loops!, simplify_libcalls!, inliner!,
        populate!
 
-@checked immutable PassManagerBuilder
+@checked struct PassManagerBuilder
     ref::API.LLVMPassManagerBuilderRef
 end
 reftype(::Type{PassManagerBuilder}) = API.LLVMPassManagerBuilderRef

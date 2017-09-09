@@ -7,11 +7,11 @@ const jlctx = LLVM.Context(convert(LLVM.API.LLVMContextRef,
                                    cglobal(:jl_LLVMContext, Void)))
 
 # pointer wrapper type for which we'll build our own low-level intrinsics
-immutable CustomPtr{T}
+struct CustomPtr{T}
     ptr::Ptr{T}
 end
 
-@generated function Base.unsafe_load{T}(p::CustomPtr{T}, i::Integer=1)
+@generated function Base.unsafe_load(p::CustomPtr{T}, i::Integer=1) where T
     # get the element type
     isboxed_ref = Ref{Bool}()
     eltyp = LLVMType(ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef,

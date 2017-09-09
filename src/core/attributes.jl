@@ -5,14 +5,14 @@ export Attribute,
        EnumAttribute, StringAttribute,
        kind, value
 
-@compat abstract type Attribute end
-reftype{T<:Attribute}(::Type{T}) = API.LLVMAttributeRef
+abstract type Attribute end
+reftype(::Type{T}) where {T<:Attribute} = API.LLVMAttributeRef
 
-@checked immutable EnumAttribute <: Attribute
+@checked struct EnumAttribute <: Attribute
     ref::reftype(Attribute)
 end
 
-@checked immutable StringAttribute <: Attribute
+@checked struct StringAttribute <: Attribute
     ref::reftype(Attribute)
 end
 
@@ -30,7 +30,7 @@ function Attribute(ref::API.LLVMAttributeRef)
     end
 end
 
-function Base.show{T<:Attribute}(io::IO, attr::T)
+function Base.show(io::IO, attr::T) where T<:Attribute
     print(io, "$T $(kind(attr))=$(value(attr))")
 end
 

@@ -4,7 +4,7 @@ export TargetMachine, dispose,
        target, triple, cpu, features, asm_verbosity!,
        emit, add_transform_info!, add_library_info!
 
-@checked immutable TargetMachine
+@checked struct TargetMachine
     ref::API.LLVMTargetMachineRef
 end
 reftype(::Type{TargetMachine}) = API.LLVMTargetMachineRef

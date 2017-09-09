@@ -1,6 +1,6 @@
 export DEBUG_METADATA_VERSION, MDString, MDNode, operands
 
-@checked immutable MetadataAsValue <: Value
+@checked struct MetadataAsValue <: Value
     ref::reftype(Value)
 end
 identify(::Type{Value}, ::Val{API.LLVMMetadataAsValueValueKind}) = MetadataAsValue
@@ -28,10 +28,10 @@ DEBUG_METADATA_VERSION() = API.LLVMGetDebugMDVersion()
 
 const MDNode = MetadataAsValue
 
-MDNode{T<:Value}(vals::Vector{T}) =
+MDNode(vals::Vector{T}) where {T<:Value} =
     MDNode(API.LLVMMDNode(ref.(vals), Cuint(length(vals))))
 
-MDNode{T<:Value}(vals::Vector{T}, ctx::Context) =
+MDNode(vals::Vector{T}, ctx::Context) where {T<:Value} =
     MDNode(API.LLVMMDNodeInContext(ref(ctx), ref.(vals),
                                    Cuint(length(vals))))
 

@@ -4,7 +4,7 @@ export Target,
        name, description,
        hasjit, hastargetmachine, hasasmparser
 
-@checked immutable Target
+@checked struct Target
     ref::API.LLVMTargetRef
 end
 reftype(::Type{Target}) = API.LLVMTargetRef
@@ -35,7 +35,7 @@ hasasmparser(t::Target) = convert(Core.Bool, API.LLVMTargetHasAsmBackend(ref(t))
 
 export targets
 
-immutable TargetSet end
+struct TargetSet end
 
 targets() = TargetSet()
 

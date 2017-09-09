@@ -3,7 +3,7 @@
 const True = API.LLVMBool(1)
 const False = API.LLVMBool(0)
 
-immutable Bool
+struct Bool
     bool::Core.Bool
 end
 

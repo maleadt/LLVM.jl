@@ -2,13 +2,13 @@ export BasicBlock, unsafe_delete!,
        parent, terminator, name,
        move_before, move_after
 
-@checked immutable BasicBlock <: Value
+@checked struct BasicBlock <: Value
     ref::reftype(Value)
 end
 identify(::Type{Value}, ::Val{API.LLVMBasicBlockValueKind}) = BasicBlock
 
 # forward declarations
-@checked immutable Function <: GlobalObject
+@checked struct Function <: GlobalObject
     ref::reftype(GlobalObject)
 end
 
@@ -45,7 +45,7 @@ move_after(bb::BasicBlock, pos::BasicBlock) =
 
 export instructions
 
-immutable BasicBlockInstructionSet
+struct BasicBlockInstructionSet
     bb::BasicBlock
 end
 

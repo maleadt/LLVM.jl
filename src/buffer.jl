@@ -1,11 +1,11 @@
 export MemoryBuffer, MemoryBufferFile, dispose
 
-@checked immutable MemoryBuffer
+@checked struct MemoryBuffer
     ref::API.LLVMMemoryBufferRef
 end
 reftype(::Type{MemoryBuffer}) = API.LLVMMemoryBufferRef
 
-function MemoryBuffer{T<:Union{UInt8,Int8}}(data::Vector{T}, name::String="", copy::Core.Bool=true)
+function MemoryBuffer(data::Vector{T}, name::String="", copy::Core.Bool=true) where T<:Union{UInt8,Int8}
     ptr = pointer(data)
     len = Csize_t(length(data))
     if copy

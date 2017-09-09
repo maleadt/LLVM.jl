@@ -32,7 +32,7 @@ entry(f::Function) = BasicBlock(API.LLVMGetEntryBasicBlock(ref(f)))
 
 export function_attributes, parameter_attributes, return_attributes
 
-immutable FunctionAttrSet
+struct FunctionAttrSet
     f::Function
     idx::API.LLVMAttributeIndex
 end
@@ -77,12 +77,12 @@ end
 
 export Argument, parameters
 
-@checked immutable Argument <: Value
+@checked struct Argument <: Value
     ref::reftype(Value)
 end
 identify(::Type{Value}, ::Val{API.LLVMArgumentValueKind}) = Argument
 
-immutable FunctionParameterSet
+struct FunctionParameterSet
     f::Function
 end
 
@@ -116,7 +116,7 @@ end
 
 export blocks
 
-immutable FunctionBlockSet
+struct FunctionBlockSet
     f::Function
 end
 

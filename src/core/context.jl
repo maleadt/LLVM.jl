@@ -2,7 +2,7 @@
 
 export Context, dispose, GlobalContext
 
-@checked immutable Context
+@checked struct Context
     ref::API.LLVMContextRef
 end
 reftype(::Type{Context}) = API.LLVMContextRef
@@ -31,7 +31,7 @@ GlobalContext() = Context(API.LLVMGetGlobalContext())
 
 export LLVMException
 
-immutable LLVMException <: Exception
+struct LLVMException <: Exception
     info::String
 end
 
@@ -44,7 +44,7 @@ end
 
 export DiagnosticInfo, severity, message
 
-@checked immutable DiagnosticInfo
+@checked struct DiagnosticInfo
     ref::API.LLVMDiagnosticInfoRef
 end
 reftype(::Type{DiagnosticInfo}) = API.LLVMDiagnosticInfoRef

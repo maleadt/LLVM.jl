@@ -78,7 +78,7 @@ function __init__()
     end
 
     # check validity of LLVM library
-    debug("Checking validity of ", (libllvm_system?"system":"bundled"), " library at $libllvm_path")
+    debug("Checking validity of ", (libllvm_system ? "system" : "bundled"), " library at $libllvm_path")
     stat(libllvm_path).mtime == libllvm_mtime ||
         warn("LLVM library has been modified. Please run Pkg.build(\"LLVM\") and restart Julia.")
 

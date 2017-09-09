@@ -3,7 +3,7 @@ export ModuleProvider, dispose
 # TODO: use this class implicitly? ie. when passing Modules to functions expecting a
 #       ModuleProvider. Especially because dispose(mp) destroys the underlying mod.
 
-@checked immutable ModuleProvider
+@checked struct ModuleProvider
     ref::API.LLVMModuleProviderRef
 end
 reftype(::Type{ModuleProvider}) = API.LLVMModuleProviderRef

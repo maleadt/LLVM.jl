@@ -5,7 +5,7 @@ export Builder,
        position!,
        debuglocation, debuglocation!
 
-@checked immutable Builder
+@checked struct Builder
     ref::API.LLVMBuilderRef
 end
 reftype(::Type{Builder}) = API.LLVMBuilderRef
@@ -88,7 +88,7 @@ ret!(builder::Builder) =
 ret!(builder::Builder, V::Value) =
     Instruction(API.LLVMBuildRet(ref(builder), ref(V)))
 
-ret!{T<:Value}(builder::Builder, RetVals::Vector{T}) =
+ret!(builder::Builder, RetVals::Vector{T}) where {T<:Value} =
     Instruction(API.LLVMBuildAggregateRet(ref(builder), ref.(RetVals), Cuint(length(RetVals))))
 
 br!(builder::Builder, Dest::BasicBlock) =
@@ -103,7 +103,7 @@ switch!(builder::Builder, V::Value, Else::BasicBlock, NumCases::Integer=10) =
 indirectbr!(builder::Builder, Addr::Value, NumDests::Integer=10) =
     Instruction(API.LLVMBuildIndirectBr(ref(builder), ref(Addr), Cuint(NumDests)))
 
-invoke!{T<:Value}(builder::Builder, Fn::Value, Args::Vector{T}, Then::BasicBlock, Catch::BasicBlock, Name::String="") =
+invoke!(builder::Builder, Fn::Value, Args::Vector{T}, Then::BasicBlock, Catch::BasicBlock, Name::String="") where {T<:Value} =
     Instruction(API.LLVMBuildInvoke(ref(builder), ref(Fn), ref.(Args), Cuint(length(Args)), blockref(Then), blockref(Catch), Name))
 
 resume!(builder::Builder, Exn::Value) =
@@ -250,10 +250,10 @@ atomic_rmw!(builder::Builder, op::API.LLVMAtomicRMWBinOp, PTR::Value, Val::Value
 atomic_cmpxchg!(builder::Builder, Ptr::Value, Cmp::Value, New::Value, SuccessOrdering::API.LLVMAtomicOrdering, FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Core.Bool) =
     Instruction(API.LLVMBuildAtomicCmpXchg(ref(builder), ref(Ptr), ref(Cmp), ref(New), SuccessOrdering,FailureOrdering, convert(Bool, SingleThread)))
 
-gep!{T<:Value}(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") =
+gep!(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") where {T<:Value} =
     Value(API.LLVMBuildGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))
 
-inbounds_gep!{T<:Value}(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") =
+inbounds_gep!(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") where {T<:Value} =
     Value(API.LLVMBuildInBoundsGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))
 
 struct_gep!(builder::Builder, Pointer::Value, Idx, Name::String="") =
@@ -337,7 +337,7 @@ phi!(builder::Builder, Ty::LLVMType, Name::String="") =
 select!(builder::Builder, If::Value, Then::Value, Else::Value, Name::String="") =
     Value(API.LLVMBuildSelect(ref(builder), ref(If), ref(Then), ref(Else), Name))
 
-call!{T<:Value}(builder::Builder, Fn::Value, Args::Vector{T}=Value[], Name::String="") =
+call!(builder::Builder, Fn::Value, Args::Vector{T}=Value[], Name::String="") where {T<:Value} =
     Instruction(API.LLVMBuildCall(ref(builder), ref(Fn), ref.(Args), Cuint(length(Args)), Name))
 
 va_arg!(builder::Builder, List::Value, Ty::LLVMType, Name::String="") =
