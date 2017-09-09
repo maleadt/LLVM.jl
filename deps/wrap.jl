@@ -38,7 +38,7 @@ function wrap(config, destdir)
             path = joinpath(parent, child)
             if isdir(path)
                 push!(header_dirs, path)
-            else isfile(path) && endswith(path, ".h")
+            elseif isfile(path) && endswith(path, ".h")
                 push!(header_files, path)
             end
         end
