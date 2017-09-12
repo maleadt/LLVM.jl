@@ -89,6 +89,47 @@ function emit_retint(ctx::Context, val)
     return mod
 end
 
+
+function emit_phi(ctx::Context)
+    # if %1 > %2 then %1+2 else %2-5
+    mod = LLVM.Module("sommod", ctx)
+    params = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
+
+    ft = LLVM.FunctionType(LLVM.Int32Type(ctx), params)
+    fn = LLVM.Function(mod, "gt", ft)
+
+    entry = BasicBlock(fn, "entry")
+    then = BasicBlock(fn, "then")
+    elsee = BasicBlock(fn, "else")
+    merge = BasicBlock(fn, "ifcont")
+
+    Builder(ctx) do builder
+        position!(builder, entry)
+
+        cond = LLVM.icmp!(builder, LLVM.API.LLVMIntSGT, parameters(fn)[1], parameters(fn)[2], "ifcond")
+        br!(builder, cond, then, elsee)
+
+        position!(builder, then)
+        thencg = add!(builder, parameters(fn)[1], ConstantInt(LLVM.Int32Type(ctx), 2))
+        br!(builder, merge)
+
+        position!(builder, elsee)
+        elsecg = sub!(builder, LLVM.parameters(fn)[2], LLVM.ConstantInt(LLVM.Int32Type(ctx), 5))
+        br!(builder, merge)
+
+        position!(builder, merge)
+        phi = phi!(builder, LLVM.Int32Type(ctx), "iftmp")
+
+        append!(LLVM.incoming(phi), [(thencg, then), (elsecg, elsee)])
+
+        @test length(LLVM.incoming(phi)) == 2
+
+        ret!(builder, phi)
+    end
+    verify(mod)
+    return mod
+end
+
 Context() do ctx
     mod = emit_sum(ctx)
 
@@ -122,6 +163,26 @@ Context() do ctx
             @test convert(Int, res) == 42
             dispose(res)
         end
+    end
+
+    args1 =
+    [GenericValue(LLVM.Int32Type(ctx), 1),
+    GenericValue(LLVM.Int32Type(ctx), 2)]
+
+    args2 =
+    [GenericValue(LLVM.Int32Type(ctx), 2),
+    GenericValue(LLVM.Int32Type(ctx), 1)]
+
+    for (args, true_res) in ((args1, -3), (args2, 4))
+        let mod = emit_phi(ctx)
+            fn = functions(mod)["gt"]
+            Interpreter(mod) do engine
+                res = LLVM.run(engine, fn, args)
+                @test convert(Int, res) == true_res
+                dispose(res)
+            end
+        end
+        dispose.(args)
     end
 end
 

@@ -135,7 +135,7 @@ callconv!(inst::Instruction, cc) =
 istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(ref(inst)))
 tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(ref(inst), convert(Bool, bool))
 
-called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(ref( inst)))
+called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(ref(inst)))
 
 
 ## terminators
@@ -200,10 +200,10 @@ Base.getindex(iter::PhiIncomingSet, i) =
     tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), Cuint(i-1))),
                 BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), Cuint(i-1))))
 
-function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{Value, BasicBlock}})
+function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{V, BasicBlock}} where V <: Value)
     vals, blocks = zip(args...)
-    API.LLVMAddIncoming(ref(iter.phi), ref.(vals),
-                        ref.(blocks), length(args))
+    API.LLVMAddIncoming(ref(iter.phi), collect(ref.(vals)),
+                        collect(ref.(blocks)), UInt32(length(args)))
 end
 
 Base.length(iter::PhiIncomingSet) = API.LLVMCountIncoming(ref(iter.phi))
