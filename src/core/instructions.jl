@@ -203,7 +203,9 @@ Base.getindex(iter::PhiIncomingSet, i) =
 function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{V, BasicBlock}} where V <: Value)
     vals, blocks = zip(args...)
     API.LLVMAddIncoming(ref(iter.phi), collect(ref.(vals)),
-                        collect(ref.(blocks)), UInt32(length(args)))
+                        collect(ref.(blocks)), Cuint(length(args)))
 end
+
+Base.push!(iter::PhiIncomingSet, args::Tuple{<:Value, BasicBlock}) = append!(iter, [args])
 
 Base.length(iter::PhiIncomingSet) = API.LLVMCountIncoming(ref(iter.phi))
