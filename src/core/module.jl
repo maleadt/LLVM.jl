@@ -100,7 +100,7 @@ function Base.getindex(iter::ModuleMetadataDict, name::String)
     return MetadataAsValue.(ops)
 end
 
-Base.push!(iter::ModuleMetadataDict, name::String, val::Value) =
+Base.push!(iter::ModuleMetadataDict, name::String, val::MetadataAsValue) =
     API.LLVMAddNamedMetadataOperand(ref(iter.mod), name, ref(val))
 
 
