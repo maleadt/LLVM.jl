@@ -902,9 +902,9 @@ Execution Engine
 - [ ] LLVMRunFunctionAsMain
 - [x] LLVMRunFunction
 - [ ] LLVMFreeMachineCodeForFunction
-- [ ] LLVMAddModule
-- [ ] LLVMRemoveModule
-- [ ] LLVMFindFunction
+- [x] LLVMAddModule
+- [x] LLVMRemoveModule
+- [x] LLVMFindFunction
 - [ ] LLVMRecompileAndRelinkFunction
 - [ ] LLVMGetExecutionEngineTargetData
 - [ ] LLVMGetExecutionEngineTargetMachine
