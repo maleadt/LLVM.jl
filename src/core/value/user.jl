@@ -1,12 +1,12 @@
 ## user values (<: llvm::User)
 
-@compat abstract type User <: Value end
+abstract type User <: Value end
 
 # operand iteration
 
 export operands
 
-immutable UserOperandSet
+struct UserOperandSet
     user::User
 end
 

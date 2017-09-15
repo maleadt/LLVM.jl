@@ -27,7 +27,7 @@ const use_system_llvm = haskey(ENV, "USE_SYSTEM_LLVM")
 # Toolchain type
 #
 
-immutable Toolchain
+struct Toolchain
     path::String
     version::VersionNumber
     config::Nullable{String}

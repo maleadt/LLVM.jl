@@ -10,7 +10,7 @@ export dispose,
 reftype(::Type{Module}) = API.LLVMModuleRef
 
 # forward declarations
-@checked immutable DataLayout
+@checked struct DataLayout
     ref::API.LLVMTargetDataRef
 end
 
@@ -61,7 +61,7 @@ context(mod::Module) = Context(API.LLVMGetModuleContext(ref(mod)))
 
 export types
 
-immutable ModuleTypeDict <: Associative{String,LLVMType}
+struct ModuleTypeDict <: Associative{String,LLVMType}
     mod::Module
 end
 
@@ -82,7 +82,7 @@ end
 
 export metadata
 
-immutable ModuleMetadataDict <: Associative{String,Vector{MetadataAsValue}}
+struct ModuleMetadataDict <: Associative{String,Vector{MetadataAsValue}}
     mod::Module
 end
 
@@ -108,7 +108,7 @@ Base.push!(iter::ModuleMetadataDict, name::String, val::MetadataAsValue) =
 
 export globals
 
-immutable ModuleGlobalSet
+struct ModuleGlobalSet
     mod::Module
 end
 
@@ -145,7 +145,7 @@ end
 
 export functions
 
-immutable ModuleFunctionSet
+struct ModuleFunctionSet
     mod::Module
 end
 

@@ -6,87 +6,87 @@ const LLVMFatalErrorHandler = Ptr{Void}
 
 const LLVMBool = Cint
 
-type LLVMOpaqueMemoryBuffer
+mutable struct LLVMOpaqueMemoryBuffer
 end
 
 const LLVMMemoryBufferRef = Ptr{LLVMOpaqueMemoryBuffer}
 
-type LLVMOpaqueContext
+mutable struct LLVMOpaqueContext
 end
 
 const LLVMContextRef = Ptr{LLVMOpaqueContext}
 
-type LLVMOpaqueModule
+mutable struct LLVMOpaqueModule
 end
 
 const LLVMModuleRef = Ptr{LLVMOpaqueModule}
 
-type LLVMOpaqueType
+mutable struct LLVMOpaqueType
 end
 
 const LLVMTypeRef = Ptr{LLVMOpaqueType}
 
-type LLVMOpaqueValue
+mutable struct LLVMOpaqueValue
 end
 
 const LLVMValueRef = Ptr{LLVMOpaqueValue}
 
-type LLVMOpaqueBasicBlock
+mutable struct LLVMOpaqueBasicBlock
 end
 
 const LLVMBasicBlockRef = Ptr{LLVMOpaqueBasicBlock}
 
-type LLVMOpaqueBuilder
+mutable struct LLVMOpaqueBuilder
 end
 
 const LLVMBuilderRef = Ptr{LLVMOpaqueBuilder}
 
-type LLVMOpaqueModuleProvider
+mutable struct LLVMOpaqueModuleProvider
 end
 
 const LLVMModuleProviderRef = Ptr{LLVMOpaqueModuleProvider}
 
-type LLVMOpaquePassManager
+mutable struct LLVMOpaquePassManager
 end
 
 const LLVMPassManagerRef = Ptr{LLVMOpaquePassManager}
 
-type LLVMOpaquePassRegistry
+mutable struct LLVMOpaquePassRegistry
 end
 
 const LLVMPassRegistryRef = Ptr{LLVMOpaquePassRegistry}
 
-type LLVMOpaqueUse
+mutable struct LLVMOpaqueUse
 end
 
 const LLVMUseRef = Ptr{LLVMOpaqueUse}
 
-type LLVMOpaqueAttributeRef
+mutable struct LLVMOpaqueAttributeRef
 end
 
 const LLVMAttributeRef = Ptr{LLVMOpaqueAttributeRef}
 
-type LLVMOpaqueDiagnosticInfo
+mutable struct LLVMOpaqueDiagnosticInfo
 end
 
 const LLVMDiagnosticInfoRef = Ptr{LLVMOpaqueDiagnosticInfo}
 
-type LLVMOpaqueObjectFile
+mutable struct LLVMOpaqueObjectFile
 end
 
 const LLVMObjectFileRef = Ptr{LLVMOpaqueObjectFile}
 
-type LLVMOpaqueSectionIterator
+mutable struct LLVMOpaqueSectionIterator
 end
 
 const LLVMSectionIteratorRef = Ptr{LLVMOpaqueSectionIterator}
 
-type LLVMOpaqueSymbolIterator
+mutable struct LLVMOpaqueSymbolIterator
 end
 
 const LLVMSymbolIteratorRef = Ptr{LLVMOpaqueSymbolIterator}
 
-type LLVMOpaqueRelocationIterator
+mutable struct LLVMOpaqueRelocationIterator
 end
 
 const LLVMRelocationIteratorRef = Ptr{LLVMOpaqueRelocationIterator}
@@ -110,22 +110,22 @@ const LLVMBigEndian = (UInt32)(0)
 const LLVMLittleEndian = (UInt32)(1)
 # end enum LLVMByteOrdering
 
-type LLVMOpaqueTargetData
+mutable struct LLVMOpaqueTargetData
 end
 
 const LLVMTargetDataRef = Ptr{LLVMOpaqueTargetData}
 
-type LLVMOpaqueTargetLibraryInfotData
+mutable struct LLVMOpaqueTargetLibraryInfotData
 end
 
 const LLVMTargetLibraryInfoRef = Ptr{LLVMOpaqueTargetLibraryInfotData}
 
-type LLVMOpaqueTargetMachine
+mutable struct LLVMOpaqueTargetMachine
 end
 
 const LLVMTargetMachineRef = Ptr{LLVMOpaqueTargetMachine}
 
-type LLVMTarget
+mutable struct LLVMTarget
 end
 
 const LLVMTargetRef = Ptr{LLVMTarget}
@@ -493,13 +493,13 @@ const LLVMDisassembler_Option_PrintLatency = 16
 const LLVMDisasmContextRef = Ptr{Void}
 const LLVMOpInfoCallback = Ptr{Void}
 
-type LLVMOpInfoSymbol1
+mutable struct LLVMOpInfoSymbol1
     Present::UInt64
     Name::Cstring
     Value::UInt64
 end
 
-type LLVMOpInfo1
+mutable struct LLVMOpInfo1
     AddSymbol::LLVMOpInfoSymbol1
     SubtractSymbol::LLVMOpInfoSymbol1
     Value::UInt64
@@ -508,22 +508,22 @@ end
 
 const LLVMSymbolLookupCallback = Ptr{Void}
 
-type LLVMOpaqueGenericValue
+mutable struct LLVMOpaqueGenericValue
 end
 
 const LLVMGenericValueRef = Ptr{LLVMOpaqueGenericValue}
 
-type LLVMOpaqueExecutionEngine
+mutable struct LLVMOpaqueExecutionEngine
 end
 
 const LLVMExecutionEngineRef = Ptr{LLVMOpaqueExecutionEngine}
 
-type LLVMOpaqueMCJITMemoryManager
+mutable struct LLVMOpaqueMCJITMemoryManager
 end
 
 const LLVMMCJITMemoryManagerRef = Ptr{LLVMOpaqueMCJITMemoryManager}
 
-type LLVMMCJITCompilerOptions
+mutable struct LLVMMCJITCompilerOptions
     OptLevel::UInt32
     CodeModel::LLVMCodeModel
     NoFramePointerElim::LLVMBool
@@ -600,17 +600,17 @@ const LTO_CODEGEN_PIC_MODEL_DYNAMIC_NO_PIC = (UInt32)(2)
 const LTO_CODEGEN_PIC_MODEL_DEFAULT = (UInt32)(3)
 # end enum lto_codegen_model
 
-type LLVMOpaqueLTOModule
+mutable struct LLVMOpaqueLTOModule
 end
 
 const lto_module_t = Ptr{LLVMOpaqueLTOModule}
 
-type LLVMOpaqueLTOCodeGenerator
+mutable struct LLVMOpaqueLTOCodeGenerator
 end
 
 const lto_code_gen_t = Ptr{LLVMOpaqueLTOCodeGenerator}
 
-type LLVMOpaqueThinLTOCodeGenerator
+mutable struct LLVMOpaqueThinLTOCodeGenerator
 end
 
 const thinlto_code_gen_t = Ptr{LLVMOpaqueThinLTOCodeGenerator}
@@ -625,12 +625,12 @@ const LTO_DS_NOTE = (UInt32)(2)
 
 const lto_diagnostic_handler_t = Ptr{Void}
 
-type LTOObjectBuffer
+mutable struct LTOObjectBuffer
     Buffer::Cstring
     Size::Csize_t
 end
 
-type LLVMOrcOpaqueJITStack
+mutable struct LLVMOrcOpaqueJITStack
 end
 
 const LLVMOrcJITStackRef = Ptr{LLVMOrcOpaqueJITStack}
@@ -645,7 +645,7 @@ const LLVMOrcErrSuccess = (UInt32)(0)
 const LLVMOrcErrGeneric = (UInt32)(1)
 # end enum LLVMOrcErrorCode
 
-type LLVMOpaquePassManagerBuilder
+mutable struct LLVMOpaquePassManagerBuilder
 end
 
 const LLVMPassManagerBuilderRef = Ptr{LLVMOpaquePassManagerBuilder}

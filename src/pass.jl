@@ -1,7 +1,7 @@
 export Pass
 
-@compat abstract type Pass end
-reftype{T<:Pass}(::Type{T}) = API.LLVMPassRef
+abstract type Pass end
+reftype(::Type{T}) where {T<:Pass} = API.LLVMPassRef
 
 @inline function check_access()
     if libllvm_system
@@ -16,7 +16,7 @@ end
 
 export ModulePass
 
-@checked immutable ModulePass <: Pass
+@checked struct ModulePass <: Pass
     ref::reftype(Pass)
     root::Any
 
@@ -39,7 +39,7 @@ end
 
 export FunctionPass
 
-@checked immutable FunctionPass <: Pass
+@checked struct FunctionPass <: Pass
     ref::reftype(Pass)
     root::Any
 
@@ -61,7 +61,7 @@ end
 
 export BasicBlockPass
 
-@checked immutable BasicBlockPass <: Pass
+@checked struct BasicBlockPass <: Pass
     ref::reftype(Pass)
     root::Any
 

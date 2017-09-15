@@ -7,7 +7,7 @@ all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(ref(typ)))
 Base.isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(ref(val)))
 
 
-@checked immutable UndefValue <: User
+@checked struct UndefValue <: User
     ref::reftype(User)
 end
 identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
@@ -15,7 +15,7 @@ identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
 UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(ref(typ)))
 
 
-@checked immutable PointerNull <: User
+@checked struct PointerNull <: User
     ref::reftype(User)
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNull
@@ -23,20 +23,20 @@ identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNu
 PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
 
 
-@compat abstract type Constant <: User end
+abstract type Constant <: User end
 
 # forward declarations
-@checked immutable Module
+@checked struct Module
     ref::API.LLVMModuleRef
 end
-@compat abstract type Instruction <: User end
+abstract type Instruction <: User end
 
 
 ## scalar
 
 export ConstantInt, ConstantFP
 
-@checked immutable ConstantInt <: Constant
+@checked struct ConstantInt <: Constant
     ref::reftype(Constant)
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantIntValueKind}) = ConstantInt
@@ -62,19 +62,19 @@ end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
 const SizeableInteger = Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
-function ConstantInt{T<:SizeableInteger}(val::T, ctx::Context=GlobalContext())
+function ConstantInt(val::T, ctx::Context=GlobalContext()) where T<:SizeableInteger
     typ = IntType(sizeof(T)*8, ctx)
     return ConstantInt(typ, val, T<:Signed)
 end
 
-Base.convert{T<:Unsigned}(::Type{T}, val::ConstantInt) =
+Base.convert(::Type{T}, val::ConstantInt) where {T<:Unsigned} =
     convert(T, API.LLVMConstIntGetZExtValue(ref(val)))
 
-Base.convert{T<:Signed}(::Type{T}, val::ConstantInt) =
+Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
     convert(T, API.LLVMConstIntGetSExtValue(ref(val)))
 
 
-@checked immutable ConstantFP <: Constant
+@checked struct ConstantFP <: Constant
     ref::reftype(Constant)
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
@@ -90,12 +90,12 @@ Base.convert(::Type{Float64}, val::ConstantFP) =
 
 export ConstantExpr, InlineAsm
 
-@checked immutable ConstantExpr <: Constant
+@checked struct ConstantExpr <: Constant
     ref::reftype(Constant)
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
 
-@checked immutable InlineAsm <: Constant
+@checked struct InlineAsm <: Constant
     ref::reftype(Constant)
 end
 identify(::Type{Value}, ::Val{API.LLVMInlineAsmValueKind}) = InlineAsm
@@ -109,7 +109,7 @@ InlineAsm(typ::FunctionType, asm::String, constraints::String,
 
 ## global values
 
-@compat abstract type GlobalValue <: Constant end
+abstract type GlobalValue <: Constant end
 
 export GlobalValue,
        parent, isdeclaration,
@@ -164,7 +164,7 @@ alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), C
 
 ## global variables
 
-@compat abstract type GlobalObject <: GlobalValue end
+abstract type GlobalObject <: GlobalValue end
 
 export GlobalVariable, unsafe_delete!,
        initializer, initializer!,
@@ -173,7 +173,7 @@ export GlobalVariable, unsafe_delete!,
        isconstant, constant!,
        isextinit, extinit!
 
-@checked immutable GlobalVariable <: GlobalObject
+@checked struct GlobalVariable <: GlobalObject
     ref::reftype(GlobalObject)
 end
 identify(::Type{Value}, ::Val{API.LLVMGlobalVariableValueKind}) = GlobalVariable

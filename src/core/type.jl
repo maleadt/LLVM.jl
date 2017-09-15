@@ -1,13 +1,13 @@
 export LLVMType, issized, context, show
 
-@compat abstract type LLVMType end
-reftype{T<:LLVMType}(::Type{T}) = API.LLVMTypeRef
+abstract type LLVMType end
+reftype(::Type{T}) where {T<:LLVMType} = API.LLVMTypeRef
 
 identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
     identify(LLVMType, Val{API.LLVMGetTypeKind(ref)}())
-identify{K}(::Type{LLVMType}, ::Val{K}) = bug("Unknown type kind $K")
+identify(::Type{LLVMType}, ::Val{K}) where {K} = bug("Unknown type kind $K")
 
-@inline function check{T<:LLVMType}(::Type{T}, ref::API.LLVMTypeRef)
+@inline function check(::Type{T}, ref::API.LLVMTypeRef) where T<:LLVMType
     ref==C_NULL && throw(NullException())
     @static if DEBUG
         T′ = identify(LLVMType, ref)
@@ -38,7 +38,7 @@ end
 
 export width
 
-@checked immutable IntegerType <: LLVMType
+@checked struct IntegerType <: LLVMType
     ref::reftype(LLVMType)
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMIntegerTypeKind}) = IntegerType
@@ -65,7 +65,7 @@ width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(ref(inttyp))
 
 # NOTE: this type doesn't exist in the LLVM API,
 #       we add it for convenience of typechecking generic values (see execution.jl)
- @compat abstract type FloatingPointType <: LLVMType end
+ abstract type FloatingPointType <: LLVMType end
 
 # NOTE: we don't handle the obscure types here (:X86FP80, :FP128, :PPCFP128),
 #       they would also need special casing as LLVMPPCFP128Type != LLVMPPC_FP128TypeKind
@@ -75,7 +75,7 @@ for T in [:Half, :Float, :Double]
     api_fname = Symbol(:LLVM, jl_fname)
     enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin
-        @checked immutable $api_typename <: FloatingPointType
+        @checked struct $api_typename <: FloatingPointType
             ref::reftype(FloatingPointType)
         end
         identify(::Type{LLVMType}, ::Val{API.$enumkind}) = $api_typename
@@ -91,12 +91,12 @@ end
 
 export isvararg, return_type, parameters
 
-@checked immutable FunctionType <: LLVMType
+@checked struct FunctionType <: LLVMType
     ref::reftype(LLVMType)
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMFunctionTypeKind}) = FunctionType
 
-FunctionType{T<:LLVMType}(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Core.Bool=false) =
+FunctionType(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Core.Bool=false) where {T<:LLVMType} =
     FunctionType(API.LLVMFunctionType(ref(rettyp), ref.(params),
                                       Cuint(length(params)), convert(Bool, vararg)))
 
@@ -117,19 +117,19 @@ end
 
 ## composite types
 
-@compat abstract type CompositeType <: LLVMType end
+abstract type CompositeType <: LLVMType end
 
 
 ## sequential types
 
 export addrspace
 
-@compat abstract type SequentialType <: CompositeType end
+abstract type SequentialType <: CompositeType end
 
 Base.eltype(typ::SequentialType) = LLVMType(API.LLVMGetElementType(ref(typ)))
 
 
-@checked immutable PointerType <: SequentialType
+@checked struct PointerType <: SequentialType
     ref::reftype(SequentialType)
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMPointerTypeKind}) = PointerType
@@ -143,7 +143,7 @@ addrspace(ptrtyp::PointerType) =
     API.LLVMGetPointerAddressSpace(ref(ptrtyp))
 
 
-@checked immutable ArrayType <: SequentialType
+@checked struct ArrayType <: SequentialType
     ref::reftype(SequentialType)
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMArrayTypeKind}) = ArrayType
@@ -155,7 +155,7 @@ end
 Base.length(arrtyp::ArrayType) = API.LLVMGetArrayLength(ref(arrtyp))
 
 
-@checked immutable VectorType <: SequentialType
+@checked struct VectorType <: SequentialType
     ref::reftype(SequentialType)
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMVectorTypeKind}) = VectorType
@@ -171,7 +171,7 @@ Base.size(vectyp::VectorType) = API.LLVMGetVectorSize(ref(vectyp))
 
 export name, ispacked, isopaque, elements!
 
-@checked immutable StructType <: SequentialType
+@checked struct StructType <: SequentialType
     ref::reftype(SequentialType)
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMStructTypeKind}) = StructType
@@ -180,11 +180,11 @@ function StructType(name::String, ctx::Context=GlobalContext())
     return StructType(API.LLVMStructCreateNamed(ref(ctx), name))
 end
 
-StructType{T<:LLVMType}(elems::Vector{T}, packed::Core.Bool=false) =
+StructType(elems::Vector{T}, packed::Core.Bool=false) where {T<:LLVMType} =
     StructType(API.LLVMStructType(ref.(elems), Cuint(length(elems)),
                                   convert(Bool, packed)))
 
-StructType{T<:LLVMType}(elems::Vector{T}, ctx::Context, packed::Core.Bool=false) =
+StructType(elems::Vector{T}, ctx::Context, packed::Core.Bool=false) where {T<:LLVMType} =
     StructType(API.LLVMStructTypeInContext(ref(ctx), ref.(elems),
                                            Cuint(length(elems)), convert(Bool, packed)))
 
@@ -195,7 +195,7 @@ ispacked(structtyp::StructType) =
 isopaque(structtyp::StructType) =
     convert(Core.Bool, API.LLVMIsOpaqueStruct(ref(structtyp)))
 
-elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Core.Bool=false) =
+elements!(structtyp::StructType, elems::Vector{T}, packed::Core.Bool=false) where {T<:LLVMType} =
     API.LLVMStructSetBody(ref(structtyp), ref.(elems),
                           Cuint(length(elems)), convert(Bool, packed))
 
@@ -203,7 +203,7 @@ elements!{T<:LLVMType}(structtyp::StructType, elems::Vector{T}, packed::Core.Boo
 
 export elements
 
-immutable StructTypeElementSet
+struct StructTypeElementSet
     typ::StructType
 end
 
@@ -235,7 +235,7 @@ end
 
 ## other
 
-@checked immutable VoidType <: LLVMType
+@checked struct VoidType <: LLVMType
     ref::reftype(LLVMType)
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMVoidTypeKind}) = VoidType
@@ -244,7 +244,7 @@ VoidType() = VoidType(API.LLVMVoidType())
 VoidType(ctx::Context) =
     VoidType(API.LLVMVoidTypeInContext(ref(ctx)))
 
-@checked immutable LabelType <: LLVMType
+@checked struct LabelType <: LLVMType
     ref::reftype(LLVMType)
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMLabelTypeKind}) = LabelType

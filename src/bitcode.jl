@@ -1,6 +1,6 @@
 ## reader
 
-function Base.parse{T<:Union{UInt8,Int8}}(::Type{Module}, data::Vector{T})
+function Base.parse(::Type{Module}, data::Vector{T}) where T<:Union{UInt8,Int8}
     membuf = MemoryBuffer(data, "", false)
     out_ref = Ref{API.LLVMModuleRef}()
 
@@ -10,7 +10,7 @@ function Base.parse{T<:Union{UInt8,Int8}}(::Type{Module}, data::Vector{T})
     Module(out_ref[])
 end
 
-function Base.parse{T<:Union{UInt8,Int8}}(::Type{Module}, data::Vector{T}, ctx::Context)
+function Base.parse(::Type{Module}, data::Vector{T}, ctx::Context) where T<:Union{UInt8,Int8}
     membuf = MemoryBuffer(data, "", false)
     out_ref = Ref{API.LLVMModuleRef}()
 
@@ -29,5 +29,5 @@ Base.write(io::IOStream, mod::Module) =
 Base.convert(::Type{MemoryBuffer}, mod::Module) = MemoryBuffer(
     API.LLVMWriteBitcodeToMemoryBuffer(ref(mod)))
 
-Base.convert{T<:Union{UInt8,Int8}}(::Type{Vector{T}}, mod::Module) =
+Base.convert(::Type{Vector{T}}, mod::Module) where {T<:Union{UInt8,Int8}} =
     convert(Vector{T}, convert(MemoryBuffer, mod))

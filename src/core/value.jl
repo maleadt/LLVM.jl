@@ -3,14 +3,14 @@
 
 export Value
 
-@compat abstract type Value end
-reftype{T<:Value}(::Type{T}) = API.LLVMValueRef
+abstract type Value end
+reftype(::Type{T}) where {T<:Value} = API.LLVMValueRef
 
 identify(::Type{Value}, ref::API.LLVMValueRef) =
     identify(Value, Val{API.LLVMGetValueKind(ref)}())
-identify{K}(::Type{Value}, ::Val{K}) = bug("Unknown value kind $K")
+identify(::Type{Value}, ::Val{K}) where {K} = bug("Unknown value kind $K")
 
-@inline function check{T<:Value}(::Type{T}, ref::API.LLVMValueRef)
+@inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Value
     ref==C_NULL && throw(NullException())
     @static if DEBUG
         T′ = identify(Value, ref)
@@ -68,7 +68,7 @@ include("value/constant.jl")
 
 export Use, user, value
 
-@checked immutable Use
+@checked struct Use
     ref::API.LLVMUseRef
 end
 reftype(::Type{Use}) = API.LLVMUseRef
@@ -80,7 +80,7 @@ value(use::Use) = Value(API.LLVMGetUsedValue(ref(use)))
 
 export uses
 
-immutable ValueUseSet
+struct ValueUseSet
     val::Value
 end
 

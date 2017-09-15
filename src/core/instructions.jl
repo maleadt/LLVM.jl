@@ -8,9 +8,9 @@ identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
 
 identify(::Type{Instruction}, ref::API.LLVMValueRef) =
     identify(Instruction, Val{API.LLVMGetInstructionOpcode(ref)}())
-identify{K}(::Type{Instruction}, ::Val{K}) = bug("Unknown instruction kind $K")
+identify(::Type{Instruction}, ::Val{K}) where {K} = bug("Unknown instruction kind $K")
 
-@inline function check{T<:Instruction}(::Type{T}, ref::API.LLVMValueRef)
+@inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(NullException())
     @static if DEBUG
         T′ = identify(Instruction, ref)
@@ -72,7 +72,7 @@ predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
 
 export InstructionMetadataDict
 
-immutable InstructionMetadataDict <: Associative{MD,MetadataAsValue}
+struct InstructionMetadataDict <: Associative{MD,MetadataAsValue}
     inst::Instruction
 end
 
@@ -114,7 +114,7 @@ for op in opcodes
     typename = Symbol(op, :Inst)
     enum = Symbol(:LLVM, op)
     @eval begin
-        @checked immutable $typename <: Instruction
+        @checked struct $typename <: Instruction
             ref::reftype(Instruction)
         end
         identify(::Type{Instruction}, ::Val{API.$enum}) = $typename
@@ -156,7 +156,7 @@ default_dest(switch::Instruction) =
 
 export successors
 
-immutable TerminatorSuccessorSet
+struct TerminatorSuccessorSet
     term::Instruction
 end
 
@@ -188,7 +188,7 @@ Base.endof(iter::TerminatorSuccessorSet) = length(iter)
 
 export PhiIncomingSet
 
-immutable PhiIncomingSet
+struct PhiIncomingSet
     phi::Instruction
 end
 

@@ -1,4 +1,4 @@
-@checked immutable PassRegistry
+@checked struct PassRegistry
     ref::API.LLVMPassRegistryRef
 end
 reftype(::Type{PassRegistry}) = API.LLVMPassRegistryRef

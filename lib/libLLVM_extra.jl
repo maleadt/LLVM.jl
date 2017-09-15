@@ -68,7 +68,7 @@ end
 
 # Julia wrapper for header: llvm-extra/IR/Pass.h
 
-type LLVMOpaquePass
+mutable struct LLVMOpaquePass
 end
 
 const LLVMPassRef = Ptr{LLVMOpaquePass}
