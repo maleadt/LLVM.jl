@@ -53,7 +53,7 @@ function emit_sum(ctx::Context)
     param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
     ret_type = LLVM.FunctionType(LLVM.Int32Type(ctx), param_types)
 
-    sum = LLVM.Function(mod, "SomeFunction", ret_type)
+    sum = LLVM.Function(mod, "SomeFunctionSum", ret_type)
 
     entry = BasicBlock(sum, "entry")
 
@@ -137,7 +137,7 @@ Context() do ctx
             GenericValue(LLVM.Int32Type(), 2)]
 
     let mod = LLVM.Module(mod)
-        fn = functions(mod)["SomeFunction"]
+        fn = functions(mod)["SomeFunctionSum"]
         Interpreter(mod) do engine
             res = LLVM.run(engine, fn, args)
             @test convert(Int, res) == 3
@@ -183,6 +183,24 @@ Context() do ctx
             end
         end
         dispose.(args)
+    end
+    
+    let mod1 = emit_sum(ctx), mod2 = emit_retint(ctx, 42)
+        Interpreter(mod1) do engine
+            @test haskey(functions(engine), "SomeFunctionSum")
+            @test functions(engine)["SomeFunctionSum"] isa LLVM.Function
+            delete!(engine, mod1)
+            @test_throws KeyError functions(engine)["SomeFunctionSum"]
+            @test !haskey(functions(engine), "SomeFunctionSum")
+            dispose(mod1)
+            push!(engine, mod2)
+            @test haskey(functions(engine), "SomeFunction")
+            @test functions(engine)["SomeFunction"] isa LLVM.Function
+
+            res = LLVM.run(engine, functions(engine)["SomeFunction"])
+            @test convert(Int, res) == 42
+            dispose(res)
+        end
     end
 end
 

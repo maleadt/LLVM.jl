@@ -118,6 +118,43 @@ for x in [:ExecutionEngine, :Interpreter, :JIT]
     end
 end
 
+Base.push!(engine::ExecutionEngine, mod::Module) = API.LLVMAddModule(engine.ref, mod.ref)
+
+# up to user to free the deleted module
+function Base.delete!(engine::ExecutionEngine, mod::Module)
+    out_ref = Ref{API.LLVMModuleRef}()
+    API.LLVMRemoveModule(engine.ref, mod.ref, out_ref, Ref{Cstring}()) # out string is not used
+    return Module(out_ref[])
+end
+
 run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =
     GenericValue(API.LLVMRunFunction(ref(engine), ref(f),
                                      Cuint(length(args)), ref.(args)))
+
+
+# ExectutionEngine function lookup
+
+export functions
+
+immutable ExecutionEngineFunctionSet
+    engine::ExecutionEngine
+end
+
+functions(engine::ExecutionEngine) = ExecutionEngineFunctionSet(engine)
+
+function Base.get(functionset::ExecutionEngineFunctionSet, name::String, default)
+    out_ref = Ref{API.LLVMValueRef}()
+    API.LLVMFindFunction(functionset.engine.ref, name, out_ref)
+    status = convert(Core.Bool, API.LLVMFindFunction(functionset.engine.ref, name, out_ref))
+    return status == 0 ? Function(out_ref[]) : default
+end
+
+function Base.haskey(functionset::ExecutionEngineFunctionSet, name::String)
+    f = get(functionset, name, nothing)
+    return f != nothing
+end
+
+function Base.getindex(functionset::ExecutionEngineFunctionSet, name::String)
+    f = get(functionset, name, nothing)
+    return f == nothing ? throw(KeyError(name)) : f
+end
