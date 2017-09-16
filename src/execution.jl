@@ -136,7 +136,7 @@ run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValu
 
 export functions
 
-immutable ExecutionEngineFunctionSet
+struct ExecutionEngineFunctionSet
     engine::ExecutionEngine
 end
 
