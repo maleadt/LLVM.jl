@@ -45,3 +45,7 @@ This object file can then be linked with e.g. a C program.
 
 The module can be executed directly in Julia using `Kaleidoscope.run(::LLVM.Module)`. This will look for a function `main()` in the code and execute it. The return value of the main function is returned from `run` as a `Float64`.
 
+# Possible future work
+
+* Store line / column in each token and give better error messages.
+* Add support for more types than double.

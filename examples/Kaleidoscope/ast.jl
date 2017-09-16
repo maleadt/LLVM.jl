@@ -5,13 +5,20 @@
 mutable struct Parser
     l::Lexer
     current_token::Token
-    Parser(str) = new(Lexer(str))
+end
+function Parser(str)
+    l = Lexer(str)
+    Parser(l, gettok(l))
 end
 
 current_token(ps::Parser) = ps.current_token
 next_token!(ps::Parser) = return (ps.current_token = gettok(ps.l))
 
-# Operator precedence
+
+##############
+# Presedence #
+##############
+
 const BinopPrecedence = Dict{Kinds.Kind, Int}()
 BinopPrecedence[Kinds.EQUAL]   = 2
 BinopPrecedence[Kinds.LESS]    = 10
@@ -26,28 +33,28 @@ function operator_precedence(ps)
     return (v in keys(BinopPrecedence)) ? BinopPrecedence[v] : -1
 end
 
+
 #############
 # AST Nodes #
 #############
+
+# TODO: Pretty printing of AST
 
 abstract type ExprAST end
 
 struct NumberExprAST <: ExprAST
     val::Float64
 end
-Base.show(io::IO, expr::NumberExprAST) = print(io, expr.val)
 
 struct VariableExprAST <: ExprAST
     name::String
 end
-Base.show(io::IO, expr::VariableExprAST) = print(io, expr.name)
 
 struct BinaryExprAST <: ExprAST
     op::Kinds.Kind
     lhs::ExprAST
     rhs::ExprAST
 end
-Base.show(io::IO, expr::BinaryExprAST) = print(io, expr.op, "(", expr.lhs, ", ", expr.rhs, ")")
 
 struct CallExprAST <: ExprAST
     callee::String
@@ -91,13 +98,13 @@ end
 # Parse Expressions #
 #####################
 
-function ParseNumberExpr(ps::Parser)::NumberExprAST
+function ParseNumberExpr(ps::Parser)
     result = NumberExprAST(Base.parse(Float64, current_token(ps).val))
     next_token!(ps) # eat the number
     return result
 end
 
-function ParseIdentifierExpr(ps::Parser)::Union{ VariableExprAST, CallExprAST}
+function ParseIdentifierExpr(ps::Parser)
     idname = current_token(ps).val
     next_token!(ps) # eat the idname
 
@@ -125,7 +132,7 @@ function ParseIdentifierExpr(ps::Parser)::Union{ VariableExprAST, CallExprAST}
     return CallExprAST(idname, args)
 end
 
-function ParseIfExpr(ps)::IfExprAST
+function ParseIfExpr(ps)
     # if
     next_token!(ps) # eat 'if'
     cond = ParseExpression(ps)
@@ -147,7 +154,7 @@ function ParseIfExpr(ps)::IfExprAST
     return IfExprAST(cond, then, elsee)
 end
 
-function ParsePrototype(ps)::PrototypeAST
+function ParsePrototype(ps)
     if current_token(ps).kind != Kinds.IDENTIFIER
         error("expected function name in prototype, got $(current_token(ps))")
     end
@@ -173,14 +180,14 @@ function ParsePrototype(ps)::PrototypeAST
     return PrototypeAST(func_name, argnames)
 end
 
-function ParseDefinition(ps)::FunctionAST
+function ParseDefinition(ps)
     next_token!(ps) # eat def
     proto = ParsePrototype(ps)
     E = ParseExpression(ps)
     return FunctionAST(proto, E)
 end
 
-function ParseParenExpr(ps::Parser)::ExprAST
+function ParseParenExpr(ps::Parser)
     next_token!(ps) # eat '('
     V = ParseExpression(ps)
     if current_token(ps).kind != Kinds.RPAR
@@ -190,7 +197,7 @@ function ParseParenExpr(ps::Parser)::ExprAST
     return V
 end
 
-function ParseBinOpRHS(ps, ExprPrec::Int, LHS::ExprAST)::ExprAST
+function ParseBinOpRHS(ps, ExprPrec::Int, LHS::ExprAST)
     while true
         tokprec = operator_precedence(ps)
         if tokprec < ExprPrec
@@ -210,7 +217,7 @@ function ParseBinOpRHS(ps, ExprPrec::Int, LHS::ExprAST)::ExprAST
     end
 end
 
-function ParseForExpr(ps)::ForExprAST
+function ParseForExpr(ps)
     next_token!(ps) # eat 'for'
 
     if current_token(ps).kind != Kinds.IDENTIFIER
@@ -244,7 +251,7 @@ function ParseForExpr(ps)::ForExprAST
     return ForExprAST(idname, start, endd, step, body)
 end
 
-function ParseExtern(ps)::PrototypeAST
+function ParseExtern(ps)
     next_token!(ps) # eat 'extern'
     return ParsePrototype(ps)
 end
@@ -277,12 +284,12 @@ function ParseVarExpr(ps)
     return VarExprAST(varnames)
 end
 
-@noinline function ParseExpression(ps)::ExprAST
+@noinline function ParseExpression(ps)
     LHS = ParsePrimary(ps)
     return ParseBinOpRHS(ps, 0, LHS)
 end
 
-function ParseBlockExpr(ps)::BlockExprAST
+function ParseBlockExpr(ps)
     next_token!(ps) # eat the '{'
     exprs = ExprAST[]
     while true

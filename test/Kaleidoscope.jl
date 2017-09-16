@@ -18,6 +18,7 @@ include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
     m = Kaleidoscope.optimize!(m)
     v = Kaleidoscope.run(m)
     @test v == 55.0
+    dispose(m)
 end
 
 @testset "loops" begin
@@ -45,6 +46,7 @@ end
     mktemp() do path, io
         Kaleidoscope.write_objectfile(m, path)
     end
+    dispose(m)
 end
 
 @testset "global vars" begin
@@ -60,4 +62,5 @@ end
     m = Kaleidoscope.optimize!(m)
     v = Kaleidoscope.run(m)
     @test v == 13
+    dispose(m)
 end

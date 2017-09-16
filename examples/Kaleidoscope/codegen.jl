@@ -1,5 +1,5 @@
 mutable struct CodeGen
-    context::LLVM.Context
+    ctx::LLVM.Context
     builder::LLVM.Builder
     current_scope::CurrentScope
     mod::LLVM.Module
@@ -11,7 +11,7 @@ function CodeGen()
         ctx,
         LLVM.Builder(ctx),
         CurrentScope(),
-        LLVM.Module("KaleidoscopeModule"),
+        LLVM.Module("KaleidoscopeModule", ctx),
     )
 end
 
@@ -23,30 +23,23 @@ function new_scope(f, cg::CodeGen)
 end
 Base.show(io::IO, cg::CodeGen) = print(io, "CodeGen")
 
-function add_optimization_passes!(cg::CodeGen)
-
-    return cg
-end
-
-function get_function(cg::CodeGen, name::String)
-    if haskey(LLVM.functions(cg.mod), name)
-        return LLVM.functions(cg.mod)[name]
-    end
-    error("encountered undeclared function $name")
-end
-
-function create_entry_block_allocation(fn::LLVM.Function, varname::String)
+function create_entry_block_allocation(cg::CodeGen, fn::LLVM.Function, varname::String)
     local alloc
     LLVM.Builder() do builder
+        # Set the builder at the start of the function
         entry_block = LLVM.entry(fn)
-        position_before_terminator!(builder, entry_block)
-        alloc = LLVM.alloca!(builder, LLVM.DoubleType(), varname)
+        if isempty(LLVM.instructions(entry_block))
+            LLVM.position!(builder, entry_block)
+        else
+            LLVM.position!(builder, first(LLVM.instructions(entry_block)))
+        end
+        alloc = LLVM.alloca!(builder, LLVM.DoubleType(cg.ctx), varname)
     end
     return alloc
 end
 
 function codegen(cg::CodeGen, expr::NumberExprAST)
-    return LLVM.ConstantFP(LLVM.DoubleType(), expr.val)
+    return LLVM.ConstantFP(LLVM.DoubleType(cg.ctx), expr.val)
 end
 
 function codegen(cg::CodeGen, expr::VariableExprAST)
@@ -80,17 +73,20 @@ function codegen(cg::CodeGen, expr::BinaryExprAST)
         return LLVM.fdiv!(cg.builder, L, R, "divtmp")
     elseif expr.op == Kinds.LESS
         L = LLVM.fcmp!(cg.builder, LLVM.API.LLVMRealOLT, L, R, "cmptmp")
-        return LLVM.uitofp!(cg.builder, L, LLVM.DoubleType(), "booltmp")
+        return LLVM.uitofp!(cg.builder, L, LLVM.DoubleType(cg.ctx), "booltmp")
     elseif expr.op == Kinds.GREATER
         L = LLVM.fcmp!(cg.builder, LLVM.API.LLVMRealOGT, L, R, "cmptmp")
-        return LLVM.uitofp!(cg.builder, L, LLVM.DoubleType(), "booltmp")
+        return LLVM.uitofp!(cg.builder, L, LLVM.DoubleType(cg.ctx), "booltmp")
     else
         error("Unhandled binary operator $(expr.op)")
     end
 end
 
 function codegen(cg::CodeGen, expr::CallExprAST)
-    func = get_function(cg, expr.callee)
+    if !haskey(LLVM.functions(cg.mod), expr.callee)
+        error("encountered undeclared function $(expr.callee)")        
+    end
+    func =  LLVM.functions(cg.mod)[expr.callee]
 
     if length(LLVM.parameters(func)) != length(expr.args)
         error("number of parameters mismatch")
@@ -108,8 +104,8 @@ function codegen(cg::CodeGen, expr::PrototypeAST)
     if haskey(LLVM.functions(cg.mod), expr.name)
             error("existing function exists")
     end
-    args = [LLVM.DoubleType() for i in 1:length(expr.args)]
-    func_type = LLVM.FunctionType(LLVM.DoubleType(), args)
+    args = [LLVM.DoubleType(cg.ctx) for i in 1:length(expr.args)]
+    func_type = LLVM.FunctionType(LLVM.DoubleType(cg.ctx), args)
     func = LLVM.Function(cg.mod, expr.name, func_type)
     LLVM.linkage!(func, LLVM.API.LLVMExternalLinkage)
 
@@ -129,13 +125,12 @@ function codegen(cg::CodeGen, expr::FunctionAST)
     new_scope(cg) do
         for (i, param) in enumerate(LLVM.parameters(the_function))
             argname = expr.proto.args[i]
-            alloc = create_entry_block_allocation(the_function, argname)
+            alloc = create_entry_block_allocation(cg, the_function, argname)
             LLVM.store!(cg.builder, param, alloc)
             current_scope(cg)[argname] = alloc
         end
 
         body = codegen(cg, expr.body)
-        # TODO, delete function on error
         LLVM.ret!(cg.builder, body)
         LLVM.verify(the_function)
     end
@@ -152,7 +147,7 @@ function codegen(cg::CodeGen, expr::IfExprAST)
     new_scope(cg) do
         # if
         cond = codegen(cg, expr.cond)
-        zero = LLVM.ConstantFP(LLVM.DoubleType(), 0.0)
+        zero = LLVM.ConstantFP(LLVM.DoubleType(cg.ctx), 0.0)
         condv = LLVM.fcmp!(cg.builder, LLVM.API.LLVMRealONE, cond, zero, "ifcond")
         LLVM.br!(cg.builder, condv, then, elsee)
 
@@ -170,7 +165,7 @@ function codegen(cg::CodeGen, expr::IfExprAST)
 
         # merge
         LLVM.position!(cg.builder, merge)
-        phi = LLVM.phi!(cg.builder, LLVM.DoubleType(), "iftmp")
+        phi = LLVM.phi!(cg.builder, LLVM.DoubleType(cg.ctx), "iftmp")
         append!(LLVM.incoming(phi), [(thencg, then_block), (elsecg, else_block)])
     end
 
@@ -182,7 +177,7 @@ function codegen(cg::CodeGen, expr::ForExprAST)
         # Allocate loop variable
         startblock = position(cg.builder)
         func = LLVM.parent(startblock)
-        alloc = create_entry_block_allocation(func, expr.varname)
+        alloc = create_entry_block_allocation(cg, func, expr.varname)
         current_scope(cg)[expr.varname] = alloc
         start = codegen(cg, expr.start)
         LLVM.store!(cg.builder, start, alloc)
@@ -202,7 +197,7 @@ function codegen(cg::CodeGen, expr::ForExprAST)
         LLVM.store!(cg.builder, nextvar, alloc)
 
         endd = LLVM.fcmp!(cg.builder, LLVM.API.LLVMRealONE, endd,
-            LLVM.ConstantFP(LLVM.DoubleType(), 0.0))
+            LLVM.ConstantFP(LLVM.DoubleType(cg.ctx), 0.0))
 
         loopendblock = position(cg.builder)
         afterblock = LLVM.BasicBlock(func, "afterloop")
@@ -211,8 +206,8 @@ function codegen(cg::CodeGen, expr::ForExprAST)
         LLVM.position!(cg.builder, afterblock)
     end
 
-    # loops return 0.0
-    return LLVM.ConstantFP(LLVM.DoubleType(), 0.0)
+    # loops return 0.0 for now
+    return LLVM.ConstantFP(LLVM.DoubleType(cg.ctx), 0.0)
 end
 
 function codegen(cg::CodeGen, expr::VarExprAST)
@@ -221,11 +216,11 @@ function codegen(cg::CodeGen, expr::VarExprAST)
         initval = codegen(cg, init)
         local V
         if isglobalscope(current_scope(cg))
-            V = LLVM.GlobalVariable(cg.mod, LLVM.DoubleType(), varname)
+            V = LLVM.GlobalVariable(cg.mod, LLVM.DoubleType(cg.ctx), varname)
             LLVM.initializer!(V, initval)
         else
             func = LLVM.parent(LLVM.position(cg.builder))
-            V = create_entry_block_allocation(func, varname)
+            V = create_entry_block_allocation(cg, func, varname)
             LLVM.store!(cg.builder, initval, V)
         end
         current_scope(cg)[varname] = V

@@ -1,7 +1,6 @@
 function generate_IR(str)
     cg = CodeGen()
     ps = Parser(str)
-    tok = next_token!(ps)
     while true
         tok = current_token(ps)
         if tok.kind == Kinds.EOF
@@ -12,6 +11,8 @@ function generate_IR(str)
         end
     end
     LLVM.verify(cg.mod)
+    #LLVM.dispose(cg.ctx)
+    #LLVM.dispose(cg.builder)
     return cg.mod
 end
 
