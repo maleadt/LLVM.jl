@@ -12,7 +12,7 @@ function generate_IR(str)
     end
     LLVM.verify(cg.mod)
     #LLVM.dispose(cg.ctx)
-    #LLVM.dispose(cg.builder)
+    LLVM.dispose(cg.builder)
     return cg.mod
 end
 
