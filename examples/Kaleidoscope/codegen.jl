@@ -119,7 +119,7 @@ function codegen(cg::CodeGen, expr::FunctionAST)
     # create new function...
     the_function = codegen(cg, expr.proto)
 
-    entry = LLVM.BasicBlock(the_function, "entry")
+    entry = LLVM.BasicBlock(the_function, "entry", cg.ctx)
     LLVM.position!(cg.builder, entry)
 
     new_scope(cg) do
@@ -139,9 +139,9 @@ end
 
 function codegen(cg::CodeGen, expr::IfExprAST)
     func = LLVM.parent(LLVM.position(cg.builder))
-    then = LLVM.BasicBlock(func, "then")
-    elsee = LLVM.BasicBlock(func, "else")
-    merge = LLVM.BasicBlock(func, "ifcont")
+    then = LLVM.BasicBlock(func, "then", cg.ctx)
+    elsee = LLVM.BasicBlock(func, "else", cg.ctx)
+    merge = LLVM.BasicBlock(func, "ifcont", cg.ctx)
 
     local phi
     new_scope(cg) do
@@ -183,7 +183,7 @@ function codegen(cg::CodeGen, expr::ForExprAST)
         LLVM.store!(cg.builder, start, alloc)
 
         # Loop block
-        loopblock = LLVM.BasicBlock(func, "loop")
+        loopblock = LLVM.BasicBlock(func, "loop", cg.ctx)
         LLVM.br!(cg.builder, loopblock)
         LLVM.position!(cg.builder, loopblock)
 
@@ -200,7 +200,7 @@ function codegen(cg::CodeGen, expr::ForExprAST)
             LLVM.ConstantFP(LLVM.DoubleType(cg.ctx), 0.0))
 
         loopendblock = position(cg.builder)
-        afterblock = LLVM.BasicBlock(func, "afterloop")
+        afterblock = LLVM.BasicBlock(func, "afterloop", cg.ctx)
 
         LLVM.br!(cg.builder, endd, loopblock, afterblock)
         LLVM.position!(cg.builder, afterblock)
