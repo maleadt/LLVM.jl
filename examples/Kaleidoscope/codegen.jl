@@ -3,16 +3,14 @@ mutable struct CodeGen
     builder::LLVM.Builder
     current_scope::CurrentScope
     mod::LLVM.Module
-end
 
-function CodeGen()
-    ctx = LLVM.Context()
-    return CodeGen(
-        ctx,
-        LLVM.Builder(ctx),
-        CurrentScope(),
-        LLVM.Module("KaleidoscopeModule", ctx),
-    )
+    CodeGen(ctx::LLVM.Context) =
+        new(
+            ctx,
+            LLVM.Builder(ctx),
+            CurrentScope(),
+            LLVM.Module("KaleidoscopeModule", ctx),
+        )
 end
 
 current_scope(cg::CodeGen) = cg.current_scope

@@ -14,11 +14,13 @@ include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
         }
     """
 
-    m = Kaleidoscope.generate_IR(program)
-    m = Kaleidoscope.optimize!(m)
-    v = Kaleidoscope.run(m)
-    @test v == 55.0
-    dispose(m)
+    LLVM.Context() do ctx
+        m = Kaleidoscope.generate_IR(program, ctx)
+        m = Kaleidoscope.optimize!(m)
+        v = Kaleidoscope.run(m)
+        @test v == 55.0
+        dispose(m)
+    end
 end
 
 @testset "loops" begin
@@ -38,15 +40,17 @@ end
     }
     """
 
-    m = Kaleidoscope.generate_IR(program)
-    m = Kaleidoscope.optimize!(m)
-    v = Kaleidoscope.run(m)
-    @test v == 55.0
+    LLVM.Context() do ctx
+        m = Kaleidoscope.generate_IR(program, ctx)
+        m = Kaleidoscope.optimize!(m)
+        v = Kaleidoscope.run(m)
+        @test v == 55.0
 
-    mktemp() do path, io
-        Kaleidoscope.write_objectfile(m, path)
+        mktemp() do path, io
+            Kaleidoscope.write_objectfile(m, path)
+        end
+        dispose(m)
     end
-    dispose(m)
 end
 
 @testset "global vars" begin
@@ -58,9 +62,11 @@ end
     def main() foo(2, 3)
     """
 
-    m = Kaleidoscope.generate_IR(program)
-    m = Kaleidoscope.optimize!(m)
-    v = Kaleidoscope.run(m)
-    @test v == 13
-    dispose(m)
+    LLVM.Context() do ctx
+        m = Kaleidoscope.generate_IR(program, ctx)
+        m = Kaleidoscope.optimize!(m)
+        v = Kaleidoscope.run(m)
+        @test v == 13
+        dispose(m)
+    end
 end

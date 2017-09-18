@@ -1,5 +1,5 @@
-function generate_IR(str)
-    cg = CodeGen()
+function generate_IR(str, ctx::LLVM.Context=LLVM.GlobalContext())
+    cg = CodeGen(ctx)
     ps = Parser(str)
     while true
         tok = current_token(ps)
@@ -11,7 +11,6 @@ function generate_IR(str)
         end
     end
     LLVM.verify(cg.mod)
-    #LLVM.dispose(cg.ctx)
     LLVM.dispose(cg.builder)
     return cg.mod
 end
