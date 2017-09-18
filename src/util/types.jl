@@ -52,7 +52,9 @@ macro checked(typedef)
     field_names = Symbol[]
     field_defs = Union{Symbol,Expr}[]
     for arg in body.args
-        if isa(arg, Symbol)
+        if isa(arg, LineNumberNode)
+            continue
+        elseif isa(arg, Symbol)
             push!(field_names, arg)
             push!(field_defs, arg)
         elseif arg.head == :(::)
