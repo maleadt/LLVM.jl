@@ -29,7 +29,7 @@ end
 
 function run(mod::LLVM.Module)
     res_jl = 0.0
-    LLVM.JIT(LLVM.Module(mod)) do engine
+    LLVM.JIT(mod) do engine
         if !haskey(LLVM.functions(engine), "main")
             error("did not find main function in module")
         end
