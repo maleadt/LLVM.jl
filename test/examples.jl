@@ -4,7 +4,7 @@ function find_sources(dir)
     sources = String[]
     for entry in readdir(dir)
         path = joinpath(dir, entry)
-        if isdir(path)
+        if isdir(path) && !contains(path, "Kaleidoscope")
             append!(sources, find_sources(path))
         elseif endswith(path, ".jl")
             push!(sources, path)

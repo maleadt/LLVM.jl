@@ -57,6 +57,7 @@ if LLVM.configured
     include("target.jl")
     include("targetmachine.jl")
     include("datalayout.jl")
+    include("Kaleidoscope.jl")
 
     include("examples.jl")
     if "Documenter" in keys(Pkg.installed())
