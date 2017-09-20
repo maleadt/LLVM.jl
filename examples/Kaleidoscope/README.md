@@ -22,7 +22,7 @@ def fib(x) {
 def fib(x) {
     var a = 1, b = 1
     for i = 3, i < x {
-        c = a + b
+        var c = a + b
         a = b
         b = c
     }
