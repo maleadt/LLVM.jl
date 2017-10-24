@@ -44,7 +44,7 @@ identify(::Type{Value}, ::Val{API.LLVMConstantIntValueKind}) = ConstantInt
 # NOTE: fixed set for dispatch, and because we can't rely on sizeof(T)==width(T)
 const SmallInteger = Union{Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64}
 function ConstantInt(typ::IntegerType, val::SmallInteger, signed=false)
-    wideval = convert(Int, val)
+    wideval = convert(Int64, val)
     bits = reinterpret(Culonglong, wideval)
     return ConstantInt(API.LLVMConstInt(ref(typ), bits, convert(Bool, signed)))
 end
