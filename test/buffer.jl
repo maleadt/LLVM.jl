@@ -1,6 +1,6 @@
 @testset "buffer" begin
 
-data = convert(Vector{UInt8}, "SomeData")
+data = Vector{UInt8}("SomeData")
 
 let
     membuf = MemoryBuffer(data)
@@ -12,7 +12,7 @@ end
 MemoryBuffer(data) do membuf
     @test pointer(data) != pointer(membuf)
     @test length(membuf) == length(data)
-    @test convert(Vector{UInt8}, membuf) == data
+    @test Vector{UInt8}(membuf) == data
 end
 
 MemoryBuffer(data, "SomeBuffer", false) do membuf

@@ -226,10 +226,10 @@ function codegen(cg::CodeGen, expr::VarExprAST)
     return initval
 end
 
-function codegen(cg::CodeGen, expr::BlockExprAST)
+function codegen(cg::CodeGen, block::BlockExprAST)
     local v
     new_scope(cg) do
-        for expr in expr.exprs
+        for expr in block.exprs
             v = codegen(cg, expr)
         end
     end

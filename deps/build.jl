@@ -24,7 +24,7 @@ function main()
     config[:libllvm_mtime]   = llvm.mtime
     config[:libllvm_system]  = use_system_llvm
 
-    llvm_targets = Symbol.(split(readstring(`$(get(llvm.config)) --targets-built`)))
+    llvm_targets = Symbol.(split(read(`$(get(llvm.config)) --targets-built`, String)))
     config[:libllvm_targets] = llvm_targets
 
     wrapper = select_wrapper(llvm, wrappers)
@@ -33,7 +33,7 @@ function main()
     package_commit =
         try
             cd(joinpath(@__DIR__, "..")) do
-                chomp(readstring(`git rev-parse HEAD`))
+                chomp(read(`git rev-parse HEAD`, String))
             end
         catch
             warning("could not get LLVM.jl commit")
@@ -46,7 +46,7 @@ function main()
     package_dirty =
         try
             cd(joinpath(@__DIR__, "..")) do
-                length(chomp(readstring(`git diff --shortstat`))) > 0
+                length(chomp(read(`git diff --shortstat`, String))) > 0
             end
         catch
             warning("could not get LLVM.jl git status")

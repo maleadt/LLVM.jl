@@ -2,7 +2,7 @@
 
 include("select.jl")
 
-const libext = is_apple() ? "dylib" : "so"
+const libext = Compat.Sys.isapple() ? "dylib" : "so"
 
 # properties of the final location of llvm-extra
 const extras_name = "LLVM_extras.$libext"

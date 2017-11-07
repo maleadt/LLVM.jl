@@ -3,7 +3,6 @@ __precompile__()
 module LLVM
 
 using Compat
-import Compat.String
 
 const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
 const configured = if isfile(ext)
@@ -54,7 +53,7 @@ include("transform.jl")
 
 include("deprecated.jl")
 
-if is_linux()
+if Compat.Sys.islinux()
     const Lmid = Clong
     const LM_ID_BASE = 0
     const LM_ID_NEWLM = -1
