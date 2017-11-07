@@ -58,5 +58,7 @@ end
 a = [42]
 ptr = CustomPtr{Int}(pointer(a))
 
-using Base.Test
+using Compat
+using Compat.Test
+
 @test unsafe_load(ptr) == a[1]

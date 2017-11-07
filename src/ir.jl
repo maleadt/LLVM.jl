@@ -1,7 +1,7 @@
 ## reader
 
 function Base.parse(::Type{Module}, ir::String, ctx::Context=GlobalContext())
-    data = convert(Vector{UInt8}, ir)
+    data = Vector{UInt8}(ir)
     membuf = MemoryBuffer(data, "", false)
 
     out_ref = Ref{API.LLVMModuleRef}()

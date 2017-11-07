@@ -9,10 +9,10 @@ include("util.jl")
 
 # possible names for libLLVM given a LLVM version number
 function llvm_libnames(version::VersionNumber)
-    @static if is_apple()
+    @static if Compat.Sys.isapple()
         # macOS dylibs are versioned already
         return ["libLLVM.dylib"]
-    elseif is_linux()
+    elseif Compat.Sys.islinux()
         # Linux DSO's aren't versioned, so only use versioned filenames
         return ["libLLVM-$(version.major).$(version.minor).$(version.patch).so",
                 "libLLVM-$(version.major).$(version.minor).$(version.patch)svn.so",
@@ -45,7 +45,7 @@ function find_llvmconfig(dir::AbstractString)
     for file in readdir(dir)
         if startswith(file, "llvm-config")
             path = joinpath(dir, file)
-            version = VersionNumber(strip(readstring(`$path --version`)))
+            version = VersionNumber(strip(read(`$path --version`, String)))
             trace("- $version at $path")
             push!(configs, tuple(path, version))
         end

@@ -31,7 +31,7 @@ TargetMachine(host_t, host_triple) do tm
 
         mktemp() do path, io
             emit(tm, mod, LLVM.API.LLVMAssemblyFile, path)
-            @test asm == readstring(path)
+            @test asm == read(path, String)
         end
 
         @test_throws LLVMException emit(tm, mod, LLVM.API.LLVMAssemblyFile, "/")
