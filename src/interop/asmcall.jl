@@ -33,13 +33,23 @@ const asmcache = Dict{UInt, Tuple{String,String}}()
                   Expr(:tuple, (:(args[$i]) for i in 1:length(args))...))
 end
 
+"""
+    @asmcall asm::String [constraints::String] [side_effects::Bool=false]
+             rettyp=Void argtyp=Tuple{} args...
+
+Call some inline assembly `asm`, optionally constrained by `constraints` and denoting other
+side_effects in `side_effects`, specifying the return type in `rettyp` and types of
+arguments as a tuple-type in `argtyp`.
+"""
+:(@asmcall)
+
 macro asmcall(asm::String, constraints::String, side_effects::Bool,
               rettyp::Symbol=:(Void), argtyp::Expr=:(Tuple{}), args...)
     key = hash((asm, constraints))
     asmcache[key] = (asm, constraints)
     return esc(:(LLVM.Interop._asmcall(Val{$key}(), Val{$side_effects}(),
-                               Val{$rettyp}(), Val{$argtyp}(),
-                               $(args...))))
+                                       Val{$rettyp}(), Val{$argtyp}(),
+                                       $(args...))))
 end
 
 # shorthand: no side_effects

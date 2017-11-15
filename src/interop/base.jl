@@ -45,6 +45,11 @@ function call_function(llvmf::LLVM.Function, rettyp::Type=Void, argtyp::Type=Tup
     end
 end
 
+"""
+    convert(LLVMType, typ::Type)
+
+Convert a Julia type `typ` to its LLVM representation. Fails if the type would be boxed.
+"""
 function Base.convert(::Type{LLVMType}, typ::Type)
     isboxed_ref = Ref{Bool}()
     llvmtyp = LLVMType(ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef,
