@@ -6,7 +6,6 @@ LLVM C API wrapper
 **Build status**: 
 
 - LLVM 3.9: 
-[![][buildbot-julia05-llvm39-img]][buildbot-julia05-llvm39-url]
 [![][buildbot-julia06-llvm39-img]][buildbot-julia06-llvm39-url]
 - LLVM 4.0: 
 [![][buildbot-julia06-llvm40-img]][buildbot-julia06-llvm40-url]
@@ -20,8 +19,6 @@ LLVM C API wrapper
 
 **Code coverage**: [![][coverage-img]][coverage-url]
 
-[buildbot-julia05-llvm39-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia05-llvm39-x86-64bit&name=julia%200.5
-[buildbot-julia05-llvm39-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia05-llvm39-x86-64bit
 [buildbot-julia06-llvm39-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-llvm39-x86-64bit&name=julia%200.6
 [buildbot-julia06-llvm39-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-llvm39-x86-64bit
 
