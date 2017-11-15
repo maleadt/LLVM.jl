@@ -16,7 +16,7 @@ Requirements:
 
 * LLVM 3.9 or higher, in full (ie. not only `libLLVM.so`, but also `llvm-config`, headers,
   etc)
-* Julia 0.5 or higher
+* Julia 0.6 or higher
 * C++ compiler, and possibly some development headers (like `libz1`, `zlib1g-dev` on many
   popular Linux distributions)
 
