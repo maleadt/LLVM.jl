@@ -13,7 +13,8 @@ makedocs(
             "man/troubleshooting.md"
         ],
         "Library" => [
-            "lib/api.md"
+            "lib/api.md",
+            "lib/interop.md"
         ]
     ],
     doctest = test
