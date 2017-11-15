@@ -52,5 +52,5 @@ LLVM.jl is a registered package, and can be installed using the Julia package ma
 Pkg.add("LLVM")
 ```
 
-However, in most cases **you need a source-build of Julia**. Refer to [the
+However, in most cases **you need a source-build of Julia 0.6**. Refer to [the
 documentation][docs-stable-url] for more information on how to install or use this package.
