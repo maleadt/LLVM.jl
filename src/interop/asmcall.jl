@@ -1,20 +1,14 @@
 export @asmcall
 
-# we can't pass asm strings via Val (typevars need to be isbits),
-# so use a global cache indexed by the hash of the source location
-const asmcache = Dict{UInt, Tuple{String,String}}()
-
-@generated function _asmcall(::Val{key}, ::Val{side_effects},
+@generated function _asmcall(::Val{asm}, ::Val{constraints}, ::Val{side_effects},
                              ::Val{rettyp}, ::Val{argtyp}, args...) where
-                            {key, side_effects, rettyp, argtyp}
-    asm, constraints = asmcache[key]
-
+                            {asm, constraints, side_effects, rettyp, argtyp}
     # create a function
     llvm_rettyp = convert(LLVMType, rettyp)
     llvm_argtyp = LLVMType[convert.(LLVMType, [argtyp.parameters...])...]
     llvm_f, llvm_ft = create_function(llvm_rettyp, llvm_argtyp)
 
-    inline_asm = InlineAsm(llvm_ft, asm, constraints, side_effects)
+    inline_asm = InlineAsm(llvm_ft, String(asm), String(constraints), side_effects)
 
     # generate IR
     Builder(JuliaContext()) do builder
@@ -45,10 +39,10 @@ arguments as a tuple-type in `argtyp`.
 
 macro asmcall(asm::String, constraints::String, side_effects::Bool,
               rettyp::Symbol=:(Void), argtyp::Expr=:(Tuple{}), args...)
-    key = hash((asm, constraints))
-    asmcache[key] = (asm, constraints)
-    return esc(:(LLVM.Interop._asmcall(Val{$key}(), Val{$side_effects}(),
-                                       Val{$rettyp}(), Val{$argtyp}(),
+    asm_val = Val{Symbol(asm)}()
+    constraints_val = Val{Symbol(constraints)}()
+    return esc(:(LLVM.Interop._asmcall($asm_val, $constraints_val,
+                                       Val{$side_effects}(), Val{$rettyp}(), Val{$argtyp}(),
                                        $(args...))))
 end
 
