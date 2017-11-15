@@ -51,6 +51,8 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 
+include("interop.jl")
+
 include("deprecated.jl")
 
 if Compat.Sys.islinux()
@@ -91,6 +93,8 @@ function __init__()
 
     _install_handlers()
     _install_handlers(GlobalContext())
+
+    Interop.__init__()
 end
 
 end

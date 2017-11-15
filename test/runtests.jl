@@ -57,6 +57,9 @@ if LLVM.configured
     include("target.jl")
     include("targetmachine.jl")
     include("datalayout.jl")
+
+    include("interop.jl")
+
     include("Kaleidoscope.jl")
 
     include("examples.jl")
