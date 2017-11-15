@@ -51,7 +51,9 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 
-include("interop.jl")
+if !configured || !LLVM.libllvm_system
+    include("interop.jl")
+end
 
 include("deprecated.jl")
 
@@ -94,7 +96,7 @@ function __init__()
     _install_handlers()
     _install_handlers(GlobalContext())
 
-    Interop.__init__()
+    LLVM.libllvm_system || Interop.__init__()
 end
 
 end
