@@ -5,16 +5,14 @@ module LLVM
 using Compat
 
 const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
-const configured = if isfile(ext)
-    include(ext)
-    true
-else
-    # enable LLVM.jl to be loaded when the build failed, simplifying downstream use.
-    # remove this when we have proper support for conditional modules.
+isfile(ext) || error("LLVM.jl has not been built, please run Pkg.build(\"LLVM\").")
+include(ext)
+if !configured
+    # default (non-functional) values for critical variables,
+    # making it possible to _load_ the package at all times.
     const libllvm_targets = Symbol[]
     const libllvm_path = nothing
     const llvmjl_wrapper = "4.0"
-    false
 end
 
 include("util/logging.jl")
@@ -75,7 +73,7 @@ function __init__()
     __init_logging__()
 
     if !configured
-        warn("LLVM.jl has not been configured, and will not work properly.")
+        warn("LLVM.jl has not been successfully built, and will not work properly.")
         warn("Please run Pkg.build(\"LLVM\") and restart Julia.")
         return
     end
