@@ -55,6 +55,9 @@ function main()
     # TODO: figure out the name of the native target
     config[:libllvm_targets] = [:NVPTX, :AMDGPU]
 
+    # backwards-compatibility
+    config[:libllvm_system] = false
+
 
     ## (re)generate ext.jl
 
