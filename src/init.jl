@@ -8,11 +8,6 @@ function version()
     return libllvm_version
 end
 
-function Shutdown()
-  libllvm_system || error("Cannot shutdown LLVM without exclusive access")
-  API.LLVMShutdown()
-end
-
 ismultithreaded() = convert(Core.Bool, API.LLVMIsMultithreaded())
 
 for subsystem in [:Core, :TransformUtils, :ScalarOpts, :ObjCARCOpts, :Vectorization,

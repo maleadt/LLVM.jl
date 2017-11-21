@@ -14,6 +14,7 @@ if !configured
     const libllvm_path = nothing
     const llvmjl_wrapper = "4.0"
 end
+const libllvm = libllvm_path
 
 include("util/logging.jl")
 include("util/types.jl")
@@ -49,9 +50,7 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 
-if !configured || !LLVM.libllvm_system
-    include("interop.jl")
-end
+include("interop.jl")
 
 include("deprecated.jl")
 
@@ -78,23 +77,10 @@ function __init__()
         return
     end
 
-    # check validity of LLVM library
-    debug("Checking validity of ", (libllvm_system ? "system" : "bundled"), " library at $libllvm_path")
-    stat(libllvm_path).mtime == libllvm_mtime ||
-        warn("LLVM library has been modified. Please run Pkg.build(\"LLVM\") and restart Julia.")
-
-    if !libllvm_system
-        libllvm[] = Libdl.dlopen(libllvm_extra_path)
-    elseif is_linux()
-        libllvm[] = dlmopen(LM_ID_NEWLM, libllvm_extra_path)
-    else
-        error("System LLVM mode only supported on Linux")
-    end
-
     _install_handlers()
     _install_handlers(GlobalContext())
 
-    LLVM.libllvm_system || Interop.__init__()
+    Interop.__init__()
 end
 
 end

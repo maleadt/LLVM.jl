@@ -64,9 +64,7 @@ function Base.delete!(iter::FunctionAttrSet, attr::StringAttribute)
 end
 
 function Base.length(iter::FunctionAttrSet)
-    # FIXME: apt nightlies report themselves as v"4.0" instead of "4.0-svn"
-    #        alternatively, make the revision number part of the version string?
-    if libllvm_version <= v"4.0"
+    if libllvm_version < v"4.0"
         API.LLVMGetAttributeCountAtIndex_D26392(ref(iter.f), iter.idx)
     else
         API.LLVMGetAttributeCountAtIndex(ref(iter.f), iter.idx)

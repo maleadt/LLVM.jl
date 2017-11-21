@@ -1,7 +1,6 @@
 # same as `sum.jl`, but reusing the Julia compiler to compile and execute the IR
 
 using LLVM
-LLVM.libllvm_system && exit() # cannot run this example if we have our own copy of LLVM
 using LLVM.Interop
 
 if length(ARGS) == 2

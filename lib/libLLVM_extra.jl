@@ -108,16 +108,16 @@ end
 # Julia wrapper for header: llvm-extra/IR/Core.h
 
 function LLVMGetAttributeCountAtIndex_D26392(F::LLVMValueRef,Idx::LLVMAttributeIndex)
-    @apicall(:LLVMGetAttributeCountAtIndex_D26392,UInt32,(LLVMValueRef,LLVMAttributeIndex),F,Idx)
+    @apicall(:LLVMExtraGetAttributeCountAtIndex_D26392,UInt32,(LLVMValueRef,LLVMAttributeIndex),F,Idx)
 end
 
 function LLVMGetCallSiteAttributeCount_D26392(C::LLVMValueRef,Idx::LLVMAttributeIndex)
-    @apicall(:LLVMGetCallSiteAttributeCount_D26392,UInt32,(LLVMValueRef,LLVMAttributeIndex),C,Idx)
+    @apicall(:LLVMExtraGetCallSiteAttributeCount_D26392,UInt32,(LLVMValueRef,LLVMAttributeIndex),C,Idx)
 end
 
 
 # Julia wrapper for header: llvm-extra/IR/Value.h
 
 function LLVMGetValueContext(V::LLVMValueRef)
-    @apicall(:LLVMGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
+    @apicall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end
