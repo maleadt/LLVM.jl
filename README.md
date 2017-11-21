@@ -3,30 +3,11 @@ LLVM C API wrapper
 
 *A Julia wrapper for the LLVM C API.*
 
-**Build status**: 
-
-- LLVM 3.9: 
-[![][buildbot-julia06-llvm39-img]][buildbot-julia06-llvm39-url]
-- LLVM 4.0: 
-[![][buildbot-julia06-llvm40-img]][buildbot-julia06-llvm40-url]
-- LLVM 5.0: 
-[![][buildbot-julia06-llvm50-img]][buildbot-julia06-llvm50-url]
-- embedded:
-[![][buildbot-julia06-img]][buildbot-julia06-url]
-[![][buildbot-juliadev-img]][buildbot-juliadev-url]
+**Build status**: [![][buildbot-julia06-img]][buildbot-julia06-url] [![][buildbot-juliadev-img]][buildbot-juliadev-url]
 
 **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
 **Code coverage**: [![][coverage-img]][coverage-url]
-
-[buildbot-julia06-llvm39-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-llvm39-x86-64bit&name=julia%200.6
-[buildbot-julia06-llvm39-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-llvm39-x86-64bit
-
-[buildbot-julia06-llvm40-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-llvm40-x86-64bit&name=julia%200.6
-[buildbot-julia06-llvm40-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-llvm40-x86-64bit
-
-[buildbot-julia06-llvm50-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-llvm50-x86-64bit&name=julia%200.6
-[buildbot-julia06-llvm50-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-llvm50-x86-64bit
 
 [buildbot-julia06-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-x86-64bit&name=julia%200.6
 [buildbot-julia06-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-x86-64bit
