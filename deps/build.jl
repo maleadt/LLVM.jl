@@ -38,8 +38,8 @@ function main()
     llvmjl_wrappers = filter(path->isdir(joinpath(@__DIR__, "..", "lib", path)),
                              readdir(joinpath(@__DIR__, "..", "lib")))
 
-    matching_wrappers = filter(wrapper->vercmp_compat(config[:libllvm_version],
-                                                      VersionNumber(wrapper)),
+    matching_wrappers = filter(wrapper->vercmp_match(config[:libllvm_version],
+                                                     VersionNumber(wrapper)),
                                llvmjl_wrappers)
     config[:llvmjl_wrapper] = if !isempty(matching_wrappers)
         @assert length(matching_wrappers) == 1
