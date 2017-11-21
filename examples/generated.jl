@@ -2,9 +2,7 @@
 
 using LLVM
 LLVM.libllvm_system && exit() # cannot run this example if we have our own copy of LLVM
-
-const jlctx = LLVM.Context(convert(LLVM.API.LLVMContextRef,
-                                   cglobal(:jl_LLVMContext, Void)))
+using LLVM.Interop
 
 # pointer wrapper type for which we'll build our own low-level intrinsics
 struct CustomPtr{T}
@@ -18,22 +16,20 @@ end
                            (Any, Ptr{Bool}), T, isboxed_ref))
     @assert !isboxed_ref[]
 
-    T_int = LLVM.IntType(sizeof(Int)*8, jlctx)
+    T_int = LLVM.IntType(sizeof(Int)*8, JuliaContext())
     T_ptr = LLVM.PointerType(eltyp)
 
     # create a module & function
-    mod = LLVM.Module("llvmcall", jlctx)
     if VERSION >= v"0.7.0-DEV.1704"
         paramtyps = [T_int, T_int]
     else
         paramtyps = [T_ptr, T_int]
     end
-    llvmf_typ = LLVM.FunctionType(eltyp, paramtyps)
-    llvmf = LLVM.Function(mod, "unsafe_load", llvmf_typ)
+    llvmf, _ = create_function(eltyp, paramtyps)
 
     # generate IR
-    Builder(jlctx) do builder
-        entry = BasicBlock(llvmf, "entry", jlctx)
+    Builder(JuliaContext()) do builder
+        entry = BasicBlock(llvmf, "entry", JuliaContext())
         position!(builder, entry)
 
         if VERSION >= v"0.7.0-DEV.1704"
@@ -47,12 +43,7 @@ end
         ret!(builder, val)
     end
 
-    # call
-    push!(function_attributes(llvmf), EnumAttribute("alwaysinline"))
-    quote
-        Base.@_inline_meta
-        Base.llvmcall(LLVM.ref($llvmf), $T, Tuple{Ptr{$T}, Int}, p.ptr, Int(i-1))
-    end
+    call_function(llvmf, T, Tuple{Ptr{T}, Int}, :(p.ptr, Int(i-1)))
 end
 
 a = [42]
