@@ -13,6 +13,7 @@ if !configured
     const libllvm_targets = Symbol[]
     const libllvm_path = nothing
     const llvmjl_wrapper = "4.0"
+    const libllvm_version = v"3.9"
 end
 const libllvm = libllvm_path
 
@@ -23,7 +24,7 @@ include("base.jl")
 
 module API
 using Compat
-using LLVM: @apicall, llvmjl_wrapper
+using LLVM: @apicall, llvmjl_wrapper, libllvm_version
 libdir = joinpath(@__DIR__, "..", "lib", llvmjl_wrapper)
 include(joinpath(libdir, "libLLVM_common.jl"))
 include(joinpath(libdir, "libLLVM_h.jl"))

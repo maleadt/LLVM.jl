@@ -64,11 +64,7 @@ function Base.delete!(iter::FunctionAttrSet, attr::StringAttribute)
 end
 
 function Base.length(iter::FunctionAttrSet)
-    if libllvm_version < v"4.0"
-        API.LLVMGetAttributeCountAtIndex_D26392(ref(iter.f), iter.idx)
-    else
-        API.LLVMGetAttributeCountAtIndex(ref(iter.f), iter.idx)
-    end
+    API.LLVMGetAttributeCountAtIndex(ref(iter.f), iter.idx)
 end
 
 # parameter iteration
