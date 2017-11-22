@@ -20,6 +20,8 @@ function main()
 
     ## discover stuff
 
+    VERSION >= v"0.7.0-DEV.2576" || error("This version of LLVM.jl requires Julia 0.7")
+
     libllvm_name = if Compat.Sys.isapple()
         "libLLVM.dylib"
     elseif Compat.Sys.iswindows()
