@@ -3,16 +3,14 @@ LLVM C API wrapper
 
 *A Julia wrapper for the LLVM C API.*
 
-**Build status**: [![][buildbot-julia06-img]][buildbot-julia06-url] [![][buildbot-juliadev-img]][buildbot-juliadev-url]
+**Build status**: [![][ci-img]][ci-url]
 
 **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
 **Code coverage**: [![][coverage-img]][coverage-url]
 
-[buildbot-julia06-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-julia06-x86-64bit&name=julia%200.6
-[buildbot-julia06-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-julia06-x86-64bit
-[buildbot-juliadev-img]: http://ci.maleadt.net/shields/build.php?builder=LLVM-juliadev-x86-64bit&name=julia%20dev
-[buildbot-juliadev-url]: http://ci.maleadt.net/shields/url.php?builder=LLVM-juliadev-x86-64bit
+[ci-img]: https://travis-ci.org/maleadt/LLVM.jl.svg?branch=master
+[ci-url]: https://travis-ci.org/maleadt/LLVM.jl
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: http://maleadt.github.io/LLVM.jl/stable
