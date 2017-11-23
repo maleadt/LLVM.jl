@@ -21,10 +21,7 @@ LLVM.Module("SomeModule", ctx) do mod
         return false
     end
 
-    if LLVM.libllvm_system
-        @test_throws ErrorException ModulePass("SomeModulePass", runOnModule)
-    else
-        pass = ModulePass("SomeModulePass", runOnModule)
+    let pass = ModulePass("SomeModulePass", runOnModule)
 
         ModulePassManager() do mpm
             add!(mpm, pass)
@@ -39,10 +36,7 @@ LLVM.Module("SomeModule", ctx) do mod
         return false
     end
 
-    if LLVM.libllvm_system
-        @test_throws ErrorException FunctionPass("SomeFunctionPass", runOnFunction)
-    else
-        pass = FunctionPass("SomeFunctionPass", runOnFunction)
+    let pass = FunctionPass("SomeFunctionPass", runOnFunction)
 
         FunctionPassManager(mod) do fpm
             add!(fpm, pass)
@@ -57,10 +51,7 @@ LLVM.Module("SomeModule", ctx) do mod
         return false
     end
 
-    if LLVM.libllvm_system
-        @test_throws ErrorException BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
-    else
-        pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
+    let pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
 
         FunctionPassManager(mod) do fpm
             add!(fpm, pass)

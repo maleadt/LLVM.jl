@@ -1,7 +1,6 @@
 # an example using generated functions which build their own IR
 
 using LLVM
-LLVM.libllvm_system && exit() # cannot run this example if we have our own copy of LLVM
 using LLVM.Interop
 
 # pointer wrapper type for which we'll build our own low-level intrinsics

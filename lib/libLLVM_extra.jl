@@ -1,4 +1,7 @@
-# Julia wrapper for header: llvm-extra/Target.h
+# Julia wrapper for source: julia/src/llvm-api.cpp
+
+
+# initialization functions
 
 function LLVMInitializeAllTargetInfos()
     @apicall(:LLVMExtraInitializeAllTargetInfos,Void,())
@@ -41,32 +44,7 @@ function LLVMInitializeNativeDisassembler()
 end
 
 
-# Julia wrapper for header: llvm-extra/Transforms/IPO.h
-
-function LLVMAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
-    @apicall(:LLVMExtraAddInternalizePassWithExportList,Void,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
-end
-
-
-# Julia wrapper for header: llvm-extra/Target/Target.h
-
-function LLVMAddTargetLibraryInfoByTriple(Triple, PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddTargetLibraryInfoByTiple,Void,(Cstring, LLVMPassManagerRef), Triple, PM)
-end
-
-
-# Julia wrapper for header: llvm-extra/Target/NVPTX.h
-
-function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddMVVMReflectPass,Void,(LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Values, Length)
-    @apicall(:LLVMExtraAddMVVMReflectPassWithMapping,Void,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
-end
-
-
-# Julia wrapper for header: llvm-extra/IR/Pass.h
+# infrastructure for writing LLVM passes in Julia
 
 mutable struct LLVMOpaquePass
 end
@@ -98,26 +76,45 @@ function LLVMCreateBasicBlockPass(Name, Callback)
 end
 
 
-# Julia wrapper for header: llvm-extra/IR/Metadata.h
+# bugfixes
+
+if libllvm_version < v"4.0"
+
+# D26392
+function LLVMGetAttributeCountAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex)
+    @apicall(:LLVMExtraGetAttributeCountAtIndex,UInt32,(LLVMValueRef,LLVMAttributeIndex),F,Idx)
+end
+
+# D26392
+function LLVMGetCallSiteAttributeCount(C::LLVMValueRef,Idx::LLVMAttributeIndex)
+    @apicall(:LLVMExtraGetCallSiteAttributeCount,UInt32,(LLVMValueRef,LLVMAttributeIndex),C,Idx)
+end
+
+end
+
+
+# various missing functions
+
+function LLVMAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
+    @apicall(:LLVMExtraAddInternalizePassWithExportList,Void,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
+end
+
+function LLVMAddTargetLibraryInfoByTriple(Triple, PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddTargetLibraryInfoByTiple,Void,(Cstring, LLVMPassManagerRef), Triple, PM)
+end
+
+function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddMVVMReflectPass,Void,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Values, Length)
+    @apicall(:LLVMExtraAddMVVMReflectPassWithMapping,Void,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
+end
 
 function LLVMGetDebugMDVersion()
     @apicall(:LLVMExtraGetDebugMDVersion,Cuint,())
 end
 
-
-# Julia wrapper for header: llvm-extra/IR/Core.h
-
-function LLVMGetAttributeCountAtIndex_D26392(F::LLVMValueRef,Idx::LLVMAttributeIndex)
-    @apicall(:LLVMGetAttributeCountAtIndex_D26392,UInt32,(LLVMValueRef,LLVMAttributeIndex),F,Idx)
-end
-
-function LLVMGetCallSiteAttributeCount_D26392(C::LLVMValueRef,Idx::LLVMAttributeIndex)
-    @apicall(:LLVMGetCallSiteAttributeCount_D26392,UInt32,(LLVMValueRef,LLVMAttributeIndex),C,Idx)
-end
-
-
-# Julia wrapper for header: llvm-extra/IR/Value.h
-
 function LLVMGetValueContext(V::LLVMValueRef)
-    @apicall(:LLVMGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
+    @apicall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end

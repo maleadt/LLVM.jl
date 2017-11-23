@@ -1757,8 +1757,10 @@ function LLVMAddAttributeAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex,A::LLVM
     @apicall(:LLVMAddAttributeAtIndex,Void,(LLVMValueRef,LLVMAttributeIndex,LLVMAttributeRef),F,Idx,A)
 end
 
+if libllvm_version >= v"4.0"    # replacement functionality in libLLVM_extra.jl
 function LLVMGetAttributeCountAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex)
     @apicall(:LLVMGetAttributeCountAtIndex,UInt32,(LLVMValueRef,LLVMAttributeIndex),F,Idx)
+end
 end
 
 function LLVMGetAttributesAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex,Attrs)
@@ -2037,8 +2039,10 @@ function LLVMAddCallSiteAttribute(C::LLVMValueRef,Idx::LLVMAttributeIndex,A::LLV
     @apicall(:LLVMAddCallSiteAttribute,Void,(LLVMValueRef,LLVMAttributeIndex,LLVMAttributeRef),C,Idx,A)
 end
 
+if libllvm_version >= v"4.0"    # replacement functionality in libLLVM_extra.jl
 function LLVMGetCallSiteAttributeCount(C::LLVMValueRef,Idx::LLVMAttributeIndex)
     @apicall(:LLVMGetCallSiteAttributeCount,UInt32,(LLVMValueRef,LLVMAttributeIndex),C,Idx)
+end
 end
 
 function LLVMGetCallSiteAttributes(C::LLVMValueRef,Idx::LLVMAttributeIndex,Attrs)

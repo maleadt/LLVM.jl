@@ -67,12 +67,7 @@ if LLVM.configured
         warn("Documenter.jl not installed, skipping documentation tests.")
     end
 
-    if LLVM.libllvm_system
-        warn("Using system LLVM library, skipping Julia interop tests")
-        Shutdown()
-    else
-        include("interop.jl")
-    end
+    include("interop.jl")
 else
     warn("LLVM.jl has not been configured; skipping most tests.")
 end
