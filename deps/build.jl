@@ -30,8 +30,12 @@ function main()
         "libLLVM.so"
     end
 
-    config[:libllvm_path] = joinpath(dirname(JULIA_HOME), "lib", libllvm_name)
-    isfile(config[:libllvm_path]) || error("Could not find libLLVM.so, is Julia built with USE_LLVM_SHLIB=1?")
+    libllvm_paths =
+        [joinpath(dirname(JULIA_HOME), "lib", libllvm_name),            # build trees
+         joinpath(dirname(JULIA_HOME), "lib", "julia", libllvm_name)]   # dists
+    filter!(isfile, libllvm_paths)
+    isempty(libllvm_paths) && error("Could not find libLLVM.so, is Julia built with USE_LLVM_SHLIB=1?")
+    config[:libllvm_path] = first(libllvm_paths)
 
     config[:libllvm_version] = VersionNumber(Base.libllvm_version)
     vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
