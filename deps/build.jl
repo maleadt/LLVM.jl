@@ -1,5 +1,7 @@
 using Compat
 
+include(joinpath(@__DIR__, "..", "src", "util", "logging.jl"))
+
 const config_path = joinpath(@__DIR__, "ext.jl")
 const previous_config_path = config_path * ".bak"
 
@@ -33,8 +35,9 @@ function main()
     libllvm_paths =
         [joinpath(dirname(JULIA_HOME), "lib", libllvm_name),            # build trees
          joinpath(dirname(JULIA_HOME), "lib", "julia", libllvm_name)]   # dists
+    debug("Looking for $(libllvm_name) in ", join(libllvm_paths, ", "))
     filter!(isfile, libllvm_paths)
-    isempty(libllvm_paths) && error("Could not find libLLVM.so, is Julia built with USE_LLVM_SHLIB=1?")
+    isempty(libllvm_paths) && error("Could not find $(libllvm_name), is Julia built with USE_LLVM_SHLIB=1?")
     config[:libllvm_path] = first(libllvm_paths)
 
     config[:libllvm_version] = VersionNumber(Base.libllvm_version)
