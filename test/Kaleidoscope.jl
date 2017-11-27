@@ -1,3 +1,5 @@
+@testset "Kaleidoscope" begin
+
 include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
 
 @testset "recursion" begin
@@ -65,4 +67,6 @@ end
         v = Kaleidoscope.run(m)
         @test v == 13
     end
+end
+
 end
