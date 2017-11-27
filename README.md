@@ -3,14 +3,17 @@ LLVM C API wrapper
 
 *A Julia wrapper for the LLVM C API.*
 
-**Build status**: [![][ci-img]][ci-url]
+**Build status**: [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url]
 
 **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
 **Code coverage**: [![][coverage-img]][coverage-url]
 
-[ci-img]: https://travis-ci.org/maleadt/LLVM.jl.svg?branch=master
-[ci-url]: https://travis-ci.org/maleadt/LLVM.jl
+[travis-img]: https://travis-ci.org/maleadt/LLVM.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/maleadt/LLVM.jl
+
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/5069m449yvvkyn9q/branch/master?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/maleadt/llvm-jl
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: http://maleadt.github.io/LLVM.jl/stable
