@@ -14,8 +14,6 @@ macro apicall(fun, rettyp, argtypes, args...)
         end
     end
 
-    configured || return :(error("LLVM.jl has not been configured."))
-
     target = if startswith(String(fun.value), "LLVMExtra")
         fun
     else

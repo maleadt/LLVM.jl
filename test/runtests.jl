@@ -17,59 +17,55 @@ include("util.jl")
     @test convert(LLVM.Bool, false) == LLVM.False
 end
 
-if LLVM.configured
-    @testset "pass registry" begin
-        passreg = GlobalPassRegistry()
+@testset "pass registry" begin
+    passreg = GlobalPassRegistry()
 
-        version()
-        ismultithreaded()
-        InitializeCore(passreg)
-        InitializeTransformUtils(passreg)
-        InitializeScalarOpts(passreg)
-        InitializeObjCARCOpts(passreg)
-        InitializeVectorization(passreg)
-        InitializeInstCombine(passreg)
-        InitializeIPO(passreg)
-        InitializeInstrumentation(passreg)
-        InitializeAnalysis(passreg)
-        InitializeIPA(passreg)
-        InitializeCodeGen(passreg)
-        InitializeTarget(passreg)
+    version()
+    ismultithreaded()
+    InitializeCore(passreg)
+    InitializeTransformUtils(passreg)
+    InitializeScalarOpts(passreg)
+    InitializeObjCARCOpts(passreg)
+    InitializeVectorization(passreg)
+    InitializeInstCombine(passreg)
+    InitializeIPO(passreg)
+    InitializeInstrumentation(passreg)
+    InitializeAnalysis(passreg)
+    InitializeIPA(passreg)
+    InitializeCodeGen(passreg)
+    InitializeTarget(passreg)
 
-        InitializeNativeTarget()
-        InitializeAllTargetInfos()
-        InitializeAllTargetMCs()
-        InitializeNativeAsmPrinter()
-    end
-
-    include("core.jl")
-    include("linker.jl")
-    include("irbuilder.jl")
-    include("buffer.jl")
-    include("bitcode.jl")
-    include("ir.jl")
-    include("analysis.jl")
-    include("moduleprovider.jl")
-    include("passmanager.jl")
-    include("pass.jl")
-    include("execution.jl")
-    include("transform.jl")
-    include("target.jl")
-    include("targetmachine.jl")
-    include("datalayout.jl")
-
-    include("Kaleidoscope.jl")
-
-    include("examples.jl")
-    if "Documenter" in keys(Pkg.installed())
-        include("documentation.jl")
-    else
-        warn("Documenter.jl not installed, skipping documentation tests.")
-    end
-
-    include("interop.jl")
-else
-    warn("LLVM.jl has not been configured; skipping most tests.")
+    InitializeNativeTarget()
+    InitializeAllTargetInfos()
+    InitializeAllTargetMCs()
+    InitializeNativeAsmPrinter()
 end
+
+include("core.jl")
+include("linker.jl")
+include("irbuilder.jl")
+include("buffer.jl")
+include("bitcode.jl")
+include("ir.jl")
+include("analysis.jl")
+include("moduleprovider.jl")
+include("passmanager.jl")
+include("pass.jl")
+include("execution.jl")
+include("transform.jl")
+include("target.jl")
+include("targetmachine.jl")
+include("datalayout.jl")
+
+include("Kaleidoscope.jl")
+
+include("examples.jl")
+if "Documenter" in keys(Pkg.installed())
+    include("documentation.jl")
+else
+    warn("Documenter.jl not installed, skipping documentation tests.")
+end
+
+include("interop.jl")
 
 end

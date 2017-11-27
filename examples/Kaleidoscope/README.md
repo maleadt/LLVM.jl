@@ -43,7 +43,7 @@ This returns an (unoptimized) LLVM `Module`. A chosen set of optimization passes
 The module can be written to an object file using `Kaleidoscope.write_objectfile(::LLVM.Module, ::String)` where the `String` is the file to write to.
 This object file can then be linked with e.g. a C program.
 
-The module can be executed directly in Julia using `Kaleidoscope.run(::LLVM.Module)`. This will look for a function `main()` in the code and execute it. The return value of the main function is returned from `run` as a `Float64`. After the module is executed, it is no longer valid.
+The module can be executed directly in Julia using `Kaleidoscope.run(::LLVM.Module, entry::String)`. This will look for an entry function in the code and execute it. The return value of the entry function is returned from `run` as a `Float64`. After the module is executed, it is no longer valid.
 
 # Possible future work
 

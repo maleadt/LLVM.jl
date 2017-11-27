@@ -4,7 +4,6 @@ export version, Shutdown,
        ismultithreaded
 
 function version()
-    LLVM.configured || error("LLVM.jl has not been configured.")
     return libllvm_version
 end
 

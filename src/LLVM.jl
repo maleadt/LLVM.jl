@@ -7,14 +7,6 @@ using Compat
 const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
 isfile(ext) || error("LLVM.jl has not been built, please run Pkg.build(\"LLVM\").")
 include(ext)
-if !configured
-    # default (non-functional) values for critical variables,
-    # making it possible to _load_ the package at all times.
-    const libllvm_targets = Symbol[]
-    const libllvm_path = nothing
-    const llvmjl_wrapper = "4.0"
-    const libllvm_version = v"3.9"
-end
 const libllvm = libllvm_path
 
 include("util/logging.jl")
@@ -71,12 +63,6 @@ end
 
 function __init__()
     __init_logging__()
-
-    if !configured
-        warn("LLVM.jl has not been successfully built, and will not work properly.")
-        warn("Please run Pkg.build(\"LLVM\") and restart Julia.")
-        return
-    end
 
     _install_handlers()
     _install_handlers(GlobalContext())

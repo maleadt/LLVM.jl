@@ -1,3 +1,5 @@
+@testset "Kaleidoscope" begin
+
 include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
 
 @testset "recursion" begin
@@ -9,7 +11,7 @@ include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
                 fib(x-1) + fib(x-2)
         }
 
-        def main() {
+        def entry() {
             fib(10)
         }
     """
@@ -17,7 +19,7 @@ include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
     LLVM.Context() do ctx
         m = Kaleidoscope.generate_IR(program, ctx)
         Kaleidoscope.optimize!(m)
-        v = Kaleidoscope.run(m)
+        v = Kaleidoscope.run(m, "entry")
         @test v == 55.0
     end
 end
@@ -34,7 +36,7 @@ end
         b
     }
 
-    def main() {
+    def entry() {
         fib(10)
     }
     """
@@ -45,7 +47,7 @@ end
         mktemp() do path, io
             Kaleidoscope.write_objectfile(m, path)
         end
-        v = Kaleidoscope.run(m)
+        v = Kaleidoscope.run(m, "entry")
         @test v == 55.0
     end
 end
@@ -56,13 +58,15 @@ end
     var y = 3
     def foo(a b) a + b + x + y
 
-    def main() foo(2, 3)
+    def entry() foo(2, 3)
     """
 
     LLVM.Context() do ctx
         m = Kaleidoscope.generate_IR(program, ctx)
         Kaleidoscope.optimize!(m)
-        v = Kaleidoscope.run(m)
+        v = Kaleidoscope.run(m, "entry")
         @test v == 13
     end
+end
+
 end
