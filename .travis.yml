@@ -15,5 +15,5 @@ env:
     - DOCUMENTER_DEBUG=true
 
 after_success:
-  - julia -e 'Pkg.add("Documenter")'
-  - julia -e 'cd(Pkg.dir("LLVM")); include(joinpath("docs", "make.jl"))'
+  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))'
+  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())';
