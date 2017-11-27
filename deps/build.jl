@@ -16,8 +16,7 @@ end
 
 function main()
     ispath(config_path) && mv(config_path, previous_config_path; remove_destination=true)
-    config = Dict{Symbol,Any}(:configured => false)
-    write_ext(config)
+    config = Dict{Symbol,Any}()
 
 
     ## discover stuff
@@ -71,6 +70,7 @@ function main()
 
     # backwards-compatibility
     config[:libllvm_system] = false
+    config[:configured] = true
 
 
     ## (re)generate ext.jl
@@ -92,7 +92,6 @@ function main()
         end
     end
 
-    config[:configured] = true
     write_ext(config)
 
     return
