@@ -142,6 +142,10 @@ end
 
 functions(engine::ExecutionEngine) = ExecutionEngineFunctionSet(engine)
 
+Base.iteratorsize(::ExecutionEngineFunctionSet) = Base.SizeUnknown()
+Base.start(::ExecutionEngineFunctionSet) =
+    error("Iteration of functions in the execution engine is not supported")
+
 function Base.get(functionset::ExecutionEngineFunctionSet, name::String, default)
     out_ref = Ref{API.LLVMValueRef}()
     API.LLVMFindFunction(functionset.engine.ref, name, out_ref)

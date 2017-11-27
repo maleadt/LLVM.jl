@@ -187,6 +187,7 @@ Context() do ctx
     
     let mod1 = emit_sum(ctx), mod2 = emit_retint(ctx, 42)
         Interpreter(mod1) do engine
+            @test_throws ErrorException collect(functions(engine))
             @test haskey(functions(engine), "SomeFunctionSum")
             @test functions(engine)["SomeFunctionSum"] isa LLVM.Function
             delete!(engine, mod1)
