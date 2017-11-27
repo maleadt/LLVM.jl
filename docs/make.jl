@@ -22,7 +22,7 @@ makedocs(
 
 test || deploydocs(
     repo = "github.com/maleadt/LLVM.jl.git",
-    julia = "0.6",
+    julia = "nightly",
     # no need to build anything here, re-use output of `makedocs`
     target = "build",
     deps = nothing,
