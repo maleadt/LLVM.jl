@@ -27,13 +27,13 @@ function optimize!(mod::LLVM.Module)
     return mod
 end
 
-function run(mod::LLVM.Module)
+function run(mod::LLVM.Module, entry::String)
     res_jl = 0.0
     LLVM.JIT(mod) do engine
-        if !haskey(LLVM.functions(engine), "main")
-            error("did not find main function in module")
+        if !haskey(LLVM.functions(engine), entry)
+            error("did not find entry function '$entry' in module")
         end
-        f = LLVM.functions(engine)["main"]
+        f = LLVM.functions(engine)[entry]
         res = LLVM.run(engine, f)
         res_jl = convert(Float64, res, LLVM.DoubleType())
         LLVM.dispose(res)
