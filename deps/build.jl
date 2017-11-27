@@ -27,14 +27,19 @@ function main()
     libllvm_name = if Compat.Sys.isapple()
         "libLLVM.dylib"
     elseif Compat.Sys.iswindows()
-        "libLLVM.dll"
+        "LLVM.dll"
     else
         "libLLVM.so"
     end
 
-    libllvm_paths =
+    libllvm_paths = if Compat.Sys.iswindows()
+        # TODO: Windows build trees
+        [joinpath(dirname(JULIA_HOME), "bin", libllvm_name)]
+    else
         [joinpath(dirname(JULIA_HOME), "lib", libllvm_name),            # build trees
          joinpath(dirname(JULIA_HOME), "lib", "julia", libllvm_name)]   # dists
+     end
+
     debug("Looking for $(libllvm_name) in ", join(libllvm_paths, ", "))
     filter!(isfile, libllvm_paths)
     isempty(libllvm_paths) && error("Could not find $(libllvm_name), is Julia built with USE_LLVM_SHLIB=1?")
