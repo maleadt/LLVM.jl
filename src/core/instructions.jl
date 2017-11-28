@@ -1,7 +1,9 @@
 export Instruction, unsafe_delete!,
        hasmetadata, metadata, metadata!,
-       parent, opcode,
+       opcode,
        predicate_int, predicate_real
+
+import Base.parent
 
 # forward definition of Instruction in src/core/value/constant.jl
 identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
