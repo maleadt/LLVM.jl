@@ -44,7 +44,7 @@ return_attributes(f::Function) = FunctionAttrSet(f, API.LLVMAttributeReturnIndex
 Base.eltype(::FunctionAttrSet) = Attribute
 
 function Base.collect(iter::FunctionAttrSet)
-    elems = Vector{API.LLVMAttributeRef}(length(iter))
+    elems = Vector{API.LLVMAttributeRef}(uninitialized, length(iter))
     if length(iter) > 0
       # FIXME: this prevents a nullptr ref in LLVM similar to D26392
       API.LLVMGetAttributesAtIndex(ref(iter.f), iter.idx, elems)
@@ -101,7 +101,7 @@ Base.length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.f))
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionParameterSet)
-    elems = Vector{API.LLVMValueRef}(length(iter))
+    elems = Vector{API.LLVMValueRef}(uninitialized, length(iter))
     API.LLVMGetParams(ref(iter.f), elems)
     return map(el->Argument(el), elems)
 end
@@ -132,7 +132,7 @@ Base.length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(ref(iter.f))
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionBlockSet)
-    elems = Vector{API.LLVMValueRef}(length(iter))
+    elems = Vector{API.LLVMValueRef}(uninitialized, length(iter))
     API.LLVMGetBasicBlocks(ref(iter.f), elems)
     return BasicBlock.(elems)
 end

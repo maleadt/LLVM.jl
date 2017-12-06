@@ -37,7 +37,7 @@ MDNode(vals::Vector{T}, ctx::Context) where {T<:Value} =
 
 function operands(md::MDNode)
     nops = API.LLVMGetMDNodeNumOperands(ref(md))
-    ops = Vector{API.LLVMValueRef}(nops)
+    ops = Vector{API.LLVMValueRef}(uninitialized, nops)
     API.LLVMGetMDNodeOperands(ref(md), ops)
     return Value.(ops)
 end
