@@ -10,9 +10,6 @@ else
     y = Int32(2)
 end
 
-# set-up
-mod = LLVM.Module("my_module", JuliaContext())
-
 param_types = [LLVM.Int32Type(JuliaContext()), LLVM.Int32Type(JuliaContext())]
 ret_type = LLVM.Int32Type(JuliaContext())
 sum, _ = create_function(ret_type, param_types)
@@ -24,9 +21,6 @@ Builder(JuliaContext()) do builder
 
     tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
     ret!(builder, tmp)
-
-    println(mod)
-    verify(mod)
 end
 
 # make Julia compile and execute the function
