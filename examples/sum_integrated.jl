@@ -25,5 +25,6 @@ end
 
 # make Julia compile and execute the function
 push!(function_attributes(sum), EnumAttribute("alwaysinline"))
-call_sum(x, y) = Base.llvmcall(LLVM.ref(sum), Int32, Tuple{Int32, Int32}, x, y)
+ptr = LLVM.ref(sum)
+call_sum(x, y) = Base.llvmcall(ptr, Int32, Tuple{Int32, Int32}, x, y)
 @show call_sum(x, y)
