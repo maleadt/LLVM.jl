@@ -18,7 +18,7 @@ end
     T_int = LLVM.IntType(sizeof(Int)*8, JuliaContext())
     T_ptr = LLVM.PointerType(eltyp)
 
-    # create a module & function
+    # create a function
     if VERSION >= v"0.7.0-DEV.1704"
         paramtyps = [T_int, T_int]
     else

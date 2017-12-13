@@ -10,9 +10,6 @@ else
     y = Int32(2)
 end
 
-# set-up
-mod = LLVM.Module("my_module", JuliaContext())
-
 param_types = [LLVM.Int32Type(JuliaContext()), LLVM.Int32Type(JuliaContext())]
 ret_type = LLVM.Int32Type(JuliaContext())
 sum, _ = create_function(ret_type, param_types)
@@ -24,12 +21,10 @@ Builder(JuliaContext()) do builder
 
     tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
     ret!(builder, tmp)
-
-    println(mod)
-    verify(mod)
 end
 
 # make Julia compile and execute the function
 push!(function_attributes(sum), EnumAttribute("alwaysinline"))
-call_sum(x, y) = Base.llvmcall(LLVM.ref(sum), Int32, Tuple{Int32, Int32}, x, y)
+ptr = LLVM.ref(sum)
+call_sum(x, y) = Base.llvmcall(ptr, Int32, Tuple{Int32, Int32}, x, y)
 @show call_sum(x, y)
