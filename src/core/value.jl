@@ -12,7 +12,7 @@ identify(::Type{Value}, ::Val{K}) where {K} = bug("Unknown value kind $K")
 
 @inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Value
     ref==C_NULL && throw(NullException())
-    @static if DEBUG
+    @debug begin
         T′ = identify(Value, ref)
         if T != T′
             error("invalid conversion of $T′ value reference to $T")

@@ -24,7 +24,7 @@ Context() do ctx
     @test typeof(LLVM.ref(typ)) == LLVM.API.LLVMTypeRef                 # untyped
 
     @test typeof(LLVM.IntegerType(LLVM.ref(typ))) == LLVM.IntegerType   # type reconstructed
-    if LLVM.DEBUG
+    @debug begin  # TODO: does this correspond with the loglevel of the LLVM module?
         @test_throws ErrorException LLVM.FunctionType(LLVM.ref(typ))    # wrong type
     end
     @test_throws NullException LLVM.FunctionType(LLVM.API.LLVMTypeRef(C_NULL))
@@ -182,7 +182,7 @@ LLVM.Module("SomeModule", ctx) do mod
     @test typeof(LLVM.ref(val)) == LLVM.API.LLVMValueRef                # untyped
 
     @test typeof(LLVM.Instruction(LLVM.ref(val))) == LLVM.AllocaInst    # type reconstructed
-    if LLVM.DEBUG
+    @debug begin  # TODO: does this correspond with the loglevel of the LLVM module?
         @test_throws ErrorException LLVM.Function(LLVM.ref(val))        # wrong
     end
     @test_throws NullException LLVM.Function(LLVM.API.LLVMValueRef(C_NULL))
