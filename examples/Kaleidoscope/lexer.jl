@@ -84,7 +84,7 @@ function Base.collect(l::Lexer)
     return tokens
 end
 
-const EOF_CHAR = convert(Char,typemax(UInt32))
+const EOF_CHAR = convert(Char,typemax(UInt16))
 
 # Reading
 readchar(io::IO) = eof(io) ? EOF_CHAR : read(io, Char)
