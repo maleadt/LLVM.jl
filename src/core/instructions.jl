@@ -12,11 +12,9 @@ identify(::Type{Instruction}, ::Val{K}) where {K} = bug("Unknown instruction kin
 
 @inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(NullException())
-    @static if DEBUG
+    @debug begin
         T′ = identify(Instruction, ref)
-        if T != T′
-            error("invalid conversion of $T′ instruction reference to $T")
-        end
+        @assert T==T′ "invalid conversion of $T′ instruction reference to $T"
     end
 end
 

@@ -1,6 +1,7 @@
 using Compat
 
-include(joinpath(@__DIR__, "..", "src", "util", "logging.jl"))
+using Logging
+parse(Bool, get(ENV, "DEBUG", "false")) && global_logger(SimpleLogger(global_logger().stream, Logging.Debug))
 
 const config_path = joinpath(@__DIR__, "ext.jl")
 const previous_config_path = config_path * ".bak"
@@ -39,7 +40,7 @@ function main()
          joinpath(dirname(JULIA_HOME), "lib", "julia", libllvm_name)]   # dists
      end
 
-    debug("Looking for $(libllvm_name) in ", join(libllvm_paths, ", "))
+    @debug "Looking for $(libllvm_name) in $(join(libllvm_paths, ", "))"
     filter!(isfile, libllvm_paths)
     isempty(libllvm_paths) && error("Could not find $(libllvm_name), is Julia built with USE_LLVM_SHLIB=1?")
     config[:libllvm_path] = first(libllvm_paths)

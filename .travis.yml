@@ -4,6 +4,10 @@ os:
   - linux
   - osx
 
+env:
+  - DEBUG=true
+  - DEBUG=false
+
 julia:
   - nightly
 
