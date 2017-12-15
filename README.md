@@ -33,3 +33,7 @@ LLVM.jl is a registered package, and can be installed using the Julia package ma
 ```julia
 Pkg.add("LLVM")
 ```
+
+**NOTE**: the current version of this package requires Julia 0.7. Only older
+versions of this package, v0.5.x, work with Julia 0.6, and require a
+**source-build** of Julia.
