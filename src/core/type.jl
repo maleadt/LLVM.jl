@@ -11,9 +11,7 @@ identify(::Type{LLVMType}, ::Val{K}) where {K} = bug("Unknown type kind $K")
     ref==C_NULL && throw(NullException())
     @debug begin
         T′ = identify(LLVMType, ref)
-        if T != T′
-            error("invalid conversion of $T′ type reference to $T")
-        end
+        @assert T==T′ "invalid conversion of $T′ type reference to $T"
     end
 end
 

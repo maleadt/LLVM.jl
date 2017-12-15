@@ -14,9 +14,7 @@ identify(::Type{Instruction}, ::Val{K}) where {K} = bug("Unknown instruction kin
     ref==C_NULL && throw(NullException())
     @debug begin
         T′ = identify(Instruction, ref)
-        if T != T′
-            error("invalid conversion of $T′ instruction reference to $T")
-        end
+        @assert T==T′ "invalid conversion of $T′ instruction reference to $T"
     end
 end
 

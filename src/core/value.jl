@@ -14,9 +14,7 @@ identify(::Type{Value}, ::Val{K}) where {K} = bug("Unknown value kind $K")
     ref==C_NULL && throw(NullException())
     @debug begin
         T′ = identify(Value, ref)
-        if T != T′
-            error("invalid conversion of $T′ value reference to $T")
-        end
+        @assert T==T′ "invalid conversion of $T′ value reference to $T"
     end
 end
 
