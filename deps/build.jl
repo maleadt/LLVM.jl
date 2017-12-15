@@ -1,7 +1,7 @@
 using Compat
 
 using Logging
-haskey(ENV, "DEBUG") && global_logger(SimpleLogger(global_logger().stream, Logging.Debug))
+parse(Bool, get(ENV, "DEBUG", "false")) && global_logger(SimpleLogger(global_logger().stream, Logging.Debug))
 
 const config_path = joinpath(@__DIR__, "ext.jl")
 const previous_config_path = config_path * ".bak"

@@ -3,7 +3,7 @@ __precompile__()
 module LLVM
 
 using Logging
-haskey(ENV, "DEBUG") && global_logger(SimpleLogger(global_logger().stream, Logging.Debug))
+parse(Bool, get(ENV, "DEBUG", "false")) && global_logger(SimpleLogger(global_logger().stream, Logging.Debug))
 
 using Unicode
 using Compat
