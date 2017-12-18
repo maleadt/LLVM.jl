@@ -20,7 +20,7 @@ end
 #       and not only Value and Type
 
 function Attribute(ref::API.LLVMAttributeRef)
-    ref == C_NULL && throw(NullException())
+    ref == C_NULL && throw(UndefRefError())
     if convert(Core.Bool, API.LLVMIsEnumAttribute(ref))
         return EnumAttribute(ref)
     elseif convert(Core.Bool, API.LLVMIsStringAttribute(ref))

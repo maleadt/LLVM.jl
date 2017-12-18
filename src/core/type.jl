@@ -8,7 +8,7 @@ identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
 identify(::Type{LLVMType}, ::Val{K}) where {K} = bug("Unknown type kind $K")
 
 @inline function check(::Type{T}, ref::API.LLVMTypeRef) where T<:LLVMType
-    ref==C_NULL && throw(NullException())
+    ref==C_NULL && throw(UndefRefError())
     @static if DEBUG
         T′ = identify(LLVMType, ref)
         if T != T′
@@ -19,7 +19,7 @@ end
 
 # Construct a concretely typed type object from an abstract type ref
 function LLVMType(ref::API.LLVMTypeRef)
-    ref == C_NULL && throw(NullException())
+    ref == C_NULL && throw(UndefRefError())
     T = identify(LLVMType, ref)
     return T(ref)
 end

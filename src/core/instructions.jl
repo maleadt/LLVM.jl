@@ -11,7 +11,7 @@ identify(::Type{Instruction}, ref::API.LLVMValueRef) =
 identify(::Type{Instruction}, ::Val{K}) where {K} = bug("Unknown instruction kind $K")
 
 @inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
-    ref==C_NULL && throw(NullException())
+    ref==C_NULL && throw(UndefRefError())
     @static if DEBUG
         T′ = identify(Instruction, ref)
         if T != T′
@@ -22,7 +22,7 @@ end
 
 # Construct a concretely typed instruction object from an abstract value ref
 function Instruction(ref::API.LLVMValueRef)
-    ref == C_NULL && throw(NullException())
+    ref == C_NULL && throw(UndefRefError())
     T = identify(Instruction, ref)
     return T(ref)
 end

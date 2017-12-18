@@ -19,7 +19,7 @@ reftype(t::Type) = bug("No reference type defined for $t")
 ref(obj) = obj.ref
 identify(::Type{T}, ref) where {T} = T(ref)
 @inline function check(::Type, ref::Ptr)
-    ref==C_NULL && throw(NullException())
+    ref==C_NULL && throw(UndefRefError())
 end
 
 # macro that adds an inner constructor to a type definition,

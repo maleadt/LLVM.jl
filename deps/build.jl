@@ -31,12 +31,18 @@ function main()
         "libLLVM.so"
     end
 
+    bindir = if VERSION >= v"0.7.0-DEV.3003"
+        Sys.BINDIR
+    else
+        JULIA_HOME
+    end
+    libdir = joinpath(dirname(bindir), "lib")
     libllvm_paths = if Compat.Sys.iswindows()
         # TODO: Windows build trees
-        [joinpath(dirname(JULIA_HOME), "bin", libllvm_name)]
+        [joinpath(bindir, libllvm_name)]
     else
-        [joinpath(dirname(JULIA_HOME), "lib", libllvm_name),            # build trees
-         joinpath(dirname(JULIA_HOME), "lib", "julia", libllvm_name)]   # dists
+        [joinpath(libdir, libllvm_name),            # build trees
+         joinpath(libdir, "julia", libllvm_name)]   # dists
      end
 
     debug("Looking for $(libllvm_name) in ", join(libllvm_paths, ", "))

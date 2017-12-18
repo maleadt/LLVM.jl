@@ -11,7 +11,7 @@ identify(::Type{Value}, ref::API.LLVMValueRef) =
 identify(::Type{Value}, ::Val{K}) where {K} = bug("Unknown value kind $K")
 
 @inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Value
-    ref==C_NULL && throw(NullException())
+    ref==C_NULL && throw(UndefRefError())
     @static if DEBUG
         T′ = identify(Value, ref)
         if T != T′
@@ -22,7 +22,7 @@ end
 
 # Construct a concretely typed value object from an abstract value ref
 function Value(ref::API.LLVMValueRef)
-    ref == C_NULL && throw(NullException())
+    ref == C_NULL && throw(UndefRefError())
     T = identify(Value, ref)
     return T(ref)
 end

@@ -27,11 +27,11 @@ Context() do ctx
     if LLVM.DEBUG
         @test_throws ErrorException LLVM.FunctionType(LLVM.ref(typ))    # wrong type
     end
-    @test_throws NullException LLVM.FunctionType(LLVM.API.LLVMTypeRef(C_NULL))
+    @test_throws UndefRefError LLVM.FunctionType(LLVM.API.LLVMTypeRef(C_NULL))
 
     @test typeof(LLVM.ref(typ)) == LLVM.API.LLVMTypeRef
     @test typeof(LLVMType(LLVM.ref(typ))) == LLVM.IntegerType           # type reconstructed
-    @test_throws NullException LLVMType(LLVM.API.LLVMTypeRef(C_NULL))
+    @test_throws UndefRefError LLVMType(LLVM.API.LLVMTypeRef(C_NULL))
 
     LLVM.IntType(8)
     @test width(LLVM.IntType(8, ctx)) == 8
@@ -185,10 +185,10 @@ LLVM.Module("SomeModule", ctx) do mod
     if LLVM.DEBUG
         @test_throws ErrorException LLVM.Function(LLVM.ref(val))        # wrong
     end
-    @test_throws NullException LLVM.Function(LLVM.API.LLVMValueRef(C_NULL))
+    @test_throws UndefRefError LLVM.Function(LLVM.API.LLVMValueRef(C_NULL))
 
     @test typeof(Value(LLVM.ref(val))) == LLVM.AllocaInst              # type reconstructed
-    @test_throws NullException Value(LLVM.API.LLVMValueRef(C_NULL))
+    @test_throws UndefRefError Value(LLVM.API.LLVMValueRef(C_NULL))
 
     show(DevNull, val)
 
@@ -390,7 +390,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     show(DevNull, gv)
 
-    @test_throws NullException initializer(gv)
+    @test_throws UndefRefError initializer(gv)
     init = ConstantInt(Int32(0))
     initializer!(gv, init)
     @test initializer(gv) == init
