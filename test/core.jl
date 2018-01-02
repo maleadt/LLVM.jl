@@ -323,6 +323,12 @@ Context() do ctx
         @test convert(UInt, constval) == 1
     end
 
+    # issue #81
+    for T in [Int32, UInt32, Int64, UInt64]
+        constval = ConstantInt(typemax(T))
+        @test convert(T, constval) == typemax(T)
+    end
+
     end
 
 
