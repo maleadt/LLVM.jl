@@ -19,7 +19,7 @@ LLVM.Module("SomeModule", ctx) do source_mod
     verify(source_mod)
     
 
-    bitcode = Vector{UInt8}(source_mod)
+    bitcode = convert(Vector{UInt8}, source_mod)
 
     let
         mod = parse(LLVM.Module, bitcode)

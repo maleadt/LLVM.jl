@@ -6,7 +6,7 @@ using LLVM.Interop
 
 @test isa(JuliaContext(), Context)
 
-@test isa(convert(LLVMType, Void), LLVM.VoidType)
+@test isa(convert(LLVMType, Nothing), LLVM.VoidType)
 
 @generated function add_one(i)
     T_int = convert(LLVMType, Int)
@@ -36,10 +36,10 @@ end
 a1() = @asmcall("nop")
 @test a1() == nothing
 
-a2() = @asmcall("nop", Void)
+a2() = @asmcall("nop", Nothing)
 @test a2() == nothing
 
-a3() = @asmcall("nop", Void, Tuple{})
+a3() = @asmcall("nop", Nothing, Tuple{})
 @test a3() == nothing
 
 # asm + constraints
@@ -47,10 +47,10 @@ a3() = @asmcall("nop", Void, Tuple{})
 b1() = @asmcall("nop", "")
 @test b1() == nothing
 
-b2() = @asmcall("nop", "", Void)
+b2() = @asmcall("nop", "", Nothing)
 @test b2() == nothing
 
-b3() = @asmcall("nop", "", Void, Tuple{})
+b3() = @asmcall("nop", "", Nothing, Tuple{})
 @test b3() == nothing
 
 # asm + constraints + side-effects
@@ -58,10 +58,10 @@ b3() = @asmcall("nop", "", Void, Tuple{})
 c1() = @asmcall("nop", "", false)
 @test c1() == nothing
 
-c2() = @asmcall("nop", "", false, Void)
+c2() = @asmcall("nop", "", false, Nothing)
 @test c2() == nothing
 
-c3() = @asmcall("nop", "", false, Void, Tuple{})
+c3() = @asmcall("nop", "", false, Nothing, Tuple{})
 @test c3() == nothing
 
 # arguments

@@ -61,7 +61,7 @@ context(mod::Module) = Context(API.LLVMGetModuleContext(ref(mod)))
 
 export types
 
-struct ModuleTypeDict <: Associative{String,LLVMType}
+struct ModuleTypeDict <: AbstractDict{String,LLVMType}
     mod::Module
 end
 
@@ -82,7 +82,7 @@ end
 
 export metadata
 
-struct ModuleMetadataDict <: Associative{String,Vector{MetadataAsValue}}
+struct ModuleMetadataDict <: AbstractDict{String,Vector{MetadataAsValue}}
     mod::Module
 end
 

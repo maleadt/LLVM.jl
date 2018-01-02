@@ -32,14 +32,14 @@ Base.convert(::Type{T}, val::GenericValue) where {T<:Unsigned} =
 GenericValue(typ::FloatingPointType, N::AbstractFloat) =
     GenericValue(API.LLVMCreateGenericValueOfFloat(ref(typ), convert(Cdouble, N)))
 
-# NOTE: this ugly-three arg convert is needed to match the C API,
+# NOTE: this ugly three-arg convert is needed to match the C API,
 #       which uses the type to call the correct C++ function.
 
 Base.convert(::Type{T}, val::GenericValue, typ::LLVMType) where {T<:AbstractFloat} =
     convert(T, API.LLVMGenericValueToFloat(ref(typ), ref(val)))
 
 GenericValue(ptr::Ptr) =
-    GenericValue(API.LLVMCreateGenericValueOfPointer(convert(Ptr{Void}, ptr)))
+    GenericValue(API.LLVMCreateGenericValueOfPointer(convert(Ptr{Cvoid}, ptr)))
 
 Base.convert(::Type{Ptr{T}}, val::GenericValue) where {T} =
     convert(Ptr{T}, API.LLVMGenericValueToPointer(ref(val)))

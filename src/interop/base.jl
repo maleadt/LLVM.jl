@@ -37,12 +37,12 @@ argument values (eg. `:((1,2))`), which will be splatted into the call to the fu
 
 # call an LLVM function, given its return (Julia) type, a tuple-type for the arguments,
 # and an expression yielding a tuple of the actual argument values.
-function call_function(llvmf::LLVM.Function, rettyp::Type=Void, argtyp::Type=Tuple{},
+function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=Tuple{},
                        args::Expr=:())
     ref = LLVM.ref(llvmf)
     quote
         Base.@_inline_meta
-        Base.llvmcall($(convert(Ptr{Void},ref)), $rettyp, $argtyp, $args...)
+        Base.llvmcall($(convert(Ptr{Cvoid},ref)), $rettyp, $argtyp, $args...)
     end
 end
 

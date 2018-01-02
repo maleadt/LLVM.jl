@@ -16,7 +16,7 @@ export @asmcall
         position!(builder, entry)
 
         val = call!(builder, inline_asm, collect(parameters(llvm_f)))
-        if rettyp == Void
+        if rettyp == Nothing
             ret!(builder)
         else
             ret!(builder, val)
@@ -29,7 +29,7 @@ end
 
 """
     @asmcall asm::String [constraints::String] [side_effects::Bool=false]
-             rettyp=Void argtyp=Tuple{} args...
+             rettyp=Nothing argtyp=Tuple{} args...
 
 Call some inline assembly `asm`, optionally constrained by `constraints` and denoting other
 side_effects in `side_effects`, specifying the return type in `rettyp` and types of
@@ -38,7 +38,7 @@ arguments as a tuple-type in `argtyp`.
 :(@asmcall)
 
 macro asmcall(asm::String, constraints::String, side_effects::Bool,
-              rettyp::Symbol=:(Void), argtyp::Expr=:(Tuple{}), args...)
+              rettyp::Symbol=:(Nothing), argtyp::Expr=:(Tuple{}), args...)
     asm_val = Val{Symbol(asm)}()
     constraints_val = Val{Symbol(constraints)}()
     return esc(:(LLVM.Interop._asmcall($asm_val, $constraints_val,
@@ -48,12 +48,12 @@ end
 
 # shorthand: no side_effects
 macro asmcall(asm::String, constraints::String,
-              rettyp::Symbol=:(Void), argtyp::Expr=:(Tuple{}), args...)
+              rettyp::Symbol=:(Nothing), argtyp::Expr=:(Tuple{}), args...)
     esc(:(LLVM.Interop.@asmcall $asm $constraints false $rettyp $argtyp $(args...)))
 end
 
 # shorthand: no side_effects or constraints
 macro asmcall(asm::String,
-              rettyp::Symbol=:(Void), argtyp::Expr=:(Tuple{}), args...)
+              rettyp::Symbol=:(Nothing), argtyp::Expr=:(Tuple{}), args...)
     esc(:(LLVM.Interop.@asmcall $asm "" $rettyp $argtyp $(args...)))
 end

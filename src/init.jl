@@ -48,6 +48,6 @@ for target in libllvm_targets,
 
     @eval begin
         export $jl_fname
-        $jl_fname() = API.@apicall($(QuoteNode(api_fname)), Void, ())
+        $jl_fname() = API.@apicall($(QuoteNode(api_fname)), Cvoid, ())
     end
 end

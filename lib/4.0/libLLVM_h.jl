@@ -2,15 +2,15 @@
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMInstallFatalErrorHandler(Handler::LLVMFatalErrorHandler)
-    @apicall(:LLVMInstallFatalErrorHandler,Void,(LLVMFatalErrorHandler,),Handler)
+    @apicall(:LLVMInstallFatalErrorHandler,Cvoid,(LLVMFatalErrorHandler,),Handler)
 end
 
 function LLVMResetFatalErrorHandler()
-    @apicall(:LLVMResetFatalErrorHandler,Void,())
+    @apicall(:LLVMResetFatalErrorHandler,Cvoid,())
 end
 
 function LLVMEnablePrettyStackTrace()
-    @apicall(:LLVMEnablePrettyStackTrace,Void,())
+    @apicall(:LLVMEnablePrettyStackTrace,Cvoid,())
 end
 
 
@@ -22,7 +22,7 @@ function LLVMCreateObjectFile(MemBuf::LLVMMemoryBufferRef)
 end
 
 function LLVMDisposeObjectFile(ObjectFile::LLVMObjectFileRef)
-    @apicall(:LLVMDisposeObjectFile,Void,(LLVMObjectFileRef,),ObjectFile)
+    @apicall(:LLVMDisposeObjectFile,Cvoid,(LLVMObjectFileRef,),ObjectFile)
 end
 
 function LLVMGetSections(ObjectFile::LLVMObjectFileRef)
@@ -30,7 +30,7 @@ function LLVMGetSections(ObjectFile::LLVMObjectFileRef)
 end
 
 function LLVMDisposeSectionIterator(SI::LLVMSectionIteratorRef)
-    @apicall(:LLVMDisposeSectionIterator,Void,(LLVMSectionIteratorRef,),SI)
+    @apicall(:LLVMDisposeSectionIterator,Cvoid,(LLVMSectionIteratorRef,),SI)
 end
 
 function LLVMIsSectionIteratorAtEnd(ObjectFile::LLVMObjectFileRef,SI::LLVMSectionIteratorRef)
@@ -38,11 +38,11 @@ function LLVMIsSectionIteratorAtEnd(ObjectFile::LLVMObjectFileRef,SI::LLVMSectio
 end
 
 function LLVMMoveToNextSection(SI::LLVMSectionIteratorRef)
-    @apicall(:LLVMMoveToNextSection,Void,(LLVMSectionIteratorRef,),SI)
+    @apicall(:LLVMMoveToNextSection,Cvoid,(LLVMSectionIteratorRef,),SI)
 end
 
 function LLVMMoveToContainingSection(Sect::LLVMSectionIteratorRef,Sym::LLVMSymbolIteratorRef)
-    @apicall(:LLVMMoveToContainingSection,Void,(LLVMSectionIteratorRef,LLVMSymbolIteratorRef),Sect,Sym)
+    @apicall(:LLVMMoveToContainingSection,Cvoid,(LLVMSectionIteratorRef,LLVMSymbolIteratorRef),Sect,Sym)
 end
 
 function LLVMGetSymbols(ObjectFile::LLVMObjectFileRef)
@@ -50,7 +50,7 @@ function LLVMGetSymbols(ObjectFile::LLVMObjectFileRef)
 end
 
 function LLVMDisposeSymbolIterator(SI::LLVMSymbolIteratorRef)
-    @apicall(:LLVMDisposeSymbolIterator,Void,(LLVMSymbolIteratorRef,),SI)
+    @apicall(:LLVMDisposeSymbolIterator,Cvoid,(LLVMSymbolIteratorRef,),SI)
 end
 
 function LLVMIsSymbolIteratorAtEnd(ObjectFile::LLVMObjectFileRef,SI::LLVMSymbolIteratorRef)
@@ -58,7 +58,7 @@ function LLVMIsSymbolIteratorAtEnd(ObjectFile::LLVMObjectFileRef,SI::LLVMSymbolI
 end
 
 function LLVMMoveToNextSymbol(SI::LLVMSymbolIteratorRef)
-    @apicall(:LLVMMoveToNextSymbol,Void,(LLVMSymbolIteratorRef,),SI)
+    @apicall(:LLVMMoveToNextSymbol,Cvoid,(LLVMSymbolIteratorRef,),SI)
 end
 
 function LLVMGetSectionName(SI::LLVMSectionIteratorRef)
@@ -86,7 +86,7 @@ function LLVMGetRelocations(Section::LLVMSectionIteratorRef)
 end
 
 function LLVMDisposeRelocationIterator(RI::LLVMRelocationIteratorRef)
-    @apicall(:LLVMDisposeRelocationIterator,Void,(LLVMRelocationIteratorRef,),RI)
+    @apicall(:LLVMDisposeRelocationIterator,Cvoid,(LLVMRelocationIteratorRef,),RI)
 end
 
 function LLVMIsRelocationIteratorAtEnd(Section::LLVMSectionIteratorRef,RI::LLVMRelocationIteratorRef)
@@ -94,7 +94,7 @@ function LLVMIsRelocationIteratorAtEnd(Section::LLVMSectionIteratorRef,RI::LLVMR
 end
 
 function LLVMMoveToNextRelocation(RI::LLVMRelocationIteratorRef)
-    @apicall(:LLVMMoveToNextRelocation,Void,(LLVMRelocationIteratorRef,),RI)
+    @apicall(:LLVMMoveToNextRelocation,Cvoid,(LLVMRelocationIteratorRef,),RI)
 end
 
 function LLVMGetSymbolName(SI::LLVMSymbolIteratorRef)
@@ -138,7 +138,7 @@ function LLVMGetModuleDataLayout(M::LLVMModuleRef)
 end
 
 function LLVMSetModuleDataLayout(M::LLVMModuleRef,DL::LLVMTargetDataRef)
-    @apicall(:LLVMSetModuleDataLayout,Void,(LLVMModuleRef,LLVMTargetDataRef),M,DL)
+    @apicall(:LLVMSetModuleDataLayout,Cvoid,(LLVMModuleRef,LLVMTargetDataRef),M,DL)
 end
 
 function LLVMCreateTargetData(StringRep)
@@ -146,11 +146,11 @@ function LLVMCreateTargetData(StringRep)
 end
 
 function LLVMDisposeTargetData(TD::LLVMTargetDataRef)
-    @apicall(:LLVMDisposeTargetData,Void,(LLVMTargetDataRef,),TD)
+    @apicall(:LLVMDisposeTargetData,Cvoid,(LLVMTargetDataRef,),TD)
 end
 
 function LLVMAddTargetLibraryInfo(TLI::LLVMTargetLibraryInfoRef,PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddTargetLibraryInfo,Void,(LLVMTargetLibraryInfoRef,LLVMPassManagerRef),TLI,PM)
+    @apicall(:LLVMAddTargetLibraryInfo,Cvoid,(LLVMTargetLibraryInfoRef,LLVMPassManagerRef),TLI,PM)
 end
 
 function LLVMCopyStringRepOfTargetData(TD::LLVMTargetDataRef)
@@ -266,7 +266,7 @@ function LLVMCreateTargetMachine(T::LLVMTargetRef,Triple,CPU,Features,Level::LLV
 end
 
 function LLVMDisposeTargetMachine(T::LLVMTargetMachineRef)
-    @apicall(:LLVMDisposeTargetMachine,Void,(LLVMTargetMachineRef,),T)
+    @apicall(:LLVMDisposeTargetMachine,Cvoid,(LLVMTargetMachineRef,),T)
 end
 
 function LLVMGetTargetMachineTarget(T::LLVMTargetMachineRef)
@@ -290,7 +290,7 @@ function LLVMCreateTargetDataLayout(T::LLVMTargetMachineRef)
 end
 
 function LLVMSetTargetMachineAsmVerbosity(T::LLVMTargetMachineRef,VerboseAsm::LLVMBool)
-    @apicall(:LLVMSetTargetMachineAsmVerbosity,Void,(LLVMTargetMachineRef,LLVMBool),T,VerboseAsm)
+    @apicall(:LLVMSetTargetMachineAsmVerbosity,Cvoid,(LLVMTargetMachineRef,LLVMBool),T,VerboseAsm)
 end
 
 function LLVMTargetMachineEmitToFile(T::LLVMTargetMachineRef,M::LLVMModuleRef,Filename,codegen::LLVMCodeGenFileType,ErrorMessage)
@@ -306,7 +306,7 @@ function LLVMGetDefaultTargetTriple()
 end
 
 function LLVMAddAnalysisPasses(T::LLVMTargetMachineRef,PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddAnalysisPasses,Void,(LLVMTargetMachineRef,LLVMPassManagerRef),T,PM)
+    @apicall(:LLVMAddAnalysisPasses,Cvoid,(LLVMTargetMachineRef,LLVMPassManagerRef),T,PM)
 end
 
 
@@ -326,11 +326,11 @@ function LLVMVerifyFunction(Fn::LLVMValueRef,Action::LLVMVerifierFailureAction)
 end
 
 function LLVMViewFunctionCFG(Fn::LLVMValueRef)
-    @apicall(:LLVMViewFunctionCFG,Void,(LLVMValueRef,),Fn)
+    @apicall(:LLVMViewFunctionCFG,Cvoid,(LLVMValueRef,),Fn)
 end
 
 function LLVMViewFunctionCFGOnly(Fn::LLVMValueRef)
-    @apicall(:LLVMViewFunctionCFGOnly,Void,(LLVMValueRef,),Fn)
+    @apicall(:LLVMViewFunctionCFGOnly,Cvoid,(LLVMValueRef,),Fn)
 end
 
 
@@ -394,11 +394,11 @@ end
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMInitializeCore(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeCore,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeCore,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMShutdown()
-    @apicall(:LLVMShutdown,Void,())
+    @apicall(:LLVMShutdown,Cvoid,())
 end
 
 function LLVMCreateMessage(Message)
@@ -406,7 +406,7 @@ function LLVMCreateMessage(Message)
 end
 
 function LLVMDisposeMessage(Message)
-    @apicall(:LLVMDisposeMessage,Void,(Cstring,),Message)
+    @apicall(:LLVMDisposeMessage,Cvoid,(Cstring,),Message)
 end
 
 function LLVMContextCreate()
@@ -418,7 +418,7 @@ function LLVMGetGlobalContext()
 end
 
 function LLVMContextSetDiagnosticHandler(C::LLVMContextRef,Handler::LLVMDiagnosticHandler,DiagnosticContext)
-    @apicall(:LLVMContextSetDiagnosticHandler,Void,(LLVMContextRef,LLVMDiagnosticHandler,Ptr{Void}),C,Handler,DiagnosticContext)
+    @apicall(:LLVMContextSetDiagnosticHandler,Cvoid,(LLVMContextRef,LLVMDiagnosticHandler,Ptr{Cvoid}),C,Handler,DiagnosticContext)
 end
 
 function LLVMContextGetDiagnosticHandler(C::LLVMContextRef)
@@ -426,15 +426,15 @@ function LLVMContextGetDiagnosticHandler(C::LLVMContextRef)
 end
 
 function LLVMContextGetDiagnosticContext(C::LLVMContextRef)
-    @apicall(:LLVMContextGetDiagnosticContext,Ptr{Void},(LLVMContextRef,),C)
+    @apicall(:LLVMContextGetDiagnosticContext,Ptr{Cvoid},(LLVMContextRef,),C)
 end
 
 function LLVMContextSetYieldCallback(C::LLVMContextRef,Callback::LLVMYieldCallback,OpaqueHandle)
-    @apicall(:LLVMContextSetYieldCallback,Void,(LLVMContextRef,LLVMYieldCallback,Ptr{Void}),C,Callback,OpaqueHandle)
+    @apicall(:LLVMContextSetYieldCallback,Cvoid,(LLVMContextRef,LLVMYieldCallback,Ptr{Cvoid}),C,Callback,OpaqueHandle)
 end
 
 function LLVMContextDispose(C::LLVMContextRef)
-    @apicall(:LLVMContextDispose,Void,(LLVMContextRef,),C)
+    @apicall(:LLVMContextDispose,Cvoid,(LLVMContextRef,),C)
 end
 
 function LLVMGetDiagInfoDescription(DI::LLVMDiagnosticInfoRef)
@@ -506,7 +506,7 @@ function LLVMCloneModule(M::LLVMModuleRef)
 end
 
 function LLVMDisposeModule(M::LLVMModuleRef)
-    @apicall(:LLVMDisposeModule,Void,(LLVMModuleRef,),M)
+    @apicall(:LLVMDisposeModule,Cvoid,(LLVMModuleRef,),M)
 end
 
 function LLVMGetModuleIdentifier(M::LLVMModuleRef,Len)
@@ -514,7 +514,7 @@ function LLVMGetModuleIdentifier(M::LLVMModuleRef,Len)
 end
 
 function LLVMSetModuleIdentifier(M::LLVMModuleRef,Ident,Len::Csize_t)
-    @apicall(:LLVMSetModuleIdentifier,Void,(LLVMModuleRef,Cstring,Csize_t),M,Ident,Len)
+    @apicall(:LLVMSetModuleIdentifier,Cvoid,(LLVMModuleRef,Cstring,Csize_t),M,Ident,Len)
 end
 
 function LLVMGetDataLayoutStr(M::LLVMModuleRef)
@@ -526,7 +526,7 @@ function LLVMGetDataLayout(M::LLVMModuleRef)
 end
 
 function LLVMSetDataLayout(M::LLVMModuleRef,DataLayoutStr)
-    @apicall(:LLVMSetDataLayout,Void,(LLVMModuleRef,Cstring),M,DataLayoutStr)
+    @apicall(:LLVMSetDataLayout,Cvoid,(LLVMModuleRef,Cstring),M,DataLayoutStr)
 end
 
 function LLVMGetTarget(M::LLVMModuleRef)
@@ -534,11 +534,11 @@ function LLVMGetTarget(M::LLVMModuleRef)
 end
 
 function LLVMSetTarget(M::LLVMModuleRef,Triple)
-    @apicall(:LLVMSetTarget,Void,(LLVMModuleRef,Cstring),M,Triple)
+    @apicall(:LLVMSetTarget,Cvoid,(LLVMModuleRef,Cstring),M,Triple)
 end
 
 function LLVMDumpModule(M::LLVMModuleRef)
-    @apicall(:LLVMDumpModule,Void,(LLVMModuleRef,),M)
+    @apicall(:LLVMDumpModule,Cvoid,(LLVMModuleRef,),M)
 end
 
 function LLVMPrintModuleToFile(M::LLVMModuleRef,Filename,ErrorMessage)
@@ -550,7 +550,7 @@ function LLVMPrintModuleToString(M::LLVMModuleRef)
 end
 
 function LLVMSetModuleInlineAsm(M::LLVMModuleRef,Asm)
-    @apicall(:LLVMSetModuleInlineAsm,Void,(LLVMModuleRef,Cstring),M,Asm)
+    @apicall(:LLVMSetModuleInlineAsm,Cvoid,(LLVMModuleRef,Cstring),M,Asm)
 end
 
 function LLVMGetModuleContext(M::LLVMModuleRef)
@@ -566,11 +566,11 @@ function LLVMGetNamedMetadataNumOperands(M::LLVMModuleRef,Name)
 end
 
 function LLVMGetNamedMetadataOperands(M::LLVMModuleRef,Name,Dest)
-    @apicall(:LLVMGetNamedMetadataOperands,Void,(LLVMModuleRef,Cstring,Ptr{LLVMValueRef}),M,Name,Dest)
+    @apicall(:LLVMGetNamedMetadataOperands,Cvoid,(LLVMModuleRef,Cstring,Ptr{LLVMValueRef}),M,Name,Dest)
 end
 
 function LLVMAddNamedMetadataOperand(M::LLVMModuleRef,Name,Val::LLVMValueRef)
-    @apicall(:LLVMAddNamedMetadataOperand,Void,(LLVMModuleRef,Cstring,LLVMValueRef),M,Name,Val)
+    @apicall(:LLVMAddNamedMetadataOperand,Cvoid,(LLVMModuleRef,Cstring,LLVMValueRef),M,Name,Val)
 end
 
 function LLVMAddFunction(M::LLVMModuleRef,Name,FunctionTy::LLVMTypeRef)
@@ -610,7 +610,7 @@ function LLVMGetTypeContext(Ty::LLVMTypeRef)
 end
 
 function LLVMDumpType(Val::LLVMTypeRef)
-    @apicall(:LLVMDumpType,Void,(LLVMTypeRef,),Val)
+    @apicall(:LLVMDumpType,Cvoid,(LLVMTypeRef,),Val)
 end
 
 function LLVMPrintTypeToString(Val::LLVMTypeRef)
@@ -742,7 +742,7 @@ function LLVMCountParamTypes(FunctionTy::LLVMTypeRef)
 end
 
 function LLVMGetParamTypes(FunctionTy::LLVMTypeRef,Dest)
-    @apicall(:LLVMGetParamTypes,Void,(LLVMTypeRef,Ptr{LLVMTypeRef}),FunctionTy,Dest)
+    @apicall(:LLVMGetParamTypes,Cvoid,(LLVMTypeRef,Ptr{LLVMTypeRef}),FunctionTy,Dest)
 end
 
 function LLVMStructTypeInContext(C::LLVMContextRef,ElementTypes,ElementCount::UInt32,Packed::LLVMBool)
@@ -762,7 +762,7 @@ function LLVMGetStructName(Ty::LLVMTypeRef)
 end
 
 function LLVMStructSetBody(StructTy::LLVMTypeRef,ElementTypes,ElementCount::UInt32,Packed::LLVMBool)
-    @apicall(:LLVMStructSetBody,Void,(LLVMTypeRef,Ptr{LLVMTypeRef},UInt32,LLVMBool),StructTy,ElementTypes,ElementCount,Packed)
+    @apicall(:LLVMStructSetBody,Cvoid,(LLVMTypeRef,Ptr{LLVMTypeRef},UInt32,LLVMBool),StructTy,ElementTypes,ElementCount,Packed)
 end
 
 function LLVMCountStructElementTypes(StructTy::LLVMTypeRef)
@@ -770,7 +770,7 @@ function LLVMCountStructElementTypes(StructTy::LLVMTypeRef)
 end
 
 function LLVMGetStructElementTypes(StructTy::LLVMTypeRef,Dest)
-    @apicall(:LLVMGetStructElementTypes,Void,(LLVMTypeRef,Ptr{LLVMTypeRef}),StructTy,Dest)
+    @apicall(:LLVMGetStructElementTypes,Cvoid,(LLVMTypeRef,Ptr{LLVMTypeRef}),StructTy,Dest)
 end
 
 function LLVMStructGetTypeAtIndex(StructTy::LLVMTypeRef,i::UInt32)
@@ -850,11 +850,11 @@ function LLVMGetValueName(Val::LLVMValueRef)
 end
 
 function LLVMSetValueName(Val::LLVMValueRef,Name)
-    @apicall(:LLVMSetValueName,Void,(LLVMValueRef,Cstring),Val,Name)
+    @apicall(:LLVMSetValueName,Cvoid,(LLVMValueRef,Cstring),Val,Name)
 end
 
 function LLVMDumpValue(Val::LLVMValueRef)
-    @apicall(:LLVMDumpValue,Void,(LLVMValueRef,),Val)
+    @apicall(:LLVMDumpValue,Cvoid,(LLVMValueRef,),Val)
 end
 
 function LLVMPrintValueToString(Val::LLVMValueRef)
@@ -862,7 +862,7 @@ function LLVMPrintValueToString(Val::LLVMValueRef)
 end
 
 function LLVMReplaceAllUsesWith(OldVal::LLVMValueRef,NewVal::LLVMValueRef)
-    @apicall(:LLVMReplaceAllUsesWith,Void,(LLVMValueRef,LLVMValueRef),OldVal,NewVal)
+    @apicall(:LLVMReplaceAllUsesWith,Cvoid,(LLVMValueRef,LLVMValueRef),OldVal,NewVal)
 end
 
 function LLVMIsConstant(Val::LLVMValueRef)
@@ -1218,7 +1218,7 @@ function LLVMGetOperandUse(Val::LLVMValueRef,Index::UInt32)
 end
 
 function LLVMSetOperand(User::LLVMValueRef,Index::UInt32,Val::LLVMValueRef)
-    @apicall(:LLVMSetOperand,Void,(LLVMValueRef,UInt32,LLVMValueRef),User,Index,Val)
+    @apicall(:LLVMSetOperand,Cvoid,(LLVMValueRef,UInt32,LLVMValueRef),User,Index,Val)
 end
 
 function LLVMGetNumOperands(Val::LLVMValueRef)
@@ -1598,7 +1598,7 @@ function LLVMGetLinkage(Global::LLVMValueRef)
 end
 
 function LLVMSetLinkage(Global::LLVMValueRef,Linkage::LLVMLinkage)
-    @apicall(:LLVMSetLinkage,Void,(LLVMValueRef,LLVMLinkage),Global,Linkage)
+    @apicall(:LLVMSetLinkage,Cvoid,(LLVMValueRef,LLVMLinkage),Global,Linkage)
 end
 
 function LLVMGetSection(Global::LLVMValueRef)
@@ -1606,7 +1606,7 @@ function LLVMGetSection(Global::LLVMValueRef)
 end
 
 function LLVMSetSection(Global::LLVMValueRef,Section)
-    @apicall(:LLVMSetSection,Void,(LLVMValueRef,Cstring),Global,Section)
+    @apicall(:LLVMSetSection,Cvoid,(LLVMValueRef,Cstring),Global,Section)
 end
 
 function LLVMGetVisibility(Global::LLVMValueRef)
@@ -1614,7 +1614,7 @@ function LLVMGetVisibility(Global::LLVMValueRef)
 end
 
 function LLVMSetVisibility(Global::LLVMValueRef,Viz::LLVMVisibility)
-    @apicall(:LLVMSetVisibility,Void,(LLVMValueRef,LLVMVisibility),Global,Viz)
+    @apicall(:LLVMSetVisibility,Cvoid,(LLVMValueRef,LLVMVisibility),Global,Viz)
 end
 
 function LLVMGetDLLStorageClass(Global::LLVMValueRef)
@@ -1622,7 +1622,7 @@ function LLVMGetDLLStorageClass(Global::LLVMValueRef)
 end
 
 function LLVMSetDLLStorageClass(Global::LLVMValueRef,Class::LLVMDLLStorageClass)
-    @apicall(:LLVMSetDLLStorageClass,Void,(LLVMValueRef,LLVMDLLStorageClass),Global,Class)
+    @apicall(:LLVMSetDLLStorageClass,Cvoid,(LLVMValueRef,LLVMDLLStorageClass),Global,Class)
 end
 
 function LLVMHasUnnamedAddr(Global::LLVMValueRef)
@@ -1630,7 +1630,7 @@ function LLVMHasUnnamedAddr(Global::LLVMValueRef)
 end
 
 function LLVMSetUnnamedAddr(Global::LLVMValueRef,HasUnnamedAddr::LLVMBool)
-    @apicall(:LLVMSetUnnamedAddr,Void,(LLVMValueRef,LLVMBool),Global,HasUnnamedAddr)
+    @apicall(:LLVMSetUnnamedAddr,Cvoid,(LLVMValueRef,LLVMBool),Global,HasUnnamedAddr)
 end
 
 function LLVMGetAlignment(V::LLVMValueRef)
@@ -1638,7 +1638,7 @@ function LLVMGetAlignment(V::LLVMValueRef)
 end
 
 function LLVMSetAlignment(V::LLVMValueRef,Bytes::UInt32)
-    @apicall(:LLVMSetAlignment,Void,(LLVMValueRef,UInt32),V,Bytes)
+    @apicall(:LLVMSetAlignment,Cvoid,(LLVMValueRef,UInt32),V,Bytes)
 end
 
 function LLVMAddGlobal(M::LLVMModuleRef,Ty::LLVMTypeRef,Name)
@@ -1670,7 +1670,7 @@ function LLVMGetPreviousGlobal(GlobalVar::LLVMValueRef)
 end
 
 function LLVMDeleteGlobal(GlobalVar::LLVMValueRef)
-    @apicall(:LLVMDeleteGlobal,Void,(LLVMValueRef,),GlobalVar)
+    @apicall(:LLVMDeleteGlobal,Cvoid,(LLVMValueRef,),GlobalVar)
 end
 
 function LLVMGetInitializer(GlobalVar::LLVMValueRef)
@@ -1678,7 +1678,7 @@ function LLVMGetInitializer(GlobalVar::LLVMValueRef)
 end
 
 function LLVMSetInitializer(GlobalVar::LLVMValueRef,ConstantVal::LLVMValueRef)
-    @apicall(:LLVMSetInitializer,Void,(LLVMValueRef,LLVMValueRef),GlobalVar,ConstantVal)
+    @apicall(:LLVMSetInitializer,Cvoid,(LLVMValueRef,LLVMValueRef),GlobalVar,ConstantVal)
 end
 
 function LLVMIsThreadLocal(GlobalVar::LLVMValueRef)
@@ -1686,7 +1686,7 @@ function LLVMIsThreadLocal(GlobalVar::LLVMValueRef)
 end
 
 function LLVMSetThreadLocal(GlobalVar::LLVMValueRef,IsThreadLocal::LLVMBool)
-    @apicall(:LLVMSetThreadLocal,Void,(LLVMValueRef,LLVMBool),GlobalVar,IsThreadLocal)
+    @apicall(:LLVMSetThreadLocal,Cvoid,(LLVMValueRef,LLVMBool),GlobalVar,IsThreadLocal)
 end
 
 function LLVMIsGlobalConstant(GlobalVar::LLVMValueRef)
@@ -1694,7 +1694,7 @@ function LLVMIsGlobalConstant(GlobalVar::LLVMValueRef)
 end
 
 function LLVMSetGlobalConstant(GlobalVar::LLVMValueRef,IsConstant::LLVMBool)
-    @apicall(:LLVMSetGlobalConstant,Void,(LLVMValueRef,LLVMBool),GlobalVar,IsConstant)
+    @apicall(:LLVMSetGlobalConstant,Cvoid,(LLVMValueRef,LLVMBool),GlobalVar,IsConstant)
 end
 
 function LLVMGetThreadLocalMode(GlobalVar::LLVMValueRef)
@@ -1702,7 +1702,7 @@ function LLVMGetThreadLocalMode(GlobalVar::LLVMValueRef)
 end
 
 function LLVMSetThreadLocalMode(GlobalVar::LLVMValueRef,Mode::LLVMThreadLocalMode)
-    @apicall(:LLVMSetThreadLocalMode,Void,(LLVMValueRef,LLVMThreadLocalMode),GlobalVar,Mode)
+    @apicall(:LLVMSetThreadLocalMode,Cvoid,(LLVMValueRef,LLVMThreadLocalMode),GlobalVar,Mode)
 end
 
 function LLVMIsExternallyInitialized(GlobalVar::LLVMValueRef)
@@ -1710,7 +1710,7 @@ function LLVMIsExternallyInitialized(GlobalVar::LLVMValueRef)
 end
 
 function LLVMSetExternallyInitialized(GlobalVar::LLVMValueRef,IsExtInit::LLVMBool)
-    @apicall(:LLVMSetExternallyInitialized,Void,(LLVMValueRef,LLVMBool),GlobalVar,IsExtInit)
+    @apicall(:LLVMSetExternallyInitialized,Cvoid,(LLVMValueRef,LLVMBool),GlobalVar,IsExtInit)
 end
 
 function LLVMAddAlias(M::LLVMModuleRef,Ty::LLVMTypeRef,Aliasee::LLVMValueRef,Name)
@@ -1718,7 +1718,7 @@ function LLVMAddAlias(M::LLVMModuleRef,Ty::LLVMTypeRef,Aliasee::LLVMValueRef,Nam
 end
 
 function LLVMDeleteFunction(Fn::LLVMValueRef)
-    @apicall(:LLVMDeleteFunction,Void,(LLVMValueRef,),Fn)
+    @apicall(:LLVMDeleteFunction,Cvoid,(LLVMValueRef,),Fn)
 end
 
 function LLVMHasPersonalityFn(Fn::LLVMValueRef)
@@ -1730,7 +1730,7 @@ function LLVMGetPersonalityFn(Fn::LLVMValueRef)
 end
 
 function LLVMSetPersonalityFn(Fn::LLVMValueRef,PersonalityFn::LLVMValueRef)
-    @apicall(:LLVMSetPersonalityFn,Void,(LLVMValueRef,LLVMValueRef),Fn,PersonalityFn)
+    @apicall(:LLVMSetPersonalityFn,Cvoid,(LLVMValueRef,LLVMValueRef),Fn,PersonalityFn)
 end
 
 function LLVMGetIntrinsicID(Fn::LLVMValueRef)
@@ -1742,7 +1742,7 @@ function LLVMGetFunctionCallConv(Fn::LLVMValueRef)
 end
 
 function LLVMSetFunctionCallConv(Fn::LLVMValueRef,CC::UInt32)
-    @apicall(:LLVMSetFunctionCallConv,Void,(LLVMValueRef,UInt32),Fn,CC)
+    @apicall(:LLVMSetFunctionCallConv,Cvoid,(LLVMValueRef,UInt32),Fn,CC)
 end
 
 function LLVMGetGC(Fn::LLVMValueRef)
@@ -1750,11 +1750,11 @@ function LLVMGetGC(Fn::LLVMValueRef)
 end
 
 function LLVMSetGC(Fn::LLVMValueRef,Name)
-    @apicall(:LLVMSetGC,Void,(LLVMValueRef,Cstring),Fn,Name)
+    @apicall(:LLVMSetGC,Cvoid,(LLVMValueRef,Cstring),Fn,Name)
 end
 
 function LLVMAddAttributeAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex,A::LLVMAttributeRef)
-    @apicall(:LLVMAddAttributeAtIndex,Void,(LLVMValueRef,LLVMAttributeIndex,LLVMAttributeRef),F,Idx,A)
+    @apicall(:LLVMAddAttributeAtIndex,Cvoid,(LLVMValueRef,LLVMAttributeIndex,LLVMAttributeRef),F,Idx,A)
 end
 
 function LLVMGetAttributeCountAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex)
@@ -1762,7 +1762,7 @@ function LLVMGetAttributeCountAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex)
 end
 
 function LLVMGetAttributesAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex,Attrs)
-    @apicall(:LLVMGetAttributesAtIndex,Void,(LLVMValueRef,LLVMAttributeIndex,Ptr{LLVMAttributeRef}),F,Idx,Attrs)
+    @apicall(:LLVMGetAttributesAtIndex,Cvoid,(LLVMValueRef,LLVMAttributeIndex,Ptr{LLVMAttributeRef}),F,Idx,Attrs)
 end
 
 function LLVMGetEnumAttributeAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex,KindID::UInt32)
@@ -1774,15 +1774,15 @@ function LLVMGetStringAttributeAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex,K
 end
 
 function LLVMRemoveEnumAttributeAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex,KindID::UInt32)
-    @apicall(:LLVMRemoveEnumAttributeAtIndex,Void,(LLVMValueRef,LLVMAttributeIndex,UInt32),F,Idx,KindID)
+    @apicall(:LLVMRemoveEnumAttributeAtIndex,Cvoid,(LLVMValueRef,LLVMAttributeIndex,UInt32),F,Idx,KindID)
 end
 
 function LLVMRemoveStringAttributeAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex,K,KLen::UInt32)
-    @apicall(:LLVMRemoveStringAttributeAtIndex,Void,(LLVMValueRef,LLVMAttributeIndex,Cstring,UInt32),F,Idx,K,KLen)
+    @apicall(:LLVMRemoveStringAttributeAtIndex,Cvoid,(LLVMValueRef,LLVMAttributeIndex,Cstring,UInt32),F,Idx,K,KLen)
 end
 
 function LLVMAddTargetDependentFunctionAttr(Fn::LLVMValueRef,A,V)
-    @apicall(:LLVMAddTargetDependentFunctionAttr,Void,(LLVMValueRef,Cstring,Cstring),Fn,A,V)
+    @apicall(:LLVMAddTargetDependentFunctionAttr,Cvoid,(LLVMValueRef,Cstring,Cstring),Fn,A,V)
 end
 
 function LLVMCountParams(Fn::LLVMValueRef)
@@ -1790,7 +1790,7 @@ function LLVMCountParams(Fn::LLVMValueRef)
 end
 
 function LLVMGetParams(Fn::LLVMValueRef,Params)
-    @apicall(:LLVMGetParams,Void,(LLVMValueRef,Ptr{LLVMValueRef}),Fn,Params)
+    @apicall(:LLVMGetParams,Cvoid,(LLVMValueRef,Ptr{LLVMValueRef}),Fn,Params)
 end
 
 function LLVMGetParam(Fn::LLVMValueRef,Index::UInt32)
@@ -1818,7 +1818,7 @@ function LLVMGetPreviousParam(Arg::LLVMValueRef)
 end
 
 function LLVMSetParamAlignment(Arg::LLVMValueRef,Align::UInt32)
-    @apicall(:LLVMSetParamAlignment,Void,(LLVMValueRef,UInt32),Arg,Align)
+    @apicall(:LLVMSetParamAlignment,Cvoid,(LLVMValueRef,UInt32),Arg,Align)
 end
 
 function LLVMMDStringInContext(C::LLVMContextRef,Str,SLen::UInt32)
@@ -1846,7 +1846,7 @@ function LLVMGetMDNodeNumOperands(V::LLVMValueRef)
 end
 
 function LLVMGetMDNodeOperands(V::LLVMValueRef,Dest)
-    @apicall(:LLVMGetMDNodeOperands,Void,(LLVMValueRef,Ptr{LLVMValueRef}),V,Dest)
+    @apicall(:LLVMGetMDNodeOperands,Cvoid,(LLVMValueRef,Ptr{LLVMValueRef}),V,Dest)
 end
 
 function LLVMBasicBlockAsValue(BB::LLVMBasicBlockRef)
@@ -1878,7 +1878,7 @@ function LLVMCountBasicBlocks(Fn::LLVMValueRef)
 end
 
 function LLVMGetBasicBlocks(Fn::LLVMValueRef,BasicBlocks)
-    @apicall(:LLVMGetBasicBlocks,Void,(LLVMValueRef,Ptr{LLVMBasicBlockRef}),Fn,BasicBlocks)
+    @apicall(:LLVMGetBasicBlocks,Cvoid,(LLVMValueRef,Ptr{LLVMBasicBlockRef}),Fn,BasicBlocks)
 end
 
 function LLVMGetFirstBasicBlock(Fn::LLVMValueRef)
@@ -1918,19 +1918,19 @@ function LLVMInsertBasicBlock(InsertBeforeBB::LLVMBasicBlockRef,Name)
 end
 
 function LLVMDeleteBasicBlock(BB::LLVMBasicBlockRef)
-    @apicall(:LLVMDeleteBasicBlock,Void,(LLVMBasicBlockRef,),BB)
+    @apicall(:LLVMDeleteBasicBlock,Cvoid,(LLVMBasicBlockRef,),BB)
 end
 
 function LLVMRemoveBasicBlockFromParent(BB::LLVMBasicBlockRef)
-    @apicall(:LLVMRemoveBasicBlockFromParent,Void,(LLVMBasicBlockRef,),BB)
+    @apicall(:LLVMRemoveBasicBlockFromParent,Cvoid,(LLVMBasicBlockRef,),BB)
 end
 
 function LLVMMoveBasicBlockBefore(BB::LLVMBasicBlockRef,MovePos::LLVMBasicBlockRef)
-    @apicall(:LLVMMoveBasicBlockBefore,Void,(LLVMBasicBlockRef,LLVMBasicBlockRef),BB,MovePos)
+    @apicall(:LLVMMoveBasicBlockBefore,Cvoid,(LLVMBasicBlockRef,LLVMBasicBlockRef),BB,MovePos)
 end
 
 function LLVMMoveBasicBlockAfter(BB::LLVMBasicBlockRef,MovePos::LLVMBasicBlockRef)
-    @apicall(:LLVMMoveBasicBlockAfter,Void,(LLVMBasicBlockRef,LLVMBasicBlockRef),BB,MovePos)
+    @apicall(:LLVMMoveBasicBlockAfter,Cvoid,(LLVMBasicBlockRef,LLVMBasicBlockRef),BB,MovePos)
 end
 
 function LLVMGetFirstInstruction(BB::LLVMBasicBlockRef)
@@ -1950,7 +1950,7 @@ function LLVMGetMetadata(Val::LLVMValueRef,KindID::UInt32)
 end
 
 function LLVMSetMetadata(Val::LLVMValueRef,KindID::UInt32,Node::LLVMValueRef)
-    @apicall(:LLVMSetMetadata,Void,(LLVMValueRef,UInt32,LLVMValueRef),Val,KindID,Node)
+    @apicall(:LLVMSetMetadata,Cvoid,(LLVMValueRef,UInt32,LLVMValueRef),Val,KindID,Node)
 end
 
 function LLVMGetInstructionParent(Inst::LLVMValueRef)
@@ -1966,11 +1966,11 @@ function LLVMGetPreviousInstruction(Inst::LLVMValueRef)
 end
 
 function LLVMInstructionRemoveFromParent(Inst::LLVMValueRef)
-    @apicall(:LLVMInstructionRemoveFromParent,Void,(LLVMValueRef,),Inst)
+    @apicall(:LLVMInstructionRemoveFromParent,Cvoid,(LLVMValueRef,),Inst)
 end
 
 function LLVMInstructionEraseFromParent(Inst::LLVMValueRef)
-    @apicall(:LLVMInstructionEraseFromParent,Void,(LLVMValueRef,),Inst)
+    @apicall(:LLVMInstructionEraseFromParent,Cvoid,(LLVMValueRef,),Inst)
 end
 
 function LLVMGetInstructionOpcode(Inst::LLVMValueRef)
@@ -1994,7 +1994,7 @@ function LLVMGetNumArgOperands(Instr::LLVMValueRef)
 end
 
 function LLVMSetInstructionCallConv(Instr::LLVMValueRef,CC::UInt32)
-    @apicall(:LLVMSetInstructionCallConv,Void,(LLVMValueRef,UInt32),Instr,CC)
+    @apicall(:LLVMSetInstructionCallConv,Cvoid,(LLVMValueRef,UInt32),Instr,CC)
 end
 
 function LLVMGetInstructionCallConv(Instr::LLVMValueRef)
@@ -2002,11 +2002,11 @@ function LLVMGetInstructionCallConv(Instr::LLVMValueRef)
 end
 
 function LLVMSetInstrParamAlignment(Instr::LLVMValueRef,index::UInt32,Align::UInt32)
-    @apicall(:LLVMSetInstrParamAlignment,Void,(LLVMValueRef,UInt32,UInt32),Instr,index,Align)
+    @apicall(:LLVMSetInstrParamAlignment,Cvoid,(LLVMValueRef,UInt32,UInt32),Instr,index,Align)
 end
 
 function LLVMAddCallSiteAttribute(C::LLVMValueRef,Idx::LLVMAttributeIndex,A::LLVMAttributeRef)
-    @apicall(:LLVMAddCallSiteAttribute,Void,(LLVMValueRef,LLVMAttributeIndex,LLVMAttributeRef),C,Idx,A)
+    @apicall(:LLVMAddCallSiteAttribute,Cvoid,(LLVMValueRef,LLVMAttributeIndex,LLVMAttributeRef),C,Idx,A)
 end
 
 function LLVMGetCallSiteAttributeCount(C::LLVMValueRef,Idx::LLVMAttributeIndex)
@@ -2014,7 +2014,7 @@ function LLVMGetCallSiteAttributeCount(C::LLVMValueRef,Idx::LLVMAttributeIndex)
 end
 
 function LLVMGetCallSiteAttributes(C::LLVMValueRef,Idx::LLVMAttributeIndex,Attrs)
-    @apicall(:LLVMGetCallSiteAttributes,Void,(LLVMValueRef,LLVMAttributeIndex,Ptr{LLVMAttributeRef}),C,Idx,Attrs)
+    @apicall(:LLVMGetCallSiteAttributes,Cvoid,(LLVMValueRef,LLVMAttributeIndex,Ptr{LLVMAttributeRef}),C,Idx,Attrs)
 end
 
 function LLVMGetCallSiteEnumAttribute(C::LLVMValueRef,Idx::LLVMAttributeIndex,KindID::UInt32)
@@ -2026,11 +2026,11 @@ function LLVMGetCallSiteStringAttribute(C::LLVMValueRef,Idx::LLVMAttributeIndex,
 end
 
 function LLVMRemoveCallSiteEnumAttribute(C::LLVMValueRef,Idx::LLVMAttributeIndex,KindID::UInt32)
-    @apicall(:LLVMRemoveCallSiteEnumAttribute,Void,(LLVMValueRef,LLVMAttributeIndex,UInt32),C,Idx,KindID)
+    @apicall(:LLVMRemoveCallSiteEnumAttribute,Cvoid,(LLVMValueRef,LLVMAttributeIndex,UInt32),C,Idx,KindID)
 end
 
 function LLVMRemoveCallSiteStringAttribute(C::LLVMValueRef,Idx::LLVMAttributeIndex,K,KLen::UInt32)
-    @apicall(:LLVMRemoveCallSiteStringAttribute,Void,(LLVMValueRef,LLVMAttributeIndex,Cstring,UInt32),C,Idx,K,KLen)
+    @apicall(:LLVMRemoveCallSiteStringAttribute,Cvoid,(LLVMValueRef,LLVMAttributeIndex,Cstring,UInt32),C,Idx,K,KLen)
 end
 
 function LLVMGetCalledValue(Instr::LLVMValueRef)
@@ -2042,7 +2042,7 @@ function LLVMIsTailCall(CallInst::LLVMValueRef)
 end
 
 function LLVMSetTailCall(CallInst::LLVMValueRef,IsTailCall::LLVMBool)
-    @apicall(:LLVMSetTailCall,Void,(LLVMValueRef,LLVMBool),CallInst,IsTailCall)
+    @apicall(:LLVMSetTailCall,Cvoid,(LLVMValueRef,LLVMBool),CallInst,IsTailCall)
 end
 
 function LLVMGetNormalDest(InvokeInst::LLVMValueRef)
@@ -2054,11 +2054,11 @@ function LLVMGetUnwindDest(InvokeInst::LLVMValueRef)
 end
 
 function LLVMSetNormalDest(InvokeInst::LLVMValueRef,B::LLVMBasicBlockRef)
-    @apicall(:LLVMSetNormalDest,Void,(LLVMValueRef,LLVMBasicBlockRef),InvokeInst,B)
+    @apicall(:LLVMSetNormalDest,Cvoid,(LLVMValueRef,LLVMBasicBlockRef),InvokeInst,B)
 end
 
 function LLVMSetUnwindDest(InvokeInst::LLVMValueRef,B::LLVMBasicBlockRef)
-    @apicall(:LLVMSetUnwindDest,Void,(LLVMValueRef,LLVMBasicBlockRef),InvokeInst,B)
+    @apicall(:LLVMSetUnwindDest,Cvoid,(LLVMValueRef,LLVMBasicBlockRef),InvokeInst,B)
 end
 
 function LLVMGetNumSuccessors(Term::LLVMValueRef)
@@ -2070,7 +2070,7 @@ function LLVMGetSuccessor(Term::LLVMValueRef,i::UInt32)
 end
 
 function LLVMSetSuccessor(Term::LLVMValueRef,i::UInt32,block::LLVMBasicBlockRef)
-    @apicall(:LLVMSetSuccessor,Void,(LLVMValueRef,UInt32,LLVMBasicBlockRef),Term,i,block)
+    @apicall(:LLVMSetSuccessor,Cvoid,(LLVMValueRef,UInt32,LLVMBasicBlockRef),Term,i,block)
 end
 
 function LLVMIsConditional(Branch::LLVMValueRef)
@@ -2082,7 +2082,7 @@ function LLVMGetCondition(Branch::LLVMValueRef)
 end
 
 function LLVMSetCondition(Branch::LLVMValueRef,Cond::LLVMValueRef)
-    @apicall(:LLVMSetCondition,Void,(LLVMValueRef,LLVMValueRef),Branch,Cond)
+    @apicall(:LLVMSetCondition,Cvoid,(LLVMValueRef,LLVMValueRef),Branch,Cond)
 end
 
 function LLVMGetSwitchDefaultDest(SwitchInstr::LLVMValueRef)
@@ -2098,11 +2098,11 @@ function LLVMIsInBounds(GEP::LLVMValueRef)
 end
 
 function LLVMSetIsInBounds(GEP::LLVMValueRef,InBounds::LLVMBool)
-    @apicall(:LLVMSetIsInBounds,Void,(LLVMValueRef,LLVMBool),GEP,InBounds)
+    @apicall(:LLVMSetIsInBounds,Cvoid,(LLVMValueRef,LLVMBool),GEP,InBounds)
 end
 
 function LLVMAddIncoming(PhiNode::LLVMValueRef,IncomingValues,IncomingBlocks,Count::UInt32)
-    @apicall(:LLVMAddIncoming,Void,(LLVMValueRef,Ptr{LLVMValueRef},Ptr{LLVMBasicBlockRef},UInt32),PhiNode,IncomingValues,IncomingBlocks,Count)
+    @apicall(:LLVMAddIncoming,Cvoid,(LLVMValueRef,Ptr{LLVMValueRef},Ptr{LLVMBasicBlockRef},UInt32),PhiNode,IncomingValues,IncomingBlocks,Count)
 end
 
 function LLVMCountIncoming(PhiNode::LLVMValueRef)
@@ -2134,15 +2134,15 @@ function LLVMCreateBuilder()
 end
 
 function LLVMPositionBuilder(Builder::LLVMBuilderRef,Block::LLVMBasicBlockRef,Instr::LLVMValueRef)
-    @apicall(:LLVMPositionBuilder,Void,(LLVMBuilderRef,LLVMBasicBlockRef,LLVMValueRef),Builder,Block,Instr)
+    @apicall(:LLVMPositionBuilder,Cvoid,(LLVMBuilderRef,LLVMBasicBlockRef,LLVMValueRef),Builder,Block,Instr)
 end
 
 function LLVMPositionBuilderBefore(Builder::LLVMBuilderRef,Instr::LLVMValueRef)
-    @apicall(:LLVMPositionBuilderBefore,Void,(LLVMBuilderRef,LLVMValueRef),Builder,Instr)
+    @apicall(:LLVMPositionBuilderBefore,Cvoid,(LLVMBuilderRef,LLVMValueRef),Builder,Instr)
 end
 
 function LLVMPositionBuilderAtEnd(Builder::LLVMBuilderRef,Block::LLVMBasicBlockRef)
-    @apicall(:LLVMPositionBuilderAtEnd,Void,(LLVMBuilderRef,LLVMBasicBlockRef),Builder,Block)
+    @apicall(:LLVMPositionBuilderAtEnd,Cvoid,(LLVMBuilderRef,LLVMBasicBlockRef),Builder,Block)
 end
 
 function LLVMGetInsertBlock(Builder::LLVMBuilderRef)
@@ -2150,23 +2150,23 @@ function LLVMGetInsertBlock(Builder::LLVMBuilderRef)
 end
 
 function LLVMClearInsertionPosition(Builder::LLVMBuilderRef)
-    @apicall(:LLVMClearInsertionPosition,Void,(LLVMBuilderRef,),Builder)
+    @apicall(:LLVMClearInsertionPosition,Cvoid,(LLVMBuilderRef,),Builder)
 end
 
 function LLVMInsertIntoBuilder(Builder::LLVMBuilderRef,Instr::LLVMValueRef)
-    @apicall(:LLVMInsertIntoBuilder,Void,(LLVMBuilderRef,LLVMValueRef),Builder,Instr)
+    @apicall(:LLVMInsertIntoBuilder,Cvoid,(LLVMBuilderRef,LLVMValueRef),Builder,Instr)
 end
 
 function LLVMInsertIntoBuilderWithName(Builder::LLVMBuilderRef,Instr::LLVMValueRef,Name)
-    @apicall(:LLVMInsertIntoBuilderWithName,Void,(LLVMBuilderRef,LLVMValueRef,Cstring),Builder,Instr,Name)
+    @apicall(:LLVMInsertIntoBuilderWithName,Cvoid,(LLVMBuilderRef,LLVMValueRef,Cstring),Builder,Instr,Name)
 end
 
 function LLVMDisposeBuilder(Builder::LLVMBuilderRef)
-    @apicall(:LLVMDisposeBuilder,Void,(LLVMBuilderRef,),Builder)
+    @apicall(:LLVMDisposeBuilder,Cvoid,(LLVMBuilderRef,),Builder)
 end
 
 function LLVMSetCurrentDebugLocation(Builder::LLVMBuilderRef,L::LLVMValueRef)
-    @apicall(:LLVMSetCurrentDebugLocation,Void,(LLVMBuilderRef,LLVMValueRef),Builder,L)
+    @apicall(:LLVMSetCurrentDebugLocation,Cvoid,(LLVMBuilderRef,LLVMValueRef),Builder,L)
 end
 
 function LLVMGetCurrentDebugLocation(Builder::LLVMBuilderRef)
@@ -2174,7 +2174,7 @@ function LLVMGetCurrentDebugLocation(Builder::LLVMBuilderRef)
 end
 
 function LLVMSetInstDebugLocation(Builder::LLVMBuilderRef,Inst::LLVMValueRef)
-    @apicall(:LLVMSetInstDebugLocation,Void,(LLVMBuilderRef,LLVMValueRef),Builder,Inst)
+    @apicall(:LLVMSetInstDebugLocation,Cvoid,(LLVMBuilderRef,LLVMValueRef),Builder,Inst)
 end
 
 function LLVMBuildRetVoid(arg1::LLVMBuilderRef)
@@ -2222,11 +2222,11 @@ function LLVMBuildUnreachable(arg1::LLVMBuilderRef)
 end
 
 function LLVMAddCase(Switch::LLVMValueRef,OnVal::LLVMValueRef,Dest::LLVMBasicBlockRef)
-    @apicall(:LLVMAddCase,Void,(LLVMValueRef,LLVMValueRef,LLVMBasicBlockRef),Switch,OnVal,Dest)
+    @apicall(:LLVMAddCase,Cvoid,(LLVMValueRef,LLVMValueRef,LLVMBasicBlockRef),Switch,OnVal,Dest)
 end
 
 function LLVMAddDestination(IndirectBr::LLVMValueRef,Dest::LLVMBasicBlockRef)
-    @apicall(:LLVMAddDestination,Void,(LLVMValueRef,LLVMBasicBlockRef),IndirectBr,Dest)
+    @apicall(:LLVMAddDestination,Cvoid,(LLVMValueRef,LLVMBasicBlockRef),IndirectBr,Dest)
 end
 
 function LLVMGetNumClauses(LandingPad::LLVMValueRef)
@@ -2238,7 +2238,7 @@ function LLVMGetClause(LandingPad::LLVMValueRef,Idx::UInt32)
 end
 
 function LLVMAddClause(LandingPad::LLVMValueRef,ClauseVal::LLVMValueRef)
-    @apicall(:LLVMAddClause,Void,(LLVMValueRef,LLVMValueRef),LandingPad,ClauseVal)
+    @apicall(:LLVMAddClause,Cvoid,(LLVMValueRef,LLVMValueRef),LandingPad,ClauseVal)
 end
 
 function LLVMIsCleanup(LandingPad::LLVMValueRef)
@@ -2246,7 +2246,7 @@ function LLVMIsCleanup(LandingPad::LLVMValueRef)
 end
 
 function LLVMSetCleanup(LandingPad::LLVMValueRef,Val::LLVMBool)
-    @apicall(:LLVMSetCleanup,Void,(LLVMValueRef,LLVMBool),LandingPad,Val)
+    @apicall(:LLVMSetCleanup,Cvoid,(LLVMValueRef,LLVMBool),LandingPad,Val)
 end
 
 function LLVMBuildAdd(arg1::LLVMBuilderRef,LHS::LLVMValueRef,RHS::LLVMValueRef,Name)
@@ -2430,7 +2430,7 @@ function LLVMGetVolatile(MemoryAccessInst::LLVMValueRef)
 end
 
 function LLVMSetVolatile(MemoryAccessInst::LLVMValueRef,IsVolatile::LLVMBool)
-    @apicall(:LLVMSetVolatile,Void,(LLVMValueRef,LLVMBool),MemoryAccessInst,IsVolatile)
+    @apicall(:LLVMSetVolatile,Cvoid,(LLVMValueRef,LLVMBool),MemoryAccessInst,IsVolatile)
 end
 
 function LLVMGetOrdering(MemoryAccessInst::LLVMValueRef)
@@ -2438,7 +2438,7 @@ function LLVMGetOrdering(MemoryAccessInst::LLVMValueRef)
 end
 
 function LLVMSetOrdering(MemoryAccessInst::LLVMValueRef,Ordering::LLVMAtomicOrdering)
-    @apicall(:LLVMSetOrdering,Void,(LLVMValueRef,LLVMAtomicOrdering),MemoryAccessInst,Ordering)
+    @apicall(:LLVMSetOrdering,Cvoid,(LLVMValueRef,LLVMAtomicOrdering),MemoryAccessInst,Ordering)
 end
 
 function LLVMBuildTrunc(arg1::LLVMBuilderRef,Val::LLVMValueRef,DestTy::LLVMTypeRef,Name)
@@ -2594,7 +2594,7 @@ function LLVMIsAtomicSingleThread(AtomicInst::LLVMValueRef)
 end
 
 function LLVMSetAtomicSingleThread(AtomicInst::LLVMValueRef,SingleThread::LLVMBool)
-    @apicall(:LLVMSetAtomicSingleThread,Void,(LLVMValueRef,LLVMBool),AtomicInst,SingleThread)
+    @apicall(:LLVMSetAtomicSingleThread,Cvoid,(LLVMValueRef,LLVMBool),AtomicInst,SingleThread)
 end
 
 function LLVMGetCmpXchgSuccessOrdering(CmpXchgInst::LLVMValueRef)
@@ -2602,7 +2602,7 @@ function LLVMGetCmpXchgSuccessOrdering(CmpXchgInst::LLVMValueRef)
 end
 
 function LLVMSetCmpXchgSuccessOrdering(CmpXchgInst::LLVMValueRef,Ordering::LLVMAtomicOrdering)
-    @apicall(:LLVMSetCmpXchgSuccessOrdering,Void,(LLVMValueRef,LLVMAtomicOrdering),CmpXchgInst,Ordering)
+    @apicall(:LLVMSetCmpXchgSuccessOrdering,Cvoid,(LLVMValueRef,LLVMAtomicOrdering),CmpXchgInst,Ordering)
 end
 
 function LLVMGetCmpXchgFailureOrdering(CmpXchgInst::LLVMValueRef)
@@ -2610,7 +2610,7 @@ function LLVMGetCmpXchgFailureOrdering(CmpXchgInst::LLVMValueRef)
 end
 
 function LLVMSetCmpXchgFailureOrdering(CmpXchgInst::LLVMValueRef,Ordering::LLVMAtomicOrdering)
-    @apicall(:LLVMSetCmpXchgFailureOrdering,Void,(LLVMValueRef,LLVMAtomicOrdering),CmpXchgInst,Ordering)
+    @apicall(:LLVMSetCmpXchgFailureOrdering,Cvoid,(LLVMValueRef,LLVMAtomicOrdering),CmpXchgInst,Ordering)
 end
 
 function LLVMCreateModuleProviderForExistingModule(M::LLVMModuleRef)
@@ -2618,7 +2618,7 @@ function LLVMCreateModuleProviderForExistingModule(M::LLVMModuleRef)
 end
 
 function LLVMDisposeModuleProvider(M::LLVMModuleProviderRef)
-    @apicall(:LLVMDisposeModuleProvider,Void,(LLVMModuleProviderRef,),M)
+    @apicall(:LLVMDisposeModuleProvider,Cvoid,(LLVMModuleProviderRef,),M)
 end
 
 function LLVMCreateMemoryBufferWithContentsOfFile(Path,OutMemBuf,OutMessage)
@@ -2646,7 +2646,7 @@ function LLVMGetBufferSize(MemBuf::LLVMMemoryBufferRef)
 end
 
 function LLVMDisposeMemoryBuffer(MemBuf::LLVMMemoryBufferRef)
-    @apicall(:LLVMDisposeMemoryBuffer,Void,(LLVMMemoryBufferRef,),MemBuf)
+    @apicall(:LLVMDisposeMemoryBuffer,Cvoid,(LLVMMemoryBufferRef,),MemBuf)
 end
 
 function LLVMGetGlobalPassRegistry()
@@ -2682,7 +2682,7 @@ function LLVMFinalizeFunctionPassManager(FPM::LLVMPassManagerRef)
 end
 
 function LLVMDisposePassManager(PM::LLVMPassManagerRef)
-    @apicall(:LLVMDisposePassManager,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMDisposePassManager,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMStartMultithreaded()
@@ -2690,7 +2690,7 @@ function LLVMStartMultithreaded()
 end
 
 function LLVMStopMultithreaded()
-    @apicall(:LLVMStopMultithreaded,Void,())
+    @apicall(:LLVMStopMultithreaded,Cvoid,())
 end
 
 function LLVMIsMultithreaded()
@@ -2702,15 +2702,15 @@ end
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMCreateDisasm(TripleName,DisInfo,TagType::Cint,GetOpInfo::LLVMOpInfoCallback,SymbolLookUp::LLVMSymbolLookupCallback)
-    @apicall(:LLVMCreateDisasm,LLVMDisasmContextRef,(Cstring,Ptr{Void},Cint,LLVMOpInfoCallback,LLVMSymbolLookupCallback),TripleName,DisInfo,TagType,GetOpInfo,SymbolLookUp)
+    @apicall(:LLVMCreateDisasm,LLVMDisasmContextRef,(Cstring,Ptr{Cvoid},Cint,LLVMOpInfoCallback,LLVMSymbolLookupCallback),TripleName,DisInfo,TagType,GetOpInfo,SymbolLookUp)
 end
 
 function LLVMCreateDisasmCPU(Triple,CPU,DisInfo,TagType::Cint,GetOpInfo::LLVMOpInfoCallback,SymbolLookUp::LLVMSymbolLookupCallback)
-    @apicall(:LLVMCreateDisasmCPU,LLVMDisasmContextRef,(Cstring,Cstring,Ptr{Void},Cint,LLVMOpInfoCallback,LLVMSymbolLookupCallback),Triple,CPU,DisInfo,TagType,GetOpInfo,SymbolLookUp)
+    @apicall(:LLVMCreateDisasmCPU,LLVMDisasmContextRef,(Cstring,Cstring,Ptr{Cvoid},Cint,LLVMOpInfoCallback,LLVMSymbolLookupCallback),Triple,CPU,DisInfo,TagType,GetOpInfo,SymbolLookUp)
 end
 
 function LLVMCreateDisasmCPUFeatures(Triple,CPU,Features,DisInfo,TagType::Cint,GetOpInfo::LLVMOpInfoCallback,SymbolLookUp::LLVMSymbolLookupCallback)
-    @apicall(:LLVMCreateDisasmCPUFeatures,LLVMDisasmContextRef,(Cstring,Cstring,Cstring,Ptr{Void},Cint,LLVMOpInfoCallback,LLVMSymbolLookupCallback),Triple,CPU,Features,DisInfo,TagType,GetOpInfo,SymbolLookUp)
+    @apicall(:LLVMCreateDisasmCPUFeatures,LLVMDisasmContextRef,(Cstring,Cstring,Cstring,Ptr{Cvoid},Cint,LLVMOpInfoCallback,LLVMSymbolLookupCallback),Triple,CPU,Features,DisInfo,TagType,GetOpInfo,SymbolLookUp)
 end
 
 function LLVMSetDisasmOptions(DC::LLVMDisasmContextRef,Options::UInt64)
@@ -2718,7 +2718,7 @@ function LLVMSetDisasmOptions(DC::LLVMDisasmContextRef,Options::UInt64)
 end
 
 function LLVMDisasmDispose(DC::LLVMDisasmContextRef)
-    @apicall(:LLVMDisasmDispose,Void,(LLVMDisasmContextRef,),DC)
+    @apicall(:LLVMDisasmDispose,Cvoid,(LLVMDisasmContextRef,),DC)
 end
 
 function LLVMDisasmInstruction(DC::LLVMDisasmContextRef,Bytes,BytesSize::UInt64,PC::UInt64,OutString,OutStringSize::Csize_t)
@@ -2730,11 +2730,11 @@ end
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMLinkInMCJIT()
-    @apicall(:LLVMLinkInMCJIT,Void,())
+    @apicall(:LLVMLinkInMCJIT,Cvoid,())
 end
 
 function LLVMLinkInInterpreter()
-    @apicall(:LLVMLinkInInterpreter,Void,())
+    @apicall(:LLVMLinkInInterpreter,Cvoid,())
 end
 
 function LLVMCreateGenericValueOfInt(Ty::LLVMTypeRef,N::Culonglong,IsSigned::LLVMBool)
@@ -2742,7 +2742,7 @@ function LLVMCreateGenericValueOfInt(Ty::LLVMTypeRef,N::Culonglong,IsSigned::LLV
 end
 
 function LLVMCreateGenericValueOfPointer(P)
-    @apicall(:LLVMCreateGenericValueOfPointer,LLVMGenericValueRef,(Ptr{Void},),P)
+    @apicall(:LLVMCreateGenericValueOfPointer,LLVMGenericValueRef,(Ptr{Cvoid},),P)
 end
 
 function LLVMCreateGenericValueOfFloat(Ty::LLVMTypeRef,N::Cdouble)
@@ -2758,7 +2758,7 @@ function LLVMGenericValueToInt(GenVal::LLVMGenericValueRef,IsSigned::LLVMBool)
 end
 
 function LLVMGenericValueToPointer(GenVal::LLVMGenericValueRef)
-    @apicall(:LLVMGenericValueToPointer,Ptr{Void},(LLVMGenericValueRef,),GenVal)
+    @apicall(:LLVMGenericValueToPointer,Ptr{Cvoid},(LLVMGenericValueRef,),GenVal)
 end
 
 function LLVMGenericValueToFloat(TyRef::LLVMTypeRef,GenVal::LLVMGenericValueRef)
@@ -2766,7 +2766,7 @@ function LLVMGenericValueToFloat(TyRef::LLVMTypeRef,GenVal::LLVMGenericValueRef)
 end
 
 function LLVMDisposeGenericValue(GenVal::LLVMGenericValueRef)
-    @apicall(:LLVMDisposeGenericValue,Void,(LLVMGenericValueRef,),GenVal)
+    @apicall(:LLVMDisposeGenericValue,Cvoid,(LLVMGenericValueRef,),GenVal)
 end
 
 function LLVMCreateExecutionEngineForModule(OutEE,M::LLVMModuleRef,OutError)
@@ -2782,7 +2782,7 @@ function LLVMCreateJITCompilerForModule(OutJIT,M::LLVMModuleRef,OptLevel::UInt32
 end
 
 function LLVMInitializeMCJITCompilerOptions(Options,SizeOfOptions::Csize_t)
-    @apicall(:LLVMInitializeMCJITCompilerOptions,Void,(Ptr{LLVMMCJITCompilerOptions},Csize_t),Options,SizeOfOptions)
+    @apicall(:LLVMInitializeMCJITCompilerOptions,Cvoid,(Ptr{LLVMMCJITCompilerOptions},Csize_t),Options,SizeOfOptions)
 end
 
 function LLVMCreateMCJITCompilerForModule(OutJIT,M::LLVMModuleRef,Options,SizeOfOptions::Csize_t,OutError)
@@ -2790,15 +2790,15 @@ function LLVMCreateMCJITCompilerForModule(OutJIT,M::LLVMModuleRef,Options,SizeOf
 end
 
 function LLVMDisposeExecutionEngine(EE::LLVMExecutionEngineRef)
-    @apicall(:LLVMDisposeExecutionEngine,Void,(LLVMExecutionEngineRef,),EE)
+    @apicall(:LLVMDisposeExecutionEngine,Cvoid,(LLVMExecutionEngineRef,),EE)
 end
 
 function LLVMRunStaticConstructors(EE::LLVMExecutionEngineRef)
-    @apicall(:LLVMRunStaticConstructors,Void,(LLVMExecutionEngineRef,),EE)
+    @apicall(:LLVMRunStaticConstructors,Cvoid,(LLVMExecutionEngineRef,),EE)
 end
 
 function LLVMRunStaticDestructors(EE::LLVMExecutionEngineRef)
-    @apicall(:LLVMRunStaticDestructors,Void,(LLVMExecutionEngineRef,),EE)
+    @apicall(:LLVMRunStaticDestructors,Cvoid,(LLVMExecutionEngineRef,),EE)
 end
 
 function LLVMRunFunctionAsMain(EE::LLVMExecutionEngineRef,F::LLVMValueRef,ArgC::UInt32,ArgV,EnvP)
@@ -2810,11 +2810,11 @@ function LLVMRunFunction(EE::LLVMExecutionEngineRef,F::LLVMValueRef,NumArgs::UIn
 end
 
 function LLVMFreeMachineCodeForFunction(EE::LLVMExecutionEngineRef,F::LLVMValueRef)
-    @apicall(:LLVMFreeMachineCodeForFunction,Void,(LLVMExecutionEngineRef,LLVMValueRef),EE,F)
+    @apicall(:LLVMFreeMachineCodeForFunction,Cvoid,(LLVMExecutionEngineRef,LLVMValueRef),EE,F)
 end
 
 function LLVMAddModule(EE::LLVMExecutionEngineRef,M::LLVMModuleRef)
-    @apicall(:LLVMAddModule,Void,(LLVMExecutionEngineRef,LLVMModuleRef),EE,M)
+    @apicall(:LLVMAddModule,Cvoid,(LLVMExecutionEngineRef,LLVMModuleRef),EE,M)
 end
 
 function LLVMRemoveModule(EE::LLVMExecutionEngineRef,M::LLVMModuleRef,OutMod,OutError)
@@ -2826,7 +2826,7 @@ function LLVMFindFunction(EE::LLVMExecutionEngineRef,Name,OutFn)
 end
 
 function LLVMRecompileAndRelinkFunction(EE::LLVMExecutionEngineRef,Fn::LLVMValueRef)
-    @apicall(:LLVMRecompileAndRelinkFunction,Ptr{Void},(LLVMExecutionEngineRef,LLVMValueRef),EE,Fn)
+    @apicall(:LLVMRecompileAndRelinkFunction,Ptr{Cvoid},(LLVMExecutionEngineRef,LLVMValueRef),EE,Fn)
 end
 
 function LLVMGetExecutionEngineTargetData(EE::LLVMExecutionEngineRef)
@@ -2838,11 +2838,11 @@ function LLVMGetExecutionEngineTargetMachine(EE::LLVMExecutionEngineRef)
 end
 
 function LLVMAddGlobalMapping(EE::LLVMExecutionEngineRef,Global::LLVMValueRef,Addr)
-    @apicall(:LLVMAddGlobalMapping,Void,(LLVMExecutionEngineRef,LLVMValueRef,Ptr{Void}),EE,Global,Addr)
+    @apicall(:LLVMAddGlobalMapping,Cvoid,(LLVMExecutionEngineRef,LLVMValueRef,Ptr{Cvoid}),EE,Global,Addr)
 end
 
 function LLVMGetPointerToGlobal(EE::LLVMExecutionEngineRef,Global::LLVMValueRef)
-    @apicall(:LLVMGetPointerToGlobal,Ptr{Void},(LLVMExecutionEngineRef,LLVMValueRef),EE,Global)
+    @apicall(:LLVMGetPointerToGlobal,Ptr{Cvoid},(LLVMExecutionEngineRef,LLVMValueRef),EE,Global)
 end
 
 function LLVMGetGlobalValueAddress(EE::LLVMExecutionEngineRef,Name)
@@ -2854,11 +2854,11 @@ function LLVMGetFunctionAddress(EE::LLVMExecutionEngineRef,Name)
 end
 
 function LLVMCreateSimpleMCJITMemoryManager(Opaque,AllocateCodeSection::LLVMMemoryManagerAllocateCodeSectionCallback,AllocateDataSection::LLVMMemoryManagerAllocateDataSectionCallback,FinalizeMemory::LLVMMemoryManagerFinalizeMemoryCallback,Destroy::LLVMMemoryManagerDestroyCallback)
-    @apicall(:LLVMCreateSimpleMCJITMemoryManager,LLVMMCJITMemoryManagerRef,(Ptr{Void},LLVMMemoryManagerAllocateCodeSectionCallback,LLVMMemoryManagerAllocateDataSectionCallback,LLVMMemoryManagerFinalizeMemoryCallback,LLVMMemoryManagerDestroyCallback),Opaque,AllocateCodeSection,AllocateDataSection,FinalizeMemory,Destroy)
+    @apicall(:LLVMCreateSimpleMCJITMemoryManager,LLVMMCJITMemoryManagerRef,(Ptr{Cvoid},LLVMMemoryManagerAllocateCodeSectionCallback,LLVMMemoryManagerAllocateDataSectionCallback,LLVMMemoryManagerFinalizeMemoryCallback,LLVMMemoryManagerDestroyCallback),Opaque,AllocateCodeSection,AllocateDataSection,FinalizeMemory,Destroy)
 end
 
 function LLVMDisposeMCJITMemoryManager(MM::LLVMMCJITMemoryManagerRef)
-    @apicall(:LLVMDisposeMCJITMemoryManager,Void,(LLVMMCJITMemoryManagerRef,),MM)
+    @apicall(:LLVMDisposeMCJITMemoryManager,Cvoid,(LLVMMCJITMemoryManagerRef,),MM)
 end
 
 
@@ -2866,47 +2866,47 @@ end
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMInitializeTransformUtils(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeTransformUtils,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeTransformUtils,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeScalarOpts(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeScalarOpts,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeScalarOpts,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeObjCARCOpts(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeObjCARCOpts,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeObjCARCOpts,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeVectorization(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeVectorization,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeVectorization,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeInstCombine(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeInstCombine,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeInstCombine,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeIPO(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeIPO,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeIPO,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeInstrumentation(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeInstrumentation,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeInstrumentation,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeAnalysis(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeAnalysis,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeAnalysis,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeIPA(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeIPA,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeIPA,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeCodeGen(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeCodeGen,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeCodeGen,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 function LLVMInitializeTarget(R::LLVMPassRegistryRef)
-    @apicall(:LLVMInitializeTarget,Void,(LLVMPassRegistryRef,),R)
+    @apicall(:LLVMInitializeTarget,Cvoid,(LLVMPassRegistryRef,),R)
 end
 
 
@@ -2934,7 +2934,7 @@ function llvm_create_optimizer()
 end
 
 function llvm_destroy_optimizer(lto::llvm_lto_t)
-    @apicall(:llvm_destroy_optimizer,Void,(llvm_lto_t,),lto)
+    @apicall(:llvm_destroy_optimizer,Cvoid,(llvm_lto_t,),lto)
 end
 
 function llvm_read_object_file(lto::llvm_lto_t,input_filename)
@@ -2966,15 +2966,15 @@ function lto_module_is_object_file_for_target(path,target_triple_prefix)
 end
 
 function lto_module_has_objc_category(mem,length::Csize_t)
-    @apicall(:lto_module_has_objc_category,lto_bool_t,(Ptr{Void},Csize_t),mem,length)
+    @apicall(:lto_module_has_objc_category,lto_bool_t,(Ptr{Cvoid},Csize_t),mem,length)
 end
 
 function lto_module_is_object_file_in_memory(mem,length::Csize_t)
-    @apicall(:lto_module_is_object_file_in_memory,lto_bool_t,(Ptr{Void},Csize_t),mem,length)
+    @apicall(:lto_module_is_object_file_in_memory,lto_bool_t,(Ptr{Cvoid},Csize_t),mem,length)
 end
 
 function lto_module_is_object_file_in_memory_for_target(mem,length::Csize_t,target_triple_prefix)
-    @apicall(:lto_module_is_object_file_in_memory_for_target,lto_bool_t,(Ptr{Void},Csize_t,Cstring),mem,length,target_triple_prefix)
+    @apicall(:lto_module_is_object_file_in_memory_for_target,lto_bool_t,(Ptr{Cvoid},Csize_t,Cstring),mem,length,target_triple_prefix)
 end
 
 function lto_module_create(path)
@@ -2982,19 +2982,19 @@ function lto_module_create(path)
 end
 
 function lto_module_create_from_memory(mem,length::Csize_t)
-    @apicall(:lto_module_create_from_memory,lto_module_t,(Ptr{Void},Csize_t),mem,length)
+    @apicall(:lto_module_create_from_memory,lto_module_t,(Ptr{Cvoid},Csize_t),mem,length)
 end
 
 function lto_module_create_from_memory_with_path(mem,length::Csize_t,path)
-    @apicall(:lto_module_create_from_memory_with_path,lto_module_t,(Ptr{Void},Csize_t,Cstring),mem,length,path)
+    @apicall(:lto_module_create_from_memory_with_path,lto_module_t,(Ptr{Cvoid},Csize_t,Cstring),mem,length,path)
 end
 
 function lto_module_create_in_local_context(mem,length::Csize_t,path)
-    @apicall(:lto_module_create_in_local_context,lto_module_t,(Ptr{Void},Csize_t,Cstring),mem,length,path)
+    @apicall(:lto_module_create_in_local_context,lto_module_t,(Ptr{Cvoid},Csize_t,Cstring),mem,length,path)
 end
 
 function lto_module_create_in_codegen_context(mem,length::Csize_t,path,cg::lto_code_gen_t)
-    @apicall(:lto_module_create_in_codegen_context,lto_module_t,(Ptr{Void},Csize_t,Cstring,lto_code_gen_t),mem,length,path,cg)
+    @apicall(:lto_module_create_in_codegen_context,lto_module_t,(Ptr{Cvoid},Csize_t,Cstring,lto_code_gen_t),mem,length,path,cg)
 end
 
 function lto_module_create_from_fd(fd::Cint,path,file_size::Csize_t)
@@ -3006,7 +3006,7 @@ function lto_module_create_from_fd_at_offset(fd::Cint,path,file_size::Csize_t,ma
 end
 
 function lto_module_dispose(mod::lto_module_t)
-    @apicall(:lto_module_dispose,Void,(lto_module_t,),mod)
+    @apicall(:lto_module_dispose,Cvoid,(lto_module_t,),mod)
 end
 
 function lto_module_get_target_triple(mod::lto_module_t)
@@ -3014,7 +3014,7 @@ function lto_module_get_target_triple(mod::lto_module_t)
 end
 
 function lto_module_set_target_triple(mod::lto_module_t,triple)
-    @apicall(:lto_module_set_target_triple,Void,(lto_module_t,Cstring),mod,triple)
+    @apicall(:lto_module_set_target_triple,Cvoid,(lto_module_t,Cstring),mod,triple)
 end
 
 function lto_module_get_num_symbols(mod::lto_module_t)
@@ -3034,7 +3034,7 @@ function lto_module_get_linkeropts(mod::lto_module_t)
 end
 
 function lto_codegen_set_diagnostic_handler(arg1::lto_code_gen_t,arg2::lto_diagnostic_handler_t,arg3)
-    @apicall(:lto_codegen_set_diagnostic_handler,Void,(lto_code_gen_t,lto_diagnostic_handler_t,Ptr{Void}),arg1,arg2,arg3)
+    @apicall(:lto_codegen_set_diagnostic_handler,Cvoid,(lto_code_gen_t,lto_diagnostic_handler_t,Ptr{Cvoid}),arg1,arg2,arg3)
 end
 
 function lto_codegen_create()
@@ -3046,7 +3046,7 @@ function lto_codegen_create_in_local_context()
 end
 
 function lto_codegen_dispose(arg1::lto_code_gen_t)
-    @apicall(:lto_codegen_dispose,Void,(lto_code_gen_t,),arg1)
+    @apicall(:lto_codegen_dispose,Cvoid,(lto_code_gen_t,),arg1)
 end
 
 function lto_codegen_add_module(cg::lto_code_gen_t,mod::lto_module_t)
@@ -3054,7 +3054,7 @@ function lto_codegen_add_module(cg::lto_code_gen_t,mod::lto_module_t)
 end
 
 function lto_codegen_set_module(cg::lto_code_gen_t,mod::lto_module_t)
-    @apicall(:lto_codegen_set_module,Void,(lto_code_gen_t,lto_module_t),cg,mod)
+    @apicall(:lto_codegen_set_module,Cvoid,(lto_code_gen_t,lto_module_t),cg,mod)
 end
 
 function lto_codegen_set_debug_model(cg::lto_code_gen_t,arg1::lto_debug_model)
@@ -3066,19 +3066,19 @@ function lto_codegen_set_pic_model(cg::lto_code_gen_t,arg1::lto_codegen_model)
 end
 
 function lto_codegen_set_cpu(cg::lto_code_gen_t,cpu)
-    @apicall(:lto_codegen_set_cpu,Void,(lto_code_gen_t,Cstring),cg,cpu)
+    @apicall(:lto_codegen_set_cpu,Cvoid,(lto_code_gen_t,Cstring),cg,cpu)
 end
 
 function lto_codegen_set_assembler_path(cg::lto_code_gen_t,path)
-    @apicall(:lto_codegen_set_assembler_path,Void,(lto_code_gen_t,Cstring),cg,path)
+    @apicall(:lto_codegen_set_assembler_path,Cvoid,(lto_code_gen_t,Cstring),cg,path)
 end
 
 function lto_codegen_set_assembler_args(cg::lto_code_gen_t,args,nargs::Cint)
-    @apicall(:lto_codegen_set_assembler_args,Void,(lto_code_gen_t,Ptr{Cstring},Cint),cg,args,nargs)
+    @apicall(:lto_codegen_set_assembler_args,Cvoid,(lto_code_gen_t,Ptr{Cstring},Cint),cg,args,nargs)
 end
 
 function lto_codegen_add_must_preserve_symbol(cg::lto_code_gen_t,symbol)
-    @apicall(:lto_codegen_add_must_preserve_symbol,Void,(lto_code_gen_t,Cstring),cg,symbol)
+    @apicall(:lto_codegen_add_must_preserve_symbol,Cvoid,(lto_code_gen_t,Cstring),cg,symbol)
 end
 
 function lto_codegen_write_merged_modules(cg::lto_code_gen_t,path)
@@ -3086,7 +3086,7 @@ function lto_codegen_write_merged_modules(cg::lto_code_gen_t,path)
 end
 
 function lto_codegen_compile(cg::lto_code_gen_t,length)
-    @apicall(:lto_codegen_compile,Ptr{Void},(lto_code_gen_t,Ptr{Csize_t}),cg,length)
+    @apicall(:lto_codegen_compile,Ptr{Cvoid},(lto_code_gen_t,Ptr{Csize_t}),cg,length)
 end
 
 function lto_codegen_compile_to_file(cg::lto_code_gen_t,name)
@@ -3098,7 +3098,7 @@ function lto_codegen_optimize(cg::lto_code_gen_t)
 end
 
 function lto_codegen_compile_optimized(cg::lto_code_gen_t,length)
-    @apicall(:lto_codegen_compile_optimized,Ptr{Void},(lto_code_gen_t,Ptr{Csize_t}),cg,length)
+    @apicall(:lto_codegen_compile_optimized,Ptr{Cvoid},(lto_code_gen_t,Ptr{Csize_t}),cg,length)
 end
 
 function lto_api_version()
@@ -3106,19 +3106,19 @@ function lto_api_version()
 end
 
 function lto_codegen_debug_options(cg::lto_code_gen_t,arg1)
-    @apicall(:lto_codegen_debug_options,Void,(lto_code_gen_t,Cstring),cg,arg1)
+    @apicall(:lto_codegen_debug_options,Cvoid,(lto_code_gen_t,Cstring),cg,arg1)
 end
 
 function lto_initialize_disassembler()
-    @apicall(:lto_initialize_disassembler,Void,())
+    @apicall(:lto_initialize_disassembler,Cvoid,())
 end
 
 function lto_codegen_set_should_internalize(cg::lto_code_gen_t,ShouldInternalize::lto_bool_t)
-    @apicall(:lto_codegen_set_should_internalize,Void,(lto_code_gen_t,lto_bool_t),cg,ShouldInternalize)
+    @apicall(:lto_codegen_set_should_internalize,Cvoid,(lto_code_gen_t,lto_bool_t),cg,ShouldInternalize)
 end
 
 function lto_codegen_set_should_embed_uselists(cg::lto_code_gen_t,ShouldEmbedUselists::lto_bool_t)
-    @apicall(:lto_codegen_set_should_embed_uselists,Void,(lto_code_gen_t,lto_bool_t),cg,ShouldEmbedUselists)
+    @apicall(:lto_codegen_set_should_embed_uselists,Cvoid,(lto_code_gen_t,lto_bool_t),cg,ShouldEmbedUselists)
 end
 
 function thinlto_create_codegen()
@@ -3126,15 +3126,15 @@ function thinlto_create_codegen()
 end
 
 function thinlto_codegen_dispose(cg::thinlto_code_gen_t)
-    @apicall(:thinlto_codegen_dispose,Void,(thinlto_code_gen_t,),cg)
+    @apicall(:thinlto_codegen_dispose,Cvoid,(thinlto_code_gen_t,),cg)
 end
 
 function thinlto_codegen_add_module(cg::thinlto_code_gen_t,identifier,data,length::Cint)
-    @apicall(:thinlto_codegen_add_module,Void,(thinlto_code_gen_t,Cstring,Cstring,Cint),cg,identifier,data,length)
+    @apicall(:thinlto_codegen_add_module,Cvoid,(thinlto_code_gen_t,Cstring,Cstring,Cint),cg,identifier,data,length)
 end
 
 function thinlto_codegen_process(cg::thinlto_code_gen_t)
-    @apicall(:thinlto_codegen_process,Void,(thinlto_code_gen_t,),cg)
+    @apicall(:thinlto_codegen_process,Cvoid,(thinlto_code_gen_t,),cg)
 end
 
 function thinlto_module_get_num_objects(cg::thinlto_code_gen_t)
@@ -3158,43 +3158,43 @@ function thinlto_codegen_set_pic_model(cg::thinlto_code_gen_t,arg1::lto_codegen_
 end
 
 function thinlto_codegen_set_cache_dir(cg::thinlto_code_gen_t,cache_dir)
-    @apicall(:thinlto_codegen_set_cache_dir,Void,(thinlto_code_gen_t,Cstring),cg,cache_dir)
+    @apicall(:thinlto_codegen_set_cache_dir,Cvoid,(thinlto_code_gen_t,Cstring),cg,cache_dir)
 end
 
 function thinlto_codegen_set_cache_pruning_interval(cg::thinlto_code_gen_t,interval::Cint)
-    @apicall(:thinlto_codegen_set_cache_pruning_interval,Void,(thinlto_code_gen_t,Cint),cg,interval)
+    @apicall(:thinlto_codegen_set_cache_pruning_interval,Cvoid,(thinlto_code_gen_t,Cint),cg,interval)
 end
 
 function thinlto_codegen_set_final_cache_size_relative_to_available_space(cg::thinlto_code_gen_t,percentage::UInt32)
-    @apicall(:thinlto_codegen_set_final_cache_size_relative_to_available_space,Void,(thinlto_code_gen_t,UInt32),cg,percentage)
+    @apicall(:thinlto_codegen_set_final_cache_size_relative_to_available_space,Cvoid,(thinlto_code_gen_t,UInt32),cg,percentage)
 end
 
 function thinlto_codegen_set_cache_entry_expiration(cg::thinlto_code_gen_t,expiration::UInt32)
-    @apicall(:thinlto_codegen_set_cache_entry_expiration,Void,(thinlto_code_gen_t,UInt32),cg,expiration)
+    @apicall(:thinlto_codegen_set_cache_entry_expiration,Cvoid,(thinlto_code_gen_t,UInt32),cg,expiration)
 end
 
 function thinlto_codegen_set_savetemps_dir(cg::thinlto_code_gen_t,save_temps_dir)
-    @apicall(:thinlto_codegen_set_savetemps_dir,Void,(thinlto_code_gen_t,Cstring),cg,save_temps_dir)
+    @apicall(:thinlto_codegen_set_savetemps_dir,Cvoid,(thinlto_code_gen_t,Cstring),cg,save_temps_dir)
 end
 
 function thinlto_set_generated_objects_dir(cg::thinlto_code_gen_t,save_temps_dir)
-    @apicall(:thinlto_set_generated_objects_dir,Void,(thinlto_code_gen_t,Cstring),cg,save_temps_dir)
+    @apicall(:thinlto_set_generated_objects_dir,Cvoid,(thinlto_code_gen_t,Cstring),cg,save_temps_dir)
 end
 
 function thinlto_codegen_set_cpu(cg::thinlto_code_gen_t,cpu)
-    @apicall(:thinlto_codegen_set_cpu,Void,(thinlto_code_gen_t,Cstring),cg,cpu)
+    @apicall(:thinlto_codegen_set_cpu,Cvoid,(thinlto_code_gen_t,Cstring),cg,cpu)
 end
 
 function thinlto_codegen_disable_codegen(cg::thinlto_code_gen_t,disable::lto_bool_t)
-    @apicall(:thinlto_codegen_disable_codegen,Void,(thinlto_code_gen_t,lto_bool_t),cg,disable)
+    @apicall(:thinlto_codegen_disable_codegen,Cvoid,(thinlto_code_gen_t,lto_bool_t),cg,disable)
 end
 
 function thinlto_codegen_set_codegen_only(cg::thinlto_code_gen_t,codegen_only::lto_bool_t)
-    @apicall(:thinlto_codegen_set_codegen_only,Void,(thinlto_code_gen_t,lto_bool_t),cg,codegen_only)
+    @apicall(:thinlto_codegen_set_codegen_only,Cvoid,(thinlto_code_gen_t,lto_bool_t),cg,codegen_only)
 end
 
 function thinlto_debug_options(options,number::Cint)
-    @apicall(:thinlto_debug_options,Void,(Ptr{Cstring},Cint),options,number)
+    @apicall(:thinlto_debug_options,Cvoid,(Ptr{Cstring},Cint),options,number)
 end
 
 function lto_module_is_thinlto(mod::lto_module_t)
@@ -3202,11 +3202,11 @@ function lto_module_is_thinlto(mod::lto_module_t)
 end
 
 function thinlto_codegen_add_must_preserve_symbol(cg::thinlto_code_gen_t,name,length::Cint)
-    @apicall(:thinlto_codegen_add_must_preserve_symbol,Void,(thinlto_code_gen_t,Cstring,Cint),cg,name,length)
+    @apicall(:thinlto_codegen_add_must_preserve_symbol,Cvoid,(thinlto_code_gen_t,Cstring,Cint),cg,name,length)
 end
 
 function thinlto_codegen_add_cross_referenced_symbol(cg::thinlto_code_gen_t,name,length::Cint)
-    @apicall(:thinlto_codegen_add_cross_referenced_symbol,Void,(thinlto_code_gen_t,Cstring,Cint),cg,name,length)
+    @apicall(:thinlto_codegen_add_cross_referenced_symbol,Cvoid,(thinlto_code_gen_t,Cstring,Cint),cg,name,length)
 end
 
 
@@ -3222,15 +3222,15 @@ function LLVMOrcGetErrorMsg(JITStack::LLVMOrcJITStackRef)
 end
 
 function LLVMOrcGetMangledSymbol(JITStack::LLVMOrcJITStackRef,MangledSymbol,Symbol)
-    @apicall(:LLVMOrcGetMangledSymbol,Void,(LLVMOrcJITStackRef,Ptr{Cstring},Cstring),JITStack,MangledSymbol,Symbol)
+    @apicall(:LLVMOrcGetMangledSymbol,Cvoid,(LLVMOrcJITStackRef,Ptr{Cstring},Cstring),JITStack,MangledSymbol,Symbol)
 end
 
 function LLVMOrcDisposeMangledSymbol(MangledSymbol)
-    @apicall(:LLVMOrcDisposeMangledSymbol,Void,(Cstring,),MangledSymbol)
+    @apicall(:LLVMOrcDisposeMangledSymbol,Cvoid,(Cstring,),MangledSymbol)
 end
 
 function LLVMOrcCreateLazyCompileCallback(JITStack::LLVMOrcJITStackRef,Callback::LLVMOrcLazyCompileCallbackFn,CallbackCtx)
-    @apicall(:LLVMOrcCreateLazyCompileCallback,LLVMOrcTargetAddress,(LLVMOrcJITStackRef,LLVMOrcLazyCompileCallbackFn,Ptr{Void}),JITStack,Callback,CallbackCtx)
+    @apicall(:LLVMOrcCreateLazyCompileCallback,LLVMOrcTargetAddress,(LLVMOrcJITStackRef,LLVMOrcLazyCompileCallbackFn,Ptr{Cvoid}),JITStack,Callback,CallbackCtx)
 end
 
 function LLVMOrcCreateIndirectStub(JITStack::LLVMOrcJITStackRef,StubName,InitAddr::LLVMOrcTargetAddress)
@@ -3242,19 +3242,19 @@ function LLVMOrcSetIndirectStubPointer(JITStack::LLVMOrcJITStackRef,StubName,New
 end
 
 function LLVMOrcAddEagerlyCompiledIR(JITStack::LLVMOrcJITStackRef,Mod::LLVMModuleRef,SymbolResolver::LLVMOrcSymbolResolverFn,SymbolResolverCtx)
-    @apicall(:LLVMOrcAddEagerlyCompiledIR,LLVMOrcModuleHandle,(LLVMOrcJITStackRef,LLVMModuleRef,LLVMOrcSymbolResolverFn,Ptr{Void}),JITStack,Mod,SymbolResolver,SymbolResolverCtx)
+    @apicall(:LLVMOrcAddEagerlyCompiledIR,LLVMOrcModuleHandle,(LLVMOrcJITStackRef,LLVMModuleRef,LLVMOrcSymbolResolverFn,Ptr{Cvoid}),JITStack,Mod,SymbolResolver,SymbolResolverCtx)
 end
 
 function LLVMOrcAddLazilyCompiledIR(JITStack::LLVMOrcJITStackRef,Mod::LLVMModuleRef,SymbolResolver::LLVMOrcSymbolResolverFn,SymbolResolverCtx)
-    @apicall(:LLVMOrcAddLazilyCompiledIR,LLVMOrcModuleHandle,(LLVMOrcJITStackRef,LLVMModuleRef,LLVMOrcSymbolResolverFn,Ptr{Void}),JITStack,Mod,SymbolResolver,SymbolResolverCtx)
+    @apicall(:LLVMOrcAddLazilyCompiledIR,LLVMOrcModuleHandle,(LLVMOrcJITStackRef,LLVMModuleRef,LLVMOrcSymbolResolverFn,Ptr{Cvoid}),JITStack,Mod,SymbolResolver,SymbolResolverCtx)
 end
 
 function LLVMOrcAddObjectFile(JITStack::LLVMOrcJITStackRef,Obj::LLVMObjectFileRef,SymbolResolver::LLVMOrcSymbolResolverFn,SymbolResolverCtx)
-    @apicall(:LLVMOrcAddObjectFile,LLVMOrcModuleHandle,(LLVMOrcJITStackRef,LLVMObjectFileRef,LLVMOrcSymbolResolverFn,Ptr{Void}),JITStack,Obj,SymbolResolver,SymbolResolverCtx)
+    @apicall(:LLVMOrcAddObjectFile,LLVMOrcModuleHandle,(LLVMOrcJITStackRef,LLVMObjectFileRef,LLVMOrcSymbolResolverFn,Ptr{Cvoid}),JITStack,Obj,SymbolResolver,SymbolResolverCtx)
 end
 
 function LLVMOrcRemoveModule(JITStack::LLVMOrcJITStackRef,H::LLVMOrcModuleHandle)
-    @apicall(:LLVMOrcRemoveModule,Void,(LLVMOrcJITStackRef,LLVMOrcModuleHandle),JITStack,H)
+    @apicall(:LLVMOrcRemoveModule,Cvoid,(LLVMOrcJITStackRef,LLVMOrcModuleHandle),JITStack,H)
 end
 
 function LLVMOrcGetSymbolAddress(JITStack::LLVMOrcJITStackRef,SymbolName)
@@ -3262,7 +3262,7 @@ function LLVMOrcGetSymbolAddress(JITStack::LLVMOrcJITStackRef,SymbolName)
 end
 
 function LLVMOrcDisposeInstance(JITStack::LLVMOrcJITStackRef)
-    @apicall(:LLVMOrcDisposeInstance,Void,(LLVMOrcJITStackRef,),JITStack)
+    @apicall(:LLVMOrcDisposeInstance,Cvoid,(LLVMOrcJITStackRef,),JITStack)
 end
 
 
@@ -3274,15 +3274,15 @@ function LLVMLoadLibraryPermanently(Filename)
 end
 
 function LLVMParseCommandLineOptions(argc::Cint,argv,Overview)
-    @apicall(:LLVMParseCommandLineOptions,Void,(Cint,Ptr{Cstring},Cstring),argc,argv,Overview)
+    @apicall(:LLVMParseCommandLineOptions,Cvoid,(Cint,Ptr{Cstring},Cstring),argc,argv,Overview)
 end
 
 function LLVMSearchForAddressOfSymbol(symbolName)
-    @apicall(:LLVMSearchForAddressOfSymbol,Ptr{Void},(Cstring,),symbolName)
+    @apicall(:LLVMSearchForAddressOfSymbol,Ptr{Cvoid},(Cstring,),symbolName)
 end
 
 function LLVMAddSymbol(symbolName,symbolValue)
-    @apicall(:LLVMAddSymbol,Void,(Cstring,Ptr{Void}),symbolName,symbolValue)
+    @apicall(:LLVMAddSymbol,Cvoid,(Cstring,Ptr{Cvoid}),symbolName,symbolValue)
 end
 
 
@@ -3290,59 +3290,59 @@ end
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMAddArgumentPromotionPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddArgumentPromotionPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddArgumentPromotionPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddConstantMergePass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddConstantMergePass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddConstantMergePass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddDeadArgEliminationPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddDeadArgEliminationPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddDeadArgEliminationPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddFunctionAttrsPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddFunctionAttrsPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddFunctionAttrsPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddFunctionInliningPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddFunctionInliningPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddFunctionInliningPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddAlwaysInlinerPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddAlwaysInlinerPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddAlwaysInlinerPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddGlobalDCEPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddGlobalDCEPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddGlobalDCEPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddGlobalOptimizerPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddGlobalOptimizerPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddGlobalOptimizerPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddIPConstantPropagationPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddIPConstantPropagationPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddIPConstantPropagationPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddPruneEHPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddPruneEHPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddPruneEHPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddIPSCCPPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddIPSCCPPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddIPSCCPPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddInternalizePass(arg1::LLVMPassManagerRef,AllButMain::UInt32)
-    @apicall(:LLVMAddInternalizePass,Void,(LLVMPassManagerRef,UInt32),arg1,AllButMain)
+    @apicall(:LLVMAddInternalizePass,Cvoid,(LLVMPassManagerRef,UInt32),arg1,AllButMain)
 end
 
 function LLVMAddStripDeadPrototypesPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddStripDeadPrototypesPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddStripDeadPrototypesPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddStripSymbolsPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddStripSymbolsPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddStripSymbolsPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 
@@ -3354,43 +3354,43 @@ function LLVMPassManagerBuilderCreate()
 end
 
 function LLVMPassManagerBuilderDispose(PMB::LLVMPassManagerBuilderRef)
-    @apicall(:LLVMPassManagerBuilderDispose,Void,(LLVMPassManagerBuilderRef,),PMB)
+    @apicall(:LLVMPassManagerBuilderDispose,Cvoid,(LLVMPassManagerBuilderRef,),PMB)
 end
 
 function LLVMPassManagerBuilderSetOptLevel(PMB::LLVMPassManagerBuilderRef,OptLevel::UInt32)
-    @apicall(:LLVMPassManagerBuilderSetOptLevel,Void,(LLVMPassManagerBuilderRef,UInt32),PMB,OptLevel)
+    @apicall(:LLVMPassManagerBuilderSetOptLevel,Cvoid,(LLVMPassManagerBuilderRef,UInt32),PMB,OptLevel)
 end
 
 function LLVMPassManagerBuilderSetSizeLevel(PMB::LLVMPassManagerBuilderRef,SizeLevel::UInt32)
-    @apicall(:LLVMPassManagerBuilderSetSizeLevel,Void,(LLVMPassManagerBuilderRef,UInt32),PMB,SizeLevel)
+    @apicall(:LLVMPassManagerBuilderSetSizeLevel,Cvoid,(LLVMPassManagerBuilderRef,UInt32),PMB,SizeLevel)
 end
 
 function LLVMPassManagerBuilderSetDisableUnitAtATime(PMB::LLVMPassManagerBuilderRef,Value::LLVMBool)
-    @apicall(:LLVMPassManagerBuilderSetDisableUnitAtATime,Void,(LLVMPassManagerBuilderRef,LLVMBool),PMB,Value)
+    @apicall(:LLVMPassManagerBuilderSetDisableUnitAtATime,Cvoid,(LLVMPassManagerBuilderRef,LLVMBool),PMB,Value)
 end
 
 function LLVMPassManagerBuilderSetDisableUnrollLoops(PMB::LLVMPassManagerBuilderRef,Value::LLVMBool)
-    @apicall(:LLVMPassManagerBuilderSetDisableUnrollLoops,Void,(LLVMPassManagerBuilderRef,LLVMBool),PMB,Value)
+    @apicall(:LLVMPassManagerBuilderSetDisableUnrollLoops,Cvoid,(LLVMPassManagerBuilderRef,LLVMBool),PMB,Value)
 end
 
 function LLVMPassManagerBuilderSetDisableSimplifyLibCalls(PMB::LLVMPassManagerBuilderRef,Value::LLVMBool)
-    @apicall(:LLVMPassManagerBuilderSetDisableSimplifyLibCalls,Void,(LLVMPassManagerBuilderRef,LLVMBool),PMB,Value)
+    @apicall(:LLVMPassManagerBuilderSetDisableSimplifyLibCalls,Cvoid,(LLVMPassManagerBuilderRef,LLVMBool),PMB,Value)
 end
 
 function LLVMPassManagerBuilderUseInlinerWithThreshold(PMB::LLVMPassManagerBuilderRef,Threshold::UInt32)
-    @apicall(:LLVMPassManagerBuilderUseInlinerWithThreshold,Void,(LLVMPassManagerBuilderRef,UInt32),PMB,Threshold)
+    @apicall(:LLVMPassManagerBuilderUseInlinerWithThreshold,Cvoid,(LLVMPassManagerBuilderRef,UInt32),PMB,Threshold)
 end
 
 function LLVMPassManagerBuilderPopulateFunctionPassManager(PMB::LLVMPassManagerBuilderRef,PM::LLVMPassManagerRef)
-    @apicall(:LLVMPassManagerBuilderPopulateFunctionPassManager,Void,(LLVMPassManagerBuilderRef,LLVMPassManagerRef),PMB,PM)
+    @apicall(:LLVMPassManagerBuilderPopulateFunctionPassManager,Cvoid,(LLVMPassManagerBuilderRef,LLVMPassManagerRef),PMB,PM)
 end
 
 function LLVMPassManagerBuilderPopulateModulePassManager(PMB::LLVMPassManagerBuilderRef,PM::LLVMPassManagerRef)
-    @apicall(:LLVMPassManagerBuilderPopulateModulePassManager,Void,(LLVMPassManagerBuilderRef,LLVMPassManagerRef),PMB,PM)
+    @apicall(:LLVMPassManagerBuilderPopulateModulePassManager,Cvoid,(LLVMPassManagerBuilderRef,LLVMPassManagerRef),PMB,PM)
 end
 
 function LLVMPassManagerBuilderPopulateLTOPassManager(PMB::LLVMPassManagerBuilderRef,PM::LLVMPassManagerRef,Internalize::LLVMBool,RunInliner::LLVMBool)
-    @apicall(:LLVMPassManagerBuilderPopulateLTOPassManager,Void,(LLVMPassManagerBuilderRef,LLVMPassManagerRef,LLVMBool,LLVMBool),PMB,PM,Internalize,RunInliner)
+    @apicall(:LLVMPassManagerBuilderPopulateLTOPassManager,Cvoid,(LLVMPassManagerBuilderRef,LLVMPassManagerRef,LLVMBool,LLVMBool),PMB,PM,Internalize,RunInliner)
 end
 
 
@@ -3398,163 +3398,163 @@ end
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMAddAggressiveDCEPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddAggressiveDCEPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddAggressiveDCEPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddBitTrackingDCEPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddBitTrackingDCEPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddBitTrackingDCEPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddAlignmentFromAssumptionsPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddAlignmentFromAssumptionsPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddAlignmentFromAssumptionsPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddCFGSimplificationPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddCFGSimplificationPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddCFGSimplificationPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddDeadStoreEliminationPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddDeadStoreEliminationPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddDeadStoreEliminationPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddScalarizerPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddScalarizerPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddScalarizerPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddMergedLoadStoreMotionPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddMergedLoadStoreMotionPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddMergedLoadStoreMotionPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddGVNPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddGVNPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddGVNPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddNewGVNPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddNewGVNPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddNewGVNPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddIndVarSimplifyPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddIndVarSimplifyPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddIndVarSimplifyPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddInstructionCombiningPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddInstructionCombiningPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddInstructionCombiningPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddJumpThreadingPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddJumpThreadingPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddJumpThreadingPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLICMPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLICMPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLICMPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLoopDeletionPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLoopDeletionPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLoopDeletionPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLoopIdiomPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLoopIdiomPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLoopIdiomPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLoopRotatePass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLoopRotatePass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLoopRotatePass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLoopRerollPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLoopRerollPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLoopRerollPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLoopUnrollPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLoopUnrollPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLoopUnrollPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLoopUnswitchPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLoopUnswitchPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLoopUnswitchPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddMemCpyOptPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddMemCpyOptPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddMemCpyOptPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddPartiallyInlineLibCallsPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddPartiallyInlineLibCallsPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddPartiallyInlineLibCallsPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLowerSwitchPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLowerSwitchPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLowerSwitchPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddPromoteMemoryToRegisterPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddPromoteMemoryToRegisterPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddPromoteMemoryToRegisterPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddReassociatePass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddReassociatePass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddReassociatePass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddSCCPPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddSCCPPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddSCCPPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddScalarReplAggregatesPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddScalarReplAggregatesPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddScalarReplAggregatesPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddScalarReplAggregatesPassSSA(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddScalarReplAggregatesPassSSA,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddScalarReplAggregatesPassSSA,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddScalarReplAggregatesPassWithThreshold(PM::LLVMPassManagerRef,Threshold::Cint)
-    @apicall(:LLVMAddScalarReplAggregatesPassWithThreshold,Void,(LLVMPassManagerRef,Cint),PM,Threshold)
+    @apicall(:LLVMAddScalarReplAggregatesPassWithThreshold,Cvoid,(LLVMPassManagerRef,Cint),PM,Threshold)
 end
 
 function LLVMAddSimplifyLibCallsPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddSimplifyLibCallsPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddSimplifyLibCallsPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddTailCallEliminationPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddTailCallEliminationPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddTailCallEliminationPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddConstantPropagationPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddConstantPropagationPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddConstantPropagationPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddDemoteMemoryToRegisterPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddDemoteMemoryToRegisterPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddDemoteMemoryToRegisterPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddVerifierPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddVerifierPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddVerifierPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddCorrelatedValuePropagationPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddCorrelatedValuePropagationPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddCorrelatedValuePropagationPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddEarlyCSEPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddEarlyCSEPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddEarlyCSEPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddEarlyCSEMemSSAPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddEarlyCSEMemSSAPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddEarlyCSEMemSSAPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLowerExpectIntrinsicPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLowerExpectIntrinsicPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLowerExpectIntrinsicPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddTypeBasedAliasAnalysisPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddTypeBasedAliasAnalysisPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddTypeBasedAliasAnalysisPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddScopedNoAliasAAPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddScopedNoAliasAAPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddScopedNoAliasAAPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddBasicAliasAnalysisPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddBasicAliasAnalysisPass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddBasicAliasAnalysisPass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 
@@ -3562,13 +3562,13 @@ end
 # Automatically generated using Clang.jl wrap_c, version 0.1.0
 
 function LLVMAddBBVectorizePass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddBBVectorizePass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddBBVectorizePass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddLoopVectorizePass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddLoopVectorizePass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddLoopVectorizePass,Cvoid,(LLVMPassManagerRef,),PM)
 end
 
 function LLVMAddSLPVectorizePass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMAddSLPVectorizePass,Void,(LLVMPassManagerRef,),PM)
+    @apicall(:LLVMAddSLPVectorizePass,Cvoid,(LLVMPassManagerRef,),PM)
 end

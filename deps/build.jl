@@ -50,7 +50,7 @@ function main()
     isempty(libllvm_paths) && error("Could not find $(libllvm_name), is Julia built with USE_LLVM_SHLIB=1?")
     config[:libllvm_path] = first(libllvm_paths)
 
-    config[:libllvm_version] = VersionNumber(Base.libllvm_version)
+    config[:libllvm_version] = Base.libllvm_version::VersionNumber
     vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
     vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 
