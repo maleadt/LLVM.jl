@@ -1,4 +1,4 @@
-Copyright &copy; 2016 Tim Besard
+Copyright &copy; 2016-2018 Tim Besard, and other contributors
 
 All Rights Reserved.
 
