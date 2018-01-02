@@ -55,7 +55,7 @@ message(di::DiagnosticInfo) = unsafe_string(API.LLVMGetDiagInfoDescription(ref(d
 
 ## handlers
 
-function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Void})
+function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Cvoid})
     di = DiagnosticInfo(diag_ref)
     @assert args == C_NULL
 
@@ -75,7 +75,7 @@ function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Void})
     return nothing
 end
 
-function yield_callback(ctx_ref::API.LLVMContextRef, args::Ptr{Void})
+function yield_callback(ctx_ref::API.LLVMContextRef, args::Ptr{Cvoid})
     ctx = Context(ctx_ref)
     @assert args == C_NULL
 
@@ -85,12 +85,12 @@ end
 
 function _install_handlers(ctx::Context)
     # set yield callback
-    callback = cfunction(yield_callback, Void, Tuple{Context, Ptr{Void}})
+    callback = cfunction(yield_callback, Cvoid, Tuple{Context, Ptr{Cvoid}})
     # NOTE: disabled until proven safe
     #API.LLVMContextSetYieldCallback(ref(ctx), callback, C_NULL)
 
     # set diagnostic callback
-    handler = cfunction(handle_diagnostic, Void, Tuple{API.LLVMDiagnosticInfoRef, Ptr{Void}})
+    handler = cfunction(handle_diagnostic, Cvoid, Tuple{API.LLVMDiagnosticInfoRef, Ptr{Cvoid}})
     API.LLVMContextSetDiagnosticHandler(ref(ctx), handler, C_NULL)
 
     return nothing
@@ -101,7 +101,7 @@ function handle_error(reason::Cstring)
 end
 
 function _install_handlers()
-    handler = cfunction(handle_error, Void, Tuple{Cstring})
+    handler = cfunction(handle_error, Cvoid, Tuple{Cstring})
 
     # NOTE: LLVM doesn't support re-installing the error handler, which happens when we
     #       `reload("LLVM")`, so reset it instead. This isn't correct, as the installed

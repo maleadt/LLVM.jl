@@ -15,7 +15,7 @@ export ModulePass
     root::Any
 
     function ModulePass(name::String, runner::Core.Function)
-        function callback(ptr::Ptr{Void})::Core.Bool
+        function callback(ptr::Ptr{Cvoid})::Core.Bool
             mod = LLVM.Module(convert(reftype(Module), ptr))
             return runner(mod)::Core.Bool
         end
@@ -37,7 +37,7 @@ export FunctionPass
     root::Any
 
     function FunctionPass(name::String, runner::Core.Function)
-        function callback(ptr::Ptr{Void})::Core.Bool
+        function callback(ptr::Ptr{Cvoid})::Core.Bool
             fn = LLVM.Function(convert(reftype(Function), ptr))
             return runner(fn)::Core.Bool
         end
@@ -58,7 +58,7 @@ export BasicBlockPass
     root::Any
 
     function BasicBlockPass(name::String, runner::Core.Function)
-        function callback(ptr::Ptr{Void})::Core.Bool
+        function callback(ptr::Ptr{Cvoid})::Core.Bool
             bb = BasicBlock(convert(reftype(BasicBlock), ptr))
             return runner(bb)::Core.Bool
         end

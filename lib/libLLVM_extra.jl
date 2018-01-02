@@ -4,27 +4,27 @@
 # initialization functions
 
 function LLVMInitializeAllTargetInfos()
-    @apicall(:LLVMExtraInitializeAllTargetInfos,Void,())
+    @apicall(:LLVMExtraInitializeAllTargetInfos,Cvoid,())
 end
 
 function LLVMInitializeAllTargets()
-    @apicall(:LLVMExtraInitializeAllTargets,Void,())
+    @apicall(:LLVMExtraInitializeAllTargets,Cvoid,())
 end
 
 function LLVMInitializeAllTargetMCs()
-    @apicall(:LLVMExtraInitializeAllTargetMCs,Void,())
+    @apicall(:LLVMExtraInitializeAllTargetMCs,Cvoid,())
 end
 
 function LLVMInitializeAllAsmPrinters()
-    @apicall(:LLVMExtraInitializeAllAsmPrinters,Void,())
+    @apicall(:LLVMExtraInitializeAllAsmPrinters,Cvoid,())
 end
 
 function LLVMInitializeAllAsmParsers()
-    @apicall(:LLVMExtraInitializeAllAsmParsers,Void,())
+    @apicall(:LLVMExtraInitializeAllAsmParsers,Cvoid,())
 end
 
 function LLVMInitializeAllDisassemblers()
-    @apicall(:LLVMExtraInitializeAllDisassemblers,Void,())
+    @apicall(:LLVMExtraInitializeAllDisassemblers,Cvoid,())
 end
 
 function LLVMInitializeNativeTarget()
@@ -52,7 +52,7 @@ end
 const LLVMPassRef = Ptr{LLVMOpaquePass}
 
 function LLVMAddPass(PM::LLVMPassManagerRef, P::LLVMPassRef)
-    @apicall(:LLVMExtraAddPass,Void,
+    @apicall(:LLVMExtraAddPass,Cvoid,
         (LLVMPassManagerRef, LLVMPassRef),
         PM, P)
 end
@@ -96,19 +96,19 @@ end
 # various missing functions
 
 function LLVMAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
-    @apicall(:LLVMExtraAddInternalizePassWithExportList,Void,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
+    @apicall(:LLVMExtraAddInternalizePassWithExportList,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
 end
 
 function LLVMAddTargetLibraryInfoByTriple(Triple, PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddTargetLibraryInfoByTiple,Void,(Cstring, LLVMPassManagerRef), Triple, PM)
+    @apicall(:LLVMExtraAddTargetLibraryInfoByTiple,Cvoid,(Cstring, LLVMPassManagerRef), Triple, PM)
 end
 
 function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddMVVMReflectPass,Void,(LLVMPassManagerRef,), PM)
+    @apicall(:LLVMExtraAddMVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Values, Length)
-    @apicall(:LLVMExtraAddMVVMReflectPassWithMapping,Void,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
+    @apicall(:LLVMExtraAddMVVMReflectPassWithMapping,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
 end
 
 function LLVMGetDebugMDVersion()

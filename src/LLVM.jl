@@ -56,7 +56,7 @@ if Compat.Sys.islinux()
     const LM_ID_NEWLM = -1
     const RTLD_LAZY = 1
     function dlmopen(linkmap::Lmid, library::String, flags::Integer=RTLD_LAZY)
-        handle = ccall((:dlmopen, :libdl), Ptr{Void}, (Lmid, Cstring, Cint), linkmap, library, flags)
+        handle = ccall((:dlmopen, :libdl), Ptr{Cvoid}, (Lmid, Cstring, Cint), linkmap, library, flags)
         if handle == C_NULL
             error(unsafe_string(ccall((:dlerror, :libdl), Cstring, ())))
         end

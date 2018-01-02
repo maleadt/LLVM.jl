@@ -2,7 +2,7 @@
 
 using Compat
 
-const LLVMFatalErrorHandler = Ptr{Void}
+const LLVMFatalErrorHandler = Ptr{Cvoid}
 
 const LLVMBool = Cint
 
@@ -425,8 +425,8 @@ const LLVMAttributeReturnIndex = (UInt32)(0)
 const LLVMAttributeFunctionIndex = reinterpret(UInt32, Int32(-1))
 # end enum LLVMAttributeIndex
 
-const LLVMDiagnosticHandler = Ptr{Void}
-const LLVMYieldCallback = Ptr{Void}
+const LLVMDiagnosticHandler = Ptr{Cvoid}
+const LLVMYieldCallback = Ptr{Cvoid}
 
 const LLVMDisassembler_VariantKind_None = 0
 const LLVMDisassembler_VariantKind_ARM_HI16 = 1
@@ -460,8 +460,8 @@ const LLVMDisassembler_Option_AsmPrinterVariant = 4
 const LLVMDisassembler_Option_SetInstrComments = 8
 const LLVMDisassembler_Option_PrintLatency = 16
 
-const LLVMDisasmContextRef = Ptr{Void}
-const LLVMOpInfoCallback = Ptr{Void}
+const LLVMDisasmContextRef = Ptr{Cvoid}
+const LLVMOpInfoCallback = Ptr{Cvoid}
 
 mutable struct LLVMOpInfoSymbol1
     Present::UInt64
@@ -476,7 +476,7 @@ mutable struct LLVMOpInfo1
     VariantKind::UInt64
 end
 
-const LLVMSymbolLookupCallback = Ptr{Void}
+const LLVMSymbolLookupCallback = Ptr{Cvoid}
 
 mutable struct LLVMOpaqueGenericValue
 end
@@ -501,10 +501,10 @@ mutable struct LLVMMCJITCompilerOptions
     MCJMM::LLVMMCJITMemoryManagerRef
 end
 
-const LLVMMemoryManagerAllocateCodeSectionCallback = Ptr{Void}
-const LLVMMemoryManagerAllocateDataSectionCallback = Ptr{Void}
-const LLVMMemoryManagerFinalizeMemoryCallback = Ptr{Void}
-const LLVMMemoryManagerDestroyCallback = Ptr{Void}
+const LLVMMemoryManagerAllocateCodeSectionCallback = Ptr{Cvoid}
+const LLVMMemoryManagerAllocateDataSectionCallback = Ptr{Cvoid}
+const LLVMMemoryManagerFinalizeMemoryCallback = Ptr{Cvoid}
+const LLVMMemoryManagerDestroyCallback = Ptr{Cvoid}
 
 # begin enum LLVMLinkerMode
 const LLVMLinkerMode = UInt32
@@ -513,7 +513,7 @@ const LLVMLinkerPreserveSource_Removed = (UInt32)(1)
 # end enum LLVMLinkerMode
 
 const off_t  = Csize_t
-const llvm_lto_t = Ptr{Void}
+const llvm_lto_t = Ptr{Cvoid}
 
 # begin enum llvm_lto_status_t
 const llvm_lto_status_t = UInt32
@@ -593,7 +593,7 @@ const LTO_DS_REMARK = (UInt32)(3)
 const LTO_DS_NOTE = (UInt32)(2)
 # end enum lto_codegen_diagnostic_severity_t
 
-const lto_diagnostic_handler_t = Ptr{Void}
+const lto_diagnostic_handler_t = Ptr{Cvoid}
 
 mutable struct LTOObjectBuffer
     Buffer::Cstring
@@ -606,8 +606,8 @@ end
 const LLVMOrcJITStackRef = Ptr{LLVMOrcOpaqueJITStack}
 const LLVMOrcModuleHandle = UInt32
 const LLVMOrcTargetAddress = UInt64
-const LLVMOrcSymbolResolverFn = Ptr{Void}
-const LLVMOrcLazyCompileCallbackFn = Ptr{Void}
+const LLVMOrcSymbolResolverFn = Ptr{Cvoid}
+const LLVMOrcLazyCompileCallbackFn = Ptr{Cvoid}
 
 # begin enum LLVMOrcErrorCode
 const LLVMOrcErrorCode = UInt32

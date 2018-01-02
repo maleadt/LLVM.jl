@@ -33,7 +33,7 @@ end
 let
     obj = "whatever"
     val = GenericValue(pointer(obj))
-    @test convert(Ptr{Void}, val) == pointer(obj)
+    @test convert(Ptr{Cvoid}, val) == pointer(obj)
     dispose(val)
 end
 
