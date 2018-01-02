@@ -141,7 +141,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Julia/LLVM interop",
     "title": "LLVM.Interop.@asmcall",
     "category": "Macro",
-    "text": "@asmcall asm::String [constraints::String] [side_effects::Bool=false]\n         rettyp=Void argtyp=Tuple{} args...\n\nCall some inline assembly asm, optionally constrained by constraints and denoting other side_effects in side_effects, specifying the return type in rettyp and types of arguments as a tuple-type in argtyp.\n\n\n\n"
+    "text": "@asmcall asm::String [constraints::String] [side_effects::Bool=false]\n         rettyp=Nothing argtyp=Tuple{} args...\n\nCall some inline assembly asm, optionally constrained by constraints and denoting other side_effects in side_effects, specifying the return type in rettyp and types of arguments as a tuple-type in argtyp.\n\n\n\n"
 },
 
 {
