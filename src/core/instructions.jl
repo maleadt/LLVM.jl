@@ -72,7 +72,7 @@ predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
 
 export InstructionMetadataDict
 
-struct InstructionMetadataDict <: Associative{MD,MetadataAsValue}
+struct InstructionMetadataDict <: AbstractDict{MD,MetadataAsValue}
     inst::Instruction
 end
 
