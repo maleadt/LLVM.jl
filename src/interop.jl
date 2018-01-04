@@ -2,6 +2,8 @@ module Interop
 
 using ..LLVM
 
+using Compat
+
 const jlctx = Ref{LLVM.Context}()
 
 include("interop/base.jl")
