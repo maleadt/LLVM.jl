@@ -19,8 +19,10 @@ include("base.jl")
 
 module API
 using Compat
-using LLVM: @apicall, llvmjl_wrapper, libllvm_version
-libdir = joinpath(@__DIR__, "..", "lib", llvmjl_wrapper)
+using LLVM
+using LLVM.@apicall
+using LLVM.libllvm_version
+libdir = joinpath(@__DIR__, "..", "lib", LLVM.llvmjl_wrapper)
 include(joinpath(libdir, "libLLVM_common.jl"))
 include(joinpath(libdir, "libLLVM_h.jl"))
 include(joinpath(libdir, "..", "libLLVM_extra.jl"))
