@@ -95,4 +95,4 @@ Base.next(::ValueUseSet, state) =
 
 Base.done(::ValueUseSet, state) = state == C_NULL
 
-Base.iteratorsize(::ValueUseSet) = Base.SizeUnknown()
+Compat.IteratorSize(::ValueUseSet) = Base.SizeUnknown()

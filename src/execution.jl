@@ -142,7 +142,7 @@ end
 
 functions(engine::ExecutionEngine) = ExecutionEngineFunctionSet(engine)
 
-Base.iteratorsize(::ExecutionEngineFunctionSet) = Base.SizeUnknown()
+Compat.IteratorSize(::ExecutionEngineFunctionSet) = Base.SizeUnknown()
 Base.start(::ExecutionEngineFunctionSet) =
     error("Iteration of functions in the execution engine is not supported")
 
