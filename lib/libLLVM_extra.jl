@@ -78,7 +78,7 @@ end
 
 # bugfixes
 
-if libllvm_version < v"4.0"
+if libllvm_version < v"4.0" && VERSION < v"0.7.0-DEV.3647"
 
 # D26392
 function LLVMGetAttributeCountAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex)
