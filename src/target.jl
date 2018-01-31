@@ -58,4 +58,4 @@ Base.next(::TargetSet, state) =
 
 Base.done(::TargetSet, state) = state == C_NULL
 
-IteratorSize(::TargetSet) = Base.SizeUnknown()
+Base.IteratorSize(::TargetSet) = Base.SizeUnknown()

@@ -223,7 +223,7 @@ Base.done(::StructTypeElementSet, state) = (state[1] > state[2])
 
 Base.length(iter::StructTypeElementSet) = API.LLVMCountStructElementTypes(ref(iter.typ))
 
-Base.endof(iter::StructTypeElementSet) = length(iter)
+Base.lastindex(iter::StructTypeElementSet) = length(iter)
 
 # NOTE: optimized `collect`
 function Base.collect(iter::StructTypeElementSet)
