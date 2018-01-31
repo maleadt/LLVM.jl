@@ -18,8 +18,7 @@ include("base.jl")
 
 module API
 using LLVM
-using LLVM.@apicall
-using LLVM.libllvm_version
+using LLVM: @apicall, libllvm_version
 libdir = joinpath(@__DIR__, "..", "lib", LLVM.llvmjl_wrapper)
 include(joinpath(libdir, "libLLVM_common.jl"))
 include(joinpath(libdir, "libLLVM_h.jl"))

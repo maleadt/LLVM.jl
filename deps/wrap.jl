@@ -1,7 +1,6 @@
 # generate LLVM wrappers
 
-using Clang.cindex
-using Clang.wrap_c
+using Clang: cindex, wrap_c
 
 include("util.jl")
 
