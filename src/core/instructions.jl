@@ -179,7 +179,7 @@ Base.done(::TerminatorSuccessorSet, state) = (state[1] > state[2])
 
 Base.length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
 
-Base.endof(iter::TerminatorSuccessorSet) = length(iter)
+Base.lastindex(iter::TerminatorSuccessorSet) = length(iter)
 
 
 ## phi nodes

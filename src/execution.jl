@@ -127,7 +127,7 @@ function Base.delete!(engine::ExecutionEngine, mod::Module)
     return Module(out_ref[])
 end
 
-run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =
+Base.run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =
     GenericValue(API.LLVMRunFunction(ref(engine), ref(f),
                                      Cuint(length(args)), ref.(args)))
 
@@ -142,7 +142,7 @@ end
 
 functions(engine::ExecutionEngine) = ExecutionEngineFunctionSet(engine)
 
-Compat.IteratorSize(::ExecutionEngineFunctionSet) = Base.SizeUnknown()
+Base.IteratorSize(::ExecutionEngineFunctionSet) = Base.SizeUnknown()
 Base.start(::ExecutionEngineFunctionSet) =
     error("Iteration of functions in the execution engine is not supported")
 

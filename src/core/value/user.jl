@@ -29,4 +29,4 @@ Base.done(::UserOperandSet, state) = (state[1] > state[2])
 
 Base.length(iter::UserOperandSet) = API.LLVMGetNumOperands(ref(iter.user))
 
-Base.endof(iter::UserOperandSet) = length(iter)
+Base.lastindex(iter::UserOperandSet) = length(iter)
