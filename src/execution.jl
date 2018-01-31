@@ -127,7 +127,7 @@ function Base.delete!(engine::ExecutionEngine, mod::Module)
     return Module(out_ref[])
 end
 
-run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =
+Base.run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =
     GenericValue(API.LLVMRunFunction(ref(engine), ref(f),
                                      Cuint(length(args)), ref.(args)))
 
