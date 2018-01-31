@@ -1,7 +1,6 @@
 using LLVM
 
-using Compat
-using Compat.Test
+using Test
 
 @testset "LLVM" begin
 

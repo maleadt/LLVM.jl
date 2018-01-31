@@ -1,4 +1,3 @@
-using Compat
 
 include(joinpath(@__DIR__, "..", "src", "util", "logging.jl"))
 
@@ -23,9 +22,9 @@ function main()
 
     VERSION >= v"0.7.0-DEV.2576" || error("This version of LLVM.jl requires Julia 0.7")
 
-    libllvm_name = if Compat.Sys.isapple()
+    libllvm_name = if Sys.isapple()
         "libLLVM.dylib"
-    elseif Compat.Sys.iswindows()
+    elseif Sys.iswindows()
         "LLVM.dll"
     else
         "libLLVM.so"
@@ -37,7 +36,7 @@ function main()
         JULIA_HOME
     end
     libdir = joinpath(dirname(bindir), "lib")
-    libllvm_paths = if Compat.Sys.iswindows()
+    libllvm_paths = if Sys.iswindows()
         # TODO: Windows build trees
         [joinpath(bindir, libllvm_name)]
     else

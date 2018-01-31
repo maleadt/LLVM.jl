@@ -3,9 +3,6 @@
 using Clang.cindex
 using Clang.wrap_c
 
-using Compat
-import Compat.String
-
 include("util.jl")
 
 function wrap(config, destdir)

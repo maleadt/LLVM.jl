@@ -5,7 +5,6 @@ module LLVM
 using Unicode
 using Printf
 
-using Compat
 
 const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
 isfile(ext) || error("LLVM.jl has not been built, please run Pkg.build(\"LLVM\").")
@@ -18,7 +17,6 @@ include("util/types.jl")
 include("base.jl")
 
 module API
-using Compat
 using LLVM
 using LLVM.@apicall
 using LLVM.libllvm_version
@@ -52,7 +50,7 @@ include("interop.jl")
 
 include("deprecated.jl")
 
-if Compat.Sys.islinux()
+if Sys.islinux()
     const Lmid = Clong
     const LM_ID_BASE = 0
     const LM_ID_NEWLM = -1
