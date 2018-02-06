@@ -1,7 +1,7 @@
 using LLVM
 
 using Test
-using Pkg
+import Pkg
 
 @testset "LLVM" begin
 
