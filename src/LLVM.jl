@@ -11,7 +11,6 @@ isfile(ext) || error("LLVM.jl has not been built, please run Pkg.build(\"LLVM\")
 include(ext)
 const libllvm = libllvm_path
 
-include("util/logging.jl")
 include("util/types.jl")
 
 include("base.jl")
@@ -64,8 +63,6 @@ if Sys.islinux()
 end
 
 function __init__()
-    __init_logging__()
-
     _install_handlers()
     _install_handlers(GlobalContext())
 

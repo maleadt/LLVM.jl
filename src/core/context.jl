@@ -65,9 +65,9 @@ function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Cvoid}
     if sev == API.LLVMDSError
         throw(LLVMException(msg))
     elseif sev == API.LLVMDSWarning
-        warn(msg)
+        @warn msg
     elseif sev == API.LLVMDSRemark || sev == API.LLVMDSNote
-        debug(msg)
+        @debug msg
     else
         error("unknown diagnostic severity level $sev")
     end

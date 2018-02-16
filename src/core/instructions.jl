@@ -12,7 +12,7 @@ identify(::Type{Instruction}, ::Val{K}) where {K} = bug("Unknown instruction kin
 
 @inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
-    @static if DEBUG
+    if Base.JLOptions().debug_level >= 2
         T′ = identify(Instruction, ref)
         if T != T′
             error("invalid conversion of $T′ instruction reference to $T")

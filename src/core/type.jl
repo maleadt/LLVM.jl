@@ -9,7 +9,7 @@ identify(::Type{LLVMType}, ::Val{K}) where {K} = bug("Unknown type kind $K")
 
 @inline function check(::Type{T}, ref::API.LLVMTypeRef) where T<:LLVMType
     ref==C_NULL && throw(UndefRefError())
-    @static if DEBUG
+    if Base.JLOptions().debug_level >= 2
         T′ = identify(LLVMType, ref)
         if T != T′
             error("invalid conversion of $T′ type reference to $T")
