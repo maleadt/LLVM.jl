@@ -80,7 +80,7 @@ function main()
         compatible_wrappers = filter(wrapper->vercmp_compat(config[:libllvm_version],
                                                             VersionNumber(wrapper)),
                                      llvmjl_wrappers)
-        isempty(compatible_wrappers) || error("Could not find any compatible wrapper for LLVM $(config[:libllvm_version])")
+        isempty(compatible_wrappers) && error("Could not find any compatible wrapper for LLVM $(config[:libllvm_version])")
         last(compatible_wrappers)
     end
 
