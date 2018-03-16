@@ -53,7 +53,7 @@ ConstantInt(typ::IntegerType, val::SmallInteger, signed=false) =
 function ConstantInt(typ::IntegerType, val::Integer, signed=false)
     valbits = ceil(Int, log2(abs(val))) + 1
     numwords = ceil(Int, valbits / 64)
-    words = Vector{Culonglong}(uninitialized, numwords)
+    words = Vector{Culonglong}(undef, numwords)
     for i in 1:numwords
         words[i] = (val >> 64(i-1)) % Culonglong
     end

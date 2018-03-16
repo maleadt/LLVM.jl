@@ -24,7 +24,7 @@ is set."
         safe_print_with_color(:cyan, io, prefix, chomp(string(msg...)), line ? "\n" : "")
     end
 end
-@inline trace(msg...; kwargs...) = trace(STDERR, msg...; kwargs...)
+@inline trace(msg...; kwargs...) = trace(stderr, msg...; kwargs...)
 
 const DEBUG = TRACE || haskey(ENV, "DEBUG")
 "Display a debug message. Only results in actual printing if the TRACE or DEBUG environment
@@ -34,7 +34,7 @@ variable is set."
         safe_print_with_color(:green, io, prefix, chomp(string(msg...)), line ? "\n" : "")
     end
 end
-@inline debug(msg...; kwargs...) = debug(STDERR, msg...; kwargs...)
+@inline debug(msg...; kwargs...) = debug(stderr, msg...; kwargs...)
 
 function __init_logging__()
     if TRACE
