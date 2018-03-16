@@ -108,7 +108,7 @@ return_type(ft::FunctionType) =
 
 function parameters(ft::FunctionType)
     nparams = API.LLVMCountParamTypes(ref(ft))
-    params = Vector{API.LLVMTypeRef}(uninitialized, nparams)
+    params = Vector{API.LLVMTypeRef}(undef, nparams)
     API.LLVMGetParamTypes(ref(ft), params)
     return LLVMType.(params)
 end
@@ -227,7 +227,7 @@ Base.lastindex(iter::StructTypeElementSet) = length(iter)
 
 # NOTE: optimized `collect`
 function Base.collect(iter::StructTypeElementSet)
-    elems = Vector{API.LLVMTypeRef}(uninitialized, length(iter))
+    elems = Vector{API.LLVMTypeRef}(undef, length(iter))
     API.LLVMGetStructElementTypes(ref(iter.typ), elems)
     return LLVMType.(elems)
 end

@@ -95,7 +95,7 @@ end
 function Base.getindex(iter::ModuleMetadataDict, name::String)
     nops = API.LLVMGetNamedMetadataNumOperands(ref(iter.mod), name)
     nops == 0 && throw(KeyError(name))
-    ops = Vector{API.LLVMValueRef}(uninitialized, nops)
+    ops = Vector{API.LLVMValueRef}(undef, nops)
     API.LLVMGetNamedMetadataOperands(ref(iter.mod), name, ops)
     return MetadataAsValue.(ops)
 end
