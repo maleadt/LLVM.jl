@@ -63,6 +63,9 @@ function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Cvoid}
     msg = message(di)
 
     if sev == API.LLVMDSError
+        # NOTE: it might be more true to the API to just report an error here,
+        #       and require callers to verify whether operations succeeded,
+        #       but throwing here fails faster with better backtraces.
         throw(LLVMException(msg))
     elseif sev == API.LLVMDSWarning
         @warn msg

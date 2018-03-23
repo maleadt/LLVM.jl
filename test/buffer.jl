@@ -1,6 +1,6 @@
 @testset "buffer" begin
 
-data = Vector{UInt8}("SomeData")
+data = rand(UInt8, 8)
 
 let
     membuf = MemoryBuffer(data)

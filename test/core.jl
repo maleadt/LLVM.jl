@@ -45,7 +45,7 @@ let
     typ = LLVM.Int1Type()
     @test context(typ) == global_ctx
 
-    show(DevNull, typ)
+    show(devnull, typ)
 
     Context() do ctx
         typ2 = LLVM.Int1Type(ctx)
@@ -190,7 +190,7 @@ LLVM.Module("SomeModule", ctx) do mod
     @test typeof(Value(LLVM.ref(val))) == LLVM.AllocaInst              # type reconstructed
     @test_throws UndefRefError Value(LLVM.API.LLVMValueRef(C_NULL))
 
-    show(DevNull, val)
+    show(devnull, val)
 
     @test llvmtype(val) == LLVM.PointerType(typ)
     @test name(val) == "foo"
@@ -394,7 +394,7 @@ Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
     gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
-    show(DevNull, gv)
+    show(devnull, gv)
 
     @test_throws UndefRefError initializer(gv)
     init = ConstantInt(Int32(0))
@@ -483,10 +483,10 @@ LLVM.Module("SomeModule", ctx) do mod
     @test context(clone) == ctx
     dispose(clone)
 
-    show(DevNull, mod)
+    show(devnull, mod)
 
     inline_asm!(mod, "nop")
-    @test contains(sprint(io->show(io,mod)), "module asm")
+    @test occursin("module asm", sprint(io->show(io,mod)))
 
     dummyTriple = "SomeTriple"
     triple!(mod, dummyTriple)
@@ -605,7 +605,7 @@ LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    show(DevNull, fn)
+    show(devnull, fn)
 
     # @show personality(fn)
 

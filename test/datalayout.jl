@@ -4,7 +4,7 @@ Context() do ctx
 DataLayout("E-p:32:32-f128:128:128") do data
     @test convert(String, data) == "E-p:32:32-f128:128:128"
 
-    @test contains(sprint(io->show(io,data)), "E-p:32:32-f128:128:128")
+    @test occursin("E-p:32:32-f128:128:128", sprint(io->show(io,data)))
 
     @test byteorder(data) == LLVM.API.LLVMBigEndian
     @test pointersize(data) == pointersize(data, 0) == 4

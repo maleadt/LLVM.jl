@@ -1,8 +1,8 @@
 @testset "bitcode" begin
 
 let
-    invalid_bitcode = Vector{UInt8}("invalid")
-    @test_throws LLVMException parse(LLVM.Module, invalid_bitcode)
+    invalid_bitcode = "invalid"
+    @test_throws LLVMException parse(LLVM.Module, unsafe_wrap(Vector{UInt8}, invalid_bitcode))
 end
 
 Context() do ctx

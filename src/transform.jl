@@ -62,12 +62,12 @@ function define_transforms(transforms)
         i = 1
         while i <= length(str)
             j = i
-            while j < length(str) && all(isupper, str[i:j+1])
+            while j < length(str) && all(isuppercase, str[i:j+1])
                 # upper-case part
                 j += 1
             end
             k = j
-            while j < length(str) && all(islower, str[k+1:j+1])
+            while j < length(str) && all(islowercase, str[k+1:j+1])
                 # optional lower-case part
                 j += 1
             end

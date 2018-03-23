@@ -12,6 +12,6 @@ end
 
 macro check_ir(inst, str)
     quote
-        @test contains(string($(esc(inst))), $(esc(str)))
+        @test occursin($(esc(str)), string($(esc(inst))))
     end
 end

@@ -34,9 +34,6 @@ Generate a call to an LLVM function `f`, given its return type `rettyp` and a tu
 the arguments. The arguments should be passed as an expression yielding a tuple of the
 argument values (eg. `:((1,2))`), which will be splatted into the call to the function.
 """
-
-# call an LLVM function, given its return (Julia) type, a tuple-type for the arguments,
-# and an expression yielding a tuple of the actual argument values.
 function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=Tuple{},
                        args::Expr=:())
     ref = LLVM.ref(llvmf)
