@@ -30,7 +30,7 @@ macro checked(typedef)
         # handle `@compat` prefixing 0.6-style type declarations
         typedef = macroexpand(typedef)
     end
-    if typedef.head == (VERSION < v"0.7.0-DEV.1263" ? :type : :struct)
+    if typedef.head == :struct
         structure = typedef.args[2]
         body = typedef.args[3]
     else
