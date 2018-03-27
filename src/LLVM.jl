@@ -48,20 +48,6 @@ include("interop.jl")
 
 include("deprecated.jl")
 
-if Sys.islinux()
-    const Lmid = Clong
-    const LM_ID_BASE = 0
-    const LM_ID_NEWLM = -1
-    const RTLD_LAZY = 1
-    function dlmopen(linkmap::Lmid, library::String, flags::Integer=RTLD_LAZY)
-        handle = ccall((:dlmopen, :libdl), Ptr{Cvoid}, (Lmid, Cstring, Cint), linkmap, library, flags)
-        if handle == C_NULL
-            error(unsafe_string(ccall((:dlerror, :libdl), Cstring, ())))
-        end
-        return handle
-    end
-end
-
 function __init__()
     _install_handlers()
     _install_handlers(GlobalContext())
