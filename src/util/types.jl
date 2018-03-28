@@ -16,11 +16,11 @@ end
 # calling `check` on the ref field argument
 macro checked(typedef)
     # decode structure definition
-    if typedef.head == :macrocall
+    if Meta.isexpr(typedef, :macrocall)
         # handle `@compat` prefixing 0.6-style type declarations
         typedef = macroexpand(typedef)
     end
-    if typedef.head == :struct
+    if Meta.isexpr(typedef, :struct)
         structure = typedef.args[2]
         body = typedef.args[3]
     else
@@ -29,7 +29,7 @@ macro checked(typedef)
     if isa(structure, Symbol)
         # basic type definition
         typename = structure
-    elseif isa(structure, Expr) && structure.head == :<:
+    elseif Meta.isexpr(structure, :<:)
         # typename <: parentname
         all(e->isa(e,Symbol), structure.args) ||
             error("typedef should consist of plain types, ie. not parametric ones")
@@ -47,7 +47,7 @@ macro checked(typedef)
         elseif isa(arg, Symbol)
             push!(field_names, arg)
             push!(field_defs, arg)
-        elseif arg.head == :(::)
+        elseif Meta.isexpr(arg, :(::))
             push!(field_names, arg.args[1])
             push!(field_defs, arg)
         end
