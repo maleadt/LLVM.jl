@@ -8,7 +8,7 @@ reftype(::Type{T}) where {T<:Value} = API.LLVMValueRef
 
 identify(::Type{Value}, ref::API.LLVMValueRef) =
     identify(Value, Val{API.LLVMGetValueKind(ref)}())
-identify(::Type{Value}, ::Val{K}) where {K} = bug("Unknown value kind $K")
+identify(::Type{Value}, ::Val{K}) where {K} = error("Unknown value kind $K")
 
 @inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Value
     ref==C_NULL && throw(UndefRefError())

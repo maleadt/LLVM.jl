@@ -8,7 +8,7 @@ identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
 
 identify(::Type{Instruction}, ref::API.LLVMValueRef) =
     identify(Instruction, Val{API.LLVMGetInstructionOpcode(ref)}())
-identify(::Type{Instruction}, ::Val{K}) where {K} = bug("Unknown instruction kind $K")
+identify(::Type{Instruction}, ::Val{K}) where {K} = error("Unknown instruction kind $K")
 
 @inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
