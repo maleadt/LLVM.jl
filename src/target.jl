@@ -45,10 +45,14 @@ function Base.haskey(::TargetSet, name::String)
     return API.LLVMGetTargetFromName(name) != C_NULL
 end
 
-function Base.get(::TargetSet, name::String)
+function Base.get(::TargetSet, name::String, default)
     objref = API.LLVMGetTargetFromName(name)
-    objref == C_NULL && throw(KeyError(name))
-    return Target(objref)
+    return objref == C_NULL ? default : Target(objref)
+end
+
+function Base.getindex(targetset::TargetSet, name::String)
+    f = get(targetset, name, nothing)
+    return f == nothing ? throw(KeyError(name)) : f
 end
 
 Base.start(::TargetSet) = API.LLVMGetFirstTarget()

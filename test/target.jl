@@ -14,10 +14,11 @@
     # target iteration
     let ts = targets()
         @test haskey(ts, host_name)
-        @test get(ts, host_name) == host_t
+        @test ts[host_name] == host_t
 
         @test !haskey(ts, "invalid")
-        @test_throws KeyError get(ts, "invalid")
+        @test get(ts, "invalid", "dummy") == "dummy"
+        @test_throws KeyError ts["invalid"]
 
         @test eltype(ts) == Target
 
