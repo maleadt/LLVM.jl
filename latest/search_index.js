@@ -37,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Usage",
     "title": "Usage",
     "category": "section",
-    "text": "WIP"
+    "text": "To enable debug logging, launch Julia with the JULIA_DEBUG environment variable set to LLVM.WIP"
 },
 
 {
