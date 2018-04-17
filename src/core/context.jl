@@ -88,12 +88,12 @@ end
 
 function _install_handlers(ctx::Context)
     # set yield callback
-    callback = cfunction(yield_callback, Cvoid, Tuple{Context, Ptr{Cvoid}})
+    callback = @cfunction(yield_callback, Cvoid, (Context, Ptr{Cvoid}))
     # NOTE: disabled until proven safe
     #API.LLVMContextSetYieldCallback(ref(ctx), callback, C_NULL)
 
     # set diagnostic callback
-    handler = cfunction(handle_diagnostic, Cvoid, Tuple{API.LLVMDiagnosticInfoRef, Ptr{Cvoid}})
+    handler = @cfunction(handle_diagnostic, Cvoid, (API.LLVMDiagnosticInfoRef, Ptr{Cvoid}))
     API.LLVMContextSetDiagnosticHandler(ref(ctx), handler, C_NULL)
 
     return nothing
@@ -104,7 +104,7 @@ function handle_error(reason::Cstring)
 end
 
 function _install_handlers()
-    handler = cfunction(handle_error, Cvoid, Tuple{Cstring})
+    handler = @cfunction(handle_error, Cvoid, (Cstring,))
 
     # NOTE: LLVM doesn't support re-installing the error handler, which happens when we
     #       `reload("LLVM")`, so reset it instead. This isn't correct, as the installed
