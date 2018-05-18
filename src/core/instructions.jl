@@ -170,12 +170,9 @@ Base.getindex(iter::TerminatorSuccessorSet, i) =
 Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
     API.LLVMSetSuccessor(ref(iter.term), Cuint(i-1), blockref(bb))
 
-Base.start(iter::TerminatorSuccessorSet) = (1,length(iter))
-
-Base.next(iter::TerminatorSuccessorSet, state) =
-    (iter[state[1]], (state[1]+1,state[2]))
-
-Base.done(::TerminatorSuccessorSet, state) = (state[1] > state[2])
+function Base.iterate(iter::TerminatorSuccessorSet, i=1)
+    i >= length(iter) + 1 ? nothing : (iter[i], i+1)
+end
 
 Base.length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
 

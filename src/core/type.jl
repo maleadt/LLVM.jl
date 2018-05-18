@@ -214,12 +214,9 @@ Base.eltype(::StructTypeElementSet) = LLVMType
 Base.getindex(iter::StructTypeElementSet, i) =
     LLVMType(API.LLVMStructGetTypeAtIndex(ref(iter.typ), Cuint(i-1)))
 
-Base.start(iter::StructTypeElementSet) = (1,length(iter))
-
-Base.next(iter::StructTypeElementSet, state) =
-    (iter[state[1]], (state[1]+1,state[2]))
-
-Base.done(::StructTypeElementSet, state) = (state[1] > state[2])
+function Base.iterate(iter::StructTypeElementSet, i=1)
+    i >= length(iter) + 1 ? nothing : (iter[i], i+1)
+end
 
 Base.length(iter::StructTypeElementSet) = API.LLVMCountStructElementTypes(ref(iter.typ))
 

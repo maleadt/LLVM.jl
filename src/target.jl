@@ -55,11 +55,8 @@ function Base.getindex(targetset::TargetSet, name::String)
     return f == nothing ? throw(KeyError(name)) : f
 end
 
-Base.start(::TargetSet) = API.LLVMGetFirstTarget()
-
-Base.next(::TargetSet, state) =
-    (Target(state), API.LLVMGetNextTarget(state))
-
-Base.done(::TargetSet, state) = state == C_NULL
+function Base.iterate(iter::TargetSet, state=API.LLVMGetFirstTarget())
+    state == C_NULL ? nothing : (Target(state), API.LLVMGetNextTarget(state))
+end
 
 Base.IteratorSize(::TargetSet) = Base.SizeUnknown()

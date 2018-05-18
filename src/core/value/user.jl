@@ -20,12 +20,9 @@ Base.getindex(iter::UserOperandSet, i) =
 Base.setindex!(iter::UserOperandSet, val::Value, i) =
     API.LLVMSetOperand(ref(iter.user), Cuint(i-1), ref(val))
 
-Base.start(iter::UserOperandSet) = (1,length(iter))
-
-Base.next(iter::UserOperandSet, state) =
-    (iter[state[1]], (state[1]+1,state[2]))
-
-Base.done(::UserOperandSet, state) = (state[1] > state[2])
+function Base.iterate(iter::UserOperandSet, i=1)
+    i >= length(iter) + 1 ? nothing : (iter[i], i+1)
+end
 
 Base.length(iter::UserOperandSet) = API.LLVMGetNumOperands(ref(iter.user))
 

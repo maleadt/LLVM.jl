@@ -116,12 +116,9 @@ globals(mod::Module) = ModuleGlobalSet(mod)
 
 Base.eltype(::ModuleGlobalSet) = GlobalVariable
 
-Base.start(iter::ModuleGlobalSet) = API.LLVMGetFirstGlobal(ref(iter.mod))
-
-Base.next(::ModuleGlobalSet, state) =
-    (GlobalVariable(state), API.LLVMGetNextGlobal(state))
-
-Base.done(::ModuleGlobalSet, state) = state == C_NULL
+function Base.iterate(iter::ModuleGlobalSet, state=API.LLVMGetFirstGlobal(ref(iter.mod)))
+    state == C_NULL ? nothing : (GlobalVariable(state), API.LLVMGetNextGlobal(state))
+end
 
 Base.last(iter::ModuleGlobalSet) =
     GlobalVariable(API.LLVMGetLastGlobal(ref(iter.mod)))
@@ -153,12 +150,9 @@ functions(mod::Module) = ModuleFunctionSet(mod)
 
 Base.eltype(::ModuleFunctionSet) = Function
 
-Base.start(iter::ModuleFunctionSet) = API.LLVMGetFirstFunction(ref(iter.mod))
-
-Base.next(::ModuleFunctionSet, state) =
-    (Function(state), API.LLVMGetNextFunction(state))
-
-Base.done(::ModuleFunctionSet, state) = state == C_NULL
+function Base.iterate(iter::ModuleFunctionSet, state=API.LLVMGetFirstFunction(ref(iter.mod)))
+    state == C_NULL ? nothing : (Function(state), API.LLVMGetNextFunction(state))
+end
 
 Base.last(iter::ModuleFunctionSet) =
     Function(API.LLVMGetLastFunction(ref(iter.mod)))

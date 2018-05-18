@@ -87,12 +87,9 @@ Base.eltype(::FunctionParameterSet) = Argument
 Base.getindex(iter::FunctionParameterSet, i) =
   Argument(API.LLVMGetParam(ref(iter.f), Cuint(i-1)))
 
-Base.start(iter::FunctionParameterSet) = API.LLVMGetFirstParam(ref(iter.f))
-
-Base.next(::FunctionParameterSet, state) =
-    (Argument(state), API.LLVMGetNextParam(state))
-
-Base.done(::FunctionParameterSet, state) = state == C_NULL
+function Base.iterate(iter::FunctionParameterSet, state=API.LLVMGetFirstParam(ref(iter.f)))
+    state == C_NULL ? nothing : (Argument(state), API.LLVMGetNextParam(state))
+end
 
 Base.last(iter::FunctionParameterSet) =
     Argument(API.LLVMGetLastParam(ref(iter.f)))
@@ -118,12 +115,9 @@ blocks(f::Function) = FunctionBlockSet(f)
 
 Base.eltype(::FunctionBlockSet) = BasicBlock
 
-Base.start(iter::FunctionBlockSet) = API.LLVMGetFirstBasicBlock(ref(iter.f))
-
-Base.next(::FunctionBlockSet, state) =
-    (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
-
-Base.done(::FunctionBlockSet, state) = state == C_NULL
+function Base.iterate(iter::FunctionBlockSet, state=API.LLVMGetFirstBasicBlock(ref(iter.f)))
+    state == C_NULL ? nothing : (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
+end
 
 Base.last(iter::FunctionBlockSet) =
     BasicBlock(API.LLVMGetLastBasicBlock(ref(iter.f)))

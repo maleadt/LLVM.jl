@@ -53,12 +53,10 @@ instructions(bb::BasicBlock) = BasicBlockInstructionSet(bb)
 
 Base.eltype(::BasicBlockInstructionSet) = Instruction
 
-Base.start(iter::BasicBlockInstructionSet) = API.LLVMGetFirstInstruction(blockref(iter.bb))
-
-Base.next(::BasicBlockInstructionSet, state) =
-    (Instruction(state), API.LLVMGetNextInstruction(state))
-
-Base.done(::BasicBlockInstructionSet, state) = state == C_NULL
+function Base.iterate(iter::BasicBlockInstructionSet,
+                      state=API.LLVMGetFirstInstruction(blockref(iter.bb)))
+    state == C_NULL ? nothing : (Instruction(state), API.LLVMGetNextInstruction(state))
+end
 
 Base.last(iter::BasicBlockInstructionSet) =
     Instruction(API.LLVMGetLastInstruction(blockref(iter.bb)))

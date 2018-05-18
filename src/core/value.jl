@@ -88,11 +88,8 @@ uses(val::Value) = ValueUseSet(val)
 
 Base.eltype(::ValueUseSet) = Use
 
-Base.start(iter::ValueUseSet) = API.LLVMGetFirstUse(ref(iter.val))
-
-Base.next(::ValueUseSet, state) =
-    (Use(state), API.LLVMGetNextUse(state))
-
-Base.done(::ValueUseSet, state) = state == C_NULL
+function Base.iterate(iter::ValueUseSet, state=API.LLVMGetFirstUse(ref(iter.val)))
+    state == C_NULL ? nothing : (Use(state), API.LLVMGetNextUse(state))
+end
 
 Base.IteratorSize(::ValueUseSet) = Base.SizeUnknown()
