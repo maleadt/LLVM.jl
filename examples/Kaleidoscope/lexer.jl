@@ -126,7 +126,7 @@ function _gettok(l::Lexer)::Token
     end
     c = readchar(l)
     if c == EOF_CHAR; return Token(Kinds.EOF)
-    elseif isalpha(c); return lex_alpha(l)
+    elseif isletter(c); return lex_alpha(l)
     # number
     elseif (c == '.' || isdigit(c)); return lex_number(l)
     # delimiters
@@ -150,7 +150,7 @@ function _gettok(l::Lexer)::Token
 end
 
 function lex_alpha(l::Lexer)
-    isvalididentifier(x) = isalpha(x) || isdigit(x)
+    isvalididentifier(x) = isletter(x) || isdigit(x)
     readwhile(isvalididentifier, l)
     str = String(take!(l.buffer_scratch))
     if haskey(KEYWORD_KINDS, str)
