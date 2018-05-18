@@ -11,9 +11,7 @@ end
 @generated function Base.unsafe_load(p::CustomPtr{T}, i::Integer=1) where T
     # get the element type
     isboxed_ref = Ref{Bool}()
-    eltyp = LLVMType(ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef,
-                           (Any, Ptr{Bool}), T, isboxed_ref))
-    @assert !isboxed_ref[]
+    eltyp = convert(LLVMType, T)
 
     T_int = LLVM.IntType(sizeof(Int)*8, JuliaContext())
     T_ptr = LLVM.PointerType(eltyp)
