@@ -41,6 +41,7 @@ end
     InitializeNativeAsmPrinter()
 end
 
+include("support.jl")
 include("core.jl")
 include("linker.jl")
 include("irbuilder.jl")
