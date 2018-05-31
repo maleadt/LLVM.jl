@@ -25,6 +25,7 @@ include(joinpath(libdir, "..", "libLLVM_extra.jl"))
 end
 
 # LLVM API wrappers
+include("support.jl")
 include("types.jl")
 include("passregistry.jl")
 include("init.jl")
