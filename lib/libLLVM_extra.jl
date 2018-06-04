@@ -94,10 +94,6 @@ function LLVMAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Value
     @apicall(:LLVMExtraAddMVVMReflectPassWithMapping,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
 end
 
-function LLVMGetDebugMDVersion()
-    @apicall(:LLVMExtraGetDebugMDVersion,Cuint,())
-end
-
 function LLVMGetValueContext(V::LLVMValueRef)
     @apicall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end
