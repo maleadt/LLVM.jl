@@ -97,3 +97,11 @@ end
 function LLVMGetValueContext(V::LLVMValueRef)
     @apicall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end
+
+if VERSION >= v"0.7.0-alpha.37"
+
+function LLVMGetSourceLocation(V::LLVMValueRef, index, Name, Filename, Line, Column)
+    @apicall(:LLVMExtraGetSourceLocation,Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
+end
+
+end
