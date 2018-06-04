@@ -11,7 +11,7 @@ out = Pipe()
 run(pipeline(julia_cmd(`-e $code`), stdout=out, stderr=out))
 close(out.in)
 
-@test occursin("LLVM (http://llvm.org/)", readstring(out))
+@test occursin("LLVM (http://llvm.org/)", read(out, String))
 
 end
 
