@@ -76,23 +76,6 @@ function LLVMCreateBasicBlockPass(Name, Callback)
 end
 
 
-# bugfixes
-
-if libllvm_version < v"4.0" && VERSION < v"0.7.0-DEV.3647"
-
-# D26392
-function LLVMGetAttributeCountAtIndex(F::LLVMValueRef,Idx::LLVMAttributeIndex)
-    @apicall(:LLVMExtraGetAttributeCountAtIndex,UInt32,(LLVMValueRef,LLVMAttributeIndex),F,Idx)
-end
-
-# D26392
-function LLVMGetCallSiteAttributeCount(C::LLVMValueRef,Idx::LLVMAttributeIndex)
-    @apicall(:LLVMExtraGetCallSiteAttributeCount,UInt32,(LLVMValueRef,LLVMAttributeIndex),C,Idx)
-end
-
-end
-
-
 # various missing functions
 
 function LLVMAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
@@ -111,10 +94,14 @@ function LLVMAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Value
     @apicall(:LLVMExtraAddMVVMReflectPassWithMapping,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
 end
 
-function LLVMGetDebugMDVersion()
-    @apicall(:LLVMExtraGetDebugMDVersion,Cuint,())
-end
-
 function LLVMGetValueContext(V::LLVMValueRef)
     @apicall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
+end
+
+if VERSION >= v"0.7.0-alpha.37"
+
+function LLVMGetSourceLocation(V::LLVMValueRef, index, Name, Filename, Line, Column)
+    @apicall(:LLVMExtraGetSourceLocation,Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
+end
+
 end

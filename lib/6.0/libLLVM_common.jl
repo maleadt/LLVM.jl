@@ -35,10 +35,20 @@ end
 
 const LLVMBasicBlockRef = Ptr{LLVMOpaqueBasicBlock}
 
+mutable struct LLVMOpaqueMetadata
+end
+
+const LLVMMetadataRef = Ptr{LLVMOpaqueMetadata}
+
 mutable struct LLVMOpaqueBuilder
 end
 
 const LLVMBuilderRef = Ptr{LLVMOpaqueBuilder}
+
+mutable struct LLVMOpaqueDIBuilder
+end
+
+const LLVMDIBuilderRef = Ptr{LLVMOpaqueDIBuilder}
 
 mutable struct LLVMOpaqueModuleProvider
 end
@@ -89,19 +99,6 @@ mutable struct LLVMOpaqueRelocationIterator
 end
 
 const LLVMRelocationIteratorRef = Ptr{LLVMOpaqueRelocationIterator}
-
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## TargetInfo ( void ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## Target ( void ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## TargetMC ( void ) ;
-# Skipping MacroDefinition: LLVM_ASM_PRINTER ( TargetName ) void LLVMInitialize ## TargetName ## AsmPrinter ( void ) ;
-# Skipping MacroDefinition: LLVM_ASM_PARSER ( TargetName ) void LLVMInitialize ## TargetName ## AsmParser ( void ) ;
-# Skipping MacroDefinition: LLVM_DISASSEMBLER ( TargetName ) void LLVMInitialize ## TargetName ## Disassembler ( void ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) LLVMInitialize ## TargetName ## TargetInfo ( ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) LLVMInitialize ## TargetName ## Target ( ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) LLVMInitialize ## TargetName ## TargetMC ( ) ;
-# Skipping MacroDefinition: LLVM_ASM_PRINTER ( TargetName ) LLVMInitialize ## TargetName ## AsmPrinter ( ) ;
-# Skipping MacroDefinition: LLVM_ASM_PARSER ( TargetName ) LLVMInitialize ## TargetName ## AsmParser ( ) ;
-# Skipping MacroDefinition: LLVM_DISASSEMBLER ( TargetName ) LLVMInitialize ## TargetName ## Disassembler ( ) ;
 
 # begin enum LLVMByteOrdering
 const LLVMByteOrdering = UInt32
@@ -167,39 +164,6 @@ const LLVMAbortProcessAction = (UInt32)(0)
 const LLVMPrintMessageAction = (UInt32)(1)
 const LLVMReturnStatusAction = (UInt32)(2)
 # end enum LLVMVerifierFailureAction
-
-# Skipping MacroDefinition: LLVM_FOR_EACH_VALUE_SUBCLASS ( macro ) macro ( Argument ) macro ( BasicBlock ) macro ( InlineAsm ) macro ( User ) macro ( Constant ) macro ( BlockAddress ) macro ( ConstantAggregateZero ) macro ( ConstantArray ) macro ( ConstantDataSequential ) macro ( ConstantDataArray ) macro ( ConstantDataVector ) macro ( ConstantExpr ) macro ( ConstantFP ) macro ( ConstantInt ) macro ( ConstantPointerNull ) macro ( ConstantStruct ) macro ( ConstantTokenNone ) macro ( ConstantVector ) macro ( GlobalValue ) macro ( GlobalAlias ) macro ( GlobalObject ) macro ( Function ) macro ( GlobalVariable ) macro ( UndefValue ) macro ( Instruction ) macro ( BinaryOperator ) macro ( CallInst ) macro ( IntrinsicInst ) macro ( DbgInfoIntrinsic ) macro ( DbgDeclareInst ) macro ( MemIntrinsic ) macro ( MemCpyInst ) macro ( MemMoveInst ) macro ( MemSetInst ) macro ( CmpInst ) macro ( FCmpInst ) macro ( ICmpInst ) macro ( ExtractElementInst ) macro ( GetElementPtrInst ) macro ( InsertElementInst ) macro ( InsertValueInst ) macro ( LandingPadInst ) macro ( PHINode ) macro ( SelectInst ) macro ( ShuffleVectorInst ) macro ( StoreInst ) macro ( TerminatorInst ) macro ( BranchInst ) macro ( IndirectBrInst ) macro ( InvokeInst ) macro ( ReturnInst ) macro ( SwitchInst ) macro ( UnreachableInst ) macro ( ResumeInst ) macro ( CleanupReturnInst ) macro ( CatchReturnInst ) macro ( FuncletPadInst ) macro ( CatchPadInst ) macro ( CleanupPadInst ) macro ( UnaryInstruction ) macro ( AllocaInst ) macro ( CastInst ) macro ( AddrSpaceCastInst ) macro ( BitCastInst ) macro ( FPExtInst ) macro ( FPToSIInst ) macro ( FPToUIInst ) macro ( FPTruncInst ) macro ( IntToPtrInst ) macro ( PtrToIntInst ) macro ( SExtInst ) macro ( SIToFPInst ) macro ( TruncInst ) macro ( UIToFPInst ) macro ( ZExtInst ) macro ( ExtractValueInst ) macro ( LoadInst ) macro ( VAArgInst )
-# Skipping MacroDefinition: LLVM_DECLARE_VALUE_CAST ( name ) LLVMValueRef LLVMIsA ## name ( LLVMValueRef Val ) ;
-
-# begin enum LLVMAttribute
-const LLVMAttribute = Cint
-const LLVMZExtAttribute = (Int32)(1)
-const LLVMSExtAttribute = (Int32)(2)
-const LLVMNoReturnAttribute = (Int32)(4)
-const LLVMInRegAttribute = (Int32)(8)
-const LLVMStructRetAttribute = (Int32)(16)
-const LLVMNoUnwindAttribute = (Int32)(32)
-const LLVMNoAliasAttribute = (Int32)(64)
-const LLVMByValAttribute = (Int32)(128)
-const LLVMNestAttribute = (Int32)(256)
-const LLVMReadNoneAttribute = (Int32)(512)
-const LLVMReadOnlyAttribute = (Int32)(1024)
-const LLVMNoInlineAttribute = (Int32)(2048)
-const LLVMAlwaysInlineAttribute = (Int32)(4096)
-const LLVMOptimizeForSizeAttribute = (Int32)(8192)
-const LLVMStackProtectAttribute = (Int32)(16384)
-const LLVMStackProtectReqAttribute = (Int32)(32768)
-const LLVMAlignment = (Int32)(2031616)
-const LLVMNoCaptureAttribute = (Int32)(2097152)
-const LLVMNoRedZoneAttribute = (Int32)(4194304)
-const LLVMNoImplicitFloatAttribute = (Int32)(8388608)
-const LLVMNakedAttribute = (Int32)(16777216)
-const LLVMInlineHintAttribute = (Int32)(33554432)
-const LLVMStackAlignment = (Int32)(469762048)
-const LLVMReturnsTwice = (Int32)(536870912)
-const LLVMUWTable = (Int32)(1073741824)
-const LLVMNonLazyBind = (Int32)(-2147483648)
-# end enum LLVMAttribute
 
 # begin enum LLVMOpcode
 const LLVMOpcode = UInt32
@@ -457,6 +421,89 @@ const LLVMAttributeFunctionIndex = reinterpret(UInt32, Int32(-1))
 const LLVMDiagnosticHandler = Ptr{Cvoid}
 const LLVMYieldCallback = Ptr{Cvoid}
 
+# begin enum LLVMDIFlags
+const LLVMDIFlags = UInt32
+const LLVMDIFlagZero = (UInt32)(0)
+const LLVMDIFlagPrivate = (UInt32)(1)
+const LLVMDIFlagProtected = (UInt32)(2)
+const LLVMDIFlagPublic = (UInt32)(3)
+const LLVMDIFlagFwdDecl = (UInt32)(4)
+const LLVMDIFlagAppleBlock = (UInt32)(8)
+const LLVMDIFlagBlockByrefStruct = (UInt32)(16)
+const LLVMDIFlagVirtual = (UInt32)(32)
+const LLVMDIFlagArtificial = (UInt32)(64)
+const LLVMDIFlagExplicit = (UInt32)(128)
+const LLVMDIFlagPrototyped = (UInt32)(256)
+const LLVMDIFlagObjcClassComplete = (UInt32)(512)
+const LLVMDIFlagObjectPointer = (UInt32)(1024)
+const LLVMDIFlagVector = (UInt32)(2048)
+const LLVMDIFlagStaticMember = (UInt32)(4096)
+const LLVMDIFlagLValueReference = (UInt32)(8192)
+const LLVMDIFlagRValueReference = (UInt32)(16384)
+const LLVMDIFlagReserved = (UInt32)(32768)
+const LLVMDIFlagSingleInheritance = (UInt32)(65536)
+const LLVMDIFlagMultipleInheritance = (UInt32)(131072)
+const LLVMDIFlagVirtualInheritance = (UInt32)(196608)
+const LLVMDIFlagIntroducedVirtual = (UInt32)(262144)
+const LLVMDIFlagBitField = (UInt32)(524288)
+const LLVMDIFlagNoReturn = (UInt32)(1048576)
+const LLVMDIFlagMainSubprogram = (UInt32)(2097152)
+const LLVMDIFlagIndirectVirtualBase = (UInt32)(36)
+const LLVMDIFlagAccessibility = (UInt32)(3)
+const LLVMDIFlagPtrToMemberRep = (UInt32)(196608)
+# end enum LLVMDIFlags
+
+# begin enum LLVMDWARFSourceLanguage
+const LLVMDWARFSourceLanguage = UInt32
+const LLVMDWARFSourceLanguageC89 = (UInt32)(0)
+const LLVMDWARFSourceLanguageC = (UInt32)(1)
+const LLVMDWARFSourceLanguageAda83 = (UInt32)(2)
+const LLVMDWARFSourceLanguageC_plus_plus = (UInt32)(3)
+const LLVMDWARFSourceLanguageCobol74 = (UInt32)(4)
+const LLVMDWARFSourceLanguageCobol85 = (UInt32)(5)
+const LLVMDWARFSourceLanguageFortran77 = (UInt32)(6)
+const LLVMDWARFSourceLanguageFortran90 = (UInt32)(7)
+const LLVMDWARFSourceLanguagePascal83 = (UInt32)(8)
+const LLVMDWARFSourceLanguageModula2 = (UInt32)(9)
+const LLVMDWARFSourceLanguageJava = (UInt32)(10)
+const LLVMDWARFSourceLanguageC99 = (UInt32)(11)
+const LLVMDWARFSourceLanguageAda95 = (UInt32)(12)
+const LLVMDWARFSourceLanguageFortran95 = (UInt32)(13)
+const LLVMDWARFSourceLanguagePLI = (UInt32)(14)
+const LLVMDWARFSourceLanguageObjC = (UInt32)(15)
+const LLVMDWARFSourceLanguageObjC_plus_plus = (UInt32)(16)
+const LLVMDWARFSourceLanguageUPC = (UInt32)(17)
+const LLVMDWARFSourceLanguageD = (UInt32)(18)
+const LLVMDWARFSourceLanguagePython = (UInt32)(19)
+const LLVMDWARFSourceLanguageOpenCL = (UInt32)(20)
+const LLVMDWARFSourceLanguageGo = (UInt32)(21)
+const LLVMDWARFSourceLanguageModula3 = (UInt32)(22)
+const LLVMDWARFSourceLanguageHaskell = (UInt32)(23)
+const LLVMDWARFSourceLanguageC_plus_plus_03 = (UInt32)(24)
+const LLVMDWARFSourceLanguageC_plus_plus_11 = (UInt32)(25)
+const LLVMDWARFSourceLanguageOCaml = (UInt32)(26)
+const LLVMDWARFSourceLanguageRust = (UInt32)(27)
+const LLVMDWARFSourceLanguageC11 = (UInt32)(28)
+const LLVMDWARFSourceLanguageSwift = (UInt32)(29)
+const LLVMDWARFSourceLanguageJulia = (UInt32)(30)
+const LLVMDWARFSourceLanguageDylan = (UInt32)(31)
+const LLVMDWARFSourceLanguageC_plus_plus_14 = (UInt32)(32)
+const LLVMDWARFSourceLanguageFortran03 = (UInt32)(33)
+const LLVMDWARFSourceLanguageFortran08 = (UInt32)(34)
+const LLVMDWARFSourceLanguageRenderScript = (UInt32)(35)
+const LLVMDWARFSourceLanguageBLISS = (UInt32)(36)
+const LLVMDWARFSourceLanguageMips_Assembler = (UInt32)(37)
+const LLVMDWARFSourceLanguageGOOGLE_RenderScript = (UInt32)(38)
+const LLVMDWARFSourceLanguageBORLAND_Delphi = (UInt32)(39)
+# end enum LLVMDWARFSourceLanguage
+
+# begin enum LLVMDWARFEmissionKind
+const LLVMDWARFEmissionKind = UInt32
+const LLVMDWARFEmissionNone = (UInt32)(0)
+const LLVMDWARFEmissionFull = (UInt32)(1)
+const LLVMDWARFEmissionLineTablesOnly = (UInt32)(2)
+# end enum LLVMDWARFEmissionKind
+
 const LLVMDisassembler_VariantKind_None = 0
 const LLVMDisassembler_VariantKind_ARM_HI16 = 1
 const LLVMDisassembler_VariantKind_ARM_LO16 = 2
@@ -558,7 +605,7 @@ const LLVM_LTO_ASM_FAILURE = (UInt32)(8)
 const LLVM_LTO_NULL_OBJECT = (UInt32)(9)
 # end enum llvm_lto_status_t
 
-const LTO_API_VERSION = 20
+const LTO_API_VERSION = 21
 
 const lto_bool_t = Bool
 
@@ -628,6 +675,11 @@ mutable struct LTOObjectBuffer
     Buffer::Cstring
     Size::Csize_t
 end
+
+mutable struct LLVMOpaqueSharedModule
+end
+
+const LLVMSharedModuleRef = Ptr{LLVMOpaqueSharedModule}
 
 mutable struct LLVMOrcOpaqueJITStack
 end

@@ -23,7 +23,7 @@ function Base.convert(::Type{String}, md::MDString)
 end
 
 # TODO: make this init-time constant
-DEBUG_METADATA_VERSION() = API.LLVMGetDebugMDVersion()
+DEBUG_METADATA_VERSION() = API.LLVMDebugMetadataVersion()
 
 
 const MDNode = MetadataAsValue

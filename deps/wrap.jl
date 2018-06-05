@@ -2,8 +2,6 @@
 
 using Clang: cindex, wrap_c
 
-include("util.jl")
-
 function wrap(config, destdir)
     info("Wrapping LLVM C API at $destdir")
     if !isdir(destdir)
@@ -52,11 +50,9 @@ function wrap(config, destdir)
     run(context)
 end
 
-length(ARGS) == 1 || error("Usage: wrap.jl /path/to/llvm-config")
-config = first(ARGS)
+length(ARGS) == 2 || error("Usage: wrap.jl /path/to/llvm-config target")
+config = ARGS[1]
 ispath(config) || error("llvm-config at $config is't a valid path")
 
-version = VersionNumber(readchomp(`$config --version`))
-wrapped_libdir = joinpath(@__DIR__, "..", "lib", verstr(version))
-
-wrap(config, wrapped_libdir)
+target = ARGS[2]
+wrap(config, target)
