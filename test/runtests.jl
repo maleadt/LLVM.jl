@@ -61,11 +61,6 @@ include("datalayout.jl")
 include("Kaleidoscope.jl")
 
 include("examples.jl")
-if "Documenter" in keys(Pkg.installed())
-    include("documentation.jl")
-else
-    @warn "Documenter.jl not installed, skipping documentation tests."
-end
 
 include("interop.jl")
 

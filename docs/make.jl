@@ -1,7 +1,5 @@
 using Documenter, LLVM
 
-const test = haskey(ENV, "TEST")    # are we running as part of the test suite?
-
 makedocs(
     modules = [LLVM],
     format = :html,
@@ -17,10 +15,10 @@ makedocs(
             "lib/interop.md"
         ]
     ],
-    doctest = test
+    doctest = true
 )
 
-test || deploydocs(
+deploydocs(
     repo = "github.com/maleadt/LLVM.jl.git",
     julia = "nightly",
     # no need to build anything here, re-use output of `makedocs`
