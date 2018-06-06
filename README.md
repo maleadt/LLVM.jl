@@ -10,7 +10,7 @@ LLVM C API wrapper
 **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
 [gitlab-img]: https://gitlab.com/JuliaGPU/LLVM.jl/badges/master/pipeline.svg
-[gitlab-url]: https://gitlab.com/JuliaGPU/LLVM.jl/commits/master
+[gitlab-url]: https://gitlab.com/JuliaGPU/LLVM.jl/pipelines
 
 [travis-img]: https://travis-ci.org/maleadt/LLVM.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/maleadt/LLVM.jl
