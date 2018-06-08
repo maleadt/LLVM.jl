@@ -1,5 +1,7 @@
 export null, all_ones, UndefValue, PointerNull
 
+import Base.parent
+
 null(typ::LLVMType) = Value(API.LLVMConstNull(ref(typ)))
 
 all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(ref(typ)))
@@ -113,7 +115,7 @@ InlineAsm(typ::FunctionType, asm::String, constraints::String,
 abstract type GlobalValue <: Constant end
 
 export GlobalValue,
-       parent, isdeclaration,
+       isdeclaration,
        linkage, linkage!,
        section, section!,
        visibility, visibility!,

@@ -1,6 +1,8 @@
 export BasicBlock, unsafe_delete!,
-       parent, terminator, name,
+       terminator, name,
        move_before, move_after
+
+import Base:gc, run, select!, parent
 
 @checked struct BasicBlock <: Value
     ref::reftype(Value)
