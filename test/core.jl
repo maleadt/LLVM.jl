@@ -427,6 +427,20 @@ end
 
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
+    st = LLVM.StructType("SomeType", ctx)
+    gv = GlobalVariable(mod, st, "SomeGlobal")
+
+    init = null(st)
+    initializer!(gv, init)
+    @test initializer(gv) == init
+
+    @show gv
+    @show st
+end
+end
+
+Context() do ctx
+LLVM.Module("SomeModule", ctx) do mod
     gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal", 1)
 
     @test addrspace(llvmtype(gv)) == 1
