@@ -169,7 +169,7 @@ end
 Context() do ctx
 Builder(ctx) do builder
 LLVM.Module("SomeModule", ctx) do mod
-    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     entry = BasicBlock(fn, "entry")
@@ -392,12 +392,12 @@ end
 # global variables
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
-    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
+    gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
 
     show(devnull, gv)
 
     @test_throws UndefRefError initializer(gv)
-    init = ConstantInt(Int32(0))
+    init = ConstantInt(Int32(0), ctx)
     initializer!(gv, init)
     @test initializer(gv) == init
 
@@ -427,7 +427,21 @@ end
 
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
-    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal", 1)
+    st = LLVM.StructType("SomeType", ctx)
+    gv = GlobalVariable(mod, st, "SomeGlobal")
+
+    init = null(st)
+    initializer!(gv, init)
+    @test initializer(gv) == init
+
+    @show gv
+    @show st
+end
+end
+
+Context() do ctx
+LLVM.Module("SomeModule", ctx) do mod
+    gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal", 1)
 
     @test addrspace(llvmtype(gv)) == 1
 end
@@ -544,7 +558,7 @@ end
 # global variable iteration
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
-    dummygv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
+    dummygv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
 
     let gvs = globals(mod)
         @test eltype(gvs) == typeof(dummygv)

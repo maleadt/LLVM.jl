@@ -87,6 +87,19 @@ Base.convert(::Type{Float64}, val::ConstantFP) =
     API.LLVMConstRealGetDouble(ref(val), Ref{API.LLVMBool}())
 
 
+## aggregate
+
+export ConstantAggregateZero
+
+@checked struct ConstantAggregateZero <: Constant
+    ref::reftype(Constant)
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantAggregateZeroValueKind}) = ConstantAggregateZero
+
+# there currently seems to be no function in the LLVM-C interface which returns a
+# ConstantAggregateZero value directly, but values can occur through calls to LLVMConstNull
+
+
 ## constant expressions
 
 export ConstantExpr, InlineAsm
