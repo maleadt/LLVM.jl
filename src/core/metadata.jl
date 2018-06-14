@@ -1,4 +1,4 @@
-export DEBUG_METADATA_VERSION, MDString, MDNode, operands
+export MDString, MDNode, operands
 
 @checked struct MetadataAsValue <: Value
     ref::reftype(Value)
@@ -21,9 +21,6 @@ function Base.convert(::Type{String}, md::MDString)
     ptr == C_NULL && throw(ArgumentError("invalid metadata, not a MDString?"))
     return unsafe_string(convert(Ptr{Int8}, ptr), len[])
 end
-
-# TODO: make this init-time constant
-DEBUG_METADATA_VERSION() = API.LLVMDebugMetadataVersion()
 
 
 const MDNode = MetadataAsValue

@@ -44,6 +44,7 @@ include("datalayout.jl")
 include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
+include("debuginfo.jl")
 
 include("interop.jl")
 

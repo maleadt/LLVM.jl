@@ -57,6 +57,7 @@ include("transform.jl")
 include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
+include("debuginfo.jl")
 
 include("Kaleidoscope.jl")
 
