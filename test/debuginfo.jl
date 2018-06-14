@@ -21,9 +21,13 @@ Context() do ctx
         !6 = !DISubroutineType(types: !4)
         !7 = !DILocation(line: 1, scope: !5)""", ctx)
 
-    @test occursin("!dbg", string(mod))
+    fun = functions(mod)["fun"]
+    bb = entry(fun)
+    inst = first(instructions(bb))
+
+    @test !isempty(metadata(inst))
     strip_debuginfo!(mod)
-    @test !occursin("!dbg", string(mod))
+    @test isempty(metadata(inst))
 end
 
 end
