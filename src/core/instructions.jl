@@ -72,6 +72,8 @@ predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
 
 export InstructionMetadataDict
 
+# doesn't print, because we don't have length. we can't iterate keys?
+
 struct InstructionMetadataDict <: AbstractDict{MD,MetadataAsValue}
     inst::Instruction
 end
