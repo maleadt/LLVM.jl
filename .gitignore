@@ -1,1 +1,3 @@
-devel/
+*.jl.*.cov
+*.jl.mem
+Manifest.toml
