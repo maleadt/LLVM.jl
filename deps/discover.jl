@@ -71,8 +71,17 @@ function discover_llvm(libdirs, configdirs)
     end
 
     # check for llvm-config binaries in known locations
+    valid_configdirs = String[]
     for dir in unique(configdirs)
-        isdir(dir) || continue
+        try
+            if isdir(dir)
+                push!(valid_configdirs, dir)
+            end
+        catch
+            # some system disallow `stat` on certain paths
+        end
+    end
+    for dir in valid_configdirs
         configs = find_llvmconfig(dir)
 
         # look for libraries in the reported library directory
