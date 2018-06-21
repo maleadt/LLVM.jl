@@ -5,15 +5,8 @@ os:
   - osx
 
 julia:
+  - 0.7
   - nightly
 
 notifications:
   email: false
-
-env:
-  global:
-    - DOCUMENTER_DEBUG=true
-
-after_success:
-  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Documenter"); Pkg.checkout("Documenter"); include(joinpath("docs", "make.jl"))'
-  - julia -e 'cd(Pkg.dir("LLVM")); Pkg.add("Coverage"); Pkg.checkout("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())';
