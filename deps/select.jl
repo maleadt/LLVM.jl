@@ -44,7 +44,7 @@ function select_llvm(llvms, wrappers)
 
     # we will require `llvm-config` for building
     filter!(x->!isnull(x.config), llvms)
-    isempty(llvms) && error("could not find LLVM installation providing llvm-config")
+    isempty(llvms) && error("could not find LLVM installation providing llvm-config; did you build Julia from source?")
 
     # pick the first version and run with it (we should be able to build with all of them)
     llvm = first(llvms)
