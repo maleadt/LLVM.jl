@@ -18,6 +18,8 @@ function llvm_libnames(version::VersionNumber)
                 "libLLVM-$(version.major).$(version.minor).$(version.patch)svn.so",
                 "libLLVM-$(version.major).$(version.minor).so",
                 "libLLVM-$(version.major).$(version.minor)svn.so"]
+    elseif Compat.Sys.iswindows()
+        error("Windows is only supported by LLVM.jl on Julia 0.7")
     else
         error("Unknown OS")
     end
