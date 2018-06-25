@@ -96,8 +96,8 @@ define_transforms([
     :LoopReroll, :LoopUnroll, :LoopUnswitch, :MemCpyOpt, :PartiallyInlineLibCalls,
     :LowerSwitch, :PromoteMemoryToRegister, :Reassociate, :SCCP, :ScalarReplAggregates,
     :SimplifyLibCalls, :TailCallElimination, :ConstantPropagation, :DemoteMemoryToRegister,
-    :Verifier, :CorrelatedValuePropagation, :EarlyCSE, :LowerExpectIntrinsic,
-    :TypeBasedAliasAnalysis, :ScopedNoAliasAA, :BasicAliasAnalysis
+    :Verifier, :CorrelatedValuePropagation, :EarlyCSE, :EarlyCSEMemSSA,
+    :LowerExpectIntrinsic, :TypeBasedAliasAnalysis, :ScopedNoAliasAA, :BasicAliasAnalysis
 ])
 
 export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!
