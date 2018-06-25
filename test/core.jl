@@ -433,9 +433,6 @@ LLVM.Module("SomeModule", ctx) do mod
     init = null(st)
     initializer!(gv, init)
     @test initializer(gv) == init
-
-    @show gv
-    @show st
 end
 end
 
