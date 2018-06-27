@@ -47,6 +47,7 @@ end
         mktemp() do path, io
             Kaleidoscope.write_objectfile(m, path)
         end
+        println(m)
         v = Kaleidoscope.run(m, "entry")
         @test v == 55.0
     end
