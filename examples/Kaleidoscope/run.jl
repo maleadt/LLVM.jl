@@ -27,7 +27,7 @@ function optimize!(mod::LLVM.Module)
     return mod
 end
 
-function run(mod::LLVM.Module, entry::String)
+function run(mod::LLVM.Module, entry::String, ctx::LLVM.Context=LLVM.GlobalContext())
     res_jl = 0.0
     LLVM.JIT(mod) do engine
         if !haskey(LLVM.functions(engine), entry)
@@ -35,7 +35,7 @@ function run(mod::LLVM.Module, entry::String)
         end
         f = LLVM.functions(engine)[entry]
         res = LLVM.run(engine, f)
-        res_jl = convert(Float64, res, LLVM.DoubleType())
+        res_jl = convert(Float64, res, LLVM.DoubleType(ctx))
         LLVM.dispose(res)
     end
     return res_jl

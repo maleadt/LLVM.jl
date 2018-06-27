@@ -48,7 +48,7 @@ end
             Kaleidoscope.write_objectfile(m, path)
         end
         println(m)
-        v = Kaleidoscope.run(m, "entry")
+        v = Kaleidoscope.run(m, "entry", ctx)
         @test v == 55.0
     end
 end
