@@ -62,4 +62,4 @@ documentation:
   script:
     - julia --project -e 'using Pkg;
                           Pkg.add("Documenter")'
-    - julia docs/make.jl
+    - julia --project docs/make.jl
