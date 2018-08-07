@@ -5,7 +5,7 @@ export JuliaContext, create_function, call_function
 
 Returns the (session-bound) LLVM context used by the Julia compiler.
 """
-JuliaContext() = jlctx[]
+JuliaContext() = LLVM.Context(convert(LLVM.API.LLVMContextRef, cglobal(:jl_LLVMContext)))
 
 """
     create_function(rettyp::LLVMType, argtyp::Vector{LLVMType}, [name::String])
