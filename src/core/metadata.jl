@@ -36,5 +36,5 @@ function operands(md::MDNode)
     nops = API.LLVMGetMDNodeNumOperands(ref(md))
     ops = Vector{API.LLVMValueRef}(undef, nops)
     API.LLVMGetMDNodeOperands(ref(md), ops)
-    return Value.(ops)
+    return Value[Value(op) for op in ops]
 end

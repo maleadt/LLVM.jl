@@ -49,7 +49,7 @@ function Base.collect(iter::FunctionAttrSet)
       # FIXME: this prevents a nullptr ref in LLVM similar to D26392
       API.LLVMGetAttributesAtIndex(ref(iter.f), iter.idx, elems)
     end
-    return Attribute.(elems)
+    return Attribute[Attribute(elem) for elem in elems]
 end
 
 Base.push!(iter::FunctionAttrSet, attr::Attribute) =
@@ -128,5 +128,5 @@ Base.length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(ref(iter.f))
 function Base.collect(iter::FunctionBlockSet)
     elems = Vector{API.LLVMValueRef}(undef, length(iter))
     API.LLVMGetBasicBlocks(ref(iter.f), elems)
-    return BasicBlock.(elems)
+    return BasicBlock[BasicBlock(elem) for elem in elems]
 end

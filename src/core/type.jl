@@ -21,7 +21,7 @@ end
 function LLVMType(ref::API.LLVMTypeRef)
     ref == C_NULL && throw(UndefRefError())
     T = identify(LLVMType, ref)
-    return T(ref)
+    return T(ref)::LLVMType
 end
 
 issized(typ::LLVMType) =
@@ -110,7 +110,7 @@ function parameters(ft::FunctionType)
     nparams = API.LLVMCountParamTypes(ref(ft))
     params = Vector{API.LLVMTypeRef}(undef, nparams)
     API.LLVMGetParamTypes(ref(ft), params)
-    return LLVMType.(params)
+    return LLVMType[LLVMType(param) for param in params]
 end
 
 
@@ -226,7 +226,7 @@ Base.lastindex(iter::StructTypeElementSet) = length(iter)
 function Base.collect(iter::StructTypeElementSet)
     elems = Vector{API.LLVMTypeRef}(undef, length(iter))
     API.LLVMGetStructElementTypes(ref(iter.typ), elems)
-    return LLVMType.(elems)
+    return LLVMType[LLVMType(elem) for elem in elems]
 end
 
 
