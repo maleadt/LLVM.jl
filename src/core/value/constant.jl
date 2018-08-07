@@ -1,10 +1,10 @@
-export null, all_ones, UndefValue, PointerNull
+export null, isnull, all_ones, UndefValue, PointerNull
 
 null(typ::LLVMType) = Value(API.LLVMConstNull(ref(typ)))
 
 all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(ref(typ)))
 
-Base.isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(ref(val)))
+isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(ref(val)))
 
 
 @checked struct UndefValue <: User
