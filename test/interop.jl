@@ -8,6 +8,9 @@ using LLVM.Interop
 
 @test isa(convert(LLVMType, Nothing), LLVM.VoidType)
 
+@test_throws ErrorException convert(LLVMType, Ref)
+convert(LLVMType, Ref, true)
+
 @generated function add_one(i)
     T_int = convert(LLVMType, Int)
 
@@ -26,6 +29,17 @@ using LLVM.Interop
 end
 
 @test add_one(1) == 2
+
+@eval struct GhostType end
+@eval struct NonGhostType1
+    x::Int
+end
+@eval mutable struct NonGhostType2 end
+
+@test isghosttype(GhostType)
+@test !isghosttype(NonGhostType1)
+@test !isghosttype(NonGhostType2)
+@test isboxed(NonGhostType2)
 
 end
 

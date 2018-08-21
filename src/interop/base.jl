@@ -1,4 +1,4 @@
-export JuliaContext, create_function, call_function
+export JuliaContext, create_function, call_function, isboxed, isghosttype
 
 """
     JuliaContext()
@@ -44,14 +44,36 @@ function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=
 end
 
 """
+    isboxed(typ::Type)
+
+Return if a type would be boxed when instantiated in the code generator.
+"""
+function isboxed(typ::Type)
+    isboxed_ref = Ref{Bool}()
+    ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef, (Any, Ptr{Bool}), typ, isboxed_ref)
+    return isboxed_ref[]
+end
+
+"""
     convert(LLVMType, typ::Type)
 
 Convert a Julia type `typ` to its LLVM representation. Fails if the type would be boxed.
 """
-function Base.convert(::Type{LLVMType}, typ::Type)
+function Base.convert(::Type{LLVMType}, typ::Type, allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
     llvmtyp = LLVMType(ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef,
                              (Any, Ptr{Bool}), typ, isboxed_ref))
-    @assert !isboxed_ref[]
+    if !allow_boxed && isboxed_ref[]
+        error("Conversion of boxed type $typ is not allowed")
+    end
     return llvmtyp
 end
+
+"""
+    isghosttype(t::Type)
+    isghosttype(T::LLVMType)
+
+Check if a type is a ghost type, implying it would not be emitted by the Julia compiler.
+"""
+isghosttype(@nospecialize(T::LLVMType)) = T == LLVM.VoidType(JuliaContext()) || isempty(T)
+isghosttype(@nospecialize(t::Type)) = isghosttype(convert(LLVMType, t, true))
