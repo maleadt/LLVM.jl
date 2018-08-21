@@ -289,6 +289,8 @@ Core
 
 - [x] LLVMVoidTypeInContext
 - [x] LLVMLabelTypeInContext
+- [x] LLVMMetadataTypeInContext
+- [x] LLVMTokenTypeInContext
 - [ ] LLVMX86MMXTypeInContext
 - [x] LLVMVoidType
 - [x] LLVMLabelType

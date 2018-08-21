@@ -160,6 +160,14 @@ Context() do ctx
     typ = LLVM.LabelType(ctx)
     @test context(typ) == ctx
 end
+Context() do ctx
+    typ = LLVM.MetadataType(ctx)
+    @test context(typ) == ctx
+end
+Context() do ctx
+    typ = LLVM.TokenType(ctx)
+    @test context(typ) == ctx
+end
 
 end
 
