@@ -33,6 +33,8 @@ function Base.show(io::IO, typ::LLVMType)
     print(io, output)
 end
 
+Base.isempty(@nospecialize(T::LLVMType)) = false
+
 
 ## integer
 
@@ -154,6 +156,8 @@ end
 
 Base.length(arrtyp::ArrayType) = API.LLVMGetArrayLength(ref(arrtyp))
 
+Base.isempty(@nospecialize(T::ArrayType)) = length(T) == 0 || isempty(eltype(T))
+
 
 @checked struct VectorType <: SequentialType
     ref::reftype(SequentialType)
@@ -198,6 +202,9 @@ isopaque(structtyp::StructType) =
 elements!(structtyp::StructType, elems::Vector{T}, packed::Core.Bool=false) where {T<:LLVMType} =
     API.LLVMStructSetBody(ref(structtyp), ref.(elems),
                           Cuint(length(elems)), convert(Bool, packed))
+
+Base.isempty(@nospecialize(T::StructType)) =
+    isempty(elements(T)) || all(isempty, elements(T))
 
 # element iteration
 

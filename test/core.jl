@@ -47,6 +47,8 @@ let
 
     show(devnull, typ)
 
+    @test !isempty(typ)
+
     Context() do ctx
         typ2 = LLVM.Int1Type(ctx)
         @test context(typ2) == ctx
@@ -87,8 +89,15 @@ Context() do ctx
     arrtyp = LLVM.ArrayType(eltyp, 2)
     @test eltype(arrtyp) == eltyp
     @test context(arrtyp) == context(eltyp)
+    @test !isempty(arrtyp)
 
     @test length(arrtyp) == 2
+end
+Context() do ctx
+    eltyp = LLVM.Int32Type(ctx)
+
+    arrtyp = LLVM.ArrayType(eltyp, 0)
+    @test isempty(arrtyp)
 end
 Context() do ctx
     eltyp = LLVM.Int32Type(ctx)
@@ -104,9 +113,11 @@ end
 let
     st = LLVM.StructType([LLVM.VoidType()])
     @test context(st) == global_ctx
+    @test !isempty(st)
 
     st2 = LLVM.StructType("foo")
     @test context(st2) == global_ctx
+    @test isempty(st2)
 end
 Context() do ctx
     elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]
