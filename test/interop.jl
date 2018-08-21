@@ -8,6 +8,9 @@ using LLVM.Interop
 
 @test isa(convert(LLVMType, Nothing), LLVM.VoidType)
 
+@test_throws ErrorException convert(LLVMType, Ref)
+convert(LLVMType, Ref, true)
+
 @generated function add_one(i)
     T_int = convert(LLVMType, Int)
 

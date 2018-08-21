@@ -48,10 +48,12 @@ end
 
 Convert a Julia type `typ` to its LLVM representation. Fails if the type would be boxed.
 """
-function Base.convert(::Type{LLVMType}, typ::Type)
+function Base.convert(::Type{LLVMType}, typ::Type, allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
     llvmtyp = LLVMType(ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef,
                              (Any, Ptr{Bool}), typ, isboxed_ref))
-    @assert !isboxed_ref[]
+    if !allow_boxed && isboxed_ref[]
+        error("Conversion of boxed type $typ is not allowed")
+    end
     return llvmtyp
 end
