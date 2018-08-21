@@ -30,6 +30,17 @@ end
 
 @test add_one(1) == 2
 
+@eval struct GhostType end
+@eval struct NonGhostType1
+    x::Int
+end
+@eval mutable struct NonGhostType2 end
+
+@test isghosttype(GhostType)
+@test !isghosttype(NonGhostType1)
+@test !isghosttype(NonGhostType2)
+@test isboxed(NonGhostType2)
+
 end
 
 @testset "asmcall" begin
