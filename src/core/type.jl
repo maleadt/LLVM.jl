@@ -256,3 +256,19 @@ identify(::Type{LLVMType}, ::Val{API.LLVMLabelTypeKind}) = LabelType
 LabelType() = LabelType(API.LLVMLabelType())
 LabelType(ctx::Context) =
     LabelType(API.LLVMLabelTypeInContext(ref(ctx)))
+
+@checked struct MetadataType <: LLVMType
+    ref::reftype(LLVMType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMMetadataTypeKind}) = MetadataType
+
+MetadataType(ctx::Context) =
+    MetadataType(API.LLVMMetadataTypeInContext(ref(ctx)))
+
+@checked struct TokenType <: LLVMType
+    ref::reftype(LLVMType)
+end
+identify(::Type{LLVMType}, ::Val{API.LLVMTokenTypeKind}) = TokenType
+
+TokenType(ctx::Context) =
+    TokenType(API.LLVMTokenTypeInContext(ref(ctx)))
