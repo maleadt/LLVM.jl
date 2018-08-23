@@ -37,25 +37,27 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
 
     # create a function
     paramtyps = [typ for i in 1:N]
-    llvmf, _ = create_function(typ, paramtyps)
+    llvm_f, _ = create_function(typ, paramtyps)
 
     # create the intrinsic
     mtyp = LLVM.MetadataType(JuliaContext())
     mround = MDString(meta(round), JuliaContext())
     mfpexcept = MDString(meta(fpexcept), JuliaContext())
-    intrinsic, _ = create_function(typ, [paramtyps..., mtyp, mtyp],
-                                   "llvm.experimental.constrained.$(func(F)).$(suffix(T))")
+    mod = LLVM.parent(llvm_f)
+    intrinsic_typ = LLVM.FunctionType(typ, [paramtyps..., mtyp, mtyp])
+    intrinsic = LLVM.Function(mod, "llvm.experimental.constrained.$(func(F)).$(suffix(T))",
+                              intrinsic_typ)
 
     # generate IR
     Builder(JuliaContext()) do builder
-        entry = BasicBlock(llvmf, "entry", JuliaContext())
+        entry = BasicBlock(llvm_f, "entry", JuliaContext())
         position!(builder, entry)
-        val = call!(builder, intrinsic, [parameters(llvmf)..., mround, mfpexcept])
+        val = call!(builder, intrinsic, [parameters(llvm_f)..., mround, mfpexcept])
         ret!(builder, val)
     end
 
     args = Expr(:tuple, (Expr(:ref, :xs, i) for i in 1:N)...)
-    call_function(llvmf, T, Tuple{(T for i in 1:N)...}, args)
+    call_function(llvm_f, T, Tuple{(T for i in 1:N)...}, args)
 end
 
 cadd(x, y) = constrained(+, RoundUpward, FPExceptStrict, x, y)
