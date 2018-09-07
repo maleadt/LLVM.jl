@@ -17,11 +17,12 @@ Returns both the newly created function, and its type.
 function create_function(rettyp::LLVMType=LLVM.VoidType(JuliaContext()),
                          argtyp::Vector{<:LLVMType}=LLVMType[],
                          name::String="")
-    mod = LLVM.Module("llvmcall", JuliaContext())
+    ctx = context(rettyp)
+    mod = LLVM.Module("llvmcall", ctx)
 
     ft = LLVM.FunctionType(rettyp, argtyp)
     f = LLVM.Function(mod, name, ft)
-    push!(function_attributes(f), EnumAttribute("alwaysinline"))
+    push!(function_attributes(f), EnumAttribute("alwaysinline", 0, ctx))
     linkage!(f, LLVM.API.LLVMPrivateLinkage)
 
     return f, ft
@@ -74,6 +75,7 @@ end
     isghosttype(T::LLVMType)
 
 Check if a type is a ghost type, implying it would not be emitted by the Julia compiler.
+This only works for types created by the Julia compiler (living in its LLVM context).
 """
 isghosttype(@nospecialize(T::LLVMType)) = T == LLVM.VoidType(JuliaContext()) || isempty(T)
 isghosttype(@nospecialize(t::Type)) = isghosttype(convert(LLVMType, t, true))
