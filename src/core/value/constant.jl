@@ -102,12 +102,29 @@ identify(::Type{Value}, ::Val{API.LLVMConstantAggregateZeroValueKind}) = Constan
 
 ## constant expressions
 
-export ConstantExpr, InlineAsm
+export ConstantExpr, ConstantAggregate, ConstantArray, ConstantStruct, ConstantVector, InlineAsm
 
 @checked struct ConstantExpr <: Constant
     ref::reftype(Constant)
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
+
+abstract type ConstantAggregate <: Constant end
+
+@checked struct ConstantArray <: ConstantAggregate
+    ref::reftype(Constant)
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
+
+@checked struct ConstantStruct <: ConstantAggregate
+    ref::reftype(Constant)
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
+
+@checked struct ConstantVector <: ConstantAggregate
+    ref::reftype(Constant)
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantVectorValueKind}) = ConstantVector
 
 @checked struct InlineAsm <: Constant
     ref::reftype(Constant)
