@@ -1,3 +1,4 @@
+using Libdl
 
 const config_path = joinpath(@__DIR__, "ext.jl")
 const previous_config_path = config_path * ".bak"
@@ -34,31 +35,19 @@ function main()
 
     VERSION >= v"0.7.0-DEV.2576" || error("This version of LLVM.jl requires Julia 0.7")
 
-    libllvm_name = if Sys.isapple()
-        "libLLVM.dylib"
-    elseif Sys.iswindows()
-        "LLVM.dll"
-    else
-        "libLLVM.so"
+    # figure out the path to libLLVM by looking at the libraries loaded by Julia
+    libllvm_paths = filter(Libdl.dllist()) do lib
+        occursin("LLVM", basename(lib))
     end
-
-    bindir = if VERSION >= v"0.7.0-DEV.3003"
-        Sys.BINDIR
-    else
-        JULIA_HOME
+    if isempty(libllvm_paths)
+        error("""Cannot find the LLVM library loaded by Julia.
+                 Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
+                 If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
     end
-    libdir = joinpath(dirname(bindir), "lib")
-    libllvm_paths = if Sys.iswindows()
-        # TODO: Windows build trees
-        [joinpath(bindir, libllvm_name)]
-    else
-        [joinpath(libdir, libllvm_name),            # build trees
-         joinpath(libdir, "julia", libllvm_name)]   # dists
-     end
-
-    @debug "Looking for $(libllvm_name) in $(join(libllvm_paths, ", "))"
-    filter!(isfile, libllvm_paths)
-    isempty(libllvm_paths) && error("Could not find $(libllvm_name), is Julia built with USE_LLVM_SHLIB=1?")
+    if length(libllvm_paths) > 1
+        error("""Multiple LLVM libraries loaded by Julia.
+                 Please file an issue and attach the output of `Libdl.dllist()`.""")
+    end
     config[:libllvm_path] = first(libllvm_paths)
 
     config[:libllvm_version] = Base.libllvm_version::VersionNumber

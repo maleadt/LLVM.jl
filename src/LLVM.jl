@@ -2,6 +2,7 @@ module LLVM
 
 using Unicode
 using Printf
+using Libdl
 
 
 const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
@@ -49,6 +50,15 @@ include("interop.jl")
 include("deprecated.jl")
 
 function __init__()
+    libllvm_paths = filter(Libdl.dllist()) do lib
+        occursin("LLVM", basename(lib))
+    end
+    if length(libllvm_paths) > 1
+        # NOTE: this still allows switching to a non-USE_LLVM_SHLIB version, but
+        #       there's no way to detect that since the new libLLVM is loaded before this...
+        error("LLVM.jl and Julia are using different LLVM libraries, please re-run Pkg.build(\"LLVM\").")
+    end
+
     _install_handlers()
     _install_handlers(GlobalContext())
 end
