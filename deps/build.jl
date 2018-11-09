@@ -45,6 +45,7 @@ function main()
         occursin("LLVM", basename(lib))
     end
     if isempty(libllvm_paths)
+        @show Libdl.dllist()
         build_error("""
             Cannot find the LLVM library loaded by Julia.
             Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
