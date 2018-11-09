@@ -26,6 +26,11 @@ function read_ext(path)
     return config
 end
 
+function build_error(reason)
+    println("$reason.")
+    exit(1)
+end
+
 function main()
     ispath(config_path) && mv(config_path, previous_config_path; force=true)
     config = Dict{Symbol,Any}()
@@ -33,20 +38,23 @@ function main()
 
     ## discover stuff
 
-    VERSION >= v"0.7.0-DEV.2576" || error("This version of LLVM.jl requires Julia 0.7")
+    VERSION >= v"0.7.0-DEV.2576" || build_error("This version of LLVM.jl requires Julia 0.7")
 
     # figure out the path to libLLVM by looking at the libraries loaded by Julia
     libllvm_paths = filter(Libdl.dllist()) do lib
         occursin("LLVM", basename(lib))
     end
     if isempty(libllvm_paths)
-        error("""Cannot find the LLVM library loaded by Julia.
-                 Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
-                 If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
+        @show Libdl.dllist()
+        build_error("""
+            Cannot find the LLVM library loaded by Julia.
+            Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
+            If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
     end
     if length(libllvm_paths) > 1
-        error("""Multiple LLVM libraries loaded by Julia.
-                 Please file an issue and attach the output of `Libdl.dllist()`.""")
+        build_error("""
+            Multiple LLVM libraries loaded by Julia.
+            Please file an issue and attach the output of `Libdl.dllist()`.""")
     end
     config[:libllvm_path] = first(libllvm_paths)
 
@@ -67,7 +75,7 @@ function main()
         compatible_wrappers = filter(wrapper->vercmp_compat(config[:libllvm_version],
                                                             VersionNumber(wrapper)),
                                      llvmjl_wrappers)
-        isempty(compatible_wrappers) && error("Could not find any compatible wrapper for LLVM $(config[:libllvm_version])")
+        isempty(compatible_wrappers) && build_error("Could not find any compatible wrapper for LLVM $(config[:libllvm_version])")
         last(compatible_wrappers)
     end
 
@@ -82,11 +90,9 @@ function main()
     ## (re)generate ext.jl
 
     if isfile(previous_config_path)
-        @debug "Checking validity of existing ext.jl..."
         previous_config = read_ext(previous_config_path)
 
         if config == previous_config
-            @info "LLVM.jl has already been built for this toolchain, no need to rebuild"
             mv(previous_config_path, config_path; force=true)
             return
         end
