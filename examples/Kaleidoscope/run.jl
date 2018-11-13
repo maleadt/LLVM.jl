@@ -42,7 +42,7 @@ function run(mod::LLVM.Module, entry::String)
 end
 
 function write_objectfile(mod::LLVM.Module, path::String)
-    host_triple = LLVM.triple()
+    host_triple = Sys.MACHINE # LLVM.triple() might be wrong (see LLVM.jl#108)
     host_t = LLVM.Target(host_triple)
     LLVM.TargetMachine(host_t, host_triple) do tm
         LLVM.emit(tm, mod, LLVM.API.LLVMObjectFile, path)
