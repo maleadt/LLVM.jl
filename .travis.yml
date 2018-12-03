@@ -13,5 +13,10 @@ matrix:
   - julia: nightly
     os: osx
 
+branches:
+  only:
+    - staging
+    - trying
+
 notifications:
   email: false
