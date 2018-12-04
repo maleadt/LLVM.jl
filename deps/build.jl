@@ -44,6 +44,11 @@ function main()
     libllvm_paths = filter(Libdl.dllist()) do lib
         occursin("LLVM", basename(lib))
     end
+    if Sys.iswindows() && isempty(libllvm_paths)
+        # work around https://github.com/JuliaLang/julia/issues/29981
+        push!(libllvm_paths, joinpath(Sys.BINDIR, "LLVM.dll"))
+    end
+    filter!(ispath, libllvm_paths)
     if isempty(libllvm_paths)
         build_error("""
             Cannot find the LLVM library loaded by Julia.
