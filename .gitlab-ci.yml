@@ -24,7 +24,6 @@ test:v1.0:
     - trying
 
 test:dev:
-  allow_failure: true
   only:
     - staging
     - trying
