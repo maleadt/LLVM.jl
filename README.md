@@ -3,20 +3,9 @@ LLVM C API wrapper
 
 *A Julia wrapper for the LLVM C API.*
 
-**Build status**: [![][gitlab-img]][gitlab-url] [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url]
-
 **Code coverage**: [![][codecov-img]][codecov-url]
 
 **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
-
-[gitlab-img]: https://gitlab.com/JuliaGPU/LLVM.jl/badges/master/pipeline.svg
-[gitlab-url]: https://gitlab.com/JuliaGPU/LLVM.jl/pipelines
-
-[travis-img]: https://travis-ci.org/maleadt/LLVM.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/maleadt/LLVM.jl
-
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/5069m449yvvkyn9q/branch/master?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/maleadt/llvm-jl
 
 [codecov-img]: https://codecov.io/gh/maleadt/LLVM.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/maleadt/LLVM.jl
