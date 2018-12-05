@@ -10,7 +10,6 @@ include:
   - 'https://raw.githubusercontent.com/JuliaGPU/gitlab-ci/master/templates/v0/test_v0.7.yml'
   - 'https://raw.githubusercontent.com/JuliaGPU/gitlab-ci/master/templates/v0/test_v1.0.yml'
   - 'https://raw.githubusercontent.com/JuliaGPU/gitlab-ci/master/templates/v0/test_dev.yml'
-  - 'https://raw.githubusercontent.com/JuliaGPU/gitlab-ci/master/templates/v0/postprocess_coverage.yml'
   - 'https://raw.githubusercontent.com/JuliaGPU/gitlab-ci/master/templates/v0/postprocess_documentation.yml'
 
 test:v0.7:
@@ -35,6 +34,18 @@ documentation:
     - trying
 
 coverage:
+  stage: postprocess
+  image: "juliagpu/julia:v1.0-${CI_IMAGE_TAG}"
+  dependencies:
+    - test:dev
+  script:
+    - julia --project -e 'using Pkg;
+                          Pkg.add("Coverage")'
+    - julia --project -e 'using Coverage;
+                          cl, tl = get_summary(process_folder());
+                          println("(", cl/tl*100, "%) covered");
+                          Codecov.submit_local(process_folder(), ".")'
+  coverage: '/\(\d+.\d+\%\) covered/'
   only:
     - staging
     - trying
