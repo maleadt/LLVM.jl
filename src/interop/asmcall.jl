@@ -32,7 +32,7 @@ end
              rettyp=Nothing argtyp=Tuple{} args...
 
 Call some inline assembly `asm`, optionally constrained by `constraints` and denoting other
-side_effects in `side_effects`, specifying the return type in `rettyp` and types of
+side effects in `side_effects`, specifying the return type in `rettyp` and types of
 arguments as a tuple-type in `argtyp`.
 """
 :(@asmcall)
