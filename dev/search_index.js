@@ -1,7 +1,7 @@
 var documenterSearchIndex = {"docs": [
 
 {
-    "location": "index.html#",
+    "location": "#",
     "page": "Home",
     "title": "Home",
     "category": "page",
@@ -9,7 +9,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#LLVM.jl-1",
+    "location": "#LLVM.jl-1",
     "page": "Home",
     "title": "LLVM.jl",
     "category": "section",
@@ -17,7 +17,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#Installation-1",
+    "location": "#Installation-1",
     "page": "Home",
     "title": "Installation",
     "category": "section",
@@ -25,7 +25,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/usage.html#",
+    "location": "man/usage/#",
     "page": "Usage",
     "title": "Usage",
     "category": "page",
@@ -33,7 +33,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/usage.html#Usage-1",
+    "location": "man/usage/#Usage-1",
     "page": "Usage",
     "title": "Usage",
     "category": "section",
@@ -41,7 +41,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/troubleshooting.html#",
+    "location": "man/troubleshooting/#",
     "page": "Troubleshooting",
     "title": "Troubleshooting",
     "category": "page",
@@ -49,7 +49,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/troubleshooting.html#Troubleshooting-1",
+    "location": "man/troubleshooting/#Troubleshooting-1",
     "page": "Troubleshooting",
     "title": "Troubleshooting",
     "category": "section",
@@ -57,7 +57,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/troubleshooting.html#Building-llvm-extra-fails-due-to-C11-ABI-issues-1",
+    "location": "man/troubleshooting/#Building-llvm-extra-fails-due-to-C11-ABI-issues-1",
     "page": "Troubleshooting",
     "title": "Building llvm-extra fails due to C++11 ABI issues",
     "category": "section",
@@ -65,7 +65,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/api.html#",
+    "location": "lib/api/#",
     "page": "API wrappers",
     "title": "API wrappers",
     "category": "page",
@@ -73,7 +73,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/api.html#API-wrappers-1",
+    "location": "lib/api/#API-wrappers-1",
     "page": "API wrappers",
     "title": "API wrappers",
     "category": "section",
@@ -81,7 +81,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/interop.html#",
+    "location": "lib/interop/#",
     "page": "Julia/LLVM interop",
     "title": "Julia/LLVM interop",
     "category": "page",
@@ -89,7 +89,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/interop.html#Julia/LLVM-interop-1",
+    "location": "lib/interop/#Julia/LLVM-interop-1",
     "page": "Julia/LLVM interop",
     "title": "Julia/LLVM interop",
     "category": "section",
@@ -97,7 +97,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/interop.html#LLVM.Interop.JuliaContext",
+    "location": "lib/interop/#LLVM.Interop.JuliaContext",
     "page": "Julia/LLVM interop",
     "title": "LLVM.Interop.JuliaContext",
     "category": "function",
@@ -105,7 +105,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/interop.html#Base.convert-Tuple{Type{LLVMType},Type}",
+    "location": "lib/interop/#Base.convert-Tuple{Type{LLVMType},Type}",
     "page": "Julia/LLVM interop",
     "title": "Base.convert",
     "category": "method",
@@ -113,7 +113,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/interop.html#LLVM.Interop.create_function",
+    "location": "lib/interop/#LLVM.Interop.create_function",
     "page": "Julia/LLVM interop",
     "title": "LLVM.Interop.create_function",
     "category": "function",
@@ -121,7 +121,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/interop.html#LLVM.Interop.call_function",
+    "location": "lib/interop/#LLVM.Interop.call_function",
     "page": "Julia/LLVM interop",
     "title": "LLVM.Interop.call_function",
     "category": "function",
@@ -129,7 +129,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/interop.html#Base-functionality-1",
+    "location": "lib/interop/#Base-functionality-1",
     "page": "Julia/LLVM interop",
     "title": "Base functionality",
     "category": "section",
@@ -137,15 +137,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "lib/interop.html#LLVM.Interop.@asmcall",
+    "location": "lib/interop/#LLVM.Interop.@asmcall",
     "page": "Julia/LLVM interop",
     "title": "LLVM.Interop.@asmcall",
     "category": "macro",
-    "text": "@asmcall asm::String [constraints::String] [side_effects::Bool=false]\n         rettyp=Nothing argtyp=Tuple{} args...\n\nCall some inline assembly asm, optionally constrained by constraints and denoting other sideeffects in `sideeffects, specifying the return type inrettypand types of arguments as a tuple-type inargtyp`.\n\n\n\n\n\n"
+    "text": "@asmcall asm::String [constraints::String] [side_effects::Bool=false]\n         rettyp=Nothing argtyp=Tuple{} args...\n\nCall some inline assembly asm, optionally constrained by constraints and denoting other side effects in side_effects, specifying the return type in rettyp and types of arguments as a tuple-type in argtyp.\n\n\n\n\n\n"
 },
 
 {
-    "location": "lib/interop.html#Inline-assembly-1",
+    "location": "lib/interop/#Inline-assembly-1",
     "page": "Julia/LLVM interop",
     "title": "Inline assembly",
     "category": "section",
