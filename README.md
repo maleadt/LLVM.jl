@@ -3,17 +3,18 @@ LLVM C API wrapper
 
 *A Julia wrapper for the LLVM C API.*
 
-**Code coverage**: [![][codecov-img]][codecov-url]
-
-**Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
+[![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] [![][codecov-img]][codecov-url] [![][doi-img]][doi-url]
 
 [codecov-img]: https://codecov.io/gh/maleadt/LLVM.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/maleadt/LLVM.jl
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: http://maleadt.github.io/LLVM.jl/stable
-[docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: http://maleadt.github.io/LLVM.jl/latest
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: http://maleadt.github.io/LLVM.jl/dev
+
+[doi-img]: https://zenodo.org/badge/DOI/10.1109/TPDS.2018.2872064.svg
+[doi-url]: https://doi.org/10.1109/TPDS.2018.2872064
 
 
 Installation

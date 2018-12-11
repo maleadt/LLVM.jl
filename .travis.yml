@@ -6,6 +6,7 @@ os:
 
 julia:
   - 0.7
+  - 1.0
   - nightly
 
 branches:
@@ -16,3 +17,15 @@ branches:
 
 notifications:
   email: false
+
+jobs:
+  include:
+    - stage: "Documentation"
+      julia: 1.0
+      os: linux
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
+                                               Pkg.build();
+                                               Pkg.instantiate()'
+        - julia --project=docs/ docs/make.jl
+      after_success: skip

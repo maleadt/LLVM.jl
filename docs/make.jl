@@ -2,7 +2,7 @@ using Documenter, LLVM
 
 makedocs(
     modules = [LLVM],
-    format = :html,
+    format = Documenter.HTML(),
     sitename = "LLVM.jl",
     pages = [
         "Home"    => "index.md",
@@ -19,10 +19,5 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/maleadt/LLVM.jl.git",
-    julia = "nightly",
-    # no need to build anything here, re-use output of `makedocs`
-    target = "build",
-    deps = nothing,
-    make = nothing
+    repo = "github.com/maleadt/LLVM.jl.git"
 )
