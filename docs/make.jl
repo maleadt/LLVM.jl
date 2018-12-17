@@ -2,7 +2,7 @@ using Documenter, LLVM
 
 makedocs(
     modules = [LLVM],
-    format = Documenter.HTML(),
+    format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true"),
     sitename = "LLVM.jl",
     pages = [
         "Home"    => "index.md",
