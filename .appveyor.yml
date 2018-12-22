@@ -8,10 +8,6 @@ platform:
   - x86
   - x64
 
-matrix:
- allow_failures:
-  - julia_version: latest
-
 branches:
   only:
     - master
