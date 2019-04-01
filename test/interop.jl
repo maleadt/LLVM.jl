@@ -85,4 +85,33 @@ d1(a) = @asmcall("bswap \$0", "=r,r", Int32, Tuple{Int32}, a)
 
 end
 
+
+if VERSION >= v"1.2.0-DEV.531"
+@testset "passes" begin
+
+
+Context() do ctx
+LLVM.Module("SomeModule", ctx) do mod
+ModulePassManager() do pm
+
+alloc_opt!(pm)
+barrier_noop!(pm)
+gc_invariant_verifier!(pm)
+gc_invariant_verifier!(pm, true)
+lower_exc_handlers!(pm)
+combine_mul_add!(pm)
+multi_versioning!(pm)
+propagate_julia_addrsp!(pm)
+lower_ptls!(pm)
+lower_ptls!(pm, true)
+lower_simdloop!(pm)
+late_lower_gc_frame!(pm)
+
+end
+end
+end
+
+end
+end
+
 end

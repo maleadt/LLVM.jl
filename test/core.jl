@@ -235,6 +235,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     valueinst1 = add!(builder, parameters(fn)[1],
                       ConstantInt(Int32(1), ctx))
+    @test !isterminator(valueinst1)
 
     userinst = add!(builder, valueinst1,
                     ConstantInt(Int32(1), ctx))
@@ -868,6 +869,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     # terminators
 
+    @test isterminator(brinst)
     @test isconditional(brinst)
     @test condition(brinst) == parameters(fn)[1]
     condition!(brinst, parameters(fn)[2])
