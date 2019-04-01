@@ -94,6 +94,9 @@ end
 Base.last(iter::FunctionParameterSet) =
     Argument(API.LLVMGetLastParam(ref(iter.f)))
 
+Base.isempty(iter::FunctionParameterSet) =
+    API.LLVMGetLastParam(ref(iter.f)) == C_NULL
+
 Base.length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.f))
 
 # NOTE: optimized `collect`
@@ -121,6 +124,9 @@ end
 
 Base.last(iter::FunctionBlockSet) =
     BasicBlock(API.LLVMGetLastBasicBlock(ref(iter.f)))
+
+Base.isempty(iter::FunctionBlockSet) =
+    API.LLVMGetLastBasicBlock(ref(iter.f)) == C_NULL
 
 Base.length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(ref(iter.f))
 

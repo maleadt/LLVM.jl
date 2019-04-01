@@ -61,4 +61,7 @@ end
 Base.last(iter::BasicBlockInstructionSet) =
     Instruction(API.LLVMGetLastInstruction(blockref(iter.bb)))
 
+Base.isempty(iter::BasicBlockInstructionSet) =
+    API.LLVMGetLastInstruction(blockref(iter.bb)) == C_NULL
+
 Base.IteratorSize(::BasicBlockInstructionSet) = Base.SizeUnknown()

@@ -123,6 +123,9 @@ end
 Base.last(iter::ModuleGlobalSet) =
     GlobalVariable(API.LLVMGetLastGlobal(ref(iter.mod)))
 
+Base.isempty(iter::ModuleGlobalSet) =
+    API.LLVMGetLastGlobal(ref(iter.mod)) == C_NULL
+
 Base.IteratorSize(::ModuleGlobalSet) = Base.SizeUnknown()
 
 # partial associative interface
@@ -156,6 +159,9 @@ end
 
 Base.last(iter::ModuleFunctionSet) =
     Function(API.LLVMGetLastFunction(ref(iter.mod)))
+
+Base.isempty(iter::ModuleFunctionSet) =
+    API.LLVMGetLastFunction(ref(iter.mod)) == C_NULL
 
 Base.IteratorSize(::ModuleFunctionSet) = Base.SizeUnknown()
 
