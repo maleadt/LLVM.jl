@@ -86,12 +86,58 @@ function LLVMAddTargetLibraryInfoByTriple(Triple, PM::LLVMPassManagerRef)
     @apicall(:LLVMExtraAddTargetLibraryInfoByTiple,Cvoid,(Cstring, LLVMPassManagerRef), Triple, PM)
 end
 
+if VERSION < v"1.2.0-DEV.531"
+
 function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
     @apicall(:LLVMExtraAddMVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddNVVMReflectPassWithMapping(PM::LLVMPassManagerRef, Params, Values, Length)
-    @apicall(:LLVMExtraAddMVVMReflectPassWithMapping,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Ptr{Int},Csize_t), PM, Params, Values, Length)
+else
+
+function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddAllocOptPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddAllocOptPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddBarrierNoopPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddBarrierNoopPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddGCInvariantVerifierPass(PM::LLVMPassManagerRef, Strong)
+    @apicall(:LLVMExtraAddGCInvariantVerifierPass,Cvoid,(LLVMPassManagerRef,LLVMBool), PM, Strong)
+end
+
+function LLVMAddLowerExcHandlersPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddLowerExcHandlersPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddCombineMulAddPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddCombineMulAddPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddMultiVersioningPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddMultiVersioningPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddPropagateJuliaAddrspaces(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddPropagateJuliaAddrspaces,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddLowerPTLSPass(PM::LLVMPassManagerRef, imaging_mode)
+    @apicall(:LLVMExtraAddLowerPTLSPass,Cvoid,(LLVMPassManagerRef,LLVMBool), PM, imaging_mode)
+end
+
+function LLVMAddLowerSimdLoopPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddLowerSimdLoopPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddLateLowerGCFramePass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddLateLowerGCFramePass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
 end
 
 function LLVMGetValueContext(V::LLVMValueRef)
