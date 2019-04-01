@@ -411,7 +411,9 @@ end
 # global variables
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
+    @test isempty(globals(mod))
     gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
+    @test !isempty(globals(mod))
 
     show(devnull, gv)
 
@@ -600,10 +602,13 @@ Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
     st = LLVM.StructType("SomeType", ctx)
     ft = LLVM.FunctionType(st, [st])
+    @test isempty(functions(mod))
 
     dummyfn = LLVM.Function(mod, "SomeFunction", ft)
     let fns = functions(mod)
         @test eltype(fns) == LLVM.Function
+
+        @test !isempty(fns)
 
         @test first(fns) == dummyfn
         @test last(fns) == dummyfn
@@ -738,12 +743,14 @@ Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(mod, "SomeFunction", ft)
+    @test isempty(blocks(fn))
 
     entrybb = BasicBlock(fn, "SomeBasicBlock")
     @test entry(fn) == entrybb
     let bbs = blocks(fn)
         @test eltype(bbs) == BasicBlock
 
+        @test !isempty(bbs)
         @test length(bbs) == 1
 
         @test first(bbs) == entrybb
@@ -799,6 +806,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     bb2 = BasicBlock(fn, "SomeOtherBasicBlock", ctx)
     @test LLVM.parent(bb2) == fn
+    @test isempty(instructions(bb2))
 
     bb1 = BasicBlock(bb2, "SomeBasicBlock", ctx)
     @test LLVM.parent(bb2) == fn
@@ -806,6 +814,7 @@ LLVM.Module("SomeModule", ctx) do mod
     brinst = br!(builder, bb2)
     position!(builder, bb2)
     retinst = ret!(builder)
+    @test !isempty(instructions(bb2))
 
     @test terminator(bb1) == brinst
     @test terminator(bb2) == retinst
@@ -835,8 +844,13 @@ end
 Context() do ctx
 Builder(ctx) do builder
 LLVM.Module("SomeModule", ctx) do mod
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int1Type(ctx), LLVM.Int1Type(ctx)])
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(mod, "SomeFunction", ft)
+    @test isempty(parameters(fn))
+
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int1Type(ctx), LLVM.Int1Type(ctx)])
+    fn = LLVM.Function(mod, "SomeOtherFunction", ft)
+    @test !isempty(parameters(fn))
 
     bb1 = BasicBlock(fn, "entry", ctx)
     bb2 = BasicBlock(fn, "then", ctx)
