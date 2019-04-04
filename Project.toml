@@ -1,5 +1,6 @@
 name = "LLVM"
 uuid = "929cbde3-209d-540e-8aea-75f648917ca0"
+version = "1.1.1"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -12,3 +13,6 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "InteractiveUtils"]
+
+[compat]
+julia = "0.7, 1"
