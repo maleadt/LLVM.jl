@@ -57,6 +57,9 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 include("debuginfo.jl")
+if LLVM.version() >=  v"8.0.0"
+    include("dibuilder.jl")
+end
 
 include("Kaleidoscope.jl")
 
