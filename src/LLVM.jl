@@ -43,6 +43,9 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 include("debuginfo.jl")
+if libllvm_version >= v"8.0.0"
+    include("dibuilder.jl")
+end
 
 has_orc_v1() = v"8" <= LLVM.version() < v"12"
 include("orc.jl")
