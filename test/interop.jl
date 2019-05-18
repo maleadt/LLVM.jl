@@ -83,6 +83,11 @@ c3() = @asmcall("nop", "", false, Nothing, Tuple{})
 d1(a) = @asmcall("bswap \$0", "=r,r", Int32, Tuple{Int32}, a)
 @test d1(Int32(1)) == Int32(16777216)
 
+# multiple output registers
+
+e1() = @asmcall("mov \$\$1, \$0; mov \$\$2, \$1;", "=r,=r", Tuple{Int32,Int64})
+@test e1() == (Int32(1), Int64(2))
+
 end
 
 
