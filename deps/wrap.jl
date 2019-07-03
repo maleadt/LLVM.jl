@@ -58,8 +58,10 @@ length(ARGS) == 2 || error("Usage: wrap.jl /path/to/llvm-config target")
 config = ARGS[1]
 ispath(config) || error("llvm-config at $config is't a valid path")
 
-# "Use `ccall\(\((:.+), libllvm\), (.*)\)` and replace with `@apicall($1, $2)`"
-# "Use `const (LLVMOpaque.*) = Cvoid` and replace with `mutable struct $1 end`"
+# Use `ccall\(\((:.+), libllvm\), (.*)\)` and replace with `@apicall($1, $2)`
+# Use `const (LLVMOpaque.*) = Cvoid` and replace with `mutable struct $1 end`
+# Use `awk '/^[[:blank:]]*$/ { print; next; }; {cur = seen[$0]; if(!seen[$0]++ || (/^end$/ && !prev) || /^.*Clang.*$/) print $0; prev=cur}' libLLVM_h.jl > libLLVM_g.jl` to remove duplicates
+# Use `cat -s` to remove duplicate empty lines
 
 target = ARGS[2]
 wrap(config, target)
