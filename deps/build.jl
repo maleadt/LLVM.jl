@@ -79,7 +79,11 @@ function main()
     end
 
     # TODO: figure out the name of the native target
-    config[:libllvm_targets] = [:NVPTX, :AMDGPU]
+    if config[:libllvm_version] < v"8.0.0"
+        config[:libllvm_targets] = [:NVPTX, :AMDGPU]
+    else
+        config[:libllvm_targets] = [:NVPTX, :AMDGPU, :WebAssembly]
+    end
 
     # backwards-compatibility
     config[:libllvm_system] = false
