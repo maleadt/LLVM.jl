@@ -88,7 +88,7 @@ end
 
 if VERSION < v"1.2.0-DEV.531"
 
-function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
+function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
     @apicall(:LLVMExtraAddMVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
