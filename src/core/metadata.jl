@@ -38,3 +38,15 @@ function operands(md::MDNode)
     API.LLVMGetMDNodeOperands(ref(md), ops)
     return Value[Value(op) for op in ops]
 end
+
+@checked struct Metadata
+    ref::API.LLVMMetadataRef
+end
+reftype(::Type{Metadata}) = API.LLVMMetdataRef
+function Value(md::Metadata, ctx::Context)
+    return MetadataAsValue(API.LLVMMetadataAsValue(ref(ctx), md))
+end
+
+function Metadata(val::Value)
+    return Metadata(LLVM.API.LLVMValueAsMetadata(ref(val)))
+end
