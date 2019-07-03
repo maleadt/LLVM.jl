@@ -1,9 +1,9 @@
 # generate LLVM wrappers
 
-using Clang: cindex, wrap_c
+using Clang
 
 function wrap(config, destdir)
-    info("Wrapping LLVM C API at $destdir")
+    @info("Wrapping LLVM C API at $destdir")
     if !isdir(destdir)
         mkdir(destdir)
     end
@@ -12,15 +12,18 @@ function wrap(config, destdir)
     cppflags = split(readchomp(`$config --cppflags`))
 
     # TODO: this should really be taken care of by Clang.jl...
-    haskey(ENV, "LLVM_CONFIG") || error("please provide the llvm-config Clang.jl was build with using LLVM_CONFIG")
-    clang_config = ENV["LLVM_CONFIG"]
+    if haskey(ENV, "LLVM_CONFIG")
+        clang_config = ENV["LLVM_CONFIG"]
+    else
+        clang_config = joinpath(dirname(pathof(Clang)), "..", "deps", "usr", "tools", "llvm-config")
+    end
     clang_libdir = readchomp(`$clang_config --libdir`)
     clang_version = readchomp(`$clang_config --version`)
 
     # Set-up arguments to clang
-    clang_includes = map(x->x[3:end], filter( x->startswith(x,"-I"), cppflags))
+    clang_includes  = map(x->x[3:end], filter( x->startswith(x,"-I"), cppflags))
     push!(clang_includes, "$clang_libdir/clang/$clang_version/include")
-    clang_extraargs =                 filter(x->!startswith(x,"-I"), cppflags)
+    clang_extraargs =                  filter(x->!startswith(x,"-I"), cppflags)
 
     # Recursively discover LLVM C API headers (files ending in .h)
     header_dirs = String[joinpath(includedir, "llvm-c")]
@@ -38,21 +41,25 @@ function wrap(config, destdir)
         end
     end
 
-    context = wrap_c.init(;
-                          output_file = "$destdir/libLLVM_h.jl",
-                          common_file = "$destdir/libLLVM_common.jl",
-                          clang_includes = convert(Vector{String}, clang_includes),
-                          clang_args = convert(Vector{String}, clang_extraargs),
-                          header_library = x->:libllvm,
-                          header_wrapped = (top,cursor)->contains(cursor, "include/llvm") )
+    context = init(;
+                    headers = header_files,
+                    output_file = "$destdir/libLLVM_h.jl",
+                    common_file = "$destdir/libLLVM_common.jl",
+                    clang_includes = convert(Vector{String}, clang_includes),
+                    clang_args = convert(Vector{String}, clang_extraargs),
+                    header_library = x->"libllvm",
+                    header_wrapped = (top,cursor)->occursin("include/llvm", cursor)
+                  )
 
-    context.headers = header_files
     run(context)
 end
 
 length(ARGS) == 2 || error("Usage: wrap.jl /path/to/llvm-config target")
 config = ARGS[1]
 ispath(config) || error("llvm-config at $config is't a valid path")
+
+# "Use `ccall\(\((:.+), libllvm\), (.*)\)` and replace with `@apicall($1, $2)`"
+# "Use `const (LLVMOpaque.*) = Cvoid` and replace with `mutable struct $1 end`"
 
 target = ARGS[2]
 wrap(config, target)
