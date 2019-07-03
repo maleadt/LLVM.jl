@@ -334,7 +334,12 @@ const LLVMFatalErrorHandler = Ptr{Cvoid}
     LLVMModuleFlagBehaviorAppendUnique = 5,
 )
 
+# These are note defined in llvm-c
+# begin enum LLVMAttributeIndex
 const LLVMAttributeIndex = UInt32
+const LLVMAttributeReturnIndex = (UInt32)(0)
+const LLVMAttributeFunctionIndex = reinterpret(UInt32, Int32(-1))
+# end enum LLVMAttributeIndex
 const LLVMDiagnosticHandler = Ptr{Cvoid}
 const LLVMYieldCallback = Ptr{Cvoid}
 
