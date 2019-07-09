@@ -161,3 +161,12 @@ function LLVMGetSourceLocation(V::LLVMValueRef, index, Name, Filename, Line, Col
 end
 
 end
+
+if libllvm_version >= v"8.0.0"
+  @cenum(LLVMDebugEmissionKind,
+    LLVMDebugEmissionKindNoDebug = 0,
+    LLVMDebugEmissionKindFullDebug = 1,
+    LLVMDebugEmissionKindLineTablesOnly = 2,
+    LLVMDebugEmissionKindDebugDirectivesOnly = 3,
+  )
+end
