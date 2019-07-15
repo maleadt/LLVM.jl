@@ -8,12 +8,6 @@ platform:
   - x86
   - x64
 
-branches:
-  only:
-    - master
-    - staging
-    - trying
-
 notifications:
   - provider: Email
     on_build_success: false
