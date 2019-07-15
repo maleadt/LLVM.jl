@@ -85,8 +85,8 @@ d1(a) = @asmcall("bswap \$0", "=r,r", Int32, Tuple{Int32}, a)
 
 # multiple output registers
 
-e1() = @asmcall("mov \$\$1, \$0; mov \$\$2, \$1;", "=r,=r", Tuple{Int32,Int64})
-@test e1() == (Int32(1), Int64(2))
+e1() = @asmcall("mov \$\$1, \$0; mov \$\$2, \$1;", "=r,=r", Tuple{Int16,Int32})
+@test e1() == (Int16(1), Int32(2))
 
 end
 
