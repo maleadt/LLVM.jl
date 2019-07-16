@@ -29,12 +29,16 @@ end
 const libllvm = first(libllvm_paths)
 const libllvm_version = Base.libllvm_version::VersionNumber
 @debug "Discovered LLVM v$libllvm_version at $libllvm"
+Base.include_dependency(libllvm)
 
 vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
 vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 
-const llvmjl_wrappers = filter(path->isdir(joinpath(@__DIR__, "..", "lib", path)),
-                                     readdir(joinpath(@__DIR__, "..", "lib")))
+const llvmjl_wrappers_path = joinpath(@__DIR__, "..", "lib")
+Base.include_dependency(llvmjl_wrappers_path)
+
+const llvmjl_wrappers = filter(path->isdir(joinpath(llvmjl_wrappers_path, path)),
+                                     readdir(llvmjl_wrappers_path))
 @assert !isempty(llvmjl_wrappers)
 
 # figure out which wrapper to use
