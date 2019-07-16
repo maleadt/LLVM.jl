@@ -5,10 +5,63 @@ using Printf
 using Libdl
 
 
-const ext = joinpath(@__DIR__, "..", "deps", "ext.jl")
-isfile(ext) || error("LLVM.jl has not been built, please run Pkg.build(\"LLVM\").")
-include(ext)
-const libllvm = libllvm_path
+## discovery
+
+using Libdl
+
+VERSION >= v"0.7.0-DEV.2576" || error("This version of LLVM.jl requires Julia 0.7")
+
+# figure out the path to libLLVM by looking at the libraries loaded by Julia
+const libllvm_paths = filter(Libdl.dllist()) do lib
+    occursin("LLVM", basename(lib))
+end
+if isempty(libllvm_paths)
+    error("""
+        Cannot find the LLVM library loaded by Julia.
+        Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
+        If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
+end
+if length(libllvm_paths) > 1
+    error("""
+        Multiple LLVM libraries loaded by Julia.
+        Please file an issue and attach the output of `Libdl.dllist()`.""")
+end
+const libllvm = first(libllvm_paths)
+const libllvm_version = Base.libllvm_version::VersionNumber
+@debug "Discovered LLVM v$libllvm_version at $libllvm"
+
+vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
+vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
+
+const llvmjl_wrappers = filter(path->isdir(joinpath(@__DIR__, "..", "lib", path)),
+                                     readdir(joinpath(@__DIR__, "..", "lib")))
+@assert !isempty(llvmjl_wrappers)
+
+# figure out which wrapper to use
+const matching_wrappers = filter(wrapper->vercmp_match(libllvm_version,
+                                                        VersionNumber(wrapper)),
+                                 llvmjl_wrappers)
+const llvmjl_wrapper = if !isempty(matching_wrappers)
+    @assert length(matching_wrappers) == 1
+    matching_wrappers[1]
+else
+    compatible_wrappers = filter(wrapper->vercmp_compat(libllvm_version,
+                                                        VersionNumber(wrapper)),
+                                 llvmjl_wrappers)
+    isempty(compatible_wrappers) && error("Could not find any compatible wrapper for LLVM $(libllvm_version)")
+    last(compatible_wrappers)
+end
+@debug "Using LLVM.jl wrapper for v$llvmjl_wrapper"
+
+# TODO: figure out the name of the native target
+const libllvm_targets = [:NVPTX, :AMDGPU]
+
+# backwards-compatible flags
+const libllvm_system = false
+const configured = true
+
+
+## source code includes
 
 include("util/types.jl")
 
@@ -49,6 +102,9 @@ include("interop.jl")
 
 include("deprecated.jl")
 
+
+## initialization
+
 function __init__()
     libllvm_paths = filter(Libdl.dllist()) do lib
         occursin("LLVM", basename(lib))
@@ -56,7 +112,9 @@ function __init__()
     if length(libllvm_paths) > 1
         # NOTE: this still allows switching to a non-USE_LLVM_SHLIB version, but
         #       there's no way to detect that since the new libLLVM is loaded before this...
-        error("LLVM.jl and Julia are using different LLVM libraries, please re-run Pkg.build(\"LLVM\").")
+        cachefile = Base.compilecache(Base.PkgId(LLVM))
+        rm(cachefile)
+        error("Your set-up changed, and LLVM.jl needs to be reconfigured. Please load the package again.")
     end
 
     _install_handlers()
