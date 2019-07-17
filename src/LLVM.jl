@@ -33,8 +33,16 @@ let
 
     global const libllvm_version = Base.libllvm_version::VersionNumber
 
+    # figure out the supported targets by looking at initialization routines
+    lib = Libdl.dlopen(libllvm)
+    llvm_targets = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai, :MSP430,
+                    :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ, :WebAssembly, :X86,
+                    :XCore]
+    @show global const libllvm_targets = filter(llvm_targets) do target
+        sym = Libdl.dlsym_e(lib, Symbol("LLVMInitialize$(target)Target"))
+        sym !== nothing
+    end
     # TODO: figure out the name of the native target
-    global const libllvm_targets = [:NVPTX, :AMDGPU]
 
     @debug "Found LLVM v$libllvm_version at $libllvm with support for $(join(libllvm_targets, ", "))"
 
