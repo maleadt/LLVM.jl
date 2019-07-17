@@ -88,14 +88,24 @@ end
 
 if VERSION < v"1.2.0-DEV.531"
 
-function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
+function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
     @apicall(:LLVMExtraAddMVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 else
 
-function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef)
+if LLVM.libllvm_version < v"8.0.0"
+
+function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
     @apicall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+else
+
+function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
+    @apicall(:LLVMExtraAddNVVMReflectFunctionPass,Cvoid,(LLVMPassManagerRef, Cuint), PM, smversion)
+end
+
 end
 
 function LLVMAddAllocOptPass(PM::LLVMPassManagerRef)

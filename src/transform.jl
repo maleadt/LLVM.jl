@@ -137,4 +137,4 @@ internalize!(pm::PassManager, exports::Vector{String}) =
 
 export nvvm_reflect!
 
-nvvm_reflect!(pm::PassManager) = API.LLVMAddNVVMReflectPass(ref(pm))
+nvvm_reflect!(pm::PassManager, smversion=Cuint(35)) = API.LLVMAddNVVMReflectPass(ref(pm), smversion)

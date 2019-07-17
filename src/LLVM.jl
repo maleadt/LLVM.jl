@@ -91,8 +91,10 @@ include("util/types.jl")
 include("base.jl")
 
 module API
+using CEnum
 using LLVM
 using LLVM: @apicall, libllvm_version
+const off_t = Csize_t
 libdir = joinpath(@__DIR__, "..", "lib", LLVM.llvmjl_wrapper)
 include(joinpath(libdir, "libLLVM_common.jl"))
 include(joinpath(libdir, "libLLVM_h.jl"))
