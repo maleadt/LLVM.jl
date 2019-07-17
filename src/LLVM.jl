@@ -66,6 +66,13 @@ let
     end
 
     @debug "Using LLVM.jl wrapper for LLVM v$llvmjl_wrapper"
+
+
+    # backwards-compatible flags
+
+    global const libllvm_system = false
+
+    global const configured = true
 end
 
 
