@@ -5,7 +5,16 @@ export JuliaContext, create_function, call_function, isboxed, isghosttype
 
 Returns the (session-bound) LLVM context used by the Julia compiler.
 """
-JuliaContext() = LLVM.Context(convert(LLVM.API.LLVMContextRef, cglobal(:jl_LLVMContext)))
+function JuliaContext()
+    ptr = cglobal(:jl_LLVMContext)
+    ref = if VERSION >= v"1.3.0-DEV.550"
+        ptr = convert(Ptr{LLVM.API.LLVMContextRef}, ptr)
+        unsafe_load(ptr)
+    else
+        convert(LLVM.API.LLVMContextRef, ptr)
+    end
+    LLVM.Context(ref)
+end
 
 """
     create_function(rettyp::LLVMType, argtyp::Vector{LLVMType}, [name::String])
