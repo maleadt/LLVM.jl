@@ -11,58 +11,62 @@ using Libdl
 
 VERSION >= v"0.7.0-DEV.2576" || error("This version of LLVM.jl requires Julia 0.7")
 
-# figure out the path to libLLVM by looking at the libraries loaded by Julia
-const libllvm_paths = filter(Libdl.dllist()) do lib
-    occursin("LLVM", basename(lib))
+let
+    # find LLVM library
+
+    libllvm_paths = filter(Libdl.dllist()) do lib
+        occursin("LLVM", basename(lib))
+    end
+    if isempty(libllvm_paths)
+        error("""
+            Cannot find the LLVM library loaded by Julia.
+            Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
+            If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
+    end
+    if length(libllvm_paths) > 1
+        error("""
+            Multiple LLVM libraries loaded by Julia.
+            Please file an issue and attach the output of `Libdl.dllist()`.""")
+    end
+    global const libllvm = first(libllvm_paths)
+    Base.include_dependency(libllvm)
+
+    global const libllvm_version = Base.libllvm_version::VersionNumber
+
+    # TODO: figure out the name of the native target
+    global const libllvm_targets = [:NVPTX, :AMDGPU]
+
+    @debug "Found LLVM v$libllvm_version at $libllvm with support for $(join(libllvm_targets, ", "))"
+
+
+    # find appropriate LLVM.jl wrapper
+
+    vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
+    vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
+
+    llvmjl_wrappers_path = joinpath(@__DIR__, "..", "lib")
+    Base.include_dependency(llvmjl_wrappers_path)
+
+    llvmjl_wrappers = filter(path->isdir(joinpath(llvmjl_wrappers_path, path)),
+                                   readdir(llvmjl_wrappers_path))
+    @assert !isempty(llvmjl_wrappers)
+
+    matching_wrappers = filter(wrapper->vercmp_match(libllvm_version,
+                                                     VersionNumber(wrapper)),
+                                    llvmjl_wrappers)
+    global const llvmjl_wrapper = if !isempty(matching_wrappers)
+        @assert length(matching_wrappers) == 1
+        matching_wrappers[1]
+    else
+        compatible_wrappers = filter(wrapper->vercmp_compat(libllvm_version,
+                                                            VersionNumber(wrapper)),
+                                    llvmjl_wrappers)
+        isempty(compatible_wrappers) && error("Could not find any compatible wrapper for LLVM $(libllvm_version)")
+        last(compatible_wrappers)
+    end
+
+    @debug "Using LLVM.jl wrapper for LLVM v$llvmjl_wrapper"
 end
-if isempty(libllvm_paths)
-    error("""
-        Cannot find the LLVM library loaded by Julia.
-        Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
-        If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
-end
-if length(libllvm_paths) > 1
-    error("""
-        Multiple LLVM libraries loaded by Julia.
-        Please file an issue and attach the output of `Libdl.dllist()`.""")
-end
-const libllvm = first(libllvm_paths)
-const libllvm_version = Base.libllvm_version::VersionNumber
-@debug "Discovered LLVM v$libllvm_version at $libllvm"
-Base.include_dependency(libllvm)
-
-vercmp_match(a,b)  = a.major==b.major &&  a.minor==b.minor
-vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
-
-const llvmjl_wrappers_path = joinpath(@__DIR__, "..", "lib")
-Base.include_dependency(llvmjl_wrappers_path)
-
-const llvmjl_wrappers = filter(path->isdir(joinpath(llvmjl_wrappers_path, path)),
-                                     readdir(llvmjl_wrappers_path))
-@assert !isempty(llvmjl_wrappers)
-
-# figure out which wrapper to use
-const matching_wrappers = filter(wrapper->vercmp_match(libllvm_version,
-                                                        VersionNumber(wrapper)),
-                                 llvmjl_wrappers)
-const llvmjl_wrapper = if !isempty(matching_wrappers)
-    @assert length(matching_wrappers) == 1
-    matching_wrappers[1]
-else
-    compatible_wrappers = filter(wrapper->vercmp_compat(libllvm_version,
-                                                        VersionNumber(wrapper)),
-                                 llvmjl_wrappers)
-    isempty(compatible_wrappers) && error("Could not find any compatible wrapper for LLVM $(libllvm_version)")
-    last(compatible_wrappers)
-end
-@debug "Using LLVM.jl wrapper for v$llvmjl_wrapper"
-
-# TODO: figure out the name of the native target
-const libllvm_targets = [:NVPTX, :AMDGPU]
-
-# backwards-compatible flags
-const libllvm_system = false
-const configured = true
 
 
 ## source code includes
