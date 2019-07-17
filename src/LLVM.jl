@@ -38,7 +38,7 @@ let
     llvm_targets = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai, :MSP430,
                     :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ, :WebAssembly, :X86,
                     :XCore]
-    @show global const libllvm_targets = filter(llvm_targets) do target
+    global const libllvm_targets = filter(llvm_targets) do target
         sym = Libdl.dlsym_e(lib, Symbol("LLVMInitialize$(target)Target"))
         sym !== nothing
     end
