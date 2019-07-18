@@ -200,7 +200,9 @@ function Base.getindex(iter::ModuleFlagDict, name::String)
     return Metadata(objref)
 end
 
-Base.push!(iter::ModuleFlagDict, behavior::LLVM.API.LLVMModuleFlagBehavior, name::String, val::Metadata) =
+function Base.setindex!(iter::ModuleFlagDict, val::Metadata,
+                        (name, behavior)::Tuple{String, LLVM.API.LLVMModuleFlagBehavior})
     API.LLVMAddModuleFlag(ref(iter.mod), behavior, name, length(name), ref(val))
+end
 
 end
