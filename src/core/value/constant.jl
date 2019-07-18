@@ -151,7 +151,7 @@ export GlobalValue,
        unnamed_addr, unnamed_addr!,
        alignment, alignment!
 
-parent(val::GlobalValue) = LLVM.Module(API.LLVMGetGlobalParent(ref(val)))
+parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(ref(val)))
 
 isdeclaration(val::GlobalValue) = convert(Core.Bool, API.LLVMIsDeclaration(ref(val)))
 
