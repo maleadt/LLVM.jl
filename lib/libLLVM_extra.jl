@@ -94,7 +94,7 @@ end
 
 else
 
-if LLVM.libllvm_version < v"8.0"
+if libllvm_version < v"8.0"
 
 function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
     @apicall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
