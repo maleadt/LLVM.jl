@@ -3,7 +3,7 @@
 DEBUG_METADATA_VERSION()
 
 Context() do ctx
-    if LLVM.libllvm_version < v"8.0.0"
+    if LLVM.version() < v"8.0"
         mod = parse(LLVM.Module,  """
             define void @fun() !dbg !5 {
             top:

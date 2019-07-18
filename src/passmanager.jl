@@ -32,7 +32,7 @@ function ModulePassManager(f::Core.Function, args...)
 end
 
 run!(mpm::ModulePassManager, mod::Module) =
-    LLVM.convert(Core.Bool, API.LLVMRunPassManager(ref(mpm), ref(mod)))
+    convert(Core.Bool, API.LLVMRunPassManager(ref(mpm), ref(mod)))
 
 
 
@@ -65,4 +65,4 @@ finalize!(fpm::FunctionPassManager) =
     convert(Core.Bool, API.LLVMFinalizeFunctionPassManager(ref(fpm)))
 
 run!(fpm::FunctionPassManager, f::Function) =
-    LLVM.convert(Core.Bool, API.LLVMRunFunctionPassManager(ref(fpm), ref(f)))
+    convert(Core.Bool, API.LLVMRunFunctionPassManager(ref(fpm), ref(f)))

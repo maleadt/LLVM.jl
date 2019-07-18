@@ -45,6 +45,7 @@ predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
 
 
 ## metadata iteration
+# TODO: doesn't actually iterate, since we can't list the available keys
 
 @enum(MD, MD_dbg = 0,
           MD_tbaa = 1,
@@ -71,8 +72,6 @@ predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
           MD_associated = 22)
 
 export InstructionMetadataDict
-
-# doesn't print, because we don't have length. we can't iterate keys?
 
 struct InstructionMetadataDict <: AbstractDict{MD,MetadataAsValue}
     inst::Instruction

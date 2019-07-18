@@ -16,7 +16,7 @@ export ModulePass
 
     function ModulePass(name::String, runner::Core.Function)
         function callback(ptr::Ptr{Cvoid})::Core.Bool
-            mod = LLVM.Module(convert(reftype(Module), ptr))
+            mod = Module(convert(reftype(Module), ptr))
             return runner(mod)::Core.Bool
         end
 
@@ -38,7 +38,7 @@ export FunctionPass
 
     function FunctionPass(name::String, runner::Core.Function)
         function callback(ptr::Ptr{Cvoid})::Core.Bool
-            fn = LLVM.Function(convert(reftype(Function), ptr))
+            fn = Function(convert(reftype(Function), ptr))
             return runner(fn)::Core.Bool
         end
 

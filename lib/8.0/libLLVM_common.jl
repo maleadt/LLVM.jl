@@ -483,26 +483,6 @@ const LLVMErrorSuccess = 0
 mutable struct LLVMOpaqueError end
 const LLVMErrorRef = Ptr{LLVMOpaqueError}
 const LLVMErrorTypeId = Ptr{Cvoid}
-# const LLVM_DEFAULT_TARGET_TRIPLE = "x86_64-linux-gnu"
-# const LLVM_ENABLE_THREADS = 1
-# const LLVM_HAS_ATOMICS = 1
-# const LLVM_HOST_TRIPLE = "x86_64-linux-gnu"
-# const LLVM_NATIVE_ARCH = X86
-# const LLVM_NATIVE_ASMPARSER = LLVMInitializeX86AsmParser
-# const LLVM_NATIVE_ASMPRINTER = LLVMInitializeX86AsmPrinter
-# const LLVM_NATIVE_DISASSEMBLER = LLVMInitializeX86Disassembler
-# const LLVM_NATIVE_TARGET = LLVMInitializeX86Target
-# const LLVM_NATIVE_TARGETINFO = LLVMInitializeX86TargetInfo
-# const LLVM_NATIVE_TARGETMC = LLVMInitializeX86TargetMC
-# const LLVM_ON_UNIX = 1
-# const LLVM_USE_INTEL_JITEVENTS = 0
-# const LLVM_USE_OPROFILE = 0
-# const LLVM_USE_PERF = 0
-# const LLVM_VERSION_MAJOR = 8
-# const LLVM_VERSION_MINOR = 0
-# const LLVM_VERSION_PATCH = 0
-# const LLVM_VERSION_STRING = "8.0.0"
-# const LLVM_FORCE_ENABLE_STATS = 0
 
 # Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## TargetInfo ( void ) ;
 # Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## Target ( void ) ;

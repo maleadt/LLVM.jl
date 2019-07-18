@@ -94,7 +94,7 @@ end
 
 else
 
-if LLVM.libllvm_version < v"8.0.0"
+if libllvm_version < v"8.0"
 
 function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
     @apicall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
@@ -160,4 +160,13 @@ function LLVMGetSourceLocation(V::LLVMValueRef, index, Name, Filename, Line, Col
     @apicall(:LLVMExtraGetSourceLocation,Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
 end
 
+end
+
+if libllvm_version >= v"8.0"
+    @cenum(LLVMDebugEmissionKind,
+        LLVMDebugEmissionKindNoDebug = 0,
+        LLVMDebugEmissionKindFullDebug = 1,
+        LLVMDebugEmissionKindLineTablesOnly = 2,
+        LLVMDebugEmissionKindDebugDirectivesOnly = 3,
+    )
 end

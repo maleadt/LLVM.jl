@@ -1,4 +1,4 @@
-export MDString, MDNode, operands
+export MDString, MDNode, operands, Metadata
 
 @checked struct MetadataAsValue <: Value
     ref::reftype(Value)
@@ -12,7 +12,7 @@ const MDString = MetadataAsValue
 
 MDString(val::String) = MDString(API.LLVMMDString(val, Cuint(length(val))))
 
-MDString(val::String, ctx::Context) = 
+MDString(val::String, ctx::Context) =
     MDString(API.LLVMMDStringInContext(ref(ctx), val, Cuint(length(val))))
 
 function Base.convert(::Type{String}, md::MDString)
@@ -37,4 +37,18 @@ function operands(md::MDNode)
     ops = Vector{API.LLVMValueRef}(undef, nops)
     API.LLVMGetMDNodeOperands(ref(md), ops)
     return Value[Value(op) for op in ops]
+end
+
+
+@checked struct Metadata
+    ref::API.LLVMMetadataRef
+end
+reftype(::Type{Metadata}) = API.LLVMMetadataRef
+
+function Metadata(val::Value)
+    return Metadata(LLVM.API.LLVMValueAsMetadata(ref(val)))
+end
+
+function Value(md::Metadata, ctx::Context)
+    return MetadataAsValue(API.LLVMMetadataAsValue(ref(ctx), ref(md)))
 end
