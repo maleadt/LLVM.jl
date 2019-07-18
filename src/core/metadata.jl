@@ -1,4 +1,4 @@
-export MDString, MDNode, operands
+export MDString, MDNode, operands, Metadata
 
 @checked struct MetadataAsValue <: Value
     ref::reftype(Value)
@@ -43,7 +43,8 @@ end
 @checked struct Metadata
     ref::API.LLVMMetadataRef
 end
-reftype(::Type{Metadata}) = API.LLVMMetdataRef
+reftype(::Type{Metadata}) = API.LLVMMetadataRef
+
 function Value(md::Metadata, ctx::Context)
     return MetadataAsValue(API.LLVMMetadataAsValue(ref(ctx), md))
 end
