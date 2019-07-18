@@ -12,7 +12,7 @@ const MDString = MetadataAsValue
 
 MDString(val::String) = MDString(API.LLVMMDString(val, Cuint(length(val))))
 
-MDString(val::String, ctx::Context) = 
+MDString(val::String, ctx::Context) =
     MDString(API.LLVMMDStringInContext(ref(ctx), val, Cuint(length(val))))
 
 function Base.convert(::Type{String}, md::MDString)
@@ -38,6 +38,7 @@ function operands(md::MDNode)
     API.LLVMGetMDNodeOperands(ref(md), ops)
     return Value[Value(op) for op in ops]
 end
+
 
 @checked struct Metadata
     ref::API.LLVMMetadataRef

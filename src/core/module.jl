@@ -180,5 +180,4 @@ end
 # flags
 if libllvm_version >= v"8.0.0"
 addflag!(mod::Module, behavior, key, val) = LLVM.API.LLVMAddModuleFlag(ref(mod), behavior, key, length(key), LLVM.ref(Metadata(val)))
-
 end
