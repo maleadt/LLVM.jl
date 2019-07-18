@@ -45,10 +45,10 @@ end
 end
 reftype(::Type{Metadata}) = API.LLVMMetadataRef
 
-function Value(md::Metadata, ctx::Context)
-    return MetadataAsValue(API.LLVMMetadataAsValue(ref(ctx), md))
-end
-
 function Metadata(val::Value)
     return Metadata(LLVM.API.LLVMValueAsMetadata(ref(val)))
+end
+
+function Value(md::Metadata, ctx::Context)
+    return MetadataAsValue(API.LLVMMetadataAsValue(ref(ctx), ref(md)))
 end

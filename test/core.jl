@@ -530,7 +530,7 @@ LLVM.Module("SomeModule", ctx) do mod
     @test convert(String, datalayout(mod)) == dummyLayout
 
     if LLVM.version() >= v"8.0"
-        md = Metadata(ConstantInt(42))
+        md = Metadata(ConstantInt(42, ctx))
 
         mod_flags = flags(mod)
         push!(mod_flags, LLVM.API.LLVMModuleFlagBehaviorError, "foobar", md)
@@ -941,6 +941,10 @@ LLVM.Module("SomeModule", ctx) do mod
 
         @test isempty(md)
         @test !haskey(md, LLVM.MD_dbg)
+    end
+    let val = ConstantInt(42, ctx)
+        md = Metadata(val)
+        @test first(operands(LLVM.Value(md, ctx))) == val
     end
 
     @test retinst in instructions(bb3)
