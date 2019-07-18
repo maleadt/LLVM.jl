@@ -533,7 +533,7 @@ LLVM.Module("SomeModule", ctx) do mod
         md = Metadata(ConstantInt(42, ctx))
 
         mod_flags = flags(mod)
-        push!(mod_flags, LLVM.API.LLVMModuleFlagBehaviorError, "foobar", md)
+        mod_flags["foobar", LLVM.API.LLVMModuleFlagBehaviorError] = md
 
         @test occursin("!llvm.module.flags = !{!0}", sprint(io->show(io,mod)))
         @test occursin(r"!0 = !\{i\d+ 1, !\"foobar\", i\d+ 42\}", sprint(io->show(io,mod)))
