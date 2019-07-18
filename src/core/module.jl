@@ -177,7 +177,30 @@ function Base.getindex(iter::ModuleFunctionSet, name::String)
     return Function(objref)
 end
 
-# flags
+
+## module flag iteration
+# TODO: doesn't actually iterate, since we can't list the available keys
+
 if libllvm_version >= v"8.0"
-addflag!(mod::Module, behavior, key, val) = LLVM.API.LLVMAddModuleFlag(ref(mod), behavior, key, length(key), LLVM.ref(Metadata(val)))
+
+export flags
+
+struct ModuleFlagDict <: AbstractDict{String,Metadata}
+    mod::Module
+end
+
+flags(mod::Module) = ModuleFlagDict(mod)
+
+Base.haskey(iter::ModuleFlagDict, name::String) =
+    API.LLVMGetModuleFlag(ref(iter.mod), name, length(name)) != C_NULL
+
+function Base.getindex(iter::ModuleFlagDict, name::String)
+    objref = API.LLVMGetModuleFlag(ref(iter.mod), name, length(name))
+    objref == C_NULL && throw(KeyError(name))
+    return Metadata(objref)
+end
+
+Base.push!(iter::ModuleFlagDict, behavior::LLVM.API.LLVMModuleFlagBehavior, name::String, val::Metadata) =
+    API.LLVMAddModuleFlag(ref(iter.mod), behavior, name, length(name), ref(val))
+
 end

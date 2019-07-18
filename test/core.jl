@@ -528,6 +528,19 @@ LLVM.Module("SomeModule", ctx) do mod
     dummyLayout = "e-p:64:64:64"
     datalayout!(mod, dummyLayout)
     @test convert(String, datalayout(mod)) == dummyLayout
+
+    if LLVM.version() >= v"8.0"
+        md = Metadata(ConstantInt(42))
+
+        mod_flags = flags(mod)
+        push!(mod_flags, LLVM.API.LLVMModuleFlagBehaviorError, "foobar", md)
+
+        @test occursin("!llvm.module.flags = !{!0}", sprint(io->show(io,mod)))
+        @test occursin(r"!0 = !\{i\d+ 1, !\"foobar\", i\d+ 42\}", sprint(io->show(io,mod)))
+
+        @test mod_flags["foobar"] == md
+        @test_throws KeyError mod_flags["foobaz"]
+    end
 end
 end
 
