@@ -12,3 +12,18 @@ include:
 coverage:
   only:
     - master
+
+test:dev:llvm8:
+  stage: test
+  image: ubuntu:18.04
+  script:
+    - apt update
+    - apt install -y git build-essential libatomic1 python gfortran perl wget m4 cmake pkg-config
+    - git clone https://github.com/JuliaLang/julia
+    - make -C julia -j$(nproc) install LLVM_VER=8.0.0 USE_BINARYBUILDER_LLVM=0
+    - ./julia/julia -e 'using InteractiveUtils;
+                        versioninfo()'
+    - ./julia/julia --project -e 'using Pkg;
+                                  Pkg.instantiate();
+                                  Pkg.build();
+                                  Pkg.test(; coverage=true);'
