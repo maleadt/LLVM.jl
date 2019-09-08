@@ -111,6 +111,7 @@ lower_ptls!(pm)
 lower_ptls!(pm, true)
 lower_simdloop!(pm)
 late_lower_gc_frame!(pm)
+final_lower_gc!(pm)
 
 end
 end
