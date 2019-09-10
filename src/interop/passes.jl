@@ -1,6 +1,6 @@
 export alloc_opt!, barrier_noop!, gc_invariant_verifier!, lower_exc_handlers!,
        combine_mul_add!, multi_versioning!, propagate_julia_addrsp!, lower_ptls!,
-       lower_simdloop!, late_lower_gc_frame!
+       lower_simdloop!, late_lower_gc_frame!, final_lower_gc!
 
 alloc_opt!(pm::PassManager) =
     API.LLVMAddAllocOptPass(ref(pm))
@@ -31,3 +31,10 @@ lower_simdloop!(pm::PassManager) =
 
 late_lower_gc_frame!(pm::PassManager) =
     API.LLVMAddLateLowerGCFramePass(ref(pm))
+
+if VERSION >= v"1.3.0-DEV.95"
+    final_lower_gc!(pm::PassManager) =
+        API.LLVMAddFinalLowerGCPass(ref(pm))
+else
+    final_lower_gc!(pm::PassManager) = nothing
+end

@@ -150,6 +150,14 @@ end
 
 end
 
+if VERSION >= v"1.3.0-DEV.95"
+
+function LLVMAddFinalLowerGCPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddFinalLowerGCPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+
+end # v"1.3.0-DEV.95"
+
 function LLVMGetValueContext(V::LLVMValueRef)
     @apicall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end
