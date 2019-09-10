@@ -137,7 +137,11 @@ function __init__()
     if length(libllvm_paths) > 1
         # NOTE: this still allows switching to a non-USE_LLVM_SHLIB version, but
         #       there's no way to detect that since the new libLLVM is loaded before this...
-        cachefile = Base.compilecache(Base.PkgId(LLVM))
+        cachefile = if VERSION >= v"1.3-"
+            Base.compilecache_path(Base.PkgId(LLVM))
+        else
+            abspath(DEPOT_PATH[1], Base.cache_file_entry(Base.PkgId(LLVM)))
+        end
         rm(cachefile)
         error("Your set-up changed, and LLVM.jl needs to be reconfigured. Please load the package again.")
     end
