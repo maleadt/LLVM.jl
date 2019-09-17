@@ -16,6 +16,8 @@ end
 function LLVMViewFunctionCFGOnly(Fn)
     @apicall(:LLVMViewFunctionCFGOnly, Cvoid, (LLVMValueRef,), Fn)
 end
+
+
 # Julia wrapper for header: BitReader.h
 # Automatically generated using Clang.jl
 
@@ -50,6 +52,8 @@ end
 function LLVMGetBitcodeModule2(MemBuf, OutM)
     @apicall(:LLVMGetBitcodeModule2, LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutM)
 end
+
+
 # Julia wrapper for header: BitWriter.h
 # Automatically generated using Clang.jl
 
@@ -68,6 +72,8 @@ end
 function LLVMWriteBitcodeToMemoryBuffer(M)
     @apicall(:LLVMWriteBitcodeToMemoryBuffer, LLVMMemoryBufferRef, (LLVMModuleRef,), M)
 end
+
+
 # Julia wrapper for header: Core.h
 # Automatically generated using Clang.jl
 
@@ -2410,6 +2416,8 @@ end
 function LLVMIsMultithreaded()
     @apicall(:LLVMIsMultithreaded, LLVMBool, ())
 end
+
+
 # Julia wrapper for header: DebugInfo.h
 # Automatically generated using Clang.jl
 
@@ -2452,6 +2460,8 @@ end
 function LLVMDIBuilderCreateDebugLocation(Ctx, Line, Column, Scope, InlinedAt)
     @apicall(:LLVMDIBuilderCreateDebugLocation, LLVMMetadataRef, (LLVMContextRef, UInt32, UInt32, LLVMMetadataRef, LLVMMetadataRef), Ctx, Line, Column, Scope, InlinedAt)
 end
+
+
 # Julia wrapper for header: Disassembler.h
 # Automatically generated using Clang.jl
 
@@ -2478,8 +2488,12 @@ end
 function LLVMDisasmInstruction(DC, Bytes, BytesSize, PC, OutString, OutStringSize)
     @apicall(:LLVMDisasmInstruction, Csize_t, (LLVMDisasmContextRef, Ptr{UInt8}, UInt64, UInt64, Cstring, Csize_t), DC, Bytes, BytesSize, PC, OutString, OutStringSize)
 end
+
+
 # Julia wrapper for header: ErrorHandling.h
 # Automatically generated using Clang.jl
+
+
 
 # Julia wrapper for header: ExecutionEngine.h
 # Automatically generated using Clang.jl
@@ -2851,12 +2865,16 @@ end
 function LLVMDisposeMCJITMemoryManager(MM)
     @apicall(:LLVMDisposeMCJITMemoryManager, Cvoid, (LLVMMCJITMemoryManagerRef,), MM)
 end
+
+
 # Julia wrapper for header: IRReader.h
 # Automatically generated using Clang.jl
 
 function LLVMParseIRInContext(ContextRef, MemBuf, OutM, OutMessage)
     @apicall(:LLVMParseIRInContext, LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
 end
+
+
 # Julia wrapper for header: Initialization.h
 # Automatically generated using Clang.jl
 
@@ -2903,6 +2921,8 @@ end
 function LLVMInitializeTarget(R)
     @apicall(:LLVMInitializeTarget, Cvoid, (LLVMPassRegistryRef,), R)
 end
+
+
 # Julia wrapper for header: LinkTimeOptimizer.h
 # Automatically generated using Clang.jl
 
@@ -2921,12 +2941,16 @@ end
 function llvm_optimize_modules(lto, output_filename)
     @apicall(:llvm_optimize_modules, llvm_lto_status_t, (llvm_lto_t, Cstring), lto, output_filename)
 end
+
+
 # Julia wrapper for header: Linker.h
 # Automatically generated using Clang.jl
 
 function LLVMLinkModules2(Dest, Src)
     @apicall(:LLVMLinkModules2, LLVMBool, (LLVMModuleRef, LLVMModuleRef), Dest, Src)
 end
+
+
 # Julia wrapper for header: Object.h
 # Automatically generated using Clang.jl
 
@@ -3041,6 +3065,8 @@ end
 function LLVMGetRelocationValueString(RI)
     @apicall(:LLVMGetRelocationValueString, Cstring, (LLVMRelocationIteratorRef,), RI)
 end
+
+
 # Julia wrapper for header: OrcBindings.h
 # Automatically generated using Clang.jl
 
@@ -3103,6 +3129,8 @@ end
 function LLVMOrcDisposeInstance(JITStack)
     @apicall(:LLVMOrcDisposeInstance, LLVMOrcErrorCode, (LLVMOrcJITStackRef,), JITStack)
 end
+
+
 # Julia wrapper for header: Support.h
 # Automatically generated using Clang.jl
 
@@ -3121,14 +3149,22 @@ end
 function LLVMAddSymbol(symbolName, symbolValue)
     @apicall(:LLVMAddSymbol, Cvoid, (Cstring, Ptr{Cvoid}), symbolName, symbolValue)
 end
+
+
 # Julia wrapper for header: Target.h
 # Automatically generated using Clang.jl
+
+
 
 # Julia wrapper for header: TargetMachine.h
 # Automatically generated using Clang.jl
 
+
+
 # Julia wrapper for header: Types.h
 # Automatically generated using Clang.jl
+
+
 
 # Julia wrapper for header: lto.h
 # Automatically generated using Clang.jl
@@ -3392,6 +3428,8 @@ end
 function thinlto_codegen_set_cache_entry_expiration(cg, expiration)
     @apicall(:thinlto_codegen_set_cache_entry_expiration, Cvoid, (thinlto_code_gen_t, UInt32), cg, expiration)
 end
+
+
 # Julia wrapper for header: IPO.h
 # Automatically generated using Clang.jl
 
@@ -3454,6 +3492,8 @@ end
 function LLVMAddStripSymbolsPass(PM)
     @apicall(:LLVMAddStripSymbolsPass, Cvoid, (LLVMPassManagerRef,), PM)
 end
+
+
 # Julia wrapper for header: PassManagerBuilder.h
 # Automatically generated using Clang.jl
 
@@ -3500,6 +3540,8 @@ end
 function LLVMPassManagerBuilderPopulateLTOPassManager(PMB, PM, Internalize, RunInliner)
     @apicall(:LLVMPassManagerBuilderPopulateLTOPassManager, Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef, LLVMBool, LLVMBool), PMB, PM, Internalize, RunInliner)
 end
+
+
 # Julia wrapper for header: Scalar.h
 # Automatically generated using Clang.jl
 
@@ -3662,6 +3704,8 @@ end
 function LLVMAddBasicAliasAnalysisPass(PM)
     @apicall(:LLVMAddBasicAliasAnalysisPass, Cvoid, (LLVMPassManagerRef,), PM)
 end
+
+
 # Julia wrapper for header: Vectorize.h
 # Automatically generated using Clang.jl
 

@@ -64,7 +64,7 @@ ispath(config) || error("llvm-config at $config is't a valid path")
 # - remove "# Skipping ..." comments by Clang.jl
 # - replace `ccall\(\((:.+), libllvm\), (.*)\)` with `@apicall($1, $2)`
 # - replace `const (LLVMOpaque.*) = Cvoid` with `struct $1 end`
-# - use `awk '/^[[:blank:]]*$/ { print; next; }; {cur = seen[$0]; if(!seen[$0]++ || (/^end$/ && !prev) || /^.*Clang.*$/) print $0; prev=cur}' libLLVM_h.jl > libLLVM_g.jl` to remove duplicates
+# - use `gawk -i inplace '/^[[:blank:]]*$/ { print; next; }; {cur = seen[$0]; if(!seen[$0]++ || (/^end$/ && !prev) || /^.*Clang.*$/) print $0; prev=cur}' libLLVM_h.jl` to remove duplicates
 # - use `cat -s` to remove duplicate empty lines
 
 target = ARGS[2]
