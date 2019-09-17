@@ -58,10 +58,14 @@ length(ARGS) == 2 || error("Usage: wrap.jl /path/to/llvm-config target")
 config = ARGS[1]
 ispath(config) || error("llvm-config at $config is't a valid path")
 
-# Use `ccall\(\((:.+), libllvm\), (.*)\)` and replace with `@apicall($1, $2)`
-# Use `const (LLVMOpaque.*) = Cvoid` and replace with `mutable struct $1 end`
-# Use `awk '/^[[:blank:]]*$/ { print; next; }; {cur = seen[$0]; if(!seen[$0]++ || (/^end$/ && !prev) || /^.*Clang.*$/) print $0; prev=cur}' libLLVM_h.jl > libLLVM_g.jl` to remove duplicates
-# Use `cat -s` to remove duplicate empty lines
+# Manual clean-up:
+# - remove build-host details (HAVE_INTTYPES_H, LLVM_DEFAULT_TARGET_TRIPLE etc) in libLLVM_common.jl
+# - remove LLVMInitializeAll and LLVMInitializeNative wrappers (these are macros)
+# - remove "# Skipping ..." comments by Clang.jl
+# - replace `ccall\(\((:.+), libllvm\), (.*)\)` with `@apicall($1, $2)`
+# - replace `const (LLVMOpaque.*) = Cvoid` with `struct $1 end`
+# - use `awk '/^[[:blank:]]*$/ { print; next; }; {cur = seen[$0]; if(!seen[$0]++ || (/^end$/ && !prev) || /^.*Clang.*$/) print $0; prev=cur}' libLLVM_h.jl > libLLVM_g.jl` to remove duplicates
+# - use `cat -s` to remove duplicate empty lines
 
 target = ARGS[2]
 wrap(config, target)
