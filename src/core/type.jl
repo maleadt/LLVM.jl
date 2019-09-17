@@ -56,9 +56,9 @@ for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     end
 end
 
-IntType(bits::Integer) = IntegerType(API.LLVMIntType(Cuint(bits)))
+IntType(bits::Integer) = IntegerType(API.LLVMIntType(bits))
 IntType(bits::Integer, ctx::Context) =
-    IntegerType(API.LLVMIntTypeInContext(ref(ctx), Cuint(bits)))
+    IntegerType(API.LLVMIntTypeInContext(ref(ctx), bits))
 
 width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(ref(inttyp))
 
@@ -100,7 +100,7 @@ identify(::Type{LLVMType}, ::Val{API.LLVMFunctionTypeKind}) = FunctionType
 
 FunctionType(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Core.Bool=false) where {T<:LLVMType} =
     FunctionType(API.LLVMFunctionType(ref(rettyp), ref.(params),
-                                      Cuint(length(params)), convert(Bool, vararg)))
+                                      length(params), convert(Bool, vararg)))
 
 isvararg(ft::FunctionType) =
     convert(Core.Bool, API.LLVMIsFunctionVarArg(ref(ft)))
@@ -137,8 +137,7 @@ end
 identify(::Type{LLVMType}, ::Val{API.LLVMPointerTypeKind}) = PointerType
 
 function PointerType(eltyp::LLVMType, addrspace=0)
-    return PointerType(API.LLVMPointerType(ref(eltyp),
-                                           Cuint(addrspace)))
+    return PointerType(API.LLVMPointerType(ref(eltyp), addrspace))
 end
 
 addrspace(ptrtyp::PointerType) =
@@ -151,7 +150,7 @@ end
 identify(::Type{LLVMType}, ::Val{API.LLVMArrayTypeKind}) = ArrayType
 
 function ArrayType(eltyp::LLVMType, count)
-    return ArrayType(API.LLVMArrayType(ref(eltyp), Cuint(count)))
+    return ArrayType(API.LLVMArrayType(ref(eltyp), count))
 end
 
 Base.length(arrtyp::ArrayType) = API.LLVMGetArrayLength(ref(arrtyp))
@@ -165,7 +164,7 @@ end
 identify(::Type{LLVMType}, ::Val{API.LLVMVectorTypeKind}) = VectorType
 
 function VectorType(eltyp::LLVMType, count)
-    return VectorType(API.LLVMVectorType(ref(eltyp), Cuint(count)))
+    return VectorType(API.LLVMVectorType(ref(eltyp), count))
 end
 
 Base.size(vectyp::VectorType) = API.LLVMGetVectorSize(ref(vectyp))
@@ -185,12 +184,12 @@ function StructType(name::String, ctx::Context=GlobalContext())
 end
 
 StructType(elems::Vector{T}, packed::Core.Bool=false) where {T<:LLVMType} =
-    StructType(API.LLVMStructType(ref.(elems), Cuint(length(elems)),
+    StructType(API.LLVMStructType(ref.(elems), length(elems),
                                   convert(Bool, packed)))
 
 StructType(elems::Vector{T}, ctx::Context, packed::Core.Bool=false) where {T<:LLVMType} =
     StructType(API.LLVMStructTypeInContext(ref(ctx), ref.(elems),
-                                           Cuint(length(elems)), convert(Bool, packed)))
+                                           length(elems), convert(Bool, packed)))
 
 name(structtyp::StructType) =
     unsafe_string(API.LLVMGetStructName(ref(structtyp)))
@@ -201,7 +200,7 @@ isopaque(structtyp::StructType) =
 
 elements!(structtyp::StructType, elems::Vector{T}, packed::Core.Bool=false) where {T<:LLVMType} =
     API.LLVMStructSetBody(ref(structtyp), ref.(elems),
-                          Cuint(length(elems)), convert(Bool, packed))
+                          length(elems), convert(Bool, packed))
 
 Base.isempty(@nospecialize(T::StructType)) =
     isempty(elements(T)) || all(isempty, elements(T))
@@ -219,7 +218,7 @@ elements(typ::StructType) = StructTypeElementSet(typ)
 Base.eltype(::StructTypeElementSet) = LLVMType
 
 Base.getindex(iter::StructTypeElementSet, i) =
-    LLVMType(API.LLVMStructGetTypeAtIndex(ref(iter.typ), Cuint(i-1)))
+    LLVMType(API.LLVMStructGetTypeAtIndex(ref(iter.typ), i-1))
 
 function Base.iterate(iter::StructTypeElementSet, i=1)
     i >= length(iter) + 1 ? nothing : (iter[i], i+1)

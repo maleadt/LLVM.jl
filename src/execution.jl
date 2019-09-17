@@ -94,7 +94,7 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
     status = convert(Core.Bool, API.LLVMCreateJITCompilerForModule(out_ref, ref(mod),
-                                                             Cuint(optlevel), out_error))
+                                                                   optlevel, out_error))
 
     if status
         error = unsafe_string(out_error[])
@@ -129,7 +129,7 @@ end
 
 Base.run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =
     GenericValue(API.LLVMRunFunction(ref(engine), ref(f),
-                                     Cuint(length(args)), ref.(args)))
+                                     length(args), ref.(args)))
 
 
 # ExectutionEngine function lookup

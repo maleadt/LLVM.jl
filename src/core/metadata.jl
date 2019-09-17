@@ -10,10 +10,10 @@ identify(::Type{Value}, ::Val{API.LLVMMetadataAsValueValueKind}) = MetadataAsVal
 
 const MDString = MetadataAsValue
 
-MDString(val::String) = MDString(API.LLVMMDString(val, Cuint(length(val))))
+MDString(val::String) = MDString(API.LLVMMDString(val, length(val)))
 
 MDString(val::String, ctx::Context) =
-    MDString(API.LLVMMDStringInContext(ref(ctx), val, Cuint(length(val))))
+    MDString(API.LLVMMDStringInContext(ref(ctx), val, length(val)))
 
 function Base.convert(::Type{String}, md::MDString)
     len = Ref{Cuint}()
@@ -26,11 +26,10 @@ end
 const MDNode = MetadataAsValue
 
 MDNode(vals::Vector{T}) where {T<:Value} =
-    MDNode(API.LLVMMDNode(ref.(vals), Cuint(length(vals))))
+    MDNode(API.LLVMMDNode(ref.(vals), length(vals)))
 
 MDNode(vals::Vector{T}, ctx::Context) where {T<:Value} =
-    MDNode(API.LLVMMDNodeInContext(ref(ctx), ref.(vals),
-                                   Cuint(length(vals))))
+    MDNode(API.LLVMMDNodeInContext(ref(ctx), ref.(vals), length(vals)))
 
 function operands(md::MDNode)
     nops = API.LLVMGetMDNodeNumOperands(ref(md))

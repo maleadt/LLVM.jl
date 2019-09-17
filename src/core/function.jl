@@ -18,7 +18,7 @@ personality!(f::Function, persfn::Function) = API.LLVMSetPersonalityFn(ref(f), r
 intrinsic_id(f::Function) = API.LLVMGetIntrinsicID(ref(f))
 
 callconv(f::Function) = API.LLVMGetFunctionCallConv(ref(f))
-callconv!(f::Function, cc) = API.LLVMSetFunctionCallConv(ref(f), Cuint(cc))
+callconv!(f::Function, cc) = API.LLVMSetFunctionCallConv(ref(f), cc)
 
 function gc(f::Function)
   ptr = API.LLVMGetGC(ref(f))
@@ -60,7 +60,7 @@ Base.delete!(iter::FunctionAttrSet, attr::EnumAttribute) =
 
 function Base.delete!(iter::FunctionAttrSet, attr::StringAttribute)
     k = kind(attr)
-    API.LLVMRemoveStringAttributeAtIndex(ref(iter.f), iter.idx, k, Cuint(length(k)))
+    API.LLVMRemoveStringAttributeAtIndex(ref(iter.f), iter.idx, k, length(k))
 end
 
 function Base.length(iter::FunctionAttrSet)
@@ -85,7 +85,7 @@ parameters(f::Function) = FunctionParameterSet(f)
 Base.eltype(::FunctionParameterSet) = Argument
 
 Base.getindex(iter::FunctionParameterSet, i) =
-  Argument(API.LLVMGetParam(ref(iter.f), Cuint(i-1)))
+  Argument(API.LLVMGetParam(ref(iter.f), i-1))
 
 function Base.iterate(iter::FunctionParameterSet, state=API.LLVMGetFirstParam(ref(iter.f)))
     state == C_NULL ? nothing : (Argument(state), API.LLVMGetNextParam(state))

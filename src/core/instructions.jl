@@ -83,19 +83,19 @@ Base.isempty(md::InstructionMetadataDict) =
   !convert(Core.Bool, API.LLVMHasMetadata(ref(md.inst)))
 
 Base.haskey(md::InstructionMetadataDict, kind::MD) =
-  API.LLVMGetMetadata(ref(md.inst), Cuint(kind)) != C_NULL
+  API.LLVMGetMetadata(ref(md.inst), kind) != C_NULL
 
 function Base.getindex(md::InstructionMetadataDict, kind::MD)
-    objref = API.LLVMGetMetadata(ref(md.inst), Cuint(kind))
+    objref = API.LLVMGetMetadata(ref(md.inst), kind)
     objref == C_NULL && throw(KeyError(name))
     return MetadataAsValue(objref)
   end
 
 Base.setindex!(md::InstructionMetadataDict, node::MetadataAsValue, kind::MD) =
-    API.LLVMSetMetadata(ref(md.inst), Cuint(kind), ref(node))
+    API.LLVMSetMetadata(ref(md.inst), kind, ref(node))
 
 Base.delete!(md::InstructionMetadataDict, kind::MD) =
-    API.LLVMSetMetadata(ref(md.inst), Cuint(kind),
+    API.LLVMSetMetadata(ref(md.inst), kind,
                         convert(reftype(MetadataAsValue), C_NULL))
 
 
@@ -131,7 +131,7 @@ export callconv, callconv!,
 
 callconv(inst::Instruction) = API.LLVMGetInstructionCallConv(ref(inst))
 callconv!(inst::Instruction, cc) =
-    API.LLVMSetInstructionCallConv(ref(inst), Cuint(cc))
+    API.LLVMSetInstructionCallConv(ref(inst), cc)
 
 istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(ref(inst)))
 tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(ref(inst), convert(Bool, bool))
@@ -168,10 +168,10 @@ successors(term::Instruction) = TerminatorSuccessorSet(term)
 Base.eltype(::TerminatorSuccessorSet) = BasicBlock
 
 Base.getindex(iter::TerminatorSuccessorSet, i) =
-    BasicBlock(API.LLVMGetSuccessor(ref(iter.term), Cuint(i-1)))
+    BasicBlock(API.LLVMGetSuccessor(ref(iter.term), i-1))
 
 Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
-    API.LLVMSetSuccessor(ref(iter.term), Cuint(i-1), blockref(bb))
+    API.LLVMSetSuccessor(ref(iter.term), i-1, blockref(bb))
 
 function Base.iterate(iter::TerminatorSuccessorSet, i=1)
     i >= length(iter) + 1 ? nothing : (iter[i], i+1)
@@ -197,13 +197,13 @@ incoming(phi::Instruction) = PhiIncomingSet(phi)
 Base.eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
 
 Base.getindex(iter::PhiIncomingSet, i) =
-    tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), Cuint(i-1))),
-                BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), Cuint(i-1))))
+    tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), i-1)),
+                BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), i-1)))
 
 function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{V, BasicBlock}} where V <: Value)
     vals, blocks = zip(args...)
     API.LLVMAddIncoming(ref(iter.phi), collect(ref.(vals)),
-                        collect(ref.(blocks)), Cuint(length(args)))
+                        collect(ref.(blocks)), length(args))
 end
 
 Base.push!(iter::PhiIncomingSet, args::Tuple{<:Value, BasicBlock}) = append!(iter, [args])

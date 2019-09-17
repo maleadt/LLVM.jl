@@ -57,8 +57,7 @@ function ConstantInt(typ::IntegerType, val::Integer, signed=false)
     for i in 1:numwords
         words[i] = (val >> 64(i-1)) % Culonglong
     end
-    return ConstantInt(
-                     API.LLVMConstIntOfArbitraryPrecision(ref(typ), Cuint(numwords), words))
+    return ConstantInt(API.LLVMConstIntOfArbitraryPrecision(ref(typ), numwords, words))
 end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
@@ -157,7 +156,7 @@ isdeclaration(val::GlobalValue) = convert(Core.Bool, API.LLVMIsDeclaration(ref(v
 
 linkage(val::GlobalValue) = API.LLVMGetLinkage(ref(val))
 linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
-    API.LLVMSetLinkage(ref(val), Cuint(linkage))
+    API.LLVMSetLinkage(ref(val), linkage)
 
 function section(val::GlobalValue)
   #=
@@ -178,11 +177,11 @@ section!(val::GlobalValue, sec::String) = API.LLVMSetSection(ref(val), sec)
 
 visibility(val::GlobalValue) = API.LLVMGetVisibility(ref(val))
 visibility!(val::GlobalValue, viz::API.LLVMVisibility) =
-    API.LLVMSetVisibility(ref(val), Cuint(viz))
+    API.LLVMSetVisibility(ref(val), viz)
 
 dllstorage(val::GlobalValue) = API.LLVMGetDLLStorageClass(ref(val))
 dllstorage!(val::GlobalValue, storage::API.LLVMDLLStorageClass) =
-    API.LLVMSetDLLStorageClass(ref(val), Cuint(storage))
+    API.LLVMSetDLLStorageClass(ref(val), storage)
 
 unnamed_addr(val::GlobalValue) = convert(Core.Bool, API.LLVMHasUnnamedAddr(ref(val)))
 unnamed_addr!(val::GlobalValue, flag::Core.Bool) =
@@ -190,7 +189,7 @@ unnamed_addr!(val::GlobalValue, flag::Core.Bool) =
 
 const AlignedValue = Union{GlobalValue,Instruction}   # load, store, alloca
 alignment(val::AlignedValue) = API.LLVMGetAlignment(ref(val))
-alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), Cuint(bytes))
+alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), bytes)
 
 
 ## global variables
@@ -213,8 +212,8 @@ GlobalVariable(mod::Module, typ::LLVMType, name::String) =
     GlobalVariable(API.LLVMAddGlobal(ref(mod), ref(typ), name))
 
 GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer) =
-    GlobalVariable( API.LLVMAddGlobalInAddressSpace(ref(mod), ref(typ),
-                                                    name, Cuint(addrspace)))
+    GlobalVariable(API.LLVMAddGlobalInAddressSpace(ref(mod), ref(typ),
+                                                   name, addrspace))
 
 unsafe_delete!(::Module, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(gv))
 
@@ -233,7 +232,7 @@ constant!(gv::GlobalVariable, bool) =
 
 threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(ref(gv))
 threadlocalmode!(gv::GlobalVariable, mode) =
-  API.LLVMSetThreadLocalMode(ref(gv), Cuint(mode))
+  API.LLVMSetThreadLocalMode(ref(gv), mode)
 
 isextinit(gv::GlobalVariable) =
   convert(Core.Bool, API.LLVMIsExternallyInitialized(ref(gv)))
