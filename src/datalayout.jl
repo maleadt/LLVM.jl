@@ -35,19 +35,18 @@ byteorder(data::DataLayout) = API.LLVMByteOrder(ref(data))
 
 pointersize(data::DataLayout) = API.LLVMPointerSize(ref(data))
 pointersize(data::DataLayout, addrspace::Integer) =
-    API.LLVMPointerSizeForAS(ref(data), Cuint(addrspace))
+    API.LLVMPointerSizeForAS(ref(data), addrspace)
 
 intptr(data::DataLayout) = IntegerType(API.LLVMIntPtrType(ref(data)))
 intptr(data::DataLayout, addrspace::Integer) =
-    IntegerType(API.LLVMIntPtrTypeForAS(ref(data), Cuint(addrspace)))
+    IntegerType(API.LLVMIntPtrTypeForAS(ref(data), addrspace))
 intptr(data::DataLayout, ctx::Context) =
     IntegerType(API.LLVMIntPtrTypeInContext(ref(ctx), ref(data)))
 intptr(data::DataLayout, addrspace::Integer, ctx::Context) =
-    IntegerType(API.LLVMIntPtrTypeForASInContext(ref(ctx), ref(data),
-                                                            Cuint(addrspace)))
+    IntegerType(API.LLVMIntPtrTypeForASInContext(ref(ctx), ref(data), addrspace))
 
 Base.sizeof(data::DataLayout, typ::LLVMType) =
-    Cuint(API.LLVMSizeOfTypeInBits(ref(data), ref(typ)) / 8)
+    Int(API.LLVMSizeOfTypeInBits(ref(data), ref(typ)) / 8)
 storage_size(data::DataLayout, typ::LLVMType) = API.LLVMStoreSizeOfType(ref(data), ref(typ))
 abi_size(data::DataLayout, typ::LLVMType) = API.LLVMABISizeOfType(ref(data), ref(typ))
 
@@ -57,11 +56,11 @@ frame_alignment(data::DataLayout, typ::LLVMType) =
     API.LLVMCallFrameAlignmentOfType(ref(data), ref(typ))
 preferred_alignment(data::DataLayout, typ::LLVMType) =
     API.LLVMPreferredAlignmentOfType(ref(data), ref(typ))
-preferred_alignment(data::DataLayout, var::GlobalVariable) = 
+preferred_alignment(data::DataLayout, var::GlobalVariable) =
     API.LLVMPreferredAlignmentOfGlobal(ref(data), ref(var))
 
 element_at(data::DataLayout, typ::StructType, offset::Integer) =
     API.LLVMElementAtOffset(ref(data), ref(typ), Culonglong(offset))
 
 offsetof(data::DataLayout, typ::StructType, element::Integer) =
-    API.LLVMOffsetOfElement(ref(data), ref(typ), Cuint(element))
+    API.LLVMOffsetOfElement(ref(data), ref(typ), element)

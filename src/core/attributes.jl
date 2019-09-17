@@ -53,8 +53,8 @@ value(attr::EnumAttribute) = API.LLVMGetEnumAttributeValue(ref(attr))
 ## string attribute
 
 StringAttribute(kind::String, value::String="", ctx::Context=GlobalContext()) =
-    StringAttribute(API.LLVMCreateStringAttribute(ref(ctx), kind, Cuint(length(kind)),
-                                                  value, Cuint(length(value))))
+    StringAttribute(API.LLVMCreateStringAttribute(ref(ctx), kind, length(kind),
+                                                  value, length(value)))
 
 function kind(attr::StringAttribute)
     len = Ref{Cuint}()

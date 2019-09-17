@@ -89,7 +89,7 @@ ret!(builder::Builder, V::Value) =
     Instruction(API.LLVMBuildRet(ref(builder), ref(V)))
 
 ret!(builder::Builder, RetVals::Vector{T}) where {T<:Value} =
-    Instruction(API.LLVMBuildAggregateRet(ref(builder), ref.(RetVals), Cuint(length(RetVals))))
+    Instruction(API.LLVMBuildAggregateRet(ref(builder), ref.(RetVals), length(RetVals)))
 
 br!(builder::Builder, Dest::BasicBlock) =
     Instruction(API.LLVMBuildBr(ref(builder), blockref(Dest)))
@@ -98,13 +98,13 @@ br!(builder::Builder, If::Value, Then::BasicBlock, Else::BasicBlock) =
     Instruction(API.LLVMBuildCondBr(ref(builder), ref(If), blockref(Then), blockref(Else)))
 
 switch!(builder::Builder, V::Value, Else::BasicBlock, NumCases::Integer=10) =
-    Instruction(API.LLVMBuildSwitch(ref(builder), ref(V), blockref(Else), Cuint(NumCases)))
+    Instruction(API.LLVMBuildSwitch(ref(builder), ref(V), blockref(Else), NumCases))
 
 indirectbr!(builder::Builder, Addr::Value, NumDests::Integer=10) =
-    Instruction(API.LLVMBuildIndirectBr(ref(builder), ref(Addr), Cuint(NumDests)))
+    Instruction(API.LLVMBuildIndirectBr(ref(builder), ref(Addr), NumDests))
 
 invoke!(builder::Builder, Fn::Value, Args::Vector{T}, Then::BasicBlock, Catch::BasicBlock, Name::String="") where {T<:Value} =
-    Instruction(API.LLVMBuildInvoke(ref(builder), ref(Fn), ref.(Args), Cuint(length(Args)), blockref(Then), blockref(Catch), Name))
+    Instruction(API.LLVMBuildInvoke(ref(builder), ref(Fn), ref.(Args), length(Args), blockref(Then), blockref(Catch), Name))
 
 resume!(builder::Builder, Exn::Value) =
     Instruction(API.LLVMBuildResume(ref(builder), ref(Exn)))
@@ -212,10 +212,10 @@ shuffle_vector!(builder::Builder, V1::Value, V2::Value, Mask::Value, Name::Strin
 # aggregate operations
 
 extract_value!(builder::Builder, AggVal::Value, Index, Name::String="") =
-    Value(API.LLVMBuildExtractValue(ref(builder), ref(AggVal), Cuint(Index), Name))
+    Value(API.LLVMBuildExtractValue(ref(builder), ref(AggVal), Index, Name))
 
 insert_value!(builder::Builder, AggVal::Value, EltVal::Value, Index, Name::String="") =
-    Value(API.LLVMBuildInsertValue(ref(builder), ref(AggVal), ref(EltVal), Cuint(Index), Name))
+    Value(API.LLVMBuildInsertValue(ref(builder), ref(AggVal), ref(EltVal), Index, Name))
 
 
 # memory access and addressing operations
@@ -251,13 +251,13 @@ atomic_cmpxchg!(builder::Builder, Ptr::Value, Cmp::Value, New::Value, SuccessOrd
     Instruction(API.LLVMBuildAtomicCmpXchg(ref(builder), ref(Ptr), ref(Cmp), ref(New), SuccessOrdering,FailureOrdering, convert(Bool, SingleThread)))
 
 gep!(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") where {T<:Value} =
-    Value(API.LLVMBuildGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))
+    Value(API.LLVMBuildGEP(ref(builder), ref(Pointer), ref.(Indices), length(Indices), Name))
 
 inbounds_gep!(builder::Builder, Pointer::Value, Indices::Vector{T}, Name::String="") where {T<:Value} =
-    Value(API.LLVMBuildInBoundsGEP(ref(builder), ref(Pointer), ref.(Indices), Cuint(length(Indices)), Name))
+    Value(API.LLVMBuildInBoundsGEP(ref(builder), ref(Pointer), ref.(Indices), length(Indices), Name))
 
 struct_gep!(builder::Builder, Pointer::Value, Idx, Name::String="") =
-    Value(API.LLVMBuildStructGEP(ref(builder), ref(Pointer), Cuint(Idx), Name))
+    Value(API.LLVMBuildStructGEP(ref(builder), ref(Pointer), Idx, Name))
 
 
 # conversion operations
@@ -338,13 +338,13 @@ select!(builder::Builder, If::Value, Then::Value, Else::Value, Name::String="") 
     Value(API.LLVMBuildSelect(ref(builder), ref(If), ref(Then), ref(Else), Name))
 
 call!(builder::Builder, Fn::Value, Args::Vector{T}=Value[], Name::String="") where {T<:Value} =
-    Instruction(API.LLVMBuildCall(ref(builder), ref(Fn), ref.(Args), Cuint(length(Args)), Name))
+    Instruction(API.LLVMBuildCall(ref(builder), ref(Fn), ref.(Args), length(Args), Name))
 
 va_arg!(builder::Builder, List::Value, Ty::LLVMType, Name::String="") =
     Instruction(API.LLVMBuildVAArg(ref(builder), ref(List), ref(Ty), Name))
 
 landingpad!(builder::Builder, Ty::LLVMType, PersFn::Value, NumClauses::Integer, Name::String="") =
-    Instruction(API.LLVMBuildLandingPad(ref(builder), ref(Ty), ref(PersFn), Cuint(NumClauses), Name))
+    Instruction(API.LLVMBuildLandingPad(ref(builder), ref(Ty), ref(PersFn), NumClauses, Name))
 
 neg!(builder::Builder, V::Value, Name::String="") =
     Value(API.LLVMBuildNeg(ref(builder), ref(V), Name))
