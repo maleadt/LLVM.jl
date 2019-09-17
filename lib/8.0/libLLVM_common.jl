@@ -1,46 +1,45 @@
 # Automatically generated using Clang.jl
 
-
 const LLVMBool = Cint
-mutable struct LLVMOpaqueMemoryBuffer end
+struct LLVMOpaqueMemoryBuffer end
 const LLVMMemoryBufferRef = Ptr{LLVMOpaqueMemoryBuffer}
-mutable struct LLVMOpaqueContext end
+struct LLVMOpaqueContext end
 const LLVMContextRef = Ptr{LLVMOpaqueContext}
-mutable struct LLVMOpaqueModule end
+struct LLVMOpaqueModule end
 const LLVMModuleRef = Ptr{LLVMOpaqueModule}
-mutable struct LLVMOpaqueType end
+struct LLVMOpaqueType end
 const LLVMTypeRef = Ptr{LLVMOpaqueType}
-mutable struct LLVMOpaqueValue end
+struct LLVMOpaqueValue end
 const LLVMValueRef = Ptr{LLVMOpaqueValue}
-mutable struct LLVMOpaqueBasicBlock end
+struct LLVMOpaqueBasicBlock end
 const LLVMBasicBlockRef = Ptr{LLVMOpaqueBasicBlock}
-mutable struct LLVMOpaqueMetadata end
+struct LLVMOpaqueMetadata end
 const LLVMMetadataRef = Ptr{LLVMOpaqueMetadata}
-mutable struct LLVMOpaqueNamedMDNode end
+struct LLVMOpaqueNamedMDNode end
 const LLVMNamedMDNodeRef = Ptr{LLVMOpaqueNamedMDNode}
-mutable struct LLVMOpaqueValueMetadataEntry end
+struct LLVMOpaqueValueMetadataEntry end
 const LLVMValueMetadataEntry = LLVMOpaqueValueMetadataEntry
-mutable struct LLVMOpaqueBuilder end
+struct LLVMOpaqueBuilder end
 const LLVMBuilderRef = Ptr{LLVMOpaqueBuilder}
-mutable struct LLVMOpaqueDIBuilder end
+struct LLVMOpaqueDIBuilder end
 const LLVMDIBuilderRef = Ptr{LLVMOpaqueDIBuilder}
-mutable struct LLVMOpaqueModuleProvider end
+struct LLVMOpaqueModuleProvider end
 const LLVMModuleProviderRef = Ptr{LLVMOpaqueModuleProvider}
-mutable struct LLVMOpaquePassManager end
+struct LLVMOpaquePassManager end
 const LLVMPassManagerRef = Ptr{LLVMOpaquePassManager}
-mutable struct LLVMOpaquePassRegistry end
+struct LLVMOpaquePassRegistry end
 const LLVMPassRegistryRef = Ptr{LLVMOpaquePassRegistry}
-mutable struct LLVMOpaqueUse end
+struct LLVMOpaqueUse end
 const LLVMUseRef = Ptr{LLVMOpaqueUse}
-mutable struct LLVMOpaqueAttributeRef end
+struct LLVMOpaqueAttributeRef end
 const LLVMAttributeRef = Ptr{LLVMOpaqueAttributeRef}
-mutable struct LLVMOpaqueDiagnosticInfo end
+struct LLVMOpaqueDiagnosticInfo end
 const LLVMDiagnosticInfoRef = Ptr{LLVMOpaqueDiagnosticInfo}
 const LLVMComdat = Cvoid
 const LLVMComdatRef = Ptr{LLVMComdat}
-mutable struct LLVMOpaqueModuleFlagEntry end
+struct LLVMOpaqueModuleFlagEntry end
 const LLVMModuleFlagEntry = LLVMOpaqueModuleFlagEntry
-mutable struct LLVMOpaqueJITEventListener end
+struct LLVMOpaqueJITEventListener end
 const LLVMJITEventListenerRef = Ptr{LLVMOpaqueJITEventListener}
 
 @cenum(LLVMVerifierFailureAction,
@@ -55,9 +54,6 @@ const LLVMJITEventListenerRef = Ptr{LLVMOpaqueJITEventListener}
     LLVMNoDuplicatesComdatSelectionKind = 3,
     LLVMSameSizeComdatSelectionKind = 4,
 )
-
-# Skipping MacroDefinition: LLVM_FOR_EACH_VALUE_SUBCLASS ( macro ) macro ( Argument ) macro ( BasicBlock ) macro ( InlineAsm ) macro ( User ) macro ( Constant ) macro ( BlockAddress ) macro ( ConstantAggregateZero ) macro ( ConstantArray ) macro ( ConstantDataSequential ) macro ( ConstantDataArray ) macro ( ConstantDataVector ) macro ( ConstantExpr ) macro ( ConstantFP ) macro ( ConstantInt ) macro ( ConstantPointerNull ) macro ( ConstantStruct ) macro ( ConstantTokenNone ) macro ( ConstantVector ) macro ( GlobalValue ) macro ( GlobalAlias ) macro ( GlobalIFunc ) macro ( GlobalObject ) macro ( Function ) macro ( GlobalVariable ) macro ( UndefValue ) macro ( Instruction ) macro ( BinaryOperator ) macro ( CallInst ) macro ( IntrinsicInst ) macro ( DbgInfoIntrinsic ) macro ( DbgVariableIntrinsic ) macro ( DbgDeclareInst ) macro ( DbgLabelInst ) macro ( MemIntrinsic ) macro ( MemCpyInst ) macro ( MemMoveInst ) macro ( MemSetInst ) macro ( CmpInst ) macro ( FCmpInst ) macro ( ICmpInst ) macro ( ExtractElementInst ) macro ( GetElementPtrInst ) macro ( InsertElementInst ) macro ( InsertValueInst ) macro ( LandingPadInst ) macro ( PHINode ) macro ( SelectInst ) macro ( ShuffleVectorInst ) macro ( StoreInst ) macro ( BranchInst ) macro ( IndirectBrInst ) macro ( InvokeInst ) macro ( ReturnInst ) macro ( SwitchInst ) macro ( UnreachableInst ) macro ( ResumeInst ) macro ( CleanupReturnInst ) macro ( CatchReturnInst ) macro ( FuncletPadInst ) macro ( CatchPadInst ) macro ( CleanupPadInst ) macro ( UnaryInstruction ) macro ( AllocaInst ) macro ( CastInst ) macro ( AddrSpaceCastInst ) macro ( BitCastInst ) macro ( FPExtInst ) macro ( FPToSIInst ) macro ( FPToUIInst ) macro ( FPTruncInst ) macro ( IntToPtrInst ) macro ( PtrToIntInst ) macro ( SExtInst ) macro ( SIToFPInst ) macro ( TruncInst ) macro ( UIToFPInst ) macro ( ZExtInst ) macro ( ExtractValueInst ) macro ( LoadInst ) macro ( VAArgInst )
-# Skipping MacroDefinition: LLVM_DECLARE_VALUE_CAST ( name ) LLVMValueRef LLVMIsA ## name ( LLVMValueRef Val ) ;
 
 const LLVMFatalErrorHandler = Ptr{Cvoid}
 
@@ -480,33 +476,20 @@ end
 
 const LLVMSymbolLookupCallback = Ptr{Cvoid}
 const LLVMErrorSuccess = 0
-mutable struct LLVMOpaqueError end
+struct LLVMOpaqueError end
 const LLVMErrorRef = Ptr{LLVMOpaqueError}
 const LLVMErrorTypeId = Ptr{Cvoid}
-
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## TargetInfo ( void ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## Target ( void ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) void LLVMInitialize ## TargetName ## TargetMC ( void ) ;
-# Skipping MacroDefinition: LLVM_ASM_PRINTER ( TargetName ) void LLVMInitialize ## TargetName ## AsmPrinter ( void ) ;
-# Skipping MacroDefinition: LLVM_ASM_PARSER ( TargetName ) void LLVMInitialize ## TargetName ## AsmParser ( void ) ;
-# Skipping MacroDefinition: LLVM_DISASSEMBLER ( TargetName ) void LLVMInitialize ## TargetName ## Disassembler ( void ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) LLVMInitialize ## TargetName ## TargetInfo ( ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) LLVMInitialize ## TargetName ## Target ( ) ;
-# Skipping MacroDefinition: LLVM_TARGET ( TargetName ) LLVMInitialize ## TargetName ## TargetMC ( ) ;
-# Skipping MacroDefinition: LLVM_ASM_PRINTER ( TargetName ) LLVMInitialize ## TargetName ## AsmPrinter ( ) ;
-# Skipping MacroDefinition: LLVM_ASM_PARSER ( TargetName ) LLVMInitialize ## TargetName ## AsmParser ( ) ;
-# Skipping MacroDefinition: LLVM_DISASSEMBLER ( TargetName ) LLVMInitialize ## TargetName ## Disassembler ( ) ;
 
 @cenum(LLVMByteOrdering,
     LLVMBigEndian = 0,
     LLVMLittleEndian = 1,
 )
 
-mutable struct LLVMOpaqueTargetData end
+struct LLVMOpaqueTargetData end
 const LLVMTargetDataRef = Ptr{LLVMOpaqueTargetData}
-mutable struct LLVMOpaqueTargetLibraryInfotData end
+struct LLVMOpaqueTargetLibraryInfotData end
 const LLVMTargetLibraryInfoRef = Ptr{LLVMOpaqueTargetLibraryInfotData}
-mutable struct LLVMOpaqueTargetMachine end
+struct LLVMOpaqueTargetMachine end
 const LLVMTargetMachineRef = Ptr{LLVMOpaqueTargetMachine}
 const LLVMTarget = Cvoid
 const LLVMTargetRef = Ptr{LLVMTarget}
@@ -540,11 +523,11 @@ const LLVMTargetRef = Ptr{LLVMTarget}
     LLVMObjectFile = 1,
 )
 
-mutable struct LLVMOpaqueGenericValue end
+struct LLVMOpaqueGenericValue end
 const LLVMGenericValueRef = Ptr{LLVMOpaqueGenericValue}
-mutable struct LLVMOpaqueExecutionEngine end
+struct LLVMOpaqueExecutionEngine end
 const LLVMExecutionEngineRef = Ptr{LLVMOpaqueExecutionEngine}
-mutable struct LLVMOpaqueMCJITMemoryManager end
+struct LLVMOpaqueMCJITMemoryManager end
 const LLVMMCJITMemoryManagerRef = Ptr{LLVMOpaqueMCJITMemoryManager}
 
 struct LLVMMCJITCompilerOptions
@@ -581,13 +564,13 @@ const llvm_lto_status_t = llvm_lto_status
     LLVMLinkerPreserveSource_Removed = 1,
 )
 
-mutable struct LLVMOpaqueObjectFile end
+struct LLVMOpaqueObjectFile end
 const LLVMObjectFileRef = Ptr{LLVMOpaqueObjectFile}
-mutable struct LLVMOpaqueSectionIterator end
+struct LLVMOpaqueSectionIterator end
 const LLVMSectionIteratorRef = Ptr{LLVMOpaqueSectionIterator}
-mutable struct LLVMOpaqueSymbolIterator end
+struct LLVMOpaqueSymbolIterator end
 const LLVMSymbolIteratorRef = Ptr{LLVMOpaqueSymbolIterator}
-mutable struct LLVMOpaqueRelocationIterator end
+struct LLVMOpaqueRelocationIterator end
 const LLVMRelocationIteratorRef = Ptr{LLVMOpaqueRelocationIterator}
 const OPT_REMARKS_API_VERSION = 0
 
@@ -662,11 +645,11 @@ const lto_bool_t = Bool
     LTO_CODEGEN_PIC_MODEL_DEFAULT = 3,
 )
 
-mutable struct LLVMOpaqueLTOModule end
+struct LLVMOpaqueLTOModule end
 const lto_module_t = Ptr{LLVMOpaqueLTOModule}
-mutable struct LLVMOpaqueLTOCodeGenerator end
+struct LLVMOpaqueLTOCodeGenerator end
 const lto_code_gen_t = Ptr{LLVMOpaqueLTOCodeGenerator}
-mutable struct LLVMOpaqueThinLTOCodeGenerator end
+struct LLVMOpaqueThinLTOCodeGenerator end
 const thinlto_code_gen_t = Ptr{LLVMOpaqueThinLTOCodeGenerator}
 
 @cenum(lto_codegen_diagnostic_severity_t,
@@ -683,5 +666,5 @@ struct LTOObjectBuffer
     Size::Csize_t
 end
 
-mutable struct LLVMOpaquePassManagerBuilder end
+struct LLVMOpaquePassManagerBuilder end
 const LLVMPassManagerBuilderRef = Ptr{LLVMOpaquePassManagerBuilder}
