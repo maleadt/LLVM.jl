@@ -330,12 +330,12 @@ const LLVMFatalErrorHandler = Ptr{Cvoid}
     LLVMModuleFlagBehaviorAppendUnique = 5,
 )
 
-# These are note defined in llvm-c
-# begin enum LLVMAttributeIndex
-const LLVMAttributeIndex = UInt32
-const LLVMAttributeReturnIndex = (UInt32)(0)
-const LLVMAttributeFunctionIndex = reinterpret(UInt32, Int32(-1))
-# end enum LLVMAttributeIndex
+# the following isn't defined as a regular enum in llvm-c, so Clang.jl fails to pick it up
+@cenum(LLVMAttributeIndex::Cuint,
+    LLVMAttributeReturnIndex = 0,
+    LLVMAttributeFunctionIndex = reinterpret(UInt32, Int32(-1))
+)
+
 const LLVMDiagnosticHandler = Ptr{Cvoid}
 const LLVMYieldCallback = Ptr{Cvoid}
 
