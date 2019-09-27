@@ -29,26 +29,12 @@ test:dev:
 
 # special tests
 
-test:dev:llvm8:
-  extends: .test:dev
-  image: ubuntu:18.04
-  before_script:
-    - apt update
-    - apt install -y git build-essential libatomic1 python gfortran perl wget m4 cmake pkg-config
-    - git clone https://github.com/JuliaLang/julia
-    - make -C julia -j$(nproc) install LLVM_VER=8.0.0 USE_BINARYBUILDER_LLVM=0
-    - ln -s $(pwd)/julia/julia /usr/bin/julia
-    - julia -e 'using InteractiveUtils;
-                versioninfo()'
+test:source:llvm8:
+  extends: .test:source
+  variables:
+    CI_BUILD_ARGS: 'LLVM_VER=8.0.0 USE_BINARYBUILDER_LLVM=0'
 
-test:dev:llvm9:
-  extends: .test:dev
-  image: ubuntu:18.04
-  before_script:
-    - apt update
-    - apt install -y git build-essential libatomic1 python gfortran perl wget m4 cmake pkg-config
-    - git clone https://github.com/JuliaLang/julia
-    - make -C julia -j$(nproc) install LLVM_VER=9.0.0rc6 USE_BINARYBUILDER_LLVM=0
-    - ln -s $(pwd)/julia/julia /usr/bin/julia
-    - julia -e 'using InteractiveUtils;
-                versioninfo()'
+test:source:llvm9:
+  extends: .test:source
+  variables:
+    CI_BUILD_ARGS: 'LLVM_VER=9.0.0rc6 USE_BINARYBUILDER_LLVM=0'
