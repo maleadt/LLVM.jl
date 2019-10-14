@@ -53,7 +53,6 @@ let
     vercmp_compat(a,b) = a.major>b.major  || (a.major==b.major && a.minor>=b.minor)
 
     llvmjl_wrappers_path = joinpath(@__DIR__, "..", "lib")
-    Base.include_dependency(llvmjl_wrappers_path)
 
     llvmjl_wrappers = filter(path->isdir(joinpath(llvmjl_wrappers_path, path)),
                                    readdir(llvmjl_wrappers_path))
