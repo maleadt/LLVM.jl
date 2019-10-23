@@ -15,14 +15,6 @@ identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
 UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(ref(typ)))
 
 
-@checked struct PointerNull <: User
-    ref::reftype(User)
-end
-identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNull
-
-PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
-
-
 abstract type Constant <: User end
 
 # forward declarations
@@ -30,6 +22,14 @@ abstract type Constant <: User end
     ref::API.LLVMModuleRef
 end
 abstract type Instruction <: User end
+
+
+@checked struct PointerNull <: Constant
+    ref::reftype(User)
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNull
+
+PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
 
 
 ## scalar
