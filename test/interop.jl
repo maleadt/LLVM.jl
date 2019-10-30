@@ -78,6 +78,8 @@ c2() = @asmcall("nop", "", false, Nothing)
 c3() = @asmcall("nop", "", false, Nothing, Tuple{})
 @test c3() == nothing
 
+if Sys.ARCH == :x86 || Sys.ARCH == :x86_64
+
 # arguments
 
 d1(a) = @asmcall("bswap \$0", "=r,r", Int32, Tuple{Int32}, a)
@@ -87,6 +89,10 @@ d1(a) = @asmcall("bswap \$0", "=r,r", Int32, Tuple{Int32}, a)
 
 e1() = @asmcall("mov \$\$1, \$0; mov \$\$2, \$1;", "=r,=r", Tuple{Int16,Int32})
 @test e1() == (Int16(1), Int32(2))
+
+# TODO: alternative test snippets for other platforms
+
+end
 
 end
 
