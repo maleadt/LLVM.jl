@@ -51,11 +51,13 @@ LLVM.Module("SomeModule", ctx) do mod
         return false
     end
 
-    let pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
+    if VERSION < v"1.4.0-DEV.589"
+        let pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
 
-        FunctionPassManager(mod) do fpm
-            add!(fpm, pass)
-            run!(fpm, fn)
+            FunctionPassManager(mod) do fpm
+                add!(fpm, pass)
+                run!(fpm, fn)
+            end
         end
     end
 end
