@@ -58,6 +58,8 @@ export BasicBlockPass
     root::Any
 
     function BasicBlockPass(name::String, runner::Core.Function)
+        VERSION >= v"1.4.0-DEV.589" && error("BasicBlockPass functionality has been removed from Julia and LLVM")
+
         function callback(ptr::Ptr{Cvoid})::Core.Bool
             bb = BasicBlock(convert(reftype(BasicBlock), ptr))
             return runner(bb)::Core.Bool
