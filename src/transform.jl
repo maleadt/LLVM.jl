@@ -137,4 +137,7 @@ internalize!(pm::PassManager, exports::Vector{String}) =
 
 export nvvm_reflect!
 
-nvvm_reflect!(pm::PassManager, smversion=35) = API.LLVMAddNVVMReflectPass(ref(pm), smversion)
+function nvvm_reflect!(pm::PassManager, smversion=35)
+    VERSION >= v"1.5.0-DEV.138" && error("NVVMReflect pass has been removed from Julia and LLVM")
+    API.LLVMAddNVVMReflectPass(ref(pm), smversion)
+end
