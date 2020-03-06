@@ -60,7 +60,11 @@ Return if a type would be boxed when instantiated in the code generator.
 """
 function isboxed(typ::Type)
     isboxed_ref = Ref{Bool}()
-    ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef, (Any, Ptr{Bool}), typ, isboxed_ref)
+    if VERSION >= v"1.5.0-DEV.393"
+        ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef, (Any, Ptr{Bool}), typ, isboxed_ref)
+    else
+        ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef, (Any, Ptr{Bool}), typ, isboxed_ref)
+    end
     return isboxed_ref[]
 end
 
@@ -71,8 +75,13 @@ Convert a Julia type `typ` to its LLVM representation. Fails if the type would b
 """
 function Base.convert(::Type{LLVMType}, typ::Type, allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
-    llvmtyp = LLVMType(ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef,
-                             (Any, Ptr{Bool}), typ, isboxed_ref))
+    if VERSION >= v"1.5.0-DEV.393"
+        llvmtyp = LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
+                                 (Any, Ptr{Bool}), typ, isboxed_ref))
+    else
+        llvmtyp = LLVMType(ccall(:julia_type_to_llvm, LLVM.API.LLVMTypeRef,
+                                 (Any, Ptr{Bool}), typ, isboxed_ref))
+    end
     if !allow_boxed && isboxed_ref[]
         error("Conversion of boxed type $typ is not allowed")
     end

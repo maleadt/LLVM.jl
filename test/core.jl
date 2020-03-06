@@ -444,13 +444,6 @@ LLVM.Module("SomeModule", ctx) do mod
         unsafe_delete!(mod, gv)
         @test isempty(gvars)
     end
-
-    # bug: PointerNull wasn't a constant, and couldn't be used as an initializer
-    let ptrtyp = LLVM.PointerType(LLVM.VoidType(ctx))
-        gv = GlobalVariable(mod, ptrtyp, "SomeOtherGlobal")
-        init = PointerNull(ptrtyp)
-        initializer!(gv, init)
-    end
 end
 end
 
