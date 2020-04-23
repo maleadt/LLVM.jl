@@ -131,7 +131,7 @@ include("deprecated.jl")
 
 function __init__()
     libllvm_paths = filter(Libdl.dllist()) do lib
-        occursin("LLVM", basename(lib))
+        occursin(r"LLVM\b", basename(lib))
     end
     if length(libllvm_paths) > 1
         # NOTE: this still allows switching to a non-USE_LLVM_SHLIB version, but
