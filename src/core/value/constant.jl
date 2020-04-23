@@ -142,7 +142,7 @@ InlineAsm(typ::FunctionType, asm::String, constraints::String,
 abstract type GlobalValue <: Constant end
 
 export GlobalValue,
-       parent, isdeclaration,
+       isdeclaration,
        linkage, linkage!,
        section, section!,
        visibility, visibility!,
