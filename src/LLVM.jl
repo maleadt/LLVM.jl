@@ -127,8 +127,8 @@ include("interop.jl")
 include("deprecated.jl")
 
 # precompile
-#include("../deps/SnoopCompile/precompile/precompile_LLVM.jl")
-#_precompile_()
+include("../deps/SnoopCompile/precompile/precompile_LLVM.jl")
+_precompile_()
 
 
 ## initialization
