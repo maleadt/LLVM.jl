@@ -87,25 +87,19 @@ function LLVMAddTargetLibraryInfoByTriple(Triple, PM::LLVMPassManagerRef)
 end
 
 if VERSION < v"1.2.0-DEV.531"
-
 function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
     @apicall(:LLVMExtraAddMVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
-
 else
 
 if libllvm_version < v"8.0"
-
-function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
-    @apicall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
-end
-
+    function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
+        @apicall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
+    end
 else
-
-function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
-    @apicall(:LLVMExtraAddNVVMReflectFunctionPass,Cvoid,(LLVMPassManagerRef, Cuint), PM, smversion)
-end
-
+    function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
+        @apicall(:LLVMExtraAddNVVMReflectFunctionPass,Cvoid,(LLVMPassManagerRef, Cuint), PM, smversion)
+    end
 end
 
 function LLVMAddAllocOptPass(PM::LLVMPassManagerRef)
@@ -151,23 +145,25 @@ end
 end
 
 if VERSION >= v"1.3.0-DEV.95"
-
 function LLVMAddFinalLowerGCPass(PM::LLVMPassManagerRef)
     @apicall(:LLVMExtraAddFinalLowerGCPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
+end
 
-end # v"1.3.0-DEV.95"
+if VERSION >= v"1.5.0-DEV.802"
+function LLVMAddRemoveJuliaAddrspacesPass(PM::LLVMPassManagerRef)
+    @apicall(:LLVMExtraAddRemoveJuliaAddrspacesPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+end
 
 function LLVMGetValueContext(V::LLVMValueRef)
     @apicall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end
 
 if VERSION >= v"0.7.0-alpha.37"
-
 function LLVMGetSourceLocation(V::LLVMValueRef, index, Name, Filename, Line, Column)
     @apicall(:LLVMExtraGetSourceLocation,Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
 end
-
 end
 
 if libllvm_version >= v"8.0"

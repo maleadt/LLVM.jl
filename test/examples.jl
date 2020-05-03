@@ -19,8 +19,12 @@ filter!(file -> !occursin("Kaleidoscope", file), examples)
 cd(examples_dir) do
     examples = relpath.(examples, Ref(examples_dir))
     @testset for example in examples
-        cmd = julia_cmd(`$example`)
-        @test success(pipeline(cmd, stderr=stderr))
+        cmd = Base.julia_cmd()
+        if Base.JLOptions().project != C_NULL
+            cmd = `$cmd --project=$(unsafe_string(Base.JLOptions().project))`
+        end
+
+        @test success(pipeline(`$cmd $example`, stderr=stderr))
     end
 end
 
