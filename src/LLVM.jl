@@ -85,7 +85,7 @@ end
 
 ## source code includes
 
-include("util/types.jl")
+include("util.jl")
 
 include("base.jl")
 

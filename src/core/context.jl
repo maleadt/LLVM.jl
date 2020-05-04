@@ -50,7 +50,7 @@ end
 reftype(::Type{DiagnosticInfo}) = API.LLVMDiagnosticInfoRef
 
 severity(di::DiagnosticInfo) = API.LLVMGetDiagInfoSeverity(ref(di))
-message(di::DiagnosticInfo) = unsafe_string(API.LLVMGetDiagInfoDescription(ref(di)))
+message(di::DiagnosticInfo) = unsafe_message(API.LLVMGetDiagInfoDescription(ref(di)))
 
 
 ## handlers

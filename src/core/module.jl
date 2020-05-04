@@ -31,7 +31,7 @@ function Module(f::Core.Function, args...)
 end
 
 function Base.show(io::IO, mod::Module)
-    output = unsafe_string(API.LLVMPrintModuleToString(ref(mod)))
+    output = unsafe_message(API.LLVMPrintModuleToString(ref(mod)))
     print(io, output)
 end
 

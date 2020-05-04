@@ -29,7 +29,7 @@ issized(typ::LLVMType) =
 context(typ::LLVMType) = Context(API.LLVMGetTypeContext(ref(typ)))
 
 function Base.show(io::IO, typ::LLVMType)
-    output = unsafe_string(API.LLVMPrintTypeToString(ref(typ)))
+    output = unsafe_message(API.LLVMPrintTypeToString(ref(typ)))
     print(io, output)
 end
 
