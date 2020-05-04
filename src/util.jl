@@ -1,4 +1,13 @@
-# Defining types in the LLVM type hierarchy
+# utilities
+
+function unsafe_message(ptr)
+    str = unsafe_string(ptr)
+    API.LLVMDisposeMessage(ptr)
+    str
+end
+
+
+## defining types in the LLVM type hierarchy
 
 # llvm.org/docs/doxygen/html/group__LLVMCSupportTypes.html
 

@@ -25,7 +25,7 @@ end
 dispose(data::DataLayout) = API.LLVMDisposeTargetData(ref(data))
 
 Base.convert(::Type{String}, data::DataLayout) =
-    unsafe_string(API.LLVMCopyStringRepOfTargetData(ref(data)))
+    unsafe_message(API.LLVMCopyStringRepOfTargetData(ref(data)))
 
 function Base.show(io::IO, data::DataLayout)
     @printf(io, "DataLayout(%s)", convert(String, data))

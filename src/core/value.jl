@@ -39,7 +39,7 @@ name(val::Value) = unsafe_string(API.LLVMGetValueName(ref(val)))
 name!(val::Value, name::String) = API.LLVMSetValueName(ref(val), name)
 
 function Base.show(io::IO, val::Value)
-    output = unsafe_string(API.LLVMPrintValueToString(ref(val)))
+    output = unsafe_message(API.LLVMPrintValueToString(ref(val)))
     print(io, output)
 end
 

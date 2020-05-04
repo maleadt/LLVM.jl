@@ -15,8 +15,7 @@ function Target(triple::String)
     status = convert(Core.Bool, API.LLVMGetTargetFromTriple(triple, out_ref, out_error))
 
     if status
-        error = unsafe_string(out_error[])
-        API.LLVMDisposeMessage(out_error[])
+        error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
