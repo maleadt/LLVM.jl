@@ -14,8 +14,10 @@ operands(user::User) = UserOperandSet(user)
 
 Base.eltype(::UserOperandSet) = Value
 
-Base.getindex(iter::UserOperandSet, i::Integer) =   # TODO: otherwise unitrange indexing errors
-    Value(API.LLVMGetOperand(ref(iter.user), i-1))
+function Base.getindex(iter::UserOperandSet, i::Integer)   # TODO: otherwise unitrange indexing errors
+    @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
+    return Value(API.LLVMGetOperand(ref(iter.user), i-1))
+end
 
 Base.setindex!(iter::UserOperandSet, val::Value, i) =
     API.LLVMSetOperand(ref(iter.user), i-1, ref(val))
