@@ -217,8 +217,10 @@ elements(typ::StructType) = StructTypeElementSet(typ)
 
 Base.eltype(::StructTypeElementSet) = LLVMType
 
-Base.getindex(iter::StructTypeElementSet, i) =
-    LLVMType(API.LLVMStructGetTypeAtIndex(ref(iter.typ), i-1))
+function Base.getindex(iter::StructTypeElementSet, i)
+    @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
+    return LLVMType(API.LLVMStructGetTypeAtIndex(ref(iter.typ), i-1))
+end
 
 function Base.iterate(iter::StructTypeElementSet, i=1)
     i >= length(iter) + 1 ? nothing : (iter[i], i+1)

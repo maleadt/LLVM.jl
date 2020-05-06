@@ -68,6 +68,7 @@ Context() do ctx
     @test !isvararg(ft)
     @test return_type(ft) == x
     @test parameters(ft) == y
+    @test_throws BoundsError parameters(ft)[3]
 end
 
 # sequential
@@ -134,6 +135,7 @@ Context() do ctx
 
             @test first(elem_it) == elem[1]
             @test last(elem_it) == elem[end]
+            @test_throws BoundsError elem_it[3]
 
             i = 1
             for el in elem_it
@@ -284,6 +286,7 @@ Context() do ctx
             @test length(ops) == 2
             @test ops[1] == first(parameters(fun))
             @test ops[2] == ConstantInt(LLVM.Int32Type(ctx), 1)
+            @test_throws BoundsError ops[3]
         elseif i == 2
             @test length(ops) == 0
             @test collect(ops) == []
@@ -895,6 +898,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
         @test succ[1] == bb2
         @test succ[2] == bb3
+        @test_throws BoundsError succ[3]
 
         @test collect(succ) == [bb2, bb3]
         @test first(succ) == bb2

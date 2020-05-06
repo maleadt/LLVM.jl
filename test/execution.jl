@@ -123,6 +123,7 @@ function emit_phi(ctx::Context)
         append!(LLVM.incoming(phi), [(thencg, then), (elsecg, elsee)])
 
         @test length(LLVM.incoming(phi)) == 2
+        @test_throws BoundsError LLVM.incoming(phi)[3]
 
         ret!(builder, phi)
     end
@@ -184,7 +185,7 @@ Context() do ctx
         end
         dispose.(args)
     end
-    
+
     let mod1 = emit_sum(ctx), mod2 = emit_retint(ctx, 42)
         Interpreter(mod1) do engine
             @test_throws ErrorException collect(functions(engine))

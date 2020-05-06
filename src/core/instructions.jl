@@ -167,8 +167,10 @@ successors(term::Instruction) = TerminatorSuccessorSet(term)
 
 Base.eltype(::TerminatorSuccessorSet) = BasicBlock
 
-Base.getindex(iter::TerminatorSuccessorSet, i) =
-    BasicBlock(API.LLVMGetSuccessor(ref(iter.term), i-1))
+function Base.getindex(iter::TerminatorSuccessorSet, i)
+    @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
+    return BasicBlock(API.LLVMGetSuccessor(ref(iter.term), i-1))
+end
 
 Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
     API.LLVMSetSuccessor(ref(iter.term), i-1, blockref(bb))
@@ -196,9 +198,11 @@ incoming(phi::Instruction) = PhiIncomingSet(phi)
 
 Base.eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
 
-Base.getindex(iter::PhiIncomingSet, i) =
-    tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), i-1)),
-                BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), i-1)))
+function Base.getindex(iter::PhiIncomingSet, i)
+    @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
+    return tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), i-1)),
+                       BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), i-1)))
+end
 
 function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{V, BasicBlock}} where V <: Value)
     vals, blocks = zip(args...)

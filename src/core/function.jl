@@ -84,8 +84,10 @@ parameters(f::Function) = FunctionParameterSet(f)
 
 Base.eltype(::FunctionParameterSet) = Argument
 
-Base.getindex(iter::FunctionParameterSet, i) =
-  Argument(API.LLVMGetParam(ref(iter.f), i-1))
+function Base.getindex(iter::FunctionParameterSet, i)
+    @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
+    return Argument(API.LLVMGetParam(ref(iter.f), i-1))
+end
 
 function Base.iterate(iter::FunctionParameterSet, state=API.LLVMGetFirstParam(ref(iter.f)))
     state == C_NULL ? nothing : (Argument(state), API.LLVMGetNextParam(state))
