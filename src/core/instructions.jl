@@ -1,6 +1,6 @@
 export Instruction, unsafe_delete!,
        metadata, metadata!,
-       parent, opcode,
+       opcode,
        predicate_int, predicate_real
 
 # forward definition of Instruction in src/core/value/constant.jl

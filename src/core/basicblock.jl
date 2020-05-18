@@ -1,5 +1,5 @@
 export BasicBlock, unsafe_delete!,
-       parent, terminator, name,
+       terminator, name,
        move_before, move_after
 
 @checked struct BasicBlock <: Value
