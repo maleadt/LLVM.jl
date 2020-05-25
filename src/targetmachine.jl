@@ -64,7 +64,7 @@ function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType,
     return nothing
 end
 
-function add_transform_info!(pm::PassManager, tm::Union{Nothing,TargetMachine})
+function add_transform_info!(pm::PassManager, tm::Union{Nothing,TargetMachine}=nothing)
     if tm !== nothing
         API.LLVMAddAnalysisPasses(ref(tm), ref(pm))
     elseif VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")

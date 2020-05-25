@@ -175,7 +175,7 @@ function LLVMExtraAppendToCompilerUsed(Mod::LLVMModuleRef, Values, Count)
     @apicall(:LLVMExtraAppendToCompilerUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
 end
 
-function LLVMExtraAddGenericAnalysisPasses(T, PM)
+function LLVMExtraAddGenericAnalysisPasses(PM)
     @apicall(:LLVMExtraAddGenericAnalysisPasses, Cvoid, (LLVMPassManagerRef,), PM)
 end
 end
