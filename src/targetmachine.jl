@@ -64,7 +64,12 @@ function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType,
     return nothing
 end
 
-add_transform_info!(pm::PassManager, tm::TargetMachine) =
-    API.LLVMAddAnalysisPasses(ref(tm), ref(pm))
+function add_transform_info!(pm::PassManager, tm::Union{Nothing,TargetMachine})
+    if tm !== nothing
+        API.LLVMAddAnalysisPasses(ref(tm), ref(pm))
+    elseif VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")
+        API.LLVMExtraAddGenericAnalysisPasses(ref(pm))
+    end
+end
 add_library_info!(pm::PassManager, triple::String) =
     API.LLVMAddTargetLibraryInfoByTriple(triple, ref(pm))

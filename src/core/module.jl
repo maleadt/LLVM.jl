@@ -4,7 +4,8 @@ export dispose,
        name, name!,
        triple, triple!,
        datalayout, datalayout!,
-       context, inline_asm!
+       context, inline_asm!,
+       set_used!, set_compiler_used!
 
 # forward definition of Module in src/core/value/constant.jl
 reftype(::Type{Module}) = API.LLVMModuleRef
@@ -56,6 +57,18 @@ inline_asm!(mod::Module, asm::String) =
 
 context(mod::Module) = Context(API.LLVMGetModuleContext(ref(mod)))
 
+if VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")
+
+set_used!(mod::Module, values::GlobalVariable...) =
+    API.LLVMExtraAppendToUsed(ref(mod), collect(ref.(values)), length(values))
+
+set_compiler_used!(mod::Module, values::GlobalVariable...) =
+    API.LLVMExtraAppendToCompilerUsed(ref(mod), collect(ref.(values)), length(values))
+
+else
+set_used!(mod::Module, values::GlobalVariable...) = nothing
+set_compiler_used!(mod::Module, values::GlobalVariable...) = nothing
+end
 
 ## type iteration
 
