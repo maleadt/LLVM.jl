@@ -166,6 +166,20 @@ function LLVMGetSourceLocation(V::LLVMValueRef, index, Name, Filename, Line, Col
 end
 end
 
+if VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")
+function LLVMExtraAppendToUsed(Mod::LLVMModuleRef, Values, Count)
+    @apicall(:LLVMExtraAppendToUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
+end
+
+function LLVMExtraAppendToCompilerUsed(Mod::LLVMModuleRef, Values, Count)
+    @apicall(:LLVMExtraAppendToCompilerUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
+end
+
+function LLVMExtraAddGenericAnalysisPasses(T, PM)
+    @apicall(:LLVMExtraAddGenericAnalysisPasses, Cvoid, (LLVMPassManagerRef,), PM)
+end
+end
+
 if libllvm_version >= v"8.0"
     @cenum(LLVMDebugEmissionKind,
         LLVMDebugEmissionKindNoDebug = 0,
