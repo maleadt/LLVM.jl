@@ -1,4 +1,5 @@
 using LLVM.Interop
+using InteractiveUtils
 
 @testset "interop" begin
 
@@ -124,6 +125,60 @@ end
 end
 
 end
+end
+
+VERSION >= v"1.5-" && @testset "pointer" begin
+
+a = Int64[1]
+ptr = reinterpret(Core.LLVMPtr{Int64,0}, pointer(a))
+@test unsafe_load(ptr) == 1
+unsafe_store!(ptr, 2)
+@test unsafe_load(ptr) == 2
+
+ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr)}))
+@test contains(ir, r"@julia_unsafe_load_\d+\(i8\*\)")
+@test contains(ir, r"load i64, i64\* %\d+, align 1")
+
+ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr), Int, Val{4}}))
+@test contains(ir, r"load i64, i64\* %\d+, align 4")
+
+@testset "reinterpret(Nothing, nothing)" begin
+    ptr = reinterpret(Core.LLVMPtr{Nothing,0}, C_NULL)
+    @test unsafe_load(ptr) === nothing
+end
+
+@testset "TBAA" begin
+    load(ptr) = unsafe_load(ptr)
+    store(ptr) = unsafe_store!(ptr, 0)
+
+    for f in (load, store)
+        ir = sprint(io->code_llvm(io, f,
+                                  Tuple{Core.LLVMPtr{Float32,1}};
+                                  dump_module=true, raw=true))
+        @test occursin("custom_tbaa_addrspace(1)", ir)
+
+        # no TBAA on generic pointers
+        ir = sprint(io->code_llvm(io, f,
+                                  Tuple{Core.LLVMPtr{Float32,0}};
+                                  dump_module=true, raw=true))
+        @test !occursin("custom_tbaa", ir)
+    end
+end
+
+@testset "ghost values" begin
+    @eval struct Singleton end
+
+    ir = sprint(io->code_llvm(io, unsafe_load,
+                              Tuple{Core.LLVMPtr{Singleton,0}}))
+    @test occursin("ret void", ir)
+    @test unsafe_load(reinterpret(Core.LLVMPtr{Singleton,0}, C_NULL)) === Singleton()
+
+    ir = sprint(io->code_llvm(io, unsafe_store!,
+                              Tuple{Core.LLVMPtr{Singleton,0},
+                              Singleton}))
+    @test !occursin("\bstore\b", ir)
+end
+
 end
 
 end
