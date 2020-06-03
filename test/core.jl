@@ -669,7 +669,14 @@ LLVM.Module("SomeModule", ctx) do mod
 
     show(devnull, fn)
 
-    # @show personality(fn)
+    @test personality(fn) === nothing
+    pers_ft = LLVM.FunctionType(LLVM.Int32Type(ctx); vararg=true)
+    pers_fn = LLVM.Function(mod, "PersonalityFunction", ft)
+    personality!(fn, pers_fn)
+    @test personality(fn) == pers_fn
+    personality!(fn, nothing)
+    @test personality(fn) === nothing
+    unsafe_delete!(mod, pers_fn)
 
     @test intrinsic_id(fn) == 0
 
