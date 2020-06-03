@@ -12,8 +12,12 @@ Function(mod::Module, name::String, ft::FunctionType) =
 
 unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(ref(f))
 
-personality(f::Function) = Function(API.LLVMGetPersonalityFn(ref(f)))
-personality!(f::Function, persfn::Function) = API.LLVMSetPersonalityFn(ref(f), ref(persfn))
+function personality(f::Function)
+    has_personality = convert(Core.Bool, API.LLVMHasPersonalityFn(ref(f)))
+    return has_personality ? Function(API.LLVMGetPersonalityFn(ref(f))) : nothing
+end
+personality!(f::Function, persfn::Union{Nothing,Function}) =
+    API.LLVMSetPersonalityFn(ref(f), persfn===nothing ? C_NULL : ref(persfn))
 
 intrinsic_id(f::Function) = API.LLVMGetIntrinsicID(ref(f))
 

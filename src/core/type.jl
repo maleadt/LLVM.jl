@@ -98,7 +98,8 @@ export isvararg, return_type, parameters
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMFunctionTypeKind}) = FunctionType
 
-FunctionType(rettyp::LLVMType, params::Vector{T}=LLVMType[], vararg::Core.Bool=false) where {T<:LLVMType} =
+FunctionType(rettyp::LLVMType, params::Vector{T}=LLVMType[];
+             vararg::Core.Bool=false) where {T<:LLVMType} =
     FunctionType(API.LLVMFunctionType(ref(rettyp), ref.(params),
                                       length(params), convert(Bool, vararg)))
 
