@@ -15,7 +15,7 @@ let
     # find LLVM library
 
     libllvm_paths = filter(Libdl.dllist()) do lib
-        occursin("LLVM", basename(lib))
+        occursin(r"LLVM\b", basename(lib))
     end
     if isempty(libllvm_paths)
         error("""
