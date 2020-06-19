@@ -112,7 +112,7 @@ scalar_repl_aggregates_ssa!(pm::PassManager) =
 ## vectorization transformations
 
 define_transforms([
-    :BBVectorize, :LoopVectorize, :SLPVectorize
+    :LoopVectorize, :SLPVectorize
 ])
 
 
