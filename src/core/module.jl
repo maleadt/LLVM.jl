@@ -194,7 +194,7 @@ end
 ## module flag iteration
 # TODO: doesn't actually iterate, since we can't list the available keys
 
-if libllvm_version >= v"8.0"
+if version() >= v"8.0"
 
 export flags
 

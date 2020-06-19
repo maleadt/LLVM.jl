@@ -1,11 +1,6 @@
 ## subsystem initialization
 
-export version, Shutdown,
-       ismultithreaded
-
-function version()
-    return libllvm_version
-end
+export Shutdown, ismultithreaded
 
 ismultithreaded() = convert(Core.Bool, API.LLVMIsMultithreaded())
 
@@ -21,6 +16,19 @@ end
 
 
 ## target initialization
+
+# figure out the supported targets by looking at initialization routines
+# TODO: figure out the name of the native target
+let
+    lib = Libdl.dlopen(libllvm)
+    known_targets = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai, :MSP430,
+                     :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ, :WebAssembly, :X86,
+                     :XCore]
+    global const libllvm_targets = filter(known_targets) do target
+        sym = Libdl.dlsym_e(lib, Symbol("LLVMInitialize$(target)Target"))
+        sym !== nothing
+    end
+end
 
 for component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
     jl_fname = Symbol(:Initialize, :All, component, :s)
