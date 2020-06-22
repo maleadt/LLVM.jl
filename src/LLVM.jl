@@ -17,11 +17,17 @@ const libllvm_version = Ref{VersionNumber}()
 function version()
     if !isassigned(libllvm_version)
         # FIXME: add a proper C API to LLVM
-        version_str = unsafe_string(
+        version_print = unsafe_string(
             ccall((:_ZN4llvm16LTOCodeGenerator16getVersionStringEv, libllvm), Cstring, ()))
-        m = match(r"LLVM version (?<version>.+)", version_str)
-        m === nothing && error("Unrecognized version string: '$version_str'")
-        libllvm_version[] =VersionNumber(m[:version])
+        m = match(r"LLVM version (?<version>.+)", version_print)
+        m === nothing && error("Unrecognized version string: '$version_print'")
+        libllvm_version[] = if endswith(m[:version], "jl")
+            # strip the "jl" SONAME suffix (JuliaLang/julia#33058)
+            # (LLVM does never report a prerelease version anyway)
+            VersionNumber(m[:version][1:end-2])
+        else
+            VersionNumber(m[:version])
+        end
     end
     return libllvm_version[]
 end
@@ -76,9 +82,7 @@ include("deprecated.jl")
 function __init__()
     libllvm_version = version()
     @debug "Using LLVM $libllvm_version at $(Libdl.dlpath(libllvm))"
-    if libllvm_version.major != Base.libllvm_version.major ||
-       libllvm_version.minor != Base.libllvm_version.minor ||
-       libllvm_version.patch != Base.libllvm_version.patch
+    if libllvm_version != Base.libllvm_version
         @warn "Using a different version of LLVM ($libllvm_version) than the one shipped with Julia ($(Base.libllvm_version)); this is unsupported"
     end
 
