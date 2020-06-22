@@ -92,7 +92,7 @@ function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
 end
 else
 
-if libllvm_version < v"8.0"
+if version() < v"8.0"
     function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
         @apicall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
     end
@@ -180,7 +180,7 @@ function LLVMExtraAddGenericAnalysisPasses(PM)
 end
 end
 
-if libllvm_version >= v"8.0"
+if version() >= v"8.0"
     @cenum(LLVMDebugEmissionKind,
         LLVMDebugEmissionKindNoDebug = 0,
         LLVMDebugEmissionKindFullDebug = 1,
