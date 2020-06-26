@@ -15,21 +15,39 @@ for subsystem in [:Core, :TransformUtils, :ScalarOpts, :ObjCARCOpts, :Vectorizat
 end
 
 
-## target initialization
+## back-end initialization
 
-# figure out the supported targets by looking at initialization routines
-# TODO: figure out the name of the native target
-let
-    lib = Libdl.dlopen(libllvm)
-    known_targets = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai, :MSP430,
-                     :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ, :WebAssembly, :X86,
-                     :XCore]
-    global const libllvm_targets = filter(known_targets) do target
-        sym = Libdl.dlsym_e(lib, Symbol("LLVMInitialize$(target)Target"))
-        sym !== nothing
+const libllvm_backends = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai,
+                          :MSP430, :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ,
+                          :WebAssembly, :X86, :XCore]
+
+function backends()
+    filter(libllvm_backends) do backend
+        library = Libdl.dlopen(libllvm[])
+        initializer = "LLVMInitialize$(backend)Target"
+        Libdl.dlsym_e(library, initializer) !== C_NULL
     end
 end
 
+# generate subsystem initialization routines for every back-end
+for backend in libllvm_backends,
+    component in [:Target, :AsmPrinter, :AsmParser, :Disassembler, :TargetInfo, :TargetMC]
+
+    initializer = "LLVMInitialize$(backend)Target"
+    supported = :(Libdl.dlsym_e(Libdl.dlopen(libllvm[]), $initializer) !== C_NULL)
+
+    jl_fname = Symbol(:Initialize, backend, component)
+    api_fname = Symbol(:LLVM, jl_fname)
+    @eval begin
+        export $jl_fname
+        $jl_fname() =
+            $supported ? @runtime_ccall(($(QuoteNode(api_fname)),libllvm[]), Cvoid, ()) :
+                         error($"The $backend back-end is not part of your LLVM library.")
+
+    end
+end
+
+# same, for initializing subsystems for all back-ends at once
 for component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
     jl_fname = Symbol(:Initialize, :All, component, :s)
     api_fname = Symbol(:LLVM, jl_fname)
@@ -39,6 +57,7 @@ for component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Dis
     end
 end
 
+# same, for the native back-end
 for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
     jl_fname = Symbol(:Initialize, :Native, component)
     api_fname = Symbol(:LLVM, jl_fname)
@@ -46,16 +65,5 @@ for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
         export $jl_fname
         $jl_fname() = convert(Core.Bool, API.$api_fname()) &&
                       throw(LLVMException($"Could not initialize native $component"))
-    end
-end
-
-for target in libllvm_targets,
-    component in [:Target, :AsmPrinter, :AsmParser, :Disassembler, :TargetInfo, :TargetMC]
-    jl_fname = Symbol(:Initialize, target, component)
-    api_fname = Symbol(:LLVM, jl_fname)
-
-    @eval begin
-        export $jl_fname
-        $jl_fname() = API.@apicall($(QuoteNode(api_fname)), Cvoid, ())
     end
 end

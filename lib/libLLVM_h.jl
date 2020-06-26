@@ -2,19 +2,19 @@
 # Automatically generated using Clang.jl
 
 function LLVMVerifyModule(M, Action, OutMessage)
-    @apicall(:LLVMVerifyModule, LLVMBool, (LLVMModuleRef, LLVMVerifierFailureAction, Ptr{Cstring}), M, Action, OutMessage)
+    @runtime_ccall((:LLVMVerifyModule,libllvm[]), LLVMBool, (LLVMModuleRef, LLVMVerifierFailureAction, Ptr{Cstring}), M, Action, OutMessage)
 end
 
 function LLVMVerifyFunction(Fn, Action)
-    @apicall(:LLVMVerifyFunction, LLVMBool, (LLVMValueRef, LLVMVerifierFailureAction), Fn, Action)
+    @runtime_ccall((:LLVMVerifyFunction,libllvm[]), LLVMBool, (LLVMValueRef, LLVMVerifierFailureAction), Fn, Action)
 end
 
 function LLVMViewFunctionCFG(Fn)
-    @apicall(:LLVMViewFunctionCFG, Cvoid, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMViewFunctionCFG,libllvm[]), Cvoid, (LLVMValueRef,), Fn)
 end
 
 function LLVMViewFunctionCFGOnly(Fn)
-    @apicall(:LLVMViewFunctionCFGOnly, Cvoid, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMViewFunctionCFGOnly,libllvm[]), Cvoid, (LLVMValueRef,), Fn)
 end
 
 
@@ -22,35 +22,35 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMParseBitcode(MemBuf, OutModule, OutMessage)
-    @apicall(:LLVMParseBitcode, LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), MemBuf, OutModule, OutMessage)
+    @runtime_ccall((:LLVMParseBitcode,libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), MemBuf, OutModule, OutMessage)
 end
 
 function LLVMParseBitcode2(MemBuf, OutModule)
-    @apicall(:LLVMParseBitcode2, LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutModule)
+    @runtime_ccall((:LLVMParseBitcode2,libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutModule)
 end
 
 function LLVMParseBitcodeInContext(ContextRef, MemBuf, OutModule, OutMessage)
-    @apicall(:LLVMParseBitcodeInContext, LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutModule, OutMessage)
+    @runtime_ccall((:LLVMParseBitcodeInContext,libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutModule, OutMessage)
 end
 
 function LLVMParseBitcodeInContext2(ContextRef, MemBuf, OutModule)
-    @apicall(:LLVMParseBitcodeInContext2, LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), ContextRef, MemBuf, OutModule)
+    @runtime_ccall((:LLVMParseBitcodeInContext2,libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), ContextRef, MemBuf, OutModule)
 end
 
 function LLVMGetBitcodeModuleInContext(ContextRef, MemBuf, OutM, OutMessage)
-    @apicall(:LLVMGetBitcodeModuleInContext, LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
+    @runtime_ccall((:LLVMGetBitcodeModuleInContext,libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
 end
 
 function LLVMGetBitcodeModuleInContext2(ContextRef, MemBuf, OutM)
-    @apicall(:LLVMGetBitcodeModuleInContext2, LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), ContextRef, MemBuf, OutM)
+    @runtime_ccall((:LLVMGetBitcodeModuleInContext2,libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), ContextRef, MemBuf, OutM)
 end
 
 function LLVMGetBitcodeModule(MemBuf, OutM, OutMessage)
-    @apicall(:LLVMGetBitcodeModule, LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), MemBuf, OutM, OutMessage)
+    @runtime_ccall((:LLVMGetBitcodeModule,libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), MemBuf, OutM, OutMessage)
 end
 
 function LLVMGetBitcodeModule2(MemBuf, OutM)
-    @apicall(:LLVMGetBitcodeModule2, LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutM)
+    @runtime_ccall((:LLVMGetBitcodeModule2,libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutM)
 end
 
 
@@ -58,19 +58,19 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMWriteBitcodeToFile(M, Path)
-    @apicall(:LLVMWriteBitcodeToFile, Cint, (LLVMModuleRef, Cstring), M, Path)
+    @runtime_ccall((:LLVMWriteBitcodeToFile,libllvm[]), Cint, (LLVMModuleRef, Cstring), M, Path)
 end
 
 function LLVMWriteBitcodeToFD(M, FD, ShouldClose, Unbuffered)
-    @apicall(:LLVMWriteBitcodeToFD, Cint, (LLVMModuleRef, Cint, Cint, Cint), M, FD, ShouldClose, Unbuffered)
+    @runtime_ccall((:LLVMWriteBitcodeToFD,libllvm[]), Cint, (LLVMModuleRef, Cint, Cint, Cint), M, FD, ShouldClose, Unbuffered)
 end
 
 function LLVMWriteBitcodeToFileHandle(M, Handle)
-    @apicall(:LLVMWriteBitcodeToFileHandle, Cint, (LLVMModuleRef, Cint), M, Handle)
+    @runtime_ccall((:LLVMWriteBitcodeToFileHandle,libllvm[]), Cint, (LLVMModuleRef, Cint), M, Handle)
 end
 
 function LLVMWriteBitcodeToMemoryBuffer(M)
-    @apicall(:LLVMWriteBitcodeToMemoryBuffer, LLVMMemoryBufferRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMWriteBitcodeToMemoryBuffer,libllvm[]), LLVMMemoryBufferRef, (LLVMModuleRef,), M)
 end
 
 
@@ -78,23 +78,23 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMGetOrInsertComdat(M, Name)
-    @apicall(:LLVMGetOrInsertComdat, LLVMComdatRef, (LLVMModuleRef, Cstring), M, Name)
+    @runtime_ccall((:LLVMGetOrInsertComdat,libllvm[]), LLVMComdatRef, (LLVMModuleRef, Cstring), M, Name)
 end
 
 function LLVMGetComdat(V)
-    @apicall(:LLVMGetComdat, LLVMComdatRef, (LLVMValueRef,), V)
+    @runtime_ccall((:LLVMGetComdat,libllvm[]), LLVMComdatRef, (LLVMValueRef,), V)
 end
 
 function LLVMSetComdat(V, C)
-    @apicall(:LLVMSetComdat, Cvoid, (LLVMValueRef, LLVMComdatRef), V, C)
+    @runtime_ccall((:LLVMSetComdat,libllvm[]), Cvoid, (LLVMValueRef, LLVMComdatRef), V, C)
 end
 
 function LLVMGetComdatSelectionKind(C)
-    @apicall(:LLVMGetComdatSelectionKind, LLVMComdatSelectionKind, (LLVMComdatRef,), C)
+    @runtime_ccall((:LLVMGetComdatSelectionKind,libllvm[]), LLVMComdatSelectionKind, (LLVMComdatRef,), C)
 end
 
 function LLVMSetComdatSelectionKind(C, Kind)
-    @apicall(:LLVMSetComdatSelectionKind, Cvoid, (LLVMComdatRef, LLVMComdatSelectionKind), C, Kind)
+    @runtime_ccall((:LLVMSetComdatSelectionKind,libllvm[]), Cvoid, (LLVMComdatRef, LLVMComdatSelectionKind), C, Kind)
 end
 
 
@@ -102,2743 +102,2743 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMInstallFatalErrorHandler(Handler)
-    @apicall(:LLVMInstallFatalErrorHandler, Cvoid, (LLVMFatalErrorHandler,), Handler)
+    @runtime_ccall((:LLVMInstallFatalErrorHandler,libllvm[]), Cvoid, (LLVMFatalErrorHandler,), Handler)
 end
 
 function LLVMResetFatalErrorHandler()
-    @apicall(:LLVMResetFatalErrorHandler, Cvoid, ())
+    @runtime_ccall((:LLVMResetFatalErrorHandler,libllvm[]), Cvoid, ())
 end
 
 function LLVMEnablePrettyStackTrace()
-    @apicall(:LLVMEnablePrettyStackTrace, Cvoid, ())
+    @runtime_ccall((:LLVMEnablePrettyStackTrace,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeCore(R)
-    @apicall(:LLVMInitializeCore, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeCore,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMShutdown()
-    @apicall(:LLVMShutdown, Cvoid, ())
+    @runtime_ccall((:LLVMShutdown,libllvm[]), Cvoid, ())
 end
 
 function LLVMCreateMessage(Message)
-    @apicall(:LLVMCreateMessage, Cstring, (Cstring,), Message)
+    @runtime_ccall((:LLVMCreateMessage,libllvm[]), Cstring, (Cstring,), Message)
 end
 
 function LLVMDisposeMessage(Message)
-    @apicall(:LLVMDisposeMessage, Cvoid, (Cstring,), Message)
+    @runtime_ccall((:LLVMDisposeMessage,libllvm[]), Cvoid, (Cstring,), Message)
 end
 
 function LLVMContextCreate()
-    @apicall(:LLVMContextCreate, LLVMContextRef, ())
+    @runtime_ccall((:LLVMContextCreate,libllvm[]), LLVMContextRef, ())
 end
 
 function LLVMGetGlobalContext()
-    @apicall(:LLVMGetGlobalContext, LLVMContextRef, ())
+    @runtime_ccall((:LLVMGetGlobalContext,libllvm[]), LLVMContextRef, ())
 end
 
 function LLVMContextSetDiagnosticHandler(C, Handler, DiagnosticContext)
-    @apicall(:LLVMContextSetDiagnosticHandler, Cvoid, (LLVMContextRef, LLVMDiagnosticHandler, Ptr{Cvoid}), C, Handler, DiagnosticContext)
+    @runtime_ccall((:LLVMContextSetDiagnosticHandler,libllvm[]), Cvoid, (LLVMContextRef, LLVMDiagnosticHandler, Ptr{Cvoid}), C, Handler, DiagnosticContext)
 end
 
 function LLVMContextGetDiagnosticHandler(C)
-    @apicall(:LLVMContextGetDiagnosticHandler, LLVMDiagnosticHandler, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMContextGetDiagnosticHandler,libllvm[]), LLVMDiagnosticHandler, (LLVMContextRef,), C)
 end
 
 function LLVMContextGetDiagnosticContext(C)
-    @apicall(:LLVMContextGetDiagnosticContext, Ptr{Cvoid}, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMContextGetDiagnosticContext,libllvm[]), Ptr{Cvoid}, (LLVMContextRef,), C)
 end
 
 function LLVMContextSetYieldCallback(C, Callback, OpaqueHandle)
-    @apicall(:LLVMContextSetYieldCallback, Cvoid, (LLVMContextRef, LLVMYieldCallback, Ptr{Cvoid}), C, Callback, OpaqueHandle)
+    @runtime_ccall((:LLVMContextSetYieldCallback,libllvm[]), Cvoid, (LLVMContextRef, LLVMYieldCallback, Ptr{Cvoid}), C, Callback, OpaqueHandle)
 end
 
 function LLVMContextShouldDiscardValueNames(C)
-    @apicall(:LLVMContextShouldDiscardValueNames, LLVMBool, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMContextShouldDiscardValueNames,libllvm[]), LLVMBool, (LLVMContextRef,), C)
 end
 
 function LLVMContextSetDiscardValueNames(C, Discard)
-    @apicall(:LLVMContextSetDiscardValueNames, Cvoid, (LLVMContextRef, LLVMBool), C, Discard)
+    @runtime_ccall((:LLVMContextSetDiscardValueNames,libllvm[]), Cvoid, (LLVMContextRef, LLVMBool), C, Discard)
 end
 
 function LLVMContextDispose(C)
-    @apicall(:LLVMContextDispose, Cvoid, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMContextDispose,libllvm[]), Cvoid, (LLVMContextRef,), C)
 end
 
 function LLVMGetDiagInfoDescription(DI)
-    @apicall(:LLVMGetDiagInfoDescription, Cstring, (LLVMDiagnosticInfoRef,), DI)
+    @runtime_ccall((:LLVMGetDiagInfoDescription,libllvm[]), Cstring, (LLVMDiagnosticInfoRef,), DI)
 end
 
 function LLVMGetDiagInfoSeverity(DI)
-    @apicall(:LLVMGetDiagInfoSeverity, LLVMDiagnosticSeverity, (LLVMDiagnosticInfoRef,), DI)
+    @runtime_ccall((:LLVMGetDiagInfoSeverity,libllvm[]), LLVMDiagnosticSeverity, (LLVMDiagnosticInfoRef,), DI)
 end
 
 function LLVMGetMDKindIDInContext(C, Name, SLen)
-    @apicall(:LLVMGetMDKindIDInContext, UInt32, (LLVMContextRef, Cstring, UInt32), C, Name, SLen)
+    @runtime_ccall((:LLVMGetMDKindIDInContext,libllvm[]), UInt32, (LLVMContextRef, Cstring, UInt32), C, Name, SLen)
 end
 
 function LLVMGetMDKindID(Name, SLen)
-    @apicall(:LLVMGetMDKindID, UInt32, (Cstring, UInt32), Name, SLen)
+    @runtime_ccall((:LLVMGetMDKindID,libllvm[]), UInt32, (Cstring, UInt32), Name, SLen)
 end
 
 function LLVMGetEnumAttributeKindForName(Name, SLen)
-    @apicall(:LLVMGetEnumAttributeKindForName, UInt32, (Cstring, Csize_t), Name, SLen)
+    @runtime_ccall((:LLVMGetEnumAttributeKindForName,libllvm[]), UInt32, (Cstring, Csize_t), Name, SLen)
 end
 
 function LLVMGetLastEnumAttributeKind()
-    @apicall(:LLVMGetLastEnumAttributeKind, UInt32, ())
+    @runtime_ccall((:LLVMGetLastEnumAttributeKind,libllvm[]), UInt32, ())
 end
 
 function LLVMCreateEnumAttribute(C, KindID, Val)
-    @apicall(:LLVMCreateEnumAttribute, LLVMAttributeRef, (LLVMContextRef, UInt32, UInt64), C, KindID, Val)
+    @runtime_ccall((:LLVMCreateEnumAttribute,libllvm[]), LLVMAttributeRef, (LLVMContextRef, UInt32, UInt64), C, KindID, Val)
 end
 
 function LLVMGetEnumAttributeKind(A)
-    @apicall(:LLVMGetEnumAttributeKind, UInt32, (LLVMAttributeRef,), A)
+    @runtime_ccall((:LLVMGetEnumAttributeKind,libllvm[]), UInt32, (LLVMAttributeRef,), A)
 end
 
 function LLVMGetEnumAttributeValue(A)
-    @apicall(:LLVMGetEnumAttributeValue, UInt64, (LLVMAttributeRef,), A)
+    @runtime_ccall((:LLVMGetEnumAttributeValue,libllvm[]), UInt64, (LLVMAttributeRef,), A)
 end
 
 function LLVMCreateStringAttribute(C, K, KLength, V, VLength)
-    @apicall(:LLVMCreateStringAttribute, LLVMAttributeRef, (LLVMContextRef, Cstring, UInt32, Cstring, UInt32), C, K, KLength, V, VLength)
+    @runtime_ccall((:LLVMCreateStringAttribute,libllvm[]), LLVMAttributeRef, (LLVMContextRef, Cstring, UInt32, Cstring, UInt32), C, K, KLength, V, VLength)
 end
 
 function LLVMGetStringAttributeKind(A, Length)
-    @apicall(:LLVMGetStringAttributeKind, Cstring, (LLVMAttributeRef, Ptr{UInt32}), A, Length)
+    @runtime_ccall((:LLVMGetStringAttributeKind,libllvm[]), Cstring, (LLVMAttributeRef, Ptr{UInt32}), A, Length)
 end
 
 function LLVMGetStringAttributeValue(A, Length)
-    @apicall(:LLVMGetStringAttributeValue, Cstring, (LLVMAttributeRef, Ptr{UInt32}), A, Length)
+    @runtime_ccall((:LLVMGetStringAttributeValue,libllvm[]), Cstring, (LLVMAttributeRef, Ptr{UInt32}), A, Length)
 end
 
 function LLVMIsEnumAttribute(A)
-    @apicall(:LLVMIsEnumAttribute, LLVMBool, (LLVMAttributeRef,), A)
+    @runtime_ccall((:LLVMIsEnumAttribute,libllvm[]), LLVMBool, (LLVMAttributeRef,), A)
 end
 
 function LLVMIsStringAttribute(A)
-    @apicall(:LLVMIsStringAttribute, LLVMBool, (LLVMAttributeRef,), A)
+    @runtime_ccall((:LLVMIsStringAttribute,libllvm[]), LLVMBool, (LLVMAttributeRef,), A)
 end
 
 function LLVMModuleCreateWithName(ModuleID)
-    @apicall(:LLVMModuleCreateWithName, LLVMModuleRef, (Cstring,), ModuleID)
+    @runtime_ccall((:LLVMModuleCreateWithName,libllvm[]), LLVMModuleRef, (Cstring,), ModuleID)
 end
 
 function LLVMModuleCreateWithNameInContext(ModuleID, C)
-    @apicall(:LLVMModuleCreateWithNameInContext, LLVMModuleRef, (Cstring, LLVMContextRef), ModuleID, C)
+    @runtime_ccall((:LLVMModuleCreateWithNameInContext,libllvm[]), LLVMModuleRef, (Cstring, LLVMContextRef), ModuleID, C)
 end
 
 function LLVMCloneModule(M)
-    @apicall(:LLVMCloneModule, LLVMModuleRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMCloneModule,libllvm[]), LLVMModuleRef, (LLVMModuleRef,), M)
 end
 
 function LLVMDisposeModule(M)
-    @apicall(:LLVMDisposeModule, Cvoid, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMDisposeModule,libllvm[]), Cvoid, (LLVMModuleRef,), M)
 end
 
 function LLVMGetModuleIdentifier(M, Len)
-    @apicall(:LLVMGetModuleIdentifier, Cstring, (LLVMModuleRef, Ptr{Csize_t}), M, Len)
+    @runtime_ccall((:LLVMGetModuleIdentifier,libllvm[]), Cstring, (LLVMModuleRef, Ptr{Csize_t}), M, Len)
 end
 
 function LLVMSetModuleIdentifier(M, Ident, Len)
-    @apicall(:LLVMSetModuleIdentifier, Cvoid, (LLVMModuleRef, Cstring, Csize_t), M, Ident, Len)
+    @runtime_ccall((:LLVMSetModuleIdentifier,libllvm[]), Cvoid, (LLVMModuleRef, Cstring, Csize_t), M, Ident, Len)
 end
 
 function LLVMGetSourceFileName(M, Len)
-    @apicall(:LLVMGetSourceFileName, Cstring, (LLVMModuleRef, Ptr{Csize_t}), M, Len)
+    @runtime_ccall((:LLVMGetSourceFileName,libllvm[]), Cstring, (LLVMModuleRef, Ptr{Csize_t}), M, Len)
 end
 
 function LLVMSetSourceFileName(M, Name, Len)
-    @apicall(:LLVMSetSourceFileName, Cvoid, (LLVMModuleRef, Cstring, Csize_t), M, Name, Len)
+    @runtime_ccall((:LLVMSetSourceFileName,libllvm[]), Cvoid, (LLVMModuleRef, Cstring, Csize_t), M, Name, Len)
 end
 
 function LLVMGetDataLayoutStr(M)
-    @apicall(:LLVMGetDataLayoutStr, Cstring, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetDataLayoutStr,libllvm[]), Cstring, (LLVMModuleRef,), M)
 end
 
 function LLVMGetDataLayout(M)
-    @apicall(:LLVMGetDataLayout, Cstring, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetDataLayout,libllvm[]), Cstring, (LLVMModuleRef,), M)
 end
 
 function LLVMSetDataLayout(M, DataLayoutStr)
-    @apicall(:LLVMSetDataLayout, Cvoid, (LLVMModuleRef, Cstring), M, DataLayoutStr)
+    @runtime_ccall((:LLVMSetDataLayout,libllvm[]), Cvoid, (LLVMModuleRef, Cstring), M, DataLayoutStr)
 end
 
 function LLVMGetTarget(M)
-    @apicall(:LLVMGetTarget, Cstring, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetTarget,libllvm[]), Cstring, (LLVMModuleRef,), M)
 end
 
 function LLVMSetTarget(M, Triple)
-    @apicall(:LLVMSetTarget, Cvoid, (LLVMModuleRef, Cstring), M, Triple)
+    @runtime_ccall((:LLVMSetTarget,libllvm[]), Cvoid, (LLVMModuleRef, Cstring), M, Triple)
 end
 
 function LLVMCopyModuleFlagsMetadata(M, Len)
-    @apicall(:LLVMCopyModuleFlagsMetadata, Ptr{LLVMModuleFlagEntry}, (LLVMModuleRef, Ptr{Csize_t}), M, Len)
+    @runtime_ccall((:LLVMCopyModuleFlagsMetadata,libllvm[]), Ptr{LLVMModuleFlagEntry}, (LLVMModuleRef, Ptr{Csize_t}), M, Len)
 end
 
 function LLVMDisposeModuleFlagsMetadata(Entries)
-    @apicall(:LLVMDisposeModuleFlagsMetadata, Cvoid, (Ptr{LLVMModuleFlagEntry},), Entries)
+    @runtime_ccall((:LLVMDisposeModuleFlagsMetadata,libllvm[]), Cvoid, (Ptr{LLVMModuleFlagEntry},), Entries)
 end
 
 function LLVMModuleFlagEntriesGetFlagBehavior(Entries, Index)
-    @apicall(:LLVMModuleFlagEntriesGetFlagBehavior, LLVMModuleFlagBehavior, (Ptr{LLVMModuleFlagEntry}, UInt32), Entries, Index)
+    @runtime_ccall((:LLVMModuleFlagEntriesGetFlagBehavior,libllvm[]), LLVMModuleFlagBehavior, (Ptr{LLVMModuleFlagEntry}, UInt32), Entries, Index)
 end
 
 function LLVMModuleFlagEntriesGetKey(Entries, Index, Len)
-    @apicall(:LLVMModuleFlagEntriesGetKey, Cstring, (Ptr{LLVMModuleFlagEntry}, UInt32, Ptr{Csize_t}), Entries, Index, Len)
+    @runtime_ccall((:LLVMModuleFlagEntriesGetKey,libllvm[]), Cstring, (Ptr{LLVMModuleFlagEntry}, UInt32, Ptr{Csize_t}), Entries, Index, Len)
 end
 
 function LLVMModuleFlagEntriesGetMetadata(Entries, Index)
-    @apicall(:LLVMModuleFlagEntriesGetMetadata, LLVMMetadataRef, (Ptr{LLVMModuleFlagEntry}, UInt32), Entries, Index)
+    @runtime_ccall((:LLVMModuleFlagEntriesGetMetadata,libllvm[]), LLVMMetadataRef, (Ptr{LLVMModuleFlagEntry}, UInt32), Entries, Index)
 end
 
 function LLVMGetModuleFlag(M, Key, KeyLen)
-    @apicall(:LLVMGetModuleFlag, LLVMMetadataRef, (LLVMModuleRef, Cstring, Csize_t), M, Key, KeyLen)
+    @runtime_ccall((:LLVMGetModuleFlag,libllvm[]), LLVMMetadataRef, (LLVMModuleRef, Cstring, Csize_t), M, Key, KeyLen)
 end
 
 function LLVMAddModuleFlag(M, Behavior, Key, KeyLen, Val)
-    @apicall(:LLVMAddModuleFlag, Cvoid, (LLVMModuleRef, LLVMModuleFlagBehavior, Cstring, Csize_t, LLVMMetadataRef), M, Behavior, Key, KeyLen, Val)
+    @runtime_ccall((:LLVMAddModuleFlag,libllvm[]), Cvoid, (LLVMModuleRef, LLVMModuleFlagBehavior, Cstring, Csize_t, LLVMMetadataRef), M, Behavior, Key, KeyLen, Val)
 end
 
 function LLVMDumpModule(M)
-    @apicall(:LLVMDumpModule, Cvoid, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMDumpModule,libllvm[]), Cvoid, (LLVMModuleRef,), M)
 end
 
 function LLVMPrintModuleToFile(M, Filename, ErrorMessage)
-    @apicall(:LLVMPrintModuleToFile, LLVMBool, (LLVMModuleRef, Cstring, Ptr{Cstring}), M, Filename, ErrorMessage)
+    @runtime_ccall((:LLVMPrintModuleToFile,libllvm[]), LLVMBool, (LLVMModuleRef, Cstring, Ptr{Cstring}), M, Filename, ErrorMessage)
 end
 
 function LLVMPrintModuleToString(M)
-    @apicall(:LLVMPrintModuleToString, Cstring, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMPrintModuleToString,libllvm[]), Cstring, (LLVMModuleRef,), M)
 end
 
 function LLVMGetModuleInlineAsm(M, Len)
-    @apicall(:LLVMGetModuleInlineAsm, Cstring, (LLVMModuleRef, Ptr{Csize_t}), M, Len)
+    @runtime_ccall((:LLVMGetModuleInlineAsm,libllvm[]), Cstring, (LLVMModuleRef, Ptr{Csize_t}), M, Len)
 end
 
 function LLVMSetModuleInlineAsm2(M, Asm, Len)
-    @apicall(:LLVMSetModuleInlineAsm2, Cvoid, (LLVMModuleRef, Cstring, Csize_t), M, Asm, Len)
+    @runtime_ccall((:LLVMSetModuleInlineAsm2,libllvm[]), Cvoid, (LLVMModuleRef, Cstring, Csize_t), M, Asm, Len)
 end
 
 function LLVMAppendModuleInlineAsm(M, Asm, Len)
-    @apicall(:LLVMAppendModuleInlineAsm, Cvoid, (LLVMModuleRef, Cstring, Csize_t), M, Asm, Len)
+    @runtime_ccall((:LLVMAppendModuleInlineAsm,libllvm[]), Cvoid, (LLVMModuleRef, Cstring, Csize_t), M, Asm, Len)
 end
 
 function LLVMGetInlineAsm(Ty, AsmString, AsmStringSize, Constraints, ConstraintsSize, HasSideEffects, IsAlignStack, Dialect)
-    @apicall(:LLVMGetInlineAsm, LLVMValueRef, (LLVMTypeRef, Cstring, Csize_t, Cstring, Csize_t, LLVMBool, LLVMBool, LLVMInlineAsmDialect), Ty, AsmString, AsmStringSize, Constraints, ConstraintsSize, HasSideEffects, IsAlignStack, Dialect)
+    @runtime_ccall((:LLVMGetInlineAsm,libllvm[]), LLVMValueRef, (LLVMTypeRef, Cstring, Csize_t, Cstring, Csize_t, LLVMBool, LLVMBool, LLVMInlineAsmDialect), Ty, AsmString, AsmStringSize, Constraints, ConstraintsSize, HasSideEffects, IsAlignStack, Dialect)
 end
 
 function LLVMGetModuleContext(M)
-    @apicall(:LLVMGetModuleContext, LLVMContextRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetModuleContext,libllvm[]), LLVMContextRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetTypeByName(M, Name)
-    @apicall(:LLVMGetTypeByName, LLVMTypeRef, (LLVMModuleRef, Cstring), M, Name)
+    @runtime_ccall((:LLVMGetTypeByName,libllvm[]), LLVMTypeRef, (LLVMModuleRef, Cstring), M, Name)
 end
 
 function LLVMGetFirstNamedMetadata(M)
-    @apicall(:LLVMGetFirstNamedMetadata, LLVMNamedMDNodeRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetFirstNamedMetadata,libllvm[]), LLVMNamedMDNodeRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetLastNamedMetadata(M)
-    @apicall(:LLVMGetLastNamedMetadata, LLVMNamedMDNodeRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetLastNamedMetadata,libllvm[]), LLVMNamedMDNodeRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetNextNamedMetadata(NamedMDNode)
-    @apicall(:LLVMGetNextNamedMetadata, LLVMNamedMDNodeRef, (LLVMNamedMDNodeRef,), NamedMDNode)
+    @runtime_ccall((:LLVMGetNextNamedMetadata,libllvm[]), LLVMNamedMDNodeRef, (LLVMNamedMDNodeRef,), NamedMDNode)
 end
 
 function LLVMGetPreviousNamedMetadata(NamedMDNode)
-    @apicall(:LLVMGetPreviousNamedMetadata, LLVMNamedMDNodeRef, (LLVMNamedMDNodeRef,), NamedMDNode)
+    @runtime_ccall((:LLVMGetPreviousNamedMetadata,libllvm[]), LLVMNamedMDNodeRef, (LLVMNamedMDNodeRef,), NamedMDNode)
 end
 
 function LLVMGetNamedMetadata(M, Name, NameLen)
-    @apicall(:LLVMGetNamedMetadata, LLVMNamedMDNodeRef, (LLVMModuleRef, Cstring, Csize_t), M, Name, NameLen)
+    @runtime_ccall((:LLVMGetNamedMetadata,libllvm[]), LLVMNamedMDNodeRef, (LLVMModuleRef, Cstring, Csize_t), M, Name, NameLen)
 end
 
 function LLVMGetOrInsertNamedMetadata(M, Name, NameLen)
-    @apicall(:LLVMGetOrInsertNamedMetadata, LLVMNamedMDNodeRef, (LLVMModuleRef, Cstring, Csize_t), M, Name, NameLen)
+    @runtime_ccall((:LLVMGetOrInsertNamedMetadata,libllvm[]), LLVMNamedMDNodeRef, (LLVMModuleRef, Cstring, Csize_t), M, Name, NameLen)
 end
 
 function LLVMGetNamedMetadataName(NamedMD, NameLen)
-    @apicall(:LLVMGetNamedMetadataName, Cstring, (LLVMNamedMDNodeRef, Ptr{Csize_t}), NamedMD, NameLen)
+    @runtime_ccall((:LLVMGetNamedMetadataName,libllvm[]), Cstring, (LLVMNamedMDNodeRef, Ptr{Csize_t}), NamedMD, NameLen)
 end
 
 function LLVMGetNamedMetadataNumOperands(M, Name)
-    @apicall(:LLVMGetNamedMetadataNumOperands, UInt32, (LLVMModuleRef, Cstring), M, Name)
+    @runtime_ccall((:LLVMGetNamedMetadataNumOperands,libllvm[]), UInt32, (LLVMModuleRef, Cstring), M, Name)
 end
 
 function LLVMGetNamedMetadataOperands(M, Name, Dest)
-    @apicall(:LLVMGetNamedMetadataOperands, Cvoid, (LLVMModuleRef, Cstring, Ptr{LLVMValueRef}), M, Name, Dest)
+    @runtime_ccall((:LLVMGetNamedMetadataOperands,libllvm[]), Cvoid, (LLVMModuleRef, Cstring, Ptr{LLVMValueRef}), M, Name, Dest)
 end
 
 function LLVMAddNamedMetadataOperand(M, Name, Val)
-    @apicall(:LLVMAddNamedMetadataOperand, Cvoid, (LLVMModuleRef, Cstring, LLVMValueRef), M, Name, Val)
+    @runtime_ccall((:LLVMAddNamedMetadataOperand,libllvm[]), Cvoid, (LLVMModuleRef, Cstring, LLVMValueRef), M, Name, Val)
 end
 
 function LLVMGetDebugLocDirectory(Val, Length)
-    @apicall(:LLVMGetDebugLocDirectory, Cstring, (LLVMValueRef, Ptr{UInt32}), Val, Length)
+    @runtime_ccall((:LLVMGetDebugLocDirectory,libllvm[]), Cstring, (LLVMValueRef, Ptr{UInt32}), Val, Length)
 end
 
 function LLVMGetDebugLocFilename(Val, Length)
-    @apicall(:LLVMGetDebugLocFilename, Cstring, (LLVMValueRef, Ptr{UInt32}), Val, Length)
+    @runtime_ccall((:LLVMGetDebugLocFilename,libllvm[]), Cstring, (LLVMValueRef, Ptr{UInt32}), Val, Length)
 end
 
 function LLVMGetDebugLocLine(Val)
-    @apicall(:LLVMGetDebugLocLine, UInt32, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMGetDebugLocLine,libllvm[]), UInt32, (LLVMValueRef,), Val)
 end
 
 function LLVMGetDebugLocColumn(Val)
-    @apicall(:LLVMGetDebugLocColumn, UInt32, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMGetDebugLocColumn,libllvm[]), UInt32, (LLVMValueRef,), Val)
 end
 
 function LLVMAddFunction(M, Name, FunctionTy)
-    @apicall(:LLVMAddFunction, LLVMValueRef, (LLVMModuleRef, Cstring, LLVMTypeRef), M, Name, FunctionTy)
+    @runtime_ccall((:LLVMAddFunction,libllvm[]), LLVMValueRef, (LLVMModuleRef, Cstring, LLVMTypeRef), M, Name, FunctionTy)
 end
 
 function LLVMGetNamedFunction(M, Name)
-    @apicall(:LLVMGetNamedFunction, LLVMValueRef, (LLVMModuleRef, Cstring), M, Name)
+    @runtime_ccall((:LLVMGetNamedFunction,libllvm[]), LLVMValueRef, (LLVMModuleRef, Cstring), M, Name)
 end
 
 function LLVMGetFirstFunction(M)
-    @apicall(:LLVMGetFirstFunction, LLVMValueRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetFirstFunction,libllvm[]), LLVMValueRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetLastFunction(M)
-    @apicall(:LLVMGetLastFunction, LLVMValueRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetLastFunction,libllvm[]), LLVMValueRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetNextFunction(Fn)
-    @apicall(:LLVMGetNextFunction, LLVMValueRef, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetNextFunction,libllvm[]), LLVMValueRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetPreviousFunction(Fn)
-    @apicall(:LLVMGetPreviousFunction, LLVMValueRef, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetPreviousFunction,libllvm[]), LLVMValueRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMSetModuleInlineAsm(M, Asm)
-    @apicall(:LLVMSetModuleInlineAsm, Cvoid, (LLVMModuleRef, Cstring), M, Asm)
+    @runtime_ccall((:LLVMSetModuleInlineAsm,libllvm[]), Cvoid, (LLVMModuleRef, Cstring), M, Asm)
 end
 
 function LLVMGetTypeKind(Ty)
-    @apicall(:LLVMGetTypeKind, LLVMTypeKind, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMGetTypeKind,libllvm[]), LLVMTypeKind, (LLVMTypeRef,), Ty)
 end
 
 function LLVMTypeIsSized(Ty)
-    @apicall(:LLVMTypeIsSized, LLVMBool, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMTypeIsSized,libllvm[]), LLVMBool, (LLVMTypeRef,), Ty)
 end
 
 function LLVMGetTypeContext(Ty)
-    @apicall(:LLVMGetTypeContext, LLVMContextRef, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMGetTypeContext,libllvm[]), LLVMContextRef, (LLVMTypeRef,), Ty)
 end
 
 function LLVMDumpType(Val)
-    @apicall(:LLVMDumpType, Cvoid, (LLVMTypeRef,), Val)
+    @runtime_ccall((:LLVMDumpType,libllvm[]), Cvoid, (LLVMTypeRef,), Val)
 end
 
 function LLVMPrintTypeToString(Val)
-    @apicall(:LLVMPrintTypeToString, Cstring, (LLVMTypeRef,), Val)
+    @runtime_ccall((:LLVMPrintTypeToString,libllvm[]), Cstring, (LLVMTypeRef,), Val)
 end
 
 function LLVMInt1TypeInContext(C)
-    @apicall(:LLVMInt1TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMInt1TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMInt8TypeInContext(C)
-    @apicall(:LLVMInt8TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMInt8TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMInt16TypeInContext(C)
-    @apicall(:LLVMInt16TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMInt16TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMInt32TypeInContext(C)
-    @apicall(:LLVMInt32TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMInt32TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMInt64TypeInContext(C)
-    @apicall(:LLVMInt64TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMInt64TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMInt128TypeInContext(C)
-    @apicall(:LLVMInt128TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMInt128TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMIntTypeInContext(C, NumBits)
-    @apicall(:LLVMIntTypeInContext, LLVMTypeRef, (LLVMContextRef, UInt32), C, NumBits)
+    @runtime_ccall((:LLVMIntTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef, UInt32), C, NumBits)
 end
 
 function LLVMInt1Type()
-    @apicall(:LLVMInt1Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMInt1Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMInt8Type()
-    @apicall(:LLVMInt8Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMInt8Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMInt16Type()
-    @apicall(:LLVMInt16Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMInt16Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMInt32Type()
-    @apicall(:LLVMInt32Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMInt32Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMInt64Type()
-    @apicall(:LLVMInt64Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMInt64Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMInt128Type()
-    @apicall(:LLVMInt128Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMInt128Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMIntType(NumBits)
-    @apicall(:LLVMIntType, LLVMTypeRef, (UInt32,), NumBits)
+    @runtime_ccall((:LLVMIntType,libllvm[]), LLVMTypeRef, (UInt32,), NumBits)
 end
 
 function LLVMGetIntTypeWidth(IntegerTy)
-    @apicall(:LLVMGetIntTypeWidth, UInt32, (LLVMTypeRef,), IntegerTy)
+    @runtime_ccall((:LLVMGetIntTypeWidth,libllvm[]), UInt32, (LLVMTypeRef,), IntegerTy)
 end
 
 function LLVMHalfTypeInContext(C)
-    @apicall(:LLVMHalfTypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMHalfTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMFloatTypeInContext(C)
-    @apicall(:LLVMFloatTypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMFloatTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMDoubleTypeInContext(C)
-    @apicall(:LLVMDoubleTypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMDoubleTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMX86FP80TypeInContext(C)
-    @apicall(:LLVMX86FP80TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMX86FP80TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMFP128TypeInContext(C)
-    @apicall(:LLVMFP128TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMFP128TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMPPCFP128TypeInContext(C)
-    @apicall(:LLVMPPCFP128TypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMPPCFP128TypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMHalfType()
-    @apicall(:LLVMHalfType, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMHalfType,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMFloatType()
-    @apicall(:LLVMFloatType, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMFloatType,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMDoubleType()
-    @apicall(:LLVMDoubleType, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMDoubleType,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMX86FP80Type()
-    @apicall(:LLVMX86FP80Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMX86FP80Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMFP128Type()
-    @apicall(:LLVMFP128Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMFP128Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMPPCFP128Type()
-    @apicall(:LLVMPPCFP128Type, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMPPCFP128Type,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMFunctionType(ReturnType, ParamTypes, ParamCount, IsVarArg)
-    @apicall(:LLVMFunctionType, LLVMTypeRef, (LLVMTypeRef, Ptr{LLVMTypeRef}, UInt32, LLVMBool), ReturnType, ParamTypes, ParamCount, IsVarArg)
+    @runtime_ccall((:LLVMFunctionType,libllvm[]), LLVMTypeRef, (LLVMTypeRef, Ptr{LLVMTypeRef}, UInt32, LLVMBool), ReturnType, ParamTypes, ParamCount, IsVarArg)
 end
 
 function LLVMIsFunctionVarArg(FunctionTy)
-    @apicall(:LLVMIsFunctionVarArg, LLVMBool, (LLVMTypeRef,), FunctionTy)
+    @runtime_ccall((:LLVMIsFunctionVarArg,libllvm[]), LLVMBool, (LLVMTypeRef,), FunctionTy)
 end
 
 function LLVMGetReturnType(FunctionTy)
-    @apicall(:LLVMGetReturnType, LLVMTypeRef, (LLVMTypeRef,), FunctionTy)
+    @runtime_ccall((:LLVMGetReturnType,libllvm[]), LLVMTypeRef, (LLVMTypeRef,), FunctionTy)
 end
 
 function LLVMCountParamTypes(FunctionTy)
-    @apicall(:LLVMCountParamTypes, UInt32, (LLVMTypeRef,), FunctionTy)
+    @runtime_ccall((:LLVMCountParamTypes,libllvm[]), UInt32, (LLVMTypeRef,), FunctionTy)
 end
 
 function LLVMGetParamTypes(FunctionTy, Dest)
-    @apicall(:LLVMGetParamTypes, Cvoid, (LLVMTypeRef, Ptr{LLVMTypeRef}), FunctionTy, Dest)
+    @runtime_ccall((:LLVMGetParamTypes,libllvm[]), Cvoid, (LLVMTypeRef, Ptr{LLVMTypeRef}), FunctionTy, Dest)
 end
 
 function LLVMStructTypeInContext(C, ElementTypes, ElementCount, Packed)
-    @apicall(:LLVMStructTypeInContext, LLVMTypeRef, (LLVMContextRef, Ptr{LLVMTypeRef}, UInt32, LLVMBool), C, ElementTypes, ElementCount, Packed)
+    @runtime_ccall((:LLVMStructTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef, Ptr{LLVMTypeRef}, UInt32, LLVMBool), C, ElementTypes, ElementCount, Packed)
 end
 
 function LLVMStructType(ElementTypes, ElementCount, Packed)
-    @apicall(:LLVMStructType, LLVMTypeRef, (Ptr{LLVMTypeRef}, UInt32, LLVMBool), ElementTypes, ElementCount, Packed)
+    @runtime_ccall((:LLVMStructType,libllvm[]), LLVMTypeRef, (Ptr{LLVMTypeRef}, UInt32, LLVMBool), ElementTypes, ElementCount, Packed)
 end
 
 function LLVMStructCreateNamed(C, Name)
-    @apicall(:LLVMStructCreateNamed, LLVMTypeRef, (LLVMContextRef, Cstring), C, Name)
+    @runtime_ccall((:LLVMStructCreateNamed,libllvm[]), LLVMTypeRef, (LLVMContextRef, Cstring), C, Name)
 end
 
 function LLVMGetStructName(Ty)
-    @apicall(:LLVMGetStructName, Cstring, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMGetStructName,libllvm[]), Cstring, (LLVMTypeRef,), Ty)
 end
 
 function LLVMStructSetBody(StructTy, ElementTypes, ElementCount, Packed)
-    @apicall(:LLVMStructSetBody, Cvoid, (LLVMTypeRef, Ptr{LLVMTypeRef}, UInt32, LLVMBool), StructTy, ElementTypes, ElementCount, Packed)
+    @runtime_ccall((:LLVMStructSetBody,libllvm[]), Cvoid, (LLVMTypeRef, Ptr{LLVMTypeRef}, UInt32, LLVMBool), StructTy, ElementTypes, ElementCount, Packed)
 end
 
 function LLVMCountStructElementTypes(StructTy)
-    @apicall(:LLVMCountStructElementTypes, UInt32, (LLVMTypeRef,), StructTy)
+    @runtime_ccall((:LLVMCountStructElementTypes,libllvm[]), UInt32, (LLVMTypeRef,), StructTy)
 end
 
 function LLVMGetStructElementTypes(StructTy, Dest)
-    @apicall(:LLVMGetStructElementTypes, Cvoid, (LLVMTypeRef, Ptr{LLVMTypeRef}), StructTy, Dest)
+    @runtime_ccall((:LLVMGetStructElementTypes,libllvm[]), Cvoid, (LLVMTypeRef, Ptr{LLVMTypeRef}), StructTy, Dest)
 end
 
 function LLVMStructGetTypeAtIndex(StructTy, i)
-    @apicall(:LLVMStructGetTypeAtIndex, LLVMTypeRef, (LLVMTypeRef, UInt32), StructTy, i)
+    @runtime_ccall((:LLVMStructGetTypeAtIndex,libllvm[]), LLVMTypeRef, (LLVMTypeRef, UInt32), StructTy, i)
 end
 
 function LLVMIsPackedStruct(StructTy)
-    @apicall(:LLVMIsPackedStruct, LLVMBool, (LLVMTypeRef,), StructTy)
+    @runtime_ccall((:LLVMIsPackedStruct,libllvm[]), LLVMBool, (LLVMTypeRef,), StructTy)
 end
 
 function LLVMIsOpaqueStruct(StructTy)
-    @apicall(:LLVMIsOpaqueStruct, LLVMBool, (LLVMTypeRef,), StructTy)
+    @runtime_ccall((:LLVMIsOpaqueStruct,libllvm[]), LLVMBool, (LLVMTypeRef,), StructTy)
 end
 
 function LLVMIsLiteralStruct(StructTy)
-    @apicall(:LLVMIsLiteralStruct, LLVMBool, (LLVMTypeRef,), StructTy)
+    @runtime_ccall((:LLVMIsLiteralStruct,libllvm[]), LLVMBool, (LLVMTypeRef,), StructTy)
 end
 
 function LLVMGetElementType(Ty)
-    @apicall(:LLVMGetElementType, LLVMTypeRef, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMGetElementType,libllvm[]), LLVMTypeRef, (LLVMTypeRef,), Ty)
 end
 
 function LLVMGetSubtypes(Tp, Arr)
-    @apicall(:LLVMGetSubtypes, Cvoid, (LLVMTypeRef, Ptr{LLVMTypeRef}), Tp, Arr)
+    @runtime_ccall((:LLVMGetSubtypes,libllvm[]), Cvoid, (LLVMTypeRef, Ptr{LLVMTypeRef}), Tp, Arr)
 end
 
 function LLVMGetNumContainedTypes(Tp)
-    @apicall(:LLVMGetNumContainedTypes, UInt32, (LLVMTypeRef,), Tp)
+    @runtime_ccall((:LLVMGetNumContainedTypes,libllvm[]), UInt32, (LLVMTypeRef,), Tp)
 end
 
 function LLVMArrayType(ElementType, ElementCount)
-    @apicall(:LLVMArrayType, LLVMTypeRef, (LLVMTypeRef, UInt32), ElementType, ElementCount)
+    @runtime_ccall((:LLVMArrayType,libllvm[]), LLVMTypeRef, (LLVMTypeRef, UInt32), ElementType, ElementCount)
 end
 
 function LLVMGetArrayLength(ArrayTy)
-    @apicall(:LLVMGetArrayLength, UInt32, (LLVMTypeRef,), ArrayTy)
+    @runtime_ccall((:LLVMGetArrayLength,libllvm[]), UInt32, (LLVMTypeRef,), ArrayTy)
 end
 
 function LLVMPointerType(ElementType, AddressSpace)
-    @apicall(:LLVMPointerType, LLVMTypeRef, (LLVMTypeRef, UInt32), ElementType, AddressSpace)
+    @runtime_ccall((:LLVMPointerType,libllvm[]), LLVMTypeRef, (LLVMTypeRef, UInt32), ElementType, AddressSpace)
 end
 
 function LLVMGetPointerAddressSpace(PointerTy)
-    @apicall(:LLVMGetPointerAddressSpace, UInt32, (LLVMTypeRef,), PointerTy)
+    @runtime_ccall((:LLVMGetPointerAddressSpace,libllvm[]), UInt32, (LLVMTypeRef,), PointerTy)
 end
 
 function LLVMVectorType(ElementType, ElementCount)
-    @apicall(:LLVMVectorType, LLVMTypeRef, (LLVMTypeRef, UInt32), ElementType, ElementCount)
+    @runtime_ccall((:LLVMVectorType,libllvm[]), LLVMTypeRef, (LLVMTypeRef, UInt32), ElementType, ElementCount)
 end
 
 function LLVMGetVectorSize(VectorTy)
-    @apicall(:LLVMGetVectorSize, UInt32, (LLVMTypeRef,), VectorTy)
+    @runtime_ccall((:LLVMGetVectorSize,libllvm[]), UInt32, (LLVMTypeRef,), VectorTy)
 end
 
 function LLVMVoidTypeInContext(C)
-    @apicall(:LLVMVoidTypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMVoidTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMLabelTypeInContext(C)
-    @apicall(:LLVMLabelTypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMLabelTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMX86MMXTypeInContext(C)
-    @apicall(:LLVMX86MMXTypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMX86MMXTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMTokenTypeInContext(C)
-    @apicall(:LLVMTokenTypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMTokenTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMMetadataTypeInContext(C)
-    @apicall(:LLVMMetadataTypeInContext, LLVMTypeRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMMetadataTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
 function LLVMVoidType()
-    @apicall(:LLVMVoidType, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMVoidType,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMLabelType()
-    @apicall(:LLVMLabelType, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMLabelType,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMX86MMXType()
-    @apicall(:LLVMX86MMXType, LLVMTypeRef, ())
+    @runtime_ccall((:LLVMX86MMXType,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMTypeOf(Val)
-    @apicall(:LLVMTypeOf, LLVMTypeRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMTypeOf,libllvm[]), LLVMTypeRef, (LLVMValueRef,), Val)
 end
 
 function LLVMGetValueKind(Val)
-    @apicall(:LLVMGetValueKind, LLVMValueKind, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMGetValueKind,libllvm[]), LLVMValueKind, (LLVMValueRef,), Val)
 end
 
 function LLVMGetValueName2(Val, Length)
-    @apicall(:LLVMGetValueName2, Cstring, (LLVMValueRef, Ptr{Csize_t}), Val, Length)
+    @runtime_ccall((:LLVMGetValueName2,libllvm[]), Cstring, (LLVMValueRef, Ptr{Csize_t}), Val, Length)
 end
 
 function LLVMSetValueName2(Val, Name, NameLen)
-    @apicall(:LLVMSetValueName2, Cvoid, (LLVMValueRef, Cstring, Csize_t), Val, Name, NameLen)
+    @runtime_ccall((:LLVMSetValueName2,libllvm[]), Cvoid, (LLVMValueRef, Cstring, Csize_t), Val, Name, NameLen)
 end
 
 function LLVMDumpValue(Val)
-    @apicall(:LLVMDumpValue, Cvoid, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMDumpValue,libllvm[]), Cvoid, (LLVMValueRef,), Val)
 end
 
 function LLVMPrintValueToString(Val)
-    @apicall(:LLVMPrintValueToString, Cstring, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMPrintValueToString,libllvm[]), Cstring, (LLVMValueRef,), Val)
 end
 
 function LLVMReplaceAllUsesWith(OldVal, NewVal)
-    @apicall(:LLVMReplaceAllUsesWith, Cvoid, (LLVMValueRef, LLVMValueRef), OldVal, NewVal)
+    @runtime_ccall((:LLVMReplaceAllUsesWith,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef), OldVal, NewVal)
 end
 
 function LLVMIsConstant(Val)
-    @apicall(:LLVMIsConstant, LLVMBool, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsConstant,libllvm[]), LLVMBool, (LLVMValueRef,), Val)
 end
 
 function LLVMIsUndef(Val)
-    @apicall(:LLVMIsUndef, LLVMBool, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsUndef,libllvm[]), LLVMBool, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAArgument(Val)
-    @apicall(:LLVMIsAArgument, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAArgument,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsABasicBlock(Val)
-    @apicall(:LLVMIsABasicBlock, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsABasicBlock,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAInlineAsm(Val)
-    @apicall(:LLVMIsAInlineAsm, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAInlineAsm,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAUser(Val)
-    @apicall(:LLVMIsAUser, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAUser,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstant(Val)
-    @apicall(:LLVMIsAConstant, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstant,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsABlockAddress(Val)
-    @apicall(:LLVMIsABlockAddress, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsABlockAddress,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantAggregateZero(Val)
-    @apicall(:LLVMIsAConstantAggregateZero, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantAggregateZero,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantArray(Val)
-    @apicall(:LLVMIsAConstantArray, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantArray,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantDataSequential(Val)
-    @apicall(:LLVMIsAConstantDataSequential, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantDataSequential,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantDataArray(Val)
-    @apicall(:LLVMIsAConstantDataArray, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantDataArray,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantDataVector(Val)
-    @apicall(:LLVMIsAConstantDataVector, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantDataVector,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantExpr(Val)
-    @apicall(:LLVMIsAConstantExpr, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantExpr,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantFP(Val)
-    @apicall(:LLVMIsAConstantFP, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantFP,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantInt(Val)
-    @apicall(:LLVMIsAConstantInt, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantInt,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantPointerNull(Val)
-    @apicall(:LLVMIsAConstantPointerNull, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantPointerNull,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantStruct(Val)
-    @apicall(:LLVMIsAConstantStruct, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantStruct,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantTokenNone(Val)
-    @apicall(:LLVMIsAConstantTokenNone, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantTokenNone,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAConstantVector(Val)
-    @apicall(:LLVMIsAConstantVector, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAConstantVector,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAGlobalValue(Val)
-    @apicall(:LLVMIsAGlobalValue, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAGlobalValue,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAGlobalAlias(Val)
-    @apicall(:LLVMIsAGlobalAlias, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAGlobalAlias,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAGlobalIFunc(Val)
-    @apicall(:LLVMIsAGlobalIFunc, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAGlobalIFunc,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAGlobalObject(Val)
-    @apicall(:LLVMIsAGlobalObject, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAGlobalObject,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAFunction(Val)
-    @apicall(:LLVMIsAFunction, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAFunction,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAGlobalVariable(Val)
-    @apicall(:LLVMIsAGlobalVariable, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAGlobalVariable,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAUndefValue(Val)
-    @apicall(:LLVMIsAUndefValue, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAUndefValue,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAInstruction(Val)
-    @apicall(:LLVMIsAInstruction, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAInstruction,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsABinaryOperator(Val)
-    @apicall(:LLVMIsABinaryOperator, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsABinaryOperator,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsACallInst(Val)
-    @apicall(:LLVMIsACallInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsACallInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAIntrinsicInst(Val)
-    @apicall(:LLVMIsAIntrinsicInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAIntrinsicInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsADbgInfoIntrinsic(Val)
-    @apicall(:LLVMIsADbgInfoIntrinsic, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsADbgInfoIntrinsic,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsADbgVariableIntrinsic(Val)
-    @apicall(:LLVMIsADbgVariableIntrinsic, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsADbgVariableIntrinsic,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsADbgDeclareInst(Val)
-    @apicall(:LLVMIsADbgDeclareInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsADbgDeclareInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsADbgLabelInst(Val)
-    @apicall(:LLVMIsADbgLabelInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsADbgLabelInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAMemIntrinsic(Val)
-    @apicall(:LLVMIsAMemIntrinsic, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAMemIntrinsic,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAMemCpyInst(Val)
-    @apicall(:LLVMIsAMemCpyInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAMemCpyInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAMemMoveInst(Val)
-    @apicall(:LLVMIsAMemMoveInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAMemMoveInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAMemSetInst(Val)
-    @apicall(:LLVMIsAMemSetInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAMemSetInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsACmpInst(Val)
-    @apicall(:LLVMIsACmpInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsACmpInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAFCmpInst(Val)
-    @apicall(:LLVMIsAFCmpInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAFCmpInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAICmpInst(Val)
-    @apicall(:LLVMIsAICmpInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAICmpInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAExtractElementInst(Val)
-    @apicall(:LLVMIsAExtractElementInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAExtractElementInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAGetElementPtrInst(Val)
-    @apicall(:LLVMIsAGetElementPtrInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAGetElementPtrInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAInsertElementInst(Val)
-    @apicall(:LLVMIsAInsertElementInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAInsertElementInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAInsertValueInst(Val)
-    @apicall(:LLVMIsAInsertValueInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAInsertValueInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsALandingPadInst(Val)
-    @apicall(:LLVMIsALandingPadInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsALandingPadInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAPHINode(Val)
-    @apicall(:LLVMIsAPHINode, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAPHINode,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsASelectInst(Val)
-    @apicall(:LLVMIsASelectInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsASelectInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAShuffleVectorInst(Val)
-    @apicall(:LLVMIsAShuffleVectorInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAShuffleVectorInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAStoreInst(Val)
-    @apicall(:LLVMIsAStoreInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAStoreInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsABranchInst(Val)
-    @apicall(:LLVMIsABranchInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsABranchInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAIndirectBrInst(Val)
-    @apicall(:LLVMIsAIndirectBrInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAIndirectBrInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAInvokeInst(Val)
-    @apicall(:LLVMIsAInvokeInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAInvokeInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAReturnInst(Val)
-    @apicall(:LLVMIsAReturnInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAReturnInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsASwitchInst(Val)
-    @apicall(:LLVMIsASwitchInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsASwitchInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAUnreachableInst(Val)
-    @apicall(:LLVMIsAUnreachableInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAUnreachableInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAResumeInst(Val)
-    @apicall(:LLVMIsAResumeInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAResumeInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsACleanupReturnInst(Val)
-    @apicall(:LLVMIsACleanupReturnInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsACleanupReturnInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsACatchReturnInst(Val)
-    @apicall(:LLVMIsACatchReturnInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsACatchReturnInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAFuncletPadInst(Val)
-    @apicall(:LLVMIsAFuncletPadInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAFuncletPadInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsACatchPadInst(Val)
-    @apicall(:LLVMIsACatchPadInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsACatchPadInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsACleanupPadInst(Val)
-    @apicall(:LLVMIsACleanupPadInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsACleanupPadInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAUnaryInstruction(Val)
-    @apicall(:LLVMIsAUnaryInstruction, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAUnaryInstruction,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAAllocaInst(Val)
-    @apicall(:LLVMIsAAllocaInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAAllocaInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsACastInst(Val)
-    @apicall(:LLVMIsACastInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsACastInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAAddrSpaceCastInst(Val)
-    @apicall(:LLVMIsAAddrSpaceCastInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAAddrSpaceCastInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsABitCastInst(Val)
-    @apicall(:LLVMIsABitCastInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsABitCastInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAFPExtInst(Val)
-    @apicall(:LLVMIsAFPExtInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAFPExtInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAFPToSIInst(Val)
-    @apicall(:LLVMIsAFPToSIInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAFPToSIInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAFPToUIInst(Val)
-    @apicall(:LLVMIsAFPToUIInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAFPToUIInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAFPTruncInst(Val)
-    @apicall(:LLVMIsAFPTruncInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAFPTruncInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAIntToPtrInst(Val)
-    @apicall(:LLVMIsAIntToPtrInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAIntToPtrInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAPtrToIntInst(Val)
-    @apicall(:LLVMIsAPtrToIntInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAPtrToIntInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsASExtInst(Val)
-    @apicall(:LLVMIsASExtInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsASExtInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsASIToFPInst(Val)
-    @apicall(:LLVMIsASIToFPInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsASIToFPInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsATruncInst(Val)
-    @apicall(:LLVMIsATruncInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsATruncInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAUIToFPInst(Val)
-    @apicall(:LLVMIsAUIToFPInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAUIToFPInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAZExtInst(Val)
-    @apicall(:LLVMIsAZExtInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAZExtInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAExtractValueInst(Val)
-    @apicall(:LLVMIsAExtractValueInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAExtractValueInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsALoadInst(Val)
-    @apicall(:LLVMIsALoadInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsALoadInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAVAArgInst(Val)
-    @apicall(:LLVMIsAVAArgInst, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAVAArgInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAMDNode(Val)
-    @apicall(:LLVMIsAMDNode, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAMDNode,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAMDString(Val)
-    @apicall(:LLVMIsAMDString, LLVMValueRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsAMDString,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMGetValueName(Val)
-    @apicall(:LLVMGetValueName, Cstring, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMGetValueName,libllvm[]), Cstring, (LLVMValueRef,), Val)
 end
 
 function LLVMSetValueName(Val, Name)
-    @apicall(:LLVMSetValueName, Cvoid, (LLVMValueRef, Cstring), Val, Name)
+    @runtime_ccall((:LLVMSetValueName,libllvm[]), Cvoid, (LLVMValueRef, Cstring), Val, Name)
 end
 
 function LLVMGetFirstUse(Val)
-    @apicall(:LLVMGetFirstUse, LLVMUseRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMGetFirstUse,libllvm[]), LLVMUseRef, (LLVMValueRef,), Val)
 end
 
 function LLVMGetNextUse(U)
-    @apicall(:LLVMGetNextUse, LLVMUseRef, (LLVMUseRef,), U)
+    @runtime_ccall((:LLVMGetNextUse,libllvm[]), LLVMUseRef, (LLVMUseRef,), U)
 end
 
 function LLVMGetUser(U)
-    @apicall(:LLVMGetUser, LLVMValueRef, (LLVMUseRef,), U)
+    @runtime_ccall((:LLVMGetUser,libllvm[]), LLVMValueRef, (LLVMUseRef,), U)
 end
 
 function LLVMGetUsedValue(U)
-    @apicall(:LLVMGetUsedValue, LLVMValueRef, (LLVMUseRef,), U)
+    @runtime_ccall((:LLVMGetUsedValue,libllvm[]), LLVMValueRef, (LLVMUseRef,), U)
 end
 
 function LLVMGetOperand(Val, Index)
-    @apicall(:LLVMGetOperand, LLVMValueRef, (LLVMValueRef, UInt32), Val, Index)
+    @runtime_ccall((:LLVMGetOperand,libllvm[]), LLVMValueRef, (LLVMValueRef, UInt32), Val, Index)
 end
 
 function LLVMGetOperandUse(Val, Index)
-    @apicall(:LLVMGetOperandUse, LLVMUseRef, (LLVMValueRef, UInt32), Val, Index)
+    @runtime_ccall((:LLVMGetOperandUse,libllvm[]), LLVMUseRef, (LLVMValueRef, UInt32), Val, Index)
 end
 
 function LLVMSetOperand(User, Index, Val)
-    @apicall(:LLVMSetOperand, Cvoid, (LLVMValueRef, UInt32, LLVMValueRef), User, Index, Val)
+    @runtime_ccall((:LLVMSetOperand,libllvm[]), Cvoid, (LLVMValueRef, UInt32, LLVMValueRef), User, Index, Val)
 end
 
 function LLVMGetNumOperands(Val)
-    @apicall(:LLVMGetNumOperands, Cint, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMGetNumOperands,libllvm[]), Cint, (LLVMValueRef,), Val)
 end
 
 function LLVMConstNull(Ty)
-    @apicall(:LLVMConstNull, LLVMValueRef, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMConstNull,libllvm[]), LLVMValueRef, (LLVMTypeRef,), Ty)
 end
 
 function LLVMConstAllOnes(Ty)
-    @apicall(:LLVMConstAllOnes, LLVMValueRef, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMConstAllOnes,libllvm[]), LLVMValueRef, (LLVMTypeRef,), Ty)
 end
 
 function LLVMGetUndef(Ty)
-    @apicall(:LLVMGetUndef, LLVMValueRef, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMGetUndef,libllvm[]), LLVMValueRef, (LLVMTypeRef,), Ty)
 end
 
 function LLVMIsNull(Val)
-    @apicall(:LLVMIsNull, LLVMBool, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMIsNull,libllvm[]), LLVMBool, (LLVMValueRef,), Val)
 end
 
 function LLVMConstPointerNull(Ty)
-    @apicall(:LLVMConstPointerNull, LLVMValueRef, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMConstPointerNull,libllvm[]), LLVMValueRef, (LLVMTypeRef,), Ty)
 end
 
 function LLVMConstInt(IntTy, N, SignExtend)
-    @apicall(:LLVMConstInt, LLVMValueRef, (LLVMTypeRef, Culonglong, LLVMBool), IntTy, N, SignExtend)
+    @runtime_ccall((:LLVMConstInt,libllvm[]), LLVMValueRef, (LLVMTypeRef, Culonglong, LLVMBool), IntTy, N, SignExtend)
 end
 
 function LLVMConstIntOfArbitraryPrecision(IntTy, NumWords, Words)
-    @apicall(:LLVMConstIntOfArbitraryPrecision, LLVMValueRef, (LLVMTypeRef, UInt32, Ptr{UInt64}), IntTy, NumWords, Words)
+    @runtime_ccall((:LLVMConstIntOfArbitraryPrecision,libllvm[]), LLVMValueRef, (LLVMTypeRef, UInt32, Ptr{UInt64}), IntTy, NumWords, Words)
 end
 
 function LLVMConstIntOfString(IntTy, Text, Radix)
-    @apicall(:LLVMConstIntOfString, LLVMValueRef, (LLVMTypeRef, Cstring, UInt8), IntTy, Text, Radix)
+    @runtime_ccall((:LLVMConstIntOfString,libllvm[]), LLVMValueRef, (LLVMTypeRef, Cstring, UInt8), IntTy, Text, Radix)
 end
 
 function LLVMConstIntOfStringAndSize(IntTy, Text, SLen, Radix)
-    @apicall(:LLVMConstIntOfStringAndSize, LLVMValueRef, (LLVMTypeRef, Cstring, UInt32, UInt8), IntTy, Text, SLen, Radix)
+    @runtime_ccall((:LLVMConstIntOfStringAndSize,libllvm[]), LLVMValueRef, (LLVMTypeRef, Cstring, UInt32, UInt8), IntTy, Text, SLen, Radix)
 end
 
 function LLVMConstReal(RealTy, N)
-    @apicall(:LLVMConstReal, LLVMValueRef, (LLVMTypeRef, Cdouble), RealTy, N)
+    @runtime_ccall((:LLVMConstReal,libllvm[]), LLVMValueRef, (LLVMTypeRef, Cdouble), RealTy, N)
 end
 
 function LLVMConstRealOfString(RealTy, Text)
-    @apicall(:LLVMConstRealOfString, LLVMValueRef, (LLVMTypeRef, Cstring), RealTy, Text)
+    @runtime_ccall((:LLVMConstRealOfString,libllvm[]), LLVMValueRef, (LLVMTypeRef, Cstring), RealTy, Text)
 end
 
 function LLVMConstRealOfStringAndSize(RealTy, Text, SLen)
-    @apicall(:LLVMConstRealOfStringAndSize, LLVMValueRef, (LLVMTypeRef, Cstring, UInt32), RealTy, Text, SLen)
+    @runtime_ccall((:LLVMConstRealOfStringAndSize,libllvm[]), LLVMValueRef, (LLVMTypeRef, Cstring, UInt32), RealTy, Text, SLen)
 end
 
 function LLVMConstIntGetZExtValue(ConstantVal)
-    @apicall(:LLVMConstIntGetZExtValue, Culonglong, (LLVMValueRef,), ConstantVal)
+    @runtime_ccall((:LLVMConstIntGetZExtValue,libllvm[]), Culonglong, (LLVMValueRef,), ConstantVal)
 end
 
 function LLVMConstIntGetSExtValue(ConstantVal)
-    @apicall(:LLVMConstIntGetSExtValue, Clonglong, (LLVMValueRef,), ConstantVal)
+    @runtime_ccall((:LLVMConstIntGetSExtValue,libllvm[]), Clonglong, (LLVMValueRef,), ConstantVal)
 end
 
 function LLVMConstRealGetDouble(ConstantVal, losesInfo)
-    @apicall(:LLVMConstRealGetDouble, Cdouble, (LLVMValueRef, Ptr{LLVMBool}), ConstantVal, losesInfo)
+    @runtime_ccall((:LLVMConstRealGetDouble,libllvm[]), Cdouble, (LLVMValueRef, Ptr{LLVMBool}), ConstantVal, losesInfo)
 end
 
 function LLVMConstStringInContext(C, Str, Length, DontNullTerminate)
-    @apicall(:LLVMConstStringInContext, LLVMValueRef, (LLVMContextRef, Cstring, UInt32, LLVMBool), C, Str, Length, DontNullTerminate)
+    @runtime_ccall((:LLVMConstStringInContext,libllvm[]), LLVMValueRef, (LLVMContextRef, Cstring, UInt32, LLVMBool), C, Str, Length, DontNullTerminate)
 end
 
 function LLVMConstString(Str, Length, DontNullTerminate)
-    @apicall(:LLVMConstString, LLVMValueRef, (Cstring, UInt32, LLVMBool), Str, Length, DontNullTerminate)
+    @runtime_ccall((:LLVMConstString,libllvm[]), LLVMValueRef, (Cstring, UInt32, LLVMBool), Str, Length, DontNullTerminate)
 end
 
 function LLVMIsConstantString(c)
-    @apicall(:LLVMIsConstantString, LLVMBool, (LLVMValueRef,), c)
+    @runtime_ccall((:LLVMIsConstantString,libllvm[]), LLVMBool, (LLVMValueRef,), c)
 end
 
 function LLVMGetAsString(c, Length)
-    @apicall(:LLVMGetAsString, Cstring, (LLVMValueRef, Ptr{Csize_t}), c, Length)
+    @runtime_ccall((:LLVMGetAsString,libllvm[]), Cstring, (LLVMValueRef, Ptr{Csize_t}), c, Length)
 end
 
 function LLVMConstStructInContext(C, ConstantVals, Count, Packed)
-    @apicall(:LLVMConstStructInContext, LLVMValueRef, (LLVMContextRef, Ptr{LLVMValueRef}, UInt32, LLVMBool), C, ConstantVals, Count, Packed)
+    @runtime_ccall((:LLVMConstStructInContext,libllvm[]), LLVMValueRef, (LLVMContextRef, Ptr{LLVMValueRef}, UInt32, LLVMBool), C, ConstantVals, Count, Packed)
 end
 
 function LLVMConstStruct(ConstantVals, Count, Packed)
-    @apicall(:LLVMConstStruct, LLVMValueRef, (Ptr{LLVMValueRef}, UInt32, LLVMBool), ConstantVals, Count, Packed)
+    @runtime_ccall((:LLVMConstStruct,libllvm[]), LLVMValueRef, (Ptr{LLVMValueRef}, UInt32, LLVMBool), ConstantVals, Count, Packed)
 end
 
 function LLVMConstArray(ElementTy, ConstantVals, Length)
-    @apicall(:LLVMConstArray, LLVMValueRef, (LLVMTypeRef, Ptr{LLVMValueRef}, UInt32), ElementTy, ConstantVals, Length)
+    @runtime_ccall((:LLVMConstArray,libllvm[]), LLVMValueRef, (LLVMTypeRef, Ptr{LLVMValueRef}, UInt32), ElementTy, ConstantVals, Length)
 end
 
 function LLVMConstNamedStruct(StructTy, ConstantVals, Count)
-    @apicall(:LLVMConstNamedStruct, LLVMValueRef, (LLVMTypeRef, Ptr{LLVMValueRef}, UInt32), StructTy, ConstantVals, Count)
+    @runtime_ccall((:LLVMConstNamedStruct,libllvm[]), LLVMValueRef, (LLVMTypeRef, Ptr{LLVMValueRef}, UInt32), StructTy, ConstantVals, Count)
 end
 
 function LLVMGetElementAsConstant(C, idx)
-    @apicall(:LLVMGetElementAsConstant, LLVMValueRef, (LLVMValueRef, UInt32), C, idx)
+    @runtime_ccall((:LLVMGetElementAsConstant,libllvm[]), LLVMValueRef, (LLVMValueRef, UInt32), C, idx)
 end
 
 function LLVMConstVector(ScalarConstantVals, Size)
-    @apicall(:LLVMConstVector, LLVMValueRef, (Ptr{LLVMValueRef}, UInt32), ScalarConstantVals, Size)
+    @runtime_ccall((:LLVMConstVector,libllvm[]), LLVMValueRef, (Ptr{LLVMValueRef}, UInt32), ScalarConstantVals, Size)
 end
 
 function LLVMGetConstOpcode(ConstantVal)
-    @apicall(:LLVMGetConstOpcode, LLVMOpcode, (LLVMValueRef,), ConstantVal)
+    @runtime_ccall((:LLVMGetConstOpcode,libllvm[]), LLVMOpcode, (LLVMValueRef,), ConstantVal)
 end
 
 function LLVMAlignOf(Ty)
-    @apicall(:LLVMAlignOf, LLVMValueRef, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMAlignOf,libllvm[]), LLVMValueRef, (LLVMTypeRef,), Ty)
 end
 
 function LLVMSizeOf(Ty)
-    @apicall(:LLVMSizeOf, LLVMValueRef, (LLVMTypeRef,), Ty)
+    @runtime_ccall((:LLVMSizeOf,libllvm[]), LLVMValueRef, (LLVMTypeRef,), Ty)
 end
 
 function LLVMConstNeg(ConstantVal)
-    @apicall(:LLVMConstNeg, LLVMValueRef, (LLVMValueRef,), ConstantVal)
+    @runtime_ccall((:LLVMConstNeg,libllvm[]), LLVMValueRef, (LLVMValueRef,), ConstantVal)
 end
 
 function LLVMConstNSWNeg(ConstantVal)
-    @apicall(:LLVMConstNSWNeg, LLVMValueRef, (LLVMValueRef,), ConstantVal)
+    @runtime_ccall((:LLVMConstNSWNeg,libllvm[]), LLVMValueRef, (LLVMValueRef,), ConstantVal)
 end
 
 function LLVMConstNUWNeg(ConstantVal)
-    @apicall(:LLVMConstNUWNeg, LLVMValueRef, (LLVMValueRef,), ConstantVal)
+    @runtime_ccall((:LLVMConstNUWNeg,libllvm[]), LLVMValueRef, (LLVMValueRef,), ConstantVal)
 end
 
 function LLVMConstFNeg(ConstantVal)
-    @apicall(:LLVMConstFNeg, LLVMValueRef, (LLVMValueRef,), ConstantVal)
+    @runtime_ccall((:LLVMConstFNeg,libllvm[]), LLVMValueRef, (LLVMValueRef,), ConstantVal)
 end
 
 function LLVMConstNot(ConstantVal)
-    @apicall(:LLVMConstNot, LLVMValueRef, (LLVMValueRef,), ConstantVal)
+    @runtime_ccall((:LLVMConstNot,libllvm[]), LLVMValueRef, (LLVMValueRef,), ConstantVal)
 end
 
 function LLVMConstAdd(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstAdd, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstAdd,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstNSWAdd(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstNSWAdd, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstNSWAdd,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstNUWAdd(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstNUWAdd, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstNUWAdd,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstFAdd(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstFAdd, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstFAdd,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstSub(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstSub, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstSub,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstNSWSub(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstNSWSub, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstNSWSub,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstNUWSub(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstNUWSub, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstNUWSub,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstFSub(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstFSub, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstFSub,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstMul(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstMul, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstMul,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstNSWMul(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstNSWMul, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstNSWMul,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstNUWMul(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstNUWMul, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstNUWMul,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstFMul(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstFMul, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstFMul,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstUDiv(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstUDiv, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstUDiv,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstExactUDiv(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstExactUDiv, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstExactUDiv,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstSDiv(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstSDiv, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstSDiv,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstExactSDiv(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstExactSDiv, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstExactSDiv,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstFDiv(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstFDiv, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstFDiv,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstURem(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstURem, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstURem,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstSRem(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstSRem, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstSRem,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstFRem(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstFRem, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstFRem,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstAnd(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstAnd, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstAnd,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstOr(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstOr, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstOr,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstXor(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstXor, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstXor,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstICmp(Predicate, LHSConstant, RHSConstant)
-    @apicall(:LLVMConstICmp, LLVMValueRef, (LLVMIntPredicate, LLVMValueRef, LLVMValueRef), Predicate, LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstICmp,libllvm[]), LLVMValueRef, (LLVMIntPredicate, LLVMValueRef, LLVMValueRef), Predicate, LHSConstant, RHSConstant)
 end
 
 function LLVMConstFCmp(Predicate, LHSConstant, RHSConstant)
-    @apicall(:LLVMConstFCmp, LLVMValueRef, (LLVMRealPredicate, LLVMValueRef, LLVMValueRef), Predicate, LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstFCmp,libllvm[]), LLVMValueRef, (LLVMRealPredicate, LLVMValueRef, LLVMValueRef), Predicate, LHSConstant, RHSConstant)
 end
 
 function LLVMConstShl(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstShl, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstShl,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstLShr(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstLShr, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstLShr,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstAShr(LHSConstant, RHSConstant)
-    @apicall(:LLVMConstAShr, LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
+    @runtime_ccall((:LLVMConstAShr,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstGEP(ConstantVal, ConstantIndices, NumIndices)
-    @apicall(:LLVMConstGEP, LLVMValueRef, (LLVMValueRef, Ptr{LLVMValueRef}, UInt32), ConstantVal, ConstantIndices, NumIndices)
+    @runtime_ccall((:LLVMConstGEP,libllvm[]), LLVMValueRef, (LLVMValueRef, Ptr{LLVMValueRef}, UInt32), ConstantVal, ConstantIndices, NumIndices)
 end
 
 function LLVMConstGEP2(Ty, ConstantVal, ConstantIndices, NumIndices)
-    @apicall(:LLVMConstGEP2, LLVMValueRef, (LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32), Ty, ConstantVal, ConstantIndices, NumIndices)
+    @runtime_ccall((:LLVMConstGEP2,libllvm[]), LLVMValueRef, (LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32), Ty, ConstantVal, ConstantIndices, NumIndices)
 end
 
 function LLVMConstInBoundsGEP(ConstantVal, ConstantIndices, NumIndices)
-    @apicall(:LLVMConstInBoundsGEP, LLVMValueRef, (LLVMValueRef, Ptr{LLVMValueRef}, UInt32), ConstantVal, ConstantIndices, NumIndices)
+    @runtime_ccall((:LLVMConstInBoundsGEP,libllvm[]), LLVMValueRef, (LLVMValueRef, Ptr{LLVMValueRef}, UInt32), ConstantVal, ConstantIndices, NumIndices)
 end
 
 function LLVMConstInBoundsGEP2(Ty, ConstantVal, ConstantIndices, NumIndices)
-    @apicall(:LLVMConstInBoundsGEP2, LLVMValueRef, (LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32), Ty, ConstantVal, ConstantIndices, NumIndices)
+    @runtime_ccall((:LLVMConstInBoundsGEP2,libllvm[]), LLVMValueRef, (LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32), Ty, ConstantVal, ConstantIndices, NumIndices)
 end
 
 function LLVMConstTrunc(ConstantVal, ToType)
-    @apicall(:LLVMConstTrunc, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstTrunc,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstSExt(ConstantVal, ToType)
-    @apicall(:LLVMConstSExt, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstSExt,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstZExt(ConstantVal, ToType)
-    @apicall(:LLVMConstZExt, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstZExt,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstFPTrunc(ConstantVal, ToType)
-    @apicall(:LLVMConstFPTrunc, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstFPTrunc,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstFPExt(ConstantVal, ToType)
-    @apicall(:LLVMConstFPExt, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstFPExt,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstUIToFP(ConstantVal, ToType)
-    @apicall(:LLVMConstUIToFP, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstUIToFP,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstSIToFP(ConstantVal, ToType)
-    @apicall(:LLVMConstSIToFP, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstSIToFP,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstFPToUI(ConstantVal, ToType)
-    @apicall(:LLVMConstFPToUI, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstFPToUI,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstFPToSI(ConstantVal, ToType)
-    @apicall(:LLVMConstFPToSI, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstFPToSI,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstPtrToInt(ConstantVal, ToType)
-    @apicall(:LLVMConstPtrToInt, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstPtrToInt,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstIntToPtr(ConstantVal, ToType)
-    @apicall(:LLVMConstIntToPtr, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstIntToPtr,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstBitCast(ConstantVal, ToType)
-    @apicall(:LLVMConstBitCast, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstBitCast,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstAddrSpaceCast(ConstantVal, ToType)
-    @apicall(:LLVMConstAddrSpaceCast, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstAddrSpaceCast,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstZExtOrBitCast(ConstantVal, ToType)
-    @apicall(:LLVMConstZExtOrBitCast, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstZExtOrBitCast,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstSExtOrBitCast(ConstantVal, ToType)
-    @apicall(:LLVMConstSExtOrBitCast, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstSExtOrBitCast,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstTruncOrBitCast(ConstantVal, ToType)
-    @apicall(:LLVMConstTruncOrBitCast, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstTruncOrBitCast,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstPointerCast(ConstantVal, ToType)
-    @apicall(:LLVMConstPointerCast, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstPointerCast,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstIntCast(ConstantVal, ToType, isSigned)
-    @apicall(:LLVMConstIntCast, LLVMValueRef, (LLVMValueRef, LLVMTypeRef, LLVMBool), ConstantVal, ToType, isSigned)
+    @runtime_ccall((:LLVMConstIntCast,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef, LLVMBool), ConstantVal, ToType, isSigned)
 end
 
 function LLVMConstFPCast(ConstantVal, ToType)
-    @apicall(:LLVMConstFPCast, LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
+    @runtime_ccall((:LLVMConstFPCast,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstSelect(ConstantCondition, ConstantIfTrue, ConstantIfFalse)
-    @apicall(:LLVMConstSelect, LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), ConstantCondition, ConstantIfTrue, ConstantIfFalse)
+    @runtime_ccall((:LLVMConstSelect,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), ConstantCondition, ConstantIfTrue, ConstantIfFalse)
 end
 
 function LLVMConstExtractElement(VectorConstant, IndexConstant)
-    @apicall(:LLVMConstExtractElement, LLVMValueRef, (LLVMValueRef, LLVMValueRef), VectorConstant, IndexConstant)
+    @runtime_ccall((:LLVMConstExtractElement,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef), VectorConstant, IndexConstant)
 end
 
 function LLVMConstInsertElement(VectorConstant, ElementValueConstant, IndexConstant)
-    @apicall(:LLVMConstInsertElement, LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), VectorConstant, ElementValueConstant, IndexConstant)
+    @runtime_ccall((:LLVMConstInsertElement,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), VectorConstant, ElementValueConstant, IndexConstant)
 end
 
 function LLVMConstShuffleVector(VectorAConstant, VectorBConstant, MaskConstant)
-    @apicall(:LLVMConstShuffleVector, LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), VectorAConstant, VectorBConstant, MaskConstant)
+    @runtime_ccall((:LLVMConstShuffleVector,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), VectorAConstant, VectorBConstant, MaskConstant)
 end
 
 function LLVMConstExtractValue(AggConstant, IdxList, NumIdx)
-    @apicall(:LLVMConstExtractValue, LLVMValueRef, (LLVMValueRef, Ptr{UInt32}, UInt32), AggConstant, IdxList, NumIdx)
+    @runtime_ccall((:LLVMConstExtractValue,libllvm[]), LLVMValueRef, (LLVMValueRef, Ptr{UInt32}, UInt32), AggConstant, IdxList, NumIdx)
 end
 
 function LLVMConstInsertValue(AggConstant, ElementValueConstant, IdxList, NumIdx)
-    @apicall(:LLVMConstInsertValue, LLVMValueRef, (LLVMValueRef, LLVMValueRef, Ptr{UInt32}, UInt32), AggConstant, ElementValueConstant, IdxList, NumIdx)
+    @runtime_ccall((:LLVMConstInsertValue,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMValueRef, Ptr{UInt32}, UInt32), AggConstant, ElementValueConstant, IdxList, NumIdx)
 end
 
 function LLVMBlockAddress(F, BB)
-    @apicall(:LLVMBlockAddress, LLVMValueRef, (LLVMValueRef, LLVMBasicBlockRef), F, BB)
+    @runtime_ccall((:LLVMBlockAddress,libllvm[]), LLVMValueRef, (LLVMValueRef, LLVMBasicBlockRef), F, BB)
 end
 
 function LLVMConstInlineAsm(Ty, AsmString, Constraints, HasSideEffects, IsAlignStack)
-    @apicall(:LLVMConstInlineAsm, LLVMValueRef, (LLVMTypeRef, Cstring, Cstring, LLVMBool, LLVMBool), Ty, AsmString, Constraints, HasSideEffects, IsAlignStack)
+    @runtime_ccall((:LLVMConstInlineAsm,libllvm[]), LLVMValueRef, (LLVMTypeRef, Cstring, Cstring, LLVMBool, LLVMBool), Ty, AsmString, Constraints, HasSideEffects, IsAlignStack)
 end
 
 function LLVMGetGlobalParent(Global)
-    @apicall(:LLVMGetGlobalParent, LLVMModuleRef, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMGetGlobalParent,libllvm[]), LLVMModuleRef, (LLVMValueRef,), Global)
 end
 
 function LLVMIsDeclaration(Global)
-    @apicall(:LLVMIsDeclaration, LLVMBool, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMIsDeclaration,libllvm[]), LLVMBool, (LLVMValueRef,), Global)
 end
 
 function LLVMGetLinkage(Global)
-    @apicall(:LLVMGetLinkage, LLVMLinkage, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMGetLinkage,libllvm[]), LLVMLinkage, (LLVMValueRef,), Global)
 end
 
 function LLVMSetLinkage(Global, Linkage)
-    @apicall(:LLVMSetLinkage, Cvoid, (LLVMValueRef, LLVMLinkage), Global, Linkage)
+    @runtime_ccall((:LLVMSetLinkage,libllvm[]), Cvoid, (LLVMValueRef, LLVMLinkage), Global, Linkage)
 end
 
 function LLVMGetSection(Global)
-    @apicall(:LLVMGetSection, Cstring, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMGetSection,libllvm[]), Cstring, (LLVMValueRef,), Global)
 end
 
 function LLVMSetSection(Global, Section)
-    @apicall(:LLVMSetSection, Cvoid, (LLVMValueRef, Cstring), Global, Section)
+    @runtime_ccall((:LLVMSetSection,libllvm[]), Cvoid, (LLVMValueRef, Cstring), Global, Section)
 end
 
 function LLVMGetVisibility(Global)
-    @apicall(:LLVMGetVisibility, LLVMVisibility, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMGetVisibility,libllvm[]), LLVMVisibility, (LLVMValueRef,), Global)
 end
 
 function LLVMSetVisibility(Global, Viz)
-    @apicall(:LLVMSetVisibility, Cvoid, (LLVMValueRef, LLVMVisibility), Global, Viz)
+    @runtime_ccall((:LLVMSetVisibility,libllvm[]), Cvoid, (LLVMValueRef, LLVMVisibility), Global, Viz)
 end
 
 function LLVMGetDLLStorageClass(Global)
-    @apicall(:LLVMGetDLLStorageClass, LLVMDLLStorageClass, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMGetDLLStorageClass,libllvm[]), LLVMDLLStorageClass, (LLVMValueRef,), Global)
 end
 
 function LLVMSetDLLStorageClass(Global, Class)
-    @apicall(:LLVMSetDLLStorageClass, Cvoid, (LLVMValueRef, LLVMDLLStorageClass), Global, Class)
+    @runtime_ccall((:LLVMSetDLLStorageClass,libllvm[]), Cvoid, (LLVMValueRef, LLVMDLLStorageClass), Global, Class)
 end
 
 function LLVMGetUnnamedAddress(Global)
-    @apicall(:LLVMGetUnnamedAddress, LLVMUnnamedAddr, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMGetUnnamedAddress,libllvm[]), LLVMUnnamedAddr, (LLVMValueRef,), Global)
 end
 
 function LLVMSetUnnamedAddress(Global, UnnamedAddr)
-    @apicall(:LLVMSetUnnamedAddress, Cvoid, (LLVMValueRef, LLVMUnnamedAddr), Global, UnnamedAddr)
+    @runtime_ccall((:LLVMSetUnnamedAddress,libllvm[]), Cvoid, (LLVMValueRef, LLVMUnnamedAddr), Global, UnnamedAddr)
 end
 
 function LLVMGlobalGetValueType(Global)
-    @apicall(:LLVMGlobalGetValueType, LLVMTypeRef, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMGlobalGetValueType,libllvm[]), LLVMTypeRef, (LLVMValueRef,), Global)
 end
 
 function LLVMHasUnnamedAddr(Global)
-    @apicall(:LLVMHasUnnamedAddr, LLVMBool, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMHasUnnamedAddr,libllvm[]), LLVMBool, (LLVMValueRef,), Global)
 end
 
 function LLVMSetUnnamedAddr(Global, HasUnnamedAddr)
-    @apicall(:LLVMSetUnnamedAddr, Cvoid, (LLVMValueRef, LLVMBool), Global, HasUnnamedAddr)
+    @runtime_ccall((:LLVMSetUnnamedAddr,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), Global, HasUnnamedAddr)
 end
 
 function LLVMGetAlignment(V)
-    @apicall(:LLVMGetAlignment, UInt32, (LLVMValueRef,), V)
+    @runtime_ccall((:LLVMGetAlignment,libllvm[]), UInt32, (LLVMValueRef,), V)
 end
 
 function LLVMSetAlignment(V, Bytes)
-    @apicall(:LLVMSetAlignment, Cvoid, (LLVMValueRef, UInt32), V, Bytes)
+    @runtime_ccall((:LLVMSetAlignment,libllvm[]), Cvoid, (LLVMValueRef, UInt32), V, Bytes)
 end
 
 function LLVMGlobalSetMetadata(Global, Kind, MD)
-    @apicall(:LLVMGlobalSetMetadata, Cvoid, (LLVMValueRef, UInt32, LLVMMetadataRef), Global, Kind, MD)
+    @runtime_ccall((:LLVMGlobalSetMetadata,libllvm[]), Cvoid, (LLVMValueRef, UInt32, LLVMMetadataRef), Global, Kind, MD)
 end
 
 function LLVMGlobalEraseMetadata(Global, Kind)
-    @apicall(:LLVMGlobalEraseMetadata, Cvoid, (LLVMValueRef, UInt32), Global, Kind)
+    @runtime_ccall((:LLVMGlobalEraseMetadata,libllvm[]), Cvoid, (LLVMValueRef, UInt32), Global, Kind)
 end
 
 function LLVMGlobalClearMetadata(Global)
-    @apicall(:LLVMGlobalClearMetadata, Cvoid, (LLVMValueRef,), Global)
+    @runtime_ccall((:LLVMGlobalClearMetadata,libllvm[]), Cvoid, (LLVMValueRef,), Global)
 end
 
 function LLVMGlobalCopyAllMetadata(Value, NumEntries)
-    @apicall(:LLVMGlobalCopyAllMetadata, Ptr{LLVMValueMetadataEntry}, (LLVMValueRef, Ptr{Csize_t}), Value, NumEntries)
+    @runtime_ccall((:LLVMGlobalCopyAllMetadata,libllvm[]), Ptr{LLVMValueMetadataEntry}, (LLVMValueRef, Ptr{Csize_t}), Value, NumEntries)
 end
 
 function LLVMDisposeValueMetadataEntries(Entries)
-    @apicall(:LLVMDisposeValueMetadataEntries, Cvoid, (Ptr{LLVMValueMetadataEntry},), Entries)
+    @runtime_ccall((:LLVMDisposeValueMetadataEntries,libllvm[]), Cvoid, (Ptr{LLVMValueMetadataEntry},), Entries)
 end
 
 function LLVMValueMetadataEntriesGetKind(Entries, Index)
-    @apicall(:LLVMValueMetadataEntriesGetKind, UInt32, (Ptr{LLVMValueMetadataEntry}, UInt32), Entries, Index)
+    @runtime_ccall((:LLVMValueMetadataEntriesGetKind,libllvm[]), UInt32, (Ptr{LLVMValueMetadataEntry}, UInt32), Entries, Index)
 end
 
 function LLVMValueMetadataEntriesGetMetadata(Entries, Index)
-    @apicall(:LLVMValueMetadataEntriesGetMetadata, LLVMMetadataRef, (Ptr{LLVMValueMetadataEntry}, UInt32), Entries, Index)
+    @runtime_ccall((:LLVMValueMetadataEntriesGetMetadata,libllvm[]), LLVMMetadataRef, (Ptr{LLVMValueMetadataEntry}, UInt32), Entries, Index)
 end
 
 function LLVMAddGlobal(M, Ty, Name)
-    @apicall(:LLVMAddGlobal, LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, Cstring), M, Ty, Name)
+    @runtime_ccall((:LLVMAddGlobal,libllvm[]), LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, Cstring), M, Ty, Name)
 end
 
 function LLVMAddGlobalInAddressSpace(M, Ty, Name, AddressSpace)
-    @apicall(:LLVMAddGlobalInAddressSpace, LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, Cstring, UInt32), M, Ty, Name, AddressSpace)
+    @runtime_ccall((:LLVMAddGlobalInAddressSpace,libllvm[]), LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, Cstring, UInt32), M, Ty, Name, AddressSpace)
 end
 
 function LLVMGetNamedGlobal(M, Name)
-    @apicall(:LLVMGetNamedGlobal, LLVMValueRef, (LLVMModuleRef, Cstring), M, Name)
+    @runtime_ccall((:LLVMGetNamedGlobal,libllvm[]), LLVMValueRef, (LLVMModuleRef, Cstring), M, Name)
 end
 
 function LLVMGetFirstGlobal(M)
-    @apicall(:LLVMGetFirstGlobal, LLVMValueRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetFirstGlobal,libllvm[]), LLVMValueRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetLastGlobal(M)
-    @apicall(:LLVMGetLastGlobal, LLVMValueRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetLastGlobal,libllvm[]), LLVMValueRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetNextGlobal(GlobalVar)
-    @apicall(:LLVMGetNextGlobal, LLVMValueRef, (LLVMValueRef,), GlobalVar)
+    @runtime_ccall((:LLVMGetNextGlobal,libllvm[]), LLVMValueRef, (LLVMValueRef,), GlobalVar)
 end
 
 function LLVMGetPreviousGlobal(GlobalVar)
-    @apicall(:LLVMGetPreviousGlobal, LLVMValueRef, (LLVMValueRef,), GlobalVar)
+    @runtime_ccall((:LLVMGetPreviousGlobal,libllvm[]), LLVMValueRef, (LLVMValueRef,), GlobalVar)
 end
 
 function LLVMDeleteGlobal(GlobalVar)
-    @apicall(:LLVMDeleteGlobal, Cvoid, (LLVMValueRef,), GlobalVar)
+    @runtime_ccall((:LLVMDeleteGlobal,libllvm[]), Cvoid, (LLVMValueRef,), GlobalVar)
 end
 
 function LLVMGetInitializer(GlobalVar)
-    @apicall(:LLVMGetInitializer, LLVMValueRef, (LLVMValueRef,), GlobalVar)
+    @runtime_ccall((:LLVMGetInitializer,libllvm[]), LLVMValueRef, (LLVMValueRef,), GlobalVar)
 end
 
 function LLVMSetInitializer(GlobalVar, ConstantVal)
-    @apicall(:LLVMSetInitializer, Cvoid, (LLVMValueRef, LLVMValueRef), GlobalVar, ConstantVal)
+    @runtime_ccall((:LLVMSetInitializer,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef), GlobalVar, ConstantVal)
 end
 
 function LLVMIsThreadLocal(GlobalVar)
-    @apicall(:LLVMIsThreadLocal, LLVMBool, (LLVMValueRef,), GlobalVar)
+    @runtime_ccall((:LLVMIsThreadLocal,libllvm[]), LLVMBool, (LLVMValueRef,), GlobalVar)
 end
 
 function LLVMSetThreadLocal(GlobalVar, IsThreadLocal)
-    @apicall(:LLVMSetThreadLocal, Cvoid, (LLVMValueRef, LLVMBool), GlobalVar, IsThreadLocal)
+    @runtime_ccall((:LLVMSetThreadLocal,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), GlobalVar, IsThreadLocal)
 end
 
 function LLVMIsGlobalConstant(GlobalVar)
-    @apicall(:LLVMIsGlobalConstant, LLVMBool, (LLVMValueRef,), GlobalVar)
+    @runtime_ccall((:LLVMIsGlobalConstant,libllvm[]), LLVMBool, (LLVMValueRef,), GlobalVar)
 end
 
 function LLVMSetGlobalConstant(GlobalVar, IsConstant)
-    @apicall(:LLVMSetGlobalConstant, Cvoid, (LLVMValueRef, LLVMBool), GlobalVar, IsConstant)
+    @runtime_ccall((:LLVMSetGlobalConstant,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), GlobalVar, IsConstant)
 end
 
 function LLVMGetThreadLocalMode(GlobalVar)
-    @apicall(:LLVMGetThreadLocalMode, LLVMThreadLocalMode, (LLVMValueRef,), GlobalVar)
+    @runtime_ccall((:LLVMGetThreadLocalMode,libllvm[]), LLVMThreadLocalMode, (LLVMValueRef,), GlobalVar)
 end
 
 function LLVMSetThreadLocalMode(GlobalVar, Mode)
-    @apicall(:LLVMSetThreadLocalMode, Cvoid, (LLVMValueRef, LLVMThreadLocalMode), GlobalVar, Mode)
+    @runtime_ccall((:LLVMSetThreadLocalMode,libllvm[]), Cvoid, (LLVMValueRef, LLVMThreadLocalMode), GlobalVar, Mode)
 end
 
 function LLVMIsExternallyInitialized(GlobalVar)
-    @apicall(:LLVMIsExternallyInitialized, LLVMBool, (LLVMValueRef,), GlobalVar)
+    @runtime_ccall((:LLVMIsExternallyInitialized,libllvm[]), LLVMBool, (LLVMValueRef,), GlobalVar)
 end
 
 function LLVMSetExternallyInitialized(GlobalVar, IsExtInit)
-    @apicall(:LLVMSetExternallyInitialized, Cvoid, (LLVMValueRef, LLVMBool), GlobalVar, IsExtInit)
+    @runtime_ccall((:LLVMSetExternallyInitialized,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), GlobalVar, IsExtInit)
 end
 
 function LLVMAddAlias(M, Ty, Aliasee, Name)
-    @apicall(:LLVMAddAlias, LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, LLVMValueRef, Cstring), M, Ty, Aliasee, Name)
+    @runtime_ccall((:LLVMAddAlias,libllvm[]), LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, LLVMValueRef, Cstring), M, Ty, Aliasee, Name)
 end
 
 function LLVMGetNamedGlobalAlias(M, Name, NameLen)
-    @apicall(:LLVMGetNamedGlobalAlias, LLVMValueRef, (LLVMModuleRef, Cstring, Csize_t), M, Name, NameLen)
+    @runtime_ccall((:LLVMGetNamedGlobalAlias,libllvm[]), LLVMValueRef, (LLVMModuleRef, Cstring, Csize_t), M, Name, NameLen)
 end
 
 function LLVMGetFirstGlobalAlias(M)
-    @apicall(:LLVMGetFirstGlobalAlias, LLVMValueRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetFirstGlobalAlias,libllvm[]), LLVMValueRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetLastGlobalAlias(M)
-    @apicall(:LLVMGetLastGlobalAlias, LLVMValueRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetLastGlobalAlias,libllvm[]), LLVMValueRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetNextGlobalAlias(GA)
-    @apicall(:LLVMGetNextGlobalAlias, LLVMValueRef, (LLVMValueRef,), GA)
+    @runtime_ccall((:LLVMGetNextGlobalAlias,libllvm[]), LLVMValueRef, (LLVMValueRef,), GA)
 end
 
 function LLVMGetPreviousGlobalAlias(GA)
-    @apicall(:LLVMGetPreviousGlobalAlias, LLVMValueRef, (LLVMValueRef,), GA)
+    @runtime_ccall((:LLVMGetPreviousGlobalAlias,libllvm[]), LLVMValueRef, (LLVMValueRef,), GA)
 end
 
 function LLVMAliasGetAliasee(Alias)
-    @apicall(:LLVMAliasGetAliasee, LLVMValueRef, (LLVMValueRef,), Alias)
+    @runtime_ccall((:LLVMAliasGetAliasee,libllvm[]), LLVMValueRef, (LLVMValueRef,), Alias)
 end
 
 function LLVMAliasSetAliasee(Alias, Aliasee)
-    @apicall(:LLVMAliasSetAliasee, Cvoid, (LLVMValueRef, LLVMValueRef), Alias, Aliasee)
+    @runtime_ccall((:LLVMAliasSetAliasee,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef), Alias, Aliasee)
 end
 
 function LLVMDeleteFunction(Fn)
-    @apicall(:LLVMDeleteFunction, Cvoid, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMDeleteFunction,libllvm[]), Cvoid, (LLVMValueRef,), Fn)
 end
 
 function LLVMHasPersonalityFn(Fn)
-    @apicall(:LLVMHasPersonalityFn, LLVMBool, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMHasPersonalityFn,libllvm[]), LLVMBool, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetPersonalityFn(Fn)
-    @apicall(:LLVMGetPersonalityFn, LLVMValueRef, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetPersonalityFn,libllvm[]), LLVMValueRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMSetPersonalityFn(Fn, PersonalityFn)
-    @apicall(:LLVMSetPersonalityFn, Cvoid, (LLVMValueRef, LLVMValueRef), Fn, PersonalityFn)
+    @runtime_ccall((:LLVMSetPersonalityFn,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef), Fn, PersonalityFn)
 end
 
 function LLVMLookupIntrinsicID(Name, NameLen)
-    @apicall(:LLVMLookupIntrinsicID, UInt32, (Cstring, Csize_t), Name, NameLen)
+    @runtime_ccall((:LLVMLookupIntrinsicID,libllvm[]), UInt32, (Cstring, Csize_t), Name, NameLen)
 end
 
 function LLVMGetIntrinsicID(Fn)
-    @apicall(:LLVMGetIntrinsicID, UInt32, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetIntrinsicID,libllvm[]), UInt32, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetIntrinsicDeclaration(Mod, ID, ParamTypes, ParamCount)
-    @apicall(:LLVMGetIntrinsicDeclaration, LLVMValueRef, (LLVMModuleRef, UInt32, Ptr{LLVMTypeRef}, Csize_t), Mod, ID, ParamTypes, ParamCount)
+    @runtime_ccall((:LLVMGetIntrinsicDeclaration,libllvm[]), LLVMValueRef, (LLVMModuleRef, UInt32, Ptr{LLVMTypeRef}, Csize_t), Mod, ID, ParamTypes, ParamCount)
 end
 
 function LLVMIntrinsicGetType(Ctx, ID, ParamTypes, ParamCount)
-    @apicall(:LLVMIntrinsicGetType, LLVMTypeRef, (LLVMContextRef, UInt32, Ptr{LLVMTypeRef}, Csize_t), Ctx, ID, ParamTypes, ParamCount)
+    @runtime_ccall((:LLVMIntrinsicGetType,libllvm[]), LLVMTypeRef, (LLVMContextRef, UInt32, Ptr{LLVMTypeRef}, Csize_t), Ctx, ID, ParamTypes, ParamCount)
 end
 
 function LLVMIntrinsicGetName(ID, NameLength)
-    @apicall(:LLVMIntrinsicGetName, Cstring, (UInt32, Ptr{Csize_t}), ID, NameLength)
+    @runtime_ccall((:LLVMIntrinsicGetName,libllvm[]), Cstring, (UInt32, Ptr{Csize_t}), ID, NameLength)
 end
 
 function LLVMIntrinsicCopyOverloadedName(ID, ParamTypes, ParamCount, NameLength)
-    @apicall(:LLVMIntrinsicCopyOverloadedName, Cstring, (UInt32, Ptr{LLVMTypeRef}, Csize_t, Ptr{Csize_t}), ID, ParamTypes, ParamCount, NameLength)
+    @runtime_ccall((:LLVMIntrinsicCopyOverloadedName,libllvm[]), Cstring, (UInt32, Ptr{LLVMTypeRef}, Csize_t, Ptr{Csize_t}), ID, ParamTypes, ParamCount, NameLength)
 end
 
 function LLVMIntrinsicIsOverloaded(ID)
-    @apicall(:LLVMIntrinsicIsOverloaded, LLVMBool, (UInt32,), ID)
+    @runtime_ccall((:LLVMIntrinsicIsOverloaded,libllvm[]), LLVMBool, (UInt32,), ID)
 end
 
 function LLVMGetFunctionCallConv(Fn)
-    @apicall(:LLVMGetFunctionCallConv, UInt32, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetFunctionCallConv,libllvm[]), UInt32, (LLVMValueRef,), Fn)
 end
 
 function LLVMSetFunctionCallConv(Fn, CC)
-    @apicall(:LLVMSetFunctionCallConv, Cvoid, (LLVMValueRef, UInt32), Fn, CC)
+    @runtime_ccall((:LLVMSetFunctionCallConv,libllvm[]), Cvoid, (LLVMValueRef, UInt32), Fn, CC)
 end
 
 function LLVMGetGC(Fn)
-    @apicall(:LLVMGetGC, Cstring, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetGC,libllvm[]), Cstring, (LLVMValueRef,), Fn)
 end
 
 function LLVMSetGC(Fn, Name)
-    @apicall(:LLVMSetGC, Cvoid, (LLVMValueRef, Cstring), Fn, Name)
+    @runtime_ccall((:LLVMSetGC,libllvm[]), Cvoid, (LLVMValueRef, Cstring), Fn, Name)
 end
 
 function LLVMAddAttributeAtIndex(F, Idx, A)
-    @apicall(:LLVMAddAttributeAtIndex, Cvoid, (LLVMValueRef, LLVMAttributeIndex, LLVMAttributeRef), F, Idx, A)
+    @runtime_ccall((:LLVMAddAttributeAtIndex,libllvm[]), Cvoid, (LLVMValueRef, LLVMAttributeIndex, LLVMAttributeRef), F, Idx, A)
 end
 
 function LLVMGetAttributeCountAtIndex(F, Idx)
-    @apicall(:LLVMGetAttributeCountAtIndex, UInt32, (LLVMValueRef, LLVMAttributeIndex), F, Idx)
+    @runtime_ccall((:LLVMGetAttributeCountAtIndex,libllvm[]), UInt32, (LLVMValueRef, LLVMAttributeIndex), F, Idx)
 end
 
 function LLVMGetAttributesAtIndex(F, Idx, Attrs)
-    @apicall(:LLVMGetAttributesAtIndex, Cvoid, (LLVMValueRef, LLVMAttributeIndex, Ptr{LLVMAttributeRef}), F, Idx, Attrs)
+    @runtime_ccall((:LLVMGetAttributesAtIndex,libllvm[]), Cvoid, (LLVMValueRef, LLVMAttributeIndex, Ptr{LLVMAttributeRef}), F, Idx, Attrs)
 end
 
 function LLVMGetEnumAttributeAtIndex(F, Idx, KindID)
-    @apicall(:LLVMGetEnumAttributeAtIndex, LLVMAttributeRef, (LLVMValueRef, LLVMAttributeIndex, UInt32), F, Idx, KindID)
+    @runtime_ccall((:LLVMGetEnumAttributeAtIndex,libllvm[]), LLVMAttributeRef, (LLVMValueRef, LLVMAttributeIndex, UInt32), F, Idx, KindID)
 end
 
 function LLVMGetStringAttributeAtIndex(F, Idx, K, KLen)
-    @apicall(:LLVMGetStringAttributeAtIndex, LLVMAttributeRef, (LLVMValueRef, LLVMAttributeIndex, Cstring, UInt32), F, Idx, K, KLen)
+    @runtime_ccall((:LLVMGetStringAttributeAtIndex,libllvm[]), LLVMAttributeRef, (LLVMValueRef, LLVMAttributeIndex, Cstring, UInt32), F, Idx, K, KLen)
 end
 
 function LLVMRemoveEnumAttributeAtIndex(F, Idx, KindID)
-    @apicall(:LLVMRemoveEnumAttributeAtIndex, Cvoid, (LLVMValueRef, LLVMAttributeIndex, UInt32), F, Idx, KindID)
+    @runtime_ccall((:LLVMRemoveEnumAttributeAtIndex,libllvm[]), Cvoid, (LLVMValueRef, LLVMAttributeIndex, UInt32), F, Idx, KindID)
 end
 
 function LLVMRemoveStringAttributeAtIndex(F, Idx, K, KLen)
-    @apicall(:LLVMRemoveStringAttributeAtIndex, Cvoid, (LLVMValueRef, LLVMAttributeIndex, Cstring, UInt32), F, Idx, K, KLen)
+    @runtime_ccall((:LLVMRemoveStringAttributeAtIndex,libllvm[]), Cvoid, (LLVMValueRef, LLVMAttributeIndex, Cstring, UInt32), F, Idx, K, KLen)
 end
 
 function LLVMAddTargetDependentFunctionAttr(Fn, A, V)
-    @apicall(:LLVMAddTargetDependentFunctionAttr, Cvoid, (LLVMValueRef, Cstring, Cstring), Fn, A, V)
+    @runtime_ccall((:LLVMAddTargetDependentFunctionAttr,libllvm[]), Cvoid, (LLVMValueRef, Cstring, Cstring), Fn, A, V)
 end
 
 function LLVMCountParams(Fn)
-    @apicall(:LLVMCountParams, UInt32, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMCountParams,libllvm[]), UInt32, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetParams(Fn, Params)
-    @apicall(:LLVMGetParams, Cvoid, (LLVMValueRef, Ptr{LLVMValueRef}), Fn, Params)
+    @runtime_ccall((:LLVMGetParams,libllvm[]), Cvoid, (LLVMValueRef, Ptr{LLVMValueRef}), Fn, Params)
 end
 
 function LLVMGetParam(Fn, Index)
-    @apicall(:LLVMGetParam, LLVMValueRef, (LLVMValueRef, UInt32), Fn, Index)
+    @runtime_ccall((:LLVMGetParam,libllvm[]), LLVMValueRef, (LLVMValueRef, UInt32), Fn, Index)
 end
 
 function LLVMGetParamParent(Inst)
-    @apicall(:LLVMGetParamParent, LLVMValueRef, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetParamParent,libllvm[]), LLVMValueRef, (LLVMValueRef,), Inst)
 end
 
 function LLVMGetFirstParam(Fn)
-    @apicall(:LLVMGetFirstParam, LLVMValueRef, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetFirstParam,libllvm[]), LLVMValueRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetLastParam(Fn)
-    @apicall(:LLVMGetLastParam, LLVMValueRef, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetLastParam,libllvm[]), LLVMValueRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetNextParam(Arg)
-    @apicall(:LLVMGetNextParam, LLVMValueRef, (LLVMValueRef,), Arg)
+    @runtime_ccall((:LLVMGetNextParam,libllvm[]), LLVMValueRef, (LLVMValueRef,), Arg)
 end
 
 function LLVMGetPreviousParam(Arg)
-    @apicall(:LLVMGetPreviousParam, LLVMValueRef, (LLVMValueRef,), Arg)
+    @runtime_ccall((:LLVMGetPreviousParam,libllvm[]), LLVMValueRef, (LLVMValueRef,), Arg)
 end
 
 function LLVMSetParamAlignment(Arg, Align)
-    @apicall(:LLVMSetParamAlignment, Cvoid, (LLVMValueRef, UInt32), Arg, Align)
+    @runtime_ccall((:LLVMSetParamAlignment,libllvm[]), Cvoid, (LLVMValueRef, UInt32), Arg, Align)
 end
 
 function LLVMAddGlobalIFunc(M, Name, NameLen, Ty, AddrSpace, Resolver)
-    @apicall(:LLVMAddGlobalIFunc, LLVMValueRef, (LLVMModuleRef, Cstring, Csize_t, LLVMTypeRef, UInt32, LLVMValueRef), M, Name, NameLen, Ty, AddrSpace, Resolver)
+    @runtime_ccall((:LLVMAddGlobalIFunc,libllvm[]), LLVMValueRef, (LLVMModuleRef, Cstring, Csize_t, LLVMTypeRef, UInt32, LLVMValueRef), M, Name, NameLen, Ty, AddrSpace, Resolver)
 end
 
 function LLVMGetNamedGlobalIFunc(M, Name, NameLen)
-    @apicall(:LLVMGetNamedGlobalIFunc, LLVMValueRef, (LLVMModuleRef, Cstring, Csize_t), M, Name, NameLen)
+    @runtime_ccall((:LLVMGetNamedGlobalIFunc,libllvm[]), LLVMValueRef, (LLVMModuleRef, Cstring, Csize_t), M, Name, NameLen)
 end
 
 function LLVMGetFirstGlobalIFunc(M)
-    @apicall(:LLVMGetFirstGlobalIFunc, LLVMValueRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetFirstGlobalIFunc,libllvm[]), LLVMValueRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetLastGlobalIFunc(M)
-    @apicall(:LLVMGetLastGlobalIFunc, LLVMValueRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetLastGlobalIFunc,libllvm[]), LLVMValueRef, (LLVMModuleRef,), M)
 end
 
 function LLVMGetNextGlobalIFunc(IFunc)
-    @apicall(:LLVMGetNextGlobalIFunc, LLVMValueRef, (LLVMValueRef,), IFunc)
+    @runtime_ccall((:LLVMGetNextGlobalIFunc,libllvm[]), LLVMValueRef, (LLVMValueRef,), IFunc)
 end
 
 function LLVMGetPreviousGlobalIFunc(IFunc)
-    @apicall(:LLVMGetPreviousGlobalIFunc, LLVMValueRef, (LLVMValueRef,), IFunc)
+    @runtime_ccall((:LLVMGetPreviousGlobalIFunc,libllvm[]), LLVMValueRef, (LLVMValueRef,), IFunc)
 end
 
 function LLVMGetGlobalIFuncResolver(IFunc)
-    @apicall(:LLVMGetGlobalIFuncResolver, LLVMValueRef, (LLVMValueRef,), IFunc)
+    @runtime_ccall((:LLVMGetGlobalIFuncResolver,libllvm[]), LLVMValueRef, (LLVMValueRef,), IFunc)
 end
 
 function LLVMSetGlobalIFuncResolver(IFunc, Resolver)
-    @apicall(:LLVMSetGlobalIFuncResolver, Cvoid, (LLVMValueRef, LLVMValueRef), IFunc, Resolver)
+    @runtime_ccall((:LLVMSetGlobalIFuncResolver,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef), IFunc, Resolver)
 end
 
 function LLVMEraseGlobalIFunc(IFunc)
-    @apicall(:LLVMEraseGlobalIFunc, Cvoid, (LLVMValueRef,), IFunc)
+    @runtime_ccall((:LLVMEraseGlobalIFunc,libllvm[]), Cvoid, (LLVMValueRef,), IFunc)
 end
 
 function LLVMRemoveGlobalIFunc(IFunc)
-    @apicall(:LLVMRemoveGlobalIFunc, Cvoid, (LLVMValueRef,), IFunc)
+    @runtime_ccall((:LLVMRemoveGlobalIFunc,libllvm[]), Cvoid, (LLVMValueRef,), IFunc)
 end
 
 function LLVMMDStringInContext2(C, Str, SLen)
-    @apicall(:LLVMMDStringInContext2, LLVMMetadataRef, (LLVMContextRef, Cstring, Csize_t), C, Str, SLen)
+    @runtime_ccall((:LLVMMDStringInContext2,libllvm[]), LLVMMetadataRef, (LLVMContextRef, Cstring, Csize_t), C, Str, SLen)
 end
 
 function LLVMMDNodeInContext2(C, MDs, Count)
-    @apicall(:LLVMMDNodeInContext2, LLVMMetadataRef, (LLVMContextRef, Ptr{LLVMMetadataRef}, Csize_t), C, MDs, Count)
+    @runtime_ccall((:LLVMMDNodeInContext2,libllvm[]), LLVMMetadataRef, (LLVMContextRef, Ptr{LLVMMetadataRef}, Csize_t), C, MDs, Count)
 end
 
 function LLVMMetadataAsValue(C, MD)
-    @apicall(:LLVMMetadataAsValue, LLVMValueRef, (LLVMContextRef, LLVMMetadataRef), C, MD)
+    @runtime_ccall((:LLVMMetadataAsValue,libllvm[]), LLVMValueRef, (LLVMContextRef, LLVMMetadataRef), C, MD)
 end
 
 function LLVMValueAsMetadata(Val)
-    @apicall(:LLVMValueAsMetadata, LLVMMetadataRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMValueAsMetadata,libllvm[]), LLVMMetadataRef, (LLVMValueRef,), Val)
 end
 
 function LLVMGetMDString(V, Length)
-    @apicall(:LLVMGetMDString, Cstring, (LLVMValueRef, Ptr{UInt32}), V, Length)
+    @runtime_ccall((:LLVMGetMDString,libllvm[]), Cstring, (LLVMValueRef, Ptr{UInt32}), V, Length)
 end
 
 function LLVMGetMDNodeNumOperands(V)
-    @apicall(:LLVMGetMDNodeNumOperands, UInt32, (LLVMValueRef,), V)
+    @runtime_ccall((:LLVMGetMDNodeNumOperands,libllvm[]), UInt32, (LLVMValueRef,), V)
 end
 
 function LLVMGetMDNodeOperands(V, Dest)
-    @apicall(:LLVMGetMDNodeOperands, Cvoid, (LLVMValueRef, Ptr{LLVMValueRef}), V, Dest)
+    @runtime_ccall((:LLVMGetMDNodeOperands,libllvm[]), Cvoid, (LLVMValueRef, Ptr{LLVMValueRef}), V, Dest)
 end
 
 function LLVMMDStringInContext(C, Str, SLen)
-    @apicall(:LLVMMDStringInContext, LLVMValueRef, (LLVMContextRef, Cstring, UInt32), C, Str, SLen)
+    @runtime_ccall((:LLVMMDStringInContext,libllvm[]), LLVMValueRef, (LLVMContextRef, Cstring, UInt32), C, Str, SLen)
 end
 
 function LLVMMDString(Str, SLen)
-    @apicall(:LLVMMDString, LLVMValueRef, (Cstring, UInt32), Str, SLen)
+    @runtime_ccall((:LLVMMDString,libllvm[]), LLVMValueRef, (Cstring, UInt32), Str, SLen)
 end
 
 function LLVMMDNodeInContext(C, Vals, Count)
-    @apicall(:LLVMMDNodeInContext, LLVMValueRef, (LLVMContextRef, Ptr{LLVMValueRef}, UInt32), C, Vals, Count)
+    @runtime_ccall((:LLVMMDNodeInContext,libllvm[]), LLVMValueRef, (LLVMContextRef, Ptr{LLVMValueRef}, UInt32), C, Vals, Count)
 end
 
 function LLVMMDNode(Vals, Count)
-    @apicall(:LLVMMDNode, LLVMValueRef, (Ptr{LLVMValueRef}, UInt32), Vals, Count)
+    @runtime_ccall((:LLVMMDNode,libllvm[]), LLVMValueRef, (Ptr{LLVMValueRef}, UInt32), Vals, Count)
 end
 
 function LLVMBasicBlockAsValue(BB)
-    @apicall(:LLVMBasicBlockAsValue, LLVMValueRef, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMBasicBlockAsValue,libllvm[]), LLVMValueRef, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMValueIsBasicBlock(Val)
-    @apicall(:LLVMValueIsBasicBlock, LLVMBool, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMValueIsBasicBlock,libllvm[]), LLVMBool, (LLVMValueRef,), Val)
 end
 
 function LLVMValueAsBasicBlock(Val)
-    @apicall(:LLVMValueAsBasicBlock, LLVMBasicBlockRef, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMValueAsBasicBlock,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef,), Val)
 end
 
 function LLVMGetBasicBlockName(BB)
-    @apicall(:LLVMGetBasicBlockName, Cstring, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMGetBasicBlockName,libllvm[]), Cstring, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMGetBasicBlockParent(BB)
-    @apicall(:LLVMGetBasicBlockParent, LLVMValueRef, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMGetBasicBlockParent,libllvm[]), LLVMValueRef, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMGetBasicBlockTerminator(BB)
-    @apicall(:LLVMGetBasicBlockTerminator, LLVMValueRef, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMGetBasicBlockTerminator,libllvm[]), LLVMValueRef, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMCountBasicBlocks(Fn)
-    @apicall(:LLVMCountBasicBlocks, UInt32, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMCountBasicBlocks,libllvm[]), UInt32, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetBasicBlocks(Fn, BasicBlocks)
-    @apicall(:LLVMGetBasicBlocks, Cvoid, (LLVMValueRef, Ptr{LLVMBasicBlockRef}), Fn, BasicBlocks)
+    @runtime_ccall((:LLVMGetBasicBlocks,libllvm[]), Cvoid, (LLVMValueRef, Ptr{LLVMBasicBlockRef}), Fn, BasicBlocks)
 end
 
 function LLVMGetFirstBasicBlock(Fn)
-    @apicall(:LLVMGetFirstBasicBlock, LLVMBasicBlockRef, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetFirstBasicBlock,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetLastBasicBlock(Fn)
-    @apicall(:LLVMGetLastBasicBlock, LLVMBasicBlockRef, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetLastBasicBlock,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMGetNextBasicBlock(BB)
-    @apicall(:LLVMGetNextBasicBlock, LLVMBasicBlockRef, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMGetNextBasicBlock,libllvm[]), LLVMBasicBlockRef, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMGetPreviousBasicBlock(BB)
-    @apicall(:LLVMGetPreviousBasicBlock, LLVMBasicBlockRef, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMGetPreviousBasicBlock,libllvm[]), LLVMBasicBlockRef, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMGetEntryBasicBlock(Fn)
-    @apicall(:LLVMGetEntryBasicBlock, LLVMBasicBlockRef, (LLVMValueRef,), Fn)
+    @runtime_ccall((:LLVMGetEntryBasicBlock,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMInsertExistingBasicBlockAfterInsertBlock(Builder, BB)
-    @apicall(:LLVMInsertExistingBasicBlockAfterInsertBlock, Cvoid, (LLVMBuilderRef, LLVMBasicBlockRef), Builder, BB)
+    @runtime_ccall((:LLVMInsertExistingBasicBlockAfterInsertBlock,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMBasicBlockRef), Builder, BB)
 end
 
 function LLVMAppendExistingBasicBlock(Fn, BB)
-    @apicall(:LLVMAppendExistingBasicBlock, Cvoid, (LLVMValueRef, LLVMBasicBlockRef), Fn, BB)
+    @runtime_ccall((:LLVMAppendExistingBasicBlock,libllvm[]), Cvoid, (LLVMValueRef, LLVMBasicBlockRef), Fn, BB)
 end
 
 function LLVMCreateBasicBlockInContext(C, Name)
-    @apicall(:LLVMCreateBasicBlockInContext, LLVMBasicBlockRef, (LLVMContextRef, Cstring), C, Name)
+    @runtime_ccall((:LLVMCreateBasicBlockInContext,libllvm[]), LLVMBasicBlockRef, (LLVMContextRef, Cstring), C, Name)
 end
 
 function LLVMAppendBasicBlockInContext(C, Fn, Name)
-    @apicall(:LLVMAppendBasicBlockInContext, LLVMBasicBlockRef, (LLVMContextRef, LLVMValueRef, Cstring), C, Fn, Name)
+    @runtime_ccall((:LLVMAppendBasicBlockInContext,libllvm[]), LLVMBasicBlockRef, (LLVMContextRef, LLVMValueRef, Cstring), C, Fn, Name)
 end
 
 function LLVMAppendBasicBlock(Fn, Name)
-    @apicall(:LLVMAppendBasicBlock, LLVMBasicBlockRef, (LLVMValueRef, Cstring), Fn, Name)
+    @runtime_ccall((:LLVMAppendBasicBlock,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef, Cstring), Fn, Name)
 end
 
 function LLVMInsertBasicBlockInContext(C, BB, Name)
-    @apicall(:LLVMInsertBasicBlockInContext, LLVMBasicBlockRef, (LLVMContextRef, LLVMBasicBlockRef, Cstring), C, BB, Name)
+    @runtime_ccall((:LLVMInsertBasicBlockInContext,libllvm[]), LLVMBasicBlockRef, (LLVMContextRef, LLVMBasicBlockRef, Cstring), C, BB, Name)
 end
 
 function LLVMInsertBasicBlock(InsertBeforeBB, Name)
-    @apicall(:LLVMInsertBasicBlock, LLVMBasicBlockRef, (LLVMBasicBlockRef, Cstring), InsertBeforeBB, Name)
+    @runtime_ccall((:LLVMInsertBasicBlock,libllvm[]), LLVMBasicBlockRef, (LLVMBasicBlockRef, Cstring), InsertBeforeBB, Name)
 end
 
 function LLVMDeleteBasicBlock(BB)
-    @apicall(:LLVMDeleteBasicBlock, Cvoid, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMDeleteBasicBlock,libllvm[]), Cvoid, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMRemoveBasicBlockFromParent(BB)
-    @apicall(:LLVMRemoveBasicBlockFromParent, Cvoid, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMRemoveBasicBlockFromParent,libllvm[]), Cvoid, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMMoveBasicBlockBefore(BB, MovePos)
-    @apicall(:LLVMMoveBasicBlockBefore, Cvoid, (LLVMBasicBlockRef, LLVMBasicBlockRef), BB, MovePos)
+    @runtime_ccall((:LLVMMoveBasicBlockBefore,libllvm[]), Cvoid, (LLVMBasicBlockRef, LLVMBasicBlockRef), BB, MovePos)
 end
 
 function LLVMMoveBasicBlockAfter(BB, MovePos)
-    @apicall(:LLVMMoveBasicBlockAfter, Cvoid, (LLVMBasicBlockRef, LLVMBasicBlockRef), BB, MovePos)
+    @runtime_ccall((:LLVMMoveBasicBlockAfter,libllvm[]), Cvoid, (LLVMBasicBlockRef, LLVMBasicBlockRef), BB, MovePos)
 end
 
 function LLVMGetFirstInstruction(BB)
-    @apicall(:LLVMGetFirstInstruction, LLVMValueRef, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMGetFirstInstruction,libllvm[]), LLVMValueRef, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMGetLastInstruction(BB)
-    @apicall(:LLVMGetLastInstruction, LLVMValueRef, (LLVMBasicBlockRef,), BB)
+    @runtime_ccall((:LLVMGetLastInstruction,libllvm[]), LLVMValueRef, (LLVMBasicBlockRef,), BB)
 end
 
 function LLVMHasMetadata(Val)
-    @apicall(:LLVMHasMetadata, Cint, (LLVMValueRef,), Val)
+    @runtime_ccall((:LLVMHasMetadata,libllvm[]), Cint, (LLVMValueRef,), Val)
 end
 
 function LLVMGetMetadata(Val, KindID)
-    @apicall(:LLVMGetMetadata, LLVMValueRef, (LLVMValueRef, UInt32), Val, KindID)
+    @runtime_ccall((:LLVMGetMetadata,libllvm[]), LLVMValueRef, (LLVMValueRef, UInt32), Val, KindID)
 end
 
 function LLVMSetMetadata(Val, KindID, Node)
-    @apicall(:LLVMSetMetadata, Cvoid, (LLVMValueRef, UInt32, LLVMValueRef), Val, KindID, Node)
+    @runtime_ccall((:LLVMSetMetadata,libllvm[]), Cvoid, (LLVMValueRef, UInt32, LLVMValueRef), Val, KindID, Node)
 end
 
 function LLVMInstructionGetAllMetadataOtherThanDebugLoc(Instr, NumEntries)
-    @apicall(:LLVMInstructionGetAllMetadataOtherThanDebugLoc, Ptr{LLVMValueMetadataEntry}, (LLVMValueRef, Ptr{Csize_t}), Instr, NumEntries)
+    @runtime_ccall((:LLVMInstructionGetAllMetadataOtherThanDebugLoc,libllvm[]), Ptr{LLVMValueMetadataEntry}, (LLVMValueRef, Ptr{Csize_t}), Instr, NumEntries)
 end
 
 function LLVMGetInstructionParent(Inst)
-    @apicall(:LLVMGetInstructionParent, LLVMBasicBlockRef, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetInstructionParent,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef,), Inst)
 end
 
 function LLVMGetNextInstruction(Inst)
-    @apicall(:LLVMGetNextInstruction, LLVMValueRef, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetNextInstruction,libllvm[]), LLVMValueRef, (LLVMValueRef,), Inst)
 end
 
 function LLVMGetPreviousInstruction(Inst)
-    @apicall(:LLVMGetPreviousInstruction, LLVMValueRef, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetPreviousInstruction,libllvm[]), LLVMValueRef, (LLVMValueRef,), Inst)
 end
 
 function LLVMInstructionRemoveFromParent(Inst)
-    @apicall(:LLVMInstructionRemoveFromParent, Cvoid, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMInstructionRemoveFromParent,libllvm[]), Cvoid, (LLVMValueRef,), Inst)
 end
 
 function LLVMInstructionEraseFromParent(Inst)
-    @apicall(:LLVMInstructionEraseFromParent, Cvoid, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMInstructionEraseFromParent,libllvm[]), Cvoid, (LLVMValueRef,), Inst)
 end
 
 function LLVMGetInstructionOpcode(Inst)
-    @apicall(:LLVMGetInstructionOpcode, LLVMOpcode, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetInstructionOpcode,libllvm[]), LLVMOpcode, (LLVMValueRef,), Inst)
 end
 
 function LLVMGetICmpPredicate(Inst)
-    @apicall(:LLVMGetICmpPredicate, LLVMIntPredicate, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetICmpPredicate,libllvm[]), LLVMIntPredicate, (LLVMValueRef,), Inst)
 end
 
 function LLVMGetFCmpPredicate(Inst)
-    @apicall(:LLVMGetFCmpPredicate, LLVMRealPredicate, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetFCmpPredicate,libllvm[]), LLVMRealPredicate, (LLVMValueRef,), Inst)
 end
 
 function LLVMInstructionClone(Inst)
-    @apicall(:LLVMInstructionClone, LLVMValueRef, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMInstructionClone,libllvm[]), LLVMValueRef, (LLVMValueRef,), Inst)
 end
 
 function LLVMIsATerminatorInst(Inst)
-    @apicall(:LLVMIsATerminatorInst, LLVMValueRef, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMIsATerminatorInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Inst)
 end
 
 function LLVMGetNumArgOperands(Instr)
-    @apicall(:LLVMGetNumArgOperands, UInt32, (LLVMValueRef,), Instr)
+    @runtime_ccall((:LLVMGetNumArgOperands,libllvm[]), UInt32, (LLVMValueRef,), Instr)
 end
 
 function LLVMSetInstructionCallConv(Instr, CC)
-    @apicall(:LLVMSetInstructionCallConv, Cvoid, (LLVMValueRef, UInt32), Instr, CC)
+    @runtime_ccall((:LLVMSetInstructionCallConv,libllvm[]), Cvoid, (LLVMValueRef, UInt32), Instr, CC)
 end
 
 function LLVMGetInstructionCallConv(Instr)
-    @apicall(:LLVMGetInstructionCallConv, UInt32, (LLVMValueRef,), Instr)
+    @runtime_ccall((:LLVMGetInstructionCallConv,libllvm[]), UInt32, (LLVMValueRef,), Instr)
 end
 
 function LLVMSetInstrParamAlignment(Instr, index, Align)
-    @apicall(:LLVMSetInstrParamAlignment, Cvoid, (LLVMValueRef, UInt32, UInt32), Instr, index, Align)
+    @runtime_ccall((:LLVMSetInstrParamAlignment,libllvm[]), Cvoid, (LLVMValueRef, UInt32, UInt32), Instr, index, Align)
 end
 
 function LLVMAddCallSiteAttribute(C, Idx, A)
-    @apicall(:LLVMAddCallSiteAttribute, Cvoid, (LLVMValueRef, LLVMAttributeIndex, LLVMAttributeRef), C, Idx, A)
+    @runtime_ccall((:LLVMAddCallSiteAttribute,libllvm[]), Cvoid, (LLVMValueRef, LLVMAttributeIndex, LLVMAttributeRef), C, Idx, A)
 end
 
 function LLVMGetCallSiteAttributeCount(C, Idx)
-    @apicall(:LLVMGetCallSiteAttributeCount, UInt32, (LLVMValueRef, LLVMAttributeIndex), C, Idx)
+    @runtime_ccall((:LLVMGetCallSiteAttributeCount,libllvm[]), UInt32, (LLVMValueRef, LLVMAttributeIndex), C, Idx)
 end
 
 function LLVMGetCallSiteAttributes(C, Idx, Attrs)
-    @apicall(:LLVMGetCallSiteAttributes, Cvoid, (LLVMValueRef, LLVMAttributeIndex, Ptr{LLVMAttributeRef}), C, Idx, Attrs)
+    @runtime_ccall((:LLVMGetCallSiteAttributes,libllvm[]), Cvoid, (LLVMValueRef, LLVMAttributeIndex, Ptr{LLVMAttributeRef}), C, Idx, Attrs)
 end
 
 function LLVMGetCallSiteEnumAttribute(C, Idx, KindID)
-    @apicall(:LLVMGetCallSiteEnumAttribute, LLVMAttributeRef, (LLVMValueRef, LLVMAttributeIndex, UInt32), C, Idx, KindID)
+    @runtime_ccall((:LLVMGetCallSiteEnumAttribute,libllvm[]), LLVMAttributeRef, (LLVMValueRef, LLVMAttributeIndex, UInt32), C, Idx, KindID)
 end
 
 function LLVMGetCallSiteStringAttribute(C, Idx, K, KLen)
-    @apicall(:LLVMGetCallSiteStringAttribute, LLVMAttributeRef, (LLVMValueRef, LLVMAttributeIndex, Cstring, UInt32), C, Idx, K, KLen)
+    @runtime_ccall((:LLVMGetCallSiteStringAttribute,libllvm[]), LLVMAttributeRef, (LLVMValueRef, LLVMAttributeIndex, Cstring, UInt32), C, Idx, K, KLen)
 end
 
 function LLVMRemoveCallSiteEnumAttribute(C, Idx, KindID)
-    @apicall(:LLVMRemoveCallSiteEnumAttribute, Cvoid, (LLVMValueRef, LLVMAttributeIndex, UInt32), C, Idx, KindID)
+    @runtime_ccall((:LLVMRemoveCallSiteEnumAttribute,libllvm[]), Cvoid, (LLVMValueRef, LLVMAttributeIndex, UInt32), C, Idx, KindID)
 end
 
 function LLVMRemoveCallSiteStringAttribute(C, Idx, K, KLen)
-    @apicall(:LLVMRemoveCallSiteStringAttribute, Cvoid, (LLVMValueRef, LLVMAttributeIndex, Cstring, UInt32), C, Idx, K, KLen)
+    @runtime_ccall((:LLVMRemoveCallSiteStringAttribute,libllvm[]), Cvoid, (LLVMValueRef, LLVMAttributeIndex, Cstring, UInt32), C, Idx, K, KLen)
 end
 
 function LLVMGetCalledFunctionType(C)
-    @apicall(:LLVMGetCalledFunctionType, LLVMTypeRef, (LLVMValueRef,), C)
+    @runtime_ccall((:LLVMGetCalledFunctionType,libllvm[]), LLVMTypeRef, (LLVMValueRef,), C)
 end
 
 function LLVMGetCalledValue(Instr)
-    @apicall(:LLVMGetCalledValue, LLVMValueRef, (LLVMValueRef,), Instr)
+    @runtime_ccall((:LLVMGetCalledValue,libllvm[]), LLVMValueRef, (LLVMValueRef,), Instr)
 end
 
 function LLVMIsTailCall(CallInst)
-    @apicall(:LLVMIsTailCall, LLVMBool, (LLVMValueRef,), CallInst)
+    @runtime_ccall((:LLVMIsTailCall,libllvm[]), LLVMBool, (LLVMValueRef,), CallInst)
 end
 
 function LLVMSetTailCall(CallInst, IsTailCall)
-    @apicall(:LLVMSetTailCall, Cvoid, (LLVMValueRef, LLVMBool), CallInst, IsTailCall)
+    @runtime_ccall((:LLVMSetTailCall,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), CallInst, IsTailCall)
 end
 
 function LLVMGetNormalDest(InvokeInst)
-    @apicall(:LLVMGetNormalDest, LLVMBasicBlockRef, (LLVMValueRef,), InvokeInst)
+    @runtime_ccall((:LLVMGetNormalDest,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef,), InvokeInst)
 end
 
 function LLVMGetUnwindDest(InvokeInst)
-    @apicall(:LLVMGetUnwindDest, LLVMBasicBlockRef, (LLVMValueRef,), InvokeInst)
+    @runtime_ccall((:LLVMGetUnwindDest,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef,), InvokeInst)
 end
 
 function LLVMSetNormalDest(InvokeInst, B)
-    @apicall(:LLVMSetNormalDest, Cvoid, (LLVMValueRef, LLVMBasicBlockRef), InvokeInst, B)
+    @runtime_ccall((:LLVMSetNormalDest,libllvm[]), Cvoid, (LLVMValueRef, LLVMBasicBlockRef), InvokeInst, B)
 end
 
 function LLVMSetUnwindDest(InvokeInst, B)
-    @apicall(:LLVMSetUnwindDest, Cvoid, (LLVMValueRef, LLVMBasicBlockRef), InvokeInst, B)
+    @runtime_ccall((:LLVMSetUnwindDest,libllvm[]), Cvoid, (LLVMValueRef, LLVMBasicBlockRef), InvokeInst, B)
 end
 
 function LLVMGetNumSuccessors(Term)
-    @apicall(:LLVMGetNumSuccessors, UInt32, (LLVMValueRef,), Term)
+    @runtime_ccall((:LLVMGetNumSuccessors,libllvm[]), UInt32, (LLVMValueRef,), Term)
 end
 
 function LLVMGetSuccessor(Term, i)
-    @apicall(:LLVMGetSuccessor, LLVMBasicBlockRef, (LLVMValueRef, UInt32), Term, i)
+    @runtime_ccall((:LLVMGetSuccessor,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef, UInt32), Term, i)
 end
 
 function LLVMSetSuccessor(Term, i, block)
-    @apicall(:LLVMSetSuccessor, Cvoid, (LLVMValueRef, UInt32, LLVMBasicBlockRef), Term, i, block)
+    @runtime_ccall((:LLVMSetSuccessor,libllvm[]), Cvoid, (LLVMValueRef, UInt32, LLVMBasicBlockRef), Term, i, block)
 end
 
 function LLVMIsConditional(Branch)
-    @apicall(:LLVMIsConditional, LLVMBool, (LLVMValueRef,), Branch)
+    @runtime_ccall((:LLVMIsConditional,libllvm[]), LLVMBool, (LLVMValueRef,), Branch)
 end
 
 function LLVMGetCondition(Branch)
-    @apicall(:LLVMGetCondition, LLVMValueRef, (LLVMValueRef,), Branch)
+    @runtime_ccall((:LLVMGetCondition,libllvm[]), LLVMValueRef, (LLVMValueRef,), Branch)
 end
 
 function LLVMSetCondition(Branch, Cond)
-    @apicall(:LLVMSetCondition, Cvoid, (LLVMValueRef, LLVMValueRef), Branch, Cond)
+    @runtime_ccall((:LLVMSetCondition,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef), Branch, Cond)
 end
 
 function LLVMGetSwitchDefaultDest(SwitchInstr)
-    @apicall(:LLVMGetSwitchDefaultDest, LLVMBasicBlockRef, (LLVMValueRef,), SwitchInstr)
+    @runtime_ccall((:LLVMGetSwitchDefaultDest,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef,), SwitchInstr)
 end
 
 function LLVMGetAllocatedType(Alloca)
-    @apicall(:LLVMGetAllocatedType, LLVMTypeRef, (LLVMValueRef,), Alloca)
+    @runtime_ccall((:LLVMGetAllocatedType,libllvm[]), LLVMTypeRef, (LLVMValueRef,), Alloca)
 end
 
 function LLVMIsInBounds(GEP)
-    @apicall(:LLVMIsInBounds, LLVMBool, (LLVMValueRef,), GEP)
+    @runtime_ccall((:LLVMIsInBounds,libllvm[]), LLVMBool, (LLVMValueRef,), GEP)
 end
 
 function LLVMSetIsInBounds(GEP, InBounds)
-    @apicall(:LLVMSetIsInBounds, Cvoid, (LLVMValueRef, LLVMBool), GEP, InBounds)
+    @runtime_ccall((:LLVMSetIsInBounds,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), GEP, InBounds)
 end
 
 function LLVMAddIncoming(PhiNode, IncomingValues, IncomingBlocks, Count)
-    @apicall(:LLVMAddIncoming, Cvoid, (LLVMValueRef, Ptr{LLVMValueRef}, Ptr{LLVMBasicBlockRef}, UInt32), PhiNode, IncomingValues, IncomingBlocks, Count)
+    @runtime_ccall((:LLVMAddIncoming,libllvm[]), Cvoid, (LLVMValueRef, Ptr{LLVMValueRef}, Ptr{LLVMBasicBlockRef}, UInt32), PhiNode, IncomingValues, IncomingBlocks, Count)
 end
 
 function LLVMCountIncoming(PhiNode)
-    @apicall(:LLVMCountIncoming, UInt32, (LLVMValueRef,), PhiNode)
+    @runtime_ccall((:LLVMCountIncoming,libllvm[]), UInt32, (LLVMValueRef,), PhiNode)
 end
 
 function LLVMGetIncomingValue(PhiNode, Index)
-    @apicall(:LLVMGetIncomingValue, LLVMValueRef, (LLVMValueRef, UInt32), PhiNode, Index)
+    @runtime_ccall((:LLVMGetIncomingValue,libllvm[]), LLVMValueRef, (LLVMValueRef, UInt32), PhiNode, Index)
 end
 
 function LLVMGetIncomingBlock(PhiNode, Index)
-    @apicall(:LLVMGetIncomingBlock, LLVMBasicBlockRef, (LLVMValueRef, UInt32), PhiNode, Index)
+    @runtime_ccall((:LLVMGetIncomingBlock,libllvm[]), LLVMBasicBlockRef, (LLVMValueRef, UInt32), PhiNode, Index)
 end
 
 function LLVMGetNumIndices(Inst)
-    @apicall(:LLVMGetNumIndices, UInt32, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetNumIndices,libllvm[]), UInt32, (LLVMValueRef,), Inst)
 end
 
 function LLVMGetIndices(Inst)
-    @apicall(:LLVMGetIndices, Ptr{UInt32}, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMGetIndices,libllvm[]), Ptr{UInt32}, (LLVMValueRef,), Inst)
 end
 
 function LLVMCreateBuilderInContext(C)
-    @apicall(:LLVMCreateBuilderInContext, LLVMBuilderRef, (LLVMContextRef,), C)
+    @runtime_ccall((:LLVMCreateBuilderInContext,libllvm[]), LLVMBuilderRef, (LLVMContextRef,), C)
 end
 
 function LLVMCreateBuilder()
-    @apicall(:LLVMCreateBuilder, LLVMBuilderRef, ())
+    @runtime_ccall((:LLVMCreateBuilder,libllvm[]), LLVMBuilderRef, ())
 end
 
 function LLVMPositionBuilder(Builder, Block, Instr)
-    @apicall(:LLVMPositionBuilder, Cvoid, (LLVMBuilderRef, LLVMBasicBlockRef, LLVMValueRef), Builder, Block, Instr)
+    @runtime_ccall((:LLVMPositionBuilder,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMBasicBlockRef, LLVMValueRef), Builder, Block, Instr)
 end
 
 function LLVMPositionBuilderBefore(Builder, Instr)
-    @apicall(:LLVMPositionBuilderBefore, Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, Instr)
+    @runtime_ccall((:LLVMPositionBuilderBefore,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, Instr)
 end
 
 function LLVMPositionBuilderAtEnd(Builder, Block)
-    @apicall(:LLVMPositionBuilderAtEnd, Cvoid, (LLVMBuilderRef, LLVMBasicBlockRef), Builder, Block)
+    @runtime_ccall((:LLVMPositionBuilderAtEnd,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMBasicBlockRef), Builder, Block)
 end
 
 function LLVMGetInsertBlock(Builder)
-    @apicall(:LLVMGetInsertBlock, LLVMBasicBlockRef, (LLVMBuilderRef,), Builder)
+    @runtime_ccall((:LLVMGetInsertBlock,libllvm[]), LLVMBasicBlockRef, (LLVMBuilderRef,), Builder)
 end
 
 function LLVMClearInsertionPosition(Builder)
-    @apicall(:LLVMClearInsertionPosition, Cvoid, (LLVMBuilderRef,), Builder)
+    @runtime_ccall((:LLVMClearInsertionPosition,libllvm[]), Cvoid, (LLVMBuilderRef,), Builder)
 end
 
 function LLVMInsertIntoBuilder(Builder, Instr)
-    @apicall(:LLVMInsertIntoBuilder, Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, Instr)
+    @runtime_ccall((:LLVMInsertIntoBuilder,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, Instr)
 end
 
 function LLVMInsertIntoBuilderWithName(Builder, Instr, Name)
-    @apicall(:LLVMInsertIntoBuilderWithName, Cvoid, (LLVMBuilderRef, LLVMValueRef, Cstring), Builder, Instr, Name)
+    @runtime_ccall((:LLVMInsertIntoBuilderWithName,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMValueRef, Cstring), Builder, Instr, Name)
 end
 
 function LLVMDisposeBuilder(Builder)
-    @apicall(:LLVMDisposeBuilder, Cvoid, (LLVMBuilderRef,), Builder)
+    @runtime_ccall((:LLVMDisposeBuilder,libllvm[]), Cvoid, (LLVMBuilderRef,), Builder)
 end
 
 function LLVMGetCurrentDebugLocation2(Builder)
-    @apicall(:LLVMGetCurrentDebugLocation2, LLVMMetadataRef, (LLVMBuilderRef,), Builder)
+    @runtime_ccall((:LLVMGetCurrentDebugLocation2,libllvm[]), LLVMMetadataRef, (LLVMBuilderRef,), Builder)
 end
 
 function LLVMSetCurrentDebugLocation2(Builder, Loc)
-    @apicall(:LLVMSetCurrentDebugLocation2, Cvoid, (LLVMBuilderRef, LLVMMetadataRef), Builder, Loc)
+    @runtime_ccall((:LLVMSetCurrentDebugLocation2,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMMetadataRef), Builder, Loc)
 end
 
 function LLVMSetInstDebugLocation(Builder, Inst)
-    @apicall(:LLVMSetInstDebugLocation, Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, Inst)
+    @runtime_ccall((:LLVMSetInstDebugLocation,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, Inst)
 end
 
 function LLVMBuilderGetDefaultFPMathTag(Builder)
-    @apicall(:LLVMBuilderGetDefaultFPMathTag, LLVMMetadataRef, (LLVMBuilderRef,), Builder)
+    @runtime_ccall((:LLVMBuilderGetDefaultFPMathTag,libllvm[]), LLVMMetadataRef, (LLVMBuilderRef,), Builder)
 end
 
 function LLVMBuilderSetDefaultFPMathTag(Builder, FPMathTag)
-    @apicall(:LLVMBuilderSetDefaultFPMathTag, Cvoid, (LLVMBuilderRef, LLVMMetadataRef), Builder, FPMathTag)
+    @runtime_ccall((:LLVMBuilderSetDefaultFPMathTag,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMMetadataRef), Builder, FPMathTag)
 end
 
 function LLVMSetCurrentDebugLocation(Builder, L)
-    @apicall(:LLVMSetCurrentDebugLocation, Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, L)
+    @runtime_ccall((:LLVMSetCurrentDebugLocation,libllvm[]), Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, L)
 end
 
 function LLVMGetCurrentDebugLocation(Builder)
-    @apicall(:LLVMGetCurrentDebugLocation, LLVMValueRef, (LLVMBuilderRef,), Builder)
+    @runtime_ccall((:LLVMGetCurrentDebugLocation,libllvm[]), LLVMValueRef, (LLVMBuilderRef,), Builder)
 end
 
 function LLVMBuildRetVoid(arg1)
-    @apicall(:LLVMBuildRetVoid, LLVMValueRef, (LLVMBuilderRef,), arg1)
+    @runtime_ccall((:LLVMBuildRetVoid,libllvm[]), LLVMValueRef, (LLVMBuilderRef,), arg1)
 end
 
 function LLVMBuildRet(arg1, V)
-    @apicall(:LLVMBuildRet, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef), arg1, V)
+    @runtime_ccall((:LLVMBuildRet,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef), arg1, V)
 end
 
 function LLVMBuildAggregateRet(arg1, RetVals, N)
-    @apicall(:LLVMBuildAggregateRet, LLVMValueRef, (LLVMBuilderRef, Ptr{LLVMValueRef}, UInt32), arg1, RetVals, N)
+    @runtime_ccall((:LLVMBuildAggregateRet,libllvm[]), LLVMValueRef, (LLVMBuilderRef, Ptr{LLVMValueRef}, UInt32), arg1, RetVals, N)
 end
 
 function LLVMBuildBr(arg1, Dest)
-    @apicall(:LLVMBuildBr, LLVMValueRef, (LLVMBuilderRef, LLVMBasicBlockRef), arg1, Dest)
+    @runtime_ccall((:LLVMBuildBr,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMBasicBlockRef), arg1, Dest)
 end
 
 function LLVMBuildCondBr(arg1, If, Then, Else)
-    @apicall(:LLVMBuildCondBr, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, LLVMBasicBlockRef), arg1, If, Then, Else)
+    @runtime_ccall((:LLVMBuildCondBr,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, LLVMBasicBlockRef), arg1, If, Then, Else)
 end
 
 function LLVMBuildSwitch(arg1, V, Else, NumCases)
-    @apicall(:LLVMBuildSwitch, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, UInt32), arg1, V, Else, NumCases)
+    @runtime_ccall((:LLVMBuildSwitch,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, UInt32), arg1, V, Else, NumCases)
 end
 
 function LLVMBuildIndirectBr(B, Addr, NumDests)
-    @apicall(:LLVMBuildIndirectBr, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32), B, Addr, NumDests)
+    @runtime_ccall((:LLVMBuildIndirectBr,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32), B, Addr, NumDests)
 end
 
 function LLVMBuildInvoke(arg1, Fn, Args, NumArgs, Then, Catch, Name)
-    @apicall(:LLVMBuildInvoke, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, LLVMBasicBlockRef, LLVMBasicBlockRef, Cstring), arg1, Fn, Args, NumArgs, Then, Catch, Name)
+    @runtime_ccall((:LLVMBuildInvoke,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, LLVMBasicBlockRef, LLVMBasicBlockRef, Cstring), arg1, Fn, Args, NumArgs, Then, Catch, Name)
 end
 
 function LLVMBuildInvoke2(arg1, Ty, Fn, Args, NumArgs, Then, Catch, Name)
-    @apicall(:LLVMBuildInvoke2, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, LLVMBasicBlockRef, LLVMBasicBlockRef, Cstring), arg1, Ty, Fn, Args, NumArgs, Then, Catch, Name)
+    @runtime_ccall((:LLVMBuildInvoke2,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, LLVMBasicBlockRef, LLVMBasicBlockRef, Cstring), arg1, Ty, Fn, Args, NumArgs, Then, Catch, Name)
 end
 
 function LLVMBuildUnreachable(arg1)
-    @apicall(:LLVMBuildUnreachable, LLVMValueRef, (LLVMBuilderRef,), arg1)
+    @runtime_ccall((:LLVMBuildUnreachable,libllvm[]), LLVMValueRef, (LLVMBuilderRef,), arg1)
 end
 
 function LLVMBuildResume(B, Exn)
-    @apicall(:LLVMBuildResume, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef), B, Exn)
+    @runtime_ccall((:LLVMBuildResume,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef), B, Exn)
 end
 
 function LLVMBuildLandingPad(B, Ty, PersFn, NumClauses, Name)
-    @apicall(:LLVMBuildLandingPad, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, UInt32, Cstring), B, Ty, PersFn, NumClauses, Name)
+    @runtime_ccall((:LLVMBuildLandingPad,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, UInt32, Cstring), B, Ty, PersFn, NumClauses, Name)
 end
 
 function LLVMBuildCleanupRet(B, CatchPad, BB)
-    @apicall(:LLVMBuildCleanupRet, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef), B, CatchPad, BB)
+    @runtime_ccall((:LLVMBuildCleanupRet,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef), B, CatchPad, BB)
 end
 
 function LLVMBuildCatchRet(B, CatchPad, BB)
-    @apicall(:LLVMBuildCatchRet, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef), B, CatchPad, BB)
+    @runtime_ccall((:LLVMBuildCatchRet,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef), B, CatchPad, BB)
 end
 
 function LLVMBuildCatchPad(B, ParentPad, Args, NumArgs, Name)
-    @apicall(:LLVMBuildCatchPad, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, ParentPad, Args, NumArgs, Name)
+    @runtime_ccall((:LLVMBuildCatchPad,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, ParentPad, Args, NumArgs, Name)
 end
 
 function LLVMBuildCleanupPad(B, ParentPad, Args, NumArgs, Name)
-    @apicall(:LLVMBuildCleanupPad, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, ParentPad, Args, NumArgs, Name)
+    @runtime_ccall((:LLVMBuildCleanupPad,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, ParentPad, Args, NumArgs, Name)
 end
 
 function LLVMBuildCatchSwitch(B, ParentPad, UnwindBB, NumHandlers, Name)
-    @apicall(:LLVMBuildCatchSwitch, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, UInt32, Cstring), B, ParentPad, UnwindBB, NumHandlers, Name)
+    @runtime_ccall((:LLVMBuildCatchSwitch,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, UInt32, Cstring), B, ParentPad, UnwindBB, NumHandlers, Name)
 end
 
 function LLVMAddCase(Switch, OnVal, Dest)
-    @apicall(:LLVMAddCase, Cvoid, (LLVMValueRef, LLVMValueRef, LLVMBasicBlockRef), Switch, OnVal, Dest)
+    @runtime_ccall((:LLVMAddCase,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef, LLVMBasicBlockRef), Switch, OnVal, Dest)
 end
 
 function LLVMAddDestination(IndirectBr, Dest)
-    @apicall(:LLVMAddDestination, Cvoid, (LLVMValueRef, LLVMBasicBlockRef), IndirectBr, Dest)
+    @runtime_ccall((:LLVMAddDestination,libllvm[]), Cvoid, (LLVMValueRef, LLVMBasicBlockRef), IndirectBr, Dest)
 end
 
 function LLVMGetNumClauses(LandingPad)
-    @apicall(:LLVMGetNumClauses, UInt32, (LLVMValueRef,), LandingPad)
+    @runtime_ccall((:LLVMGetNumClauses,libllvm[]), UInt32, (LLVMValueRef,), LandingPad)
 end
 
 function LLVMGetClause(LandingPad, Idx)
-    @apicall(:LLVMGetClause, LLVMValueRef, (LLVMValueRef, UInt32), LandingPad, Idx)
+    @runtime_ccall((:LLVMGetClause,libllvm[]), LLVMValueRef, (LLVMValueRef, UInt32), LandingPad, Idx)
 end
 
 function LLVMAddClause(LandingPad, ClauseVal)
-    @apicall(:LLVMAddClause, Cvoid, (LLVMValueRef, LLVMValueRef), LandingPad, ClauseVal)
+    @runtime_ccall((:LLVMAddClause,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef), LandingPad, ClauseVal)
 end
 
 function LLVMIsCleanup(LandingPad)
-    @apicall(:LLVMIsCleanup, LLVMBool, (LLVMValueRef,), LandingPad)
+    @runtime_ccall((:LLVMIsCleanup,libllvm[]), LLVMBool, (LLVMValueRef,), LandingPad)
 end
 
 function LLVMSetCleanup(LandingPad, Val)
-    @apicall(:LLVMSetCleanup, Cvoid, (LLVMValueRef, LLVMBool), LandingPad, Val)
+    @runtime_ccall((:LLVMSetCleanup,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), LandingPad, Val)
 end
 
 function LLVMAddHandler(CatchSwitch, Dest)
-    @apicall(:LLVMAddHandler, Cvoid, (LLVMValueRef, LLVMBasicBlockRef), CatchSwitch, Dest)
+    @runtime_ccall((:LLVMAddHandler,libllvm[]), Cvoid, (LLVMValueRef, LLVMBasicBlockRef), CatchSwitch, Dest)
 end
 
 function LLVMGetNumHandlers(CatchSwitch)
-    @apicall(:LLVMGetNumHandlers, UInt32, (LLVMValueRef,), CatchSwitch)
+    @runtime_ccall((:LLVMGetNumHandlers,libllvm[]), UInt32, (LLVMValueRef,), CatchSwitch)
 end
 
 function LLVMGetHandlers(CatchSwitch, Handlers)
-    @apicall(:LLVMGetHandlers, Cvoid, (LLVMValueRef, Ptr{LLVMBasicBlockRef}), CatchSwitch, Handlers)
+    @runtime_ccall((:LLVMGetHandlers,libllvm[]), Cvoid, (LLVMValueRef, Ptr{LLVMBasicBlockRef}), CatchSwitch, Handlers)
 end
 
 function LLVMGetArgOperand(Funclet, i)
-    @apicall(:LLVMGetArgOperand, LLVMValueRef, (LLVMValueRef, UInt32), Funclet, i)
+    @runtime_ccall((:LLVMGetArgOperand,libllvm[]), LLVMValueRef, (LLVMValueRef, UInt32), Funclet, i)
 end
 
 function LLVMSetArgOperand(Funclet, i, value)
-    @apicall(:LLVMSetArgOperand, Cvoid, (LLVMValueRef, UInt32, LLVMValueRef), Funclet, i, value)
+    @runtime_ccall((:LLVMSetArgOperand,libllvm[]), Cvoid, (LLVMValueRef, UInt32, LLVMValueRef), Funclet, i, value)
 end
 
 function LLVMGetParentCatchSwitch(CatchPad)
-    @apicall(:LLVMGetParentCatchSwitch, LLVMValueRef, (LLVMValueRef,), CatchPad)
+    @runtime_ccall((:LLVMGetParentCatchSwitch,libllvm[]), LLVMValueRef, (LLVMValueRef,), CatchPad)
 end
 
 function LLVMSetParentCatchSwitch(CatchPad, CatchSwitch)
-    @apicall(:LLVMSetParentCatchSwitch, Cvoid, (LLVMValueRef, LLVMValueRef), CatchPad, CatchSwitch)
+    @runtime_ccall((:LLVMSetParentCatchSwitch,libllvm[]), Cvoid, (LLVMValueRef, LLVMValueRef), CatchPad, CatchSwitch)
 end
 
 function LLVMBuildAdd(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildAdd, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildAdd,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildNSWAdd(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildNSWAdd, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildNSWAdd,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildNUWAdd(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildNUWAdd, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildNUWAdd,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildFAdd(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildFAdd, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildFAdd,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildSub(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildSub, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildSub,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildNSWSub(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildNSWSub, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildNSWSub,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildNUWSub(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildNUWSub, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildNUWSub,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildFSub(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildFSub, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildFSub,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildMul(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildMul, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildMul,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildNSWMul(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildNSWMul, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildNSWMul,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildNUWMul(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildNUWMul, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildNUWMul,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildFMul(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildFMul, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildFMul,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildUDiv(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildUDiv, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildUDiv,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildExactUDiv(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildExactUDiv, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildExactUDiv,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildSDiv(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildSDiv, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildSDiv,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildExactSDiv(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildExactSDiv, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildExactSDiv,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildFDiv(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildFDiv, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildFDiv,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildURem(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildURem, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildURem,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildSRem(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildSRem, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildSRem,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildFRem(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildFRem, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildFRem,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildShl(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildShl, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildShl,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildLShr(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildLShr, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildLShr,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildAShr(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildAShr, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildAShr,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildAnd(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildAnd, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildAnd,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildOr(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildOr, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildOr,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildXor(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildXor, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildXor,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildBinOp(B, Op, LHS, RHS, Name)
-    @apicall(:LLVMBuildBinOp, LLVMValueRef, (LLVMBuilderRef, LLVMOpcode, LLVMValueRef, LLVMValueRef, Cstring), B, Op, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildBinOp,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMOpcode, LLVMValueRef, LLVMValueRef, Cstring), B, Op, LHS, RHS, Name)
 end
 
 function LLVMBuildNeg(arg1, V, Name)
-    @apicall(:LLVMBuildNeg, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, V, Name)
+    @runtime_ccall((:LLVMBuildNeg,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, V, Name)
 end
 
 function LLVMBuildNSWNeg(B, V, Name)
-    @apicall(:LLVMBuildNSWNeg, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), B, V, Name)
+    @runtime_ccall((:LLVMBuildNSWNeg,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), B, V, Name)
 end
 
 function LLVMBuildNUWNeg(B, V, Name)
-    @apicall(:LLVMBuildNUWNeg, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), B, V, Name)
+    @runtime_ccall((:LLVMBuildNUWNeg,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), B, V, Name)
 end
 
 function LLVMBuildFNeg(arg1, V, Name)
-    @apicall(:LLVMBuildFNeg, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, V, Name)
+    @runtime_ccall((:LLVMBuildFNeg,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, V, Name)
 end
 
 function LLVMBuildNot(arg1, V, Name)
-    @apicall(:LLVMBuildNot, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, V, Name)
+    @runtime_ccall((:LLVMBuildNot,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, V, Name)
 end
 
 function LLVMBuildMalloc(arg1, Ty, Name)
-    @apicall(:LLVMBuildMalloc, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, Cstring), arg1, Ty, Name)
+    @runtime_ccall((:LLVMBuildMalloc,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, Cstring), arg1, Ty, Name)
 end
 
 function LLVMBuildArrayMalloc(arg1, Ty, Val, Name)
-    @apicall(:LLVMBuildArrayMalloc, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Cstring), arg1, Ty, Val, Name)
+    @runtime_ccall((:LLVMBuildArrayMalloc,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Cstring), arg1, Ty, Val, Name)
 end
 
 function LLVMBuildMemSet(B, Ptr, Val, Len, Align)
-    @apicall(:LLVMBuildMemSet, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, UInt32), B, Ptr, Val, Len, Align)
+    @runtime_ccall((:LLVMBuildMemSet,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, UInt32), B, Ptr, Val, Len, Align)
 end
 
 function LLVMBuildMemCpy(B, Dst, DstAlign, Src, SrcAlign, Size)
-    @apicall(:LLVMBuildMemCpy, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32, LLVMValueRef, UInt32, LLVMValueRef), B, Dst, DstAlign, Src, SrcAlign, Size)
+    @runtime_ccall((:LLVMBuildMemCpy,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32, LLVMValueRef, UInt32, LLVMValueRef), B, Dst, DstAlign, Src, SrcAlign, Size)
 end
 
 function LLVMBuildMemMove(B, Dst, DstAlign, Src, SrcAlign, Size)
-    @apicall(:LLVMBuildMemMove, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32, LLVMValueRef, UInt32, LLVMValueRef), B, Dst, DstAlign, Src, SrcAlign, Size)
+    @runtime_ccall((:LLVMBuildMemMove,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32, LLVMValueRef, UInt32, LLVMValueRef), B, Dst, DstAlign, Src, SrcAlign, Size)
 end
 
 function LLVMBuildAlloca(arg1, Ty, Name)
-    @apicall(:LLVMBuildAlloca, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, Cstring), arg1, Ty, Name)
+    @runtime_ccall((:LLVMBuildAlloca,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, Cstring), arg1, Ty, Name)
 end
 
 function LLVMBuildArrayAlloca(arg1, Ty, Val, Name)
-    @apicall(:LLVMBuildArrayAlloca, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Cstring), arg1, Ty, Val, Name)
+    @runtime_ccall((:LLVMBuildArrayAlloca,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Cstring), arg1, Ty, Val, Name)
 end
 
 function LLVMBuildFree(arg1, PointerVal)
-    @apicall(:LLVMBuildFree, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef), arg1, PointerVal)
+    @runtime_ccall((:LLVMBuildFree,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef), arg1, PointerVal)
 end
 
 function LLVMBuildLoad(arg1, PointerVal, Name)
-    @apicall(:LLVMBuildLoad, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, PointerVal, Name)
+    @runtime_ccall((:LLVMBuildLoad,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, PointerVal, Name)
 end
 
 function LLVMBuildLoad2(arg1, Ty, PointerVal, Name)
-    @apicall(:LLVMBuildLoad2, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Cstring), arg1, Ty, PointerVal, Name)
+    @runtime_ccall((:LLVMBuildLoad2,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Cstring), arg1, Ty, PointerVal, Name)
 end
 
 function LLVMBuildStore(arg1, Val, Ptr)
-    @apicall(:LLVMBuildStore, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef), arg1, Val, Ptr)
+    @runtime_ccall((:LLVMBuildStore,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef), arg1, Val, Ptr)
 end
 
 function LLVMBuildGEP(B, Pointer, Indices, NumIndices, Name)
-    @apicall(:LLVMBuildGEP, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, Pointer, Indices, NumIndices, Name)
+    @runtime_ccall((:LLVMBuildGEP,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, Pointer, Indices, NumIndices, Name)
 end
 
 function LLVMBuildInBoundsGEP(B, Pointer, Indices, NumIndices, Name)
-    @apicall(:LLVMBuildInBoundsGEP, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, Pointer, Indices, NumIndices, Name)
+    @runtime_ccall((:LLVMBuildInBoundsGEP,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, Pointer, Indices, NumIndices, Name)
 end
 
 function LLVMBuildStructGEP(B, Pointer, Idx, Name)
-    @apicall(:LLVMBuildStructGEP, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32, Cstring), B, Pointer, Idx, Name)
+    @runtime_ccall((:LLVMBuildStructGEP,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32, Cstring), B, Pointer, Idx, Name)
 end
 
 function LLVMBuildGEP2(B, Ty, Pointer, Indices, NumIndices, Name)
-    @apicall(:LLVMBuildGEP2, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, Ty, Pointer, Indices, NumIndices, Name)
+    @runtime_ccall((:LLVMBuildGEP2,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, Ty, Pointer, Indices, NumIndices, Name)
 end
 
 function LLVMBuildInBoundsGEP2(B, Ty, Pointer, Indices, NumIndices, Name)
-    @apicall(:LLVMBuildInBoundsGEP2, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, Ty, Pointer, Indices, NumIndices, Name)
+    @runtime_ccall((:LLVMBuildInBoundsGEP2,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), B, Ty, Pointer, Indices, NumIndices, Name)
 end
 
 function LLVMBuildStructGEP2(B, Ty, Pointer, Idx, Name)
-    @apicall(:LLVMBuildStructGEP2, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, UInt32, Cstring), B, Ty, Pointer, Idx, Name)
+    @runtime_ccall((:LLVMBuildStructGEP2,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, UInt32, Cstring), B, Ty, Pointer, Idx, Name)
 end
 
 function LLVMBuildGlobalString(B, Str, Name)
-    @apicall(:LLVMBuildGlobalString, LLVMValueRef, (LLVMBuilderRef, Cstring, Cstring), B, Str, Name)
+    @runtime_ccall((:LLVMBuildGlobalString,libllvm[]), LLVMValueRef, (LLVMBuilderRef, Cstring, Cstring), B, Str, Name)
 end
 
 function LLVMBuildGlobalStringPtr(B, Str, Name)
-    @apicall(:LLVMBuildGlobalStringPtr, LLVMValueRef, (LLVMBuilderRef, Cstring, Cstring), B, Str, Name)
+    @runtime_ccall((:LLVMBuildGlobalStringPtr,libllvm[]), LLVMValueRef, (LLVMBuilderRef, Cstring, Cstring), B, Str, Name)
 end
 
 function LLVMGetVolatile(MemoryAccessInst)
-    @apicall(:LLVMGetVolatile, LLVMBool, (LLVMValueRef,), MemoryAccessInst)
+    @runtime_ccall((:LLVMGetVolatile,libllvm[]), LLVMBool, (LLVMValueRef,), MemoryAccessInst)
 end
 
 function LLVMSetVolatile(MemoryAccessInst, IsVolatile)
-    @apicall(:LLVMSetVolatile, Cvoid, (LLVMValueRef, LLVMBool), MemoryAccessInst, IsVolatile)
+    @runtime_ccall((:LLVMSetVolatile,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), MemoryAccessInst, IsVolatile)
 end
 
 function LLVMGetOrdering(MemoryAccessInst)
-    @apicall(:LLVMGetOrdering, LLVMAtomicOrdering, (LLVMValueRef,), MemoryAccessInst)
+    @runtime_ccall((:LLVMGetOrdering,libllvm[]), LLVMAtomicOrdering, (LLVMValueRef,), MemoryAccessInst)
 end
 
 function LLVMSetOrdering(MemoryAccessInst, Ordering)
-    @apicall(:LLVMSetOrdering, Cvoid, (LLVMValueRef, LLVMAtomicOrdering), MemoryAccessInst, Ordering)
+    @runtime_ccall((:LLVMSetOrdering,libllvm[]), Cvoid, (LLVMValueRef, LLVMAtomicOrdering), MemoryAccessInst, Ordering)
 end
 
 function LLVMBuildTrunc(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildTrunc, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildTrunc,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildZExt(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildZExt, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildZExt,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildSExt(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildSExt, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildSExt,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildFPToUI(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildFPToUI, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildFPToUI,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildFPToSI(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildFPToSI, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildFPToSI,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildUIToFP(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildUIToFP, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildUIToFP,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildSIToFP(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildSIToFP, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildSIToFP,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildFPTrunc(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildFPTrunc, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildFPTrunc,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildFPExt(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildFPExt, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildFPExt,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildPtrToInt(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildPtrToInt, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildPtrToInt,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildIntToPtr(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildIntToPtr, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildIntToPtr,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildBitCast(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildBitCast, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildBitCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildAddrSpaceCast(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildAddrSpaceCast, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildAddrSpaceCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildZExtOrBitCast(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildZExtOrBitCast, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildZExtOrBitCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildSExtOrBitCast(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildSExtOrBitCast, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildSExtOrBitCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildTruncOrBitCast(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildTruncOrBitCast, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildTruncOrBitCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildCast(B, Op, Val, DestTy, Name)
-    @apicall(:LLVMBuildCast, LLVMValueRef, (LLVMBuilderRef, LLVMOpcode, LLVMValueRef, LLVMTypeRef, Cstring), B, Op, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMOpcode, LLVMValueRef, LLVMTypeRef, Cstring), B, Op, Val, DestTy, Name)
 end
 
 function LLVMBuildPointerCast(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildPointerCast, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildPointerCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildIntCast2(arg1, Val, DestTy, IsSigned, Name)
-    @apicall(:LLVMBuildIntCast2, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, LLVMBool, Cstring), arg1, Val, DestTy, IsSigned, Name)
+    @runtime_ccall((:LLVMBuildIntCast2,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, LLVMBool, Cstring), arg1, Val, DestTy, IsSigned, Name)
 end
 
 function LLVMBuildFPCast(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildFPCast, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildFPCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildIntCast(arg1, Val, DestTy, Name)
-    @apicall(:LLVMBuildIntCast, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
+    @runtime_ccall((:LLVMBuildIntCast,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
 function LLVMBuildICmp(arg1, Op, LHS, RHS, Name)
-    @apicall(:LLVMBuildICmp, LLVMValueRef, (LLVMBuilderRef, LLVMIntPredicate, LLVMValueRef, LLVMValueRef, Cstring), arg1, Op, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildICmp,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMIntPredicate, LLVMValueRef, LLVMValueRef, Cstring), arg1, Op, LHS, RHS, Name)
 end
 
 function LLVMBuildFCmp(arg1, Op, LHS, RHS, Name)
-    @apicall(:LLVMBuildFCmp, LLVMValueRef, (LLVMBuilderRef, LLVMRealPredicate, LLVMValueRef, LLVMValueRef, Cstring), arg1, Op, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildFCmp,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMRealPredicate, LLVMValueRef, LLVMValueRef, Cstring), arg1, Op, LHS, RHS, Name)
 end
 
 function LLVMBuildPhi(arg1, Ty, Name)
-    @apicall(:LLVMBuildPhi, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, Cstring), arg1, Ty, Name)
+    @runtime_ccall((:LLVMBuildPhi,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, Cstring), arg1, Ty, Name)
 end
 
 function LLVMBuildCall(arg1, Fn, Args, NumArgs, Name)
-    @apicall(:LLVMBuildCall, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), arg1, Fn, Args, NumArgs, Name)
+    @runtime_ccall((:LLVMBuildCall,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), arg1, Fn, Args, NumArgs, Name)
 end
 
 function LLVMBuildCall2(arg1, arg2, Fn, Args, NumArgs, Name)
-    @apicall(:LLVMBuildCall2, LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), arg1, arg2, Fn, Args, NumArgs, Name)
+    @runtime_ccall((:LLVMBuildCall2,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, UInt32, Cstring), arg1, arg2, Fn, Args, NumArgs, Name)
 end
 
 function LLVMBuildSelect(arg1, If, Then, Else, Name)
-    @apicall(:LLVMBuildSelect, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, If, Then, Else, Name)
+    @runtime_ccall((:LLVMBuildSelect,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, If, Then, Else, Name)
 end
 
 function LLVMBuildVAArg(arg1, List, Ty, Name)
-    @apicall(:LLVMBuildVAArg, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, List, Ty, Name)
+    @runtime_ccall((:LLVMBuildVAArg,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, List, Ty, Name)
 end
 
 function LLVMBuildExtractElement(arg1, VecVal, Index, Name)
-    @apicall(:LLVMBuildExtractElement, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, VecVal, Index, Name)
+    @runtime_ccall((:LLVMBuildExtractElement,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, VecVal, Index, Name)
 end
 
 function LLVMBuildInsertElement(arg1, VecVal, EltVal, Index, Name)
-    @apicall(:LLVMBuildInsertElement, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, VecVal, EltVal, Index, Name)
+    @runtime_ccall((:LLVMBuildInsertElement,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, VecVal, EltVal, Index, Name)
 end
 
 function LLVMBuildShuffleVector(arg1, V1, V2, Mask, Name)
-    @apicall(:LLVMBuildShuffleVector, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, V1, V2, Mask, Name)
+    @runtime_ccall((:LLVMBuildShuffleVector,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, V1, V2, Mask, Name)
 end
 
 function LLVMBuildExtractValue(arg1, AggVal, Index, Name)
-    @apicall(:LLVMBuildExtractValue, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32, Cstring), arg1, AggVal, Index, Name)
+    @runtime_ccall((:LLVMBuildExtractValue,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, UInt32, Cstring), arg1, AggVal, Index, Name)
 end
 
 function LLVMBuildInsertValue(arg1, AggVal, EltVal, Index, Name)
-    @apicall(:LLVMBuildInsertValue, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, UInt32, Cstring), arg1, AggVal, EltVal, Index, Name)
+    @runtime_ccall((:LLVMBuildInsertValue,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, UInt32, Cstring), arg1, AggVal, EltVal, Index, Name)
 end
 
 function LLVMBuildIsNull(arg1, Val, Name)
-    @apicall(:LLVMBuildIsNull, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, Val, Name)
+    @runtime_ccall((:LLVMBuildIsNull,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, Val, Name)
 end
 
 function LLVMBuildIsNotNull(arg1, Val, Name)
-    @apicall(:LLVMBuildIsNotNull, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, Val, Name)
+    @runtime_ccall((:LLVMBuildIsNotNull,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, Val, Name)
 end
 
 function LLVMBuildPtrDiff(arg1, LHS, RHS, Name)
-    @apicall(:LLVMBuildPtrDiff, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+    @runtime_ccall((:LLVMBuildPtrDiff,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
 end
 
 function LLVMBuildFence(B, ordering, singleThread, Name)
-    @apicall(:LLVMBuildFence, LLVMValueRef, (LLVMBuilderRef, LLVMAtomicOrdering, LLVMBool, Cstring), B, ordering, singleThread, Name)
+    @runtime_ccall((:LLVMBuildFence,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMAtomicOrdering, LLVMBool, Cstring), B, ordering, singleThread, Name)
 end
 
 function LLVMBuildAtomicRMW(B, op, PTR, Val, ordering, singleThread)
-    @apicall(:LLVMBuildAtomicRMW, LLVMValueRef, (LLVMBuilderRef, LLVMAtomicRMWBinOp, LLVMValueRef, LLVMValueRef, LLVMAtomicOrdering, LLVMBool), B, op, PTR, Val, ordering, singleThread)
+    @runtime_ccall((:LLVMBuildAtomicRMW,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMAtomicRMWBinOp, LLVMValueRef, LLVMValueRef, LLVMAtomicOrdering, LLVMBool), B, op, PTR, Val, ordering, singleThread)
 end
 
 function LLVMBuildAtomicCmpXchg(B, Ptr, Cmp, New, SuccessOrdering, FailureOrdering, SingleThread)
-    @apicall(:LLVMBuildAtomicCmpXchg, LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMAtomicOrdering, LLVMAtomicOrdering, LLVMBool), B, Ptr, Cmp, New, SuccessOrdering, FailureOrdering, SingleThread)
+    @runtime_ccall((:LLVMBuildAtomicCmpXchg,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMAtomicOrdering, LLVMAtomicOrdering, LLVMBool), B, Ptr, Cmp, New, SuccessOrdering, FailureOrdering, SingleThread)
 end
 
 function LLVMIsAtomicSingleThread(AtomicInst)
-    @apicall(:LLVMIsAtomicSingleThread, LLVMBool, (LLVMValueRef,), AtomicInst)
+    @runtime_ccall((:LLVMIsAtomicSingleThread,libllvm[]), LLVMBool, (LLVMValueRef,), AtomicInst)
 end
 
 function LLVMSetAtomicSingleThread(AtomicInst, SingleThread)
-    @apicall(:LLVMSetAtomicSingleThread, Cvoid, (LLVMValueRef, LLVMBool), AtomicInst, SingleThread)
+    @runtime_ccall((:LLVMSetAtomicSingleThread,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), AtomicInst, SingleThread)
 end
 
 function LLVMGetCmpXchgSuccessOrdering(CmpXchgInst)
-    @apicall(:LLVMGetCmpXchgSuccessOrdering, LLVMAtomicOrdering, (LLVMValueRef,), CmpXchgInst)
+    @runtime_ccall((:LLVMGetCmpXchgSuccessOrdering,libllvm[]), LLVMAtomicOrdering, (LLVMValueRef,), CmpXchgInst)
 end
 
 function LLVMSetCmpXchgSuccessOrdering(CmpXchgInst, Ordering)
-    @apicall(:LLVMSetCmpXchgSuccessOrdering, Cvoid, (LLVMValueRef, LLVMAtomicOrdering), CmpXchgInst, Ordering)
+    @runtime_ccall((:LLVMSetCmpXchgSuccessOrdering,libllvm[]), Cvoid, (LLVMValueRef, LLVMAtomicOrdering), CmpXchgInst, Ordering)
 end
 
 function LLVMGetCmpXchgFailureOrdering(CmpXchgInst)
-    @apicall(:LLVMGetCmpXchgFailureOrdering, LLVMAtomicOrdering, (LLVMValueRef,), CmpXchgInst)
+    @runtime_ccall((:LLVMGetCmpXchgFailureOrdering,libllvm[]), LLVMAtomicOrdering, (LLVMValueRef,), CmpXchgInst)
 end
 
 function LLVMSetCmpXchgFailureOrdering(CmpXchgInst, Ordering)
-    @apicall(:LLVMSetCmpXchgFailureOrdering, Cvoid, (LLVMValueRef, LLVMAtomicOrdering), CmpXchgInst, Ordering)
+    @runtime_ccall((:LLVMSetCmpXchgFailureOrdering,libllvm[]), Cvoid, (LLVMValueRef, LLVMAtomicOrdering), CmpXchgInst, Ordering)
 end
 
 function LLVMCreateModuleProviderForExistingModule(M)
-    @apicall(:LLVMCreateModuleProviderForExistingModule, LLVMModuleProviderRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMCreateModuleProviderForExistingModule,libllvm[]), LLVMModuleProviderRef, (LLVMModuleRef,), M)
 end
 
 function LLVMDisposeModuleProvider(M)
-    @apicall(:LLVMDisposeModuleProvider, Cvoid, (LLVMModuleProviderRef,), M)
+    @runtime_ccall((:LLVMDisposeModuleProvider,libllvm[]), Cvoid, (LLVMModuleProviderRef,), M)
 end
 
 function LLVMCreateMemoryBufferWithContentsOfFile(Path, OutMemBuf, OutMessage)
-    @apicall(:LLVMCreateMemoryBufferWithContentsOfFile, LLVMBool, (Cstring, Ptr{LLVMMemoryBufferRef}, Ptr{Cstring}), Path, OutMemBuf, OutMessage)
+    @runtime_ccall((:LLVMCreateMemoryBufferWithContentsOfFile,libllvm[]), LLVMBool, (Cstring, Ptr{LLVMMemoryBufferRef}, Ptr{Cstring}), Path, OutMemBuf, OutMessage)
 end
 
 function LLVMCreateMemoryBufferWithSTDIN(OutMemBuf, OutMessage)
-    @apicall(:LLVMCreateMemoryBufferWithSTDIN, LLVMBool, (Ptr{LLVMMemoryBufferRef}, Ptr{Cstring}), OutMemBuf, OutMessage)
+    @runtime_ccall((:LLVMCreateMemoryBufferWithSTDIN,libllvm[]), LLVMBool, (Ptr{LLVMMemoryBufferRef}, Ptr{Cstring}), OutMemBuf, OutMessage)
 end
 
 function LLVMCreateMemoryBufferWithMemoryRange(InputData, InputDataLength, BufferName, RequiresNullTerminator)
-    @apicall(:LLVMCreateMemoryBufferWithMemoryRange, LLVMMemoryBufferRef, (Cstring, Csize_t, Cstring, LLVMBool), InputData, InputDataLength, BufferName, RequiresNullTerminator)
+    @runtime_ccall((:LLVMCreateMemoryBufferWithMemoryRange,libllvm[]), LLVMMemoryBufferRef, (Cstring, Csize_t, Cstring, LLVMBool), InputData, InputDataLength, BufferName, RequiresNullTerminator)
 end
 
 function LLVMCreateMemoryBufferWithMemoryRangeCopy(InputData, InputDataLength, BufferName)
-    @apicall(:LLVMCreateMemoryBufferWithMemoryRangeCopy, LLVMMemoryBufferRef, (Cstring, Csize_t, Cstring), InputData, InputDataLength, BufferName)
+    @runtime_ccall((:LLVMCreateMemoryBufferWithMemoryRangeCopy,libllvm[]), LLVMMemoryBufferRef, (Cstring, Csize_t, Cstring), InputData, InputDataLength, BufferName)
 end
 
 function LLVMGetBufferStart(MemBuf)
-    @apicall(:LLVMGetBufferStart, Cstring, (LLVMMemoryBufferRef,), MemBuf)
+    @runtime_ccall((:LLVMGetBufferStart,libllvm[]), Cstring, (LLVMMemoryBufferRef,), MemBuf)
 end
 
 function LLVMGetBufferSize(MemBuf)
-    @apicall(:LLVMGetBufferSize, Csize_t, (LLVMMemoryBufferRef,), MemBuf)
+    @runtime_ccall((:LLVMGetBufferSize,libllvm[]), Csize_t, (LLVMMemoryBufferRef,), MemBuf)
 end
 
 function LLVMDisposeMemoryBuffer(MemBuf)
-    @apicall(:LLVMDisposeMemoryBuffer, Cvoid, (LLVMMemoryBufferRef,), MemBuf)
+    @runtime_ccall((:LLVMDisposeMemoryBuffer,libllvm[]), Cvoid, (LLVMMemoryBufferRef,), MemBuf)
 end
 
 function LLVMGetGlobalPassRegistry()
-    @apicall(:LLVMGetGlobalPassRegistry, LLVMPassRegistryRef, ())
+    @runtime_ccall((:LLVMGetGlobalPassRegistry,libllvm[]), LLVMPassRegistryRef, ())
 end
 
 function LLVMCreatePassManager()
-    @apicall(:LLVMCreatePassManager, LLVMPassManagerRef, ())
+    @runtime_ccall((:LLVMCreatePassManager,libllvm[]), LLVMPassManagerRef, ())
 end
 
 function LLVMCreateFunctionPassManagerForModule(M)
-    @apicall(:LLVMCreateFunctionPassManagerForModule, LLVMPassManagerRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMCreateFunctionPassManagerForModule,libllvm[]), LLVMPassManagerRef, (LLVMModuleRef,), M)
 end
 
 function LLVMCreateFunctionPassManager(MP)
-    @apicall(:LLVMCreateFunctionPassManager, LLVMPassManagerRef, (LLVMModuleProviderRef,), MP)
+    @runtime_ccall((:LLVMCreateFunctionPassManager,libllvm[]), LLVMPassManagerRef, (LLVMModuleProviderRef,), MP)
 end
 
 function LLVMRunPassManager(PM, M)
-    @apicall(:LLVMRunPassManager, LLVMBool, (LLVMPassManagerRef, LLVMModuleRef), PM, M)
+    @runtime_ccall((:LLVMRunPassManager,libllvm[]), LLVMBool, (LLVMPassManagerRef, LLVMModuleRef), PM, M)
 end
 
 function LLVMInitializeFunctionPassManager(FPM)
-    @apicall(:LLVMInitializeFunctionPassManager, LLVMBool, (LLVMPassManagerRef,), FPM)
+    @runtime_ccall((:LLVMInitializeFunctionPassManager,libllvm[]), LLVMBool, (LLVMPassManagerRef,), FPM)
 end
 
 function LLVMRunFunctionPassManager(FPM, F)
-    @apicall(:LLVMRunFunctionPassManager, LLVMBool, (LLVMPassManagerRef, LLVMValueRef), FPM, F)
+    @runtime_ccall((:LLVMRunFunctionPassManager,libllvm[]), LLVMBool, (LLVMPassManagerRef, LLVMValueRef), FPM, F)
 end
 
 function LLVMFinalizeFunctionPassManager(FPM)
-    @apicall(:LLVMFinalizeFunctionPassManager, LLVMBool, (LLVMPassManagerRef,), FPM)
+    @runtime_ccall((:LLVMFinalizeFunctionPassManager,libllvm[]), LLVMBool, (LLVMPassManagerRef,), FPM)
 end
 
 function LLVMDisposePassManager(PM)
-    @apicall(:LLVMDisposePassManager, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMDisposePassManager,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMStartMultithreaded()
-    @apicall(:LLVMStartMultithreaded, LLVMBool, ())
+    @runtime_ccall((:LLVMStartMultithreaded,libllvm[]), LLVMBool, ())
 end
 
 function LLVMStopMultithreaded()
-    @apicall(:LLVMStopMultithreaded, Cvoid, ())
+    @runtime_ccall((:LLVMStopMultithreaded,libllvm[]), Cvoid, ())
 end
 
 function LLVMIsMultithreaded()
-    @apicall(:LLVMIsMultithreaded, LLVMBool, ())
+    @runtime_ccall((:LLVMIsMultithreaded,libllvm[]), LLVMBool, ())
 end
 
 
@@ -2851,347 +2851,347 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMDebugMetadataVersion()
-    @apicall(:LLVMDebugMetadataVersion, UInt32, ())
+    @runtime_ccall((:LLVMDebugMetadataVersion,libllvm[]), UInt32, ())
 end
 
 function LLVMGetModuleDebugMetadataVersion(Module)
-    @apicall(:LLVMGetModuleDebugMetadataVersion, UInt32, (LLVMModuleRef,), Module)
+    @runtime_ccall((:LLVMGetModuleDebugMetadataVersion,libllvm[]), UInt32, (LLVMModuleRef,), Module)
 end
 
 function LLVMStripModuleDebugInfo(Module)
-    @apicall(:LLVMStripModuleDebugInfo, LLVMBool, (LLVMModuleRef,), Module)
+    @runtime_ccall((:LLVMStripModuleDebugInfo,libllvm[]), LLVMBool, (LLVMModuleRef,), Module)
 end
 
 function LLVMCreateDIBuilderDisallowUnresolved(M)
-    @apicall(:LLVMCreateDIBuilderDisallowUnresolved, LLVMDIBuilderRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMCreateDIBuilderDisallowUnresolved,libllvm[]), LLVMDIBuilderRef, (LLVMModuleRef,), M)
 end
 
 function LLVMCreateDIBuilder(M)
-    @apicall(:LLVMCreateDIBuilder, LLVMDIBuilderRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMCreateDIBuilder,libllvm[]), LLVMDIBuilderRef, (LLVMModuleRef,), M)
 end
 
 function LLVMDisposeDIBuilder(Builder)
-    @apicall(:LLVMDisposeDIBuilder, Cvoid, (LLVMDIBuilderRef,), Builder)
+    @runtime_ccall((:LLVMDisposeDIBuilder,libllvm[]), Cvoid, (LLVMDIBuilderRef,), Builder)
 end
 
 function LLVMDIBuilderFinalize(Builder)
-    @apicall(:LLVMDIBuilderFinalize, Cvoid, (LLVMDIBuilderRef,), Builder)
+    @runtime_ccall((:LLVMDIBuilderFinalize,libllvm[]), Cvoid, (LLVMDIBuilderRef,), Builder)
 end
 
 function LLVMDIBuilderCreateCompileUnit(Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling)
-    @apicall(:LLVMDIBuilderCreateCompileUnit, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMDWARFSourceLanguage, LLVMMetadataRef, Cstring, Csize_t, LLVMBool, Cstring, Csize_t, UInt32, Cstring, Csize_t, LLVMDWARFEmissionKind, UInt32, LLVMBool, LLVMBool), Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling)
+    @runtime_ccall((:LLVMDIBuilderCreateCompileUnit,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMDWARFSourceLanguage, LLVMMetadataRef, Cstring, Csize_t, LLVMBool, Cstring, Csize_t, UInt32, Cstring, Csize_t, LLVMDWARFEmissionKind, UInt32, LLVMBool, LLVMBool), Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling)
 end
 
 function LLVMDIBuilderCreateFile(Builder, Filename, FilenameLen, Directory, DirectoryLen)
-    @apicall(:LLVMDIBuilderCreateFile, LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, Cstring, Csize_t), Builder, Filename, FilenameLen, Directory, DirectoryLen)
+    @runtime_ccall((:LLVMDIBuilderCreateFile,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, Cstring, Csize_t), Builder, Filename, FilenameLen, Directory, DirectoryLen)
 end
 
 function LLVMDIBuilderCreateModule(Builder, ParentScope, Name, NameLen, ConfigMacros, ConfigMacrosLen, IncludePath, IncludePathLen, ISysRoot, ISysRootLen)
-    @apicall(:LLVMDIBuilderCreateModule, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, Cstring, Csize_t, Cstring, Csize_t), Builder, ParentScope, Name, NameLen, ConfigMacros, ConfigMacrosLen, IncludePath, IncludePathLen, ISysRoot, ISysRootLen)
+    @runtime_ccall((:LLVMDIBuilderCreateModule,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, Cstring, Csize_t, Cstring, Csize_t), Builder, ParentScope, Name, NameLen, ConfigMacros, ConfigMacrosLen, IncludePath, IncludePathLen, ISysRoot, ISysRootLen)
 end
 
 function LLVMDIBuilderCreateNameSpace(Builder, ParentScope, Name, NameLen, ExportSymbols)
-    @apicall(:LLVMDIBuilderCreateNameSpace, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMBool), Builder, ParentScope, Name, NameLen, ExportSymbols)
+    @runtime_ccall((:LLVMDIBuilderCreateNameSpace,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMBool), Builder, ParentScope, Name, NameLen, ExportSymbols)
 end
 
 function LLVMDIBuilderCreateFunction(Builder, Scope, Name, NameLen, LinkageName, LinkageNameLen, File, LineNo, Ty, IsLocalToUnit, IsDefinition, ScopeLine, Flags, IsOptimized)
-    @apicall(:LLVMDIBuilderCreateFunction, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMBool, UInt32, LLVMDIFlags, LLVMBool), Builder, Scope, Name, NameLen, LinkageName, LinkageNameLen, File, LineNo, Ty, IsLocalToUnit, IsDefinition, ScopeLine, Flags, IsOptimized)
+    @runtime_ccall((:LLVMDIBuilderCreateFunction,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMBool, UInt32, LLVMDIFlags, LLVMBool), Builder, Scope, Name, NameLen, LinkageName, LinkageNameLen, File, LineNo, Ty, IsLocalToUnit, IsDefinition, ScopeLine, Flags, IsOptimized)
 end
 
 function LLVMDIBuilderCreateLexicalBlock(Builder, Scope, File, Line, Column)
-    @apicall(:LLVMDIBuilderCreateLexicalBlock, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, UInt32, UInt32), Builder, Scope, File, Line, Column)
+    @runtime_ccall((:LLVMDIBuilderCreateLexicalBlock,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, UInt32, UInt32), Builder, Scope, File, Line, Column)
 end
 
 function LLVMDIBuilderCreateLexicalBlockFile(Builder, Scope, File, Discriminator)
-    @apicall(:LLVMDIBuilderCreateLexicalBlockFile, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, File, Discriminator)
+    @runtime_ccall((:LLVMDIBuilderCreateLexicalBlockFile,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, File, Discriminator)
 end
 
 function LLVMDIBuilderCreateImportedModuleFromNamespace(Builder, Scope, NS, File, Line)
-    @apicall(:LLVMDIBuilderCreateImportedModuleFromNamespace, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, NS, File, Line)
+    @runtime_ccall((:LLVMDIBuilderCreateImportedModuleFromNamespace,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, NS, File, Line)
 end
 
 function LLVMDIBuilderCreateImportedModuleFromAlias(Builder, Scope, ImportedEntity, File, Line)
-    @apicall(:LLVMDIBuilderCreateImportedModuleFromAlias, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, ImportedEntity, File, Line)
+    @runtime_ccall((:LLVMDIBuilderCreateImportedModuleFromAlias,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, ImportedEntity, File, Line)
 end
 
 function LLVMDIBuilderCreateImportedModuleFromModule(Builder, Scope, M, File, Line)
-    @apicall(:LLVMDIBuilderCreateImportedModuleFromModule, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, M, File, Line)
+    @runtime_ccall((:LLVMDIBuilderCreateImportedModuleFromModule,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, M, File, Line)
 end
 
 function LLVMDIBuilderCreateImportedDeclaration(Builder, Scope, Decl, File, Line, Name, NameLen)
-    @apicall(:LLVMDIBuilderCreateImportedDeclaration, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, UInt32, Cstring, Csize_t), Builder, Scope, Decl, File, Line, Name, NameLen)
+    @runtime_ccall((:LLVMDIBuilderCreateImportedDeclaration,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, UInt32, Cstring, Csize_t), Builder, Scope, Decl, File, Line, Name, NameLen)
 end
 
 function LLVMDIBuilderCreateDebugLocation(Ctx, Line, Column, Scope, InlinedAt)
-    @apicall(:LLVMDIBuilderCreateDebugLocation, LLVMMetadataRef, (LLVMContextRef, UInt32, UInt32, LLVMMetadataRef, LLVMMetadataRef), Ctx, Line, Column, Scope, InlinedAt)
+    @runtime_ccall((:LLVMDIBuilderCreateDebugLocation,libllvm[]), LLVMMetadataRef, (LLVMContextRef, UInt32, UInt32, LLVMMetadataRef, LLVMMetadataRef), Ctx, Line, Column, Scope, InlinedAt)
 end
 
 function LLVMDILocationGetLine(Location)
-    @apicall(:LLVMDILocationGetLine, UInt32, (LLVMMetadataRef,), Location)
+    @runtime_ccall((:LLVMDILocationGetLine,libllvm[]), UInt32, (LLVMMetadataRef,), Location)
 end
 
 function LLVMDILocationGetColumn(Location)
-    @apicall(:LLVMDILocationGetColumn, UInt32, (LLVMMetadataRef,), Location)
+    @runtime_ccall((:LLVMDILocationGetColumn,libllvm[]), UInt32, (LLVMMetadataRef,), Location)
 end
 
 function LLVMDILocationGetScope(Location)
-    @apicall(:LLVMDILocationGetScope, LLVMMetadataRef, (LLVMMetadataRef,), Location)
+    @runtime_ccall((:LLVMDILocationGetScope,libllvm[]), LLVMMetadataRef, (LLVMMetadataRef,), Location)
 end
 
 function LLVMDILocationGetInlinedAt(Location)
-    @apicall(:LLVMDILocationGetInlinedAt, LLVMMetadataRef, (LLVMMetadataRef,), Location)
+    @runtime_ccall((:LLVMDILocationGetInlinedAt,libllvm[]), LLVMMetadataRef, (LLVMMetadataRef,), Location)
 end
 
 function LLVMDIScopeGetFile(Scope)
-    @apicall(:LLVMDIScopeGetFile, LLVMMetadataRef, (LLVMMetadataRef,), Scope)
+    @runtime_ccall((:LLVMDIScopeGetFile,libllvm[]), LLVMMetadataRef, (LLVMMetadataRef,), Scope)
 end
 
 function LLVMDIFileGetDirectory(File, Len)
-    @apicall(:LLVMDIFileGetDirectory, Cstring, (LLVMMetadataRef, Ptr{UInt32}), File, Len)
+    @runtime_ccall((:LLVMDIFileGetDirectory,libllvm[]), Cstring, (LLVMMetadataRef, Ptr{UInt32}), File, Len)
 end
 
 function LLVMDIFileGetFilename(File, Len)
-    @apicall(:LLVMDIFileGetFilename, Cstring, (LLVMMetadataRef, Ptr{UInt32}), File, Len)
+    @runtime_ccall((:LLVMDIFileGetFilename,libllvm[]), Cstring, (LLVMMetadataRef, Ptr{UInt32}), File, Len)
 end
 
 function LLVMDIFileGetSource(File, Len)
-    @apicall(:LLVMDIFileGetSource, Cstring, (LLVMMetadataRef, Ptr{UInt32}), File, Len)
+    @runtime_ccall((:LLVMDIFileGetSource,libllvm[]), Cstring, (LLVMMetadataRef, Ptr{UInt32}), File, Len)
 end
 
 function LLVMDIBuilderGetOrCreateTypeArray(Builder, Data, NumElements)
-    @apicall(:LLVMDIBuilderGetOrCreateTypeArray, LLVMMetadataRef, (LLVMDIBuilderRef, Ptr{LLVMMetadataRef}, Csize_t), Builder, Data, NumElements)
+    @runtime_ccall((:LLVMDIBuilderGetOrCreateTypeArray,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Ptr{LLVMMetadataRef}, Csize_t), Builder, Data, NumElements)
 end
 
 function LLVMDIBuilderCreateSubroutineType(Builder, File, ParameterTypes, NumParameterTypes, Flags)
-    @apicall(:LLVMDIBuilderCreateSubroutineType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32, LLVMDIFlags), Builder, File, ParameterTypes, NumParameterTypes, Flags)
+    @runtime_ccall((:LLVMDIBuilderCreateSubroutineType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32, LLVMDIFlags), Builder, File, ParameterTypes, NumParameterTypes, Flags)
 end
 
 function LLVMDIBuilderCreateEnumerator(Builder, Name, NameLen, Value, IsUnsigned)
-    @apicall(:LLVMDIBuilderCreateEnumerator, LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, Int64, LLVMBool), Builder, Name, NameLen, Value, IsUnsigned)
+    @runtime_ccall((:LLVMDIBuilderCreateEnumerator,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, Int64, LLVMBool), Builder, Name, NameLen, Value, IsUnsigned)
 end
 
 function LLVMDIBuilderCreateEnumerationType(Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Elements, NumElements, ClassTy)
-    @apicall(:LLVMDIBuilderCreateEnumerationType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, Ptr{LLVMMetadataRef}, UInt32, LLVMMetadataRef), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Elements, NumElements, ClassTy)
+    @runtime_ccall((:LLVMDIBuilderCreateEnumerationType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, Ptr{LLVMMetadataRef}, UInt32, LLVMMetadataRef), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Elements, NumElements, ClassTy)
 end
 
 function LLVMDIBuilderCreateUnionType(Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Flags, Elements, NumElements, RunTimeLang, UniqueId, UniqueIdLen)
-    @apicall(:LLVMDIBuilderCreateUnionType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, LLVMDIFlags, Ptr{LLVMMetadataRef}, UInt32, UInt32, Cstring, Csize_t), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Flags, Elements, NumElements, RunTimeLang, UniqueId, UniqueIdLen)
+    @runtime_ccall((:LLVMDIBuilderCreateUnionType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, LLVMDIFlags, Ptr{LLVMMetadataRef}, UInt32, UInt32, Cstring, Csize_t), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Flags, Elements, NumElements, RunTimeLang, UniqueId, UniqueIdLen)
 end
 
 function LLVMDIBuilderCreateArrayType(Builder, Size, AlignInBits, Ty, Subscripts, NumSubscripts)
-    @apicall(:LLVMDIBuilderCreateArrayType, LLVMMetadataRef, (LLVMDIBuilderRef, UInt64, UInt32, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32), Builder, Size, AlignInBits, Ty, Subscripts, NumSubscripts)
+    @runtime_ccall((:LLVMDIBuilderCreateArrayType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, UInt64, UInt32, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32), Builder, Size, AlignInBits, Ty, Subscripts, NumSubscripts)
 end
 
 function LLVMDIBuilderCreateVectorType(Builder, Size, AlignInBits, Ty, Subscripts, NumSubscripts)
-    @apicall(:LLVMDIBuilderCreateVectorType, LLVMMetadataRef, (LLVMDIBuilderRef, UInt64, UInt32, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32), Builder, Size, AlignInBits, Ty, Subscripts, NumSubscripts)
+    @runtime_ccall((:LLVMDIBuilderCreateVectorType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, UInt64, UInt32, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32), Builder, Size, AlignInBits, Ty, Subscripts, NumSubscripts)
 end
 
 function LLVMDIBuilderCreateUnspecifiedType(Builder, Name, NameLen)
-    @apicall(:LLVMDIBuilderCreateUnspecifiedType, LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t), Builder, Name, NameLen)
+    @runtime_ccall((:LLVMDIBuilderCreateUnspecifiedType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t), Builder, Name, NameLen)
 end
 
 function LLVMDIBuilderCreateBasicType(Builder, Name, NameLen, SizeInBits, Encoding, Flags)
-    @apicall(:LLVMDIBuilderCreateBasicType, LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, UInt64, LLVMDWARFTypeEncoding, LLVMDIFlags), Builder, Name, NameLen, SizeInBits, Encoding, Flags)
+    @runtime_ccall((:LLVMDIBuilderCreateBasicType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, UInt64, LLVMDWARFTypeEncoding, LLVMDIFlags), Builder, Name, NameLen, SizeInBits, Encoding, Flags)
 end
 
 function LLVMDIBuilderCreatePointerType(Builder, PointeeTy, SizeInBits, AlignInBits, AddressSpace, Name, NameLen)
-    @apicall(:LLVMDIBuilderCreatePointerType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, UInt64, UInt32, UInt32, Cstring, Csize_t), Builder, PointeeTy, SizeInBits, AlignInBits, AddressSpace, Name, NameLen)
+    @runtime_ccall((:LLVMDIBuilderCreatePointerType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, UInt64, UInt32, UInt32, Cstring, Csize_t), Builder, PointeeTy, SizeInBits, AlignInBits, AddressSpace, Name, NameLen)
 end
 
 function LLVMDIBuilderCreateStructType(Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Flags, DerivedFrom, Elements, NumElements, RunTimeLang, VTableHolder, UniqueId, UniqueIdLen)
-    @apicall(:LLVMDIBuilderCreateStructType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, LLVMDIFlags, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32, UInt32, LLVMMetadataRef, Cstring, Csize_t), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Flags, DerivedFrom, Elements, NumElements, RunTimeLang, VTableHolder, UniqueId, UniqueIdLen)
+    @runtime_ccall((:LLVMDIBuilderCreateStructType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, LLVMDIFlags, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32, UInt32, LLVMMetadataRef, Cstring, Csize_t), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, Flags, DerivedFrom, Elements, NumElements, RunTimeLang, VTableHolder, UniqueId, UniqueIdLen)
 end
 
 function LLVMDIBuilderCreateMemberType(Builder, Scope, Name, NameLen, File, LineNo, SizeInBits, AlignInBits, OffsetInBits, Flags, Ty)
-    @apicall(:LLVMDIBuilderCreateMemberType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, UInt64, LLVMDIFlags, LLVMMetadataRef), Builder, Scope, Name, NameLen, File, LineNo, SizeInBits, AlignInBits, OffsetInBits, Flags, Ty)
+    @runtime_ccall((:LLVMDIBuilderCreateMemberType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, UInt64, LLVMDIFlags, LLVMMetadataRef), Builder, Scope, Name, NameLen, File, LineNo, SizeInBits, AlignInBits, OffsetInBits, Flags, Ty)
 end
 
 function LLVMDIBuilderCreateStaticMemberType(Builder, Scope, Name, NameLen, File, LineNumber, Type, Flags, ConstantVal, AlignInBits)
-    @apicall(:LLVMDIBuilderCreateStaticMemberType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMDIFlags, LLVMValueRef, UInt32), Builder, Scope, Name, NameLen, File, LineNumber, Type, Flags, ConstantVal, AlignInBits)
+    @runtime_ccall((:LLVMDIBuilderCreateStaticMemberType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMDIFlags, LLVMValueRef, UInt32), Builder, Scope, Name, NameLen, File, LineNumber, Type, Flags, ConstantVal, AlignInBits)
 end
 
 function LLVMDIBuilderCreateMemberPointerType(Builder, PointeeType, ClassType, SizeInBits, AlignInBits, Flags)
-    @apicall(:LLVMDIBuilderCreateMemberPointerType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, UInt64, UInt32, LLVMDIFlags), Builder, PointeeType, ClassType, SizeInBits, AlignInBits, Flags)
+    @runtime_ccall((:LLVMDIBuilderCreateMemberPointerType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, UInt64, UInt32, LLVMDIFlags), Builder, PointeeType, ClassType, SizeInBits, AlignInBits, Flags)
 end
 
 function LLVMDIBuilderCreateObjCIVar(Builder, Name, NameLen, File, LineNo, SizeInBits, AlignInBits, OffsetInBits, Flags, Ty, PropertyNode)
-    @apicall(:LLVMDIBuilderCreateObjCIVar, LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, UInt64, LLVMDIFlags, LLVMMetadataRef, LLVMMetadataRef), Builder, Name, NameLen, File, LineNo, SizeInBits, AlignInBits, OffsetInBits, Flags, Ty, PropertyNode)
+    @runtime_ccall((:LLVMDIBuilderCreateObjCIVar,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, UInt64, LLVMDIFlags, LLVMMetadataRef, LLVMMetadataRef), Builder, Name, NameLen, File, LineNo, SizeInBits, AlignInBits, OffsetInBits, Flags, Ty, PropertyNode)
 end
 
 function LLVMDIBuilderCreateObjCProperty(Builder, Name, NameLen, File, LineNo, GetterName, GetterNameLen, SetterName, SetterNameLen, PropertyAttributes, Ty)
-    @apicall(:LLVMDIBuilderCreateObjCProperty, LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, Cstring, Csize_t, Cstring, Csize_t, UInt32, LLVMMetadataRef), Builder, Name, NameLen, File, LineNo, GetterName, GetterNameLen, SetterName, SetterNameLen, PropertyAttributes, Ty)
+    @runtime_ccall((:LLVMDIBuilderCreateObjCProperty,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, Cstring, Csize_t, Cstring, Csize_t, UInt32, LLVMMetadataRef), Builder, Name, NameLen, File, LineNo, GetterName, GetterNameLen, SetterName, SetterNameLen, PropertyAttributes, Ty)
 end
 
 function LLVMDIBuilderCreateObjectPointerType(Builder, Type)
-    @apicall(:LLVMDIBuilderCreateObjectPointerType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef), Builder, Type)
+    @runtime_ccall((:LLVMDIBuilderCreateObjectPointerType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef), Builder, Type)
 end
 
 function LLVMDIBuilderCreateQualifiedType(Builder, Tag, Type)
-    @apicall(:LLVMDIBuilderCreateQualifiedType, LLVMMetadataRef, (LLVMDIBuilderRef, UInt32, LLVMMetadataRef), Builder, Tag, Type)
+    @runtime_ccall((:LLVMDIBuilderCreateQualifiedType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, UInt32, LLVMMetadataRef), Builder, Tag, Type)
 end
 
 function LLVMDIBuilderCreateReferenceType(Builder, Tag, Type)
-    @apicall(:LLVMDIBuilderCreateReferenceType, LLVMMetadataRef, (LLVMDIBuilderRef, UInt32, LLVMMetadataRef), Builder, Tag, Type)
+    @runtime_ccall((:LLVMDIBuilderCreateReferenceType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, UInt32, LLVMMetadataRef), Builder, Tag, Type)
 end
 
 function LLVMDIBuilderCreateNullPtrType(Builder)
-    @apicall(:LLVMDIBuilderCreateNullPtrType, LLVMMetadataRef, (LLVMDIBuilderRef,), Builder)
+    @runtime_ccall((:LLVMDIBuilderCreateNullPtrType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef,), Builder)
 end
 
 function LLVMDIBuilderCreateTypedef(Builder, Type, Name, NameLen, File, LineNo, Scope)
-    @apicall(:LLVMDIBuilderCreateTypedef, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef), Builder, Type, Name, NameLen, File, LineNo, Scope)
+    @runtime_ccall((:LLVMDIBuilderCreateTypedef,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef), Builder, Type, Name, NameLen, File, LineNo, Scope)
 end
 
 function LLVMDIBuilderCreateInheritance(Builder, Ty, BaseTy, BaseOffset, VBPtrOffset, Flags)
-    @apicall(:LLVMDIBuilderCreateInheritance, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, UInt64, UInt32, LLVMDIFlags), Builder, Ty, BaseTy, BaseOffset, VBPtrOffset, Flags)
+    @runtime_ccall((:LLVMDIBuilderCreateInheritance,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, UInt64, UInt32, LLVMDIFlags), Builder, Ty, BaseTy, BaseOffset, VBPtrOffset, Flags)
 end
 
 function LLVMDIBuilderCreateForwardDecl(Builder, Tag, Name, NameLen, Scope, File, Line, RuntimeLang, SizeInBits, AlignInBits, UniqueIdentifier, UniqueIdentifierLen)
-    @apicall(:LLVMDIBuilderCreateForwardDecl, LLVMMetadataRef, (LLVMDIBuilderRef, UInt32, Cstring, Csize_t, LLVMMetadataRef, LLVMMetadataRef, UInt32, UInt32, UInt64, UInt32, Cstring, Csize_t), Builder, Tag, Name, NameLen, Scope, File, Line, RuntimeLang, SizeInBits, AlignInBits, UniqueIdentifier, UniqueIdentifierLen)
+    @runtime_ccall((:LLVMDIBuilderCreateForwardDecl,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, UInt32, Cstring, Csize_t, LLVMMetadataRef, LLVMMetadataRef, UInt32, UInt32, UInt64, UInt32, Cstring, Csize_t), Builder, Tag, Name, NameLen, Scope, File, Line, RuntimeLang, SizeInBits, AlignInBits, UniqueIdentifier, UniqueIdentifierLen)
 end
 
 function LLVMDIBuilderCreateReplaceableCompositeType(Builder, Tag, Name, NameLen, Scope, File, Line, RuntimeLang, SizeInBits, AlignInBits, Flags, UniqueIdentifier, UniqueIdentifierLen)
-    @apicall(:LLVMDIBuilderCreateReplaceableCompositeType, LLVMMetadataRef, (LLVMDIBuilderRef, UInt32, Cstring, Csize_t, LLVMMetadataRef, LLVMMetadataRef, UInt32, UInt32, UInt64, UInt32, LLVMDIFlags, Cstring, Csize_t), Builder, Tag, Name, NameLen, Scope, File, Line, RuntimeLang, SizeInBits, AlignInBits, Flags, UniqueIdentifier, UniqueIdentifierLen)
+    @runtime_ccall((:LLVMDIBuilderCreateReplaceableCompositeType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, UInt32, Cstring, Csize_t, LLVMMetadataRef, LLVMMetadataRef, UInt32, UInt32, UInt64, UInt32, LLVMDIFlags, Cstring, Csize_t), Builder, Tag, Name, NameLen, Scope, File, Line, RuntimeLang, SizeInBits, AlignInBits, Flags, UniqueIdentifier, UniqueIdentifierLen)
 end
 
 function LLVMDIBuilderCreateBitFieldMemberType(Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, OffsetInBits, StorageOffsetInBits, Flags, Type)
-    @apicall(:LLVMDIBuilderCreateBitFieldMemberType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt64, UInt64, LLVMDIFlags, LLVMMetadataRef), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, OffsetInBits, StorageOffsetInBits, Flags, Type)
+    @runtime_ccall((:LLVMDIBuilderCreateBitFieldMemberType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt64, UInt64, LLVMDIFlags, LLVMMetadataRef), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, OffsetInBits, StorageOffsetInBits, Flags, Type)
 end
 
 function LLVMDIBuilderCreateClassType(Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, OffsetInBits, Flags, DerivedFrom, Elements, NumElements, VTableHolder, TemplateParamsNode, UniqueIdentifier, UniqueIdentifierLen)
-    @apicall(:LLVMDIBuilderCreateClassType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, UInt64, LLVMDIFlags, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32, LLVMMetadataRef, LLVMMetadataRef, Cstring, Csize_t), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, OffsetInBits, Flags, DerivedFrom, Elements, NumElements, VTableHolder, TemplateParamsNode, UniqueIdentifier, UniqueIdentifierLen)
+    @runtime_ccall((:LLVMDIBuilderCreateClassType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, UInt64, UInt32, UInt64, LLVMDIFlags, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32, LLVMMetadataRef, LLVMMetadataRef, Cstring, Csize_t), Builder, Scope, Name, NameLen, File, LineNumber, SizeInBits, AlignInBits, OffsetInBits, Flags, DerivedFrom, Elements, NumElements, VTableHolder, TemplateParamsNode, UniqueIdentifier, UniqueIdentifierLen)
 end
 
 function LLVMDIBuilderCreateArtificialType(Builder, Type)
-    @apicall(:LLVMDIBuilderCreateArtificialType, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef), Builder, Type)
+    @runtime_ccall((:LLVMDIBuilderCreateArtificialType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef), Builder, Type)
 end
 
 function LLVMDITypeGetName(DType, Length)
-    @apicall(:LLVMDITypeGetName, Cstring, (LLVMMetadataRef, Ptr{Csize_t}), DType, Length)
+    @runtime_ccall((:LLVMDITypeGetName,libllvm[]), Cstring, (LLVMMetadataRef, Ptr{Csize_t}), DType, Length)
 end
 
 function LLVMDITypeGetSizeInBits(DType)
-    @apicall(:LLVMDITypeGetSizeInBits, UInt64, (LLVMMetadataRef,), DType)
+    @runtime_ccall((:LLVMDITypeGetSizeInBits,libllvm[]), UInt64, (LLVMMetadataRef,), DType)
 end
 
 function LLVMDITypeGetOffsetInBits(DType)
-    @apicall(:LLVMDITypeGetOffsetInBits, UInt64, (LLVMMetadataRef,), DType)
+    @runtime_ccall((:LLVMDITypeGetOffsetInBits,libllvm[]), UInt64, (LLVMMetadataRef,), DType)
 end
 
 function LLVMDITypeGetAlignInBits(DType)
-    @apicall(:LLVMDITypeGetAlignInBits, UInt32, (LLVMMetadataRef,), DType)
+    @runtime_ccall((:LLVMDITypeGetAlignInBits,libllvm[]), UInt32, (LLVMMetadataRef,), DType)
 end
 
 function LLVMDITypeGetLine(DType)
-    @apicall(:LLVMDITypeGetLine, UInt32, (LLVMMetadataRef,), DType)
+    @runtime_ccall((:LLVMDITypeGetLine,libllvm[]), UInt32, (LLVMMetadataRef,), DType)
 end
 
 function LLVMDITypeGetFlags(DType)
-    @apicall(:LLVMDITypeGetFlags, LLVMDIFlags, (LLVMMetadataRef,), DType)
+    @runtime_ccall((:LLVMDITypeGetFlags,libllvm[]), LLVMDIFlags, (LLVMMetadataRef,), DType)
 end
 
 function LLVMDIBuilderGetOrCreateSubrange(Builder, LowerBound, Count)
-    @apicall(:LLVMDIBuilderGetOrCreateSubrange, LLVMMetadataRef, (LLVMDIBuilderRef, Int64, Int64), Builder, LowerBound, Count)
+    @runtime_ccall((:LLVMDIBuilderGetOrCreateSubrange,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Int64, Int64), Builder, LowerBound, Count)
 end
 
 function LLVMDIBuilderGetOrCreateArray(Builder, Data, NumElements)
-    @apicall(:LLVMDIBuilderGetOrCreateArray, LLVMMetadataRef, (LLVMDIBuilderRef, Ptr{LLVMMetadataRef}, Csize_t), Builder, Data, NumElements)
+    @runtime_ccall((:LLVMDIBuilderGetOrCreateArray,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Ptr{LLVMMetadataRef}, Csize_t), Builder, Data, NumElements)
 end
 
 function LLVMDIBuilderCreateExpression(Builder, Addr, Length)
-    @apicall(:LLVMDIBuilderCreateExpression, LLVMMetadataRef, (LLVMDIBuilderRef, Ptr{Int64}, Csize_t), Builder, Addr, Length)
+    @runtime_ccall((:LLVMDIBuilderCreateExpression,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Ptr{Int64}, Csize_t), Builder, Addr, Length)
 end
 
 function LLVMDIBuilderCreateConstantValueExpression(Builder, Value)
-    @apicall(:LLVMDIBuilderCreateConstantValueExpression, LLVMMetadataRef, (LLVMDIBuilderRef, Int64), Builder, Value)
+    @runtime_ccall((:LLVMDIBuilderCreateConstantValueExpression,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Int64), Builder, Value)
 end
 
 function LLVMDIBuilderCreateGlobalVariableExpression(Builder, Scope, Name, NameLen, Linkage, LinkLen, File, LineNo, Ty, LocalToUnit, Expr, Decl, AlignInBits)
-    @apicall(:LLVMDIBuilderCreateGlobalVariableExpression, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, Name, NameLen, Linkage, LinkLen, File, LineNo, Ty, LocalToUnit, Expr, Decl, AlignInBits)
+    @runtime_ccall((:LLVMDIBuilderCreateGlobalVariableExpression,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, Name, NameLen, Linkage, LinkLen, File, LineNo, Ty, LocalToUnit, Expr, Decl, AlignInBits)
 end
 
 function LLVMDIGlobalVariableExpressionGetVariable(GVE)
-    @apicall(:LLVMDIGlobalVariableExpressionGetVariable, LLVMMetadataRef, (LLVMMetadataRef,), GVE)
+    @runtime_ccall((:LLVMDIGlobalVariableExpressionGetVariable,libllvm[]), LLVMMetadataRef, (LLVMMetadataRef,), GVE)
 end
 
 function LLVMDIGlobalVariableExpressionGetExpression(GVE)
-    @apicall(:LLVMDIGlobalVariableExpressionGetExpression, LLVMMetadataRef, (LLVMMetadataRef,), GVE)
+    @runtime_ccall((:LLVMDIGlobalVariableExpressionGetExpression,libllvm[]), LLVMMetadataRef, (LLVMMetadataRef,), GVE)
 end
 
 function LLVMDIVariableGetFile(Var)
-    @apicall(:LLVMDIVariableGetFile, LLVMMetadataRef, (LLVMMetadataRef,), Var)
+    @runtime_ccall((:LLVMDIVariableGetFile,libllvm[]), LLVMMetadataRef, (LLVMMetadataRef,), Var)
 end
 
 function LLVMDIVariableGetScope(Var)
-    @apicall(:LLVMDIVariableGetScope, LLVMMetadataRef, (LLVMMetadataRef,), Var)
+    @runtime_ccall((:LLVMDIVariableGetScope,libllvm[]), LLVMMetadataRef, (LLVMMetadataRef,), Var)
 end
 
 function LLVMDIVariableGetLine(Var)
-    @apicall(:LLVMDIVariableGetLine, UInt32, (LLVMMetadataRef,), Var)
+    @runtime_ccall((:LLVMDIVariableGetLine,libllvm[]), UInt32, (LLVMMetadataRef,), Var)
 end
 
 function LLVMTemporaryMDNode(Ctx, Data, NumElements)
-    @apicall(:LLVMTemporaryMDNode, LLVMMetadataRef, (LLVMContextRef, Ptr{LLVMMetadataRef}, Csize_t), Ctx, Data, NumElements)
+    @runtime_ccall((:LLVMTemporaryMDNode,libllvm[]), LLVMMetadataRef, (LLVMContextRef, Ptr{LLVMMetadataRef}, Csize_t), Ctx, Data, NumElements)
 end
 
 function LLVMDisposeTemporaryMDNode(TempNode)
-    @apicall(:LLVMDisposeTemporaryMDNode, Cvoid, (LLVMMetadataRef,), TempNode)
+    @runtime_ccall((:LLVMDisposeTemporaryMDNode,libllvm[]), Cvoid, (LLVMMetadataRef,), TempNode)
 end
 
 function LLVMMetadataReplaceAllUsesWith(TempTargetMetadata, Replacement)
-    @apicall(:LLVMMetadataReplaceAllUsesWith, Cvoid, (LLVMMetadataRef, LLVMMetadataRef), TempTargetMetadata, Replacement)
+    @runtime_ccall((:LLVMMetadataReplaceAllUsesWith,libllvm[]), Cvoid, (LLVMMetadataRef, LLVMMetadataRef), TempTargetMetadata, Replacement)
 end
 
 function LLVMDIBuilderCreateTempGlobalVariableFwdDecl(Builder, Scope, Name, NameLen, Linkage, LnkLen, File, LineNo, Ty, LocalToUnit, Decl, AlignInBits)
-    @apicall(:LLVMDIBuilderCreateTempGlobalVariableFwdDecl, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMMetadataRef, UInt32), Builder, Scope, Name, NameLen, Linkage, LnkLen, File, LineNo, Ty, LocalToUnit, Decl, AlignInBits)
+    @runtime_ccall((:LLVMDIBuilderCreateTempGlobalVariableFwdDecl,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMMetadataRef, UInt32), Builder, Scope, Name, NameLen, Linkage, LnkLen, File, LineNo, Ty, LocalToUnit, Decl, AlignInBits)
 end
 
 function LLVMDIBuilderInsertDeclareBefore(Builder, Storage, VarInfo, Expr, DebugLoc, Instr)
-    @apicall(:LLVMDIBuilderInsertDeclareBefore, LLVMValueRef, (LLVMDIBuilderRef, LLVMValueRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, LLVMValueRef), Builder, Storage, VarInfo, Expr, DebugLoc, Instr)
+    @runtime_ccall((:LLVMDIBuilderInsertDeclareBefore,libllvm[]), LLVMValueRef, (LLVMDIBuilderRef, LLVMValueRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, LLVMValueRef), Builder, Storage, VarInfo, Expr, DebugLoc, Instr)
 end
 
 function LLVMDIBuilderInsertDeclareAtEnd(Builder, Storage, VarInfo, Expr, DebugLoc, Block)
-    @apicall(:LLVMDIBuilderInsertDeclareAtEnd, LLVMValueRef, (LLVMDIBuilderRef, LLVMValueRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, LLVMBasicBlockRef), Builder, Storage, VarInfo, Expr, DebugLoc, Block)
+    @runtime_ccall((:LLVMDIBuilderInsertDeclareAtEnd,libllvm[]), LLVMValueRef, (LLVMDIBuilderRef, LLVMValueRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, LLVMBasicBlockRef), Builder, Storage, VarInfo, Expr, DebugLoc, Block)
 end
 
 function LLVMDIBuilderInsertDbgValueBefore(Builder, Val, VarInfo, Expr, DebugLoc, Instr)
-    @apicall(:LLVMDIBuilderInsertDbgValueBefore, LLVMValueRef, (LLVMDIBuilderRef, LLVMValueRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, LLVMValueRef), Builder, Val, VarInfo, Expr, DebugLoc, Instr)
+    @runtime_ccall((:LLVMDIBuilderInsertDbgValueBefore,libllvm[]), LLVMValueRef, (LLVMDIBuilderRef, LLVMValueRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, LLVMValueRef), Builder, Val, VarInfo, Expr, DebugLoc, Instr)
 end
 
 function LLVMDIBuilderInsertDbgValueAtEnd(Builder, Val, VarInfo, Expr, DebugLoc, Block)
-    @apicall(:LLVMDIBuilderInsertDbgValueAtEnd, LLVMValueRef, (LLVMDIBuilderRef, LLVMValueRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, LLVMBasicBlockRef), Builder, Val, VarInfo, Expr, DebugLoc, Block)
+    @runtime_ccall((:LLVMDIBuilderInsertDbgValueAtEnd,libllvm[]), LLVMValueRef, (LLVMDIBuilderRef, LLVMValueRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, LLVMBasicBlockRef), Builder, Val, VarInfo, Expr, DebugLoc, Block)
 end
 
 function LLVMDIBuilderCreateAutoVariable(Builder, Scope, Name, NameLen, File, LineNo, Ty, AlwaysPreserve, Flags, AlignInBits)
-    @apicall(:LLVMDIBuilderCreateAutoVariable, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMDIFlags, UInt32), Builder, Scope, Name, NameLen, File, LineNo, Ty, AlwaysPreserve, Flags, AlignInBits)
+    @runtime_ccall((:LLVMDIBuilderCreateAutoVariable,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMDIFlags, UInt32), Builder, Scope, Name, NameLen, File, LineNo, Ty, AlwaysPreserve, Flags, AlignInBits)
 end
 
 function LLVMDIBuilderCreateParameterVariable(Builder, Scope, Name, NameLen, ArgNo, File, LineNo, Ty, AlwaysPreserve, Flags)
-    @apicall(:LLVMDIBuilderCreateParameterVariable, LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, UInt32, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMDIFlags), Builder, Scope, Name, NameLen, ArgNo, File, LineNo, Ty, AlwaysPreserve, Flags)
+    @runtime_ccall((:LLVMDIBuilderCreateParameterVariable,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, UInt32, LLVMMetadataRef, UInt32, LLVMMetadataRef, LLVMBool, LLVMDIFlags), Builder, Scope, Name, NameLen, ArgNo, File, LineNo, Ty, AlwaysPreserve, Flags)
 end
 
 function LLVMGetSubprogram(Func)
-    @apicall(:LLVMGetSubprogram, LLVMMetadataRef, (LLVMValueRef,), Func)
+    @runtime_ccall((:LLVMGetSubprogram,libllvm[]), LLVMMetadataRef, (LLVMValueRef,), Func)
 end
 
 function LLVMSetSubprogram(Func, SP)
-    @apicall(:LLVMSetSubprogram, Cvoid, (LLVMValueRef, LLVMMetadataRef), Func, SP)
+    @runtime_ccall((:LLVMSetSubprogram,libllvm[]), Cvoid, (LLVMValueRef, LLVMMetadataRef), Func, SP)
 end
 
 function LLVMDISubprogramGetLine(Subprogram)
-    @apicall(:LLVMDISubprogramGetLine, UInt32, (LLVMMetadataRef,), Subprogram)
+    @runtime_ccall((:LLVMDISubprogramGetLine,libllvm[]), UInt32, (LLVMMetadataRef,), Subprogram)
 end
 
 function LLVMInstructionGetDebugLoc(Inst)
-    @apicall(:LLVMInstructionGetDebugLoc, LLVMMetadataRef, (LLVMValueRef,), Inst)
+    @runtime_ccall((:LLVMInstructionGetDebugLoc,libllvm[]), LLVMMetadataRef, (LLVMValueRef,), Inst)
 end
 
 function LLVMInstructionSetDebugLoc(Inst, Loc)
-    @apicall(:LLVMInstructionSetDebugLoc, Cvoid, (LLVMValueRef, LLVMMetadataRef), Inst, Loc)
+    @runtime_ccall((:LLVMInstructionSetDebugLoc,libllvm[]), Cvoid, (LLVMValueRef, LLVMMetadataRef), Inst, Loc)
 end
 
 function LLVMGetMetadataKind(Metadata)
-    @apicall(:LLVMGetMetadataKind, LLVMMetadataKind, (LLVMMetadataRef,), Metadata)
+    @runtime_ccall((:LLVMGetMetadataKind,libllvm[]), LLVMMetadataKind, (LLVMMetadataRef,), Metadata)
 end
 
 
@@ -3199,27 +3199,27 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMCreateDisasm(TripleName, DisInfo, TagType, GetOpInfo, SymbolLookUp)
-    @apicall(:LLVMCreateDisasm, LLVMDisasmContextRef, (Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), TripleName, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+    @runtime_ccall((:LLVMCreateDisasm,libllvm[]), LLVMDisasmContextRef, (Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), TripleName, DisInfo, TagType, GetOpInfo, SymbolLookUp)
 end
 
 function LLVMCreateDisasmCPU(Triple, CPU, DisInfo, TagType, GetOpInfo, SymbolLookUp)
-    @apicall(:LLVMCreateDisasmCPU, LLVMDisasmContextRef, (Cstring, Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), Triple, CPU, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+    @runtime_ccall((:LLVMCreateDisasmCPU,libllvm[]), LLVMDisasmContextRef, (Cstring, Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), Triple, CPU, DisInfo, TagType, GetOpInfo, SymbolLookUp)
 end
 
 function LLVMCreateDisasmCPUFeatures(Triple, CPU, Features, DisInfo, TagType, GetOpInfo, SymbolLookUp)
-    @apicall(:LLVMCreateDisasmCPUFeatures, LLVMDisasmContextRef, (Cstring, Cstring, Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), Triple, CPU, Features, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+    @runtime_ccall((:LLVMCreateDisasmCPUFeatures,libllvm[]), LLVMDisasmContextRef, (Cstring, Cstring, Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), Triple, CPU, Features, DisInfo, TagType, GetOpInfo, SymbolLookUp)
 end
 
 function LLVMSetDisasmOptions(DC, Options)
-    @apicall(:LLVMSetDisasmOptions, Cint, (LLVMDisasmContextRef, UInt64), DC, Options)
+    @runtime_ccall((:LLVMSetDisasmOptions,libllvm[]), Cint, (LLVMDisasmContextRef, UInt64), DC, Options)
 end
 
 function LLVMDisasmDispose(DC)
-    @apicall(:LLVMDisasmDispose, Cvoid, (LLVMDisasmContextRef,), DC)
+    @runtime_ccall((:LLVMDisasmDispose,libllvm[]), Cvoid, (LLVMDisasmContextRef,), DC)
 end
 
 function LLVMDisasmInstruction(DC, Bytes, BytesSize, PC, OutString, OutStringSize)
-    @apicall(:LLVMDisasmInstruction, Csize_t, (LLVMDisasmContextRef, Ptr{UInt8}, UInt64, UInt64, Cstring, Csize_t), DC, Bytes, BytesSize, PC, OutString, OutStringSize)
+    @runtime_ccall((:LLVMDisasmInstruction,libllvm[]), Csize_t, (LLVMDisasmContextRef, Ptr{UInt8}, UInt64, UInt64, Cstring, Csize_t), DC, Bytes, BytesSize, PC, OutString, OutStringSize)
 end
 
 
@@ -3232,23 +3232,23 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMGetErrorTypeId(Err)
-    @apicall(:LLVMGetErrorTypeId, LLVMErrorTypeId, (LLVMErrorRef,), Err)
+    @runtime_ccall((:LLVMGetErrorTypeId,libllvm[]), LLVMErrorTypeId, (LLVMErrorRef,), Err)
 end
 
 function LLVMConsumeError(Err)
-    @apicall(:LLVMConsumeError, Cvoid, (LLVMErrorRef,), Err)
+    @runtime_ccall((:LLVMConsumeError,libllvm[]), Cvoid, (LLVMErrorRef,), Err)
 end
 
 function LLVMGetErrorMessage(Err)
-    @apicall(:LLVMGetErrorMessage, Cstring, (LLVMErrorRef,), Err)
+    @runtime_ccall((:LLVMGetErrorMessage,libllvm[]), Cstring, (LLVMErrorRef,), Err)
 end
 
 function LLVMDisposeErrorMessage(ErrMsg)
-    @apicall(:LLVMDisposeErrorMessage, Cvoid, (Cstring,), ErrMsg)
+    @runtime_ccall((:LLVMDisposeErrorMessage,libllvm[]), Cvoid, (Cstring,), ErrMsg)
 end
 
 function LLVMGetStringErrorTypeId()
-    @apicall(:LLVMGetStringErrorTypeId, LLVMErrorTypeId, ())
+    @runtime_ccall((:LLVMGetStringErrorTypeId,libllvm[]), LLVMErrorTypeId, ())
 end
 
 
@@ -3261,423 +3261,423 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMInitializeNVPTXTargetInfo()
-    @apicall(:LLVMInitializeNVPTXTargetInfo, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeNVPTXTargetInfo,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUTargetInfo()
-    @apicall(:LLVMInitializeAMDGPUTargetInfo, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeAMDGPUTargetInfo,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyTargetInfo()
-    @apicall(:LLVMInitializeWebAssemblyTargetInfo, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeWebAssemblyTargetInfo,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeX86TargetInfo()
-    @apicall(:LLVMInitializeX86TargetInfo, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeX86TargetInfo,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeNVPTXTarget()
-    @apicall(:LLVMInitializeNVPTXTarget, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeNVPTXTarget,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUTarget()
-    @apicall(:LLVMInitializeAMDGPUTarget, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeAMDGPUTarget,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyTarget()
-    @apicall(:LLVMInitializeWebAssemblyTarget, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeWebAssemblyTarget,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeX86Target()
-    @apicall(:LLVMInitializeX86Target, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeX86Target,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeNVPTXTargetMC()
-    @apicall(:LLVMInitializeNVPTXTargetMC, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeNVPTXTargetMC,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUTargetMC()
-    @apicall(:LLVMInitializeAMDGPUTargetMC, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeAMDGPUTargetMC,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyTargetMC()
-    @apicall(:LLVMInitializeWebAssemblyTargetMC, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeWebAssemblyTargetMC,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeX86TargetMC()
-    @apicall(:LLVMInitializeX86TargetMC, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeX86TargetMC,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeNVPTXAsmPrinter()
-    @apicall(:LLVMInitializeNVPTXAsmPrinter, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeNVPTXAsmPrinter,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUAsmPrinter()
-    @apicall(:LLVMInitializeAMDGPUAsmPrinter, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeAMDGPUAsmPrinter,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyAsmPrinter()
-    @apicall(:LLVMInitializeWebAssemblyAsmPrinter, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeWebAssemblyAsmPrinter,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeX86AsmPrinter()
-    @apicall(:LLVMInitializeX86AsmPrinter, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeX86AsmPrinter,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUAsmParser()
-    @apicall(:LLVMInitializeAMDGPUAsmParser, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeAMDGPUAsmParser,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyAsmParser()
-    @apicall(:LLVMInitializeWebAssemblyAsmParser, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeWebAssemblyAsmParser,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeX86AsmParser()
-    @apicall(:LLVMInitializeX86AsmParser, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeX86AsmParser,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUDisassembler()
-    @apicall(:LLVMInitializeAMDGPUDisassembler, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeAMDGPUDisassembler,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyDisassembler()
-    @apicall(:LLVMInitializeWebAssemblyDisassembler, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeWebAssemblyDisassembler,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeX86Disassembler()
-    @apicall(:LLVMInitializeX86Disassembler, Cvoid, ())
+    @runtime_ccall((:LLVMInitializeX86Disassembler,libllvm[]), Cvoid, ())
 end
 
 function LLVMGetModuleDataLayout(M)
-    @apicall(:LLVMGetModuleDataLayout, LLVMTargetDataRef, (LLVMModuleRef,), M)
+    @runtime_ccall((:LLVMGetModuleDataLayout,libllvm[]), LLVMTargetDataRef, (LLVMModuleRef,), M)
 end
 
 function LLVMSetModuleDataLayout(M, DL)
-    @apicall(:LLVMSetModuleDataLayout, Cvoid, (LLVMModuleRef, LLVMTargetDataRef), M, DL)
+    @runtime_ccall((:LLVMSetModuleDataLayout,libllvm[]), Cvoid, (LLVMModuleRef, LLVMTargetDataRef), M, DL)
 end
 
 function LLVMCreateTargetData(StringRep)
-    @apicall(:LLVMCreateTargetData, LLVMTargetDataRef, (Cstring,), StringRep)
+    @runtime_ccall((:LLVMCreateTargetData,libllvm[]), LLVMTargetDataRef, (Cstring,), StringRep)
 end
 
 function LLVMDisposeTargetData(TD)
-    @apicall(:LLVMDisposeTargetData, Cvoid, (LLVMTargetDataRef,), TD)
+    @runtime_ccall((:LLVMDisposeTargetData,libllvm[]), Cvoid, (LLVMTargetDataRef,), TD)
 end
 
 function LLVMAddTargetLibraryInfo(TLI, PM)
-    @apicall(:LLVMAddTargetLibraryInfo, Cvoid, (LLVMTargetLibraryInfoRef, LLVMPassManagerRef), TLI, PM)
+    @runtime_ccall((:LLVMAddTargetLibraryInfo,libllvm[]), Cvoid, (LLVMTargetLibraryInfoRef, LLVMPassManagerRef), TLI, PM)
 end
 
 function LLVMCopyStringRepOfTargetData(TD)
-    @apicall(:LLVMCopyStringRepOfTargetData, Cstring, (LLVMTargetDataRef,), TD)
+    @runtime_ccall((:LLVMCopyStringRepOfTargetData,libllvm[]), Cstring, (LLVMTargetDataRef,), TD)
 end
 
 function LLVMByteOrder(TD)
-    @apicall(:LLVMByteOrder, LLVMByteOrdering, (LLVMTargetDataRef,), TD)
+    @runtime_ccall((:LLVMByteOrder,libllvm[]), LLVMByteOrdering, (LLVMTargetDataRef,), TD)
 end
 
 function LLVMPointerSize(TD)
-    @apicall(:LLVMPointerSize, UInt32, (LLVMTargetDataRef,), TD)
+    @runtime_ccall((:LLVMPointerSize,libllvm[]), UInt32, (LLVMTargetDataRef,), TD)
 end
 
 function LLVMPointerSizeForAS(TD, AS)
-    @apicall(:LLVMPointerSizeForAS, UInt32, (LLVMTargetDataRef, UInt32), TD, AS)
+    @runtime_ccall((:LLVMPointerSizeForAS,libllvm[]), UInt32, (LLVMTargetDataRef, UInt32), TD, AS)
 end
 
 function LLVMIntPtrType(TD)
-    @apicall(:LLVMIntPtrType, LLVMTypeRef, (LLVMTargetDataRef,), TD)
+    @runtime_ccall((:LLVMIntPtrType,libllvm[]), LLVMTypeRef, (LLVMTargetDataRef,), TD)
 end
 
 function LLVMIntPtrTypeForAS(TD, AS)
-    @apicall(:LLVMIntPtrTypeForAS, LLVMTypeRef, (LLVMTargetDataRef, UInt32), TD, AS)
+    @runtime_ccall((:LLVMIntPtrTypeForAS,libllvm[]), LLVMTypeRef, (LLVMTargetDataRef, UInt32), TD, AS)
 end
 
 function LLVMIntPtrTypeInContext(C, TD)
-    @apicall(:LLVMIntPtrTypeInContext, LLVMTypeRef, (LLVMContextRef, LLVMTargetDataRef), C, TD)
+    @runtime_ccall((:LLVMIntPtrTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef, LLVMTargetDataRef), C, TD)
 end
 
 function LLVMIntPtrTypeForASInContext(C, TD, AS)
-    @apicall(:LLVMIntPtrTypeForASInContext, LLVMTypeRef, (LLVMContextRef, LLVMTargetDataRef, UInt32), C, TD, AS)
+    @runtime_ccall((:LLVMIntPtrTypeForASInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef, LLVMTargetDataRef, UInt32), C, TD, AS)
 end
 
 function LLVMSizeOfTypeInBits(TD, Ty)
-    @apicall(:LLVMSizeOfTypeInBits, Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+    @runtime_ccall((:LLVMSizeOfTypeInBits,libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
 end
 
 function LLVMStoreSizeOfType(TD, Ty)
-    @apicall(:LLVMStoreSizeOfType, Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+    @runtime_ccall((:LLVMStoreSizeOfType,libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
 end
 
 function LLVMABISizeOfType(TD, Ty)
-    @apicall(:LLVMABISizeOfType, Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+    @runtime_ccall((:LLVMABISizeOfType,libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
 end
 
 function LLVMABIAlignmentOfType(TD, Ty)
-    @apicall(:LLVMABIAlignmentOfType, UInt32, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+    @runtime_ccall((:LLVMABIAlignmentOfType,libllvm[]), UInt32, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
 end
 
 function LLVMCallFrameAlignmentOfType(TD, Ty)
-    @apicall(:LLVMCallFrameAlignmentOfType, UInt32, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+    @runtime_ccall((:LLVMCallFrameAlignmentOfType,libllvm[]), UInt32, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
 end
 
 function LLVMPreferredAlignmentOfType(TD, Ty)
-    @apicall(:LLVMPreferredAlignmentOfType, UInt32, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+    @runtime_ccall((:LLVMPreferredAlignmentOfType,libllvm[]), UInt32, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
 end
 
 function LLVMPreferredAlignmentOfGlobal(TD, GlobalVar)
-    @apicall(:LLVMPreferredAlignmentOfGlobal, UInt32, (LLVMTargetDataRef, LLVMValueRef), TD, GlobalVar)
+    @runtime_ccall((:LLVMPreferredAlignmentOfGlobal,libllvm[]), UInt32, (LLVMTargetDataRef, LLVMValueRef), TD, GlobalVar)
 end
 
 function LLVMElementAtOffset(TD, StructTy, Offset)
-    @apicall(:LLVMElementAtOffset, UInt32, (LLVMTargetDataRef, LLVMTypeRef, Culonglong), TD, StructTy, Offset)
+    @runtime_ccall((:LLVMElementAtOffset,libllvm[]), UInt32, (LLVMTargetDataRef, LLVMTypeRef, Culonglong), TD, StructTy, Offset)
 end
 
 function LLVMOffsetOfElement(TD, StructTy, Element)
-    @apicall(:LLVMOffsetOfElement, Culonglong, (LLVMTargetDataRef, LLVMTypeRef, UInt32), TD, StructTy, Element)
+    @runtime_ccall((:LLVMOffsetOfElement,libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef, UInt32), TD, StructTy, Element)
 end
 
 function LLVMGetFirstTarget()
-    @apicall(:LLVMGetFirstTarget, LLVMTargetRef, ())
+    @runtime_ccall((:LLVMGetFirstTarget,libllvm[]), LLVMTargetRef, ())
 end
 
 function LLVMGetNextTarget(T)
-    @apicall(:LLVMGetNextTarget, LLVMTargetRef, (LLVMTargetRef,), T)
+    @runtime_ccall((:LLVMGetNextTarget,libllvm[]), LLVMTargetRef, (LLVMTargetRef,), T)
 end
 
 function LLVMGetTargetFromName(Name)
-    @apicall(:LLVMGetTargetFromName, LLVMTargetRef, (Cstring,), Name)
+    @runtime_ccall((:LLVMGetTargetFromName,libllvm[]), LLVMTargetRef, (Cstring,), Name)
 end
 
 function LLVMGetTargetFromTriple(Triple, T, ErrorMessage)
-    @apicall(:LLVMGetTargetFromTriple, LLVMBool, (Cstring, Ptr{LLVMTargetRef}, Ptr{Cstring}), Triple, T, ErrorMessage)
+    @runtime_ccall((:LLVMGetTargetFromTriple,libllvm[]), LLVMBool, (Cstring, Ptr{LLVMTargetRef}, Ptr{Cstring}), Triple, T, ErrorMessage)
 end
 
 function LLVMGetTargetName(T)
-    @apicall(:LLVMGetTargetName, Cstring, (LLVMTargetRef,), T)
+    @runtime_ccall((:LLVMGetTargetName,libllvm[]), Cstring, (LLVMTargetRef,), T)
 end
 
 function LLVMGetTargetDescription(T)
-    @apicall(:LLVMGetTargetDescription, Cstring, (LLVMTargetRef,), T)
+    @runtime_ccall((:LLVMGetTargetDescription,libllvm[]), Cstring, (LLVMTargetRef,), T)
 end
 
 function LLVMTargetHasJIT(T)
-    @apicall(:LLVMTargetHasJIT, LLVMBool, (LLVMTargetRef,), T)
+    @runtime_ccall((:LLVMTargetHasJIT,libllvm[]), LLVMBool, (LLVMTargetRef,), T)
 end
 
 function LLVMTargetHasTargetMachine(T)
-    @apicall(:LLVMTargetHasTargetMachine, LLVMBool, (LLVMTargetRef,), T)
+    @runtime_ccall((:LLVMTargetHasTargetMachine,libllvm[]), LLVMBool, (LLVMTargetRef,), T)
 end
 
 function LLVMTargetHasAsmBackend(T)
-    @apicall(:LLVMTargetHasAsmBackend, LLVMBool, (LLVMTargetRef,), T)
+    @runtime_ccall((:LLVMTargetHasAsmBackend,libllvm[]), LLVMBool, (LLVMTargetRef,), T)
 end
 
 function LLVMCreateTargetMachine(T, Triple, CPU, Features, Level, Reloc, CodeModel)
-    @apicall(:LLVMCreateTargetMachine, LLVMTargetMachineRef, (LLVMTargetRef, Cstring, Cstring, Cstring, LLVMCodeGenOptLevel, LLVMRelocMode, LLVMCodeModel), T, Triple, CPU, Features, Level, Reloc, CodeModel)
+    @runtime_ccall((:LLVMCreateTargetMachine,libllvm[]), LLVMTargetMachineRef, (LLVMTargetRef, Cstring, Cstring, Cstring, LLVMCodeGenOptLevel, LLVMRelocMode, LLVMCodeModel), T, Triple, CPU, Features, Level, Reloc, CodeModel)
 end
 
 function LLVMDisposeTargetMachine(T)
-    @apicall(:LLVMDisposeTargetMachine, Cvoid, (LLVMTargetMachineRef,), T)
+    @runtime_ccall((:LLVMDisposeTargetMachine,libllvm[]), Cvoid, (LLVMTargetMachineRef,), T)
 end
 
 function LLVMGetTargetMachineTarget(T)
-    @apicall(:LLVMGetTargetMachineTarget, LLVMTargetRef, (LLVMTargetMachineRef,), T)
+    @runtime_ccall((:LLVMGetTargetMachineTarget,libllvm[]), LLVMTargetRef, (LLVMTargetMachineRef,), T)
 end
 
 function LLVMGetTargetMachineTriple(T)
-    @apicall(:LLVMGetTargetMachineTriple, Cstring, (LLVMTargetMachineRef,), T)
+    @runtime_ccall((:LLVMGetTargetMachineTriple,libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
 end
 
 function LLVMGetTargetMachineCPU(T)
-    @apicall(:LLVMGetTargetMachineCPU, Cstring, (LLVMTargetMachineRef,), T)
+    @runtime_ccall((:LLVMGetTargetMachineCPU,libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
 end
 
 function LLVMGetTargetMachineFeatureString(T)
-    @apicall(:LLVMGetTargetMachineFeatureString, Cstring, (LLVMTargetMachineRef,), T)
+    @runtime_ccall((:LLVMGetTargetMachineFeatureString,libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
 end
 
 function LLVMCreateTargetDataLayout(T)
-    @apicall(:LLVMCreateTargetDataLayout, LLVMTargetDataRef, (LLVMTargetMachineRef,), T)
+    @runtime_ccall((:LLVMCreateTargetDataLayout,libllvm[]), LLVMTargetDataRef, (LLVMTargetMachineRef,), T)
 end
 
 function LLVMSetTargetMachineAsmVerbosity(T, VerboseAsm)
-    @apicall(:LLVMSetTargetMachineAsmVerbosity, Cvoid, (LLVMTargetMachineRef, LLVMBool), T, VerboseAsm)
+    @runtime_ccall((:LLVMSetTargetMachineAsmVerbosity,libllvm[]), Cvoid, (LLVMTargetMachineRef, LLVMBool), T, VerboseAsm)
 end
 
 function LLVMTargetMachineEmitToFile(T, M, Filename, codegen, ErrorMessage)
-    @apicall(:LLVMTargetMachineEmitToFile, LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, Cstring, LLVMCodeGenFileType, Ptr{Cstring}), T, M, Filename, codegen, ErrorMessage)
+    @runtime_ccall((:LLVMTargetMachineEmitToFile,libllvm[]), LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, Cstring, LLVMCodeGenFileType, Ptr{Cstring}), T, M, Filename, codegen, ErrorMessage)
 end
 
 function LLVMTargetMachineEmitToMemoryBuffer(T, M, codegen, ErrorMessage, OutMemBuf)
-    @apicall(:LLVMTargetMachineEmitToMemoryBuffer, LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, LLVMCodeGenFileType, Ptr{Cstring}, Ptr{LLVMMemoryBufferRef}), T, M, codegen, ErrorMessage, OutMemBuf)
+    @runtime_ccall((:LLVMTargetMachineEmitToMemoryBuffer,libllvm[]), LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, LLVMCodeGenFileType, Ptr{Cstring}, Ptr{LLVMMemoryBufferRef}), T, M, codegen, ErrorMessage, OutMemBuf)
 end
 
 function LLVMGetDefaultTargetTriple()
-    @apicall(:LLVMGetDefaultTargetTriple, Cstring, ())
+    @runtime_ccall((:LLVMGetDefaultTargetTriple,libllvm[]), Cstring, ())
 end
 
 function LLVMNormalizeTargetTriple(triple)
-    @apicall(:LLVMNormalizeTargetTriple, Cstring, (Cstring,), triple)
+    @runtime_ccall((:LLVMNormalizeTargetTriple,libllvm[]), Cstring, (Cstring,), triple)
 end
 
 function LLVMGetHostCPUName()
-    @apicall(:LLVMGetHostCPUName, Cstring, ())
+    @runtime_ccall((:LLVMGetHostCPUName,libllvm[]), Cstring, ())
 end
 
 function LLVMGetHostCPUFeatures()
-    @apicall(:LLVMGetHostCPUFeatures, Cstring, ())
+    @runtime_ccall((:LLVMGetHostCPUFeatures,libllvm[]), Cstring, ())
 end
 
 function LLVMAddAnalysisPasses(T, PM)
-    @apicall(:LLVMAddAnalysisPasses, Cvoid, (LLVMTargetMachineRef, LLVMPassManagerRef), T, PM)
+    @runtime_ccall((:LLVMAddAnalysisPasses,libllvm[]), Cvoid, (LLVMTargetMachineRef, LLVMPassManagerRef), T, PM)
 end
 
 function LLVMLinkInMCJIT()
-    @apicall(:LLVMLinkInMCJIT, Cvoid, ())
+    @runtime_ccall((:LLVMLinkInMCJIT,libllvm[]), Cvoid, ())
 end
 
 function LLVMLinkInInterpreter()
-    @apicall(:LLVMLinkInInterpreter, Cvoid, ())
+    @runtime_ccall((:LLVMLinkInInterpreter,libllvm[]), Cvoid, ())
 end
 
 function LLVMCreateGenericValueOfInt(Ty, N, IsSigned)
-    @apicall(:LLVMCreateGenericValueOfInt, LLVMGenericValueRef, (LLVMTypeRef, Culonglong, LLVMBool), Ty, N, IsSigned)
+    @runtime_ccall((:LLVMCreateGenericValueOfInt,libllvm[]), LLVMGenericValueRef, (LLVMTypeRef, Culonglong, LLVMBool), Ty, N, IsSigned)
 end
 
 function LLVMCreateGenericValueOfPointer(P)
-    @apicall(:LLVMCreateGenericValueOfPointer, LLVMGenericValueRef, (Ptr{Cvoid},), P)
+    @runtime_ccall((:LLVMCreateGenericValueOfPointer,libllvm[]), LLVMGenericValueRef, (Ptr{Cvoid},), P)
 end
 
 function LLVMCreateGenericValueOfFloat(Ty, N)
-    @apicall(:LLVMCreateGenericValueOfFloat, LLVMGenericValueRef, (LLVMTypeRef, Cdouble), Ty, N)
+    @runtime_ccall((:LLVMCreateGenericValueOfFloat,libllvm[]), LLVMGenericValueRef, (LLVMTypeRef, Cdouble), Ty, N)
 end
 
 function LLVMGenericValueIntWidth(GenValRef)
-    @apicall(:LLVMGenericValueIntWidth, UInt32, (LLVMGenericValueRef,), GenValRef)
+    @runtime_ccall((:LLVMGenericValueIntWidth,libllvm[]), UInt32, (LLVMGenericValueRef,), GenValRef)
 end
 
 function LLVMGenericValueToInt(GenVal, IsSigned)
-    @apicall(:LLVMGenericValueToInt, Culonglong, (LLVMGenericValueRef, LLVMBool), GenVal, IsSigned)
+    @runtime_ccall((:LLVMGenericValueToInt,libllvm[]), Culonglong, (LLVMGenericValueRef, LLVMBool), GenVal, IsSigned)
 end
 
 function LLVMGenericValueToPointer(GenVal)
-    @apicall(:LLVMGenericValueToPointer, Ptr{Cvoid}, (LLVMGenericValueRef,), GenVal)
+    @runtime_ccall((:LLVMGenericValueToPointer,libllvm[]), Ptr{Cvoid}, (LLVMGenericValueRef,), GenVal)
 end
 
 function LLVMGenericValueToFloat(TyRef, GenVal)
-    @apicall(:LLVMGenericValueToFloat, Cdouble, (LLVMTypeRef, LLVMGenericValueRef), TyRef, GenVal)
+    @runtime_ccall((:LLVMGenericValueToFloat,libllvm[]), Cdouble, (LLVMTypeRef, LLVMGenericValueRef), TyRef, GenVal)
 end
 
 function LLVMDisposeGenericValue(GenVal)
-    @apicall(:LLVMDisposeGenericValue, Cvoid, (LLVMGenericValueRef,), GenVal)
+    @runtime_ccall((:LLVMDisposeGenericValue,libllvm[]), Cvoid, (LLVMGenericValueRef,), GenVal)
 end
 
 function LLVMCreateExecutionEngineForModule(OutEE, M, OutError)
-    @apicall(:LLVMCreateExecutionEngineForModule, LLVMBool, (Ptr{LLVMExecutionEngineRef}, LLVMModuleRef, Ptr{Cstring}), OutEE, M, OutError)
+    @runtime_ccall((:LLVMCreateExecutionEngineForModule,libllvm[]), LLVMBool, (Ptr{LLVMExecutionEngineRef}, LLVMModuleRef, Ptr{Cstring}), OutEE, M, OutError)
 end
 
 function LLVMCreateInterpreterForModule(OutInterp, M, OutError)
-    @apicall(:LLVMCreateInterpreterForModule, LLVMBool, (Ptr{LLVMExecutionEngineRef}, LLVMModuleRef, Ptr{Cstring}), OutInterp, M, OutError)
+    @runtime_ccall((:LLVMCreateInterpreterForModule,libllvm[]), LLVMBool, (Ptr{LLVMExecutionEngineRef}, LLVMModuleRef, Ptr{Cstring}), OutInterp, M, OutError)
 end
 
 function LLVMCreateJITCompilerForModule(OutJIT, M, OptLevel, OutError)
-    @apicall(:LLVMCreateJITCompilerForModule, LLVMBool, (Ptr{LLVMExecutionEngineRef}, LLVMModuleRef, UInt32, Ptr{Cstring}), OutJIT, M, OptLevel, OutError)
+    @runtime_ccall((:LLVMCreateJITCompilerForModule,libllvm[]), LLVMBool, (Ptr{LLVMExecutionEngineRef}, LLVMModuleRef, UInt32, Ptr{Cstring}), OutJIT, M, OptLevel, OutError)
 end
 
 function LLVMInitializeMCJITCompilerOptions(Options, SizeOfOptions)
-    @apicall(:LLVMInitializeMCJITCompilerOptions, Cvoid, (Ptr{LLVMMCJITCompilerOptions}, Csize_t), Options, SizeOfOptions)
+    @runtime_ccall((:LLVMInitializeMCJITCompilerOptions,libllvm[]), Cvoid, (Ptr{LLVMMCJITCompilerOptions}, Csize_t), Options, SizeOfOptions)
 end
 
 function LLVMCreateMCJITCompilerForModule(OutJIT, M, Options, SizeOfOptions, OutError)
-    @apicall(:LLVMCreateMCJITCompilerForModule, LLVMBool, (Ptr{LLVMExecutionEngineRef}, LLVMModuleRef, Ptr{LLVMMCJITCompilerOptions}, Csize_t, Ptr{Cstring}), OutJIT, M, Options, SizeOfOptions, OutError)
+    @runtime_ccall((:LLVMCreateMCJITCompilerForModule,libllvm[]), LLVMBool, (Ptr{LLVMExecutionEngineRef}, LLVMModuleRef, Ptr{LLVMMCJITCompilerOptions}, Csize_t, Ptr{Cstring}), OutJIT, M, Options, SizeOfOptions, OutError)
 end
 
 function LLVMDisposeExecutionEngine(EE)
-    @apicall(:LLVMDisposeExecutionEngine, Cvoid, (LLVMExecutionEngineRef,), EE)
+    @runtime_ccall((:LLVMDisposeExecutionEngine,libllvm[]), Cvoid, (LLVMExecutionEngineRef,), EE)
 end
 
 function LLVMRunStaticConstructors(EE)
-    @apicall(:LLVMRunStaticConstructors, Cvoid, (LLVMExecutionEngineRef,), EE)
+    @runtime_ccall((:LLVMRunStaticConstructors,libllvm[]), Cvoid, (LLVMExecutionEngineRef,), EE)
 end
 
 function LLVMRunStaticDestructors(EE)
-    @apicall(:LLVMRunStaticDestructors, Cvoid, (LLVMExecutionEngineRef,), EE)
+    @runtime_ccall((:LLVMRunStaticDestructors,libllvm[]), Cvoid, (LLVMExecutionEngineRef,), EE)
 end
 
 function LLVMRunFunctionAsMain(EE, F, ArgC, ArgV, EnvP)
-    @apicall(:LLVMRunFunctionAsMain, Cint, (LLVMExecutionEngineRef, LLVMValueRef, UInt32, Ptr{Cstring}, Ptr{Cstring}), EE, F, ArgC, ArgV, EnvP)
+    @runtime_ccall((:LLVMRunFunctionAsMain,libllvm[]), Cint, (LLVMExecutionEngineRef, LLVMValueRef, UInt32, Ptr{Cstring}, Ptr{Cstring}), EE, F, ArgC, ArgV, EnvP)
 end
 
 function LLVMRunFunction(EE, F, NumArgs, Args)
-    @apicall(:LLVMRunFunction, LLVMGenericValueRef, (LLVMExecutionEngineRef, LLVMValueRef, UInt32, Ptr{LLVMGenericValueRef}), EE, F, NumArgs, Args)
+    @runtime_ccall((:LLVMRunFunction,libllvm[]), LLVMGenericValueRef, (LLVMExecutionEngineRef, LLVMValueRef, UInt32, Ptr{LLVMGenericValueRef}), EE, F, NumArgs, Args)
 end
 
 function LLVMFreeMachineCodeForFunction(EE, F)
-    @apicall(:LLVMFreeMachineCodeForFunction, Cvoid, (LLVMExecutionEngineRef, LLVMValueRef), EE, F)
+    @runtime_ccall((:LLVMFreeMachineCodeForFunction,libllvm[]), Cvoid, (LLVMExecutionEngineRef, LLVMValueRef), EE, F)
 end
 
 function LLVMAddModule(EE, M)
-    @apicall(:LLVMAddModule, Cvoid, (LLVMExecutionEngineRef, LLVMModuleRef), EE, M)
+    @runtime_ccall((:LLVMAddModule,libllvm[]), Cvoid, (LLVMExecutionEngineRef, LLVMModuleRef), EE, M)
 end
 
 function LLVMRemoveModule(EE, M, OutMod, OutError)
-    @apicall(:LLVMRemoveModule, LLVMBool, (LLVMExecutionEngineRef, LLVMModuleRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), EE, M, OutMod, OutError)
+    @runtime_ccall((:LLVMRemoveModule,libllvm[]), LLVMBool, (LLVMExecutionEngineRef, LLVMModuleRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), EE, M, OutMod, OutError)
 end
 
 function LLVMFindFunction(EE, Name, OutFn)
-    @apicall(:LLVMFindFunction, LLVMBool, (LLVMExecutionEngineRef, Cstring, Ptr{LLVMValueRef}), EE, Name, OutFn)
+    @runtime_ccall((:LLVMFindFunction,libllvm[]), LLVMBool, (LLVMExecutionEngineRef, Cstring, Ptr{LLVMValueRef}), EE, Name, OutFn)
 end
 
 function LLVMRecompileAndRelinkFunction(EE, Fn)
-    @apicall(:LLVMRecompileAndRelinkFunction, Ptr{Cvoid}, (LLVMExecutionEngineRef, LLVMValueRef), EE, Fn)
+    @runtime_ccall((:LLVMRecompileAndRelinkFunction,libllvm[]), Ptr{Cvoid}, (LLVMExecutionEngineRef, LLVMValueRef), EE, Fn)
 end
 
 function LLVMGetExecutionEngineTargetData(EE)
-    @apicall(:LLVMGetExecutionEngineTargetData, LLVMTargetDataRef, (LLVMExecutionEngineRef,), EE)
+    @runtime_ccall((:LLVMGetExecutionEngineTargetData,libllvm[]), LLVMTargetDataRef, (LLVMExecutionEngineRef,), EE)
 end
 
 function LLVMGetExecutionEngineTargetMachine(EE)
-    @apicall(:LLVMGetExecutionEngineTargetMachine, LLVMTargetMachineRef, (LLVMExecutionEngineRef,), EE)
+    @runtime_ccall((:LLVMGetExecutionEngineTargetMachine,libllvm[]), LLVMTargetMachineRef, (LLVMExecutionEngineRef,), EE)
 end
 
 function LLVMAddGlobalMapping(EE, Global, Addr)
-    @apicall(:LLVMAddGlobalMapping, Cvoid, (LLVMExecutionEngineRef, LLVMValueRef, Ptr{Cvoid}), EE, Global, Addr)
+    @runtime_ccall((:LLVMAddGlobalMapping,libllvm[]), Cvoid, (LLVMExecutionEngineRef, LLVMValueRef, Ptr{Cvoid}), EE, Global, Addr)
 end
 
 function LLVMGetPointerToGlobal(EE, Global)
-    @apicall(:LLVMGetPointerToGlobal, Ptr{Cvoid}, (LLVMExecutionEngineRef, LLVMValueRef), EE, Global)
+    @runtime_ccall((:LLVMGetPointerToGlobal,libllvm[]), Ptr{Cvoid}, (LLVMExecutionEngineRef, LLVMValueRef), EE, Global)
 end
 
 function LLVMGetGlobalValueAddress(EE, Name)
-    @apicall(:LLVMGetGlobalValueAddress, UInt64, (LLVMExecutionEngineRef, Cstring), EE, Name)
+    @runtime_ccall((:LLVMGetGlobalValueAddress,libllvm[]), UInt64, (LLVMExecutionEngineRef, Cstring), EE, Name)
 end
 
 function LLVMGetFunctionAddress(EE, Name)
-    @apicall(:LLVMGetFunctionAddress, UInt64, (LLVMExecutionEngineRef, Cstring), EE, Name)
+    @runtime_ccall((:LLVMGetFunctionAddress,libllvm[]), UInt64, (LLVMExecutionEngineRef, Cstring), EE, Name)
 end
 
 function LLVMCreateSimpleMCJITMemoryManager(Opaque, AllocateCodeSection, AllocateDataSection, FinalizeMemory, Destroy)
-    @apicall(:LLVMCreateSimpleMCJITMemoryManager, LLVMMCJITMemoryManagerRef, (Ptr{Cvoid}, LLVMMemoryManagerAllocateCodeSectionCallback, LLVMMemoryManagerAllocateDataSectionCallback, LLVMMemoryManagerFinalizeMemoryCallback, LLVMMemoryManagerDestroyCallback), Opaque, AllocateCodeSection, AllocateDataSection, FinalizeMemory, Destroy)
+    @runtime_ccall((:LLVMCreateSimpleMCJITMemoryManager,libllvm[]), LLVMMCJITMemoryManagerRef, (Ptr{Cvoid}, LLVMMemoryManagerAllocateCodeSectionCallback, LLVMMemoryManagerAllocateDataSectionCallback, LLVMMemoryManagerFinalizeMemoryCallback, LLVMMemoryManagerDestroyCallback), Opaque, AllocateCodeSection, AllocateDataSection, FinalizeMemory, Destroy)
 end
 
 function LLVMDisposeMCJITMemoryManager(MM)
-    @apicall(:LLVMDisposeMCJITMemoryManager, Cvoid, (LLVMMCJITMemoryManagerRef,), MM)
+    @runtime_ccall((:LLVMDisposeMCJITMemoryManager,libllvm[]), Cvoid, (LLVMMCJITMemoryManagerRef,), MM)
 end
 
 function LLVMCreateGDBRegistrationListener()
-    @apicall(:LLVMCreateGDBRegistrationListener, LLVMJITEventListenerRef, ())
+    @runtime_ccall((:LLVMCreateGDBRegistrationListener,libllvm[]), LLVMJITEventListenerRef, ())
 end
 
 function LLVMCreateIntelJITEventListener()
-    @apicall(:LLVMCreateIntelJITEventListener, LLVMJITEventListenerRef, ())
+    @runtime_ccall((:LLVMCreateIntelJITEventListener,libllvm[]), LLVMJITEventListenerRef, ())
 end
 
 function LLVMCreateOProfileJITEventListener()
-    @apicall(:LLVMCreateOProfileJITEventListener, LLVMJITEventListenerRef, ())
+    @runtime_ccall((:LLVMCreateOProfileJITEventListener,libllvm[]), LLVMJITEventListenerRef, ())
 end
 
 function LLVMCreatePerfJITEventListener()
-    @apicall(:LLVMCreatePerfJITEventListener, LLVMJITEventListenerRef, ())
+    @runtime_ccall((:LLVMCreatePerfJITEventListener,libllvm[]), LLVMJITEventListenerRef, ())
 end
 
 
@@ -3685,7 +3685,7 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMParseIRInContext(ContextRef, MemBuf, OutM, OutMessage)
-    @apicall(:LLVMParseIRInContext, LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
+    @runtime_ccall((:LLVMParseIRInContext,libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
 end
 
 
@@ -3693,51 +3693,51 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMInitializeTransformUtils(R)
-    @apicall(:LLVMInitializeTransformUtils, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeTransformUtils,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeScalarOpts(R)
-    @apicall(:LLVMInitializeScalarOpts, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeScalarOpts,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeObjCARCOpts(R)
-    @apicall(:LLVMInitializeObjCARCOpts, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeObjCARCOpts,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeVectorization(R)
-    @apicall(:LLVMInitializeVectorization, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeVectorization,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeInstCombine(R)
-    @apicall(:LLVMInitializeInstCombine, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeInstCombine,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeAggressiveInstCombiner(R)
-    @apicall(:LLVMInitializeAggressiveInstCombiner, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeAggressiveInstCombiner,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeIPO(R)
-    @apicall(:LLVMInitializeIPO, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeIPO,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeInstrumentation(R)
-    @apicall(:LLVMInitializeInstrumentation, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeInstrumentation,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeAnalysis(R)
-    @apicall(:LLVMInitializeAnalysis, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeAnalysis,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeIPA(R)
-    @apicall(:LLVMInitializeIPA, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeIPA,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeCodeGen(R)
-    @apicall(:LLVMInitializeCodeGen, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeCodeGen,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 function LLVMInitializeTarget(R)
-    @apicall(:LLVMInitializeTarget, Cvoid, (LLVMPassRegistryRef,), R)
+    @runtime_ccall((:LLVMInitializeTarget,libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
 
@@ -3745,19 +3745,19 @@ end
 # Automatically generated using Clang.jl
 
 function llvm_create_optimizer()
-    @apicall(:llvm_create_optimizer, llvm_lto_t, ())
+    @runtime_ccall((:llvm_create_optimizer,libllvm[]), llvm_lto_t, ())
 end
 
 function llvm_destroy_optimizer(lto)
-    @apicall(:llvm_destroy_optimizer, Cvoid, (llvm_lto_t,), lto)
+    @runtime_ccall((:llvm_destroy_optimizer,libllvm[]), Cvoid, (llvm_lto_t,), lto)
 end
 
 function llvm_read_object_file(lto, input_filename)
-    @apicall(:llvm_read_object_file, llvm_lto_status_t, (llvm_lto_t, Cstring), lto, input_filename)
+    @runtime_ccall((:llvm_read_object_file,libllvm[]), llvm_lto_status_t, (llvm_lto_t, Cstring), lto, input_filename)
 end
 
 function llvm_optimize_modules(lto, output_filename)
-    @apicall(:llvm_optimize_modules, llvm_lto_status_t, (llvm_lto_t, Cstring), lto, output_filename)
+    @runtime_ccall((:llvm_optimize_modules,libllvm[]), llvm_lto_status_t, (llvm_lto_t, Cstring), lto, output_filename)
 end
 
 
@@ -3765,7 +3765,7 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMLinkModules2(Dest, Src)
-    @apicall(:LLVMLinkModules2, LLVMBool, (LLVMModuleRef, LLVMModuleRef), Dest, Src)
+    @runtime_ccall((:LLVMLinkModules2,libllvm[]), LLVMBool, (LLVMModuleRef, LLVMModuleRef), Dest, Src)
 end
 
 
@@ -3773,151 +3773,151 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMCreateBinary(MemBuf, Context, ErrorMessage)
-    @apicall(:LLVMCreateBinary, LLVMBinaryRef, (LLVMMemoryBufferRef, LLVMContextRef, Ptr{Cstring}), MemBuf, Context, ErrorMessage)
+    @runtime_ccall((:LLVMCreateBinary,libllvm[]), LLVMBinaryRef, (LLVMMemoryBufferRef, LLVMContextRef, Ptr{Cstring}), MemBuf, Context, ErrorMessage)
 end
 
 function LLVMDisposeBinary(BR)
-    @apicall(:LLVMDisposeBinary, Cvoid, (LLVMBinaryRef,), BR)
+    @runtime_ccall((:LLVMDisposeBinary,libllvm[]), Cvoid, (LLVMBinaryRef,), BR)
 end
 
 function LLVMBinaryCopyMemoryBuffer(BR)
-    @apicall(:LLVMBinaryCopyMemoryBuffer, LLVMMemoryBufferRef, (LLVMBinaryRef,), BR)
+    @runtime_ccall((:LLVMBinaryCopyMemoryBuffer,libllvm[]), LLVMMemoryBufferRef, (LLVMBinaryRef,), BR)
 end
 
 function LLVMBinaryGetType(BR)
-    @apicall(:LLVMBinaryGetType, LLVMBinaryType, (LLVMBinaryRef,), BR)
+    @runtime_ccall((:LLVMBinaryGetType,libllvm[]), LLVMBinaryType, (LLVMBinaryRef,), BR)
 end
 
 function LLVMMachOUniversalBinaryCopyObjectForArch(BR, Arch, ArchLen, ErrorMessage)
-    @apicall(:LLVMMachOUniversalBinaryCopyObjectForArch, LLVMBinaryRef, (LLVMBinaryRef, Cstring, Csize_t, Ptr{Cstring}), BR, Arch, ArchLen, ErrorMessage)
+    @runtime_ccall((:LLVMMachOUniversalBinaryCopyObjectForArch,libllvm[]), LLVMBinaryRef, (LLVMBinaryRef, Cstring, Csize_t, Ptr{Cstring}), BR, Arch, ArchLen, ErrorMessage)
 end
 
 function LLVMObjectFileCopySectionIterator(BR)
-    @apicall(:LLVMObjectFileCopySectionIterator, LLVMSectionIteratorRef, (LLVMBinaryRef,), BR)
+    @runtime_ccall((:LLVMObjectFileCopySectionIterator,libllvm[]), LLVMSectionIteratorRef, (LLVMBinaryRef,), BR)
 end
 
 function LLVMObjectFileIsSectionIteratorAtEnd(BR, SI)
-    @apicall(:LLVMObjectFileIsSectionIteratorAtEnd, LLVMBool, (LLVMBinaryRef, LLVMSectionIteratorRef), BR, SI)
+    @runtime_ccall((:LLVMObjectFileIsSectionIteratorAtEnd,libllvm[]), LLVMBool, (LLVMBinaryRef, LLVMSectionIteratorRef), BR, SI)
 end
 
 function LLVMObjectFileCopySymbolIterator(BR)
-    @apicall(:LLVMObjectFileCopySymbolIterator, LLVMSymbolIteratorRef, (LLVMBinaryRef,), BR)
+    @runtime_ccall((:LLVMObjectFileCopySymbolIterator,libllvm[]), LLVMSymbolIteratorRef, (LLVMBinaryRef,), BR)
 end
 
 function LLVMObjectFileIsSymbolIteratorAtEnd(BR, SI)
-    @apicall(:LLVMObjectFileIsSymbolIteratorAtEnd, LLVMBool, (LLVMBinaryRef, LLVMSymbolIteratorRef), BR, SI)
+    @runtime_ccall((:LLVMObjectFileIsSymbolIteratorAtEnd,libllvm[]), LLVMBool, (LLVMBinaryRef, LLVMSymbolIteratorRef), BR, SI)
 end
 
 function LLVMDisposeSectionIterator(SI)
-    @apicall(:LLVMDisposeSectionIterator, Cvoid, (LLVMSectionIteratorRef,), SI)
+    @runtime_ccall((:LLVMDisposeSectionIterator,libllvm[]), Cvoid, (LLVMSectionIteratorRef,), SI)
 end
 
 function LLVMMoveToNextSection(SI)
-    @apicall(:LLVMMoveToNextSection, Cvoid, (LLVMSectionIteratorRef,), SI)
+    @runtime_ccall((:LLVMMoveToNextSection,libllvm[]), Cvoid, (LLVMSectionIteratorRef,), SI)
 end
 
 function LLVMMoveToContainingSection(Sect, Sym)
-    @apicall(:LLVMMoveToContainingSection, Cvoid, (LLVMSectionIteratorRef, LLVMSymbolIteratorRef), Sect, Sym)
+    @runtime_ccall((:LLVMMoveToContainingSection,libllvm[]), Cvoid, (LLVMSectionIteratorRef, LLVMSymbolIteratorRef), Sect, Sym)
 end
 
 function LLVMDisposeSymbolIterator(SI)
-    @apicall(:LLVMDisposeSymbolIterator, Cvoid, (LLVMSymbolIteratorRef,), SI)
+    @runtime_ccall((:LLVMDisposeSymbolIterator,libllvm[]), Cvoid, (LLVMSymbolIteratorRef,), SI)
 end
 
 function LLVMMoveToNextSymbol(SI)
-    @apicall(:LLVMMoveToNextSymbol, Cvoid, (LLVMSymbolIteratorRef,), SI)
+    @runtime_ccall((:LLVMMoveToNextSymbol,libllvm[]), Cvoid, (LLVMSymbolIteratorRef,), SI)
 end
 
 function LLVMGetSectionName(SI)
-    @apicall(:LLVMGetSectionName, Cstring, (LLVMSectionIteratorRef,), SI)
+    @runtime_ccall((:LLVMGetSectionName,libllvm[]), Cstring, (LLVMSectionIteratorRef,), SI)
 end
 
 function LLVMGetSectionSize(SI)
-    @apicall(:LLVMGetSectionSize, UInt64, (LLVMSectionIteratorRef,), SI)
+    @runtime_ccall((:LLVMGetSectionSize,libllvm[]), UInt64, (LLVMSectionIteratorRef,), SI)
 end
 
 function LLVMGetSectionContents(SI)
-    @apicall(:LLVMGetSectionContents, Cstring, (LLVMSectionIteratorRef,), SI)
+    @runtime_ccall((:LLVMGetSectionContents,libllvm[]), Cstring, (LLVMSectionIteratorRef,), SI)
 end
 
 function LLVMGetSectionAddress(SI)
-    @apicall(:LLVMGetSectionAddress, UInt64, (LLVMSectionIteratorRef,), SI)
+    @runtime_ccall((:LLVMGetSectionAddress,libllvm[]), UInt64, (LLVMSectionIteratorRef,), SI)
 end
 
 function LLVMGetSectionContainsSymbol(SI, Sym)
-    @apicall(:LLVMGetSectionContainsSymbol, LLVMBool, (LLVMSectionIteratorRef, LLVMSymbolIteratorRef), SI, Sym)
+    @runtime_ccall((:LLVMGetSectionContainsSymbol,libllvm[]), LLVMBool, (LLVMSectionIteratorRef, LLVMSymbolIteratorRef), SI, Sym)
 end
 
 function LLVMGetRelocations(Section)
-    @apicall(:LLVMGetRelocations, LLVMRelocationIteratorRef, (LLVMSectionIteratorRef,), Section)
+    @runtime_ccall((:LLVMGetRelocations,libllvm[]), LLVMRelocationIteratorRef, (LLVMSectionIteratorRef,), Section)
 end
 
 function LLVMDisposeRelocationIterator(RI)
-    @apicall(:LLVMDisposeRelocationIterator, Cvoid, (LLVMRelocationIteratorRef,), RI)
+    @runtime_ccall((:LLVMDisposeRelocationIterator,libllvm[]), Cvoid, (LLVMRelocationIteratorRef,), RI)
 end
 
 function LLVMIsRelocationIteratorAtEnd(Section, RI)
-    @apicall(:LLVMIsRelocationIteratorAtEnd, LLVMBool, (LLVMSectionIteratorRef, LLVMRelocationIteratorRef), Section, RI)
+    @runtime_ccall((:LLVMIsRelocationIteratorAtEnd,libllvm[]), LLVMBool, (LLVMSectionIteratorRef, LLVMRelocationIteratorRef), Section, RI)
 end
 
 function LLVMMoveToNextRelocation(RI)
-    @apicall(:LLVMMoveToNextRelocation, Cvoid, (LLVMRelocationIteratorRef,), RI)
+    @runtime_ccall((:LLVMMoveToNextRelocation,libllvm[]), Cvoid, (LLVMRelocationIteratorRef,), RI)
 end
 
 function LLVMGetSymbolName(SI)
-    @apicall(:LLVMGetSymbolName, Cstring, (LLVMSymbolIteratorRef,), SI)
+    @runtime_ccall((:LLVMGetSymbolName,libllvm[]), Cstring, (LLVMSymbolIteratorRef,), SI)
 end
 
 function LLVMGetSymbolAddress(SI)
-    @apicall(:LLVMGetSymbolAddress, UInt64, (LLVMSymbolIteratorRef,), SI)
+    @runtime_ccall((:LLVMGetSymbolAddress,libllvm[]), UInt64, (LLVMSymbolIteratorRef,), SI)
 end
 
 function LLVMGetSymbolSize(SI)
-    @apicall(:LLVMGetSymbolSize, UInt64, (LLVMSymbolIteratorRef,), SI)
+    @runtime_ccall((:LLVMGetSymbolSize,libllvm[]), UInt64, (LLVMSymbolIteratorRef,), SI)
 end
 
 function LLVMGetRelocationOffset(RI)
-    @apicall(:LLVMGetRelocationOffset, UInt64, (LLVMRelocationIteratorRef,), RI)
+    @runtime_ccall((:LLVMGetRelocationOffset,libllvm[]), UInt64, (LLVMRelocationIteratorRef,), RI)
 end
 
 function LLVMGetRelocationSymbol(RI)
-    @apicall(:LLVMGetRelocationSymbol, LLVMSymbolIteratorRef, (LLVMRelocationIteratorRef,), RI)
+    @runtime_ccall((:LLVMGetRelocationSymbol,libllvm[]), LLVMSymbolIteratorRef, (LLVMRelocationIteratorRef,), RI)
 end
 
 function LLVMGetRelocationType(RI)
-    @apicall(:LLVMGetRelocationType, UInt64, (LLVMRelocationIteratorRef,), RI)
+    @runtime_ccall((:LLVMGetRelocationType,libllvm[]), UInt64, (LLVMRelocationIteratorRef,), RI)
 end
 
 function LLVMGetRelocationTypeName(RI)
-    @apicall(:LLVMGetRelocationTypeName, Cstring, (LLVMRelocationIteratorRef,), RI)
+    @runtime_ccall((:LLVMGetRelocationTypeName,libllvm[]), Cstring, (LLVMRelocationIteratorRef,), RI)
 end
 
 function LLVMGetRelocationValueString(RI)
-    @apicall(:LLVMGetRelocationValueString, Cstring, (LLVMRelocationIteratorRef,), RI)
+    @runtime_ccall((:LLVMGetRelocationValueString,libllvm[]), Cstring, (LLVMRelocationIteratorRef,), RI)
 end
 
 function LLVMCreateObjectFile(MemBuf)
-    @apicall(:LLVMCreateObjectFile, LLVMObjectFileRef, (LLVMMemoryBufferRef,), MemBuf)
+    @runtime_ccall((:LLVMCreateObjectFile,libllvm[]), LLVMObjectFileRef, (LLVMMemoryBufferRef,), MemBuf)
 end
 
 function LLVMDisposeObjectFile(ObjectFile)
-    @apicall(:LLVMDisposeObjectFile, Cvoid, (LLVMObjectFileRef,), ObjectFile)
+    @runtime_ccall((:LLVMDisposeObjectFile,libllvm[]), Cvoid, (LLVMObjectFileRef,), ObjectFile)
 end
 
 function LLVMGetSections(ObjectFile)
-    @apicall(:LLVMGetSections, LLVMSectionIteratorRef, (LLVMObjectFileRef,), ObjectFile)
+    @runtime_ccall((:LLVMGetSections,libllvm[]), LLVMSectionIteratorRef, (LLVMObjectFileRef,), ObjectFile)
 end
 
 function LLVMIsSectionIteratorAtEnd(ObjectFile, SI)
-    @apicall(:LLVMIsSectionIteratorAtEnd, LLVMBool, (LLVMObjectFileRef, LLVMSectionIteratorRef), ObjectFile, SI)
+    @runtime_ccall((:LLVMIsSectionIteratorAtEnd,libllvm[]), LLVMBool, (LLVMObjectFileRef, LLVMSectionIteratorRef), ObjectFile, SI)
 end
 
 function LLVMGetSymbols(ObjectFile)
-    @apicall(:LLVMGetSymbols, LLVMSymbolIteratorRef, (LLVMObjectFileRef,), ObjectFile)
+    @runtime_ccall((:LLVMGetSymbols,libllvm[]), LLVMSymbolIteratorRef, (LLVMObjectFileRef,), ObjectFile)
 end
 
 function LLVMIsSymbolIteratorAtEnd(ObjectFile, SI)
-    @apicall(:LLVMIsSymbolIteratorAtEnd, LLVMBool, (LLVMObjectFileRef, LLVMSymbolIteratorRef), ObjectFile, SI)
+    @runtime_ccall((:LLVMIsSymbolIteratorAtEnd,libllvm[]), LLVMBool, (LLVMObjectFileRef, LLVMSymbolIteratorRef), ObjectFile, SI)
 end
 
 
@@ -3925,27 +3925,27 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMOptRemarkParserCreate(Buf, Size)
-    @apicall(:LLVMOptRemarkParserCreate, LLVMOptRemarkParserRef, (Ptr{Cvoid}, UInt64), Buf, Size)
+    @runtime_ccall((:LLVMOptRemarkParserCreate,libllvm[]), LLVMOptRemarkParserRef, (Ptr{Cvoid}, UInt64), Buf, Size)
 end
 
 function LLVMOptRemarkParserGetNext(Parser)
-    @apicall(:LLVMOptRemarkParserGetNext, Ptr{LLVMOptRemarkEntry}, (LLVMOptRemarkParserRef,), Parser)
+    @runtime_ccall((:LLVMOptRemarkParserGetNext,libllvm[]), Ptr{LLVMOptRemarkEntry}, (LLVMOptRemarkParserRef,), Parser)
 end
 
 function LLVMOptRemarkParserHasError(Parser)
-    @apicall(:LLVMOptRemarkParserHasError, LLVMBool, (LLVMOptRemarkParserRef,), Parser)
+    @runtime_ccall((:LLVMOptRemarkParserHasError,libllvm[]), LLVMBool, (LLVMOptRemarkParserRef,), Parser)
 end
 
 function LLVMOptRemarkParserGetErrorMessage(Parser)
-    @apicall(:LLVMOptRemarkParserGetErrorMessage, Cstring, (LLVMOptRemarkParserRef,), Parser)
+    @runtime_ccall((:LLVMOptRemarkParserGetErrorMessage,libllvm[]), Cstring, (LLVMOptRemarkParserRef,), Parser)
 end
 
 function LLVMOptRemarkParserDispose(Parser)
-    @apicall(:LLVMOptRemarkParserDispose, Cvoid, (LLVMOptRemarkParserRef,), Parser)
+    @runtime_ccall((:LLVMOptRemarkParserDispose,libllvm[]), Cvoid, (LLVMOptRemarkParserRef,), Parser)
 end
 
 function LLVMOptRemarkVersion()
-    @apicall(:LLVMOptRemarkVersion, UInt32, ())
+    @runtime_ccall((:LLVMOptRemarkVersion,libllvm[]), UInt32, ())
 end
 
 
@@ -3953,67 +3953,67 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMOrcCreateInstance(TM)
-    @apicall(:LLVMOrcCreateInstance, LLVMOrcJITStackRef, (LLVMTargetMachineRef,), TM)
+    @runtime_ccall((:LLVMOrcCreateInstance,libllvm[]), LLVMOrcJITStackRef, (LLVMTargetMachineRef,), TM)
 end
 
 function LLVMOrcGetErrorMsg(JITStack)
-    @apicall(:LLVMOrcGetErrorMsg, Cstring, (LLVMOrcJITStackRef,), JITStack)
+    @runtime_ccall((:LLVMOrcGetErrorMsg,libllvm[]), Cstring, (LLVMOrcJITStackRef,), JITStack)
 end
 
 function LLVMOrcGetMangledSymbol(JITStack, MangledSymbol, Symbol)
-    @apicall(:LLVMOrcGetMangledSymbol, Cvoid, (LLVMOrcJITStackRef, Ptr{Cstring}, Cstring), JITStack, MangledSymbol, Symbol)
+    @runtime_ccall((:LLVMOrcGetMangledSymbol,libllvm[]), Cvoid, (LLVMOrcJITStackRef, Ptr{Cstring}, Cstring), JITStack, MangledSymbol, Symbol)
 end
 
 function LLVMOrcDisposeMangledSymbol(MangledSymbol)
-    @apicall(:LLVMOrcDisposeMangledSymbol, Cvoid, (Cstring,), MangledSymbol)
+    @runtime_ccall((:LLVMOrcDisposeMangledSymbol,libllvm[]), Cvoid, (Cstring,), MangledSymbol)
 end
 
 function LLVMOrcCreateLazyCompileCallback(JITStack, RetAddr, Callback, CallbackCtx)
-    @apicall(:LLVMOrcCreateLazyCompileCallback, LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcTargetAddress}, LLVMOrcLazyCompileCallbackFn, Ptr{Cvoid}), JITStack, RetAddr, Callback, CallbackCtx)
+    @runtime_ccall((:LLVMOrcCreateLazyCompileCallback,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcTargetAddress}, LLVMOrcLazyCompileCallbackFn, Ptr{Cvoid}), JITStack, RetAddr, Callback, CallbackCtx)
 end
 
 function LLVMOrcCreateIndirectStub(JITStack, StubName, InitAddr)
-    @apicall(:LLVMOrcCreateIndirectStub, LLVMErrorRef, (LLVMOrcJITStackRef, Cstring, LLVMOrcTargetAddress), JITStack, StubName, InitAddr)
+    @runtime_ccall((:LLVMOrcCreateIndirectStub,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, Cstring, LLVMOrcTargetAddress), JITStack, StubName, InitAddr)
 end
 
 function LLVMOrcSetIndirectStubPointer(JITStack, StubName, NewAddr)
-    @apicall(:LLVMOrcSetIndirectStubPointer, LLVMErrorRef, (LLVMOrcJITStackRef, Cstring, LLVMOrcTargetAddress), JITStack, StubName, NewAddr)
+    @runtime_ccall((:LLVMOrcSetIndirectStubPointer,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, Cstring, LLVMOrcTargetAddress), JITStack, StubName, NewAddr)
 end
 
 function LLVMOrcAddEagerlyCompiledIR(JITStack, RetHandle, Mod, SymbolResolver, SymbolResolverCtx)
-    @apicall(:LLVMOrcAddEagerlyCompiledIR, LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcModuleHandle}, LLVMModuleRef, LLVMOrcSymbolResolverFn, Ptr{Cvoid}), JITStack, RetHandle, Mod, SymbolResolver, SymbolResolverCtx)
+    @runtime_ccall((:LLVMOrcAddEagerlyCompiledIR,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcModuleHandle}, LLVMModuleRef, LLVMOrcSymbolResolverFn, Ptr{Cvoid}), JITStack, RetHandle, Mod, SymbolResolver, SymbolResolverCtx)
 end
 
 function LLVMOrcAddLazilyCompiledIR(JITStack, RetHandle, Mod, SymbolResolver, SymbolResolverCtx)
-    @apicall(:LLVMOrcAddLazilyCompiledIR, LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcModuleHandle}, LLVMModuleRef, LLVMOrcSymbolResolverFn, Ptr{Cvoid}), JITStack, RetHandle, Mod, SymbolResolver, SymbolResolverCtx)
+    @runtime_ccall((:LLVMOrcAddLazilyCompiledIR,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcModuleHandle}, LLVMModuleRef, LLVMOrcSymbolResolverFn, Ptr{Cvoid}), JITStack, RetHandle, Mod, SymbolResolver, SymbolResolverCtx)
 end
 
 function LLVMOrcAddObjectFile(JITStack, RetHandle, Obj, SymbolResolver, SymbolResolverCtx)
-    @apicall(:LLVMOrcAddObjectFile, LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcModuleHandle}, LLVMMemoryBufferRef, LLVMOrcSymbolResolverFn, Ptr{Cvoid}), JITStack, RetHandle, Obj, SymbolResolver, SymbolResolverCtx)
+    @runtime_ccall((:LLVMOrcAddObjectFile,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcModuleHandle}, LLVMMemoryBufferRef, LLVMOrcSymbolResolverFn, Ptr{Cvoid}), JITStack, RetHandle, Obj, SymbolResolver, SymbolResolverCtx)
 end
 
 function LLVMOrcRemoveModule(JITStack, H)
-    @apicall(:LLVMOrcRemoveModule, LLVMErrorRef, (LLVMOrcJITStackRef, LLVMOrcModuleHandle), JITStack, H)
+    @runtime_ccall((:LLVMOrcRemoveModule,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, LLVMOrcModuleHandle), JITStack, H)
 end
 
 function LLVMOrcGetSymbolAddress(JITStack, RetAddr, SymbolName)
-    @apicall(:LLVMOrcGetSymbolAddress, LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcTargetAddress}, Cstring), JITStack, RetAddr, SymbolName)
+    @runtime_ccall((:LLVMOrcGetSymbolAddress,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcTargetAddress}, Cstring), JITStack, RetAddr, SymbolName)
 end
 
 function LLVMOrcGetSymbolAddressIn(JITStack, RetAddr, H, SymbolName)
-    @apicall(:LLVMOrcGetSymbolAddressIn, LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcTargetAddress}, LLVMOrcModuleHandle, Cstring), JITStack, RetAddr, H, SymbolName)
+    @runtime_ccall((:LLVMOrcGetSymbolAddressIn,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef, Ptr{LLVMOrcTargetAddress}, LLVMOrcModuleHandle, Cstring), JITStack, RetAddr, H, SymbolName)
 end
 
 function LLVMOrcDisposeInstance(JITStack)
-    @apicall(:LLVMOrcDisposeInstance, LLVMErrorRef, (LLVMOrcJITStackRef,), JITStack)
+    @runtime_ccall((:LLVMOrcDisposeInstance,libllvm[]), LLVMErrorRef, (LLVMOrcJITStackRef,), JITStack)
 end
 
 function LLVMOrcRegisterJITEventListener(JITStack, L)
-    @apicall(:LLVMOrcRegisterJITEventListener, Cvoid, (LLVMOrcJITStackRef, LLVMJITEventListenerRef), JITStack, L)
+    @runtime_ccall((:LLVMOrcRegisterJITEventListener,libllvm[]), Cvoid, (LLVMOrcJITStackRef, LLVMJITEventListenerRef), JITStack, L)
 end
 
 function LLVMOrcUnregisterJITEventListener(JITStack, L)
-    @apicall(:LLVMOrcUnregisterJITEventListener, Cvoid, (LLVMOrcJITStackRef, LLVMJITEventListenerRef), JITStack, L)
+    @runtime_ccall((:LLVMOrcUnregisterJITEventListener,libllvm[]), Cvoid, (LLVMOrcJITStackRef, LLVMJITEventListenerRef), JITStack, L)
 end
 
 
@@ -4021,99 +4021,99 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMRemarkStringGetData(String)
-    @apicall(:LLVMRemarkStringGetData, Cstring, (LLVMRemarkStringRef,), String)
+    @runtime_ccall((:LLVMRemarkStringGetData,libllvm[]), Cstring, (LLVMRemarkStringRef,), String)
 end
 
 function LLVMRemarkStringGetLen(String)
-    @apicall(:LLVMRemarkStringGetLen, UInt32, (LLVMRemarkStringRef,), String)
+    @runtime_ccall((:LLVMRemarkStringGetLen,libllvm[]), UInt32, (LLVMRemarkStringRef,), String)
 end
 
 function LLVMRemarkDebugLocGetSourceFilePath(DL)
-    @apicall(:LLVMRemarkDebugLocGetSourceFilePath, LLVMRemarkStringRef, (LLVMRemarkDebugLocRef,), DL)
+    @runtime_ccall((:LLVMRemarkDebugLocGetSourceFilePath,libllvm[]), LLVMRemarkStringRef, (LLVMRemarkDebugLocRef,), DL)
 end
 
 function LLVMRemarkDebugLocGetSourceLine(DL)
-    @apicall(:LLVMRemarkDebugLocGetSourceLine, UInt32, (LLVMRemarkDebugLocRef,), DL)
+    @runtime_ccall((:LLVMRemarkDebugLocGetSourceLine,libllvm[]), UInt32, (LLVMRemarkDebugLocRef,), DL)
 end
 
 function LLVMRemarkDebugLocGetSourceColumn(DL)
-    @apicall(:LLVMRemarkDebugLocGetSourceColumn, UInt32, (LLVMRemarkDebugLocRef,), DL)
+    @runtime_ccall((:LLVMRemarkDebugLocGetSourceColumn,libllvm[]), UInt32, (LLVMRemarkDebugLocRef,), DL)
 end
 
 function LLVMRemarkArgGetKey(Arg)
-    @apicall(:LLVMRemarkArgGetKey, LLVMRemarkStringRef, (LLVMRemarkArgRef,), Arg)
+    @runtime_ccall((:LLVMRemarkArgGetKey,libllvm[]), LLVMRemarkStringRef, (LLVMRemarkArgRef,), Arg)
 end
 
 function LLVMRemarkArgGetValue(Arg)
-    @apicall(:LLVMRemarkArgGetValue, LLVMRemarkStringRef, (LLVMRemarkArgRef,), Arg)
+    @runtime_ccall((:LLVMRemarkArgGetValue,libllvm[]), LLVMRemarkStringRef, (LLVMRemarkArgRef,), Arg)
 end
 
 function LLVMRemarkArgGetDebugLoc(Arg)
-    @apicall(:LLVMRemarkArgGetDebugLoc, LLVMRemarkDebugLocRef, (LLVMRemarkArgRef,), Arg)
+    @runtime_ccall((:LLVMRemarkArgGetDebugLoc,libllvm[]), LLVMRemarkDebugLocRef, (LLVMRemarkArgRef,), Arg)
 end
 
 function LLVMRemarkEntryDispose(Remark)
-    @apicall(:LLVMRemarkEntryDispose, Cvoid, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryDispose,libllvm[]), Cvoid, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetType(Remark)
-    @apicall(:LLVMRemarkEntryGetType, LLVMRemarkType, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetType,libllvm[]), LLVMRemarkType, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetPassName(Remark)
-    @apicall(:LLVMRemarkEntryGetPassName, LLVMRemarkStringRef, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetPassName,libllvm[]), LLVMRemarkStringRef, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetRemarkName(Remark)
-    @apicall(:LLVMRemarkEntryGetRemarkName, LLVMRemarkStringRef, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetRemarkName,libllvm[]), LLVMRemarkStringRef, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetFunctionName(Remark)
-    @apicall(:LLVMRemarkEntryGetFunctionName, LLVMRemarkStringRef, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetFunctionName,libllvm[]), LLVMRemarkStringRef, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetDebugLoc(Remark)
-    @apicall(:LLVMRemarkEntryGetDebugLoc, LLVMRemarkDebugLocRef, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetDebugLoc,libllvm[]), LLVMRemarkDebugLocRef, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetHotness(Remark)
-    @apicall(:LLVMRemarkEntryGetHotness, UInt64, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetHotness,libllvm[]), UInt64, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetNumArgs(Remark)
-    @apicall(:LLVMRemarkEntryGetNumArgs, UInt32, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetNumArgs,libllvm[]), UInt32, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetFirstArg(Remark)
-    @apicall(:LLVMRemarkEntryGetFirstArg, LLVMRemarkArgRef, (LLVMRemarkEntryRef,), Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetFirstArg,libllvm[]), LLVMRemarkArgRef, (LLVMRemarkEntryRef,), Remark)
 end
 
 function LLVMRemarkEntryGetNextArg(It, Remark)
-    @apicall(:LLVMRemarkEntryGetNextArg, LLVMRemarkArgRef, (LLVMRemarkArgRef, LLVMRemarkEntryRef), It, Remark)
+    @runtime_ccall((:LLVMRemarkEntryGetNextArg,libllvm[]), LLVMRemarkArgRef, (LLVMRemarkArgRef, LLVMRemarkEntryRef), It, Remark)
 end
 
 function LLVMRemarkParserCreateYAML(Buf, Size)
-    @apicall(:LLVMRemarkParserCreateYAML, LLVMRemarkParserRef, (Ptr{Cvoid}, UInt64), Buf, Size)
+    @runtime_ccall((:LLVMRemarkParserCreateYAML,libllvm[]), LLVMRemarkParserRef, (Ptr{Cvoid}, UInt64), Buf, Size)
 end
 
 function LLVMRemarkParserGetNext(Parser)
-    @apicall(:LLVMRemarkParserGetNext, LLVMRemarkEntryRef, (LLVMRemarkParserRef,), Parser)
+    @runtime_ccall((:LLVMRemarkParserGetNext,libllvm[]), LLVMRemarkEntryRef, (LLVMRemarkParserRef,), Parser)
 end
 
 function LLVMRemarkParserHasError(Parser)
-    @apicall(:LLVMRemarkParserHasError, LLVMBool, (LLVMRemarkParserRef,), Parser)
+    @runtime_ccall((:LLVMRemarkParserHasError,libllvm[]), LLVMBool, (LLVMRemarkParserRef,), Parser)
 end
 
 function LLVMRemarkParserGetErrorMessage(Parser)
-    @apicall(:LLVMRemarkParserGetErrorMessage, Cstring, (LLVMRemarkParserRef,), Parser)
+    @runtime_ccall((:LLVMRemarkParserGetErrorMessage,libllvm[]), Cstring, (LLVMRemarkParserRef,), Parser)
 end
 
 function LLVMRemarkParserDispose(Parser)
-    @apicall(:LLVMRemarkParserDispose, Cvoid, (LLVMRemarkParserRef,), Parser)
+    @runtime_ccall((:LLVMRemarkParserDispose,libllvm[]), Cvoid, (LLVMRemarkParserRef,), Parser)
 end
 
 function LLVMRemarkVersion()
-    @apicall(:LLVMRemarkVersion, UInt32, ())
+    @runtime_ccall((:LLVMRemarkVersion,libllvm[]), UInt32, ())
 end
 
 
@@ -4121,19 +4121,19 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMLoadLibraryPermanently(Filename)
-    @apicall(:LLVMLoadLibraryPermanently, LLVMBool, (Cstring,), Filename)
+    @runtime_ccall((:LLVMLoadLibraryPermanently,libllvm[]), LLVMBool, (Cstring,), Filename)
 end
 
 function LLVMParseCommandLineOptions(argc, argv, Overview)
-    @apicall(:LLVMParseCommandLineOptions, Cvoid, (Cint, Ptr{Cstring}, Cstring), argc, argv, Overview)
+    @runtime_ccall((:LLVMParseCommandLineOptions,libllvm[]), Cvoid, (Cint, Ptr{Cstring}, Cstring), argc, argv, Overview)
 end
 
 function LLVMSearchForAddressOfSymbol(symbolName)
-    @apicall(:LLVMSearchForAddressOfSymbol, Ptr{Cvoid}, (Cstring,), symbolName)
+    @runtime_ccall((:LLVMSearchForAddressOfSymbol,libllvm[]), Ptr{Cvoid}, (Cstring,), symbolName)
 end
 
 function LLVMAddSymbol(symbolName, symbolValue)
-    @apicall(:LLVMAddSymbol, Cvoid, (Cstring, Ptr{Cvoid}), symbolName, symbolValue)
+    @runtime_ccall((:LLVMAddSymbol,libllvm[]), Cvoid, (Cstring, Ptr{Cvoid}), symbolName, symbolValue)
 end
 
 
@@ -4156,291 +4156,291 @@ end
 # Automatically generated using Clang.jl
 
 function lto_get_version()
-    @apicall(:lto_get_version, Cstring, ())
+    @runtime_ccall((:lto_get_version,libllvm[]), Cstring, ())
 end
 
 function lto_get_error_message()
-    @apicall(:lto_get_error_message, Cstring, ())
+    @runtime_ccall((:lto_get_error_message,libllvm[]), Cstring, ())
 end
 
 function lto_module_is_object_file(path)
-    @apicall(:lto_module_is_object_file, lto_bool_t, (Cstring,), path)
+    @runtime_ccall((:lto_module_is_object_file,libllvm[]), lto_bool_t, (Cstring,), path)
 end
 
 function lto_module_is_object_file_for_target(path, target_triple_prefix)
-    @apicall(:lto_module_is_object_file_for_target, lto_bool_t, (Cstring, Cstring), path, target_triple_prefix)
+    @runtime_ccall((:lto_module_is_object_file_for_target,libllvm[]), lto_bool_t, (Cstring, Cstring), path, target_triple_prefix)
 end
 
 function lto_module_has_objc_category(mem, length)
-    @apicall(:lto_module_has_objc_category, lto_bool_t, (Ptr{Cvoid}, Csize_t), mem, length)
+    @runtime_ccall((:lto_module_has_objc_category,libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t), mem, length)
 end
 
 function lto_module_is_object_file_in_memory(mem, length)
-    @apicall(:lto_module_is_object_file_in_memory, lto_bool_t, (Ptr{Cvoid}, Csize_t), mem, length)
+    @runtime_ccall((:lto_module_is_object_file_in_memory,libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t), mem, length)
 end
 
 function lto_module_is_object_file_in_memory_for_target(mem, length, target_triple_prefix)
-    @apicall(:lto_module_is_object_file_in_memory_for_target, lto_bool_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, target_triple_prefix)
+    @runtime_ccall((:lto_module_is_object_file_in_memory_for_target,libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, target_triple_prefix)
 end
 
 function lto_module_create(path)
-    @apicall(:lto_module_create, lto_module_t, (Cstring,), path)
+    @runtime_ccall((:lto_module_create,libllvm[]), lto_module_t, (Cstring,), path)
 end
 
 function lto_module_create_from_memory(mem, length)
-    @apicall(:lto_module_create_from_memory, lto_module_t, (Ptr{Cvoid}, Csize_t), mem, length)
+    @runtime_ccall((:lto_module_create_from_memory,libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t), mem, length)
 end
 
 function lto_module_create_from_memory_with_path(mem, length, path)
-    @apicall(:lto_module_create_from_memory_with_path, lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, path)
+    @runtime_ccall((:lto_module_create_from_memory_with_path,libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, path)
 end
 
 function lto_module_create_in_local_context(mem, length, path)
-    @apicall(:lto_module_create_in_local_context, lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, path)
+    @runtime_ccall((:lto_module_create_in_local_context,libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, path)
 end
 
 function lto_module_create_in_codegen_context(mem, length, path, cg)
-    @apicall(:lto_module_create_in_codegen_context, lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring, lto_code_gen_t), mem, length, path, cg)
+    @runtime_ccall((:lto_module_create_in_codegen_context,libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring, lto_code_gen_t), mem, length, path, cg)
 end
 
 function lto_module_create_from_fd(fd, path, file_size)
-    @apicall(:lto_module_create_from_fd, lto_module_t, (Cint, Cstring, Csize_t), fd, path, file_size)
+    @runtime_ccall((:lto_module_create_from_fd,libllvm[]), lto_module_t, (Cint, Cstring, Csize_t), fd, path, file_size)
 end
 
 function lto_module_create_from_fd_at_offset(fd, path, file_size, map_size, offset)
-    @apicall(:lto_module_create_from_fd_at_offset, lto_module_t, (Cint, Cstring, Csize_t, Csize_t, off_t), fd, path, file_size, map_size, offset)
+    @runtime_ccall((:lto_module_create_from_fd_at_offset,libllvm[]), lto_module_t, (Cint, Cstring, Csize_t, Csize_t, off_t), fd, path, file_size, map_size, offset)
 end
 
 function lto_module_dispose(mod)
-    @apicall(:lto_module_dispose, Cvoid, (lto_module_t,), mod)
+    @runtime_ccall((:lto_module_dispose,libllvm[]), Cvoid, (lto_module_t,), mod)
 end
 
 function lto_module_get_target_triple(mod)
-    @apicall(:lto_module_get_target_triple, Cstring, (lto_module_t,), mod)
+    @runtime_ccall((:lto_module_get_target_triple,libllvm[]), Cstring, (lto_module_t,), mod)
 end
 
 function lto_module_set_target_triple(mod, triple)
-    @apicall(:lto_module_set_target_triple, Cvoid, (lto_module_t, Cstring), mod, triple)
+    @runtime_ccall((:lto_module_set_target_triple,libllvm[]), Cvoid, (lto_module_t, Cstring), mod, triple)
 end
 
 function lto_module_get_num_symbols(mod)
-    @apicall(:lto_module_get_num_symbols, UInt32, (lto_module_t,), mod)
+    @runtime_ccall((:lto_module_get_num_symbols,libllvm[]), UInt32, (lto_module_t,), mod)
 end
 
 function lto_module_get_symbol_name(mod, index)
-    @apicall(:lto_module_get_symbol_name, Cstring, (lto_module_t, UInt32), mod, index)
+    @runtime_ccall((:lto_module_get_symbol_name,libllvm[]), Cstring, (lto_module_t, UInt32), mod, index)
 end
 
 function lto_module_get_symbol_attribute(mod, index)
-    @apicall(:lto_module_get_symbol_attribute, lto_symbol_attributes, (lto_module_t, UInt32), mod, index)
+    @runtime_ccall((:lto_module_get_symbol_attribute,libllvm[]), lto_symbol_attributes, (lto_module_t, UInt32), mod, index)
 end
 
 function lto_module_get_linkeropts(mod)
-    @apicall(:lto_module_get_linkeropts, Cstring, (lto_module_t,), mod)
+    @runtime_ccall((:lto_module_get_linkeropts,libllvm[]), Cstring, (lto_module_t,), mod)
 end
 
 function lto_codegen_set_diagnostic_handler(arg1, arg2, arg3)
-    @apicall(:lto_codegen_set_diagnostic_handler, Cvoid, (lto_code_gen_t, lto_diagnostic_handler_t, Ptr{Cvoid}), arg1, arg2, arg3)
+    @runtime_ccall((:lto_codegen_set_diagnostic_handler,libllvm[]), Cvoid, (lto_code_gen_t, lto_diagnostic_handler_t, Ptr{Cvoid}), arg1, arg2, arg3)
 end
 
 function lto_codegen_create()
-    @apicall(:lto_codegen_create, lto_code_gen_t, ())
+    @runtime_ccall((:lto_codegen_create,libllvm[]), lto_code_gen_t, ())
 end
 
 function lto_codegen_create_in_local_context()
-    @apicall(:lto_codegen_create_in_local_context, lto_code_gen_t, ())
+    @runtime_ccall((:lto_codegen_create_in_local_context,libllvm[]), lto_code_gen_t, ())
 end
 
 function lto_codegen_dispose(arg1)
-    @apicall(:lto_codegen_dispose, Cvoid, (lto_code_gen_t,), arg1)
+    @runtime_ccall((:lto_codegen_dispose,libllvm[]), Cvoid, (lto_code_gen_t,), arg1)
 end
 
 function lto_codegen_add_module(cg, mod)
-    @apicall(:lto_codegen_add_module, lto_bool_t, (lto_code_gen_t, lto_module_t), cg, mod)
+    @runtime_ccall((:lto_codegen_add_module,libllvm[]), lto_bool_t, (lto_code_gen_t, lto_module_t), cg, mod)
 end
 
 function lto_codegen_set_module(cg, mod)
-    @apicall(:lto_codegen_set_module, Cvoid, (lto_code_gen_t, lto_module_t), cg, mod)
+    @runtime_ccall((:lto_codegen_set_module,libllvm[]), Cvoid, (lto_code_gen_t, lto_module_t), cg, mod)
 end
 
 function lto_codegen_set_debug_model(cg, arg1)
-    @apicall(:lto_codegen_set_debug_model, lto_bool_t, (lto_code_gen_t, lto_debug_model), cg, arg1)
+    @runtime_ccall((:lto_codegen_set_debug_model,libllvm[]), lto_bool_t, (lto_code_gen_t, lto_debug_model), cg, arg1)
 end
 
 function lto_codegen_set_pic_model(cg, arg1)
-    @apicall(:lto_codegen_set_pic_model, lto_bool_t, (lto_code_gen_t, lto_codegen_model), cg, arg1)
+    @runtime_ccall((:lto_codegen_set_pic_model,libllvm[]), lto_bool_t, (lto_code_gen_t, lto_codegen_model), cg, arg1)
 end
 
 function lto_codegen_set_cpu(cg, cpu)
-    @apicall(:lto_codegen_set_cpu, Cvoid, (lto_code_gen_t, Cstring), cg, cpu)
+    @runtime_ccall((:lto_codegen_set_cpu,libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, cpu)
 end
 
 function lto_codegen_set_assembler_path(cg, path)
-    @apicall(:lto_codegen_set_assembler_path, Cvoid, (lto_code_gen_t, Cstring), cg, path)
+    @runtime_ccall((:lto_codegen_set_assembler_path,libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, path)
 end
 
 function lto_codegen_set_assembler_args(cg, args, nargs)
-    @apicall(:lto_codegen_set_assembler_args, Cvoid, (lto_code_gen_t, Ptr{Cstring}, Cint), cg, args, nargs)
+    @runtime_ccall((:lto_codegen_set_assembler_args,libllvm[]), Cvoid, (lto_code_gen_t, Ptr{Cstring}, Cint), cg, args, nargs)
 end
 
 function lto_codegen_add_must_preserve_symbol(cg, symbol)
-    @apicall(:lto_codegen_add_must_preserve_symbol, Cvoid, (lto_code_gen_t, Cstring), cg, symbol)
+    @runtime_ccall((:lto_codegen_add_must_preserve_symbol,libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, symbol)
 end
 
 function lto_codegen_write_merged_modules(cg, path)
-    @apicall(:lto_codegen_write_merged_modules, lto_bool_t, (lto_code_gen_t, Cstring), cg, path)
+    @runtime_ccall((:lto_codegen_write_merged_modules,libllvm[]), lto_bool_t, (lto_code_gen_t, Cstring), cg, path)
 end
 
 function lto_codegen_compile(cg, length)
-    @apicall(:lto_codegen_compile, Ptr{Cvoid}, (lto_code_gen_t, Ptr{Csize_t}), cg, length)
+    @runtime_ccall((:lto_codegen_compile,libllvm[]), Ptr{Cvoid}, (lto_code_gen_t, Ptr{Csize_t}), cg, length)
 end
 
 function lto_codegen_compile_to_file(cg, name)
-    @apicall(:lto_codegen_compile_to_file, lto_bool_t, (lto_code_gen_t, Ptr{Cstring}), cg, name)
+    @runtime_ccall((:lto_codegen_compile_to_file,libllvm[]), lto_bool_t, (lto_code_gen_t, Ptr{Cstring}), cg, name)
 end
 
 function lto_codegen_optimize(cg)
-    @apicall(:lto_codegen_optimize, lto_bool_t, (lto_code_gen_t,), cg)
+    @runtime_ccall((:lto_codegen_optimize,libllvm[]), lto_bool_t, (lto_code_gen_t,), cg)
 end
 
 function lto_codegen_compile_optimized(cg, length)
-    @apicall(:lto_codegen_compile_optimized, Ptr{Cvoid}, (lto_code_gen_t, Ptr{Csize_t}), cg, length)
+    @runtime_ccall((:lto_codegen_compile_optimized,libllvm[]), Ptr{Cvoid}, (lto_code_gen_t, Ptr{Csize_t}), cg, length)
 end
 
 function lto_api_version()
-    @apicall(:lto_api_version, UInt32, ())
+    @runtime_ccall((:lto_api_version,libllvm[]), UInt32, ())
 end
 
 function lto_codegen_debug_options(cg, arg1)
-    @apicall(:lto_codegen_debug_options, Cvoid, (lto_code_gen_t, Cstring), cg, arg1)
+    @runtime_ccall((:lto_codegen_debug_options,libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, arg1)
 end
 
 function lto_initialize_disassembler()
-    @apicall(:lto_initialize_disassembler, Cvoid, ())
+    @runtime_ccall((:lto_initialize_disassembler,libllvm[]), Cvoid, ())
 end
 
 function lto_codegen_set_should_internalize(cg, ShouldInternalize)
-    @apicall(:lto_codegen_set_should_internalize, Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldInternalize)
+    @runtime_ccall((:lto_codegen_set_should_internalize,libllvm[]), Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldInternalize)
 end
 
 function lto_codegen_set_should_embed_uselists(cg, ShouldEmbedUselists)
-    @apicall(:lto_codegen_set_should_embed_uselists, Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldEmbedUselists)
+    @runtime_ccall((:lto_codegen_set_should_embed_uselists,libllvm[]), Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldEmbedUselists)
 end
 
 function thinlto_create_codegen()
-    @apicall(:thinlto_create_codegen, thinlto_code_gen_t, ())
+    @runtime_ccall((:thinlto_create_codegen,libllvm[]), thinlto_code_gen_t, ())
 end
 
 function thinlto_codegen_dispose(cg)
-    @apicall(:thinlto_codegen_dispose, Cvoid, (thinlto_code_gen_t,), cg)
+    @runtime_ccall((:thinlto_codegen_dispose,libllvm[]), Cvoid, (thinlto_code_gen_t,), cg)
 end
 
 function thinlto_codegen_add_module(cg, identifier, data, length)
-    @apicall(:thinlto_codegen_add_module, Cvoid, (thinlto_code_gen_t, Cstring, Cstring, Cint), cg, identifier, data, length)
+    @runtime_ccall((:thinlto_codegen_add_module,libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cstring, Cint), cg, identifier, data, length)
 end
 
 function thinlto_codegen_process(cg)
-    @apicall(:thinlto_codegen_process, Cvoid, (thinlto_code_gen_t,), cg)
+    @runtime_ccall((:thinlto_codegen_process,libllvm[]), Cvoid, (thinlto_code_gen_t,), cg)
 end
 
 function thinlto_module_get_num_objects(cg)
-    @apicall(:thinlto_module_get_num_objects, UInt32, (thinlto_code_gen_t,), cg)
+    @runtime_ccall((:thinlto_module_get_num_objects,libllvm[]), UInt32, (thinlto_code_gen_t,), cg)
 end
 
 function thinlto_module_get_object(cg, index)
-    @apicall(:thinlto_module_get_object, LTOObjectBuffer, (thinlto_code_gen_t, UInt32), cg, index)
+    @runtime_ccall((:thinlto_module_get_object,libllvm[]), LTOObjectBuffer, (thinlto_code_gen_t, UInt32), cg, index)
 end
 
 function thinlto_module_get_num_object_files(cg)
-    @apicall(:thinlto_module_get_num_object_files, UInt32, (thinlto_code_gen_t,), cg)
+    @runtime_ccall((:thinlto_module_get_num_object_files,libllvm[]), UInt32, (thinlto_code_gen_t,), cg)
 end
 
 function thinlto_module_get_object_file(cg, index)
-    @apicall(:thinlto_module_get_object_file, Cstring, (thinlto_code_gen_t, UInt32), cg, index)
+    @runtime_ccall((:thinlto_module_get_object_file,libllvm[]), Cstring, (thinlto_code_gen_t, UInt32), cg, index)
 end
 
 function thinlto_codegen_set_pic_model(cg, arg1)
-    @apicall(:thinlto_codegen_set_pic_model, lto_bool_t, (thinlto_code_gen_t, lto_codegen_model), cg, arg1)
+    @runtime_ccall((:thinlto_codegen_set_pic_model,libllvm[]), lto_bool_t, (thinlto_code_gen_t, lto_codegen_model), cg, arg1)
 end
 
 function thinlto_codegen_set_savetemps_dir(cg, save_temps_dir)
-    @apicall(:thinlto_codegen_set_savetemps_dir, Cvoid, (thinlto_code_gen_t, Cstring), cg, save_temps_dir)
+    @runtime_ccall((:thinlto_codegen_set_savetemps_dir,libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, save_temps_dir)
 end
 
 function thinlto_set_generated_objects_dir(cg, save_temps_dir)
-    @apicall(:thinlto_set_generated_objects_dir, Cvoid, (thinlto_code_gen_t, Cstring), cg, save_temps_dir)
+    @runtime_ccall((:thinlto_set_generated_objects_dir,libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, save_temps_dir)
 end
 
 function thinlto_codegen_set_cpu(cg, cpu)
-    @apicall(:thinlto_codegen_set_cpu, Cvoid, (thinlto_code_gen_t, Cstring), cg, cpu)
+    @runtime_ccall((:thinlto_codegen_set_cpu,libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, cpu)
 end
 
 function thinlto_codegen_disable_codegen(cg, disable)
-    @apicall(:thinlto_codegen_disable_codegen, Cvoid, (thinlto_code_gen_t, lto_bool_t), cg, disable)
+    @runtime_ccall((:thinlto_codegen_disable_codegen,libllvm[]), Cvoid, (thinlto_code_gen_t, lto_bool_t), cg, disable)
 end
 
 function thinlto_codegen_set_codegen_only(cg, codegen_only)
-    @apicall(:thinlto_codegen_set_codegen_only, Cvoid, (thinlto_code_gen_t, lto_bool_t), cg, codegen_only)
+    @runtime_ccall((:thinlto_codegen_set_codegen_only,libllvm[]), Cvoid, (thinlto_code_gen_t, lto_bool_t), cg, codegen_only)
 end
 
 function thinlto_debug_options(options, number)
-    @apicall(:thinlto_debug_options, Cvoid, (Ptr{Cstring}, Cint), options, number)
+    @runtime_ccall((:thinlto_debug_options,libllvm[]), Cvoid, (Ptr{Cstring}, Cint), options, number)
 end
 
 function lto_module_is_thinlto(mod)
-    @apicall(:lto_module_is_thinlto, lto_bool_t, (lto_module_t,), mod)
+    @runtime_ccall((:lto_module_is_thinlto,libllvm[]), lto_bool_t, (lto_module_t,), mod)
 end
 
 function thinlto_codegen_add_must_preserve_symbol(cg, name, length)
-    @apicall(:thinlto_codegen_add_must_preserve_symbol, Cvoid, (thinlto_code_gen_t, Cstring, Cint), cg, name, length)
+    @runtime_ccall((:thinlto_codegen_add_must_preserve_symbol,libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cint), cg, name, length)
 end
 
 function thinlto_codegen_add_cross_referenced_symbol(cg, name, length)
-    @apicall(:thinlto_codegen_add_cross_referenced_symbol, Cvoid, (thinlto_code_gen_t, Cstring, Cint), cg, name, length)
+    @runtime_ccall((:thinlto_codegen_add_cross_referenced_symbol,libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cint), cg, name, length)
 end
 
 function thinlto_codegen_set_cache_dir(cg, cache_dir)
-    @apicall(:thinlto_codegen_set_cache_dir, Cvoid, (thinlto_code_gen_t, Cstring), cg, cache_dir)
+    @runtime_ccall((:thinlto_codegen_set_cache_dir,libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, cache_dir)
 end
 
 function thinlto_codegen_set_cache_pruning_interval(cg, interval)
-    @apicall(:thinlto_codegen_set_cache_pruning_interval, Cvoid, (thinlto_code_gen_t, Cint), cg, interval)
+    @runtime_ccall((:thinlto_codegen_set_cache_pruning_interval,libllvm[]), Cvoid, (thinlto_code_gen_t, Cint), cg, interval)
 end
 
 function thinlto_codegen_set_final_cache_size_relative_to_available_space(cg, percentage)
-    @apicall(:thinlto_codegen_set_final_cache_size_relative_to_available_space, Cvoid, (thinlto_code_gen_t, UInt32), cg, percentage)
+    @runtime_ccall((:thinlto_codegen_set_final_cache_size_relative_to_available_space,libllvm[]), Cvoid, (thinlto_code_gen_t, UInt32), cg, percentage)
 end
 
 function thinlto_codegen_set_cache_entry_expiration(cg, expiration)
-    @apicall(:thinlto_codegen_set_cache_entry_expiration, Cvoid, (thinlto_code_gen_t, UInt32), cg, expiration)
+    @runtime_ccall((:thinlto_codegen_set_cache_entry_expiration,libllvm[]), Cvoid, (thinlto_code_gen_t, UInt32), cg, expiration)
 end
 
 function thinlto_codegen_set_cache_size_bytes(cg, max_size_bytes)
-    @apicall(:thinlto_codegen_set_cache_size_bytes, Cvoid, (thinlto_code_gen_t, UInt32), cg, max_size_bytes)
+    @runtime_ccall((:thinlto_codegen_set_cache_size_bytes,libllvm[]), Cvoid, (thinlto_code_gen_t, UInt32), cg, max_size_bytes)
 end
 
 function thinlto_codegen_set_cache_size_megabytes(cg, max_size_megabytes)
-    @apicall(:thinlto_codegen_set_cache_size_megabytes, Cvoid, (thinlto_code_gen_t, UInt32), cg, max_size_megabytes)
+    @runtime_ccall((:thinlto_codegen_set_cache_size_megabytes,libllvm[]), Cvoid, (thinlto_code_gen_t, UInt32), cg, max_size_megabytes)
 end
 
 function thinlto_codegen_set_cache_size_files(cg, max_size_files)
-    @apicall(:thinlto_codegen_set_cache_size_files, Cvoid, (thinlto_code_gen_t, UInt32), cg, max_size_files)
+    @runtime_ccall((:thinlto_codegen_set_cache_size_files,libllvm[]), Cvoid, (thinlto_code_gen_t, UInt32), cg, max_size_files)
 end
 
 function lto_input_create(buffer, buffer_size, path)
-    @apicall(:lto_input_create, lto_input_t, (Ptr{Cvoid}, Csize_t, Cstring), buffer, buffer_size, path)
+    @runtime_ccall((:lto_input_create,libllvm[]), lto_input_t, (Ptr{Cvoid}, Csize_t, Cstring), buffer, buffer_size, path)
 end
 
 function lto_input_dispose(input)
-    @apicall(:lto_input_dispose, Cvoid, (lto_input_t,), input)
+    @runtime_ccall((:lto_input_dispose,libllvm[]), Cvoid, (lto_input_t,), input)
 end
 
 function lto_input_get_num_dependent_libraries(input)
-    @apicall(:lto_input_get_num_dependent_libraries, UInt32, (lto_input_t,), input)
+    @runtime_ccall((:lto_input_get_num_dependent_libraries,libllvm[]), UInt32, (lto_input_t,), input)
 end
 
 function lto_input_get_dependent_library(input, index, size)
-    @apicall(:lto_input_get_dependent_library, Cstring, (lto_input_t, Csize_t, Ptr{Csize_t}), input, index, size)
+    @runtime_ccall((:lto_input_get_dependent_library,libllvm[]), Cstring, (lto_input_t, Csize_t, Ptr{Csize_t}), input, index, size)
 end
 
 
@@ -4448,7 +4448,7 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMAddAggressiveInstCombinerPass(PM)
-    @apicall(:LLVMAddAggressiveInstCombinerPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddAggressiveInstCombinerPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 
@@ -4456,19 +4456,19 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMAddCoroEarlyPass(PM)
-    @apicall(:LLVMAddCoroEarlyPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddCoroEarlyPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddCoroSplitPass(PM)
-    @apicall(:LLVMAddCoroSplitPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddCoroSplitPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddCoroElidePass(PM)
-    @apicall(:LLVMAddCoroElidePass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddCoroElidePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddCoroCleanupPass(PM)
-    @apicall(:LLVMAddCoroCleanupPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddCoroCleanupPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 
@@ -4476,63 +4476,63 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMAddArgumentPromotionPass(PM)
-    @apicall(:LLVMAddArgumentPromotionPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddArgumentPromotionPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddConstantMergePass(PM)
-    @apicall(:LLVMAddConstantMergePass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddConstantMergePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddCalledValuePropagationPass(PM)
-    @apicall(:LLVMAddCalledValuePropagationPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddCalledValuePropagationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddDeadArgEliminationPass(PM)
-    @apicall(:LLVMAddDeadArgEliminationPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddDeadArgEliminationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddFunctionAttrsPass(PM)
-    @apicall(:LLVMAddFunctionAttrsPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddFunctionAttrsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddFunctionInliningPass(PM)
-    @apicall(:LLVMAddFunctionInliningPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddFunctionInliningPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddAlwaysInlinerPass(PM)
-    @apicall(:LLVMAddAlwaysInlinerPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddAlwaysInlinerPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddGlobalDCEPass(PM)
-    @apicall(:LLVMAddGlobalDCEPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddGlobalDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddGlobalOptimizerPass(PM)
-    @apicall(:LLVMAddGlobalOptimizerPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddGlobalOptimizerPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddIPConstantPropagationPass(PM)
-    @apicall(:LLVMAddIPConstantPropagationPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddIPConstantPropagationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddPruneEHPass(PM)
-    @apicall(:LLVMAddPruneEHPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddPruneEHPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddIPSCCPPass(PM)
-    @apicall(:LLVMAddIPSCCPPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddIPSCCPPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddInternalizePass(arg1, AllButMain)
-    @apicall(:LLVMAddInternalizePass, Cvoid, (LLVMPassManagerRef, UInt32), arg1, AllButMain)
+    @runtime_ccall((:LLVMAddInternalizePass,libllvm[]), Cvoid, (LLVMPassManagerRef, UInt32), arg1, AllButMain)
 end
 
 function LLVMAddStripDeadPrototypesPass(PM)
-    @apicall(:LLVMAddStripDeadPrototypesPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddStripDeadPrototypesPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddStripSymbolsPass(PM)
-    @apicall(:LLVMAddStripSymbolsPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddStripSymbolsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 
@@ -4540,7 +4540,7 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMAddInstructionCombiningPass(PM)
-    @apicall(:LLVMAddInstructionCombiningPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddInstructionCombiningPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 
@@ -4548,47 +4548,47 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMPassManagerBuilderCreate()
-    @apicall(:LLVMPassManagerBuilderCreate, LLVMPassManagerBuilderRef, ())
+    @runtime_ccall((:LLVMPassManagerBuilderCreate,libllvm[]), LLVMPassManagerBuilderRef, ())
 end
 
 function LLVMPassManagerBuilderDispose(PMB)
-    @apicall(:LLVMPassManagerBuilderDispose, Cvoid, (LLVMPassManagerBuilderRef,), PMB)
+    @runtime_ccall((:LLVMPassManagerBuilderDispose,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef,), PMB)
 end
 
 function LLVMPassManagerBuilderSetOptLevel(PMB, OptLevel)
-    @apicall(:LLVMPassManagerBuilderSetOptLevel, Cvoid, (LLVMPassManagerBuilderRef, UInt32), PMB, OptLevel)
+    @runtime_ccall((:LLVMPassManagerBuilderSetOptLevel,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, UInt32), PMB, OptLevel)
 end
 
 function LLVMPassManagerBuilderSetSizeLevel(PMB, SizeLevel)
-    @apicall(:LLVMPassManagerBuilderSetSizeLevel, Cvoid, (LLVMPassManagerBuilderRef, UInt32), PMB, SizeLevel)
+    @runtime_ccall((:LLVMPassManagerBuilderSetSizeLevel,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, UInt32), PMB, SizeLevel)
 end
 
 function LLVMPassManagerBuilderSetDisableUnitAtATime(PMB, Value)
-    @apicall(:LLVMPassManagerBuilderSetDisableUnitAtATime, Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+    @runtime_ccall((:LLVMPassManagerBuilderSetDisableUnitAtATime,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
 end
 
 function LLVMPassManagerBuilderSetDisableUnrollLoops(PMB, Value)
-    @apicall(:LLVMPassManagerBuilderSetDisableUnrollLoops, Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+    @runtime_ccall((:LLVMPassManagerBuilderSetDisableUnrollLoops,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
 end
 
 function LLVMPassManagerBuilderSetDisableSimplifyLibCalls(PMB, Value)
-    @apicall(:LLVMPassManagerBuilderSetDisableSimplifyLibCalls, Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+    @runtime_ccall((:LLVMPassManagerBuilderSetDisableSimplifyLibCalls,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
 end
 
 function LLVMPassManagerBuilderUseInlinerWithThreshold(PMB, Threshold)
-    @apicall(:LLVMPassManagerBuilderUseInlinerWithThreshold, Cvoid, (LLVMPassManagerBuilderRef, UInt32), PMB, Threshold)
+    @runtime_ccall((:LLVMPassManagerBuilderUseInlinerWithThreshold,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, UInt32), PMB, Threshold)
 end
 
 function LLVMPassManagerBuilderPopulateFunctionPassManager(PMB, PM)
-    @apicall(:LLVMPassManagerBuilderPopulateFunctionPassManager, Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
+    @runtime_ccall((:LLVMPassManagerBuilderPopulateFunctionPassManager,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
 end
 
 function LLVMPassManagerBuilderPopulateModulePassManager(PMB, PM)
-    @apicall(:LLVMPassManagerBuilderPopulateModulePassManager, Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
+    @runtime_ccall((:LLVMPassManagerBuilderPopulateModulePassManager,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
 end
 
 function LLVMPassManagerBuilderPopulateLTOPassManager(PMB, PM, Internalize, RunInliner)
-    @apicall(:LLVMPassManagerBuilderPopulateLTOPassManager, Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef, LLVMBool, LLVMBool), PMB, PM, Internalize, RunInliner)
+    @runtime_ccall((:LLVMPassManagerBuilderPopulateLTOPassManager,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef, LLVMBool, LLVMBool), PMB, PM, Internalize, RunInliner)
 end
 
 
@@ -4596,163 +4596,163 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMAddAggressiveDCEPass(PM)
-    @apicall(:LLVMAddAggressiveDCEPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddAggressiveDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddBitTrackingDCEPass(PM)
-    @apicall(:LLVMAddBitTrackingDCEPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddBitTrackingDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddAlignmentFromAssumptionsPass(PM)
-    @apicall(:LLVMAddAlignmentFromAssumptionsPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddAlignmentFromAssumptionsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddCFGSimplificationPass(PM)
-    @apicall(:LLVMAddCFGSimplificationPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddCFGSimplificationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddDeadStoreEliminationPass(PM)
-    @apicall(:LLVMAddDeadStoreEliminationPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddDeadStoreEliminationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddScalarizerPass(PM)
-    @apicall(:LLVMAddScalarizerPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddScalarizerPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddMergedLoadStoreMotionPass(PM)
-    @apicall(:LLVMAddMergedLoadStoreMotionPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddMergedLoadStoreMotionPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddGVNPass(PM)
-    @apicall(:LLVMAddGVNPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddGVNPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddNewGVNPass(PM)
-    @apicall(:LLVMAddNewGVNPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddNewGVNPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddIndVarSimplifyPass(PM)
-    @apicall(:LLVMAddIndVarSimplifyPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddIndVarSimplifyPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddJumpThreadingPass(PM)
-    @apicall(:LLVMAddJumpThreadingPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddJumpThreadingPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLICMPass(PM)
-    @apicall(:LLVMAddLICMPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLICMPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopDeletionPass(PM)
-    @apicall(:LLVMAddLoopDeletionPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLoopDeletionPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopIdiomPass(PM)
-    @apicall(:LLVMAddLoopIdiomPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLoopIdiomPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopRotatePass(PM)
-    @apicall(:LLVMAddLoopRotatePass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLoopRotatePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopRerollPass(PM)
-    @apicall(:LLVMAddLoopRerollPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLoopRerollPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopUnrollPass(PM)
-    @apicall(:LLVMAddLoopUnrollPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLoopUnrollPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopUnrollAndJamPass(PM)
-    @apicall(:LLVMAddLoopUnrollAndJamPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLoopUnrollAndJamPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopUnswitchPass(PM)
-    @apicall(:LLVMAddLoopUnswitchPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLoopUnswitchPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLowerAtomicPass(PM)
-    @apicall(:LLVMAddLowerAtomicPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLowerAtomicPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddMemCpyOptPass(PM)
-    @apicall(:LLVMAddMemCpyOptPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddMemCpyOptPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddPartiallyInlineLibCallsPass(PM)
-    @apicall(:LLVMAddPartiallyInlineLibCallsPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddPartiallyInlineLibCallsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddReassociatePass(PM)
-    @apicall(:LLVMAddReassociatePass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddReassociatePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddSCCPPass(PM)
-    @apicall(:LLVMAddSCCPPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddSCCPPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddScalarReplAggregatesPass(PM)
-    @apicall(:LLVMAddScalarReplAggregatesPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddScalarReplAggregatesPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddScalarReplAggregatesPassSSA(PM)
-    @apicall(:LLVMAddScalarReplAggregatesPassSSA, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddScalarReplAggregatesPassSSA,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddScalarReplAggregatesPassWithThreshold(PM, Threshold)
-    @apicall(:LLVMAddScalarReplAggregatesPassWithThreshold, Cvoid, (LLVMPassManagerRef, Cint), PM, Threshold)
+    @runtime_ccall((:LLVMAddScalarReplAggregatesPassWithThreshold,libllvm[]), Cvoid, (LLVMPassManagerRef, Cint), PM, Threshold)
 end
 
 function LLVMAddSimplifyLibCallsPass(PM)
-    @apicall(:LLVMAddSimplifyLibCallsPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddSimplifyLibCallsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddTailCallEliminationPass(PM)
-    @apicall(:LLVMAddTailCallEliminationPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddTailCallEliminationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddConstantPropagationPass(PM)
-    @apicall(:LLVMAddConstantPropagationPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddConstantPropagationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddDemoteMemoryToRegisterPass(PM)
-    @apicall(:LLVMAddDemoteMemoryToRegisterPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddDemoteMemoryToRegisterPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddVerifierPass(PM)
-    @apicall(:LLVMAddVerifierPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddVerifierPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddCorrelatedValuePropagationPass(PM)
-    @apicall(:LLVMAddCorrelatedValuePropagationPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddCorrelatedValuePropagationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddEarlyCSEPass(PM)
-    @apicall(:LLVMAddEarlyCSEPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddEarlyCSEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddEarlyCSEMemSSAPass(PM)
-    @apicall(:LLVMAddEarlyCSEMemSSAPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddEarlyCSEMemSSAPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLowerExpectIntrinsicPass(PM)
-    @apicall(:LLVMAddLowerExpectIntrinsicPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLowerExpectIntrinsicPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddTypeBasedAliasAnalysisPass(PM)
-    @apicall(:LLVMAddTypeBasedAliasAnalysisPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddTypeBasedAliasAnalysisPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddScopedNoAliasAAPass(PM)
-    @apicall(:LLVMAddScopedNoAliasAAPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddScopedNoAliasAAPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddBasicAliasAnalysisPass(PM)
-    @apicall(:LLVMAddBasicAliasAnalysisPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddBasicAliasAnalysisPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddUnifyFunctionExitNodesPass(PM)
-    @apicall(:LLVMAddUnifyFunctionExitNodesPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddUnifyFunctionExitNodesPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 
@@ -4760,15 +4760,15 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMAddLowerSwitchPass(PM)
-    @apicall(:LLVMAddLowerSwitchPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLowerSwitchPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddPromoteMemoryToRegisterPass(PM)
-    @apicall(:LLVMAddPromoteMemoryToRegisterPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddPromoteMemoryToRegisterPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddAddDiscriminatorsPass(PM)
-    @apicall(:LLVMAddAddDiscriminatorsPass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddAddDiscriminatorsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 
@@ -4776,9 +4776,9 @@ end
 # Automatically generated using Clang.jl
 
 function LLVMAddLoopVectorizePass(PM)
-    @apicall(:LLVMAddLoopVectorizePass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddLoopVectorizePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddSLPVectorizePass(PM)
-    @apicall(:LLVMAddSLPVectorizePass, Cvoid, (LLVMPassManagerRef,), PM)
+    @runtime_ccall((:LLVMAddSLPVectorizePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
