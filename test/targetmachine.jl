@@ -1,7 +1,7 @@
 @testset "targetmachine" begin
 
 host_triple = triple()
-host_t = Target(host_triple)
+host_t = Target(triple=host_triple)
 
 let
     tm = TargetMachine(host_t, host_triple)

@@ -1,7 +1,13 @@
 # deprecated methods
 
-import Base: get
-
-@deprecate get(set::TargetSet, name::String) getindex(set, name)
-
 @deprecate FunctionType(rettyp, params, vararg) FunctionType(rettyp, params; vararg=vararg)
+
+# Target non-kwarg constructor
+@deprecate Target(triple::String) Target(; triple=triple)
+
+# TargetIterator dict-like behavior
+import Base: haskey, getindex, get
+@deprecate get(set::TargetIterator, name::String) getindex(set, name)
+@deprecate haskey(::TargetIterator, name::String) Target(;name=name) !== nothing
+@deprecate getindex(iter::TargetIterator, name::String) Target(;name=name)
+@deprecate get(::TargetIterator, name::String, default) try Target(;name=name) catch; default end

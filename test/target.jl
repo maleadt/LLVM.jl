@@ -1,8 +1,9 @@
 @testset "target" begin
-    @test_throws LLVMException Target("invalid")
+    @test_throws ArgumentError Target(triple="invalid")
+    @test_throws ArgumentError Target(name="invalid")
 
     host_triple = triple()
-    host_t = Target(host_triple)
+    host_t = Target(triple=host_triple)
 
     host_name = name(host_t)
     description(host_t)
@@ -13,12 +14,8 @@
 
     # target iteration
     let ts = targets()
-        @test haskey(ts, host_name)
-        @test ts[host_name] == host_t
-
-        @test !haskey(ts, "invalid")
-        @test get(ts, "invalid", "dummy") == "dummy"
-        @test_throws KeyError ts["invalid"]
+        @test !isempty(ts)
+        @test host_t in ts
 
         @test eltype(ts) == Target
 

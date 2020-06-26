@@ -9,17 +9,29 @@ export Target,
 end
 reftype(::Type{Target}) = API.LLVMTargetRef
 
-function Target(triple::String)
-    out_ref = Ref{API.LLVMTargetRef}()
-    out_error = Ref{Cstring}()
-    status = convert(Core.Bool, API.LLVMGetTargetFromTriple(triple, out_ref, out_error))
+function Target(; name=nothing, triple=nothing)
+    (name !== nothing) ⊻ (triple !== nothing) ||
+        throw(ArgumentError("Specify either name or triple."))
 
-    if status
-        error = unsafe_message(out_error[])
-        throw(LLVMException(error))
+    if triple !== nothing
+        target_ref = Ref{API.LLVMTargetRef}(0)
+        error_ref = Ref{Cstring}(C_NULL)
+        status = convert(Core.Bool, API.LLVMGetTargetFromTriple(triple, target_ref, error_ref))
+        if status && error_ref[] !== C_NULL
+            error = unsafe_message(error_ref[])
+            throw(ArgumentError(error))
+        elseif status
+            throw(ArgumentError("Cannot find a target for triple '$triple'"))
+        end
+        @assert target_ref[] != C_NULL
+        return Target(target_ref[])
+    elseif name !== nothing
+        target = API.LLVMGetTargetFromName(name)
+        if target == C_NULL
+            throw(ArgumentError("Cannot find target '$triple'"))
+        end
+        return Target(target)
     end
-
-    return Target(out_ref[])
 end
 
 name(t::Target) = unsafe_string(API.LLVMGetTargetName(ref(t)))
@@ -30,32 +42,23 @@ hasjit(t::Target) = convert(Core.Bool, API.LLVMTargetHasJIT(ref(t)))
 hastargetmachine(t::Target) = convert(Core.Bool, API.LLVMTargetHasTargetMachine(ref(t)))
 hasasmparser(t::Target) = convert(Core.Bool, API.LLVMTargetHasAsmBackend(ref(t)))
 
-# target iteration
+function Base.show(io::IO, ::MIME"text/plain", target::Target)
+  print(io, "LLVM.Target($(name(target))): $(description(target))")
+end
+
+
+## target iteration
 
 export targets
 
-struct TargetSet end
+struct TargetIterator end
 
-targets() = TargetSet()
+targets() = TargetIterator()
 
-Base.eltype(::TargetSet) = Target
+Base.eltype(::TargetIterator) = Target
 
-function Base.haskey(::TargetSet, name::String)
-    return API.LLVMGetTargetFromName(name) != C_NULL
-end
-
-function Base.get(::TargetSet, name::String, default)
-    objref = API.LLVMGetTargetFromName(name)
-    return objref == C_NULL ? default : Target(objref)
-end
-
-function Base.getindex(targetset::TargetSet, name::String)
-    f = get(targetset, name, nothing)
-    return f == nothing ? throw(KeyError(name)) : f
-end
-
-function Base.iterate(iter::TargetSet, state=API.LLVMGetFirstTarget())
+function Base.iterate(iter::TargetIterator, state=API.LLVMGetFirstTarget())
     state == C_NULL ? nothing : (Target(state), API.LLVMGetNextTarget(state))
 end
 
-Base.IteratorSize(::TargetSet) = Base.SizeUnknown()
+Base.IteratorSize(::TargetIterator) = Base.SizeUnknown()
