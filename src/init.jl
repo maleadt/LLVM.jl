@@ -17,6 +17,8 @@ end
 
 ## back-end initialization
 
+export backends
+
 const libllvm_backends = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai,
                           :MSP430, :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ,
                           :WebAssembly, :X86, :XCore]

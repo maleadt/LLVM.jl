@@ -89,7 +89,7 @@ ModulePassManager() do pm
     internalize!(pm, false)
     internalize!(pm, ["SomeFunction", "SomeOtherFunction"])
 
-    if :NVPTX in LLVM.backends() && VERSION <= v"1.5.0-DEV.138"
+    if :NVPTX in backends() && VERSION <= v"1.5.0-DEV.138"
         nvvm_reflect!(pm)
     end
 end
