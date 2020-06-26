@@ -4,43 +4,43 @@
 # initialization functions
 
 function LLVMInitializeAllTargetInfos()
-    @apicall(:LLVMExtraInitializeAllTargetInfos,Cvoid,())
+    ccall(:LLVMExtraInitializeAllTargetInfos,Cvoid,())
 end
 
 function LLVMInitializeAllTargets()
-    @apicall(:LLVMExtraInitializeAllTargets,Cvoid,())
+    ccall(:LLVMExtraInitializeAllTargets,Cvoid,())
 end
 
 function LLVMInitializeAllTargetMCs()
-    @apicall(:LLVMExtraInitializeAllTargetMCs,Cvoid,())
+    ccall(:LLVMExtraInitializeAllTargetMCs,Cvoid,())
 end
 
 function LLVMInitializeAllAsmPrinters()
-    @apicall(:LLVMExtraInitializeAllAsmPrinters,Cvoid,())
+    ccall(:LLVMExtraInitializeAllAsmPrinters,Cvoid,())
 end
 
 function LLVMInitializeAllAsmParsers()
-    @apicall(:LLVMExtraInitializeAllAsmParsers,Cvoid,())
+    ccall(:LLVMExtraInitializeAllAsmParsers,Cvoid,())
 end
 
 function LLVMInitializeAllDisassemblers()
-    @apicall(:LLVMExtraInitializeAllDisassemblers,Cvoid,())
+    ccall(:LLVMExtraInitializeAllDisassemblers,Cvoid,())
 end
 
 function LLVMInitializeNativeTarget()
-    @apicall(:LLVMExtraInitializeNativeTarget,LLVMBool,())
+    ccall(:LLVMExtraInitializeNativeTarget,LLVMBool,())
 end
 
 function LLVMInitializeNativeAsmPrinter()
-    @apicall(:LLVMExtraInitializeNativeAsmPrinter,LLVMBool,())
+    ccall(:LLVMExtraInitializeNativeAsmPrinter,LLVMBool,())
 end
 
 function LLVMInitializeNativeAsmParser()
-    @apicall(:LLVMExtraInitializeNativeAsmParser,LLVMBool,())
+    ccall(:LLVMExtraInitializeNativeAsmParser,LLVMBool,())
 end
 
 function LLVMInitializeNativeDisassembler()
-    @apicall(:LLVMExtraInitializeNativeDisassembler,LLVMBool,())
+    ccall(:LLVMExtraInitializeNativeDisassembler,LLVMBool,())
 end
 
 
@@ -52,25 +52,25 @@ end
 const LLVMPassRef = Ptr{LLVMOpaquePass}
 
 function LLVMAddPass(PM::LLVMPassManagerRef, P::LLVMPassRef)
-    @apicall(:LLVMExtraAddPass,Cvoid,
+    ccall(:LLVMExtraAddPass,Cvoid,
         (LLVMPassManagerRef, LLVMPassRef),
         PM, P)
 end
 
 function LLVMCreateModulePass(Name, Callback)
-    @apicall(:LLVMExtraCreateModulePass,LLVMPassRef,
+    ccall(:LLVMExtraCreateModulePass,LLVMPassRef,
         (Cstring, Any),
         Name, Callback)
 end
 
 function LLVMCreateFunctionPass(Name, Callback)
-    @apicall(:LLVMExtraCreateFunctionPass,LLVMPassRef,
+    ccall(:LLVMExtraCreateFunctionPass,LLVMPassRef,
         (Cstring, Any),
         Name, Callback)
 end
 
 function LLVMCreateBasicBlockPass(Name, Callback)
-    @apicall(:LLVMExtraCreateBasicBlockPass,LLVMPassRef,
+    ccall(:LLVMExtraCreateBasicBlockPass,LLVMPassRef,
         (Cstring, Any),
         Name, Callback)
 end
@@ -79,104 +79,104 @@ end
 # various missing functions
 
 function LLVMAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
-    @apicall(:LLVMExtraAddInternalizePassWithExportList,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
+    ccall(:LLVMExtraAddInternalizePassWithExportList,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
 end
 
 function LLVMAddTargetLibraryInfoByTriple(Triple, PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddTargetLibraryInfoByTiple,Cvoid,(Cstring, LLVMPassManagerRef), Triple, PM)
+    ccall(:LLVMExtraAddTargetLibraryInfoByTiple,Cvoid,(Cstring, LLVMPassManagerRef), Triple, PM)
 end
 
 if VERSION < v"1.2.0-DEV.531"
 function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
-    @apicall(:LLVMExtraAddMVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddMVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 else
 
 if version() < v"8.0"
     function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
-        @apicall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
+        ccall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
     end
 else
     function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
-        @apicall(:LLVMExtraAddNVVMReflectFunctionPass,Cvoid,(LLVMPassManagerRef, Cuint), PM, smversion)
+        ccall(:LLVMExtraAddNVVMReflectFunctionPass,Cvoid,(LLVMPassManagerRef, Cuint), PM, smversion)
     end
 end
 
 function LLVMAddAllocOptPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddAllocOptPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddAllocOptPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddBarrierNoopPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddBarrierNoopPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddBarrierNoopPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddGCInvariantVerifierPass(PM::LLVMPassManagerRef, Strong)
-    @apicall(:LLVMExtraAddGCInvariantVerifierPass,Cvoid,(LLVMPassManagerRef,LLVMBool), PM, Strong)
+    ccall(:LLVMExtraAddGCInvariantVerifierPass,Cvoid,(LLVMPassManagerRef,LLVMBool), PM, Strong)
 end
 
 function LLVMAddLowerExcHandlersPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddLowerExcHandlersPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddLowerExcHandlersPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddCombineMulAddPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddCombineMulAddPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddCombineMulAddPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddMultiVersioningPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddMultiVersioningPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddMultiVersioningPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddPropagateJuliaAddrspaces(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddPropagateJuliaAddrspaces,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddPropagateJuliaAddrspaces,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLowerPTLSPass(PM::LLVMPassManagerRef, imaging_mode)
-    @apicall(:LLVMExtraAddLowerPTLSPass,Cvoid,(LLVMPassManagerRef,LLVMBool), PM, imaging_mode)
+    ccall(:LLVMExtraAddLowerPTLSPass,Cvoid,(LLVMPassManagerRef,LLVMBool), PM, imaging_mode)
 end
 
 function LLVMAddLowerSimdLoopPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddLowerSimdLoopPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddLowerSimdLoopPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLateLowerGCFramePass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddLateLowerGCFramePass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddLateLowerGCFramePass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 end
 
 if VERSION >= v"1.3.0-DEV.95"
 function LLVMAddFinalLowerGCPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddFinalLowerGCPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddFinalLowerGCPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 end
 
 if VERSION >= v"1.5.0-DEV.802"
 function LLVMAddRemoveJuliaAddrspacesPass(PM::LLVMPassManagerRef)
-    @apicall(:LLVMExtraAddRemoveJuliaAddrspacesPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddRemoveJuliaAddrspacesPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 end
 
 function LLVMGetValueContext(V::LLVMValueRef)
-    @apicall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
+    ccall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end
 
 if VERSION >= v"0.7.0-alpha.37"
 function LLVMGetSourceLocation(V::LLVMValueRef, index, Name, Filename, Line, Column)
-    @apicall(:LLVMExtraGetSourceLocation,Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
+    ccall(:LLVMExtraGetSourceLocation,Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
 end
 end
 
 if VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")
 function LLVMExtraAppendToUsed(Mod::LLVMModuleRef, Values, Count)
-    @apicall(:LLVMExtraAppendToUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
+    ccall(:LLVMExtraAppendToUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
 end
 
 function LLVMExtraAppendToCompilerUsed(Mod::LLVMModuleRef, Values, Count)
-    @apicall(:LLVMExtraAppendToCompilerUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
+    ccall(:LLVMExtraAppendToCompilerUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
 end
 
 function LLVMExtraAddGenericAnalysisPasses(PM)
-    @apicall(:LLVMExtraAddGenericAnalysisPasses, Cvoid, (LLVMPassManagerRef,), PM)
+    ccall(:LLVMExtraAddGenericAnalysisPasses, Cvoid, (LLVMPassManagerRef,), PM)
 end
 end
 
