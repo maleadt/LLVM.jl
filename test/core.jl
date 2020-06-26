@@ -421,10 +421,12 @@ LLVM.Module("SomeModule", ctx) do mod
 
     show(devnull, gv)
 
-    @test_throws UndefRefError initializer(gv)
+    @test initializer(gv) === nothing
     init = ConstantInt(Int32(0), ctx)
     initializer!(gv, init)
     @test initializer(gv) == init
+    initializer!(gv, nothing)
+    @test initializer(gv) === nothing
 
     @test !isthreadlocal(gv)
     threadlocal!(gv, true)
