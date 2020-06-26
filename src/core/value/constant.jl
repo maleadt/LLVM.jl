@@ -217,10 +217,14 @@ GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer) =
 
 unsafe_delete!(::Module, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(gv))
 
-initializer(gv::GlobalVariable) =
-  Value(API.LLVMGetInitializer(ref(gv)))
+function initializer(gv::GlobalVariable)
+    init = API.LLVMGetInitializer(ref(gv))
+    init == C_NULL ? nothing : Value(init)
+end
 initializer!(gv::GlobalVariable, val::Constant) =
   API.LLVMSetInitializer(ref(gv), ref(val))
+initializer!(gv::GlobalVariable, ::Nothing) =
+  API.LLVMSetInitializer(ref(gv), C_NULL)
 
 isthreadlocal(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsThreadLocal(ref(gv)))
 threadlocal!(gv::GlobalVariable, bool) =
