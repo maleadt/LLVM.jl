@@ -94,3 +94,33 @@ Base.unsafe_load(ptr::Core.LLVMPtr, i::Integer=1, align::Val=Val(1)) =
 
 Base.unsafe_store!(ptr::Core.LLVMPtr{T}, x, i::Integer=1, align::Val=Val(1)) where {T} =
     pointerset(ptr, convert(T, x), Int(i), align)
+
+
+# pointer operations
+
+# NOTE: this is type-pirating; move functionality upstream
+
+LLVMPtr{T,A}(x::Union{Int,UInt,Ptr}) where {T,A} = reinterpret(LLVMPtr{T,A}, x)
+LLVMPtr{T,A}() where {T,A} = LLVMPtr{T,A}(0)
+
+# conversions from and to integers
+Base.UInt(x::LLVMPtr) = reinterpret(UInt, x)
+Base.Int(x::LLVMPtr) = reinterpret(Int, x)
+Base.convert(::Type{LLVMPtr{T,A}}, x::Union{Int,UInt}) where {T,A} =
+    reinterpret(LLVMPtr{T,A}, x)
+
+Base.isequal(x::LLVMPtr, y::LLVMPtr) = (x === y)
+Base.isless(x::LLVMPtr{T,A}, y::LLVMPtr{T,A}) where {T,A} = x < y
+
+Base.:(==)(x::LLVMPtr{<:Any,A}, y::LLVMPtr{<:Any,A}) where {A} = UInt(x) == UInt(y)
+Base.:(<)(x::LLVMPtr{<:Any,A},  y::LLVMPtr{<:Any,A}) where {A} = UInt(x) < UInt(y)
+Base.:(==)(x::LLVMPtr, y::LLVMPtr) = false
+
+Base.:(-)(x::LLVMPtr{<:Any,A},  y::LLVMPtr{<:Any,A}) where {A} = UInt(x) - UInt(y)
+
+Base.:(+)(x::LLVMPtr, y::Integer) = oftype(x, Base.add_ptr(UInt(x), (y % UInt) % UInt))
+Base.:(-)(x::LLVMPtr, y::Integer) = oftype(x, Base.sub_ptr(UInt(x), (y % UInt) % UInt))
+Base.:(+)(x::Integer, y::LLVMPtr) = y + x
+
+Base.unsigned(x::LLVMPtr) = UInt(x)
+Base.signed(x::LLVMPtr) = Int(x)

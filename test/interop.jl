@@ -129,18 +129,64 @@ end
 
 VERSION >= v"1.5-" && @testset "pointer" begin
 
-a = Int64[1]
-ptr = reinterpret(Core.LLVMPtr{Int64,0}, pointer(a))
-@test unsafe_load(ptr) == 1
-unsafe_store!(ptr, 2)
-@test unsafe_load(ptr) == 2
+using Core: LLVMPtr
 
-ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr)}))
-@test contains(ir, r"@julia_unsafe_load_\d+\(i8\*\)")
-@test contains(ir, r"load i64, i64\* %\d+, align 1")
+@testset "pointer operations" begin
+    a = LLVMPtr{Int,0}(0)
+    b = LLVMPtr{Int,0}(1)
+    c = LLVMPtr{UInt,0}(0)
+    d = LLVMPtr{UInt,0}(1)
+    e = LLVMPtr{Int,1}(0)
+    f = LLVMPtr{Int,1}(1)
 
-ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr), Int, Val{4}}))
-@test contains(ir, r"load i64, i64\* %\d+, align 4")
+    @test UInt(a) == 0
+    @test UInt(f) == 1
+
+    @test isequal(a,a)
+    @test !isequal(a,b)
+    @test !isequal(a,c)
+    @test !isequal(a,d)
+    @test !isequal(a,e)
+    @test !isequal(a,f)
+
+    @test a == a
+    @test a != b
+    @test a == c
+    @test a != d
+    @test a != e
+    @test a != f
+
+    @test a < b
+    @test a < d
+    @test_throws MethodError a < f
+
+    @test b - a == 1
+    @test d - a == 1
+    @test_throws MethodError  f - a
+
+    @test a + 1 == b
+    @test c + 1 == d
+    @test e + 1 == f
+
+    @test b - 1 == a
+    @test d - 1 == c
+    @test f - 1 == e
+end
+
+@testset "unsafe_load" begin
+    a = Int64[1]
+    ptr = reinterpret(Core.LLVMPtr{Int64,0}, pointer(a))
+    @test unsafe_load(ptr) == 1
+    unsafe_store!(ptr, 2)
+    @test unsafe_load(ptr) == 2
+
+    ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr)}))
+    @test contains(ir, r"@julia_unsafe_load_\d+\(i8\*\)")
+    @test contains(ir, r"load i64, i64\* %\d+, align 1")
+
+    ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr), Int, Val{4}}))
+    @test contains(ir, r"load i64, i64\* %\d+, align 4")
+end
 
 @testset "reinterpret(Nothing, nothing)" begin
     ptr = reinterpret(Core.LLVMPtr{Nothing,0}, C_NULL)
