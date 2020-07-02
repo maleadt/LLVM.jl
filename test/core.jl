@@ -700,18 +700,26 @@ end
 
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
-    intr = Intrinsic("llvm.sin")
+    intr_ft = LLVM.FunctionType(LLVM.DoubleType(ctx), [LLVM.DoubleType(ctx)])
+    intr_fn = LLVM.Function(mod, "llvm.sin.f64", intr_ft)
+    @test isintrinsic(intr_fn)
+
+    intr = Intrinsic(intr_fn)
     @test isoverloaded(intr)
+
+    if LLVM.version() >= v"9"
+        @test intr == Intrinsic("llvm.sin")
+    end
 
     @test name(intr) == "llvm.sin"
     @test name(intr, [LLVM.DoubleType(ctx)]) == "llvm.sin.f64"
 
     ft = FunctionType(intr, [LLVM.DoubleType(ctx)])
+    @test ft isa FunctionType
     @test return_type(ft) == LLVM.DoubleType(ctx)
-    @test isempty(functions(mod))
 
     fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
-    @test first(functions(mod)) == fn
+    @test fn isa LLVM.Function
     @test eltype(llvmtype(fn)) == ft
     @test isintrinsic(fn)
 end
