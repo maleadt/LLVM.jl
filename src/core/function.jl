@@ -1,7 +1,7 @@
 export unsafe_delete!,
        personality, personality!,
        callconv, callconv!,
-       gc, gc!, intrinsic_id,
+       gc, gc!,
        entry
 
 # forward declaration of Function in src/core/basicblock.jl
@@ -18,8 +18,6 @@ function personality(f::Function)
 end
 personality!(f::Function, persfn::Union{Nothing,Function}) =
     API.LLVMSetPersonalityFn(ref(f), persfn===nothing ? C_NULL : ref(persfn))
-
-intrinsic_id(f::Function) = API.LLVMGetIntrinsicID(ref(f))
 
 callconv(f::Function) = API.LLVMGetFunctionCallConv(ref(f))
 callconv!(f::Function, cc) = API.LLVMSetFunctionCallConv(ref(f), cc)
@@ -142,3 +140,55 @@ function Base.collect(iter::FunctionBlockSet)
     API.LLVMGetBasicBlocks(ref(iter.f), elems)
     return BasicBlock[BasicBlock(elem) for elem in elems]
 end
+
+# intrinsics
+
+export isintrinsic, Intrinsic, isoverloaded, declaration
+
+isintrinsic(f::Function) = API.LLVMGetIntrinsicID(ref(f)) != 0
+
+struct Intrinsic
+    id::UInt32
+
+    function Intrinsic(name::String)
+        new(API.LLVMLookupIntrinsicID(name, length(name)))
+    end
+
+    function Intrinsic(f::Function)
+        id = API.LLVMGetIntrinsicID(ref(f))
+        id == 0 && throw(ArgumentError("Function is not an intrinsic"))
+        new(id)
+    end
+end
+
+Base.convert(::Type{UInt32}, intr::Intrinsic) = intr.id
+
+function name(intr::Intrinsic)
+    len = Ref{Csize_t}()
+    str = API.LLVMIntrinsicGetName(intr, len)
+    unsafe_string(convert(Ptr{Cchar}, str), len[])
+end
+
+function name(intr::Intrinsic, params::Vector{<:LLVMType})
+    len = Ref{Csize_t}()
+    str = API.LLVMIntrinsicCopyOverloadedName(intr, ref.(params), length(params), len)
+    unsafe_message(convert(Ptr{Cchar}, str), len[])
+end
+
+function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[];
+                  ctx::Context=GlobalContext())
+    LLVMType(API.LLVMIntrinsicGetType(ref(ctx), intr, ref.(params), length(params)))
+end
+
+function Function(mod::Module, intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[])
+    Value(API.LLVMGetIntrinsicDeclaration(ref(mod), intr, ref.(params), length(params)))
+end
+
+function Base.show(io::IO, intr::Intrinsic)
+    print(io, "Intrinsic($(intr.id)): \"$(name(intr))\"")
+    if isoverloaded(intr)
+        print(io, " (overloaded)")
+    end
+end
+
+isoverloaded(intr::Intrinsic) = convert(Core.Bool, API.LLVMIntrinsicIsOverloaded(intr))
