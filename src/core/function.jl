@@ -150,45 +150,56 @@ isintrinsic(f::Function) = API.LLVMGetIntrinsicID(ref(f)) != 0
 struct Intrinsic
     id::UInt32
 
-    function Intrinsic(name::String)
-        new(API.LLVMLookupIntrinsicID(name, length(name)))
-    end
-
     function Intrinsic(f::Function)
         id = API.LLVMGetIntrinsicID(ref(f))
         id == 0 && throw(ArgumentError("Function is not an intrinsic"))
         new(id)
+    end
+
+    function Intrinsic(name::String)
+        @assert version() >= v"9"
+        new(API.LLVMLookupIntrinsicID(name, length(name)))
     end
 end
 
 Base.convert(::Type{UInt32}, intr::Intrinsic) = intr.id
 
 function name(intr::Intrinsic)
+    @assert version() >= v"8"
     len = Ref{Csize_t}()
     str = API.LLVMIntrinsicGetName(intr, len)
     unsafe_string(convert(Ptr{Cchar}, str), len[])
 end
 
 function name(intr::Intrinsic, params::Vector{<:LLVMType})
+    @assert version() >= v"8"
     len = Ref{Csize_t}()
     str = API.LLVMIntrinsicCopyOverloadedName(intr, ref.(params), length(params), len)
     unsafe_message(convert(Ptr{Cchar}, str), len[])
 end
 
-function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[];
-                  ctx::Context=GlobalContext())
-    LLVMType(API.LLVMIntrinsicGetType(ref(ctx), intr, ref.(params), length(params)))
+function isoverloaded(intr::Intrinsic)
+    @assert version() >= v"8"
+    convert(Core.Bool, API.LLVMIntrinsicIsOverloaded(intr))
 end
 
 function Function(mod::Module, intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[])
+    @assert version() >= v"8"
     Value(API.LLVMGetIntrinsicDeclaration(ref(mod), intr, ref.(params), length(params)))
 end
 
-function Base.show(io::IO, intr::Intrinsic)
-    print(io, "Intrinsic($(intr.id)): \"$(name(intr))\"")
-    if isoverloaded(intr)
-        print(io, " (overloaded)")
-    end
+function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[];
+                  ctx::Context=GlobalContext())
+    @assert version() >= v"8"
+    LLVMType(API.LLVMIntrinsicGetType(ref(ctx), intr, ref.(params), length(params)))
 end
 
-isoverloaded(intr::Intrinsic) = convert(Core.Bool, API.LLVMIntrinsicIsOverloaded(intr))
+function Base.show(io::IO, intr::Intrinsic)
+    print(io, "Intrinsic($(intr.id))")
+    if version() >= v"8"
+        print(io, ": \"$(name(intr))\"")
+        if isoverloaded(intr)
+            print(io, " (overloaded)")
+        end
+    end
+end
