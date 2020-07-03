@@ -16,16 +16,16 @@ Base.eltype(::UserOperandSet) = Value
 
 function Base.getindex(iter::UserOperandSet, i::Integer)   # TODO: otherwise unitrange indexing errors
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
-    return Value(API.LLVMGetOperand(ref(iter.user), i-1))
+    return Value(API.LLVMGetOperand(iter.user, i-1))
 end
 
 Base.setindex!(iter::UserOperandSet, val::Value, i) =
-    API.LLVMSetOperand(ref(iter.user), i-1, ref(val))
+    API.LLVMSetOperand(iter.user, i-1, val)
 
 function Base.iterate(iter::UserOperandSet, i=1)
     i >= length(iter) + 1 ? nothing : (iter[i], i+1)
 end
 
-Base.length(iter::UserOperandSet) = API.LLVMGetNumOperands(ref(iter.user))
+Base.length(iter::UserOperandSet) = API.LLVMGetNumOperands(iter.user)
 
 Base.lastindex(iter::UserOperandSet) = length(iter)

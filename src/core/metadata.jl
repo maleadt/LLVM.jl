@@ -1,7 +1,7 @@
 export MDString, MDNode, operands, Metadata
 
 @checked struct MetadataAsValue <: Value
-    ref::reftype(Value)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMMetadataAsValueValueKind}) = MetadataAsValue
 
@@ -13,11 +13,11 @@ const MDString = MetadataAsValue
 MDString(val::String) = MDString(API.LLVMMDString(val, length(val)))
 
 MDString(val::String, ctx::Context) =
-    MDString(API.LLVMMDStringInContext(ref(ctx), val, length(val)))
+    MDString(API.LLVMMDStringInContext(ctx, val, length(val)))
 
 function Base.convert(::Type{String}, md::MDString)
     len = Ref{Cuint}()
-    ptr = API.LLVMGetMDString(ref(md), len)
+    ptr = API.LLVMGetMDString(md, len)
     ptr == C_NULL && throw(ArgumentError("invalid metadata, not a MDString?"))
     return unsafe_string(convert(Ptr{Int8}, ptr), len[])
 end
@@ -25,16 +25,16 @@ end
 
 const MDNode = MetadataAsValue
 
-MDNode(vals::Vector{T}) where {T<:Value} =
-    MDNode(API.LLVMMDNode(ref.(vals), length(vals)))
+MDNode(vals::Vector{<:Value}) =
+    MDNode(API.LLVMMDNode(vals, length(vals)))
 
-MDNode(vals::Vector{T}, ctx::Context) where {T<:Value} =
-    MDNode(API.LLVMMDNodeInContext(ref(ctx), ref.(vals), length(vals)))
+MDNode(vals::Vector{<:Value}, ctx::Context) =
+    MDNode(API.LLVMMDNodeInContext(ctx, vals, length(vals)))
 
 function operands(md::MDNode)
-    nops = API.LLVMGetMDNodeNumOperands(ref(md))
+    nops = API.LLVMGetMDNodeNumOperands(md)
     ops = Vector{API.LLVMValueRef}(undef, nops)
-    API.LLVMGetMDNodeOperands(ref(md), ops)
+    API.LLVMGetMDNodeOperands(md, ops)
     return Value[Value(op) for op in ops]
 end
 
@@ -42,12 +42,13 @@ end
 @checked struct Metadata
     ref::API.LLVMMetadataRef
 end
-reftype(::Type{Metadata}) = API.LLVMMetadataRef
+
+Base.unsafe_convert(::Type{API.LLVMMetadataRef}, md::Metadata) = md.ref
 
 function Metadata(val::Value)
-    return Metadata(LLVM.API.LLVMValueAsMetadata(ref(val)))
+    return Metadata(LLVM.API.LLVMValueAsMetadata(val))
 end
 
 function Value(md::Metadata, ctx::Context)
-    return MetadataAsValue(API.LLVMMetadataAsValue(ref(ctx), ref(md)))
+    return MetadataAsValue(API.LLVMMetadataAsValue(ctx, md))
 end

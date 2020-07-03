@@ -7,7 +7,8 @@ export Target,
 @checked struct Target
     ref::API.LLVMTargetRef
 end
-reftype(::Type{Target}) = API.LLVMTargetRef
+
+Base.unsafe_convert(::Type{API.LLVMTargetRef}, target::Target) = target.ref
 
 function Target(; name=nothing, triple=nothing)
     (name !== nothing) ⊻ (triple !== nothing) ||
@@ -34,13 +35,13 @@ function Target(; name=nothing, triple=nothing)
     end
 end
 
-name(t::Target) = unsafe_string(API.LLVMGetTargetName(ref(t)))
+name(t::Target) = unsafe_string(API.LLVMGetTargetName(t))
 
-description(t::Target) = unsafe_string(API.LLVMGetTargetDescription(ref(t)))
+description(t::Target) = unsafe_string(API.LLVMGetTargetDescription(t))
 
-hasjit(t::Target) = convert(Core.Bool, API.LLVMTargetHasJIT(ref(t)))
-hastargetmachine(t::Target) = convert(Core.Bool, API.LLVMTargetHasTargetMachine(ref(t)))
-hasasmparser(t::Target) = convert(Core.Bool, API.LLVMTargetHasAsmBackend(ref(t)))
+hasjit(t::Target) = convert(Core.Bool, API.LLVMTargetHasJIT(t))
+hastargetmachine(t::Target) = convert(Core.Bool, API.LLVMTargetHasTargetMachine(t))
+hasasmparser(t::Target) = convert(Core.Bool, API.LLVMTargetHasAsmBackend(t))
 
 function Base.show(io::IO, ::MIME"text/plain", target::Target)
   print(io, "LLVM.Target($(name(target))): $(description(target))")

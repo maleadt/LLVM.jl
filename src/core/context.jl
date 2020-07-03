@@ -5,7 +5,8 @@ export Context, dispose, GlobalContext
 @checked struct Context
     ref::API.LLVMContextRef
 end
-reftype(::Type{Context}) = API.LLVMContextRef
+
+Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 
 function Context()
     ctx = Context(API.LLVMContextCreate())
@@ -13,7 +14,7 @@ function Context()
     ctx
 end
 
-dispose(ctx::Context) = API.LLVMContextDispose(ref(ctx))
+dispose(ctx::Context) = API.LLVMContextDispose(ctx)
 
 function Context(f::Core.Function)
     ctx = Context()
@@ -47,10 +48,11 @@ export DiagnosticInfo, severity, message
 @checked struct DiagnosticInfo
     ref::API.LLVMDiagnosticInfoRef
 end
-reftype(::Type{DiagnosticInfo}) = API.LLVMDiagnosticInfoRef
 
-severity(di::DiagnosticInfo) = API.LLVMGetDiagInfoSeverity(ref(di))
-message(di::DiagnosticInfo) = unsafe_message(API.LLVMGetDiagInfoDescription(ref(di)))
+Base.unsafe_convert(::Type{API.LLVMDiagnosticInfoRef}, di::DiagnosticInfo) = di.ref
+
+severity(di::DiagnosticInfo) = API.LLVMGetDiagInfoSeverity(di)
+message(di::DiagnosticInfo) = unsafe_message(API.LLVMGetDiagInfoDescription(di))
 
 
 ## handlers
@@ -90,11 +92,11 @@ function _install_handlers(ctx::Context)
     # set yield callback
     callback = @cfunction(yield_callback, Cvoid, (Context, Ptr{Cvoid}))
     # NOTE: disabled until proven safe
-    #API.LLVMContextSetYieldCallback(ref(ctx), callback, C_NULL)
+    #API.LLVMContextSetYieldCallback(ctx, callback, C_NULL)
 
     # set diagnostic callback
     handler = @cfunction(handle_diagnostic, Cvoid, (API.LLVMDiagnosticInfoRef, Ptr{Cvoid}))
-    API.LLVMContextSetDiagnosticHandler(ref(ctx), handler, C_NULL)
+    API.LLVMContextSetDiagnosticHandler(ctx, handler, C_NULL)
 
     return nothing
 end

@@ -144,6 +144,7 @@ Context() do ctx
             @test convert(Int, res) == 3
             dispose(res)
         end
+        @test_throws UndefRefError show(mod)
     end
 
     dispose.(args)
@@ -155,6 +156,7 @@ Context() do ctx
             @test convert(Int, res) == 42
             dispose(res)
         end
+        @test_throws UndefRefError show(mod)
     end
 
     let mod = emit_retint(ctx, 42)
@@ -164,6 +166,7 @@ Context() do ctx
             @test convert(Int, res) == 42
             dispose(res)
         end
+        @test_throws UndefRefError show(mod)
     end
 
     args1 =

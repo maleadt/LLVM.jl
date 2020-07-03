@@ -1,7 +1,7 @@
 module Interop
 
 using ..LLVM
-import ..LLVM: API, ref
+import ..LLVM: API
 
 
 const jlctx = Ref{LLVM.Context}()

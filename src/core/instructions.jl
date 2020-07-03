@@ -10,13 +10,11 @@ identify(::Type{Instruction}, ref::API.LLVMValueRef) =
     identify(Instruction, Val{API.LLVMGetInstructionOpcode(ref)}())
 identify(::Type{Instruction}, ::Val{K}) where {K} = error("Unknown instruction kind $K")
 
-@inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
+@inline function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
-    if Base.JLOptions().debug_level >= 2
-        T′ = identify(Instruction, ref)
-        if T != T′
-            error("invalid conversion of $T′ instruction reference to $T")
-        end
+    T′ = identify(Instruction, ref)
+    if T != T′
+        error("invalid conversion of $T′ instruction reference to $T")
     end
 end
 
@@ -28,20 +26,20 @@ function Instruction(ref::API.LLVMValueRef)
 end
 
 Instruction(inst::Instruction) =
-    Instruction(API.LLVMInstructionClone(ref(inst)))
+    Instruction(API.LLVMInstructionClone(inst))
 
 unsafe_delete!(::BasicBlock, inst::Instruction) =
-    API.LLVMInstructionEraseFromParent(ref(inst))
+    API.LLVMInstructionEraseFromParent(inst)
 Base.delete!(::BasicBlock, inst::Instruction) =
-    API.LLVMInstructionRemoveFromParent(ref(inst))
+    API.LLVMInstructionRemoveFromParent(inst)
 
 parent(inst::Instruction) =
-    BasicBlock(API.LLVMGetInstructionParent(ref(inst)))
+    BasicBlock(API.LLVMGetInstructionParent(inst))
 
-opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(ref(inst))
+opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(inst)
 
-predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(ref(inst))
-predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(ref(inst))
+predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(inst)
+predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(inst)
 
 
 ## metadata iteration
@@ -80,23 +78,22 @@ end
 metadata(inst::Instruction) = InstructionMetadataDict(inst)
 
 Base.isempty(md::InstructionMetadataDict) =
-  !convert(Core.Bool, API.LLVMHasMetadata(ref(md.inst)))
+  !convert(Core.Bool, API.LLVMHasMetadata(md.inst))
 
 Base.haskey(md::InstructionMetadataDict, kind::MD) =
-  API.LLVMGetMetadata(ref(md.inst), kind) != C_NULL
+  API.LLVMGetMetadata(md.inst, kind) != C_NULL
 
 function Base.getindex(md::InstructionMetadataDict, kind::MD)
-    objref = API.LLVMGetMetadata(ref(md.inst), kind)
+    objref = API.LLVMGetMetadata(md.inst, kind)
     objref == C_NULL && throw(KeyError(name))
     return MetadataAsValue(objref)
   end
 
 Base.setindex!(md::InstructionMetadataDict, node::MetadataAsValue, kind::MD) =
-    API.LLVMSetMetadata(ref(md.inst), kind, ref(node))
+    API.LLVMSetMetadata(md.inst, kind, node)
 
 Base.delete!(md::InstructionMetadataDict, kind::MD) =
-    API.LLVMSetMetadata(ref(md.inst), kind,
-                        convert(reftype(MetadataAsValue), C_NULL))
+    API.LLVMSetMetadata(md.inst, kind, C_NULL)
 
 
 ## instruction types
@@ -116,7 +113,7 @@ for op in opcodes
     enum = Symbol(:LLVM, op)
     @eval begin
         @checked struct $typename <: Instruction
-            ref::reftype(Instruction)
+            ref::API.LLVMValueRef
         end
         identify(::Type{Instruction}, ::Val{API.$enum}) = $typename
     end
@@ -129,31 +126,31 @@ export callconv, callconv!,
        istailcall, tailcall!,
        called_value
 
-callconv(inst::Instruction) = API.LLVMGetInstructionCallConv(ref(inst))
+callconv(inst::Instruction) = API.LLVMGetInstructionCallConv(inst)
 callconv!(inst::Instruction, cc) =
-    API.LLVMSetInstructionCallConv(ref(inst), cc)
+    API.LLVMSetInstructionCallConv(inst, cc)
 
-istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(ref(inst)))
-tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(ref(inst), convert(Bool, bool))
+istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(inst))
+tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(inst, convert(Bool, bool))
 
-called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(ref(inst)))
+called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(inst))
 
 
 ## terminators
 
 export isterminator, isconditional, condition, condition!, default_dest
 
-isterminator(inst::Instruction) = LLVM.API.LLVMIsATerminatorInst(LLVM.ref(inst)) != C_NULL
+isterminator(inst::Instruction) = LLVM.API.LLVMIsATerminatorInst(inst) != C_NULL
 
-isconditional(br::Instruction) = convert(Core.Bool, API.LLVMIsConditional(ref(br)))
+isconditional(br::Instruction) = convert(Core.Bool, API.LLVMIsConditional(br))
 
 condition(br::Instruction) =
-    Value(API.LLVMGetCondition(ref(br)))
+    Value(API.LLVMGetCondition(br))
 condition!(br::Instruction, cond::Value) =
-    API.LLVMSetCondition(ref(br), ref(cond))
+    API.LLVMSetCondition(br, cond)
 
 default_dest(switch::Instruction) =
-    BasicBlock(API.LLVMGetSwitchDefaultDest(ref(switch)))
+    BasicBlock(API.LLVMGetSwitchDefaultDest(switch))
 
 # successor iteration
 
@@ -169,17 +166,17 @@ Base.eltype(::TerminatorSuccessorSet) = BasicBlock
 
 function Base.getindex(iter::TerminatorSuccessorSet, i)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
-    return BasicBlock(API.LLVMGetSuccessor(ref(iter.term), i-1))
+    return BasicBlock(API.LLVMGetSuccessor(iter.term, i-1))
 end
 
 Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
-    API.LLVMSetSuccessor(ref(iter.term), i-1, blockref(bb))
+    API.LLVMSetSuccessor(iter.term, i-1, bb)
 
 function Base.iterate(iter::TerminatorSuccessorSet, i=1)
     i >= length(iter) + 1 ? nothing : (iter[i], i+1)
 end
 
-Base.length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(ref(iter.term))
+Base.length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(iter.term)
 
 Base.lastindex(iter::TerminatorSuccessorSet) = length(iter)
 
@@ -200,16 +197,16 @@ Base.eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
 
 function Base.getindex(iter::PhiIncomingSet, i)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
-    return tuple(Value(API.LLVMGetIncomingValue(ref(iter.phi), i-1)),
-                       BasicBlock(API.LLVMGetIncomingBlock(ref(iter.phi), i-1)))
+    return tuple(Value(API.LLVMGetIncomingValue(iter.phi, i-1)),
+                       BasicBlock(API.LLVMGetIncomingBlock(iter.phi, i-1)))
 end
 
 function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{V, BasicBlock}} where V <: Value)
     vals, blocks = zip(args...)
-    API.LLVMAddIncoming(ref(iter.phi), collect(ref.(vals)),
-                        collect(ref.(blocks)), length(args))
+    API.LLVMAddIncoming(iter.phi, collect(vals),
+                        collect(blocks), length(args))
 end
 
 Base.push!(iter::PhiIncomingSet, args::Tuple{<:Value, BasicBlock}) = append!(iter, [args])
 
-Base.length(iter::PhiIncomingSet) = API.LLVMCountIncoming(ref(iter.phi))
+Base.length(iter::PhiIncomingSet) = API.LLVMCountIncoming(iter.phi)

@@ -6,17 +6,18 @@ export Attribute,
        kind, value
 
 abstract type Attribute end
-reftype(::Type{T}) where {T<:Attribute} = API.LLVMAttributeRef
+
+Base.unsafe_convert(::Type{API.LLVMAttributeRef}, attr::Attribute) = attr.ref
 
 @checked struct EnumAttribute <: Attribute
-    ref::reftype(Attribute)
+    ref::API.LLVMAttributeRef
 end
 
 @checked struct StringAttribute <: Attribute
-    ref::reftype(Attribute)
+    ref::API.LLVMAttributeRef
 end
 
-# TODO: make @reftype's identify mechanism flexible enough to cover cases like this one,
+# TODO: make the identify mechanism flexible enough to cover cases like this one,
 #       and not only Value and Type
 
 function Attribute(ref::API.LLVMAttributeRef)
@@ -42,28 +43,28 @@ end
 #       (which also would conflict with the inner ref constructor)
 function EnumAttribute(kind::String, value::Integer=0, ctx::Context=GlobalContext())
     enum_kind = API.LLVMGetEnumAttributeKindForName(kind, Csize_t(length(kind)))
-    return EnumAttribute(API.LLVMCreateEnumAttribute(ref(ctx), enum_kind, UInt64(value)))
+    return EnumAttribute(API.LLVMCreateEnumAttribute(ctx, enum_kind, UInt64(value)))
 end
 
-kind(attr::EnumAttribute) = API.LLVMGetEnumAttributeKind(ref(attr))
+kind(attr::EnumAttribute) = API.LLVMGetEnumAttributeKind(attr)
 
-value(attr::EnumAttribute) = API.LLVMGetEnumAttributeValue(ref(attr))
+value(attr::EnumAttribute) = API.LLVMGetEnumAttributeValue(attr)
 
 
 ## string attribute
 
 StringAttribute(kind::String, value::String="", ctx::Context=GlobalContext()) =
-    StringAttribute(API.LLVMCreateStringAttribute(ref(ctx), kind, length(kind),
+    StringAttribute(API.LLVMCreateStringAttribute(ctx, kind, length(kind),
                                                   value, length(value)))
 
 function kind(attr::StringAttribute)
     len = Ref{Cuint}()
-    data = API.LLVMGetStringAttributeKind(ref(attr), len)
+    data = API.LLVMGetStringAttributeKind(attr, len)
     return unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
 function value(attr::StringAttribute)
     len = Ref{Cuint}()
-    data = API.LLVMGetStringAttributeValue(ref(attr), len)
+    data = API.LLVMGetStringAttributeValue(attr, len)
     return unsafe_string(convert(Ptr{Int8}, data), len[])
 end

@@ -11,18 +11,8 @@ end
 
 # llvm.org/docs/doxygen/html/group__LLVMCSupportTypes.html
 
-# traits
-reftype(t::Type) = error("No reference type defined for $t")
-
-# abstract implementations
-ref(obj) = obj.ref
-identify(::Type{T}, ref) where {T} = T(ref)
-@inline function check(::Type, ref::Ptr)
-    ref==C_NULL && throw(UndefRefError())
-end
-
 # macro that adds an inner constructor to a type definition,
-# calling `check` on the ref field argument
+# calling `refcheck` on the ref field argument
 macro checked(typedef)
     # decode structure definition
     if Meta.isexpr(typedef, :macrocall)
@@ -65,10 +55,15 @@ macro checked(typedef)
 
     # insert checked constructor
     push!(body.args, :(
-        $typename($(field_defs...)) = (check($typename, ref); new($(field_names...)))
+        $typename($(field_defs...)) = (refcheck($typename, ref); new($(field_names...)))
     ))
 
     return esc(typedef)
+end
+
+# the most basic check is asserting that we don't use a null pointer
+@inline function refcheck(::Type, ref::Ptr)
+    ref==C_NULL && throw(UndefRefError())
 end
 
 

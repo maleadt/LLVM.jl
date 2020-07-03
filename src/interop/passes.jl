@@ -3,44 +3,44 @@ export alloc_opt!, barrier_noop!, gc_invariant_verifier!, lower_exc_handlers!,
        lower_simdloop!, late_lower_gc_frame!, final_lower_gc!, remove_julia_addrspaces!
 
 alloc_opt!(pm::PassManager) =
-    API.LLVMAddAllocOptPass(ref(pm))
+    API.LLVMAddAllocOptPass(pm)
 
 barrier_noop!(pm::PassManager) =
-    API.LLVMAddBarrierNoopPass(ref(pm))
+    API.LLVMAddBarrierNoopPass(pm)
 
 gc_invariant_verifier!(pm::PassManager, strong::Bool=false) =
-    API.LLVMAddGCInvariantVerifierPass(ref(pm), convert(Bool, strong))
+    API.LLVMAddGCInvariantVerifierPass(pm, convert(Bool, strong))
 
 lower_exc_handlers!(pm::PassManager) =
-    API.LLVMAddLowerExcHandlersPass(ref(pm))
+    API.LLVMAddLowerExcHandlersPass(pm)
 
 combine_mul_add!(pm::PassManager) =
-    API.LLVMAddCombineMulAddPass(ref(pm))
+    API.LLVMAddCombineMulAddPass(pm)
 
 multi_versioning!(pm::PassManager) =
-    API.LLVMAddMultiVersioningPass(ref(pm))
+    API.LLVMAddMultiVersioningPass(pm)
 
 propagate_julia_addrsp!(pm::PassManager) =
-    API.LLVMAddPropagateJuliaAddrspaces(ref(pm))
+    API.LLVMAddPropagateJuliaAddrspaces(pm)
 
 lower_ptls!(pm::PassManager, imaging_mode::Bool=false) =
-    API.LLVMAddLowerPTLSPass(ref(pm), convert(Bool, imaging_mode))
+    API.LLVMAddLowerPTLSPass(pm, convert(Bool, imaging_mode))
 
 lower_simdloop!(pm::PassManager) =
-    API.LLVMAddLowerSimdLoopPass(ref(pm))
+    API.LLVMAddLowerSimdLoopPass(pm)
 
 late_lower_gc_frame!(pm::PassManager) =
-    API.LLVMAddLateLowerGCFramePass(ref(pm))
+    API.LLVMAddLateLowerGCFramePass(pm)
 
 if VERSION >= v"1.3.0-DEV.95"
     final_lower_gc!(pm::PassManager) =
-        API.LLVMAddFinalLowerGCPass(ref(pm))
+        API.LLVMAddFinalLowerGCPass(pm)
 else
     final_lower_gc!(pm::PassManager) = nothing
 end
 
 if VERSION >= v"1.5.0-DEV.802"
-    remove_julia_addrspaces!(pm::PassManager) = API.LLVMAddRemoveJuliaAddrspacesPass(LLVM.ref(pm))
+    remove_julia_addrspaces!(pm::PassManager) = API.LLVMAddRemoveJuliaAddrspacesPass(LLVM.pm)
 else
     remove_julia_addrspaces!(pm::PassManager) = nothing
 end

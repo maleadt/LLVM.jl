@@ -8,27 +8,27 @@ export unsafe_delete!,
 identify(::Type{Value}, ::Val{API.LLVMFunctionValueKind}) = Function
 
 Function(mod::Module, name::String, ft::FunctionType) =
-    Function(API.LLVMAddFunction(ref(mod), name, ref(ft)))
+    Function(API.LLVMAddFunction(mod, name, ft))
 
-unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(ref(f))
+unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(f)
 
 function personality(f::Function)
-    has_personality = convert(Core.Bool, API.LLVMHasPersonalityFn(ref(f)))
-    return has_personality ? Function(API.LLVMGetPersonalityFn(ref(f))) : nothing
+    has_personality = convert(Core.Bool, API.LLVMHasPersonalityFn(f))
+    return has_personality ? Function(API.LLVMGetPersonalityFn(f)) : nothing
 end
 personality!(f::Function, persfn::Union{Nothing,Function}) =
-    API.LLVMSetPersonalityFn(ref(f), persfn===nothing ? C_NULL : ref(persfn))
+    API.LLVMSetPersonalityFn(f, persfn===nothing ? C_NULL : persfn)
 
-callconv(f::Function) = API.LLVMGetFunctionCallConv(ref(f))
-callconv!(f::Function, cc) = API.LLVMSetFunctionCallConv(ref(f), cc)
+callconv(f::Function) = API.LLVMGetFunctionCallConv(f)
+callconv!(f::Function, cc) = API.LLVMSetFunctionCallConv(f, cc)
 
 function gc(f::Function)
-  ptr = API.LLVMGetGC(ref(f))
+  ptr = API.LLVMGetGC(f)
   return ptr==C_NULL ? "" :  unsafe_string(ptr)
 end
-gc!(f::Function, name::String) = API.LLVMSetGC(ref(f), name)
+gc!(f::Function, name::String) = API.LLVMSetGC(f, name)
 
-entry(f::Function) = BasicBlock(API.LLVMGetEntryBasicBlock(ref(f)))
+entry(f::Function) = BasicBlock(API.LLVMGetEntryBasicBlock(f))
 
 # attributes
 
@@ -49,24 +49,24 @@ function Base.collect(iter::FunctionAttrSet)
     elems = Vector{API.LLVMAttributeRef}(undef, length(iter))
     if length(iter) > 0
       # FIXME: this prevents a nullptr ref in LLVM similar to D26392
-      API.LLVMGetAttributesAtIndex(ref(iter.f), iter.idx, elems)
+      API.LLVMGetAttributesAtIndex(iter.f, iter.idx, elems)
     end
     return Attribute[Attribute(elem) for elem in elems]
 end
 
 Base.push!(iter::FunctionAttrSet, attr::Attribute) =
-    API.LLVMAddAttributeAtIndex(ref(iter.f), iter.idx, ref(attr))
+    API.LLVMAddAttributeAtIndex(iter.f, iter.idx, attr)
 
 Base.delete!(iter::FunctionAttrSet, attr::EnumAttribute) =
-    API.LLVMRemoveEnumAttributeAtIndex(ref(iter.f), iter.idx, kind(attr))
+    API.LLVMRemoveEnumAttributeAtIndex(iter.f, iter.idx, kind(attr))
 
 function Base.delete!(iter::FunctionAttrSet, attr::StringAttribute)
     k = kind(attr)
-    API.LLVMRemoveStringAttributeAtIndex(ref(iter.f), iter.idx, k, length(k))
+    API.LLVMRemoveStringAttributeAtIndex(iter.f, iter.idx, k, length(k))
 end
 
 function Base.length(iter::FunctionAttrSet)
-    API.LLVMGetAttributeCountAtIndex(ref(iter.f), iter.idx)
+    API.LLVMGetAttributeCountAtIndex(iter.f, iter.idx)
 end
 
 # parameter iteration
@@ -74,7 +74,7 @@ end
 export Argument, parameters
 
 @checked struct Argument <: Value
-    ref::reftype(Value)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMArgumentValueKind}) = Argument
 
@@ -88,25 +88,25 @@ Base.eltype(::FunctionParameterSet) = Argument
 
 function Base.getindex(iter::FunctionParameterSet, i)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
-    return Argument(API.LLVMGetParam(ref(iter.f), i-1))
+    return Argument(API.LLVMGetParam(iter.f, i-1))
 end
 
-function Base.iterate(iter::FunctionParameterSet, state=API.LLVMGetFirstParam(ref(iter.f)))
+function Base.iterate(iter::FunctionParameterSet, state=API.LLVMGetFirstParam(iter.f))
     state == C_NULL ? nothing : (Argument(state), API.LLVMGetNextParam(state))
 end
 
 Base.last(iter::FunctionParameterSet) =
-    Argument(API.LLVMGetLastParam(ref(iter.f)))
+    Argument(API.LLVMGetLastParam(iter.f))
 
 Base.isempty(iter::FunctionParameterSet) =
-    API.LLVMGetLastParam(ref(iter.f)) == C_NULL
+    API.LLVMGetLastParam(iter.f) == C_NULL
 
-Base.length(iter::FunctionParameterSet) = API.LLVMCountParams(ref(iter.f))
+Base.length(iter::FunctionParameterSet) = API.LLVMCountParams(iter.f)
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionParameterSet)
     elems = Vector{API.LLVMValueRef}(undef, length(iter))
-    API.LLVMGetParams(ref(iter.f), elems)
+    API.LLVMGetParams(iter.f, elems)
     return map(el->Argument(el), elems)
 end
 
@@ -122,22 +122,22 @@ blocks(f::Function) = FunctionBlockSet(f)
 
 Base.eltype(::FunctionBlockSet) = BasicBlock
 
-function Base.iterate(iter::FunctionBlockSet, state=API.LLVMGetFirstBasicBlock(ref(iter.f)))
+function Base.iterate(iter::FunctionBlockSet, state=API.LLVMGetFirstBasicBlock(iter.f))
     state == C_NULL ? nothing : (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
 end
 
 Base.last(iter::FunctionBlockSet) =
-    BasicBlock(API.LLVMGetLastBasicBlock(ref(iter.f)))
+    BasicBlock(API.LLVMGetLastBasicBlock(iter.f))
 
 Base.isempty(iter::FunctionBlockSet) =
-    API.LLVMGetLastBasicBlock(ref(iter.f)) == C_NULL
+    API.LLVMGetLastBasicBlock(iter.f) == C_NULL
 
-Base.length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(ref(iter.f))
+Base.length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(iter.f)
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionBlockSet)
     elems = Vector{API.LLVMValueRef}(undef, length(iter))
-    API.LLVMGetBasicBlocks(ref(iter.f), elems)
+    API.LLVMGetBasicBlocks(iter.f, elems)
     return BasicBlock[BasicBlock(elem) for elem in elems]
 end
 
@@ -145,13 +145,13 @@ end
 
 export isintrinsic, Intrinsic, isoverloaded, declaration
 
-isintrinsic(f::Function) = API.LLVMGetIntrinsicID(ref(f)) != 0
+isintrinsic(f::Function) = API.LLVMGetIntrinsicID(f) != 0
 
 struct Intrinsic
     id::UInt32
 
     function Intrinsic(f::Function)
-        id = API.LLVMGetIntrinsicID(ref(f))
+        id = API.LLVMGetIntrinsicID(f)
         id == 0 && throw(ArgumentError("Function is not an intrinsic"))
         new(id)
     end
@@ -174,7 +174,7 @@ end
 function name(intr::Intrinsic, params::Vector{<:LLVMType})
     @assert version() >= v"8"
     len = Ref{Csize_t}()
-    str = API.LLVMIntrinsicCopyOverloadedName(intr, ref.(params), length(params), len)
+    str = API.LLVMIntrinsicCopyOverloadedName(intr, params, length(params), len)
     unsafe_message(convert(Ptr{Cchar}, str), len[])
 end
 
@@ -185,13 +185,13 @@ end
 
 function Function(mod::Module, intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[])
     @assert version() >= v"8"
-    Value(API.LLVMGetIntrinsicDeclaration(ref(mod), intr, ref.(params), length(params)))
+    Value(API.LLVMGetIntrinsicDeclaration(mod, intr, params, length(params)))
 end
 
 function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[];
                   ctx::Context=GlobalContext())
     @assert version() >= v"8"
-    LLVMType(API.LLVMIntrinsicGetType(ref(ctx), intr, ref.(params), length(params)))
+    LLVMType(API.LLVMIntrinsicGetType(ctx, intr, params, length(params)))
 end
 
 function Base.show(io::IO, intr::Intrinsic)

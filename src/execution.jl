@@ -9,42 +9,43 @@ export GenericValue, dispose,
 @checked struct GenericValue
     ref::API.LLVMGenericValueRef
 end
-reftype(::Type{GenericValue}) = API.LLVMGenericValueRef
+
+Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = val.ref
 
 GenericValue(typ::IntegerType, N::Signed) =
     GenericValue(
-        API.LLVMCreateGenericValueOfInt(ref(typ),
+        API.LLVMCreateGenericValueOfInt(typ,
                                         reinterpret(Culonglong, convert(Int64, N)), True))
 
 GenericValue(typ::IntegerType, N::Unsigned) =
     GenericValue(
-        API.LLVMCreateGenericValueOfInt(ref(typ),
+        API.LLVMCreateGenericValueOfInt(typ,
                                         reinterpret(Culonglong, convert(UInt64, N)), False))
 
-intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(ref(val))
+intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(val)
 
 Base.convert(::Type{T}, val::GenericValue) where {T<:Signed} =
-    convert(T, reinterpret(Clonglong, API.LLVMGenericValueToInt(ref(val), True)))
+    convert(T, reinterpret(Clonglong, API.LLVMGenericValueToInt(val, True)))
 
 Base.convert(::Type{T}, val::GenericValue) where {T<:Unsigned} =
-    convert(T, API.LLVMGenericValueToInt(ref(val), False))
+    convert(T, API.LLVMGenericValueToInt(val, False))
 
 GenericValue(typ::FloatingPointType, N::AbstractFloat) =
-    GenericValue(API.LLVMCreateGenericValueOfFloat(ref(typ), convert(Cdouble, N)))
+    GenericValue(API.LLVMCreateGenericValueOfFloat(typ, convert(Cdouble, N)))
 
 # NOTE: this ugly three-arg convert is needed to match the C API,
 #       which uses the type to call the correct C++ function.
 
 Base.convert(::Type{T}, val::GenericValue, typ::LLVMType) where {T<:AbstractFloat} =
-    convert(T, API.LLVMGenericValueToFloat(ref(typ), ref(val)))
+    convert(T, API.LLVMGenericValueToFloat(typ, val))
 
 GenericValue(ptr::Ptr) =
     GenericValue(API.LLVMCreateGenericValueOfPointer(convert(Ptr{Cvoid}, ptr)))
 
 Base.convert(::Type{Ptr{T}}, val::GenericValue) where {T} =
-    convert(Ptr{T}, API.LLVMGenericValueToPointer(ref(val)))
+    convert(Ptr{T}, API.LLVMGenericValueToPointer(val))
 
-dispose(val::GenericValue) = API.LLVMDisposeGenericValue(ref(val))
+dispose(val::GenericValue) = API.LLVMDisposeGenericValue(val)
 
 
 ## execution engine
@@ -54,58 +55,62 @@ export ExecutionEngine, Interpreter, JIT,
 
 @checked struct ExecutionEngine
     ref::API.LLVMExecutionEngineRef
+    mods::Set{Module}
 end
-reftype(::Type{ExecutionEngine}) = API.LLVMExecutionEngineRef
+
+Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine) = engine.ref
 
 # NOTE: these takes ownership of the module
 function ExecutionEngine(mod::Module)
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Core.Bool, API.LLVMCreateExecutionEngineForModule(out_ref, ref(mod),
-                                                                 out_error))
+    status = convert(Core.Bool, API.LLVMCreateExecutionEngineForModule(out_ref, mod,
+                                                                       out_error))
 
     if status
-        error = unsafe_string(out_error[])
-        API.LLVMDisposeMessage(out_error[])
+        error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[])
+    return ExecutionEngine(out_ref[], Set([mod]))
 end
 function Interpreter(mod::Module)
     API.LLVMLinkInInterpreter()
 
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Core.Bool, API.LLVMCreateInterpreterForModule(out_ref, ref(mod),
-                                                             out_error))
+    status = convert(Core.Bool, API.LLVMCreateInterpreterForModule(out_ref, mod,
+                                                                   out_error))
 
     if status
-        error = unsafe_string(out_error[])
-        API.LLVMDisposeMessage(out_error[])
+        error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[])
+    return ExecutionEngine(out_ref[], Set([mod]))
 end
 function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault)
     API.LLVMLinkInMCJIT()
 
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Core.Bool, API.LLVMCreateJITCompilerForModule(out_ref, ref(mod),
+    status = convert(Core.Bool, API.LLVMCreateJITCompilerForModule(out_ref, mod,
                                                                    optlevel, out_error))
 
     if status
-        error = unsafe_string(out_error[])
-        API.LLVMDisposeMessage(out_error[])
+        error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[])
+    return ExecutionEngine(out_ref[], Set([mod]))
 end
 
-dispose(engine::ExecutionEngine) = API.LLVMDisposeExecutionEngine(ref(engine))
+function dispose(engine::ExecutionEngine)
+    for mod in engine.mods
+        mod.ref = C_NULL
+    end
+    API.LLVMDisposeExecutionEngine(engine)
+end
 
 for x in [:ExecutionEngine, :Interpreter, :JIT]
     @eval function $x(f::Core.Function, args...)
@@ -124,12 +129,14 @@ Base.push!(engine::ExecutionEngine, mod::Module) = API.LLVMAddModule(engine.ref,
 function Base.delete!(engine::ExecutionEngine, mod::Module)
     out_ref = Ref{API.LLVMModuleRef}()
     API.LLVMRemoveModule(engine.ref, mod.ref, out_ref, Ref{Cstring}()) # out string is not used
-    return Module(out_ref[])
+    @assert mod == Module(out_ref[])
+    delete!(engine.mods, mod)
+    return
 end
 
 Base.run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =
-    GenericValue(API.LLVMRunFunction(ref(engine), ref(f),
-                                     length(args), ref.(args)))
+    GenericValue(API.LLVMRunFunction(engine, f,
+                                     length(args), args))
 
 
 # ExectutionEngine function lookup

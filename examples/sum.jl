@@ -1,5 +1,7 @@
 # https://pauladamsmith.com/blog/2015/01/how-to-get-started-with-llvm-c-api.html
 
+using Test
+
 using LLVM
 
 if length(ARGS) == 2
@@ -35,7 +37,7 @@ Interpreter(mod) do engine
             GenericValue(LLVM.Int32Type(), y)]
 
     res = LLVM.run(engine, sum, args)
-    println(convert(Int, res))
+    @test convert(Int, res) == x + y
 
     dispose.(args)
     dispose(res)
