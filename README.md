@@ -53,22 +53,3 @@ That means you can not use it with other LLVM libraries, like the one provided b
 operating system. It is recommended to use the official binaries from
 [julialang.org](https://julialang.org/downloads/), but custom builds are supported too (as
 long as they provide a dynamically-linked copy of the LLVM library).
-
-
-## License
-
-LLVM.jl is licensed under the [NCSA license](LICENSE.md).
-
-If you use this package in your research, please cite the [following
-paper](https://ieeexplore.ieee.org/document/8471188):
-
-```
-@article{besard:2017,
-  author    = {Besard, Tim and Foket, Christophe and De Sutter, Bjorn},
-  title     = {Effective Extensible Programming: Unleashing {Julia} on {GPUs}},
-  journal   = {IEEE Transactions on Parallel and Distributed Systems},
-  year      = {2018},
-  doi       = {10.1109/TPDS.2018.2872064},
-  ISSN      = {1045-9219},
-}
-```
