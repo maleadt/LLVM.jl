@@ -21,16 +21,16 @@ end
 
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
-    @test typeof(LLVM.ref(typ)) == LLVM.API.LLVMTypeRef                 # untyped
+    @test typeof(typ.ref) == LLVM.API.LLVMTypeRef                 # untyped
 
-    @test typeof(LLVM.IntegerType(LLVM.ref(typ))) == LLVM.IntegerType   # type reconstructed
+    @test typeof(LLVM.IntegerType(typ.ref)) == LLVM.IntegerType   # type reconstructed
     if Base.JLOptions().debug_level >= 2
-        @test_throws ErrorException LLVM.FunctionType(LLVM.ref(typ))    # wrong type
+        @test_throws ErrorException LLVM.FunctionType(typ.ref)    # wrong type
     end
     @test_throws UndefRefError LLVM.FunctionType(LLVM.API.LLVMTypeRef(C_NULL))
 
-    @test typeof(LLVM.ref(typ)) == LLVM.API.LLVMTypeRef
-    @test typeof(LLVMType(LLVM.ref(typ))) == LLVM.IntegerType           # type reconstructed
+    @test typeof(typ.ref) == LLVM.API.LLVMTypeRef
+    @test typeof(LLVMType(typ.ref)) == LLVM.IntegerType           # type reconstructed
     @test_throws UndefRefError LLVMType(LLVM.API.LLVMTypeRef(C_NULL))
 
     LLVM.IntType(8)
@@ -200,15 +200,15 @@ LLVM.Module("SomeModule", ctx) do mod
     typ = LLVM.Int32Type(ctx)
     val = alloca!(builder, typ, "foo")
     @test context(val) == ctx
-    @test typeof(LLVM.ref(val)) == LLVM.API.LLVMValueRef                # untyped
+    @test typeof(val.ref) == LLVM.API.LLVMValueRef                # untyped
 
-    @test typeof(LLVM.Instruction(LLVM.ref(val))) == LLVM.AllocaInst    # type reconstructed
+    @test typeof(LLVM.Instruction(val.ref)) == LLVM.AllocaInst    # type reconstructed
     if Base.JLOptions().debug_level >= 2
-        @test_throws ErrorException LLVM.Function(LLVM.ref(val))        # wrong
+        @test_throws ErrorException LLVM.Function(val.ref)        # wrong
     end
     @test_throws UndefRefError LLVM.Function(LLVM.API.LLVMValueRef(C_NULL))
 
-    @test typeof(Value(LLVM.ref(val))) == LLVM.AllocaInst              # type reconstructed
+    @test typeof(Value(val.ref)) == LLVM.AllocaInst              # type reconstructed
     @test_throws UndefRefError Value(LLVM.API.LLVMValueRef(C_NULL))
 
     show(devnull, val)

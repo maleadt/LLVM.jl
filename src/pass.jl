@@ -1,7 +1,10 @@
 export Pass
 
+# subtypes are expected to have a 'ref::API.LLVMPassRef' field
 abstract type Pass end
 reftype(::Type{T}) where {T<:Pass} = API.LLVMPassRef
+
+Base.unsafe_convert(::Type{API.LLVMPassRef}, pass::Pass) = pass.ref
 
 
 #
@@ -23,7 +26,6 @@ export ModulePass
         return new(API.LLVMCreateModulePass(name, callback), callback)
     end
 end
-
 
 
 #

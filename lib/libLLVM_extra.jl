@@ -51,7 +51,7 @@ end
 
 const LLVMPassRef = Ptr{LLVMOpaquePass}
 
-function LLVMAddPass(PM::LLVMPassManagerRef, P::LLVMPassRef)
+function LLVMAddPass(PM, P)
     ccall(:LLVMExtraAddPass,Cvoid,
         (LLVMPassManagerRef, LLVMPassRef),
         PM, P)
@@ -78,100 +78,100 @@ end
 
 # various missing functions
 
-function LLVMAddInternalizePassWithExportList(PM::LLVMPassManagerRef, ExportList, Length)
+function LLVMAddInternalizePassWithExportList(PM, ExportList, Length)
     ccall(:LLVMExtraAddInternalizePassWithExportList,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
 end
 
-function LLVMAddTargetLibraryInfoByTriple(Triple, PM::LLVMPassManagerRef)
+function LLVMAddTargetLibraryInfoByTriple(Triple, PM)
     ccall(:LLVMExtraAddTargetLibraryInfoByTiple,Cvoid,(Cstring, LLVMPassManagerRef), Triple, PM)
 end
 
 if VERSION < v"1.2.0-DEV.531"
-function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
+function LLVMAddNVVMReflectPass(PM, smversion)
     ccall(:LLVMExtraAddMVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 else
 
 if version() < v"8.0"
-    function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
+    function LLVMAddNVVMReflectPass(PM, smversion)
         ccall(:LLVMExtraAddNVVMReflectPass,Cvoid,(LLVMPassManagerRef,), PM)
     end
 else
-    function LLVMAddNVVMReflectPass(PM::LLVMPassManagerRef, smversion)
+    function LLVMAddNVVMReflectPass(PM, smversion)
         ccall(:LLVMExtraAddNVVMReflectFunctionPass,Cvoid,(LLVMPassManagerRef, Cuint), PM, smversion)
     end
 end
 
-function LLVMAddAllocOptPass(PM::LLVMPassManagerRef)
+function LLVMAddAllocOptPass(PM)
     ccall(:LLVMExtraAddAllocOptPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddBarrierNoopPass(PM::LLVMPassManagerRef)
+function LLVMAddBarrierNoopPass(PM)
     ccall(:LLVMExtraAddBarrierNoopPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddGCInvariantVerifierPass(PM::LLVMPassManagerRef, Strong)
+function LLVMAddGCInvariantVerifierPass(PM, Strong)
     ccall(:LLVMExtraAddGCInvariantVerifierPass,Cvoid,(LLVMPassManagerRef,LLVMBool), PM, Strong)
 end
 
-function LLVMAddLowerExcHandlersPass(PM::LLVMPassManagerRef)
+function LLVMAddLowerExcHandlersPass(PM)
     ccall(:LLVMExtraAddLowerExcHandlersPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddCombineMulAddPass(PM::LLVMPassManagerRef)
+function LLVMAddCombineMulAddPass(PM)
     ccall(:LLVMExtraAddCombineMulAddPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddMultiVersioningPass(PM::LLVMPassManagerRef)
+function LLVMAddMultiVersioningPass(PM)
     ccall(:LLVMExtraAddMultiVersioningPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddPropagateJuliaAddrspaces(PM::LLVMPassManagerRef)
+function LLVMAddPropagateJuliaAddrspaces(PM)
     ccall(:LLVMExtraAddPropagateJuliaAddrspaces,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddLowerPTLSPass(PM::LLVMPassManagerRef, imaging_mode)
+function LLVMAddLowerPTLSPass(PM, imaging_mode)
     ccall(:LLVMExtraAddLowerPTLSPass,Cvoid,(LLVMPassManagerRef,LLVMBool), PM, imaging_mode)
 end
 
-function LLVMAddLowerSimdLoopPass(PM::LLVMPassManagerRef)
+function LLVMAddLowerSimdLoopPass(PM)
     ccall(:LLVMExtraAddLowerSimdLoopPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddLateLowerGCFramePass(PM::LLVMPassManagerRef)
+function LLVMAddLateLowerGCFramePass(PM)
     ccall(:LLVMExtraAddLateLowerGCFramePass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 end
 
 if VERSION >= v"1.3.0-DEV.95"
-function LLVMAddFinalLowerGCPass(PM::LLVMPassManagerRef)
+function LLVMAddFinalLowerGCPass(PM)
     ccall(:LLVMExtraAddFinalLowerGCPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 end
 
 if VERSION >= v"1.5.0-DEV.802"
-function LLVMAddRemoveJuliaAddrspacesPass(PM::LLVMPassManagerRef)
+function LLVMAddRemoveJuliaAddrspacesPass(PM)
     ccall(:LLVMExtraAddRemoveJuliaAddrspacesPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 end
 
-function LLVMGetValueContext(V::LLVMValueRef)
+function LLVMGetValueContext(V)
     ccall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end
 
 if VERSION >= v"0.7.0-alpha.37"
-function LLVMGetSourceLocation(V::LLVMValueRef, index, Name, Filename, Line, Column)
+function LLVMGetSourceLocation(V, index, Name, Filename, Line, Column)
     ccall(:LLVMExtraGetSourceLocation,Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
 end
 end
 
 if VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")
-function LLVMExtraAppendToUsed(Mod::LLVMModuleRef, Values, Count)
+function LLVMExtraAppendToUsed(Mod, Values, Count)
     ccall(:LLVMExtraAppendToUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
 end
 
-function LLVMExtraAppendToCompilerUsed(Mod::LLVMModuleRef, Values, Count)
+function LLVMExtraAppendToCompilerUsed(Mod, Values, Count)
     ccall(:LLVMExtraAppendToCompilerUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
 end
 

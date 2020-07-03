@@ -8,8 +8,10 @@ export ModuleProvider, dispose
 end
 reftype(::Type{ModuleProvider}) = API.LLVMModuleProviderRef
 
+Base.unsafe_convert(::Type{API.LLVMModuleProviderRef}, mp::ModuleProvider) = mp.ref
+
 ModuleProvider(mod::Module) =
-    ModuleProvider(API.LLVMCreateModuleProviderForExistingModule(ref(mod)))
+    ModuleProvider(API.LLVMCreateModuleProviderForExistingModule(mod))
 
 function ModuleProvider(f::Core.Function, args...)
     mp = ModuleProvider(args...)
@@ -21,4 +23,4 @@ function ModuleProvider(f::Core.Function, args...)
 end
 
 # NOTE: this destroys the underlying module
-dispose(mp::ModuleProvider) = API.LLVMDisposeModuleProvider(ref(mp))
+dispose(mp::ModuleProvider) = API.LLVMDisposeModuleProvider(mp)

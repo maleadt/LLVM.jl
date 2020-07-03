@@ -10,7 +10,7 @@ for subsystem in [:Core, :TransformUtils, :ScalarOpts, :ObjCARCOpts, :Vectorizat
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
         export $jl_fname
-        $jl_fname(R::PassRegistry) = API.$api_fname(ref(R))
+        $jl_fname(R::PassRegistry) = API.$api_fname(R)
     end
 end
 

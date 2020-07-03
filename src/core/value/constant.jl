@@ -1,10 +1,10 @@
 export null, isnull, all_ones, UndefValue, PointerNull
 
-null(typ::LLVMType) = Value(API.LLVMConstNull(ref(typ)))
+null(typ::LLVMType) = Value(API.LLVMConstNull(typ))
 
-all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(ref(typ)))
+all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(typ))
 
-isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(ref(val)))
+isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(val))
 
 
 @checked struct UndefValue <: User
@@ -12,7 +12,7 @@ isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(ref(val)))
 end
 identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
 
-UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(ref(typ)))
+UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 
 
 abstract type Constant <: User end
@@ -29,7 +29,7 @@ abstract type Instruction <: User end
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNull
 
-PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(ref(typ)))
+PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
 
 
 ## scalar
@@ -44,7 +44,7 @@ identify(::Type{Value}, ::Val{API.LLVMConstantIntValueKind}) = ConstantInt
 # NOTE: fixed set for dispatch, also because we can't rely on sizeof(T)==width(T)
 const WideInteger = Union{Int64, UInt64}
 ConstantInt(typ::IntegerType, val::WideInteger, signed=false) =
-    ConstantInt(API.LLVMConstInt(ref(typ), reinterpret(Culonglong, val),
+    ConstantInt(API.LLVMConstInt(typ, reinterpret(Culonglong, val),
                 convert(Bool, signed)))
 const SmallInteger = Union{Int8, Int16, Int32, UInt8, UInt16, UInt32}
 ConstantInt(typ::IntegerType, val::SmallInteger, signed=false) =
@@ -57,7 +57,7 @@ function ConstantInt(typ::IntegerType, val::Integer, signed=false)
     for i in 1:numwords
         words[i] = (val >> 64(i-1)) % Culonglong
     end
-    return ConstantInt(API.LLVMConstIntOfArbitraryPrecision(ref(typ), numwords, words))
+    return ConstantInt(API.LLVMConstIntOfArbitraryPrecision(typ, numwords, words))
 end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
@@ -68,10 +68,10 @@ function ConstantInt(val::T, ctx::Context=GlobalContext()) where T<:SizeableInte
 end
 
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Unsigned} =
-    convert(T, API.LLVMConstIntGetZExtValue(ref(val)))
+    convert(T, API.LLVMConstIntGetZExtValue(val))
 
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
-    convert(T, API.LLVMConstIntGetSExtValue(ref(val)))
+    convert(T, API.LLVMConstIntGetSExtValue(val))
 
 
 @checked struct ConstantFP <: Constant
@@ -80,10 +80,10 @@ end
 identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
 
 ConstantFP(typ::LLVMDouble, val::Real) =
-    ConstantFP(API.LLVMConstReal(ref(typ), Cdouble(val)))
+    ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
 
 Base.convert(::Type{Float64}, val::ConstantFP) =
-    API.LLVMConstRealGetDouble(ref(val), Ref{API.LLVMBool}())
+    API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}())
 
 
 ## aggregate
@@ -132,7 +132,7 @@ identify(::Type{Value}, ::Val{API.LLVMInlineAsmValueKind}) = InlineAsm
 
 InlineAsm(typ::FunctionType, asm::String, constraints::String,
           side_effects::Core.Bool, align_stack::Core.Bool=false) =
-    InlineAsm(API.LLVMConstInlineAsm(ref(typ), asm, constraints,
+    InlineAsm(API.LLVMConstInlineAsm(typ, asm, constraints,
                                      convert(Bool, side_effects),
                                      convert(Bool, align_stack)))
 
@@ -150,13 +150,13 @@ export GlobalValue,
        unnamed_addr, unnamed_addr!,
        alignment, alignment!
 
-parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(ref(val)))
+parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(val))
 
-isdeclaration(val::GlobalValue) = convert(Core.Bool, API.LLVMIsDeclaration(ref(val)))
+isdeclaration(val::GlobalValue) = convert(Core.Bool, API.LLVMIsDeclaration(val))
 
-linkage(val::GlobalValue) = API.LLVMGetLinkage(ref(val))
+linkage(val::GlobalValue) = API.LLVMGetLinkage(val)
 linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
-    API.LLVMSetLinkage(ref(val), linkage)
+    API.LLVMSetLinkage(val, linkage)
 
 function section(val::GlobalValue)
   #=
@@ -170,26 +170,26 @@ function section(val::GlobalValue)
       end
       end
   =#
-  section_ptr = API.LLVMGetSection(ref(val))
+  section_ptr = API.LLVMGetSection(val)
   return section_ptr != C_NULL ? unsafe_string(section_ptr) : ""
 end
-section!(val::GlobalValue, sec::String) = API.LLVMSetSection(ref(val), sec)
+section!(val::GlobalValue, sec::String) = API.LLVMSetSection(val, sec)
 
-visibility(val::GlobalValue) = API.LLVMGetVisibility(ref(val))
+visibility(val::GlobalValue) = API.LLVMGetVisibility(val)
 visibility!(val::GlobalValue, viz::API.LLVMVisibility) =
-    API.LLVMSetVisibility(ref(val), viz)
+    API.LLVMSetVisibility(val, viz)
 
-dllstorage(val::GlobalValue) = API.LLVMGetDLLStorageClass(ref(val))
+dllstorage(val::GlobalValue) = API.LLVMGetDLLStorageClass(val)
 dllstorage!(val::GlobalValue, storage::API.LLVMDLLStorageClass) =
-    API.LLVMSetDLLStorageClass(ref(val), storage)
+    API.LLVMSetDLLStorageClass(val, storage)
 
-unnamed_addr(val::GlobalValue) = convert(Core.Bool, API.LLVMHasUnnamedAddr(ref(val)))
+unnamed_addr(val::GlobalValue) = convert(Core.Bool, API.LLVMHasUnnamedAddr(val))
 unnamed_addr!(val::GlobalValue, flag::Core.Bool) =
-    API.LLVMSetUnnamedAddr(ref(val), convert(Bool, flag))
+    API.LLVMSetUnnamedAddr(val, convert(Bool, flag))
 
 const AlignedValue = Union{GlobalValue,Instruction}   # load, store, alloca
-alignment(val::AlignedValue) = API.LLVMGetAlignment(ref(val))
-alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(ref(val), bytes)
+alignment(val::AlignedValue) = API.LLVMGetAlignment(val)
+alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(val, bytes)
 
 
 ## global variables
@@ -209,36 +209,36 @@ end
 identify(::Type{Value}, ::Val{API.LLVMGlobalVariableValueKind}) = GlobalVariable
 
 GlobalVariable(mod::Module, typ::LLVMType, name::String) =
-    GlobalVariable(API.LLVMAddGlobal(ref(mod), ref(typ), name))
+    GlobalVariable(API.LLVMAddGlobal(mod, typ, name))
 
 GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer) =
-    GlobalVariable(API.LLVMAddGlobalInAddressSpace(ref(mod), ref(typ),
+    GlobalVariable(API.LLVMAddGlobalInAddressSpace(mod, typ,
                                                    name, addrspace))
 
-unsafe_delete!(::Module, gv::GlobalVariable) = API.LLVMDeleteGlobal(ref(gv))
+unsafe_delete!(::Module, gv::GlobalVariable) = API.LLVMDeleteGlobal(gv)
 
 function initializer(gv::GlobalVariable)
-    init = API.LLVMGetInitializer(ref(gv))
+    init = API.LLVMGetInitializer(gv)
     init == C_NULL ? nothing : Value(init)
 end
 initializer!(gv::GlobalVariable, val::Constant) =
-  API.LLVMSetInitializer(ref(gv), ref(val))
+  API.LLVMSetInitializer(gv, val)
 initializer!(gv::GlobalVariable, ::Nothing) =
-  API.LLVMSetInitializer(ref(gv), C_NULL)
+  API.LLVMSetInitializer(gv, C_NULL)
 
-isthreadlocal(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsThreadLocal(ref(gv)))
+isthreadlocal(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsThreadLocal(gv))
 threadlocal!(gv::GlobalVariable, bool) =
-  API.LLVMSetThreadLocal(ref(gv), convert(Bool, bool))
+  API.LLVMSetThreadLocal(gv, convert(Bool, bool))
 
-isconstant(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsGlobalConstant(ref(gv)))
+isconstant(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsGlobalConstant(gv))
 constant!(gv::GlobalVariable, bool) =
-  API.LLVMSetGlobalConstant(ref(gv), convert(Bool, bool))
+  API.LLVMSetGlobalConstant(gv, convert(Bool, bool))
 
-threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(ref(gv))
+threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(gv)
 threadlocalmode!(gv::GlobalVariable, mode) =
-  API.LLVMSetThreadLocalMode(ref(gv), mode)
+  API.LLVMSetThreadLocalMode(gv, mode)
 
 isextinit(gv::GlobalVariable) =
-  convert(Core.Bool, API.LLVMIsExternallyInitialized(ref(gv)))
+  convert(Core.Bool, API.LLVMIsExternallyInitialized(gv))
 extinit!(gv::GlobalVariable, bool) =
-  API.LLVMSetExternallyInitialized(ref(gv), convert(Bool, bool))
+  API.LLVMSetExternallyInitialized(gv, convert(Bool, bool))

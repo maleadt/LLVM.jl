@@ -10,9 +10,11 @@ export PassManagerBuilder, dispose,
 end
 reftype(::Type{PassManagerBuilder}) = API.LLVMPassManagerBuilderRef
 
+Base.unsafe_convert(::Type{API.LLVMPassManagerBuilderRef}, pmb::PassManagerBuilder) = pmb.ref
+
 PassManagerBuilder() = PassManagerBuilder(API.LLVMPassManagerBuilderCreate())
 
-dispose(pmb::PassManagerBuilder) = API.LLVMPassManagerBuilderDispose(ref(pmb))
+dispose(pmb::PassManagerBuilder) = API.LLVMPassManagerBuilderDispose(pmb)
 
 function PassManagerBuilder(f::Core.Function)
     pmb = PassManagerBuilder()
@@ -25,29 +27,29 @@ end
 
 # 0 = -O0, 1 = -O1, 2 = -O2, 3 = -O3
 optlevel!(pmb::PassManagerBuilder, level::Integer) =
-    API.LLVMPassManagerBuilderSetOptLevel(ref(pmb), level)
+    API.LLVMPassManagerBuilderSetOptLevel(pmb, level)
 
 # 0 = none, 1 = -Os, 2 = -Oz
 sizelevel!(pmb::PassManagerBuilder, level::Integer) =
-    API.LLVMPassManagerBuilderSetSizeLevel(ref(pmb), level)
+    API.LLVMPassManagerBuilderSetSizeLevel(pmb, level)
 
 unit_at_a_time!(pmb::PassManagerBuilder, flag::Core.Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableUnitAtATime(ref(pmb), convert(Bool, !flag))
+    API.LLVMPassManagerBuilderSetDisableUnitAtATime(pmb, convert(Bool, !flag))
 
 unroll_loops!(pmb::PassManagerBuilder, flag::Core.Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableUnrollLoops(ref(pmb), convert(Bool, !flag))
+    API.LLVMPassManagerBuilderSetDisableUnrollLoops(pmb, convert(Bool, !flag))
 
 simplify_libcalls!(pmb::PassManagerBuilder, flag::Core.Bool=true) =
-    API.LLVMPassManagerBuilderSetDisableSimplifyLibCalls(ref(pmb), convert(Bool, !flag))
+    API.LLVMPassManagerBuilderSetDisableSimplifyLibCalls(pmb, convert(Bool, !flag))
 
 inliner!(pmb::PassManagerBuilder, threshold::Integer) =
-    API.LLVMPassManagerBuilderUseInlinerWithThreshold(ref(pmb), threshold)
+    API.LLVMPassManagerBuilderUseInlinerWithThreshold(pmb, threshold)
 
 populate!(fpm::FunctionPassManager, pmb::PassManagerBuilder) =
-    API.LLVMPassManagerBuilderPopulateFunctionPassManager(ref(pmb), ref(fpm))
+    API.LLVMPassManagerBuilderPopulateFunctionPassManager(pmb, fpm)
 
 populate!(mpm::ModulePassManager, pmb::PassManagerBuilder) =
-    API.LLVMPassManagerBuilderPopulateModulePassManager(ref(pmb), ref(mpm))
+    API.LLVMPassManagerBuilderPopulateModulePassManager(pmb, mpm)
 
 
 ## auxiliary
@@ -79,7 +81,7 @@ function define_transforms(transforms)
 
         @eval begin
             export $jl_fname
-            $jl_fname(pm::PassManager) = API.$api_fname(ref(pm))
+            $jl_fname(pm::PassManager) = API.$api_fname(pm)
         end
     end
 
@@ -103,10 +105,10 @@ define_transforms([
 export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!
 
 scalar_repl_aggregates!(pm::PassManager, threshold::Integer) =
-    API.LLVMAddScalarReplAggregatesPassWithThreshold(ref(pm), Cint(threshold))
+    API.LLVMAddScalarReplAggregatesPassWithThreshold(pm, Cint(threshold))
 
 scalar_repl_aggregates_ssa!(pm::PassManager) =
-    API.LLVMAddScalarReplAggregatesPassSSA(ref(pm))
+    API.LLVMAddScalarReplAggregatesPassSSA(pm)
 
 
 ## vectorization transformations
@@ -127,10 +129,10 @@ define_transforms([
 export internalize!
 
 internalize!(pm::PassManager, allbutmain::Core.Bool=true) =
-    API.LLVMAddInternalizePass(ref(pm), convert(Bool, allbutmain))
+    API.LLVMAddInternalizePass(pm, convert(Bool, allbutmain))
 
 internalize!(pm::PassManager, exports::Vector{String}) =
-    API.LLVMAddInternalizePassWithExportList(ref(pm), exports, Csize_t(length(exports)))
+    API.LLVMAddInternalizePassWithExportList(pm, exports, Csize_t(length(exports)))
 
 
 ## target-specific transformations
@@ -139,5 +141,5 @@ export nvvm_reflect!
 
 function nvvm_reflect!(pm::PassManager, smversion=35)
     VERSION >= v"1.5.0-DEV.138" && error("NVVMReflect pass has been removed from Julia and LLVM")
-    API.LLVMAddNVVMReflectPass(ref(pm), smversion)
+    API.LLVMAddNVVMReflectPass(pm, smversion)
 end

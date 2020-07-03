@@ -46,10 +46,11 @@ argument values (eg. `:((1,2))`), which will be splatted into the call to the fu
 """
 function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=Tuple{},
                        args::Expr=:())
-    ref = LLVM.ref(llvmf)
+    ref = Base.unsafe_convert(API.LLVMValueRef, llvmf)
+    ptr = convert(Ptr{Cvoid},ref)
     quote
         Base.@_inline_meta
-        Base.llvmcall($(convert(Ptr{Cvoid},ref)), $rettyp, $argtyp, $args...)
+        Base.llvmcall($ptr, $rettyp, $argtyp, $args...)
     end
 end
 

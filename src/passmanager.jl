@@ -1,13 +1,16 @@
 export PassManager,
        add!, dispose
 
+# subtypes are expected to have a 'ref::API.LLVMPassManagerRef' field
 abstract type PassManager end
 reftype(::Type{T}) where {T<:PassManager} = API.LLVMPassManagerRef
 
-add!(pm::PassManager, pass::Pass) =
-    API.LLVMAddPass(ref(pm), ref(pass))
+Base.unsafe_convert(::Type{API.LLVMPassManagerRef}, pm::PassManager) = pm.ref
 
-dispose(pm::PassManager) = API.LLVMDisposePassManager(ref(pm))
+add!(pm::PassManager, pass::Pass) =
+    API.LLVMAddPass(pm, pass)
+
+dispose(pm::PassManager) = API.LLVMDisposePassManager(pm)
 
 
 #
@@ -32,7 +35,7 @@ function ModulePassManager(f::Core.Function, args...)
 end
 
 run!(mpm::ModulePassManager, mod::Module) =
-    convert(Core.Bool, API.LLVMRunPassManager(ref(mpm), ref(mod)))
+    convert(Core.Bool, API.LLVMRunPassManager(mpm, mod))
 
 
 
@@ -48,7 +51,7 @@ export FunctionPassManager,
 end
 
 FunctionPassManager(mod::Module) =
-    FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(ref(mod)))
+    FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(mod))
 
 function FunctionPassManager(f::Core.Function, args...)
     fpm = FunctionPassManager(args...)
@@ -60,9 +63,9 @@ function FunctionPassManager(f::Core.Function, args...)
 end
 
 initialize!(fpm::FunctionPassManager) =
-    convert(Core.Bool, API.LLVMInitializeFunctionPassManager(ref(fpm)))
+    convert(Core.Bool, API.LLVMInitializeFunctionPassManager(fpm))
 finalize!(fpm::FunctionPassManager) =
-    convert(Core.Bool, API.LLVMFinalizeFunctionPassManager(ref(fpm)))
+    convert(Core.Bool, API.LLVMFinalizeFunctionPassManager(fpm))
 
 run!(fpm::FunctionPassManager, f::Function) =
-    convert(Core.Bool, API.LLVMRunFunctionPassManager(ref(fpm), ref(f)))
+    convert(Core.Bool, API.LLVMRunFunctionPassManager(fpm, f))

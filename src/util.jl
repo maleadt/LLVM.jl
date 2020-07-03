@@ -15,7 +15,6 @@ end
 reftype(t::Type) = error("No reference type defined for $t")
 
 # abstract implementations
-ref(obj) = obj.ref
 identify(::Type{T}, ref) where {T} = T(ref)
 @inline function check(::Type, ref::Ptr)
     ref==C_NULL && throw(UndefRefError())
