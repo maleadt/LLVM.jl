@@ -25,10 +25,10 @@ end
 
 const MDNode = MetadataAsValue
 
-MDNode(vals::Vector{T}) where {T<:Value} =
+MDNode(vals::Vector{<:Value}) =
     MDNode(API.LLVMMDNode(vals, length(vals)))
 
-MDNode(vals::Vector{T}, ctx::Context) where {T<:Value} =
+MDNode(vals::Vector{<:Value}, ctx::Context) =
     MDNode(API.LLVMMDNodeInContext(ctx, vals, length(vals)))
 
 function operands(md::MDNode)

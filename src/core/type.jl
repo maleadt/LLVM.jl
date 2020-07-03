@@ -98,8 +98,8 @@ export isvararg, return_type, parameters
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMFunctionTypeKind}) = FunctionType
 
-FunctionType(rettyp::LLVMType, params::Vector{T}=LLVMType[];
-             vararg::Core.Bool=false) where {T<:LLVMType} =
+FunctionType(rettyp::LLVMType, params::Vector{<:LLVMType}=LLVMType[];
+             vararg::Core.Bool=false) =
     FunctionType(API.LLVMFunctionType(rettyp, params,
                                       length(params), convert(Bool, vararg)))
 
@@ -184,10 +184,10 @@ function StructType(name::String, ctx::Context=GlobalContext())
     return StructType(API.LLVMStructCreateNamed(ctx, name))
 end
 
-StructType(elems::Vector{T}, packed::Core.Bool=false) where {T<:LLVMType} =
+StructType(elems::Vector{<:LLVMType}, packed::Core.Bool=false) =
     StructType(API.LLVMStructType(elems, length(elems), convert(Bool, packed)))
 
-StructType(elems::Vector{T}, ctx::Context, packed::Core.Bool=false) where {T<:LLVMType} =
+StructType(elems::Vector{<:LLVMType}, ctx::Context, packed::Core.Bool=false) =
     StructType(API.LLVMStructTypeInContext(ctx, elems, length(elems), convert(Bool, packed)))
 
 name(structtyp::StructType) =
@@ -197,7 +197,7 @@ ispacked(structtyp::StructType) =
 isopaque(structtyp::StructType) =
     convert(Core.Bool, API.LLVMIsOpaqueStruct(structtyp))
 
-elements!(structtyp::StructType, elems::Vector{T}, packed::Core.Bool=false) where {T<:LLVMType} =
+elements!(structtyp::StructType, elems::Vector{<:LLVMType}, packed::Core.Bool=false) =
     API.LLVMStructSetBody(structtyp, elems,
                           length(elems), convert(Bool, packed))
 
