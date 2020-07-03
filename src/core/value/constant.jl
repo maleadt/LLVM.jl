@@ -8,7 +8,7 @@ isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(val))
 
 
 @checked struct UndefValue <: User
-    ref::reftype(User)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
 
@@ -25,7 +25,7 @@ abstract type Instruction <: User end
 
 
 @checked struct PointerNull <: Constant
-    ref::reftype(User)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNull
 
@@ -37,7 +37,7 @@ PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
 export ConstantInt, ConstantFP
 
 @checked struct ConstantInt <: Constant
-    ref::reftype(Constant)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantIntValueKind}) = ConstantInt
 
@@ -75,7 +75,7 @@ Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
 
 
 @checked struct ConstantFP <: Constant
-    ref::reftype(Constant)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
 
@@ -91,7 +91,7 @@ Base.convert(::Type{Float64}, val::ConstantFP) =
 export ConstantAggregateZero
 
 @checked struct ConstantAggregateZero <: Constant
-    ref::reftype(Constant)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantAggregateZeroValueKind}) = ConstantAggregateZero
 
@@ -104,29 +104,29 @@ identify(::Type{Value}, ::Val{API.LLVMConstantAggregateZeroValueKind}) = Constan
 export ConstantExpr, ConstantAggregate, ConstantArray, ConstantStruct, ConstantVector, InlineAsm
 
 @checked struct ConstantExpr <: Constant
-    ref::reftype(Constant)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
 
 abstract type ConstantAggregate <: Constant end
 
 @checked struct ConstantArray <: ConstantAggregate
-    ref::reftype(Constant)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
 
 @checked struct ConstantStruct <: ConstantAggregate
-    ref::reftype(Constant)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
 
 @checked struct ConstantVector <: ConstantAggregate
-    ref::reftype(Constant)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantVectorValueKind}) = ConstantVector
 
 @checked struct InlineAsm <: Constant
-    ref::reftype(Constant)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMInlineAsmValueKind}) = InlineAsm
 
@@ -204,7 +204,7 @@ export GlobalVariable, unsafe_delete!,
        isextinit, extinit!
 
 @checked struct GlobalVariable <: GlobalObject
-    ref::reftype(GlobalObject)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMGlobalVariableValueKind}) = GlobalVariable
 

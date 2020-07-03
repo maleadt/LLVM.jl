@@ -3,7 +3,7 @@ export BasicBlock, unsafe_delete!,
        move_before, move_after
 
 @checked struct BasicBlock <: Value
-    ref::reftype(Value)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMBasicBlockValueKind}) = BasicBlock
 
@@ -12,7 +12,7 @@ Base.unsafe_convert(::Type{API.LLVMBasicBlockRef}, bb::BasicBlock) = API.LLVMVal
 
 # forward declarations
 @checked struct Function <: GlobalObject
-    ref::reftype(GlobalObject)
+    ref::API.LLVMValueRef
 end
 
 BasicBlock(f::Function, name::String) =

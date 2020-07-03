@@ -7,7 +7,6 @@ export TargetMachine, dispose,
 @checked struct TargetMachine
     ref::API.LLVMTargetMachineRef
 end
-reftype(::Type{TargetMachine}) = API.LLVMTargetMachineRef
 
 Base.unsafe_convert(::Type{API.LLVMTargetMachineRef}, tm::TargetMachine) = tm.ref
 

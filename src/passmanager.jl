@@ -3,7 +3,6 @@ export PassManager,
 
 # subtypes are expected to have a 'ref::API.LLVMPassManagerRef' field
 abstract type PassManager end
-reftype(::Type{T}) where {T<:PassManager} = API.LLVMPassManagerRef
 
 Base.unsafe_convert(::Type{API.LLVMPassManagerRef}, pm::PassManager) = pm.ref
 
@@ -20,7 +19,7 @@ dispose(pm::PassManager) = API.LLVMDisposePassManager(pm)
 export ModulePassManager, run!
 
 @checked struct ModulePassManager <: PassManager
-    ref::reftype(PassManager)
+    ref::API.LLVMPassManagerRef
 end
 
 ModulePassManager() = ModulePassManager(API.LLVMCreatePassManager())
@@ -47,7 +46,7 @@ export FunctionPassManager,
        initialize!, finalize!, run!
 
 @checked struct FunctionPassManager <: PassManager
-    ref::reftype(PassManager)
+    ref::API.LLVMPassManagerRef
 end
 
 FunctionPassManager(mod::Module) =

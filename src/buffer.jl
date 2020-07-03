@@ -3,7 +3,6 @@ export MemoryBuffer, MemoryBufferFile, dispose
 @checked struct MemoryBuffer
     ref::API.LLVMMemoryBufferRef
 end
-reftype(::Type{MemoryBuffer}) = API.LLVMMemoryBufferRef
 
 Base.unsafe_convert(::Type{API.LLVMMemoryBufferRef}, membuf::MemoryBuffer) = membuf.ref
 

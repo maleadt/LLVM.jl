@@ -1,7 +1,7 @@
 export MDString, MDNode, operands, Metadata
 
 @checked struct MetadataAsValue <: Value
-    ref::reftype(Value)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMMetadataAsValueValueKind}) = MetadataAsValue
 
@@ -42,7 +42,6 @@ end
 @checked struct Metadata
     ref::API.LLVMMetadataRef
 end
-reftype(::Type{Metadata}) = API.LLVMMetadataRef
 
 Base.unsafe_convert(::Type{API.LLVMMetadataRef}, md::Metadata) = md.ref
 

@@ -5,7 +5,6 @@ export Value
 
 # subtypes are expected to have a 'ref::API.LLVMValueRef' field
 abstract type Value end
-reftype(::Type{T}) where {T<:Value} = API.LLVMValueRef
 
 Base.unsafe_convert(::Type{API.LLVMValueRef}, val::Value) = val.ref
 
@@ -72,7 +71,6 @@ export Use, user, value
 @checked struct Use
     ref::API.LLVMUseRef
 end
-reftype(::Type{Use}) = API.LLVMUseRef
 
 Base.unsafe_convert(::Type{API.LLVMUseRef}, use::Use) = use.ref
 

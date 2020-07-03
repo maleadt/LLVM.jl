@@ -2,7 +2,6 @@ export Pass
 
 # subtypes are expected to have a 'ref::API.LLVMPassRef' field
 abstract type Pass end
-reftype(::Type{T}) where {T<:Pass} = API.LLVMPassRef
 
 Base.unsafe_convert(::Type{API.LLVMPassRef}, pass::Pass) = pass.ref
 
@@ -14,12 +13,12 @@ Base.unsafe_convert(::Type{API.LLVMPassRef}, pass::Pass) = pass.ref
 export ModulePass
 
 @checked struct ModulePass <: Pass
-    ref::reftype(Pass)
+    ref::API.LLVMPassRef
     root::Any
 
     function ModulePass(name::String, runner::Core.Function)
         function callback(ptr::Ptr{Cvoid})::Core.Bool
-            mod = Module(convert(reftype(Module), ptr))
+            mod = Module(convert(API.LLVMModuleRef, ptr))
             return runner(mod)::Core.Bool
         end
 
@@ -35,12 +34,12 @@ end
 export FunctionPass
 
 @checked struct FunctionPass <: Pass
-    ref::reftype(Pass)
+    ref::API.LLVMPassRef
     root::Any
 
     function FunctionPass(name::String, runner::Core.Function)
         function callback(ptr::Ptr{Cvoid})::Core.Bool
-            fn = Function(convert(reftype(Function), ptr))
+            fn = Function(convert(API.LLVMValueRef, ptr))
             return runner(fn)::Core.Bool
         end
 
@@ -56,14 +55,14 @@ end
 export BasicBlockPass
 
 @checked struct BasicBlockPass <: Pass
-    ref::reftype(Pass)
+    ref::API.LLVMPassRef
     root::Any
 
     function BasicBlockPass(name::String, runner::Core.Function)
         VERSION >= v"1.4.0-DEV.589" && error("BasicBlockPass functionality has been removed from Julia and LLVM")
 
         function callback(ptr::Ptr{Cvoid})::Core.Bool
-            bb = BasicBlock(convert(reftype(BasicBlock), ptr))
+            bb = BasicBlock(convert(API.LLVMBasicBlockRef, ptr))
             return runner(bb)::Core.Bool
         end
 

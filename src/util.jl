@@ -11,9 +11,6 @@ end
 
 # llvm.org/docs/doxygen/html/group__LLVMCSupportTypes.html
 
-# traits
-reftype(t::Type) = error("No reference type defined for $t")
-
 # abstract implementations
 identify(::Type{T}, ref) where {T} = T(ref)
 @inline function check(::Type, ref::Ptr)

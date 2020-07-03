@@ -2,7 +2,6 @@ export LLVMType, issized, context, show
 
 # subtypes are expected to have a 'ref::API.LLVMTypeRef' field
 abstract type LLVMType end
-reftype(::Type{T}) where {T<:LLVMType} = API.LLVMTypeRef
 
 Base.unsafe_convert(::Type{API.LLVMTypeRef}, typ::LLVMType) = typ.ref
 
@@ -44,7 +43,7 @@ Base.isempty(@nospecialize(T::LLVMType)) = false
 export width
 
 @checked struct IntegerType <: LLVMType
-    ref::reftype(LLVMType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMIntegerTypeKind}) = IntegerType
 
@@ -81,7 +80,7 @@ for T in [:Half, :Float, :Double]
     enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin
         @checked struct $api_typename <: FloatingPointType
-            ref::reftype(FloatingPointType)
+            ref::API.LLVMTypeRef
         end
         identify(::Type{LLVMType}, ::Val{API.$enumkind}) = $api_typename
 
@@ -97,7 +96,7 @@ end
 export isvararg, return_type, parameters
 
 @checked struct FunctionType <: LLVMType
-    ref::reftype(LLVMType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMFunctionTypeKind}) = FunctionType
 
@@ -136,7 +135,7 @@ Base.eltype(typ::SequentialType) = LLVMType(API.LLVMGetElementType(typ))
 
 
 @checked struct PointerType <: SequentialType
-    ref::reftype(SequentialType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMPointerTypeKind}) = PointerType
 
@@ -149,7 +148,7 @@ addrspace(ptrtyp::PointerType) =
 
 
 @checked struct ArrayType <: SequentialType
-    ref::reftype(SequentialType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMArrayTypeKind}) = ArrayType
 
@@ -163,7 +162,7 @@ Base.isempty(@nospecialize(T::ArrayType)) = length(T) == 0 || isempty(eltype(T))
 
 
 @checked struct VectorType <: SequentialType
-    ref::reftype(SequentialType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMVectorTypeKind}) = VectorType
 
@@ -179,7 +178,7 @@ Base.size(vectyp::VectorType) = API.LLVMGetVectorSize(vectyp)
 export name, ispacked, isopaque, elements!
 
 @checked struct StructType <: SequentialType
-    ref::reftype(SequentialType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMStructTypeKind}) = StructType
 
@@ -243,7 +242,7 @@ end
 ## other
 
 @checked struct VoidType <: LLVMType
-    ref::reftype(LLVMType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMVoidTypeKind}) = VoidType
 
@@ -252,7 +251,7 @@ VoidType(ctx::Context) =
     VoidType(API.LLVMVoidTypeInContext(ctx))
 
 @checked struct LabelType <: LLVMType
-    ref::reftype(LLVMType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMLabelTypeKind}) = LabelType
 
@@ -261,7 +260,7 @@ LabelType(ctx::Context) =
     LabelType(API.LLVMLabelTypeInContext(ctx))
 
 @checked struct MetadataType <: LLVMType
-    ref::reftype(LLVMType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMMetadataTypeKind}) = MetadataType
 
@@ -269,7 +268,7 @@ MetadataType(ctx::Context) =
     MetadataType(API.LLVMMetadataTypeInContext(ctx))
 
 @checked struct TokenType <: LLVMType
-    ref::reftype(LLVMType)
+    ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMTokenTypeKind}) = TokenType
 

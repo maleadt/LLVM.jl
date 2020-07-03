@@ -6,7 +6,6 @@ export ModuleProvider, dispose
 @checked struct ModuleProvider
     ref::API.LLVMModuleProviderRef
 end
-reftype(::Type{ModuleProvider}) = API.LLVMModuleProviderRef
 
 Base.unsafe_convert(::Type{API.LLVMModuleProviderRef}, mp::ModuleProvider) = mp.ref
 

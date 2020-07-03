@@ -74,7 +74,7 @@ end
 export Argument, parameters
 
 @checked struct Argument <: Value
-    ref::reftype(Value)
+    ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMArgumentValueKind}) = Argument
 

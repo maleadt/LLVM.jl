@@ -7,7 +7,6 @@ export DataLayout, dispose,
        element_at, offsetof
 
 # forward definition of DataLayout in src/module.jl
-reftype(::Type{DataLayout}) = API.LLVMTargetDataRef
 
 Base.unsafe_convert(::Type{API.LLVMTargetDataRef}, dl::DataLayout) = dl.ref
 

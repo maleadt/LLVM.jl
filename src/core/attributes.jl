@@ -6,19 +6,18 @@ export Attribute,
        kind, value
 
 abstract type Attribute end
-reftype(::Type{T}) where {T<:Attribute} = API.LLVMAttributeRef
 
 Base.unsafe_convert(::Type{API.LLVMAttributeRef}, attr::Attribute) = attr.ref
 
 @checked struct EnumAttribute <: Attribute
-    ref::reftype(Attribute)
+    ref::API.LLVMAttributeRef
 end
 
 @checked struct StringAttribute <: Attribute
-    ref::reftype(Attribute)
+    ref::API.LLVMAttributeRef
 end
 
-# TODO: make @reftype's identify mechanism flexible enough to cover cases like this one,
+# TODO: make the identify mechanism flexible enough to cover cases like this one,
 #       and not only Value and Type
 
 function Attribute(ref::API.LLVMAttributeRef)

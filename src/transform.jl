@@ -8,7 +8,6 @@ export PassManagerBuilder, dispose,
 @checked struct PassManagerBuilder
     ref::API.LLVMPassManagerBuilderRef
 end
-reftype(::Type{PassManagerBuilder}) = API.LLVMPassManagerBuilderRef
 
 Base.unsafe_convert(::Type{API.LLVMPassManagerBuilderRef}, pmb::PassManagerBuilder) = pmb.ref
 

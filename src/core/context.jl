@@ -5,7 +5,6 @@ export Context, dispose, GlobalContext
 @checked struct Context
     ref::API.LLVMContextRef
 end
-reftype(::Type{Context}) = API.LLVMContextRef
 
 Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 
@@ -49,7 +48,6 @@ export DiagnosticInfo, severity, message
 @checked struct DiagnosticInfo
     ref::API.LLVMDiagnosticInfoRef
 end
-reftype(::Type{DiagnosticInfo}) = API.LLVMDiagnosticInfoRef
 
 Base.unsafe_convert(::Type{API.LLVMDiagnosticInfoRef}, di::DiagnosticInfo) = di.ref
 

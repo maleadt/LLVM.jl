@@ -95,8 +95,7 @@ Base.setindex!(md::InstructionMetadataDict, node::MetadataAsValue, kind::MD) =
     API.LLVMSetMetadata(md.inst, kind, node)
 
 Base.delete!(md::InstructionMetadataDict, kind::MD) =
-    API.LLVMSetMetadata(md.inst, kind,
-                        convert(reftype(MetadataAsValue), C_NULL))
+    API.LLVMSetMetadata(md.inst, kind, C_NULL)
 
 
 ## instruction types
@@ -116,7 +115,7 @@ for op in opcodes
     enum = Symbol(:LLVM, op)
     @eval begin
         @checked struct $typename <: Instruction
-            ref::reftype(Instruction)
+            ref::API.LLVMValueRef
         end
         identify(::Type{Instruction}, ::Val{API.$enum}) = $typename
     end

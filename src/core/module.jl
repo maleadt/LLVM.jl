@@ -8,7 +8,6 @@ export dispose,
        set_used!, set_compiler_used!
 
 # forward definition of Module in src/core/value/constant.jl
-reftype(::Type{Module}) = API.LLVMModuleRef
 
 Base.unsafe_convert(::Type{API.LLVMModuleRef}, mod::Module) = mod.ref
 

@@ -9,7 +9,6 @@ export GenericValue, dispose,
 @checked struct GenericValue
     ref::API.LLVMGenericValueRef
 end
-reftype(::Type{GenericValue}) = API.LLVMGenericValueRef
 
 Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = val.ref
 
@@ -57,7 +56,6 @@ export ExecutionEngine, Interpreter, JIT,
 @checked struct ExecutionEngine
     ref::API.LLVMExecutionEngineRef
 end
-reftype(::Type{ExecutionEngine}) = API.LLVMExecutionEngineRef
 
 Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine) = engine.ref
 

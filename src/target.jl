@@ -7,7 +7,6 @@ export Target,
 @checked struct Target
     ref::API.LLVMTargetRef
 end
-reftype(::Type{Target}) = API.LLVMTargetRef
 
 Base.unsafe_convert(::Type{API.LLVMTargetRef}, target::Target) = target.ref
 

@@ -8,7 +8,6 @@ export Builder,
 @checked struct Builder
     ref::API.LLVMBuilderRef
 end
-reftype(::Type{Builder}) = API.LLVMBuilderRef
 
 Base.unsafe_convert(::Type{API.LLVMBuilderRef}, builder::Builder) = builder.ref
 
