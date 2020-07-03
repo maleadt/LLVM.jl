@@ -1,5 +1,7 @@
 # same as `sum.jl`, but reusing the Julia compiler to compile and execute the IR
 
+using Test
+
 using LLVM
 using LLVM.Interop
 
@@ -25,6 +27,5 @@ end
 
 # make Julia compile and execute the function
 push!(function_attributes(sum), EnumAttribute("alwaysinline"))
-ptr = LLVM.ref(sum)
-call_sum(x, y) = Base.llvmcall(ptr, Int32, Tuple{Int32, Int32}, x, y)
-@show call_sum(x, y)
+@eval call_sum(x, y) = $(call_function(sum, Int32, Tuple{Int32, Int32}, :(x, y)))
+@test call_sum(x, y) == x + y
