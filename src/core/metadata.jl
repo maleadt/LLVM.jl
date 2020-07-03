@@ -46,7 +46,7 @@ end
 Base.unsafe_convert(::Type{API.LLVMMetadataRef}, md::Metadata) = md.ref
 
 function Metadata(val::Value)
-    return Metadata(LLVM.API.LLVMValueAsMetadata(val))
+    return Metadata(API.LLVMValueAsMetadata(val))
 end
 
 function Value(md::Metadata, ctx::Context)

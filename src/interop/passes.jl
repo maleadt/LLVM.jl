@@ -40,7 +40,7 @@ else
 end
 
 if VERSION >= v"1.5.0-DEV.802"
-    remove_julia_addrspaces!(pm::PassManager) = API.LLVMAddRemoveJuliaAddrspacesPass(LLVM.pm)
+    remove_julia_addrspaces!(pm::PassManager) = API.LLVMAddRemoveJuliaAddrspacesPass(pm)
 else
     remove_julia_addrspaces!(pm::PassManager) = nothing
 end

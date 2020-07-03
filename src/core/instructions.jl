@@ -140,7 +140,7 @@ called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(inst))
 
 export isterminator, isconditional, condition, condition!, default_dest
 
-isterminator(inst::Instruction) = LLVM.API.LLVMIsATerminatorInst(inst) != C_NULL
+isterminator(inst::Instruction) = API.LLVMIsATerminatorInst(inst) != C_NULL
 
 isconditional(br::Instruction) = convert(Core.Bool, API.LLVMIsConditional(br))
 
