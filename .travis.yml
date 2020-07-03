@@ -16,15 +16,26 @@ julia:
 notifications:
   email: false
 
+after_success:
+  - julia -e '
+      using Pkg;
+      Pkg.add("Coverage");
+      using Coverage;
+      dirs = ["src", "test", "examples"];
+      coverage = vcat(map(process_folder, dirs)...);
+      Codecov.submit(coverage);'
+
 jobs:
   include:
     - stage: "Documentation"
       julia: 1.0
       os: linux
       script:
-        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
-                                               Pkg.build();
-                                               Pkg.instantiate()'
+        - julia --project=docs/ -e '
+            using Pkg;
+            Pkg.develop(PackageSpec(path=pwd()));
+            Pkg.build();
+            Pkg.instantiate();'
         - julia --project=docs/ docs/make.jl
       after_success: skip
   allow_failures:
