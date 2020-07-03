@@ -10,13 +10,11 @@ identify(::Type{Instruction}, ref::API.LLVMValueRef) =
     identify(Instruction, Val{API.LLVMGetInstructionOpcode(ref)}())
 identify(::Type{Instruction}, ::Val{K}) where {K} = error("Unknown instruction kind $K")
 
-@inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
+@inline function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
-    if Base.JLOptions().debug_level >= 2
-        T′ = identify(Instruction, ref)
-        if T != T′
-            error("invalid conversion of $T′ instruction reference to $T")
-        end
+    T′ = identify(Instruction, ref)
+    if T != T′
+        error("invalid conversion of $T′ instruction reference to $T")
     end
 end
 

@@ -12,13 +12,11 @@ identify(::Type{Value}, ref::API.LLVMValueRef) =
     identify(Value, Val{API.LLVMGetValueKind(ref)}())
 identify(::Type{Value}, ::Val{K}) where {K} = error("Unknown value kind $K")
 
-@inline function check(::Type{T}, ref::API.LLVMValueRef) where T<:Value
+@inline function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Value
     ref==C_NULL && throw(UndefRefError())
-    if Base.JLOptions().debug_level >= 2
-        T′ = identify(Value, ref)
-        if T != T′
-            error("invalid conversion of $T′ value reference to $T")
-        end
+    T′ = identify(Value, ref)
+    if T != T′
+        error("invalid conversion of $T′ value reference to $T")
     end
 end
 

@@ -22,7 +22,10 @@ export ModulePass
             return runner(mod)::Core.Bool
         end
 
-        return new(API.LLVMCreateModulePass(name, callback), callback)
+        ref = API.LLVMCreateModulePass(name, callback)
+        refcheck(ModulePass, ref)
+
+        return new(ref, callback)
     end
 end
 
@@ -43,7 +46,10 @@ export FunctionPass
             return runner(fn)::Core.Bool
         end
 
-        return new(API.LLVMCreateFunctionPass(name, callback), callback)
+        ref = API.LLVMCreateFunctionPass(name, callback)
+        refcheck(FunctionPass, ref)
+
+        return new(ref, callback)
     end
 end
 
@@ -66,7 +72,10 @@ export BasicBlockPass
             return runner(bb)::Core.Bool
         end
 
-        return new(API.LLVMCreateBasicBlockPass(name, callback), callback)
+        ref = API.LLVMCreateBasicBlockPass(name, callback)
+        refcheck(BasicBlockPass, ref)
+
+        return new(ref, callback)
     end
 end
 
