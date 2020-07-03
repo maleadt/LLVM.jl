@@ -67,8 +67,7 @@ function ExecutionEngine(mod::Module)
                                                                  out_error))
 
     if status
-        error = unsafe_string(out_error[])
-        API.LLVMDisposeMessage(out_error[])
+        error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
@@ -83,8 +82,7 @@ function Interpreter(mod::Module)
                                                              out_error))
 
     if status
-        error = unsafe_string(out_error[])
-        API.LLVMDisposeMessage(out_error[])
+        error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
@@ -99,8 +97,7 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
                                                                    optlevel, out_error))
 
     if status
-        error = unsafe_string(out_error[])
-        API.LLVMDisposeMessage(out_error[])
+        error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 

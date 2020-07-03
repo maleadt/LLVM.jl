@@ -9,8 +9,7 @@ function Base.parse(::Type{Module}, ir::String, ctx::Context=GlobalContext())
     status = convert(Core.Bool, API.LLVMParseIRInContext(ctx, membuf, out_ref, out_error))
 
     if status
-        error = unsafe_string(out_error[])
-        API.LLVMDisposeMessage(out_error[])
+        error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
