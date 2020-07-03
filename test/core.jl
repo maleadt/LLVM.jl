@@ -709,8 +709,8 @@ LLVM.Module("SomeModule", ctx) do mod
         @test name(intr) == "llvm.sin"
         @test name(intr, [LLVM.DoubleType(ctx)]) == "llvm.sin.f64"
 
-        ft = FunctionType(intr, [LLVM.DoubleType(ctx)])
-        @test ft isa FunctionType
+        ft = LLVM.FunctionType(intr, [LLVM.DoubleType(ctx)])
+        @test ft isa LLVM.FunctionType
         @test return_type(ft) == LLVM.DoubleType(ctx)
 
         fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
