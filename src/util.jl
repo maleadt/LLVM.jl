@@ -1,7 +1,7 @@
 # utilities
 
-function unsafe_message(ptr)
-    str = unsafe_string(ptr)
+function unsafe_message(ptr, args...)
+    str = unsafe_string(ptr, args...)
     API.LLVMDisposeMessage(ptr)
     str
 end

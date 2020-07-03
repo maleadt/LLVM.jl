@@ -680,7 +680,7 @@ LLVM.Module("SomeModule", ctx) do mod
     @test personality(fn) === nothing
     unsafe_delete!(mod, pers_fn)
 
-    @test intrinsic_id(fn) == 0
+    @test !isintrinsic(fn)
 
     @test callconv(fn) == LLVM.API.LLVMCCallConv
     callconv!(fn, LLVM.API.LLVMFastCallConv)
@@ -694,6 +694,37 @@ LLVM.Module("SomeModule", ctx) do mod
         @test fn in fns
         unsafe_delete!(mod, fn)
         @test isempty(fns)
+    end
+end
+end
+
+Context() do ctx
+LLVM.Module("SomeModule", ctx) do mod
+    intr_ft = LLVM.FunctionType(LLVM.DoubleType(ctx), [LLVM.DoubleType(ctx)])
+    intr_fn = LLVM.Function(mod, "llvm.sin.f64", intr_ft)
+    @test isintrinsic(intr_fn)
+
+    intr = Intrinsic(intr_fn)
+    show(devnull, intr)
+
+    if LLVM.version() >= v"8"
+        @test isoverloaded(intr)
+
+        @test name(intr) == "llvm.sin"
+        @test name(intr, [LLVM.DoubleType(ctx)]) == "llvm.sin.f64"
+
+        ft = FunctionType(intr, [LLVM.DoubleType(ctx)])
+        @test ft isa FunctionType
+        @test return_type(ft) == LLVM.DoubleType(ctx)
+
+        fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
+        @test fn isa LLVM.Function
+        @test eltype(llvmtype(fn)) == ft
+        @test isintrinsic(fn)
+    end
+
+    if LLVM.version() >= v"9"
+        @test intr == Intrinsic("llvm.sin")
     end
 end
 end
