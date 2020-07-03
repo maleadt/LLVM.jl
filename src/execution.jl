@@ -55,6 +55,7 @@ export ExecutionEngine, Interpreter, JIT,
 
 @checked struct ExecutionEngine
     ref::API.LLVMExecutionEngineRef
+    mods::Set{Module}
 end
 
 Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine) = engine.ref
@@ -64,14 +65,14 @@ function ExecutionEngine(mod::Module)
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
     status = convert(Core.Bool, API.LLVMCreateExecutionEngineForModule(out_ref, mod,
-                                                                 out_error))
+                                                                       out_error))
 
     if status
         error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[])
+    return ExecutionEngine(out_ref[], Set([mod]))
 end
 function Interpreter(mod::Module)
     API.LLVMLinkInInterpreter()
@@ -79,14 +80,14 @@ function Interpreter(mod::Module)
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
     status = convert(Core.Bool, API.LLVMCreateInterpreterForModule(out_ref, mod,
-                                                             out_error))
+                                                                   out_error))
 
     if status
         error = unsafe_message(out_error[])
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[])
+    return ExecutionEngine(out_ref[], Set([mod]))
 end
 function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault)
     API.LLVMLinkInMCJIT()
@@ -101,10 +102,15 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[])
+    return ExecutionEngine(out_ref[], Set([mod]))
 end
 
-dispose(engine::ExecutionEngine) = API.LLVMDisposeExecutionEngine(engine)
+function dispose(engine::ExecutionEngine)
+    for mod in engine.mods
+        mod.ref = C_NULL
+    end
+    API.LLVMDisposeExecutionEngine(engine)
+end
 
 for x in [:ExecutionEngine, :Interpreter, :JIT]
     @eval function $x(f::Core.Function, args...)
@@ -123,7 +129,9 @@ Base.push!(engine::ExecutionEngine, mod::Module) = API.LLVMAddModule(engine.ref,
 function Base.delete!(engine::ExecutionEngine, mod::Module)
     out_ref = Ref{API.LLVMModuleRef}()
     API.LLVMRemoveModule(engine.ref, mod.ref, out_ref, Ref{Cstring}()) # out string is not used
-    return Module(out_ref[])
+    @assert mod == Module(out_ref[])
+    delete!(engine.mods, mod)
+    return
 end
 
 Base.run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=GenericValue[]) =

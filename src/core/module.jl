@@ -9,7 +9,13 @@ export dispose,
 
 # forward definition of Module in src/core/value/constant.jl
 
-Base.unsafe_convert(::Type{API.LLVMModuleRef}, mod::Module) = mod.ref
+function Base.unsafe_convert(::Type{API.LLVMModuleRef}, mod::Module)
+    # modules can get destroyed, so be sure to check for validity
+    mod.ref == C_NULL && throw(UndefRefError())
+    mod.ref
+end
+
+Base.:(==)(x::Module, y::Module) = (x.ref === y.ref)
 
 # forward declarations
 @checked struct DataLayout

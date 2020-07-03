@@ -18,7 +18,7 @@ UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 abstract type Constant <: User end
 
 # forward declarations
-@checked struct Module
+@checked mutable struct Module
     ref::API.LLVMModuleRef
 end
 abstract type Instruction <: User end
