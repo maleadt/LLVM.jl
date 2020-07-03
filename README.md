@@ -1,5 +1,4 @@
-LLVM C API wrapper
-==================
+# LLVM C API wrapper
 
 *A Julia wrapper for the LLVM C API.*
 
@@ -28,23 +27,35 @@ LLVM C API wrapper
 [codecov-img]: https://codecov.io/gh/maleadt/LLVM.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/maleadt/LLVM.jl
 
+The LLVM.jl package is a Julia wrapper for the LLVM C API, and can be used to work with the
+LLVM compiler framework from Julia. You can use the package to work with LLVM code generated
+by Julia, to interoperate with the Julia compiler, or to create your own compiler. It is
+heavily used by the different GPU compilers for the Julia programming language.
 
-Installation
-------------
 
-LLVM.jl is a registered package, and can be installed using the Julia package manager:
+## Installation
 
-```julia
-Pkg.add("LLVM")
+LLVM.jl can be installed with the Julia package manager.
+From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
+
+```
+pkg> add LLVM
 ```
 
-**NOTE**: the current version of this package requires Julia 0.7. Only older
-versions of this package, v0.5.x, work with Julia 0.6, and require a
-**source-build** of Julia.
+Or, equivalently, via the `Pkg` API:
+
+```julia
+julia> import Pkg; Pkg.add("LLVM")
+```
+
+Note that the package **is intended to be used with the LLVM library shipped with Julia**.
+That means you can not use it with other LLVM libraries, like the one provided by your
+operating system. It is recommended to use the official binaries from
+[julialang.org](https://julialang.org/downloads/), but custom builds are supported too (as
+long as they provide a dynamically-linked copy of the LLVM library).
 
 
-License
--------
+## License
 
 LLVM.jl is licensed under the [NCSA license](LICENSE.md).
 
