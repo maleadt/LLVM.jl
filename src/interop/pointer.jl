@@ -40,7 +40,7 @@ tbaa_addrspace(as) = tbaa_make_child("addrspace($(as))")
         position!(builder, entry)
 
         typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
-        typed_ptr = gep!(builder, typed_ptr, [parameters(llvm_f)[2]])
+        typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[2]])
         ld = load!(builder, typed_ptr)
 
         if A != 0
@@ -73,7 +73,7 @@ end
         position!(builder, entry)
 
         typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
-        typed_ptr = gep!(builder, typed_ptr, [parameters(llvm_f)[3]])
+        typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[3]])
         val = parameters(llvm_f)[2]
         st = store!(builder, val, typed_ptr)
 
