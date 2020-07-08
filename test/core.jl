@@ -694,6 +694,38 @@ LLVM.Module("SomeModule", ctx) do mod
 end
 end
 
+# non-overloaded intrinsic
+Context() do ctx
+LLVM.Module("SomeModule", ctx) do mod
+    intr_ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+    intr_fn = LLVM.Function(mod, "llvm.trap", intr_ft)
+    @test isintrinsic(intr_fn)
+
+    intr = Intrinsic(intr_fn)
+    show(devnull, intr)
+
+    if LLVM.version() >= v"8"
+        @test !isoverloaded(intr)
+
+        @test name(intr) == "llvm.trap"
+
+        ft = LLVM.FunctionType(intr; ctx=ctx)
+        @test ft isa LLVM.FunctionType
+        @test return_type(ft) == LLVM.VoidType(ctx)
+
+        fn = LLVM.Function(mod, intr)
+        @test fn isa LLVM.Function
+        @test eltype(llvmtype(fn)) == ft
+        @test isintrinsic(fn)
+    end
+
+    if LLVM.version() >= v"9"
+        @test intr == Intrinsic("llvm.trap")
+    end
+end
+end
+
+# overloaded intrinsic
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
     intr_ft = LLVM.FunctionType(LLVM.DoubleType(ctx), [LLVM.DoubleType(ctx)])
@@ -706,7 +738,6 @@ LLVM.Module("SomeModule", ctx) do mod
     if LLVM.version() >= v"8"
         @test isoverloaded(intr)
 
-        @test name(intr) == "llvm.sin"
         @test name(intr, [LLVM.DoubleType(ctx)]) == "llvm.sin.f64"
 
         ft = LLVM.FunctionType(intr, [LLVM.DoubleType(ctx)])
