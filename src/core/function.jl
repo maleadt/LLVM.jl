@@ -197,9 +197,10 @@ end
 function Base.show(io::IO, intr::Intrinsic)
     print(io, "Intrinsic($(intr.id))")
     if version() >= v"8"
-        print(io, ": \"$(name(intr))\"")
         if isoverloaded(intr)
-            print(io, " (overloaded)")
+            print(io, ": overloaded intrinsic")
+        else
+            print(io, ": \"$(name(intr))\"")
         end
     end
 end
