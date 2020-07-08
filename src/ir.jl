@@ -19,4 +19,4 @@ end
 
 ## writer
 
-Base.convert(::Type{String}, mod::Module) = unsafe_string(API.LLVMPrintModuleToString(mod))
+Base.convert(::Type{String}, mod::Module) = unsafe_message(API.LLVMPrintModuleToString(mod))
