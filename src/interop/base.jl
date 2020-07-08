@@ -25,14 +25,14 @@ Returns both the newly created function, and its type.
 """
 function create_function(rettyp::LLVMType=LLVM.VoidType(JuliaContext()),
                          argtyp::Vector{<:LLVMType}=LLVMType[],
-                         name::String="")
+                         name::String="entry")
     ctx = context(rettyp)
     mod = LLVM.Module("llvmcall", ctx)
+    isempty(name) && throw(ArgumentError("Function name cannot be empty"))
 
     ft = LLVM.FunctionType(rettyp, argtyp)
     f = LLVM.Function(mod, name, ft)
     push!(function_attributes(f), EnumAttribute("alwaysinline", 0, ctx))
-    linkage!(f, LLVM.API.LLVMPrivateLinkage)
 
     return f, ft
 end
@@ -46,11 +46,13 @@ argument values (eg. `:((1,2))`), which will be splatted into the call to the fu
 """
 function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=Tuple{},
                        args::Expr=:())
-    ref = Base.unsafe_convert(API.LLVMValueRef, llvmf)
-    ptr = convert(Ptr{Cvoid},ref)
+    mod = LLVM.parent(llvmf)
+    ir = convert(String, mod)
+    fn = LLVM.name(llvmf)
+    @assert !isempty(fn)
     quote
         Base.@_inline_meta
-        Base.llvmcall($ptr, $rettyp, $argtyp, $args...)
+        Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $args...)
     end
 end
 
