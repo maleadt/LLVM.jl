@@ -1,7 +1,5 @@
 ## reader
-
-function Base.parse(::Type{Module}, data::Vector{T}) where T<:Union{UInt8,Int8}
-    membuf = MemoryBuffer(data, "", false)
+function Base.parse(::Type{Module}, membuf::MemoryBuffer)
     out_ref = Ref{API.LLVMModuleRef}()
 
     status = convert(Core.Bool, API.LLVMParseBitcode2(membuf, out_ref))
@@ -10,8 +8,7 @@ function Base.parse(::Type{Module}, data::Vector{T}) where T<:Union{UInt8,Int8}
     Module(out_ref[])
 end
 
-function Base.parse(::Type{Module}, data::Vector{T}, ctx::Context) where T<:Union{UInt8,Int8}
-    membuf = MemoryBuffer(data, "", false)
+function Base.parse(::Type{Module}, membuf::MemoryBuffer, ctx::Context)
     out_ref = Ref{API.LLVMModuleRef}()
 
     status = convert(Core.Bool, API.LLVMParseBitcodeInContext2(ctx, membuf, out_ref))
@@ -19,6 +16,11 @@ function Base.parse(::Type{Module}, data::Vector{T}, ctx::Context) where T<:Unio
 
     Module(out_ref[])
 end
+
+Base.parse(::Type{Module}, data::Vector) =
+    parse(Module, MemoryBuffer(data, "", false))
+Base.parse(::Type{Module}, data::Vector, ctx::Context) =
+    parse(Module, MemoryBuffer(data, "", false), ctx)
 
 
 ## writer
