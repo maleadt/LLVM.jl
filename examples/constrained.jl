@@ -33,31 +33,33 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
                                {F, round, fpexcept, T<:AbstractFloat, N}
     @assert N >= 0
 
-    typ = convert(LLVMType, T)
+    JuliaContext() do ctx
+        typ = convert(LLVMType, T, ctx)
 
-    # create a function
-    paramtyps = [typ for i in 1:N]
-    llvm_f, _ = create_function(typ, paramtyps)
+        # create a function
+        paramtyps = [typ for i in 1:N]
+        llvm_f, _ = create_function(typ, paramtyps)
 
-    # create the intrinsic
-    mtyp = LLVM.MetadataType(JuliaContext())
-    mround = MDString(meta(round), JuliaContext())
-    mfpexcept = MDString(meta(fpexcept), JuliaContext())
-    mod = LLVM.parent(llvm_f)
-    intrinsic_typ = LLVM.FunctionType(typ, [paramtyps..., mtyp, mtyp])
-    intrinsic = LLVM.Function(mod, "llvm.experimental.constrained.$(func(F)).$(suffix(T))",
-                              intrinsic_typ)
+        # create the intrinsic
+        mtyp = LLVM.MetadataType(ctx)
+        mround = MDString(meta(round), ctx)
+        mfpexcept = MDString(meta(fpexcept), ctx)
+        mod = LLVM.parent(llvm_f)
+        intrinsic_typ = LLVM.FunctionType(typ, [paramtyps..., mtyp, mtyp])
+        intrinsic = LLVM.Function(mod, "llvm.experimental.constrained.$(func(F)).$(suffix(T))",
+                                intrinsic_typ)
 
-    # generate IR
-    Builder(JuliaContext()) do builder
-        entry = BasicBlock(llvm_f, "entry", JuliaContext())
-        position!(builder, entry)
-        val = call!(builder, intrinsic, [parameters(llvm_f)..., mround, mfpexcept])
-        ret!(builder, val)
+        # generate IR
+        Builder(ctx) do builder
+            entry = BasicBlock(llvm_f, "entry", ctx)
+            position!(builder, entry)
+            val = call!(builder, intrinsic, [parameters(llvm_f)..., mround, mfpexcept])
+            ret!(builder, val)
+        end
+
+        args = Expr(:tuple, (Expr(:ref, :xs, i) for i in 1:N)...)
+        call_function(llvm_f, T, Tuple{(T for i in 1:N)...}, args)
     end
-
-    args = Expr(:tuple, (Expr(:ref, :xs, i) for i in 1:N)...)
-    call_function(llvm_f, T, Tuple{(T for i in 1:N)...}, args)
 end
 
 cadd(x, y) = constrained(+, RoundUpward, FPExceptStrict, x, y)
