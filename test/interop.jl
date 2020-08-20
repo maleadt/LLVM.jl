@@ -5,28 +5,32 @@ using InteractiveUtils
 
 @testset "base" begin
 
-@test isa(JuliaContext(), Context)
+JuliaContext() do ctx
+    @test isa(ctx, Context)
 
-@test isa(convert(LLVMType, Nothing), LLVM.VoidType)
+    @test isa(convert(LLVMType, Nothing, ctx), LLVM.VoidType)
 
-@test_throws ErrorException convert(LLVMType, Ref)
-convert(LLVMType, Ref, true)
+    @test_throws ErrorException convert(LLVMType, Ref, ctx)
+    convert(LLVMType, Ref, ctx; allow_boxed=true)
+end
 
 @generated function add_one(i)
-    T_int = convert(LLVMType, Int)
+    JuliaContext() do ctx
+        T_int = convert(LLVMType, Int, ctx)
 
-    f, ft = create_function(T_int, [T_int])
+        f, ft = create_function(T_int, [T_int])
 
-    Builder(JuliaContext()) do builder
-        entry = BasicBlock(f, "entry", JuliaContext())
-        position!(builder, entry)
+        Builder(ctx) do builder
+            entry = BasicBlock(f, "entry", ctx)
+            position!(builder, entry)
 
-        val = add!(builder, parameters(f)[1], ConstantInt(T_int, 1))
+            val = add!(builder, parameters(f)[1], ConstantInt(T_int, 1))
 
-        ret!(builder, val)
+            ret!(builder, val)
+        end
+
+        call_function(f, Int, Tuple{Int}, :((i,)))
     end
-
-    call_function(f, Int, Tuple{Int}, :((i,)))
 end
 
 @test add_one(1) == 2
@@ -41,6 +45,12 @@ end
 @test !isghosttype(NonGhostType1)
 @test !isghosttype(NonGhostType2)
 @test isboxed(NonGhostType2)
+
+JuliaContext() do ctx
+    @test isghosttype(GhostType, ctx)
+    @test !isghosttype(NonGhostType1, ctx)
+    @test !isghosttype(NonGhostType2, ctx)
+end
 
 end
 

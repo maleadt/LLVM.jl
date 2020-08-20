@@ -3,28 +3,30 @@ export @asmcall
 @generated function _asmcall(::Val{asm}, ::Val{constraints}, ::Val{side_effects},
                              ::Val{rettyp}, ::Val{argtyp}, args...) where
                             {asm, constraints, side_effects, rettyp, argtyp}
-    # create a function
-    llvm_rettyp = convert(LLVMType, rettyp)
-    llvm_argtyp = LLVMType[convert.(LLVMType, [argtyp.parameters...])...]
-    llvm_f, llvm_ft = create_function(llvm_rettyp, llvm_argtyp)
+    JuliaContext() do ctx
+        # create a function
+        llvm_rettyp = convert(LLVMType, rettyp, ctx)
+        llvm_argtyp = LLVMType[convert.(LLVMType, [argtyp.parameters...], Ref(ctx))...]
+        llvm_f, llvm_ft = create_function(llvm_rettyp, llvm_argtyp)
 
-    inline_asm = InlineAsm(llvm_ft, String(asm), String(constraints), side_effects)
+        inline_asm = InlineAsm(llvm_ft, String(asm), String(constraints), side_effects)
 
-    # generate IR
-    Builder(JuliaContext()) do builder
-        entry = BasicBlock(llvm_f, "entry", JuliaContext())
-        position!(builder, entry)
+        # generate IR
+        Builder(ctx) do builder
+            entry = BasicBlock(llvm_f, "entry", ctx)
+            position!(builder, entry)
 
-        val = call!(builder, inline_asm, collect(parameters(llvm_f)))
-        if rettyp == Nothing
-            ret!(builder)
-        else
-            ret!(builder, val)
+            val = call!(builder, inline_asm, collect(parameters(llvm_f)))
+            if rettyp == Nothing
+                ret!(builder)
+            else
+                ret!(builder, val)
+            end
         end
-    end
 
-    call_function(llvm_f, rettyp, argtyp,
-                  Expr(:tuple, (:(args[$i]) for i in 1:length(args))...))
+        call_function(llvm_f, rettyp, argtyp,
+                      Expr(:tuple, (:(args[$i]) for i in 1:length(args))...))
+    end
 end
 
 """

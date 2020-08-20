@@ -12,20 +12,23 @@ else
     y = Int32(2)
 end
 
-param_types = [LLVM.Int32Type(JuliaContext()), LLVM.Int32Type(JuliaContext())]
-ret_type = LLVM.Int32Type(JuliaContext())
-sum, _ = create_function(ret_type, param_types)
+JuliaContext() do ctx
+    param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
+    ret_type = LLVM.Int32Type(ctx)
+    sum, _ = create_function(ret_type, param_types)
 
-# generate IR
-Builder(JuliaContext()) do builder
-    entry = BasicBlock(sum, "entry", JuliaContext())
-    position!(builder, entry)
+    # generate IR
+    Builder(ctx) do builder
+        entry = BasicBlock(sum, "entry", ctx)
+        position!(builder, entry)
 
-    tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
-    ret!(builder, tmp)
+        tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
+        ret!(builder, tmp)
+    end
+
+    # make Julia compile and execute the function
+    push!(function_attributes(sum), EnumAttribute("alwaysinline"))
+    @eval call_sum(x, y) = $(call_function(sum, Int32, Tuple{Int32, Int32}, :(x, y)))
 end
 
-# make Julia compile and execute the function
-push!(function_attributes(sum), EnumAttribute("alwaysinline"))
-@eval call_sum(x, y) = $(call_function(sum, Int32, Tuple{Int32, Int32}, :(x, y)))
 @test call_sum(x, y) == x + y

@@ -17,7 +17,24 @@ LLVM.Module("SomeModule", ctx) do source_mod
     ret!(builder)
 
     verify(source_mod)
-    
+
+
+    bitcode_buf = convert(MemoryBuffer, source_mod)
+
+    let
+        mod = parse(LLVM.Module, bitcode_buf)
+        verify(mod)
+        @test haskey(functions(mod), "SomeFunction")
+        dispose(mod)
+    end
+
+    let
+        mod = parse(LLVM.Module, bitcode_buf, ctx)
+        verify(mod)
+        @test haskey(functions(mod), "SomeFunction")
+        dispose(mod)
+    end
+
 
     bitcode = convert(Vector{UInt8}, source_mod)
 
