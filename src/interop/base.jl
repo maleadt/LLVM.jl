@@ -11,7 +11,7 @@ and pipe it through instead of assuming and accessing a single global contex.
 The do-block version also works on 1.5 and below, where it just returns the global context.
 """
 function JuliaContext()
-    if VERSION >= v"1.6-"
+    if VERSION >= v"1.6.0-DEV.674"
         error("Julia 1.6 does not have a global LLVM context; use the do-block version of this function to instantiate a temporary context (and use it throughout your code instead of assuming and accessing a single global context).")
     end
 
@@ -25,7 +25,7 @@ function JuliaContext()
     LLVM.Context(ref)
 end
 function JuliaContext(f::Base.Callable)
-    if VERSION >= v"1.6-"
+    if VERSION >= v"1.6.0-DEV.674"
         return Context(f)
     else
         return f(JuliaContext())
@@ -62,7 +62,7 @@ argument values (eg. `:((1,2))`), which will be splatted into the call to the fu
 """
 function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=Tuple{},
                        args::Expr=:())
-    if VERSION >= v"1.6-"
+    if VERSION >= v"1.6.0-DEV.674"
         mod = LLVM.parent(llvmf)
         ir = convert(String, mod)
         fn = LLVM.name(llvmf)
