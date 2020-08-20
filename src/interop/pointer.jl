@@ -4,6 +4,8 @@
 
 using Core: LLVMPtr
 
+export tbaa_make_child, tbaa_addrspace
+
 function tbaa_make_child(name::String, ctx::LLVM.Context=JuliaContext(); constant::Bool=false)
     tbaa_root = MDNode([MDString("custom_tbaa", ctx)], ctx)
     tbaa_struct_type =
