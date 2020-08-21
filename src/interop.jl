@@ -12,5 +12,6 @@ include("interop/passes.jl")
 if VERSION >= v"1.5-"
 include("interop/pointer.jl")
 end
+include("interop/utils.jl")
 
 end
