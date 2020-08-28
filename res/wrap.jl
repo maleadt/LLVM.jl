@@ -1,28 +1,19 @@
 # generate LLVM wrappers
 
+using LLVM_full_jll
+
 using Clang
 
-function wrap(config, destdir)
-    @info("Wrapping LLVM C API at $destdir")
-    if !isdir(destdir)
-        mkdir(destdir)
+function wrap()
+    includedir = LLVM_full_jll.llvm_config() do config
+        readchomp(`$config --includedir`)
     end
-
-    includedir = readchomp(`$config --includedir`)
-    cppflags = split(readchomp(`$config --cppflags`))
-
-    # TODO: this should really be taken care of by Clang.jl...
-    if haskey(ENV, "LLVM_CONFIG")
-        clang_config = ENV["LLVM_CONFIG"]
-    else
-        clang_config = joinpath(dirname(pathof(Clang)), "..", "deps", "usr", "tools", "llvm-config")
+    cppflags = LLVM_full_jll.llvm_config() do config
+        split(readchomp(`$config --cppflags`))
     end
-    clang_libdir = readchomp(`$clang_config --libdir`)
-    clang_version = readchomp(`$clang_config --version`)
 
     # Set-up arguments to clang
     clang_includes  = map(x->x[3:end], filter( x->startswith(x,"-I"), cppflags))
-    push!(clang_includes, "$clang_libdir/clang/$clang_version/include")
     clang_extraargs =                  filter(x->!startswith(x,"-I"), cppflags)
 
     # Recursively discover LLVM C API headers (files ending in .h)
@@ -43,8 +34,8 @@ function wrap(config, destdir)
 
     context = init(;
                     headers = header_files,
-                    output_file = "$destdir/libLLVM_h.jl",
-                    common_file = "$destdir/libLLVM_common.jl",
+                    output_file = "libLLVM.jl",
+                    common_file = "libLLVM_common.jl",
                     clang_includes = convert(Vector{String}, clang_includes),
                     clang_args = convert(Vector{String}, clang_extraargs),
                     header_library = x->"libllvm",
@@ -54,18 +45,19 @@ function wrap(config, destdir)
     run(context)
 end
 
-length(ARGS) == 2 || error("Usage: wrap.jl /path/to/llvm-config target")
-config = ARGS[1]
-ispath(config) || error("llvm-config at $config is't a valid path")
+function main()
+    cd(joinpath(dirname(@__DIR__), "lib")) do
+        wrap()
+    end
+end
+
+isinteractive() || main()
 
 # Manual clean-up:
 # - remove build-host details (HAVE_INTTYPES_H, LLVM_DEFAULT_TARGET_TRIPLE etc) in libLLVM_common.jl
 # - remove LLVMInitializeAll and LLVMInitializeNative wrappers (these are macros)
 # - remove "# Skipping ..." comments by Clang.jl
-# - replace `ccall\(\((:.+), libllvm\), (.*)\)` with `@apicall($1, $2)`
+# - replace `ccall\(\((:.+), libllvm\), (.*)\)` with `@runtime_ccall($1, $2)`
 # - replace `const (LLVMOpaque.*) = Cvoid` with `struct $1 end`
 # - use `gawk -i inplace '/^[[:blank:]]*$/ { print; next; }; {cur = seen[$0]; if(!seen[$0]++ || (/^end$/ && !prev) || /^.*Clang.*$/) print $0; prev=cur}' libLLVM_h.jl` to remove duplicates
 # - use `cat -s` to remove duplicate empty lines
-
-target = ARGS[2]
-wrap(config, target)
