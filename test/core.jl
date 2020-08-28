@@ -488,7 +488,7 @@ end
 
 Context() do ctx
     str = MDString("foo", ctx)
-    @test convert(String, str) == "foo"
+    @test string(str) == "foo"
 end
 
 @test MDNode([MDString("foo")]) == MDNode([MDString("foo", global_ctx)], global_ctx)
@@ -540,7 +540,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     dummyLayout = "e-p:64:64:64"
     datalayout!(mod, dummyLayout)
-    @test convert(String, datalayout(mod)) == dummyLayout
+    @test string(datalayout(mod)) == dummyLayout
 
     if LLVM.version() >= v"8.0"
         md = Metadata(ConstantInt(42, ctx))

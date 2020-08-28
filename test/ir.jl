@@ -17,9 +17,9 @@ LLVM.Module("SomeModule", ctx) do source_mod
     ret!(builder)
 
     verify(source_mod)
-    
 
-    ir = convert(String, source_mod)
+
+    ir = string(source_mod)
 
     let
         mod = parse(LLVM.Module, ir)

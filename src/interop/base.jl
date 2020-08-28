@@ -64,7 +64,7 @@ function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=
                        args::Expr=:())
     if VERSION >= v"1.6.0-DEV.674"
         mod = LLVM.parent(llvmf)
-        ir = convert(String, mod)
+        ir = string(mod)
         fn = LLVM.name(llvmf)
         @assert !isempty(fn)
         quote
