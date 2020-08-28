@@ -39,7 +39,7 @@ function Module(f::Core.Function, args...)
 end
 
 function Base.show(io::IO, mod::Module)
-    output = convert(String, mod)
+    output = string(mod)
     print(io, output)
 end
 

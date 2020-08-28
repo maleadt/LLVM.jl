@@ -25,11 +25,11 @@ end
 
 dispose(data::DataLayout) = API.LLVMDisposeTargetData(data)
 
-Base.convert(::Type{String}, data::DataLayout) =
+Base.string(data::DataLayout) =
     unsafe_message(API.LLVMCopyStringRepOfTargetData(data))
 
 function Base.show(io::IO, data::DataLayout)
-    @printf(io, "DataLayout(%s)", convert(String, data))
+    @printf(io, "DataLayout(%s)", string(data))
 end
 
 byteorder(data::DataLayout) = API.LLVMByteOrder(data)

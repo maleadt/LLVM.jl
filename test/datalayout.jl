@@ -2,7 +2,7 @@
 
 Context() do ctx
 DataLayout("E-p:32:32-f128:128:128") do data
-    @test convert(String, data) == "E-p:32:32-f128:128:128"
+    @test string(data) == "E-p:32:32-f128:128:128"
 
     @test occursin("E-p:32:32-f128:128:128", sprint(io->show(io,data)))
 
@@ -21,7 +21,7 @@ DataLayout("E-p:32:32-f128:128:128") do data
         @test preferred_alignment(data, gv) == 4
 
         datalayout!(mod, data)
-        @test convert(String, datalayout(mod)) == convert(String, data)
+        @test string(datalayout(mod)) == string(data)
     end
 
     elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]

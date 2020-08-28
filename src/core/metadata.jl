@@ -15,7 +15,7 @@ MDString(val::String) = MDString(API.LLVMMDString(val, length(val)))
 MDString(val::String, ctx::Context) =
     MDString(API.LLVMMDStringInContext(ctx, val, length(val)))
 
-function Base.convert(::Type{String}, md::MDString)
+function Base.string(md::MDString)
     len = Ref{Cuint}()
     ptr = API.LLVMGetMDString(md, len)
     ptr == C_NULL && throw(ArgumentError("invalid metadata, not a MDString?"))
