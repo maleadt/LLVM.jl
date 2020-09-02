@@ -6,8 +6,10 @@ abstract type PassManager end
 
 Base.unsafe_convert(::Type{API.LLVMPassManagerRef}, pm::PassManager) = pm.ref
 
-add!(pm::PassManager, pass::Pass) =
+function add!(pm::PassManager, pass::Pass)
+    push!(pm.roots, pass)
     API.LLVMAddPass(pm, pass)
+end
 
 dispose(pm::PassManager) = API.LLVMDisposePassManager(pm)
 
@@ -20,9 +22,10 @@ export ModulePassManager, run!
 
 @checked struct ModulePassManager <: PassManager
     ref::API.LLVMPassManagerRef
+    roots::Vector{Any}
 end
 
-ModulePassManager() = ModulePassManager(API.LLVMCreatePassManager())
+ModulePassManager() = ModulePassManager(API.LLVMCreatePassManager(), [])
 
 function ModulePassManager(f::Core.Function, args...)
     mpm = ModulePassManager(args...)
@@ -47,10 +50,11 @@ export FunctionPassManager,
 
 @checked struct FunctionPassManager <: PassManager
     ref::API.LLVMPassManagerRef
+    roots::Vector{Any}
 end
 
 FunctionPassManager(mod::Module) =
-    FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(mod))
+    FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(mod), [])
 
 function FunctionPassManager(f::Core.Function, args...)
     fpm = FunctionPassManager(args...)
