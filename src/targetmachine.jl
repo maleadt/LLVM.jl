@@ -31,6 +31,7 @@ end
 target(tm::TargetMachine) = Target(API.LLVMGetTargetMachineTarget(tm))
 triple(tm::TargetMachine) = unsafe_message(API.LLVMGetTargetMachineTriple(tm))
 triple() = unsafe_message(API.LLVMGetDefaultTargetTriple())
+normalize(triple) = unsafe_message(API.LLVMNormalizeTargetTriple(triple))
 cpu(tm::TargetMachine) = unsafe_message(API.LLVMGetTargetMachineCPU(tm))
 features(tm::TargetMachine) = unsafe_message(API.LLVMGetTargetMachineFeatureString(tm))
 
