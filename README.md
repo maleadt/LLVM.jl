@@ -12,8 +12,8 @@
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: http://maleadt.github.io/LLVM.jl/dev
 
-[travis-img]: https://api.travis-ci.org/maleadt/LLVM.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/maleadt/LLVM.jl
+[travis-img]: https://api.travis-ci.com/maleadt/LLVM.jl.svg?branch=master
+[travis-url]: https://travis-ci.com/maleadt/LLVM.jl
 
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/5069m449yvvkyn9q/branch/master?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/maleadt/llvm-jl
