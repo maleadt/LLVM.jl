@@ -57,6 +57,9 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 include("debuginfo.jl")
+if LLVM.has_orc_v1() 
+    include("orc.jl")
+end
 
 include("Kaleidoscope.jl")
 

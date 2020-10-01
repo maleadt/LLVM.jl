@@ -44,6 +44,9 @@ include("bitcode.jl")
 include("transform.jl")
 include("debuginfo.jl")
 
+has_orc_v1() = v"8" <= LLVM.version() < v"12"
+include("orc.jl")
+
 include("interop.jl")
 
 include("deprecated.jl")

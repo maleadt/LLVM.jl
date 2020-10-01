@@ -191,11 +191,11 @@ end
     @test unsafe_load(ptr) == 2
 
     ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr)}))
-    if VERSION >= v"1.6-" && Sys.iswindows() && Sys.WORD_SIZE == 32
+    if VERSION >= v"1.5.2" && Sys.iswindows() && Sys.WORD_SIZE == 32
         # FIXME: Win32 nightly emits a i64*, even though bitstype_to_llvm uses T_int8
-        @test_broken contains(ir, r"@julia_unsafe_load_\d+\(i8\*\)")
+        @test_broken contains(ir, r"@julia_unsafe_load_\d+\(i8\*")
     else
-        @test contains(ir, r"@julia_unsafe_load_\d+\(i8\*\)")
+        @test contains(ir, r"@julia_unsafe_load_\d+\(i8\*")
     end
     @test contains(ir, r"load i64, i64\* %\d+, align 1")
 

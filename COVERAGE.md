@@ -1135,19 +1135,19 @@ ErrorHandling
 ORC JIT
 -------
 
-- [ ] LLVMOrcCreateInstance
-- [ ] LLVMOrcGetErrorMsg
-- [ ] LLVMOrcGetMangledSymbol
-- [ ] LLVMOrcDisposeMangledSymbol
-- [ ] LLVMOrcCreateLazyCompileCallback
-- [ ] LLVMOrcCreateIndirectStub
-- [ ] LLVMOrcSetIndirectStubPointer
-- [ ] LLVMOrcAddEagerlyCompiledIR
-- [ ] LLVMOrcAddLazilyCompiledIR
-- [ ] LLVMOrcAddObjectFile
-- [ ] LLVMOrcRemoveModule
-- [ ] LLVMOrcGetSymbolAddress
-- [ ] LLVMOrcDisposeInstance
+- [x] LLVMOrcCreateInstance
+- [x] LLVMOrcGetErrorMsg
+- [x] LLVMOrcGetMangledSymbol
+- [x] LLVMOrcDisposeMangledSymbol
+- [x] LLVMOrcCreateLazyCompileCallback
+- [x] LLVMOrcCreateIndirectStub
+- [x] LLVMOrcSetIndirectStubPointer
+- [x] LLVMOrcAddEagerlyCompiledIR
+- [x] LLVMOrcAddLazilyCompiledIR
+- [x] LLVMOrcAddObjectFile
+- [x] LLVMOrcRemoveModule
+- [x] LLVMOrcGetSymbolAddress
+- [x] LLVMOrcDisposeInstance
 
 
 
