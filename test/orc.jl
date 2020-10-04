@@ -1,6 +1,44 @@
 @testset "orc" begin
 
-let ctx = Context()
+@testset "Undefined Symbol" begin
+    ctx = Context()
+    tm  = JITTargetMachine()
+    orc = OrcJIT(tm)
+
+    mod = LLVM.Module("jit", ctx)
+    T_Int32 = LLVM.Int32Type(ctx)
+    ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
+    fn = LLVM.Function(mod, "mysum", ft)
+    linkage!(fn, LLVM.API.LLVMExternalLinkage)
+
+    fname = mangle(orc, "wrapper")
+    wrapper = LLVM.Function(mod, fname, ft)
+    # generate IR
+    Builder(ctx) do builder
+        entry = BasicBlock(wrapper, "entry", ctx)
+        position!(builder, entry)
+
+        tmp = call!(builder, fn, [parameters(wrapper)...])
+        ret!(builder, tmp)
+    end
+
+    triple!(mod, triple(tm))
+    ModulePassManager() do pm
+        add_library_info!(pm, triple(mod))
+        add_transform_info!(pm, tm)
+        run!(pm, mod)
+    end
+    verify(mod)
+
+    orc_mod = compile!(orc, mod)
+    @test_throws ErrorException address(orc, fname)
+
+    delete!(orc, orc_mod)
+    dispose(orc)
+end
+
+@testset "Custom Resolver" begin
+    ctx = Context()
     tm  = JITTargetMachine()
     orc = OrcJIT(tm)
 
@@ -14,10 +52,10 @@ let ctx = Context()
             end
             fnames[name] += 1
 
-            return get(known_functions, name, OrcTargetAddress(C_NULL)).ptr
+            return known_functions[name].ptr
         catch ex
-            @error "Exception during lookup" exception=(ex, catch_backtrace())
-            return UInt64(0)
+            @error "Exception during lookup" name exception=(ex, catch_backtrace())
+            error("OrcJIT: Could not find symbol")
         end
     end
 
@@ -51,7 +89,7 @@ let ctx = Context()
 
     f_lookup = @cfunction($lookup, UInt64, (Cstring, Ptr{Cvoid}))
     GC.@preserve f_lookup begin
-        orc_mod = compile!(orc, mod, f_lookup, lazy=true) # will capture f_lookup
+        orc_mod = compile!(orc, mod, f_lookup, C_NULL, lazy=true) # will capture f_lookup
 
         addr = address(orc, fname)
         @test errormsg(orc) == ""
@@ -73,7 +111,101 @@ let ctx = Context()
     dispose(orc)
 end
 
-let ctx = Context()
+@testset "Default Resolver + Stub" begin
+    ctx = Context()
+    tm  = JITTargetMachine()
+    orc = OrcJIT(tm)
+
+    mod = LLVM.Module("jit", ctx)
+    T_Int32 = LLVM.Int32Type(ctx)
+    ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
+    fn = LLVM.Function(mod, "mysum", ft)
+    linkage!(fn, LLVM.API.LLVMExternalLinkage)
+
+    fname = mangle(orc, "wrapper")
+    wrapper = LLVM.Function(mod, fname, ft)
+    # generate IR
+    Builder(ctx) do builder
+        entry = BasicBlock(wrapper, "entry", ctx)
+        position!(builder, entry)
+
+        tmp = call!(builder, fn, [parameters(wrapper)...])
+        ret!(builder, tmp)
+    end
+
+    triple!(mod, triple(tm))
+    ModulePassManager() do pm
+        add_library_info!(pm, triple(mod))
+        add_transform_info!(pm, tm)
+        run!(pm, mod)
+    end
+    verify(mod)
+
+    create_stub!(orc, mangle(orc, "mysum"), OrcTargetAddress(@cfunction(+, Int32, (Int32, Int32))))
+
+    orc_mod = compile!(orc, mod)
+
+    addr = address(orc, fname)
+    @test errormsg(orc) == ""
+
+    r = ccall(pointer(addr), Int32, (Int32, Int32), 1, 2)
+    @test r == 3
+
+    delete!(orc, orc_mod)
+    dispose(orc)
+end
+
+@testset "Default Resolver + Global Symbol" begin
+    ctx = Context()
+    tm  = JITTargetMachine()
+    orc = OrcJIT(tm)
+
+    mod = LLVM.Module("jit", ctx)
+    T_Int32 = LLVM.Int32Type(ctx)
+    ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
+    mysum = mangle(orc, "mysum")
+    fn = LLVM.Function(mod, mysum, ft)
+    linkage!(fn, LLVM.API.LLVMExternalLinkage)
+
+    fname = mangle(orc, "wrapper")
+    wrapper = LLVM.Function(mod, fname, ft)
+    # generate IR
+    Builder(ctx) do builder
+        entry = BasicBlock(wrapper, "entry", ctx)
+        position!(builder, entry)
+
+        tmp = call!(builder, fn, [parameters(wrapper)...])
+        ret!(builder, tmp)
+    end
+
+    triple!(mod, triple(tm))
+    ModulePassManager() do pm
+        add_library_info!(pm, triple(mod))
+        add_transform_info!(pm, tm)
+        run!(pm, mod)
+    end
+    verify(mod)
+
+    # Should do pretty much the same as `@ccallable`
+    LLVM.add_symbol(mysum, @cfunction(+, Int32, (Int32, Int32)))
+    ptr = LLVM.find_symbol(mysum)
+    @test ptr !== C_NULL
+    @test ccall(ptr, Int32, (Int32, Int32), 1, 2) == 3
+
+    orc_mod = compile!(orc, mod, lazy=true)
+
+    addr = address(orc, fname)
+    @test errormsg(orc) == ""
+
+    r = ccall(pointer(addr), Int32, (Int32, Int32), 1, 2)
+    @test r == 3
+
+    delete!(orc, orc_mod)
+    dispose(orc)
+end
+
+@testset "Loading ObjectFile" begin
+    ctx = Context()
     tm = JITTargetMachine()
     orc = OrcJIT(tm) 
     sym = mangle(orc, "SomeFunction")
@@ -96,6 +228,12 @@ let ctx = Context()
 
     @test addr.ptr != 0
     delete!(orc, orc_m)
+end
+
+@testset "Stubs" begin
+    ctx = Context()
+    tm = JITTargetMachine()
+    orc = OrcJIT(tm)
 
     toggle = Ref{Bool}(false)
     on()  = (toggle[] = true; nothing)
