@@ -272,7 +272,62 @@ end
     end
 end
 
-# TODO:
-# Test for `callback!`, currently unsure how to trigger that.
+@testset "callback!" begin
+    tm  = JITTargetMachine()
+    OrcJIT(tm) do orc
+        triggered = Ref{Bool}(false)
+
+        # Setup the lazy callback for creating a module
+        function callback(orc_ref::LLVM.API.LLVMOrcJITStackRef, callback_ctx::Ptr{Cvoid})
+            orc = OrcJIT(orc_ref)
+            sym = mangle(orc, "SomeFunction")
+
+            # 1. IRGen & Optimize the module
+            orc_mod = Context() do ctx
+                mod = LLVM.Module("jit", ctx)
+                ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+                fn = LLVM.Function(mod, sym, ft)
+
+                Builder(ctx) do builder
+                    entry = BasicBlock(fn, "entry")
+                    position!(builder, entry)
+                    ret!(builder)
+                end
+                verify(mod)
+
+                triple!(mod, triple(tm))
+                ModulePassManager() do pm
+                    add_library_info!(pm, triple(mod))
+                    add_transform_info!(pm, tm)
+                    run!(pm, mod)
+                end
+                verify(mod)
+
+                # 2. Add the IR module to the JIT
+                return compile!(orc, mod)
+            end
+
+            # 3. Obtain address of compiled module
+            addr = addressin(orc, orc_mod, sym)
+
+            # 4. Update the stub pointer to point to the recently compiled module
+            set_stub!(orc, "lazystub", addr)
+
+            # 5. Return the address of tie implementation, since we are going to call it now
+            triggered[] = true
+            return addr.ptr
+        end
+        c_callback = @cfunction($callback, UInt64, (LLVM.API.LLVMOrcJITStackRef, Ptr{Cvoid}))
+
+        GC.@preserve c_callback begin
+            initial_addr = callback!(orc, c_callback, C_NULL)
+            create_stub!(orc, "lazystub", initial_addr)
+            addr = address(orc, "lazystub")
+
+            ccall(pointer(addr), Cvoid, ()) # Triggers compilation
+        end
+        @test triggered[]
+    end
+end
 
 end

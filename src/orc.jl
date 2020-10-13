@@ -150,7 +150,7 @@ end
 
 function callback!(orc::OrcJIT, callback, ctx)
     r_address = Ref{API.LLVMOrcTargetAddress}()
-    LLVM.API.LLVMOrcLazyCompileCallback(orc, r_address, callback, ctx)
+    API.LLVMOrcCreateLazyCompileCallback(orc, r_address, callback, ctx)
     return OrcTargetAddress(r_address[])
 end
 
