@@ -31,6 +31,15 @@ function dispose(orc::OrcJIT)
     API.LLVMOrcDisposeInstance(orc)
 end
 
+function OrcJIT(f::Core.Function, tm::TargetMachine)
+    orc = OrcJIT(tm)
+    try
+        f(orc)
+    finally
+        dispose(orc)
+    end
+end
+
 function errormsg(orc::OrcJIT)
     # The error message is owned by `orc`, and will
     # be disposed along-side the OrcJIT. 
