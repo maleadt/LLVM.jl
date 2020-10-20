@@ -62,7 +62,7 @@ end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
 const SizeableInteger = Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
-function ConstantInt(val::T, ctx::Context=GlobalContext()) where T<:SizeableInteger
+function ConstantInt(val::T, ctx::Context) where T<:SizeableInteger
     typ = IntType(sizeof(T)*8, ctx)
     return ConstantInt(typ, val, T<:Signed)
 end
@@ -82,11 +82,11 @@ identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
 ConstantFP(typ::FloatingPointType, val::Real) =
     ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
 
-ConstantFP(val::Float16, ctx::Context=GlobalContext()) =
+ConstantFP(val::Float16, ctx::Context) =
     ConstantFP(HalfType(ctx), val)
-ConstantFP(val::Float32, ctx::Context=GlobalContext()) =
+ConstantFP(val::Float32, ctx::Context) =
     ConstantFP(FloatType(ctx), val)
-ConstantFP(val::Float64, ctx::Context=GlobalContext()) =
+ConstantFP(val::Float64, ctx::Context) =
     ConstantFP(DoubleType(ctx), val)
 
 Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
