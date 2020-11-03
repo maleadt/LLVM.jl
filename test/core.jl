@@ -338,13 +338,13 @@ Context() do ctx
 
     # automatic construction
     let
-        constval = ConstantInt(UInt32(1))
+        constval = ConstantInt(UInt32(1), ctx)
         @test convert(UInt, constval) == 1
     end
 
     # issue #81
     for T in [Int32, UInt32, Int64, UInt64]
-        constval = ConstantInt(typemax(T))
+        constval = ConstantInt(typemax(T), ctx)
         @test convert(T, constval) == typemax(T)
     end
 
@@ -353,9 +353,45 @@ Context() do ctx
 
     @testset "floating point constants" begin
 
-    t2 = LLVM.DoubleType(ctx)
-    c = ConstantFP(t2, 1.1)
-    @test convert(Float64, c) == 1.1
+    let
+        typ = LLVM.HalfType(ctx)
+        c = ConstantFP(typ, Float16(1.1f0))
+        @test convert(Float16, c) == Float16(1.1f0)
+    end
+    let
+        typ = LLVM.FloatType(ctx)
+        c = ConstantFP(typ, 1.1f0)
+        @test convert(Float32, c) == 1.1f0
+    end
+    let
+        typ = LLVM.DoubleType(ctx)
+        c = ConstantFP(typ, 1.1)
+        @test convert(Float64, c) == 1.1
+    end
+    for T in [Float16, Float32, Float64]
+        c = ConstantFP(typemax(T), ctx)
+        @test convert(T, c) == typemax(T)
+    end
+
+    end
+
+
+    @testset "array constants" begin
+
+    let
+        typ = LLVM.Int32Type(ctx)
+        vec = Int32[1,2,3,4]
+        ca = ConstantArray(typ, vec)
+        @test convert(Int32, ConstantInt(ca[1]))::Int32 == Int32(1)
+        @test convert(Vector{Int32}, ca) == vec
+    end
+    let
+        typ = LLVM.FloatType(ctx)
+        vec = Float32[1.1f0,2.2f0,3.3f0,4.4f0]
+        ca = ConstantArray(typ, vec)
+        @test convert(Float32, ConstantFP(ca[1]))::Float32 == 1.1f0
+        @test convert(Vector{Float32}, ca) == vec
+    end
 
     end
 end

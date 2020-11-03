@@ -62,7 +62,7 @@ end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
 const SizeableInteger = Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
-function ConstantInt(val::T, ctx::Context=GlobalContext()) where T<:SizeableInteger
+function ConstantInt(val::T, ctx::Context) where T<:SizeableInteger
     typ = IntType(sizeof(T)*8, ctx)
     return ConstantInt(typ, val, T<:Signed)
 end
@@ -79,11 +79,18 @@ Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
 
-ConstantFP(typ::LLVMDouble, val::Real) =
+ConstantFP(typ::FloatingPointType, val::Real) =
     ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
 
-Base.convert(::Type{Float64}, val::ConstantFP) =
-    API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}())
+ConstantFP(val::Float16, ctx::Context) =
+    ConstantFP(HalfType(ctx), val)
+ConstantFP(val::Float32, ctx::Context) =
+    ConstantFP(FloatType(ctx), val)
+ConstantFP(val::Float64, ctx::Context) =
+    ConstantFP(DoubleType(ctx), val)
+
+Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
+    convert(T, API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}()))
 
 
 ## aggregate
@@ -114,6 +121,23 @@ abstract type ConstantAggregate <: Constant end
     ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
+identify(::Type{Value}, ::Val{API.LLVMConstantDataArrayValueKind}) = ConstantArray
+
+ConstantArray(typ::LLVMType, data::Vector{T}) where {T<:Constant} =
+    ConstantArray(API.LLVMConstArray(typ, data, length(data)))
+ConstantArray(typ::IntegerType, data::Vector{T}) where {T<:Integer} =
+    ConstantArray(typ, map(x->ConstantInt(convert(T,x),context(typ)), data))
+ConstantArray(typ::FloatingPointType, data::Vector{T}) where {T<:AbstractFloat} =
+    ConstantArray(typ, map(x->ConstantFP(convert(T,x),context(typ)), data))
+
+Base.getindex(ca::ConstantArray, idx::Integer) =
+    API.LLVMGetElementAsConstant(ca, idx-1)
+Base.length(ca::ConstantArray) = length(llvmtype(ca))
+Base.eltype(ca::ConstantArray) = eltype(llvmtype(ca))
+Base.convert(::Type{Array{T,1}}, ca::ConstantArray) where {T<:Integer} =
+    [convert(T,ConstantInt(ca[i])) for i in 1:length(ca)]
+Base.convert(::Type{Array{T,1}}, ca::ConstantArray) where {T<:AbstractFloat} =
+    [convert(T,ConstantFP(ca[i])) for i in 1:length(ca)]
 
 @checked struct ConstantStruct <: ConstantAggregate
     ref::API.LLVMValueRef
