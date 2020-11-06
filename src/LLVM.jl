@@ -60,8 +60,8 @@ function __init__()
     # we only support working with the copy of LLVM that Julia uses, because we have
     # additional library calls compiled in the Julia binary which cannot be used with
     # another copy of LLVM. loading multiple copies of LLVM typically breaks anyhow.
-    libllvm[] = if VERSION >= v"1.6.0-DEV.1356"
-        path = Base.libllvm()
+    libllvm[] = if VERSION >= v"1.6.0-DEV.1429"
+        path = Base.libllvm_path()
         if path === nothing
             error("""Cannot find the LLVM library loaded by Julia.
                      Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
