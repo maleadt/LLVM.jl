@@ -101,7 +101,7 @@ define_transforms([
     :LowerExpectIntrinsic, :TypeBasedAliasAnalysis, :ScopedNoAliasAA, :BasicAliasAnalysis
 ])
 
-export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!
+export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!, dce!
 
 scalar_repl_aggregates!(pm::PassManager, threshold::Integer) =
     API.LLVMAddScalarReplAggregatesPassWithThreshold(pm, Cint(threshold))
@@ -109,6 +109,12 @@ scalar_repl_aggregates!(pm::PassManager, threshold::Integer) =
 scalar_repl_aggregates_ssa!(pm::PassManager) =
     API.LLVMAddScalarReplAggregatesPassSSA(pm)
 
+if version() >= v"10.0"
+dce!(pm::PassManager) =
+    API.LLVMAddDCEPass(pm)
+else
+dce!(pm::PassManager) = nothing
+end
 
 ## vectorization transformations
 

@@ -4599,6 +4599,11 @@ function LLVMAddAggressiveDCEPass(PM)
     @runtime_ccall((:LLVMAddAggressiveDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
+# added in LLVM10
+function LLVMAddDCEPass(PM)
+    @runtime_ccall((:LLVMAddDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
 function LLVMAddBitTrackingDCEPass(PM)
     @runtime_ccall((:LLVMAddBitTrackingDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end

@@ -30,6 +30,7 @@ Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
 ModulePassManager() do pm
     aggressive_dce!(pm)
+    dce!(pm)
     bit_tracking_dce!(pm)
     alignment_from_assumptions!(pm)
     cfgsimplification!(pm)
