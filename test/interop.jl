@@ -116,6 +116,7 @@ Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
 ModulePassManager() do pm
 
+demote_float16!(pm)
 julia_licm!(pm)
 alloc_opt!(pm)
 barrier_noop!(pm)

@@ -168,6 +168,12 @@ function LLVMAddRemoveJuliaAddrspacesPass(PM)
 end
 end
 
+if VERSION >= v"1.6.0-DEV.1215"
+function LLVMAddDemoteFloat16Pass(PM)
+    ccall(:LLVMExtraAddDemoteFloat16Pass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+end
+
 if VERSION >= v"1.6.0-DEV.1476"
 function LLVMAddRemoveNIPass(PM)
     ccall(:LLVMExtraAddRemoveNIPass,Cvoid,(LLVMPassManagerRef,), PM)

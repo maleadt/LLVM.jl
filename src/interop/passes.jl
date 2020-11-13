@@ -1,7 +1,7 @@
 export alloc_opt!, barrier_noop!, gc_invariant_verifier!, lower_exc_handlers!,
        combine_mul_add!, multi_versioning!, propagate_julia_addrsp!, lower_ptls!,
        lower_simdloop!, late_lower_gc_frame!, final_lower_gc!, remove_julia_addrspaces!,
-       remove_ni!, julia_licm!
+       demote_float16!, remove_ni!, julia_licm!
 
 alloc_opt!(pm::PassManager) =
     API.LLVMAddAllocOptPass(pm)
@@ -44,6 +44,12 @@ if VERSION >= v"1.5.0-DEV.802"
     remove_julia_addrspaces!(pm::PassManager) = API.LLVMAddRemoveJuliaAddrspacesPass(pm)
 else
     remove_julia_addrspaces!(pm::PassManager) = nothing
+end
+
+if VERSION >= v"1.6.0-DEV.1215"
+    demote_float16!(pm::PassManager) = API.LLVMAddDemoteFloat16Pass(pm)
+else
+    demote_float16!(pm::PassManager) = nothing
 end
 
 if VERSION >= v"1.6.0-DEV.1476"
