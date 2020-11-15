@@ -116,6 +116,8 @@ Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
 ModulePassManager() do pm
 
+demote_float16!(pm)
+julia_licm!(pm)
 alloc_opt!(pm)
 barrier_noop!(pm)
 gc_invariant_verifier!(pm)
@@ -127,6 +129,7 @@ propagate_julia_addrsp!(pm)
 lower_ptls!(pm)
 lower_ptls!(pm, true)
 lower_simdloop!(pm)
+remove_ni!(pm)
 late_lower_gc_frame!(pm)
 final_lower_gc!(pm)
 
