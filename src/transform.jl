@@ -53,7 +53,7 @@ populate!(mpm::ModulePassManager, pmb::PassManagerBuilder) =
 
 ## auxiliary
 
-function define_transforms(transforms)
+function define_transforms(transforms, available=true)
     for transform in transforms
         api_fname = Symbol(:LLVM, :Add, transform, :Pass)
 
@@ -78,9 +78,16 @@ function define_transforms(transforms)
         end
         jl_fname = Symbol(join(lowercase.(groups), '_'), '!')
 
-        @eval begin
-            export $jl_fname
-            $jl_fname(pm::PassManager) = API.$api_fname(pm)
+        if available
+            @eval begin
+                export $jl_fname
+                $jl_fname(pm::PassManager) = API.$api_fname(pm)
+            end
+        else
+            @eval begin
+                export $jl_fname
+                $jl_fname(pm::PassManager) = nothing
+            end
         end
     end
 
@@ -101,7 +108,7 @@ define_transforms([
     :LowerExpectIntrinsic, :TypeBasedAliasAnalysis, :ScopedNoAliasAA, :BasicAliasAnalysis
 ])
 
-export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!, dce!
+export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!
 
 scalar_repl_aggregates!(pm::PassManager, threshold::Integer) =
     API.LLVMAddScalarReplAggregatesPassWithThreshold(pm, Cint(threshold))
@@ -109,12 +116,7 @@ scalar_repl_aggregates!(pm::PassManager, threshold::Integer) =
 scalar_repl_aggregates_ssa!(pm::PassManager) =
     API.LLVMAddScalarReplAggregatesPassSSA(pm)
 
-if version() >= v"10.0"
-dce!(pm::PassManager) =
-    API.LLVMAddDCEPass(pm)
-else
-dce!(pm::PassManager) = nothing
-end
+define_transforms([:DCE], version() >= v"10.0")
 
 ## vectorization transformations
 
