@@ -118,12 +118,17 @@ scalar_repl_aggregates_ssa!(pm::PassManager) =
 
 define_transforms([:DCE], version() >= v"10.0")
 
+define_transforms([
+    :DivRemPairs, :LoopDistribute, :LoopFuse, :LoopLoadElimination, :InstSimplify
+], VERSION >= v"1.6.0-DEV.1503")
+
 ## vectorization transformations
 
 define_transforms([
     :LoopVectorize, :SLPVectorize
 ])
 
+define_transforms([:LoadStoreVectorizer], VERSION >= v"1.6.0-DEV.1503")
 
 ## interprocedural transformations
 
