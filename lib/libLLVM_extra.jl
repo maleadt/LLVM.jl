@@ -186,6 +186,42 @@ function LLVMAddJuliaLICMPass(PM)
 end
 end
 
+if VERSION >= v"1.6.0-DEV.1503"
+function LLVMAddDivRemPairsPass(PM)
+    ccall(:LLVMExtraAddDivRemPairsPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+end
+
+if VERSION >= v"1.6.0-DEV.1503"
+function LLVMAddLoopDistributePass(PM)
+    ccall(:LLVMExtraAddLoopDistributePass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+end
+
+if VERSION >= v"1.6.0-DEV.1503"
+function LLVMAddLoopFusePass(PM)
+    ccall(:LLVMExtraAddLoopFusePass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+end
+
+if VERSION >= v"1.6.0-DEV.1503"
+function LLVMAddLoopLoadEliminationPass(PM)
+    ccall(:LLVMExtraLoopLoadEliminationPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+end
+
+if VERSION >= v"1.6.0-DEV.1503"
+function LLVMAddLoadStoreVectorizerPass(PM)
+    ccall(:LLVMExtraAddLoadStoreVectorizerPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+end
+
+if VERSION >= v"1.6.0-DEV.1503"
+function LLVMAddInstSimplifyPass(PM)
+    ccall(:LLVMExtraAddInstructionSimplifyPass,Cvoid,(LLVMPassManagerRef,), PM)
+end
+end
+
 function LLVMGetValueContext(V)
     ccall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
 end

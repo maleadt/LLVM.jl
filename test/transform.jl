@@ -38,8 +38,10 @@ ModulePassManager() do pm
     scalarizer!(pm)
     merged_load_store_motion!(pm)
     gvn!(pm)
+    div_rem_pairs!(pm)
     ind_var_simplify!(pm)
     instruction_combining!(pm)
+    inst_simplify!(pm)
     jump_threading!(pm)
     licm!(pm)
     loop_deletion!(pm)
@@ -48,7 +50,11 @@ ModulePassManager() do pm
     loop_reroll!(pm)
     loop_unroll!(pm)
     loop_unswitch!(pm)
+    loop_distribute!(pm)
+    loop_fuse!(pm)
+    loop_load_elimination!(pm)
     mem_cpy_opt!(pm)
+
     partially_inline_lib_calls!(pm)
     lower_switch!(pm)
     promote_memory_to_register!(pm)
@@ -71,6 +77,7 @@ ModulePassManager() do pm
 
     loop_vectorize!(pm)
     slpvectorize!(pm)
+    load_store_vectorizer!(pm)
 
     argument_promotion!(pm)
     constant_merge!(pm)
