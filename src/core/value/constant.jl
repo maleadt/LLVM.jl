@@ -7,14 +7,6 @@ all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(typ))
 isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(val))
 
 
-@checked struct UndefValue <: User
-    ref::API.LLVMValueRef
-end
-identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
-
-UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
-
-
 abstract type Constant <: User end
 
 # forward declarations
@@ -30,6 +22,14 @@ end
 identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNull
 
 PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
+
+
+@checked struct UndefValue <: Constant
+    ref::API.LLVMValueRef
+end
+identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
+
+UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 
 
 ## scalar

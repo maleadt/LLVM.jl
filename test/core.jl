@@ -312,6 +312,7 @@ Context() do ctx
 
     let val = UndefValue(typ)
         @test isundef(val)
+        @test val isa LLVM.Constant
     end
 
     end
