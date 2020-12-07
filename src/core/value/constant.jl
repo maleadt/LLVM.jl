@@ -128,7 +128,8 @@ function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}) where {T<:Consta
         return ConstantArray(API.LLVMConstArray(typ, Array(data), length(data)))
     end
 
-    ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
+    # FIXME: once we drop support for julia 1.0, we can use `eachslice(data, dims=1)` instead of this monstrosity
+    ca_vec = map(x->ConstantArray(typ, x), (view(data, i, ntuple(d->(:), N-1)...) for i in axes(data, 1)))
     ca_typ = llvmtype(first(ca_vec))
 
     return ConstantArray(API.LLVMConstArray(ca_typ, ca_vec, length(ca_vec)))

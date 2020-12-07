@@ -432,10 +432,10 @@ Core
 - [ ] LLVMConstString
 - [ ] LLVMIsConstantString
 - [ ] LLVMGetAsString
-- [ ] LLVMConstStructInContext
-- [ ] LLVMConstStruct
-- [ ] LLVMConstArray
-- [ ] LLVMConstNamedStruct
+- [x] LLVMConstStructInContext
+- [x] LLVMConstStruct
+- [x] LLVMConstArray
+- [x] LLVMConstNamedStruct
 - [ ] LLVMGetElementAsConstant
 - [ ] LLVMConstVector
 
