@@ -123,13 +123,22 @@ end
 identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
 identify(::Type{Value}, ::Val{API.LLVMConstantDataArrayValueKind}) = ConstantArray
 
-ConstantArray(typ::LLVMType, data::Vector{T}) where {T<:Constant} =
-    ConstantArray(API.LLVMConstArray(typ, data, length(data)))
-ConstantArray(typ::IntegerType, data::Vector{T}) where {T<:Integer} =
-    ConstantArray(typ, map(x->ConstantInt(convert(T,x),context(typ)), data))
-ConstantArray(typ::FloatingPointType, data::Vector{T}) where {T<:AbstractFloat} =
-    ConstantArray(typ, map(x->ConstantFP(convert(T,x),context(typ)), data))
+function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}) where {T<:Constant,N}
+    if N == 1
+        return ConstantArray(API.LLVMConstArray(typ, Array(data), length(data)))
+    end
 
+    ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
+    ca_typ = llvmtype(first(ca_vec))
+
+    return ConstantArray(API.LLVMConstArray(ca_typ, ca_vec, length(ca_vec)))
+end
+ConstantArray(typ::IntegerType, data::AbstractArray{T,N}) where {T<:Integer,N} =
+    ConstantArray(typ, map(x->ConstantInt(typ, x), data))
+ConstantArray(typ::FloatingPointType, data::AbstractArray{T,N}) where {T<:AbstractFloat,N} =
+    ConstantArray(typ, map(x->ConstantFP(typ, x), data))
+
+# NOTE: getindex is not supported for multidimensionsal constant arrays
 Base.getindex(ca::ConstantArray, idx::Integer) =
     API.LLVMGetElementAsConstant(ca, idx-1)
 Base.length(ca::ConstantArray) = length(llvmtype(ca))
@@ -143,6 +152,52 @@ Base.convert(::Type{Array{T,1}}, ca::ConstantArray) where {T<:AbstractFloat} =
     ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
+
+ConstantStruct(constant_vals::Vector{T}, packed::Core.Bool=false) where {T<:Constant} =
+    ConstantStruct(API.LLVMConstStruct(constant_vals, length(constant_vals), convert(Bool, packed)))
+ConstantStruct(constant_vals::Vector{T}, ctx::Context, packed::Core.Bool=false) where {T<:Constant} =
+    ConstantStruct(API.LLVMConstStructInContext(ctx, constant_vals, length(constant_vals), convert(Bool, packed)))
+ConstantStruct(constant_vals::Vector{T}, typ::LLVMType) where {T<:Constant} =
+    ConstantStruct(API.LLVMConstNamedStruct(typ, constant_vals, length(constant_vals)))
+
+function struct_to_constants(value, ctx::Context)
+    constants = Vector{Constant}()
+
+    for fieldname in fieldnames(typeof(value))
+        field = getfield(value, fieldname)
+
+        if isa(field, Core.Bool)
+            typ = LLVM.Int1Type(ctx)
+            push!(constants, ConstantInt(typ, Int(field)))
+        elseif isa(field, Integer)
+            push!(constants, ConstantInt(field, ctx))
+        elseif isa(field, AbstractFloat)
+            push!(constants, ConstantFP(field, ctx))
+        else # TODO: nested structs?
+            throw(ArgumentError("only structs with boolean, integer and floating point fields are allowed"))
+        end
+    end
+
+    return constants
+end
+
+function ConstantStruct(value, packed::Core.Bool=false)
+    isbits(value) || throw(ArgumentError("`value` must be isbits"))
+    constants = struct_to_constants(value, GlobalContext())
+    return ConstantStruct(constants, packed)
+end
+
+function ConstantStruct(value, ctx::Context, packed::Core.Bool=false)
+    isbits(value) || throw(ArgumentError("`value` must be isbits"))
+    constants = struct_to_constants(value, ctx)
+    return ConstantStruct(constants, ctx, packed)
+end
+
+function ConstantStruct(value, typ::LLVMType)
+    isbits(value) || throw(ArgumentError("`value` must be isbits"))
+    constants = struct_to_constants(value, context(typ))
+    return ConstantStruct(constants, typ)
+end
 
 @checked struct ConstantVector <: ConstantAggregate
     ref::API.LLVMValueRef

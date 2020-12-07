@@ -1,3 +1,9 @@
+struct TestStruct
+    x::Bool
+    y::Int64
+    z::Float16
+end
+
 @testset "core" begin
 
 @testset "context" begin
@@ -392,6 +398,54 @@ Context() do ctx
         ca = ConstantArray(typ, vec)
         @test convert(Float32, ConstantFP(ca[1]))::Float32 == 1.1f0
         @test convert(Vector{Float32}, ca) == vec
+    end
+    let
+        typ = LLVM.Int64Type(ctx)
+        vec = fill(5, 3, 4, 5, 6)
+        ca = ConstantArray(typ, vec)
+        @test length(ca) == size(vec, 1)
+        @test llvmtype(ca) == LLVM.ArrayType(LLVM.ArrayType(LLVM.ArrayType(LLVM.ArrayType(LLVM.Int64Type(ctx), 6), 5), 4), 3)
+        # NOTE: can't test content of the array because the API does not support reading from multidimensional arrays
+    end
+
+    end
+
+    @testset "struct constants" begin
+    
+    let
+        test_struct = TestStruct(true, -99, 1.5)
+        constant_struct = ConstantStruct(test_struct, ctx)
+        constant_struct_type = llvmtype(constant_struct)
+        
+        @test typeof(constant_struct_type) == LLVM.StructType
+        @test context(constant_struct_type) == ctx
+        @test !ispacked(constant_struct_type)
+        @test !isopaque(constant_struct_type)
+
+        @test collect(elements(constant_struct_type)) == [LLVM.Int1Type(ctx), LLVM.Int64Type(ctx), LLVM.HalfType(ctx)]
+        
+        expected_operands = [
+            ConstantInt(LLVM.Int1Type(ctx), Int(true)),
+            ConstantInt(LLVM.Int64Type(ctx), -99),
+            ConstantFP(LLVM.HalfType(ctx), 1.5)
+        ]
+        @test collect(operands(constant_struct)) == expected_operands
+    end
+    let
+        named_struct_type = LLVM.StructType("named_struct", ctx)
+        elements!(named_struct_type, [LLVM.Int1Type(ctx), LLVM.Int64Type(ctx), LLVM.HalfType(ctx)], true)
+
+        test_struct = TestStruct(false, 52, -2.5)
+        constant_struct = ConstantStruct(test_struct, named_struct_type)
+
+        @test llvmtype(constant_struct) == named_struct_type
+
+        expected_operands = [
+            ConstantInt(LLVM.Int1Type(ctx), Int(false)),
+            ConstantInt(LLVM.Int64Type(ctx), 52),
+            ConstantFP(LLVM.HalfType(ctx), -2.5)
+        ]
+        @test collect(operands(constant_struct)) == expected_operands
     end
 
     end
