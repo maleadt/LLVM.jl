@@ -505,6 +505,10 @@ function LLVMHalfTypeInContext(C)
     @runtime_ccall((:LLVMHalfTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
 
+function LLVMBFloatTypeInContext(C)
+    @runtime_ccall((:LLVMBFloatTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
+end
+
 function LLVMFloatTypeInContext(C)
     @runtime_ccall((:LLVMFloatTypeInContext,libllvm[]), LLVMTypeRef, (LLVMContextRef,), C)
 end
@@ -527,6 +531,10 @@ end
 
 function LLVMHalfType()
     @runtime_ccall((:LLVMHalfType,libllvm[]), LLVMTypeRef, ())
+end
+
+function LLVMBFloatType()
+    @runtime_ccall((:LLVMBFloatType,libllvm[]), LLVMTypeRef, ())
 end
 
 function LLVMFloatType()
@@ -821,6 +829,10 @@ function LLVMIsAInstruction(Val)
     @runtime_ccall((:LLVMIsAInstruction,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
+function LLVMIsAUnaryOperator(Val)
+    @runtime_ccall((:LLVMIsAUnaryOperator,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
 function LLVMIsABinaryOperator(Val)
     @runtime_ccall((:LLVMIsABinaryOperator,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
@@ -949,6 +961,14 @@ function LLVMIsACatchReturnInst(Val)
     @runtime_ccall((:LLVMIsACatchReturnInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
+function LLVMIsACatchSwitchInst(Val)
+    @runtime_ccall((:LLVMIsACatchSwitchInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
+function LLVMIsACallBrInst(Val)
+    @runtime_ccall((:LLVMIsACallBrInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
 function LLVMIsAFuncletPadInst(Val)
     @runtime_ccall((:LLVMIsAFuncletPadInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
@@ -1035,6 +1055,22 @@ end
 
 function LLVMIsAVAArgInst(Val)
     @runtime_ccall((:LLVMIsAVAArgInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
+function LLVMIsAFreezeInst(Val)
+    @runtime_ccall((:LLVMIsAFreezeInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
+function LLVMIsAAtomicCmpXchgInst(Val)
+    @runtime_ccall((:LLVMIsAAtomicCmpXchgInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
+function LLVMIsAAtomicRMWInst(Val)
+    @runtime_ccall((:LLVMIsAAtomicRMWInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
+function LLVMIsAFenceInst(Val)
+    @runtime_ccall((:LLVMIsAFenceInst,libllvm[]), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAMDNode(Val)
@@ -2569,12 +2605,28 @@ function LLVMSetVolatile(MemoryAccessInst, IsVolatile)
     @runtime_ccall((:LLVMSetVolatile,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), MemoryAccessInst, IsVolatile)
 end
 
+function LLVMGetWeak(CmpXchgInst)
+    @runtime_ccall((:LLVMGetWeak,libllvm[]), LLVMBool, (LLVMValueRef,), CmpXchgInst)
+end
+
+function LLVMSetWeak(CmpXchgInst, IsWeak)
+    @runtime_ccall((:LLVMSetWeak,libllvm[]), Cvoid, (LLVMValueRef, LLVMBool), CmpXchgInst, IsWeak)
+end
+
 function LLVMGetOrdering(MemoryAccessInst)
     @runtime_ccall((:LLVMGetOrdering,libllvm[]), LLVMAtomicOrdering, (LLVMValueRef,), MemoryAccessInst)
 end
 
 function LLVMSetOrdering(MemoryAccessInst, Ordering)
     @runtime_ccall((:LLVMSetOrdering,libllvm[]), Cvoid, (LLVMValueRef, LLVMAtomicOrdering), MemoryAccessInst, Ordering)
+end
+
+function LLVMGetAtomicRMWBinOp(AtomicRMWInst)
+    @runtime_ccall((:LLVMGetAtomicRMWBinOp,libllvm[]), LLVMAtomicRMWBinOp, (LLVMValueRef,), AtomicRMWInst)
+end
+
+function LLVMSetAtomicRMWBinOp(AtomicRMWInst, BinOp)
+    @runtime_ccall((:LLVMSetAtomicRMWBinOp,libllvm[]), Cvoid, (LLVMValueRef, LLVMAtomicRMWBinOp), AtomicRMWInst, BinOp)
 end
 
 function LLVMBuildTrunc(arg1, Val, DestTy, Name)
@@ -2709,6 +2761,10 @@ function LLVMBuildInsertValue(arg1, AggVal, EltVal, Index, Name)
     @runtime_ccall((:LLVMBuildInsertValue,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, UInt32, Cstring), arg1, AggVal, EltVal, Index, Name)
 end
 
+function LLVMBuildFreeze(arg1, Val, Name)
+    @runtime_ccall((:LLVMBuildFreeze,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, Val, Name)
+end
+
 function LLVMBuildIsNull(arg1, Val, Name)
     @runtime_ccall((:LLVMBuildIsNull,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, Val, Name)
 end
@@ -2731,6 +2787,18 @@ end
 
 function LLVMBuildAtomicCmpXchg(B, Ptr, Cmp, New, SuccessOrdering, FailureOrdering, SingleThread)
     @runtime_ccall((:LLVMBuildAtomicCmpXchg,libllvm[]), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMAtomicOrdering, LLVMAtomicOrdering, LLVMBool), B, Ptr, Cmp, New, SuccessOrdering, FailureOrdering, SingleThread)
+end
+
+function LLVMGetNumMaskElements(ShuffleVectorInst)
+    @runtime_ccall((:LLVMGetNumMaskElements,libllvm[]), UInt32, (LLVMValueRef,), ShuffleVectorInst)
+end
+
+function LLVMGetUndefMaskElem()
+    @runtime_ccall((:LLVMGetUndefMaskElem,libllvm[]), Cint, ())
+end
+
+function LLVMGetMaskValue(ShuffleVectorInst, Elt)
+    @runtime_ccall((:LLVMGetMaskValue,libllvm[]), Cint, (LLVMValueRef, UInt32), ShuffleVectorInst, Elt)
 end
 
 function LLVMIsAtomicSingleThread(AtomicInst)
@@ -2878,16 +2946,16 @@ function LLVMDIBuilderFinalize(Builder)
     @runtime_ccall((:LLVMDIBuilderFinalize,libllvm[]), Cvoid, (LLVMDIBuilderRef,), Builder)
 end
 
-function LLVMDIBuilderCreateCompileUnit(Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling)
-    @runtime_ccall((:LLVMDIBuilderCreateCompileUnit,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMDWARFSourceLanguage, LLVMMetadataRef, Cstring, Csize_t, LLVMBool, Cstring, Csize_t, UInt32, Cstring, Csize_t, LLVMDWARFEmissionKind, UInt32, LLVMBool, LLVMBool), Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling)
+function LLVMDIBuilderCreateCompileUnit(Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling, SysRoot, SysRootLen, SDK, SDKLen)
+    @runtime_ccall((:LLVMDIBuilderCreateCompileUnit,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMDWARFSourceLanguage, LLVMMetadataRef, Cstring, Csize_t, LLVMBool, Cstring, Csize_t, UInt32, Cstring, Csize_t, LLVMDWARFEmissionKind, UInt32, LLVMBool, LLVMBool, Cstring, Csize_t, Cstring, Csize_t), Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling, SysRoot, SysRootLen, SDK, SDKLen)
 end
 
 function LLVMDIBuilderCreateFile(Builder, Filename, FilenameLen, Directory, DirectoryLen)
     @runtime_ccall((:LLVMDIBuilderCreateFile,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, Cstring, Csize_t), Builder, Filename, FilenameLen, Directory, DirectoryLen)
 end
 
-function LLVMDIBuilderCreateModule(Builder, ParentScope, Name, NameLen, ConfigMacros, ConfigMacrosLen, IncludePath, IncludePathLen, ISysRoot, ISysRootLen)
-    @runtime_ccall((:LLVMDIBuilderCreateModule,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, Cstring, Csize_t, Cstring, Csize_t), Builder, ParentScope, Name, NameLen, ConfigMacros, ConfigMacrosLen, IncludePath, IncludePathLen, ISysRoot, ISysRootLen)
+function LLVMDIBuilderCreateModule(Builder, ParentScope, Name, NameLen, ConfigMacros, ConfigMacrosLen, IncludePath, IncludePathLen, APINotesFile, APINotesFileLen)
+    @runtime_ccall((:LLVMDIBuilderCreateModule,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, Cstring, Csize_t, Cstring, Csize_t), Builder, ParentScope, Name, NameLen, ConfigMacros, ConfigMacrosLen, IncludePath, IncludePathLen, APINotesFile, APINotesFileLen)
 end
 
 function LLVMDIBuilderCreateNameSpace(Builder, ParentScope, Name, NameLen, ExportSymbols)
@@ -2966,6 +3034,14 @@ function LLVMDIBuilderCreateSubroutineType(Builder, File, ParameterTypes, NumPar
     @runtime_ccall((:LLVMDIBuilderCreateSubroutineType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Ptr{LLVMMetadataRef}, UInt32, LLVMDIFlags), Builder, File, ParameterTypes, NumParameterTypes, Flags)
 end
 
+function LLVMDIBuilderCreateMacro(Builder, ParentMacroFile, Line, RecordType, Name, NameLen, Value, ValueLen)
+    @runtime_ccall((:LLVMDIBuilderCreateMacro,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, UInt32, LLVMDWARFMacinfoRecordType, Cstring, Csize_t, Cstring, Csize_t), Builder, ParentMacroFile, Line, RecordType, Name, NameLen, Value, ValueLen)
+end
+
+function LLVMDIBuilderCreateTempMacroFile(Builder, ParentMacroFile, Line, File)
+    @runtime_ccall((:LLVMDIBuilderCreateTempMacroFile,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, UInt32, LLVMMetadataRef), Builder, ParentMacroFile, Line, File)
+end
+
 function LLVMDIBuilderCreateEnumerator(Builder, Name, NameLen, Value, IsUnsigned)
     @runtime_ccall((:LLVMDIBuilderCreateEnumerator,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, Cstring, Csize_t, Int64, LLVMBool), Builder, Name, NameLen, Value, IsUnsigned)
 end
@@ -3038,8 +3114,8 @@ function LLVMDIBuilderCreateNullPtrType(Builder)
     @runtime_ccall((:LLVMDIBuilderCreateNullPtrType,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef,), Builder)
 end
 
-function LLVMDIBuilderCreateTypedef(Builder, Type, Name, NameLen, File, LineNo, Scope)
-    @runtime_ccall((:LLVMDIBuilderCreateTypedef,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef), Builder, Type, Name, NameLen, File, LineNo, Scope)
+function LLVMDIBuilderCreateTypedef(Builder, Type, Name, NameLen, File, LineNo, Scope, AlignInBits)
+    @runtime_ccall((:LLVMDIBuilderCreateTypedef,libllvm[]), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, LLVMMetadataRef, UInt32, LLVMMetadataRef, UInt32), Builder, Type, Name, NameLen, File, LineNo, Scope, AlignInBits)
 end
 
 function LLVMDIBuilderCreateInheritance(Builder, Ty, BaseTy, BaseOffset, VBPtrOffset, Flags)
@@ -3272,6 +3348,10 @@ function LLVMInitializeWebAssemblyTargetInfo()
     @runtime_ccall((:LLVMInitializeWebAssemblyTargetInfo,libllvm[]), Cvoid, ())
 end
 
+function LLVMInitializeBPFTargetInfo()
+    @runtime_ccall((:LLVMInitializeBPFTargetInfo,libllvm[]), Cvoid, ())
+end
+
 function LLVMInitializeX86TargetInfo()
     @runtime_ccall((:LLVMInitializeX86TargetInfo,libllvm[]), Cvoid, ())
 end
@@ -3286,6 +3366,10 @@ end
 
 function LLVMInitializeWebAssemblyTarget()
     @runtime_ccall((:LLVMInitializeWebAssemblyTarget,libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeBPFTarget()
+    @runtime_ccall((:LLVMInitializeBPFTarget,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeX86Target()
@@ -3304,6 +3388,10 @@ function LLVMInitializeWebAssemblyTargetMC()
     @runtime_ccall((:LLVMInitializeWebAssemblyTargetMC,libllvm[]), Cvoid, ())
 end
 
+function LLVMInitializeBPFTargetMC()
+    @runtime_ccall((:LLVMInitializeBPFTargetMC,libllvm[]), Cvoid, ())
+end
+
 function LLVMInitializeX86TargetMC()
     @runtime_ccall((:LLVMInitializeX86TargetMC,libllvm[]), Cvoid, ())
 end
@@ -3320,6 +3408,10 @@ function LLVMInitializeWebAssemblyAsmPrinter()
     @runtime_ccall((:LLVMInitializeWebAssemblyAsmPrinter,libllvm[]), Cvoid, ())
 end
 
+function LLVMInitializeBPFAsmPrinter()
+    @runtime_ccall((:LLVMInitializeBPFAsmPrinter,libllvm[]), Cvoid, ())
+end
+
 function LLVMInitializeX86AsmPrinter()
     @runtime_ccall((:LLVMInitializeX86AsmPrinter,libllvm[]), Cvoid, ())
 end
@@ -3330,6 +3422,10 @@ end
 
 function LLVMInitializeWebAssemblyAsmParser()
     @runtime_ccall((:LLVMInitializeWebAssemblyAsmParser,libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeBPFAsmParser()
+    @runtime_ccall((:LLVMInitializeBPFAsmParser,libllvm[]), Cvoid, ())
 end
 
 function LLVMInitializeX86AsmParser()
@@ -3344,8 +3440,28 @@ function LLVMInitializeWebAssemblyDisassembler()
     @runtime_ccall((:LLVMInitializeWebAssemblyDisassembler,libllvm[]), Cvoid, ())
 end
 
+function LLVMInitializeBPFDisassembler()
+    @runtime_ccall((:LLVMInitializeBPFDisassembler,libllvm[]), Cvoid, ())
+end
+
 function LLVMInitializeX86Disassembler()
     @runtime_ccall((:LLVMInitializeX86Disassembler,libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeNativeTarget()
+    @runtime_ccall((:LLVMInitializeNativeTarget,libllvm[]), LLVMBool, ())
+end
+
+function LLVMInitializeNativeAsmParser()
+    @runtime_ccall((:LLVMInitializeNativeAsmParser,libllvm[]), LLVMBool, ())
+end
+
+function LLVMInitializeNativeAsmPrinter()
+    @runtime_ccall((:LLVMInitializeNativeAsmPrinter,libllvm[]), LLVMBool, ())
+end
+
+function LLVMInitializeNativeDisassembler()
+    @runtime_ccall((:LLVMInitializeNativeDisassembler,libllvm[]), LLVMBool, ())
 end
 
 function LLVMGetModuleDataLayout(M)
@@ -3656,6 +3772,10 @@ function LLVMGetFunctionAddress(EE, Name)
     @runtime_ccall((:LLVMGetFunctionAddress,libllvm[]), UInt64, (LLVMExecutionEngineRef, Cstring), EE, Name)
 end
 
+function LLVMExecutionEngineGetErrMsg(EE, OutError)
+    @runtime_ccall((:LLVMExecutionEngineGetErrMsg,libllvm[]), LLVMBool, (LLVMExecutionEngineRef, Ptr{Cstring}), EE, OutError)
+end
+
 function LLVMCreateSimpleMCJITMemoryManager(Opaque, AllocateCodeSection, AllocateDataSection, FinalizeMemory, Destroy)
     @runtime_ccall((:LLVMCreateSimpleMCJITMemoryManager,libllvm[]), LLVMMCJITMemoryManagerRef, (Ptr{Cvoid}, LLVMMemoryManagerAllocateCodeSectionCallback, LLVMMemoryManagerAllocateDataSectionCallback, LLVMMemoryManagerFinalizeMemoryCallback, LLVMMemoryManagerDestroyCallback), Opaque, AllocateCodeSection, AllocateDataSection, FinalizeMemory, Destroy)
 end
@@ -3679,6 +3799,11 @@ end
 function LLVMCreatePerfJITEventListener()
     @runtime_ccall((:LLVMCreatePerfJITEventListener,libllvm[]), LLVMJITEventListenerRef, ())
 end
+
+
+# Julia wrapper for header: ExternC.h
+# Automatically generated using Clang.jl
+
 
 
 # Julia wrapper for header: IRReader.h
@@ -3921,31 +4046,111 @@ function LLVMIsSymbolIteratorAtEnd(ObjectFile, SI)
 end
 
 
-# Julia wrapper for header: OptRemarks.h
+# Julia wrapper for header: Orc.h
 # Automatically generated using Clang.jl
 
-function LLVMOptRemarkParserCreate(Buf, Size)
-    @runtime_ccall((:LLVMOptRemarkParserCreate,libllvm[]), LLVMOptRemarkParserRef, (Ptr{Cvoid}, UInt64), Buf, Size)
+function LLVMOrcExecutionSessionIntern(ES, Name)
+    @runtime_ccall((:LLVMOrcExecutionSessionIntern,libllvm[]), LLVMOrcSymbolStringPoolEntryRef, (LLVMOrcExecutionSessionRef, Cstring), ES, Name)
 end
 
-function LLVMOptRemarkParserGetNext(Parser)
-    @runtime_ccall((:LLVMOptRemarkParserGetNext,libllvm[]), Ptr{LLVMOptRemarkEntry}, (LLVMOptRemarkParserRef,), Parser)
+function LLVMOrcReleaseSymbolStringPoolEntry(S)
+    @runtime_ccall((:LLVMOrcReleaseSymbolStringPoolEntry,libllvm[]), Cvoid, (LLVMOrcSymbolStringPoolEntryRef,), S)
 end
 
-function LLVMOptRemarkParserHasError(Parser)
-    @runtime_ccall((:LLVMOptRemarkParserHasError,libllvm[]), LLVMBool, (LLVMOptRemarkParserRef,), Parser)
+function LLVMOrcDisposeJITDylibDefinitionGenerator(DG)
+    @runtime_ccall((:LLVMOrcDisposeJITDylibDefinitionGenerator,libllvm[]), Cvoid, (LLVMOrcJITDylibDefinitionGeneratorRef,), DG)
 end
 
-function LLVMOptRemarkParserGetErrorMessage(Parser)
-    @runtime_ccall((:LLVMOptRemarkParserGetErrorMessage,libllvm[]), Cstring, (LLVMOptRemarkParserRef,), Parser)
+function LLVMOrcJITDylibAddGenerator(JD, DG)
+    @runtime_ccall((:LLVMOrcJITDylibAddGenerator,libllvm[]), Cvoid, (LLVMOrcJITDylibRef, LLVMOrcJITDylibDefinitionGeneratorRef), JD, DG)
 end
 
-function LLVMOptRemarkParserDispose(Parser)
-    @runtime_ccall((:LLVMOptRemarkParserDispose,libllvm[]), Cvoid, (LLVMOptRemarkParserRef,), Parser)
+function LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess(Result, GlobalPrefx, Filter, FilterCtx)
+    @runtime_ccall((:LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess,libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcJITDylibDefinitionGeneratorRef}, UInt8, LLVMOrcSymbolPredicate, Ptr{Cvoid}), Result, GlobalPrefx, Filter, FilterCtx)
 end
 
-function LLVMOptRemarkVersion()
-    @runtime_ccall((:LLVMOptRemarkVersion,libllvm[]), UInt32, ())
+function LLVMOrcCreateNewThreadSafeContext()
+    @runtime_ccall((:LLVMOrcCreateNewThreadSafeContext,libllvm[]), LLVMOrcThreadSafeContextRef, ())
+end
+
+function LLVMOrcThreadSafeContextGetContext(TSCtx)
+    @runtime_ccall((:LLVMOrcThreadSafeContextGetContext,libllvm[]), LLVMContextRef, (LLVMOrcThreadSafeContextRef,), TSCtx)
+end
+
+function LLVMOrcDisposeThreadSafeContext(TSCtx)
+    @runtime_ccall((:LLVMOrcDisposeThreadSafeContext,libllvm[]), Cvoid, (LLVMOrcThreadSafeContextRef,), TSCtx)
+end
+
+function LLVMOrcCreateNewThreadSafeModule(M, TSCtx)
+    @runtime_ccall((:LLVMOrcCreateNewThreadSafeModule,libllvm[]), LLVMOrcThreadSafeModuleRef, (LLVMModuleRef, LLVMOrcThreadSafeContextRef), M, TSCtx)
+end
+
+function LLVMOrcDisposeThreadSafeModule(TSM)
+    @runtime_ccall((:LLVMOrcDisposeThreadSafeModule,libllvm[]), Cvoid, (LLVMOrcThreadSafeModuleRef,), TSM)
+end
+
+function LLVMOrcJITTargetMachineBuilderDetectHost(Result)
+    @runtime_ccall((:LLVMOrcJITTargetMachineBuilderDetectHost,libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcJITTargetMachineBuilderRef},), Result)
+end
+
+function LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(TM)
+    @runtime_ccall((:LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine,libllvm[]), LLVMOrcJITTargetMachineBuilderRef, (LLVMTargetMachineRef,), TM)
+end
+
+function LLVMOrcDisposeJITTargetMachineBuilder(JTMB)
+    @runtime_ccall((:LLVMOrcDisposeJITTargetMachineBuilder,libllvm[]), Cvoid, (LLVMOrcJITTargetMachineBuilderRef,), JTMB)
+end
+
+function LLVMOrcCreateLLJITBuilder()
+    @runtime_ccall((:LLVMOrcCreateLLJITBuilder,libllvm[]), LLVMOrcLLJITBuilderRef, ())
+end
+
+function LLVMOrcDisposeLLJITBuilder(Builder)
+    @runtime_ccall((:LLVMOrcDisposeLLJITBuilder,libllvm[]), Cvoid, (LLVMOrcLLJITBuilderRef,), Builder)
+end
+
+function LLVMOrcLLJITBuilderSetJITTargetMachineBuilder(Builder, JTMB)
+    @runtime_ccall((:LLVMOrcLLJITBuilderSetJITTargetMachineBuilder,libllvm[]), Cvoid, (LLVMOrcLLJITBuilderRef, LLVMOrcJITTargetMachineBuilderRef), Builder, JTMB)
+end
+
+function LLVMOrcCreateLLJIT(Result, Builder)
+    @runtime_ccall((:LLVMOrcCreateLLJIT,libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcLLJITRef}, LLVMOrcLLJITBuilderRef), Result, Builder)
+end
+
+function LLVMOrcDisposeLLJIT(J)
+    @runtime_ccall((:LLVMOrcDisposeLLJIT,libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITGetExecutionSession(J)
+    @runtime_ccall((:LLVMOrcLLJITGetExecutionSession,libllvm[]), LLVMOrcExecutionSessionRef, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITGetMainJITDylib(J)
+    @runtime_ccall((:LLVMOrcLLJITGetMainJITDylib,libllvm[]), LLVMOrcJITDylibRef, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITGetTripleString(J)
+    @runtime_ccall((:LLVMOrcLLJITGetTripleString,libllvm[]), Cstring, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITGetGlobalPrefix(J)
+    @runtime_ccall((:LLVMOrcLLJITGetGlobalPrefix,libllvm[]), UInt8, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITMangleAndIntern(J, UnmangledName)
+    @runtime_ccall((:LLVMOrcLLJITMangleAndIntern,libllvm[]), LLVMOrcSymbolStringPoolEntryRef, (LLVMOrcLLJITRef, Cstring), J, UnmangledName)
+end
+
+function LLVMOrcLLJITAddObjectFile(J, JD, ObjBuffer)
+    @runtime_ccall((:LLVMOrcLLJITAddObjectFile,libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcJITDylibRef, LLVMMemoryBufferRef), J, JD, ObjBuffer)
+end
+
+function LLVMOrcLLJITAddLLVMIRModule(J, JD, TSM)
+    @runtime_ccall((:LLVMOrcLLJITAddLLVMIRModule,libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcJITDylibRef, LLVMOrcThreadSafeModuleRef), J, JD, TSM)
+end
+
+function LLVMOrcLLJITLookup(J, Result, Name)
+    @runtime_ccall((:LLVMOrcLLJITLookup,libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, Ptr{LLVMOrcJITTargetAddress}, Cstring), J, Result, Name)
 end
 
 
@@ -4096,6 +4301,10 @@ function LLVMRemarkParserCreateYAML(Buf, Size)
     @runtime_ccall((:LLVMRemarkParserCreateYAML,libllvm[]), LLVMRemarkParserRef, (Ptr{Cvoid}, UInt64), Buf, Size)
 end
 
+function LLVMRemarkParserCreateBitstream(Buf, Size)
+    @runtime_ccall((:LLVMRemarkParserCreateBitstream,libllvm[]), LLVMRemarkParserRef, (Ptr{Cvoid}, UInt64), Buf, Size)
+end
+
 function LLVMRemarkParserGetNext(Parser)
     @runtime_ccall((:LLVMRemarkParserGetNext,libllvm[]), LLVMRemarkEntryRef, (LLVMRemarkParserRef,), Parser)
 end
@@ -4239,6 +4448,10 @@ function lto_module_get_linkeropts(mod)
     @runtime_ccall((:lto_module_get_linkeropts,libllvm[]), Cstring, (lto_module_t,), mod)
 end
 
+function lto_module_get_macho_cputype(mod, out_cputype, out_cpusubtype)
+    @runtime_ccall((:lto_module_get_macho_cputype,libllvm[]), lto_bool_t, (lto_module_t, Ptr{UInt32}, Ptr{UInt32}), mod, out_cputype, out_cpusubtype)
+end
+
 function lto_codegen_set_diagnostic_handler(arg1, arg2, arg3)
     @runtime_ccall((:lto_codegen_set_diagnostic_handler,libllvm[]), Cvoid, (lto_code_gen_t, lto_diagnostic_handler_t, Ptr{Cvoid}), arg1, arg2, arg3)
 end
@@ -4315,6 +4528,10 @@ function lto_codegen_debug_options(cg, arg1)
     @runtime_ccall((:lto_codegen_debug_options,libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, arg1)
 end
 
+function lto_codegen_debug_options_array(cg, arg1, number)
+    @runtime_ccall((:lto_codegen_debug_options_array,libllvm[]), Cvoid, (lto_code_gen_t, Ptr{Cstring}, Cint), cg, arg1, number)
+end
+
 function lto_initialize_disassembler()
     @runtime_ccall((:lto_initialize_disassembler,libllvm[]), Cvoid, ())
 end
@@ -4325,6 +4542,26 @@ end
 
 function lto_codegen_set_should_embed_uselists(cg, ShouldEmbedUselists)
     @runtime_ccall((:lto_codegen_set_should_embed_uselists,libllvm[]), Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldEmbedUselists)
+end
+
+function lto_input_create(buffer, buffer_size, path)
+    @runtime_ccall((:lto_input_create,libllvm[]), lto_input_t, (Ptr{Cvoid}, Csize_t, Cstring), buffer, buffer_size, path)
+end
+
+function lto_input_dispose(input)
+    @runtime_ccall((:lto_input_dispose,libllvm[]), Cvoid, (lto_input_t,), input)
+end
+
+function lto_input_get_num_dependent_libraries(input)
+    @runtime_ccall((:lto_input_get_num_dependent_libraries,libllvm[]), UInt32, (lto_input_t,), input)
+end
+
+function lto_input_get_dependent_library(input, index, size)
+    @runtime_ccall((:lto_input_get_dependent_library,libllvm[]), Cstring, (lto_input_t, Csize_t, Ptr{Csize_t}), input, index, size)
+end
+
+function lto_runtime_lib_symbols_list(size)
+    @runtime_ccall((:lto_runtime_lib_symbols_list,libllvm[]), Ptr{Cstring}, (Ptr{Csize_t},), size)
 end
 
 function thinlto_create_codegen()
@@ -4427,22 +4664,6 @@ function thinlto_codegen_set_cache_size_files(cg, max_size_files)
     @runtime_ccall((:thinlto_codegen_set_cache_size_files,libllvm[]), Cvoid, (thinlto_code_gen_t, UInt32), cg, max_size_files)
 end
 
-function lto_input_create(buffer, buffer_size, path)
-    @runtime_ccall((:lto_input_create,libllvm[]), lto_input_t, (Ptr{Cvoid}, Csize_t, Cstring), buffer, buffer_size, path)
-end
-
-function lto_input_dispose(input)
-    @runtime_ccall((:lto_input_dispose,libllvm[]), Cvoid, (lto_input_t,), input)
-end
-
-function lto_input_get_num_dependent_libraries(input)
-    @runtime_ccall((:lto_input_get_num_dependent_libraries,libllvm[]), UInt32, (lto_input_t,), input)
-end
-
-function lto_input_get_dependent_library(input, index, size)
-    @runtime_ccall((:lto_input_get_dependent_library,libllvm[]), Cstring, (lto_input_t, Csize_t, Ptr{Csize_t}), input, index, size)
-end
-
 
 # Julia wrapper for header: AggressiveInstCombine.h
 # Automatically generated using Clang.jl
@@ -4453,98 +4674,6 @@ end
 
 
 # Julia wrapper for header: Coroutines.h
-# Automatically generated using Clang.jl
-
-function LLVMAddCoroEarlyPass(PM)
-    @runtime_ccall((:LLVMAddCoroEarlyPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroSplitPass(PM)
-    @runtime_ccall((:LLVMAddCoroSplitPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroElidePass(PM)
-    @runtime_ccall((:LLVMAddCoroElidePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroCleanupPass(PM)
-    @runtime_ccall((:LLVMAddCoroCleanupPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-
-# Julia wrapper for header: IPO.h
-# Automatically generated using Clang.jl
-
-function LLVMAddArgumentPromotionPass(PM)
-    @runtime_ccall((:LLVMAddArgumentPromotionPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddConstantMergePass(PM)
-    @runtime_ccall((:LLVMAddConstantMergePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCalledValuePropagationPass(PM)
-    @runtime_ccall((:LLVMAddCalledValuePropagationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddDeadArgEliminationPass(PM)
-    @runtime_ccall((:LLVMAddDeadArgEliminationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddFunctionAttrsPass(PM)
-    @runtime_ccall((:LLVMAddFunctionAttrsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddFunctionInliningPass(PM)
-    @runtime_ccall((:LLVMAddFunctionInliningPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddAlwaysInlinerPass(PM)
-    @runtime_ccall((:LLVMAddAlwaysInlinerPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddGlobalDCEPass(PM)
-    @runtime_ccall((:LLVMAddGlobalDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddGlobalOptimizerPass(PM)
-    @runtime_ccall((:LLVMAddGlobalOptimizerPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddIPConstantPropagationPass(PM)
-    @runtime_ccall((:LLVMAddIPConstantPropagationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddPruneEHPass(PM)
-    @runtime_ccall((:LLVMAddPruneEHPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddIPSCCPPass(PM)
-    @runtime_ccall((:LLVMAddIPSCCPPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddInternalizePass(arg1, AllButMain)
-    @runtime_ccall((:LLVMAddInternalizePass,libllvm[]), Cvoid, (LLVMPassManagerRef, UInt32), arg1, AllButMain)
-end
-
-function LLVMAddStripDeadPrototypesPass(PM)
-    @runtime_ccall((:LLVMAddStripDeadPrototypesPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddStripSymbolsPass(PM)
-    @runtime_ccall((:LLVMAddStripSymbolsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-
-# Julia wrapper for header: InstCombine.h
-# Automatically generated using Clang.jl
-
-function LLVMAddInstructionCombiningPass(PM)
-    @runtime_ccall((:LLVMAddInstructionCombiningPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-
-# Julia wrapper for header: PassManagerBuilder.h
 # Automatically generated using Clang.jl
 
 function LLVMPassManagerBuilderCreate()
@@ -4591,6 +4720,111 @@ function LLVMPassManagerBuilderPopulateLTOPassManager(PMB, PM, Internalize, RunI
     @runtime_ccall((:LLVMPassManagerBuilderPopulateLTOPassManager,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef, LLVMBool, LLVMBool), PMB, PM, Internalize, RunInliner)
 end
 
+function LLVMAddCoroEarlyPass(PM)
+    @runtime_ccall((:LLVMAddCoroEarlyPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddCoroSplitPass(PM)
+    @runtime_ccall((:LLVMAddCoroSplitPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddCoroElidePass(PM)
+    @runtime_ccall((:LLVMAddCoroElidePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddCoroCleanupPass(PM)
+    @runtime_ccall((:LLVMAddCoroCleanupPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints(PMB)
+    @runtime_ccall((:LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints,libllvm[]), Cvoid, (LLVMPassManagerBuilderRef,), PMB)
+end
+
+
+# Julia wrapper for header: IPO.h
+# Automatically generated using Clang.jl
+
+function LLVMAddArgumentPromotionPass(PM)
+    @runtime_ccall((:LLVMAddArgumentPromotionPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddConstantMergePass(PM)
+    @runtime_ccall((:LLVMAddConstantMergePass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddMergeFunctionsPass(PM)
+    @runtime_ccall((:LLVMAddMergeFunctionsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddCalledValuePropagationPass(PM)
+    @runtime_ccall((:LLVMAddCalledValuePropagationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddDeadArgEliminationPass(PM)
+    @runtime_ccall((:LLVMAddDeadArgEliminationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddFunctionAttrsPass(PM)
+    @runtime_ccall((:LLVMAddFunctionAttrsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddFunctionInliningPass(PM)
+    @runtime_ccall((:LLVMAddFunctionInliningPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddAlwaysInlinerPass(PM)
+    @runtime_ccall((:LLVMAddAlwaysInlinerPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddGlobalDCEPass(PM)
+    @runtime_ccall((:LLVMAddGlobalDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddGlobalOptimizerPass(PM)
+    @runtime_ccall((:LLVMAddGlobalOptimizerPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddIPConstantPropagationPass(PM)
+    @runtime_ccall((:LLVMAddIPConstantPropagationPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddPruneEHPass(PM)
+    @runtime_ccall((:LLVMAddPruneEHPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddIPSCCPPass(PM)
+    @runtime_ccall((:LLVMAddIPSCCPPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddInternalizePass(arg1, AllButMain)
+    @runtime_ccall((:LLVMAddInternalizePass,libllvm[]), Cvoid, (LLVMPassManagerRef, UInt32), arg1, AllButMain)
+end
+
+function LLVMAddInternalizePassWithMustPreservePredicate(PM, Context, MustPreserve)
+    @runtime_ccall((:LLVMAddInternalizePassWithMustPreservePredicate,libllvm[]), Cvoid, (LLVMPassManagerRef, Ptr{Cvoid}, Ptr{Cvoid}), PM, Context, MustPreserve)
+end
+
+function LLVMAddStripDeadPrototypesPass(PM)
+    @runtime_ccall((:LLVMAddStripDeadPrototypesPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddStripSymbolsPass(PM)
+    @runtime_ccall((:LLVMAddStripSymbolsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+
+# Julia wrapper for header: InstCombine.h
+# Automatically generated using Clang.jl
+
+function LLVMAddInstructionCombiningPass(PM)
+    @runtime_ccall((:LLVMAddInstructionCombiningPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+
+# Julia wrapper for header: PassManagerBuilder.h
+# Automatically generated using Clang.jl
+
+
 
 # Julia wrapper for header: Scalar.h
 # Automatically generated using Clang.jl
@@ -4599,7 +4833,6 @@ function LLVMAddAggressiveDCEPass(PM)
     @runtime_ccall((:LLVMAddAggressiveDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-# added in LLVM10
 function LLVMAddDCEPass(PM)
     @runtime_ccall((:LLVMAddDCEPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
@@ -4742,6 +4975,10 @@ end
 
 function LLVMAddLowerExpectIntrinsicPass(PM)
     @runtime_ccall((:LLVMAddLowerExpectIntrinsicPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddLowerConstantIntrinsicsPass(PM)
+    @runtime_ccall((:LLVMAddLowerConstantIntrinsicsPass,libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddTypeBasedAliasAnalysisPass(PM)
