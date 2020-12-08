@@ -102,8 +102,14 @@ export ConstantAggregateZero
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantAggregateZeroValueKind}) = ConstantAggregateZero
 
-# there currently seems to be no function in the LLVM-C interface which returns a
-# ConstantAggregateZero value directly, but values can occur through calls to LLVMConstNull
+# array interface
+# FIXME: can we reuse the ::ConstantArray functionality with ConstantAggregateZero values?
+#        probably works fine if we just get rid of the refcheck
+Base.eltype(caz::ConstantAggregateZero) = eltype(llvmtype(caz))
+Base.size(caz::ConstantAggregateZero) = (0,)
+Base.length(caz::ConstantAggregateZero) = 0
+Base.axes(caz::ConstantAggregateZero) = (Base.OneTo(0),)
+Base.collect(caz::ConstantAggregateZero) = Value[]
 
 
 ## regular aggregate
@@ -118,13 +124,15 @@ end
 identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
 identify(::Type{Value}, ::Val{API.LLVMConstantDataArrayValueKind}) = ConstantArray
 
+ConstantArrayOrAggregateZero(value) = Value(value)::Union{ConstantArray,ConstantAggregateZero}
+
 # generic constructor taking an array of constants
 function ConstantArray(data::AbstractArray{<:Constant,N},
                        typ::LLVMType=llvmtype(first(data))) where {N}
     @assert all(x->x==typ, llvmtype.(data))
 
     if N == 1
-        return ConstantArray(API.LLVMConstArray(typ, Array(data), length(data)))
+        return ConstantArrayOrAggregateZero(API.LLVMConstArray(typ, Array(data), length(data)))
     end
 
     if VERSION >= v"1.1"
@@ -155,7 +163,6 @@ function Base.collect(ca::ConstantArray)
     end
     return constants
 end
-
 
 # array interface
 Base.eltype(ca::ConstantArray) = eltype(llvmtype(ca))
@@ -195,20 +202,24 @@ end
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
 
+ConstantStructOrAggregateZero(value) = Value(value)::Union{ConstantStruct,ConstantAggregateZero}
+
 # anonymous
 ConstantStruct(values::Vector{<:Constant}; packed::Core.Bool=false) =
-    ConstantStruct(API.LLVMConstStruct(values, length(values), convert(Bool, packed)))
+    ConstantStructOrAggregateZero(API.LLVMConstStruct(values, length(values), convert(Bool, packed)))
 ConstantStruct(values::Vector{<:Constant}, ctx::Context; packed::Core.Bool=false) =
-    ConstantStruct(API.LLVMConstStructInContext(ctx, values, length(values), convert(Bool, packed)))
+    ConstantStructOrAggregateZero(API.LLVMConstStructInContext(ctx, values, length(values), convert(Bool, packed)))
 
 # named
 ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
-    ConstantStruct(API.LLVMConstNamedStruct(typ, values, length(values)))
+    ConstantStructOrAggregateZero(API.LLVMConstNamedStruct(typ, values, length(values)))
 
 # create a ConstantStruct from a Julia object
 function ConstantStruct(value::T, ctx::Context=GlobalContext(); name=String(nameof(T)),
                         anonymous::Core.Bool=false, packed::Core.Bool=false) where {T}
     isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
+    isprimitivetype(T) && throw(ArgumentError("Cannot create a ConstantStruct from a primitive value"))
+
     constants = Vector{Constant}()
     for fieldname in fieldnames(T)
         field = getfield(value, fieldname)

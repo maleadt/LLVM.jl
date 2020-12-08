@@ -4,6 +4,9 @@ struct TestStruct
     z::Float16
 end
 
+struct TestSingleton
+end
+
 @testset "core" begin
 
 @testset "context" begin
@@ -418,6 +421,14 @@ Context() do ctx
         @test ca[1] == ConstantFP(vec[1], ctx)
         @test collect(ca) == ConstantFP.(vec, Ref(ctx))
     end
+    let
+        # tests for ConstantAggregateZero, constructed indirectly.
+        # should behave similarly to ConstantArray since it can get returned there.
+        ca = ConstantArray(Int[], ctx)
+        @test size(ca) == (0,)
+        @test length(ca) == 0
+        @test isempty(collect(ca))
+    end
 
     # multidimensional
     let
@@ -455,7 +466,7 @@ Context() do ctx
     end
     let
         test_struct = TestStruct(false, 52, -2.5)
-        constant_struct = ConstantStruct(test_struct, ctx; anonymous=false)
+        constant_struct = ConstantStruct(test_struct, ctx)
         constant_struct_type = llvmtype(constant_struct)
 
         @test constant_struct_type isa LLVM.StructType
@@ -467,7 +478,17 @@ Context() do ctx
         ]
         @test collect(operands(constant_struct)) == expected_operands
 
-        @test_throws ArgumentError ConstantStruct(test_struct, ctx; anonymous=false)
+        @test_throws ArgumentError ConstantStruct(test_struct, ctx)
+    end
+    let
+        test_struct = TestSingleton()
+        constant_struct = ConstantStruct(test_struct, ctx)
+        constant_struct_type = llvmtype(constant_struct)
+
+        @test isempty(operands(constant_struct))
+    end
+    let
+        @test_throws ArgumentError ConstantStruct(1, ctx)
     end
 
     end
