@@ -272,3 +272,31 @@ identify(::Type{LLVMType}, ::Val{API.LLVMTokenTypeKind}) = TokenType
 
 TokenType(ctx::Context) =
     TokenType(API.LLVMTokenTypeInContext(ctx))
+
+
+## type iteration
+
+export types
+
+struct ContextTypeDict <: AbstractDict{String,LLVMType}
+    ctx::Context
+end
+
+# FIXME: remove on LLVM 12
+function LLVMGetTypeByName2(ctx::Context, name)
+    Module("dummy", ctx) do mod
+        API.LLVMGetTypeByName(mod, name)
+    end
+end
+
+types(ctx::Context) = ContextTypeDict(ctx)
+
+function Base.haskey(iter::ContextTypeDict, name::String)
+    return LLVMGetTypeByName2(iter.ctx, name) != C_NULL
+end
+
+function Base.getindex(iter::ContextTypeDict, name::String)
+    objref = LLVMGetTypeByName2(iter.ctx, name)
+    objref == C_NULL && throw(KeyError(name))
+    return LLVMType(objref)
+end

@@ -206,7 +206,7 @@ ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
     ConstantStruct(API.LLVMConstNamedStruct(typ, values, length(values)))
 
 # create a ConstantStruct from a Julia object
-function ConstantStruct(value::T, ctx::Context=GlobalContext();
+function ConstantStruct(value::T, ctx::Context=GlobalContext(); name=String(nameof(T)),
                         anonymous::Core.Bool=false, packed::Core.Bool=false) where {T}
     isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
     constants = Vector{Constant}()
@@ -228,7 +228,9 @@ function ConstantStruct(value::T, ctx::Context=GlobalContext();
     if anonymous
         ConstantStruct(constants, ctx; packed=packed)
     else
-        typ = StructType(String(nameof(T)), ctx)
+        # check if this name already exists in the context
+        haskey(types(ctx), name) && throw(ArgumentError("Type name '$name' is already used in this context. Use a different context, name, or request an anonymous struct."))
+        typ = StructType(name, ctx)
         ConstantStruct(typ, constants)
     end
 end
