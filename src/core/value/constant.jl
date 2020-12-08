@@ -93,7 +93,7 @@ Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
     convert(T, API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}()))
 
 
-## aggregate
+## aggregate zero
 
 export ConstantAggregateZero
 
@@ -106,16 +106,11 @@ identify(::Type{Value}, ::Val{API.LLVMConstantAggregateZeroValueKind}) = Constan
 # ConstantAggregateZero value directly, but values can occur through calls to LLVMConstNull
 
 
-## constant expressions
-
-export ConstantExpr, ConstantAggregate, ConstantArray, ConstantStruct, ConstantVector, InlineAsm
-
-@checked struct ConstantExpr <: Constant
-    ref::API.LLVMValueRef
-end
-identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
+## regular aggregate
 
 abstract type ConstantAggregate <: Constant end
+
+# arrays
 
 @checked struct ConstantArray <: ConstantAggregate
     ref::API.LLVMValueRef
@@ -123,34 +118,77 @@ end
 identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
 identify(::Type{Value}, ::Val{API.LLVMConstantDataArrayValueKind}) = ConstantArray
 
-function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}) where {T<:Constant,N}
+# generic constructor taking an array of constants
+function ConstantArray(data::AbstractArray{<:Constant,N},
+                       typ::LLVMType=llvmtype(first(data))) where {N}
+    @assert all(x->x==typ, llvmtype.(data))
+
     if N == 1
         return ConstantArray(API.LLVMConstArray(typ, Array(data), length(data)))
     end
 
     if VERSION >= v"1.1"
-        ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
+        ca_vec = map(x->ConstantArray(x, typ), eachslice(data, dims=1))
     else
-        ca_vec = map(x->ConstantArray(typ, x), (view(data, i, ntuple(d->(:), N-1)...) for i in axes(data, 1)))
+        ca_vec = map(x->ConstantArray(x, typ), (view(data, i, ntuple(d->(:), N-1)...) for i in axes(data, 1)))
     end
     ca_typ = llvmtype(first(ca_vec))
 
     return ConstantArray(API.LLVMConstArray(ca_typ, ca_vec, length(ca_vec)))
 end
-ConstantArray(typ::IntegerType, data::AbstractArray{T,N}) where {T<:Integer,N} =
-    ConstantArray(typ, map(x->ConstantInt(typ, x), data))
-ConstantArray(typ::FloatingPointType, data::AbstractArray{T,N}) where {T<:AbstractFloat,N} =
-    ConstantArray(typ, map(x->ConstantFP(typ, x), data))
 
-# NOTE: getindex is not supported for multidimensionsal constant arrays
-Base.getindex(ca::ConstantArray, idx::Integer) =
-    API.LLVMGetElementAsConstant(ca, idx-1)
-Base.length(ca::ConstantArray) = length(llvmtype(ca))
+# shorthands with arrays of plain Julia data
+ConstantArray(data::AbstractArray{T,N}, ctx::Context=GlobalContext()) where {T<:Integer,N} =
+    ConstantArray(ConstantInt.(data, Ref(ctx)), IntType(sizeof(T)*8, ctx))
+ConstantArray(data::AbstractArray{Float16,N}, ctx::Context=GlobalContext()) where {N} =
+    ConstantArray(ConstantFP.(data, Ref(ctx)), HalfType(ctx))
+ConstantArray(data::AbstractArray{Float32,N}, ctx::Context=GlobalContext()) where {N} =
+    ConstantArray(ConstantFP.(data, Ref(ctx)), FloatType(ctx))
+ConstantArray(data::AbstractArray{Float64,N}, ctx::Context=GlobalContext()) where {N} =
+    ConstantArray(ConstantFP.(data, Ref(ctx)), DoubleType(ctx))
+
+# convert back to known array types
+function Base.collect(ca::ConstantArray)
+    constants = Array{Value}(undef, size(ca))
+    for I in CartesianIndices(size(ca))
+        @inbounds constants[I] = ca[Tuple(I)...]
+    end
+    return constants
+end
+
+
+# array interface
 Base.eltype(ca::ConstantArray) = eltype(llvmtype(ca))
-Base.convert(::Type{Array{T,1}}, ca::ConstantArray) where {T<:Integer} =
-    [convert(T,ConstantInt(ca[i])) for i in 1:length(ca)]
-Base.convert(::Type{Array{T,1}}, ca::ConstantArray) where {T<:AbstractFloat} =
-    [convert(T,ConstantFP(ca[i])) for i in 1:length(ca)]
+function Base.size(ca::ConstantArray)
+    dims = Int[]
+    typ = llvmtype(ca)
+    while typ isa ArrayType
+        push!(dims, length(typ))
+        typ = eltype(typ)
+    end
+    return Tuple(dims)
+end
+Base.length(ca::ConstantArray) = prod(size(ca))
+Base.axes(ca::ConstantArray) = Base.OneTo.(size(ca))
+
+function Base.getindex(ca::ConstantArray, idx::Integer...)
+    # multidimensional arrays are represented by arrays of arrays,
+    # which we need to 'peel back' by looking at the operand sets.
+    # for the final dimension, we use LLVMGetElementAsConstant
+    @boundscheck Base.checkbounds_indices(Base.Bool, axes(ca), idx) ||
+        throw(BoundsError(ca, idx))
+    I = CartesianIndices(size(ca))[idx...]
+    for i in Tuple(I)
+        if isempty(operands(ca))
+            ca = LLVM.Value(API.LLVMGetElementAsConstant(ca, i-1))
+        else
+            ca = (Base.@_propagate_inbounds_meta; operands(ca)[i])
+        end
+    end
+    return ca
+end
+
+# structs
 
 @checked struct ConstantStruct <: ConstantAggregate
     ref::API.LLVMValueRef
@@ -203,10 +241,25 @@ function ConstantStruct(value, typ::LLVMType)
     return ConstantStruct(constants, typ)
 end
 
+# vectors
+
 @checked struct ConstantVector <: ConstantAggregate
     ref::API.LLVMValueRef
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantVectorValueKind}) = ConstantVector
+
+
+## constant expressions
+
+export ConstantExpr, ConstantAggregate, ConstantArray, ConstantStruct, ConstantVector, InlineAsm
+
+@checked struct ConstantExpr <: Constant
+    ref::API.LLVMValueRef
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
+
+
+## inline assembly
 
 @checked struct InlineAsm <: Constant
     ref::API.LLVMValueRef
