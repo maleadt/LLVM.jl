@@ -238,10 +238,15 @@ function ConstantStruct(value::T, ctx::Context=GlobalContext(); name=String(name
 
     if anonymous
         ConstantStruct(constants, ctx; packed=packed)
+    elseif haskey(types(ctx), name)
+        typ = types(ctx)[name]
+        if collect(elements(typ)) != llvmtype.(constants)
+            throw(ArgumentError("Cannot create struct $name {$(join(llvmtype.(constants), ", "))} as it is already defined in this context as {$(join(elements(typ), ", "))}."))
+        end
+        ConstantStruct(typ, constants)
     else
-        # check if this name already exists in the context
-        haskey(types(ctx), name) && throw(ArgumentError("Type name '$name' is already used in this context. Use a different context, name, or request an anonymous struct."))
         typ = StructType(name, ctx)
+        elements!(typ, llvmtype.(constants))
         ConstantStruct(typ, constants)
     end
 end

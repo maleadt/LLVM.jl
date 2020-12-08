@@ -4,6 +4,10 @@ struct TestStruct
     z::Float16
 end
 
+struct AnotherTestStruct
+    x::Int
+end
+
 struct TestSingleton
 end
 
@@ -478,7 +482,11 @@ Context() do ctx
         ]
         @test collect(operands(constant_struct)) == expected_operands
 
-        @test_throws ArgumentError ConstantStruct(test_struct, ctx)
+        # re-creating the same type shouldn't fail
+        ConstantStruct(TestStruct(true, 42, 0), ctx)
+        # unless it's a conflicting type
+        @test_throws ArgumentError ConstantStruct(AnotherTestStruct(1), ctx; name="TestStruct")
+
     end
     let
         test_struct = TestSingleton()
