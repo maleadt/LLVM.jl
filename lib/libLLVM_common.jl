@@ -35,7 +35,7 @@ struct LLVMOpaqueAttributeRef end
 const LLVMAttributeRef = Ptr{LLVMOpaqueAttributeRef}
 struct LLVMOpaqueDiagnosticInfo end
 const LLVMDiagnosticInfoRef = Ptr{LLVMOpaqueDiagnosticInfo}
-const LLVMComdat = Cvoid
+struct LLVMComdat end
 const LLVMComdatRef = Ptr{LLVMComdat}
 struct LLVMOpaqueModuleFlagEntry end
 const LLVMModuleFlagEntry = LLVMOpaqueModuleFlagEntry
@@ -117,6 +117,7 @@ const LLVMFatalErrorHandler = Ptr{Cvoid}
     LLVMShuffleVector = 52
     LLVMExtractValue = 53
     LLVMInsertValue = 54
+    LLVMFreeze = 68
     LLVMFence = 55
     LLVMAtomicCmpXchg = 56
     LLVMAtomicRMW = 57
@@ -147,6 +148,8 @@ end
     LLVMMetadataTypeKind = 14
     LLVMX86_MMXTypeKind = 15
     LLVMTokenTypeKind = 16
+    LLVMScalableVectorTypeKind = 17
+    LLVMBFloatTypeKind = 18
 end
 
 @cenum LLVMLinkage::UInt32 begin
@@ -327,6 +330,8 @@ end
     LLVMAtomicRMWBinOpMin = 8
     LLVMAtomicRMWBinOpUMax = 9
     LLVMAtomicRMWBinOpUMin = 10
+    LLVMAtomicRMWBinOpFAdd = 11
+    LLVMAtomicRMWBinOpFSub = 12
 end
 
 @cenum LLVMDiagnosticSeverity::UInt32 begin
@@ -366,7 +371,7 @@ const LLVMYieldCallback = Ptr{Cvoid}
     LLVMDIFlagPublic = 3
     LLVMDIFlagFwdDecl = 4
     LLVMDIFlagAppleBlock = 8
-    LLVMDIFlagBlockByrefStruct = 16
+    LLVMDIFlagReservedBit4 = 16
     LLVMDIFlagVirtual = 32
     LLVMDIFlagArtificial = 64
     LLVMDIFlagExplicit = 128
@@ -448,6 +453,15 @@ end
 
 const LLVMMetadataKind = UInt32
 const LLVMDWARFTypeEncoding = UInt32
+
+@cenum LLVMDWARFMacinfoRecordType::UInt32 begin
+    LLVMDWARFMacinfoRecordTypeDefine = 1
+    LLVMDWARFMacinfoRecordTypeMacro = 2
+    LLVMDWARFMacinfoRecordTypeStartFile = 3
+    LLVMDWARFMacinfoRecordTypeEndFile = 4
+    LLVMDWARFMacinfoRecordTypeVendorExt = 255
+end
+
 const LLVMDisassembler_VariantKind_None = 0
 const LLVMDisassembler_VariantKind_ARM_HI16 = 1
 const LLVMDisassembler_VariantKind_ARM_LO16 = 2
@@ -512,7 +526,7 @@ struct LLVMOpaqueTargetLibraryInfotData end
 const LLVMTargetLibraryInfoRef = Ptr{LLVMOpaqueTargetLibraryInfotData}
 struct LLVMOpaqueTargetMachine end
 const LLVMTargetMachineRef = Ptr{LLVMOpaqueTargetMachine}
-const LLVMTarget = Cvoid
+struct LLVMTarget end
 const LLVMTargetRef = Ptr{LLVMTarget}
 
 @cenum LLVMCodeGenOptLevel::UInt32 begin
@@ -615,45 +629,33 @@ end
 
 struct LLVMOpaqueObjectFile end
 const LLVMObjectFileRef = Ptr{LLVMOpaqueObjectFile}
-const OPT_REMARKS_API_VERSION = 0
-
-struct LLVMOptRemarkStringRef
-    Str::Cstring
-    Len::UInt32
-end
-
-struct LLVMOptRemarkDebugLoc
-    SourceFile::LLVMOptRemarkStringRef
-    SourceLineNumber::UInt32
-    SourceColumnNumber::UInt32
-end
-
-struct LLVMOptRemarkArg
-    Key::LLVMOptRemarkStringRef
-    Value::LLVMOptRemarkStringRef
-    DebugLoc::LLVMOptRemarkDebugLoc
-end
-
-struct LLVMOptRemarkEntry
-    RemarkType::LLVMOptRemarkStringRef
-    PassName::LLVMOptRemarkStringRef
-    RemarkName::LLVMOptRemarkStringRef
-    FunctionName::LLVMOptRemarkStringRef
-    DebugLoc::LLVMOptRemarkDebugLoc
-    Hotness::UInt32
-    NumArgs::UInt32
-    Args::Ptr{LLVMOptRemarkArg}
-end
-
-const LLVMOptRemarkOpaqueParser = Cvoid
-const LLVMOptRemarkParserRef = Ptr{LLVMOptRemarkOpaqueParser}
-const LLVMOrcOpaqueJITStack = Cvoid
+const LLVMOrcJITTargetAddress = UInt64
+struct LLVMOrcOpaqueExecutionSession end
+const LLVMOrcExecutionSessionRef = Ptr{LLVMOrcOpaqueExecutionSession}
+struct LLVMOrcQuaqueSymbolStringPoolEntryPtr end
+const LLVMOrcSymbolStringPoolEntryRef = Ptr{LLVMOrcQuaqueSymbolStringPoolEntryPtr}
+struct LLVMOrcOpaqueJITDylib end
+const LLVMOrcJITDylibRef = Ptr{LLVMOrcOpaqueJITDylib}
+struct LLVMOrcOpaqueJITDylibDefinitionGenerator end
+const LLVMOrcJITDylibDefinitionGeneratorRef = Ptr{LLVMOrcOpaqueJITDylibDefinitionGenerator}
+const LLVMOrcSymbolPredicate = Ptr{Cvoid}
+struct LLVMOrcOpaqueThreadSafeContext end
+const LLVMOrcThreadSafeContextRef = Ptr{LLVMOrcOpaqueThreadSafeContext}
+struct LLVMOrcOpaqueThreadSafeModule end
+const LLVMOrcThreadSafeModuleRef = Ptr{LLVMOrcOpaqueThreadSafeModule}
+struct LLVMOrcOpaqueJITTargetMachineBuilder end
+const LLVMOrcJITTargetMachineBuilderRef = Ptr{LLVMOrcOpaqueJITTargetMachineBuilder}
+struct LLVMOrcOpaqueLLJITBuilder end
+const LLVMOrcLLJITBuilderRef = Ptr{LLVMOrcOpaqueLLJITBuilder}
+struct LLVMOrcOpaqueLLJIT end
+const LLVMOrcLLJITRef = Ptr{LLVMOrcOpaqueLLJIT}
+struct LLVMOrcOpaqueJITStack end
 const LLVMOrcJITStackRef = Ptr{LLVMOrcOpaqueJITStack}
 const LLVMOrcModuleHandle = UInt64
 const LLVMOrcTargetAddress = UInt64
 const LLVMOrcSymbolResolverFn = Ptr{Cvoid}
 const LLVMOrcLazyCompileCallbackFn = Ptr{Cvoid}
-const REMARKS_API_VERSION = 0
+const REMARKS_API_VERSION = 1
 
 @cenum LLVMRemarkType::UInt32 begin
     LLVMRemarkTypeUnknown = 0
@@ -665,17 +667,17 @@ const REMARKS_API_VERSION = 0
     LLVMRemarkTypeFailure = 6
 end
 
-const LLVMRemarkOpaqueString = Cvoid
+struct LLVMRemarkOpaqueString end
 const LLVMRemarkStringRef = Ptr{LLVMRemarkOpaqueString}
-const LLVMRemarkOpaqueDebugLoc = Cvoid
+struct LLVMRemarkOpaqueDebugLoc end
 const LLVMRemarkDebugLocRef = Ptr{LLVMRemarkOpaqueDebugLoc}
-const LLVMRemarkOpaqueArg = Cvoid
+struct LLVMRemarkOpaqueArg end
 const LLVMRemarkArgRef = Ptr{LLVMRemarkOpaqueArg}
-const LLVMRemarkOpaqueEntry = Cvoid
+struct LLVMRemarkOpaqueEntry end
 const LLVMRemarkEntryRef = Ptr{LLVMRemarkOpaqueEntry}
-const LLVMRemarkOpaqueParser = Cvoid
+struct LLVMRemarkOpaqueParser end
 const LLVMRemarkParserRef = Ptr{LLVMRemarkOpaqueParser}
-const LTO_API_VERSION = 24
+const LTO_API_VERSION = 27
 const lto_bool_t = Bool
 
 @cenum lto_symbol_attributes::UInt32 begin
@@ -727,13 +729,13 @@ const thinlto_code_gen_t = Ptr{LLVMOpaqueThinLTOCodeGenerator}
 end
 
 const lto_diagnostic_handler_t = Ptr{Cvoid}
+struct LLVMOpaqueLTOInput end
+const lto_input_t = Ptr{LLVMOpaqueLTOInput}
 
 struct LTOObjectBuffer
     Buffer::Cstring
     Size::Csize_t
 end
 
-struct LLVMOpaqueLTOInput end
-const lto_input_t = Ptr{LLVMOpaqueLTOInput}
 struct LLVMOpaquePassManagerBuilder end
 const LLVMPassManagerBuilderRef = Ptr{LLVMOpaquePassManagerBuilder}

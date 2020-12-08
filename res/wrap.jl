@@ -16,6 +16,9 @@ function wrap()
     clang_includes  = map(x->x[3:end], filter( x->startswith(x,"-I"), cppflags))
     clang_extraargs =                  filter(x->!startswith(x,"-I"), cppflags)
 
+    # FIXME: Clang.jl doesn't properly detect system headers
+    push!(clang_extraargs, "-I/usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include")
+
     # Recursively discover LLVM C API headers (files ending in .h)
     header_dirs = String[joinpath(includedir, "llvm-c")]
     header_files = String[]
@@ -34,7 +37,7 @@ function wrap()
 
     context = init(;
                     headers = header_files,
-                    output_file = "libLLVM.jl",
+                    output_file = "libLLVM_h.jl",
                     common_file = "libLLVM_common.jl",
                     clang_includes = convert(Vector{String}, clang_includes),
                     clang_args = convert(Vector{String}, clang_extraargs),
@@ -54,10 +57,8 @@ end
 isinteractive() || main()
 
 # Manual clean-up:
-# - remove build-host details (HAVE_INTTYPES_H, LLVM_DEFAULT_TARGET_TRIPLE etc) in libLLVM_common.jl
-# - remove LLVMInitializeAll and LLVMInitializeNative wrappers (these are macros)
+# - remove build-host details (LLVM_DEFAULT_TARGET_TRIPLE etc) in libLLVM_common.jl
 # - remove "# Skipping ..." comments by Clang.jl
-# - replace `ccall\(\((:.+), libllvm\), (.*)\)` with `@runtime_ccall($1, $2)`
 # - replace `const (LLVMOpaque.*) = Cvoid` with `struct $1 end`
 # - use `gawk -i inplace '/^[[:blank:]]*$/ { print; next; }; {cur = seen[$0]; if(!seen[$0]++ || (/^end$/ && !prev) || /^.*Clang.*$/) print $0; prev=cur}' libLLVM_h.jl` to remove duplicates
 # - use `cat -s` to remove duplicate empty lines
