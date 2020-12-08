@@ -195,17 +195,22 @@ end
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
 
-ConstantStruct(constant_vals::Vector{T}, packed::Core.Bool=false) where {T<:Constant} =
-    ConstantStruct(API.LLVMConstStruct(constant_vals, length(constant_vals), convert(Bool, packed)))
-ConstantStruct(constant_vals::Vector{T}, ctx::Context, packed::Core.Bool=false) where {T<:Constant} =
-    ConstantStruct(API.LLVMConstStructInContext(ctx, constant_vals, length(constant_vals), convert(Bool, packed)))
-ConstantStruct(constant_vals::Vector{T}, typ::LLVMType) where {T<:Constant} =
-    ConstantStruct(API.LLVMConstNamedStruct(typ, constant_vals, length(constant_vals)))
+# anonymous
+ConstantStruct(values::Vector{<:Constant}; packed::Core.Bool=false) =
+    ConstantStruct(API.LLVMConstStruct(values, length(values), convert(Bool, packed)))
+ConstantStruct(values::Vector{<:Constant}, ctx::Context; packed::Core.Bool=false) =
+    ConstantStruct(API.LLVMConstStructInContext(ctx, values, length(values), convert(Bool, packed)))
 
-function struct_to_constants(value, ctx::Context)
+# named
+ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
+    ConstantStruct(API.LLVMConstNamedStruct(typ, values, length(values)))
+
+# create a ConstantStruct from a Julia object
+function ConstantStruct(value::T, ctx::Context=GlobalContext();
+                        anonymous::Core.Bool=false, packed::Core.Bool=false) where {T}
+    isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
     constants = Vector{Constant}()
-
-    for fieldname in fieldnames(typeof(value))
+    for fieldname in fieldnames(T)
         field = getfield(value, fieldname)
 
         if isa(field, Core.Bool)
@@ -220,25 +225,12 @@ function struct_to_constants(value, ctx::Context)
         end
     end
 
-    return constants
-end
-
-function ConstantStruct(value, packed::Core.Bool=false)
-    isbits(value) || throw(ArgumentError("`value` must be isbits"))
-    constants = struct_to_constants(value, GlobalContext())
-    return ConstantStruct(constants, packed)
-end
-
-function ConstantStruct(value, ctx::Context, packed::Core.Bool=false)
-    isbits(value) || throw(ArgumentError("`value` must be isbits"))
-    constants = struct_to_constants(value, ctx)
-    return ConstantStruct(constants, ctx, packed)
-end
-
-function ConstantStruct(value, typ::LLVMType)
-    isbits(value) || throw(ArgumentError("`value` must be isbits"))
-    constants = struct_to_constants(value, context(typ))
-    return ConstantStruct(constants, typ)
+    if anonymous
+        ConstantStruct(constants, ctx; packed=packed)
+    else
+        typ = StructType(String(nameof(T)), ctx)
+        ConstantStruct(typ, constants)
+    end
 end
 
 # vectors
