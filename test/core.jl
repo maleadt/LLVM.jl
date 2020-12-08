@@ -186,6 +186,22 @@ Context() do ctx
     @test context(typ) == ctx
 end
 
+# type iteration
+Context() do ctx
+    st = LLVM.StructType("SomeType", ctx)
+
+    let ts = types(ctx)
+        @test keytype(ts) == String
+        @test valtype(ts) == LLVMType
+
+        @test haskey(ts, "SomeType")
+        @test ts["SomeType"] == st
+
+        @test !haskey(ts, "SomeOtherType")
+        @test_throws KeyError ts["SomeOtherType"]
+    end
+end
+
 end
 
 
@@ -450,6 +466,8 @@ Context() do ctx
             ConstantFP(LLVM.HalfType(ctx), -2.5)
         ]
         @test collect(operands(constant_struct)) == expected_operands
+
+        @test_throws ArgumentError ConstantStruct(test_struct, ctx; anonymous=false)
     end
 
     end
@@ -648,26 +666,6 @@ LLVM.Module("SomeModule", ctx) do mod
 
         @test mod_flags["foobar"] == md
         @test_throws KeyError mod_flags["foobaz"]
-    end
-end
-end
-
-# type iteration
-Context() do ctx
-LLVM.Module("SomeModule", ctx) do mod
-    st = LLVM.StructType("SomeType", ctx)
-    ft = LLVM.FunctionType(st, [st])
-    fn = LLVM.Function(mod, "SomeFunction", ft)
-
-    let ts = types(mod)
-        @test keytype(ts) == String
-        @test valtype(ts) == LLVMType
-
-        @test haskey(ts, "SomeType")
-        @test ts["SomeType"] == st
-
-        @test !haskey(ts, "SomeOtherType")
-        @test_throws KeyError ts["SomeOtherType"]
     end
 end
 end
