@@ -3448,22 +3448,6 @@ function LLVMInitializeX86Disassembler()
     @runtime_ccall((:LLVMInitializeX86Disassembler,libllvm[]), Cvoid, ())
 end
 
-function LLVMInitializeNativeTarget()
-    @runtime_ccall((:LLVMInitializeNativeTarget,libllvm[]), LLVMBool, ())
-end
-
-function LLVMInitializeNativeAsmParser()
-    @runtime_ccall((:LLVMInitializeNativeAsmParser,libllvm[]), LLVMBool, ())
-end
-
-function LLVMInitializeNativeAsmPrinter()
-    @runtime_ccall((:LLVMInitializeNativeAsmPrinter,libllvm[]), LLVMBool, ())
-end
-
-function LLVMInitializeNativeDisassembler()
-    @runtime_ccall((:LLVMInitializeNativeDisassembler,libllvm[]), LLVMBool, ())
-end
-
 function LLVMGetModuleDataLayout(M)
     @runtime_ccall((:LLVMGetModuleDataLayout,libllvm[]), LLVMTargetDataRef, (LLVMModuleRef,), M)
 end
