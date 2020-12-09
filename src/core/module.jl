@@ -77,25 +77,12 @@ set_used!(mod::Module, values::GlobalVariable...) = nothing
 set_compiler_used!(mod::Module, values::GlobalVariable...) = nothing
 end
 
+
 ## type iteration
 
 export types
 
-struct ModuleTypeDict <: AbstractDict{String,LLVMType}
-    mod::Module
-end
-
-types(mod::Module) = ModuleTypeDict(mod)
-
-function Base.haskey(iter::ModuleTypeDict, name::String)
-    return API.LLVMGetTypeByName(iter.mod, name) != C_NULL
-end
-
-function Base.getindex(iter::ModuleTypeDict, name::String)
-    objref = API.LLVMGetTypeByName(iter.mod, name)
-    objref == C_NULL && throw(KeyError(name))
-    return LLVMType(objref)
-end
+@deprecate types(mod::Module) types(context(mod))
 
 
 ## metadata iteration

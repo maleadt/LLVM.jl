@@ -46,12 +46,12 @@ const WideInteger = Union{Int64, UInt64}
 ConstantInt(typ::IntegerType, val::WideInteger, signed=false) =
     ConstantInt(API.LLVMConstInt(typ, reinterpret(Culonglong, val),
                 convert(Bool, signed)))
-const SmallInteger = Union{Int8, Int16, Int32, UInt8, UInt16, UInt32}
+const SmallInteger = Union{Core.Bool, Int8, Int16, Int32, UInt8, UInt16, UInt32}
 ConstantInt(typ::IntegerType, val::SmallInteger, signed=false) =
     ConstantInt(typ, convert(Int64, val), signed)
 
 function ConstantInt(typ::IntegerType, val::Integer, signed=false)
-    valbits = ceil(Int, log2(abs(val))) + 1
+    valbits = ceil(Int, log2(abs(val))) + 1 # FIXME: doesn't work for val=0
     numwords = ceil(Int, valbits / 64)
     words = Vector{Culonglong}(undef, numwords)
     for i in 1:numwords
@@ -67,11 +67,17 @@ function ConstantInt(val::T, ctx::Context) where T<:SizeableInteger
     return ConstantInt(typ, val, T<:Signed)
 end
 
+# Booleans are encoded with a single bit, so we can't use sizeof
+ConstantInt(val::Core.Bool, ctx::Context) = ConstantInt(Int1Type(ctx), val ? 1 : 0)
+
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Unsigned} =
     convert(T, API.LLVMConstIntGetZExtValue(val))
 
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
     convert(T, API.LLVMConstIntGetSExtValue(val))
+
+# Booleans aren't Signed or Unsigned
+Base.convert(::Type{Core.Bool}, val::ConstantInt) = convert(Int, val) != 0
 
 
 @checked struct ConstantFP <: Constant
@@ -93,7 +99,7 @@ Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
     convert(T, API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}()))
 
 
-## aggregate
+## aggregate zero
 
 export ConstantAggregateZero
 
@@ -102,8 +108,160 @@ export ConstantAggregateZero
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantAggregateZeroValueKind}) = ConstantAggregateZero
 
-# there currently seems to be no function in the LLVM-C interface which returns a
-# ConstantAggregateZero value directly, but values can occur through calls to LLVMConstNull
+# array interface
+# FIXME: can we reuse the ::ConstantArray functionality with ConstantAggregateZero values?
+#        probably works fine if we just get rid of the refcheck
+Base.eltype(caz::ConstantAggregateZero) = eltype(llvmtype(caz))
+Base.size(caz::ConstantAggregateZero) = (0,)
+Base.length(caz::ConstantAggregateZero) = 0
+Base.axes(caz::ConstantAggregateZero) = (Base.OneTo(0),)
+Base.collect(caz::ConstantAggregateZero) = Value[]
+
+
+## regular aggregate
+
+abstract type ConstantAggregate <: Constant end
+
+# arrays
+
+@checked struct ConstantArray <: ConstantAggregate
+    ref::API.LLVMValueRef
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
+identify(::Type{Value}, ::Val{API.LLVMConstantDataArrayValueKind}) = ConstantArray
+
+ConstantArrayOrAggregateZero(value) = Value(value)::Union{ConstantArray,ConstantAggregateZero}
+
+# generic constructor taking an array of constants
+function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}=T[]) where {T<:Constant,N}
+    @assert all(x->x==typ, llvmtype.(data))
+
+    if N == 1
+        return ConstantArrayOrAggregateZero(API.LLVMConstArray(typ, Array(data), length(data)))
+    end
+
+    if VERSION >= v"1.1"
+        ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
+    else
+        ca_vec = map(x->ConstantArray(typ, x), (view(data, i, ntuple(d->(:), N-1)...) for i in axes(data, 1)))
+    end
+    ca_typ = llvmtype(first(ca_vec))
+
+    return ConstantArray(API.LLVMConstArray(ca_typ, ca_vec, length(ca_vec)))
+end
+
+# shorthands with arrays of plain Julia data
+# FIXME: duplicates the ConstantInt/ConstantFP conversion rules
+ConstantArray(data::AbstractArray{T,N}, ctx::Context=GlobalContext()) where {T<:Integer,N} =
+    ConstantArray(IntType(sizeof(T)*8, ctx), ConstantInt.(data, Ref(ctx)))
+ConstantArray(data::AbstractArray{Core.Bool,N}, ctx::Context=GlobalContext()) where {N} =
+    ConstantArray(Int1Type(ctx), ConstantInt.(data, Ref(ctx)))
+ConstantArray(data::AbstractArray{Float16,N}, ctx::Context=GlobalContext()) where {N} =
+    ConstantArray(HalfType(ctx), ConstantFP.(data, Ref(ctx)))
+ConstantArray(data::AbstractArray{Float32,N}, ctx::Context=GlobalContext()) where {N} =
+    ConstantArray(FloatType(ctx), ConstantFP.(data, Ref(ctx)))
+ConstantArray(data::AbstractArray{Float64,N}, ctx::Context=GlobalContext()) where {N} =
+    ConstantArray(DoubleType(ctx), ConstantFP.(data, Ref(ctx)))
+
+# convert back to known array types
+function Base.collect(ca::ConstantArray)
+    constants = Array{Value}(undef, size(ca))
+    for I in CartesianIndices(size(ca))
+        @inbounds constants[I] = ca[Tuple(I)...]
+    end
+    return constants
+end
+
+# array interface
+Base.eltype(ca::ConstantArray) = eltype(llvmtype(ca))
+function Base.size(ca::ConstantArray)
+    dims = Int[]
+    typ = llvmtype(ca)
+    while typ isa ArrayType
+        push!(dims, length(typ))
+        typ = eltype(typ)
+    end
+    return Tuple(dims)
+end
+Base.length(ca::ConstantArray) = prod(size(ca))
+Base.axes(ca::ConstantArray) = Base.OneTo.(size(ca))
+
+function Base.getindex(ca::ConstantArray, idx::Integer...)
+    # multidimensional arrays are represented by arrays of arrays,
+    # which we need to 'peel back' by looking at the operand sets.
+    # for the final dimension, we use LLVMGetElementAsConstant
+    @boundscheck Base.checkbounds_indices(Base.Bool, axes(ca), idx) ||
+        throw(BoundsError(ca, idx))
+    I = CartesianIndices(size(ca))[idx...]
+    for i in Tuple(I)
+        if isempty(operands(ca))
+            ca = LLVM.Value(API.LLVMGetElementAsConstant(ca, i-1))
+        else
+            ca = (Base.@_propagate_inbounds_meta; operands(ca)[i])
+        end
+    end
+    return ca
+end
+
+# structs
+
+@checked struct ConstantStruct <: ConstantAggregate
+    ref::API.LLVMValueRef
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
+
+ConstantStructOrAggregateZero(value) = Value(value)::Union{ConstantStruct,ConstantAggregateZero}
+
+# anonymous
+ConstantStruct(values::Vector{<:Constant}; packed::Core.Bool=false) =
+    ConstantStructOrAggregateZero(API.LLVMConstStruct(values, length(values), convert(Bool, packed)))
+ConstantStruct(values::Vector{<:Constant}, ctx::Context; packed::Core.Bool=false) =
+    ConstantStructOrAggregateZero(API.LLVMConstStructInContext(ctx, values, length(values), convert(Bool, packed)))
+
+# named
+ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
+    ConstantStructOrAggregateZero(API.LLVMConstNamedStruct(typ, values, length(values)))
+
+# create a ConstantStruct from a Julia object
+function ConstantStruct(value::T, ctx::Context=GlobalContext(); name=String(nameof(T)),
+                        anonymous::Core.Bool=false, packed::Core.Bool=false) where {T}
+    isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
+    isprimitivetype(T) && throw(ArgumentError("Cannot create a ConstantStruct from a primitive value"))
+
+    constants = Vector{Constant}()
+    for fieldname in fieldnames(T)
+        field = getfield(value, fieldname)
+
+        if isa(field, Integer)
+            push!(constants, ConstantInt(field, ctx))
+        elseif isa(field, AbstractFloat)
+            push!(constants, ConstantFP(field, ctx))
+        else # TODO: nested structs?
+            throw(ArgumentError("only structs with boolean, integer and floating point fields are allowed"))
+        end
+    end
+
+    if anonymous
+        ConstantStruct(constants, ctx; packed=packed)
+    elseif haskey(types(ctx), name)
+        typ = types(ctx)[name]
+        if collect(elements(typ)) != llvmtype.(constants)
+            throw(ArgumentError("Cannot create struct $name {$(join(llvmtype.(constants), ", "))} as it is already defined in this context as {$(join(elements(typ), ", "))}."))
+        end
+        ConstantStruct(typ, constants)
+    else
+        typ = StructType(name, ctx)
+        elements!(typ, llvmtype.(constants))
+        ConstantStruct(typ, constants)
+    end
+end
+
+# vectors
+
+@checked struct ConstantVector <: ConstantAggregate
+    ref::API.LLVMValueRef
+end
+identify(::Type{Value}, ::Val{API.LLVMConstantVectorValueKind}) = ConstantVector
 
 
 ## constant expressions
@@ -115,39 +273,8 @@ export ConstantExpr, ConstantAggregate, ConstantArray, ConstantStruct, ConstantV
 end
 identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
 
-abstract type ConstantAggregate <: Constant end
 
-@checked struct ConstantArray <: ConstantAggregate
-    ref::API.LLVMValueRef
-end
-identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
-identify(::Type{Value}, ::Val{API.LLVMConstantDataArrayValueKind}) = ConstantArray
-
-ConstantArray(typ::LLVMType, data::Vector{T}) where {T<:Constant} =
-    ConstantArray(API.LLVMConstArray(typ, data, length(data)))
-ConstantArray(typ::IntegerType, data::Vector{T}) where {T<:Integer} =
-    ConstantArray(typ, map(x->ConstantInt(convert(T,x),context(typ)), data))
-ConstantArray(typ::FloatingPointType, data::Vector{T}) where {T<:AbstractFloat} =
-    ConstantArray(typ, map(x->ConstantFP(convert(T,x),context(typ)), data))
-
-Base.getindex(ca::ConstantArray, idx::Integer) =
-    API.LLVMGetElementAsConstant(ca, idx-1)
-Base.length(ca::ConstantArray) = length(llvmtype(ca))
-Base.eltype(ca::ConstantArray) = eltype(llvmtype(ca))
-Base.convert(::Type{Array{T,1}}, ca::ConstantArray) where {T<:Integer} =
-    [convert(T,ConstantInt(ca[i])) for i in 1:length(ca)]
-Base.convert(::Type{Array{T,1}}, ca::ConstantArray) where {T<:AbstractFloat} =
-    [convert(T,ConstantFP(ca[i])) for i in 1:length(ca)]
-
-@checked struct ConstantStruct <: ConstantAggregate
-    ref::API.LLVMValueRef
-end
-identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
-
-@checked struct ConstantVector <: ConstantAggregate
-    ref::API.LLVMValueRef
-end
-identify(::Type{Value}, ::Val{API.LLVMConstantVectorValueKind}) = ConstantVector
+## inline assembly
 
 @checked struct InlineAsm <: Constant
     ref::API.LLVMValueRef

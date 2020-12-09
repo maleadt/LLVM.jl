@@ -1,3 +1,16 @@
+struct TestStruct
+    x::Bool
+    y::Int64
+    z::Float16
+end
+
+struct AnotherTestStruct
+    x::Int
+end
+
+struct TestSingleton
+end
+
 @testset "core" begin
 
 @testset "context" begin
@@ -180,6 +193,22 @@ Context() do ctx
     @test context(typ) == ctx
 end
 
+# type iteration
+Context() do ctx
+    st = LLVM.StructType("SomeType", ctx)
+
+    let ts = types(ctx)
+        @test keytype(ts) == String
+        @test valtype(ts) == LLVMType
+
+        @test haskey(ts, "SomeType")
+        @test ts["SomeType"] == st
+
+        @test !haskey(ts, "SomeOtherType")
+        @test_throws KeyError ts["SomeOtherType"]
+    end
+end
+
 end
 
 
@@ -342,6 +371,14 @@ Context() do ctx
         constval = ConstantInt(UInt32(1), ctx)
         @test convert(UInt, constval) == 1
     end
+    let
+        constval = ConstantInt(false, ctx)
+        @test llvmtype(constval) == LLVM.Int1Type(ctx)
+        @test !convert(Bool, constval)
+
+        constval = ConstantInt(true, ctx)
+        @test convert(Bool, constval)
+    end
 
     # issue #81
     for T in [Int32, UInt32, Int64, UInt64]
@@ -379,19 +416,95 @@ Context() do ctx
 
     @testset "array constants" begin
 
+    # from Julia values
     let
-        typ = LLVM.Int32Type(ctx)
         vec = Int32[1,2,3,4]
-        ca = ConstantArray(typ, vec)
-        @test convert(Int32, ConstantInt(ca[1]))::Int32 == Int32(1)
-        @test convert(Vector{Int32}, ca) == vec
+        ca = ConstantArray(vec, ctx)
+        @test size(vec) == size(ca)
+        @test length(vec) == length(ca)
+        @test ca[1] == ConstantInt(vec[1], ctx)
+        @test collect(ca) == ConstantInt.(vec, Ref(ctx))
     end
     let
-        typ = LLVM.FloatType(ctx)
         vec = Float32[1.1f0,2.2f0,3.3f0,4.4f0]
-        ca = ConstantArray(typ, vec)
-        @test convert(Float32, ConstantFP(ca[1]))::Float32 == 1.1f0
-        @test convert(Vector{Float32}, ca) == vec
+        ca = ConstantArray(vec, ctx)
+        @test size(vec) == size(ca)
+        @test length(vec) == length(ca)
+        @test ca[1] == ConstantFP(vec[1], ctx)
+        @test collect(ca) == ConstantFP.(vec, Ref(ctx))
+    end
+    let
+        # tests for ConstantAggregateZero, constructed indirectly.
+        # should behave similarly to ConstantArray since it can get returned there.
+        ca = ConstantArray(Int[], ctx)
+        @test size(ca) == (0,)
+        @test length(ca) == 0
+        @test isempty(collect(ca))
+    end
+
+    # multidimensional
+    let
+        vec = rand(Int, 2,3,4)
+        ca = ConstantArray(vec, ctx)
+        @test size(vec) == size(ca)
+        @test length(vec) == length(ca)
+        @test collect(ca) == ConstantInt.(vec, Ref(ctx))
+    end
+
+    end
+
+    @testset "struct constants" begin
+
+    # from Julia values
+    let
+        test_struct = TestStruct(true, -99, 1.5)
+        constant_struct = ConstantStruct(test_struct, ctx; anonymous=true)
+        constant_struct_type = llvmtype(constant_struct)
+
+        @test constant_struct_type isa LLVM.StructType
+        @test context(constant_struct) == ctx
+        @test !ispacked(constant_struct_type)
+        @test !isopaque(constant_struct_type)
+
+        @test collect(elements(constant_struct_type)) ==
+            [LLVM.Int1Type(ctx), LLVM.Int64Type(ctx), LLVM.HalfType(ctx)]
+
+        expected_operands = [
+            ConstantInt(LLVM.Int1Type(ctx), Int(true)),
+            ConstantInt(LLVM.Int64Type(ctx), -99),
+            ConstantFP(LLVM.HalfType(ctx), 1.5)
+        ]
+        @test collect(operands(constant_struct)) == expected_operands
+    end
+    let
+        test_struct = TestStruct(false, 52, -2.5)
+        constant_struct = ConstantStruct(test_struct, ctx)
+        constant_struct_type = llvmtype(constant_struct)
+
+        @test constant_struct_type isa LLVM.StructType
+
+        expected_operands = [
+            ConstantInt(LLVM.Int1Type(ctx), Int(false)),
+            ConstantInt(LLVM.Int64Type(ctx), 52),
+            ConstantFP(LLVM.HalfType(ctx), -2.5)
+        ]
+        @test collect(operands(constant_struct)) == expected_operands
+
+        # re-creating the same type shouldn't fail
+        ConstantStruct(TestStruct(true, 42, 0), ctx)
+        # unless it's a conflicting type
+        @test_throws ArgumentError ConstantStruct(AnotherTestStruct(1), ctx; name="TestStruct")
+
+    end
+    let
+        test_struct = TestSingleton()
+        constant_struct = ConstantStruct(test_struct, ctx)
+        constant_struct_type = llvmtype(constant_struct)
+
+        @test isempty(operands(constant_struct))
+    end
+    let
+        @test_throws ArgumentError ConstantStruct(1, ctx)
     end
 
     end
@@ -590,26 +703,6 @@ LLVM.Module("SomeModule", ctx) do mod
 
         @test mod_flags["foobar"] == md
         @test_throws KeyError mod_flags["foobaz"]
-    end
-end
-end
-
-# type iteration
-Context() do ctx
-LLVM.Module("SomeModule", ctx) do mod
-    st = LLVM.StructType("SomeType", ctx)
-    ft = LLVM.FunctionType(st, [st])
-    fn = LLVM.Function(mod, "SomeFunction", ft)
-
-    let ts = types(mod)
-        @test keytype(ts) == String
-        @test valtype(ts) == LLVMType
-
-        @test haskey(ts, "SomeType")
-        @test ts["SomeType"] == st
-
-        @test !haskey(ts, "SomeOtherType")
-        @test_throws KeyError ts["SomeOtherType"]
     end
 end
 end
