@@ -371,6 +371,14 @@ Context() do ctx
         constval = ConstantInt(UInt32(1), ctx)
         @test convert(UInt, constval) == 1
     end
+    let
+        constval = ConstantInt(false, ctx)
+        @test llvmtype(constval) == LLVM.Int1Type(ctx)
+        @test !convert(Bool, constval)
+
+        constval = ConstantInt(true, ctx)
+        @test convert(Bool, constval)
+    end
 
     # issue #81
     for T in [Int32, UInt32, Int64, UInt64]

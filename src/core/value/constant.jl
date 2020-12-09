@@ -46,12 +46,12 @@ const WideInteger = Union{Int64, UInt64}
 ConstantInt(typ::IntegerType, val::WideInteger, signed=false) =
     ConstantInt(API.LLVMConstInt(typ, reinterpret(Culonglong, val),
                 convert(Bool, signed)))
-const SmallInteger = Union{Int8, Int16, Int32, UInt8, UInt16, UInt32}
+const SmallInteger = Union{Core.Bool, Int8, Int16, Int32, UInt8, UInt16, UInt32}
 ConstantInt(typ::IntegerType, val::SmallInteger, signed=false) =
     ConstantInt(typ, convert(Int64, val), signed)
 
 function ConstantInt(typ::IntegerType, val::Integer, signed=false)
-    valbits = ceil(Int, log2(abs(val))) + 1
+    valbits = ceil(Int, log2(abs(val))) + 1 # FIXME: doesn't work for val=0
     numwords = ceil(Int, valbits / 64)
     words = Vector{Culonglong}(undef, numwords)
     for i in 1:numwords
@@ -67,11 +67,17 @@ function ConstantInt(val::T, ctx::Context) where T<:SizeableInteger
     return ConstantInt(typ, val, T<:Signed)
 end
 
+# Booleans are encoded with a single bit, so we can't use sizeof
+ConstantInt(val::Core.Bool, ctx::Context) = ConstantInt(Int1Type(ctx), val ? 1 : 0)
+
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Unsigned} =
     convert(T, API.LLVMConstIntGetZExtValue(val))
 
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
     convert(T, API.LLVMConstIntGetSExtValue(val))
+
+# Booleans aren't Signed or Unsigned
+Base.convert(::Type{Core.Bool}, val::ConstantInt) = convert(Int, val) != 0
 
 
 @checked struct ConstantFP <: Constant
@@ -146,8 +152,11 @@ function ConstantArray(data::AbstractArray{<:Constant,N},
 end
 
 # shorthands with arrays of plain Julia data
+# FIXME: duplicates the ConstantInt/ConstantFP conversion rules (to support empty arrays)
 ConstantArray(data::AbstractArray{T,N}, ctx::Context=GlobalContext()) where {T<:Integer,N} =
     ConstantArray(ConstantInt.(data, Ref(ctx)), IntType(sizeof(T)*8, ctx))
+ConstantArray(data::AbstractArray{Core.Bool,N}, ctx::Context=GlobalContext()) where {N} =
+    ConstantArray(ConstantInt.(data, Ref(ctx)), Int1Type(ctx))
 ConstantArray(data::AbstractArray{Float16,N}, ctx::Context=GlobalContext()) where {N} =
     ConstantArray(ConstantFP.(data, Ref(ctx)), HalfType(ctx))
 ConstantArray(data::AbstractArray{Float32,N}, ctx::Context=GlobalContext()) where {N} =
@@ -224,10 +233,7 @@ function ConstantStruct(value::T, ctx::Context=GlobalContext(); name=String(name
     for fieldname in fieldnames(T)
         field = getfield(value, fieldname)
 
-        if isa(field, Core.Bool)
-            typ = LLVM.Int1Type(ctx)
-            push!(constants, ConstantInt(typ, Int(field)))
-        elseif isa(field, Integer)
+        if isa(field, Integer)
             push!(constants, ConstantInt(field, ctx))
         elseif isa(field, AbstractFloat)
             push!(constants, ConstantFP(field, ctx))
