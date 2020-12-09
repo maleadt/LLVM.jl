@@ -133,8 +133,7 @@ identify(::Type{Value}, ::Val{API.LLVMConstantDataArrayValueKind}) = ConstantArr
 ConstantArrayOrAggregateZero(value) = Value(value)::Union{ConstantArray,ConstantAggregateZero}
 
 # generic constructor taking an array of constants
-function ConstantArray(data::AbstractArray{<:Constant,N},
-                       typ::LLVMType=llvmtype(first(data))) where {N}
+function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}=T[]) where {T<:Constant,N}
     @assert all(x->x==typ, llvmtype.(data))
 
     if N == 1
@@ -142,9 +141,9 @@ function ConstantArray(data::AbstractArray{<:Constant,N},
     end
 
     if VERSION >= v"1.1"
-        ca_vec = map(x->ConstantArray(x, typ), eachslice(data, dims=1))
+        ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
     else
-        ca_vec = map(x->ConstantArray(x, typ), (view(data, i, ntuple(d->(:), N-1)...) for i in axes(data, 1)))
+        ca_vec = map(x->ConstantArray(typ, x), (view(data, i, ntuple(d->(:), N-1)...) for i in axes(data, 1)))
     end
     ca_typ = llvmtype(first(ca_vec))
 
@@ -152,17 +151,17 @@ function ConstantArray(data::AbstractArray{<:Constant,N},
 end
 
 # shorthands with arrays of plain Julia data
-# FIXME: duplicates the ConstantInt/ConstantFP conversion rules (to support empty arrays)
+# FIXME: duplicates the ConstantInt/ConstantFP conversion rules
 ConstantArray(data::AbstractArray{T,N}, ctx::Context=GlobalContext()) where {T<:Integer,N} =
-    ConstantArray(ConstantInt.(data, Ref(ctx)), IntType(sizeof(T)*8, ctx))
+    ConstantArray(IntType(sizeof(T)*8, ctx), ConstantInt.(data, Ref(ctx)))
 ConstantArray(data::AbstractArray{Core.Bool,N}, ctx::Context=GlobalContext()) where {N} =
-    ConstantArray(ConstantInt.(data, Ref(ctx)), Int1Type(ctx))
+    ConstantArray(Int1Type(ctx), ConstantInt.(data, Ref(ctx)))
 ConstantArray(data::AbstractArray{Float16,N}, ctx::Context=GlobalContext()) where {N} =
-    ConstantArray(ConstantFP.(data, Ref(ctx)), HalfType(ctx))
+    ConstantArray(HalfType(ctx), ConstantFP.(data, Ref(ctx)))
 ConstantArray(data::AbstractArray{Float32,N}, ctx::Context=GlobalContext()) where {N} =
-    ConstantArray(ConstantFP.(data, Ref(ctx)), FloatType(ctx))
+    ConstantArray(FloatType(ctx), ConstantFP.(data, Ref(ctx)))
 ConstantArray(data::AbstractArray{Float64,N}, ctx::Context=GlobalContext()) where {N} =
-    ConstantArray(ConstantFP.(data, Ref(ctx)), DoubleType(ctx))
+    ConstantArray(DoubleType(ctx), ConstantFP.(data, Ref(ctx)))
 
 # convert back to known array types
 function Base.collect(ca::ConstantArray)
