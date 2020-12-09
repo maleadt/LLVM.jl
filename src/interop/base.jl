@@ -79,7 +79,7 @@ function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=
         ptr = convert(Ptr{Cvoid},ref)
         quote
             Base.@_inline_meta
-            Base.llvmcall($ptr, $rettyp, $argtyp, $args...)
+            Base.llvmcall($ptr, $rettyp, $argtyp, $(args.args...))
         end
     end
 end
