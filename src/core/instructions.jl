@@ -98,15 +98,15 @@ Base.delete!(md::InstructionMetadataDict, kind::MD) =
 
 ## instruction types
 
-const opcodes = [:Ret, :Br, :Switch, :IndirectBr, :Invoke, :Unreachable, :Add, :FAdd, :Sub,
-                 :FSub, :FNeg, :Mul, :FMul, :UDiv, :SDiv, :FDiv, :URem, :SRem, :FRem, :Shl, :LShr,
-                 :AShr, :And, :Or, :Xor, :Alloca, :Load, :Store, :GetElementPtr, :Trunc,
-                 :ZExt, :SExt, :FPToUI, :FPToSI, :UIToFP, :SIToFP, :FPTrunc, :FPExt,
-                 :PtrToInt, :IntToPtr, :BitCast, :AddrSpaceCast, :ICmp, :FCmp, :PHI, :Call,
-                 :Select, :UserOp1, :UserOp2, :VAArg, :ExtractElement, :InsertElement,
-                 :ShuffleVector, :ExtractValue, :InsertValue, :Fence, :AtomicCmpXchg,
-                 :AtomicRMW, :Resume, :LandingPad, :CleanupRet, :CatchRet, :CatchPad,
-                 :CleanupPad, :CatchSwitch]
+const opcodes = [:Ret, :Br, :Switch, :IndirectBr, :Invoke, :Unreachable, :CallBr, :FNeg,
+                 :Add, :FAdd, :Sub, :FSub, :Mul, :FMul, :UDiv, :SDiv, :FDiv, :URem, :SRem,
+                 :FRem, :Shl, :LShr, :AShr, :And, :Or, :Xor, :Alloca, :Load, :Store,
+                 :GetElementPtr, :Trunc, :ZExt, :SExt, :FPToUI, :FPToSI, :UIToFP, :SIToFP,
+                 :FPTrunc, :FPExt, :PtrToInt, :IntToPtr, :BitCast, :AddrSpaceCast, :ICmp,
+                 :FCmp, :PHI, :Call, :Select, :UserOp1, :UserOp2, :VAArg, :ExtractElement,
+                 :InsertElement, :ShuffleVector, :ExtractValue, :InsertValue, :Freeze,
+                 :Fence, :AtomicCmpXchg, :AtomicRMW, :Resume, :LandingPad, :CleanupRet,
+                 :CatchRet, :CatchPad, :CleanupPad, :CatchSwitch]
 
 for op in opcodes
     typename = Symbol(op, :Inst)
