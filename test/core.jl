@@ -317,6 +317,8 @@ Context() do ctx
             @test collect(ops) == []
         end
     end
+
+    dispose(mod)
 end
 
 # constants
@@ -1169,6 +1171,23 @@ LLVM.Module("SomeModule", ctx) do mod
     unsafe_delete!(bb1, brinst)
     @test !(brinst in instructions(bb1))
 end
+end
+end
+
+# new freeze instruction (used in 1.7 with JuliaLang/julia#38977)
+if LLVM.version() >= v"10.0"
+Context() do ctx
+    mod = parse(LLVM.Module,  """
+        define i64 @julia_f_246(i64 %0) {
+        top:
+            %1 = freeze i64 undef
+            ret i64 %1
+        }""", ctx)
+    f = first(functions(mod))
+    bb = first(blocks(f))
+    inst = first(instructions(bb))
+    @test inst isa LLVM.FreezeInst
+    dispose(mod)
 end
 end
 
