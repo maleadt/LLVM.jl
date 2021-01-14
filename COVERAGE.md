@@ -1154,7 +1154,7 @@ ORC JIT
 Support
 -------
 
-- [ ] LLVMLoadLibraryPermanently
-- [ ] LLVMParseCommandLineOptions
-- [ ] LLVMSearchForAddressOfSymbol
-- [ ] LLVMAddSymbol
+- [x] LLVMLoadLibraryPermanently
+- [x] LLVMParseCommandLineOptions
+- [x] LLVMSearchForAddressOfSymbol
+- [x] LLVMAddSymbol
