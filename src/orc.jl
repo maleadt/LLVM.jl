@@ -11,6 +11,9 @@ export JITTargetMachine
 end
 
 Base.unsafe_convert(::Type{API.LLVMOrcJITStackRef}, orc::OrcJIT) = orc.ref
+Base.unsafe_convert(::Type{Ptr{Cvoid}}, orc::OrcJIT) = Base.unsafe_convert(Ptr{Cvoid}, orc.ref)
+
+OrcJIT(ref::Ptr{Cvoid}) = OrcJIT(Base.unsafe_convert(API.LLVMOrcJITStackRef, ref))
 
 """
     OrcJIT(::TargetMachine)
