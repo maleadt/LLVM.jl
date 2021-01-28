@@ -7,10 +7,10 @@ Context() do ctx
     mod = LLVM.Module("jit", ctx)
     T_Int32 = LLVM.Int32Type(ctx)
     ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
-    fn = LLVM.Function(mod, "mysum_", ft)
+    fn = LLVM.Function(mod, "mysum", ft)
     linkage!(fn, LLVM.API.LLVMExternalLinkage)
 
-    fname = mangle(orc, "wrapper_")
+    fname = mangle(orc, "wrapper")
     wrapper = LLVM.Function(mod, fname, ft)
     # generate IR
     Builder(ctx) do builder
@@ -162,7 +162,7 @@ Context() do ctx
     mod = LLVM.Module("jit", ctx)
     T_Int32 = LLVM.Int32Type(ctx)
     ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
-    mysum = mangle(orc, "mysum")
+    mysum = mangle(orc, String(gensym("mysum")))
     fn = LLVM.Function(mod, mysum, ft)
     linkage!(fn, LLVM.API.LLVMExternalLinkage)
 
@@ -186,6 +186,7 @@ Context() do ctx
     verify(mod)
 
     # Should do pretty much the same as `@ccallable`
+    # XXX: this has global effects; hence the gensym
     LLVM.add_symbol(mysum, @cfunction(+, Int32, (Int32, Int32)))
     ptr = LLVM.find_symbol(mysum)
     @test ptr !== C_NULL
