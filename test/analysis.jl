@@ -1,4 +1,4 @@
-@testset "analysis" begin
+@testcase "analysis" begin
 
 Context() do ctx
 Builder(ctx) do builder

@@ -1,19 +1,6 @@
 using LLVM.Interop
 using InteractiveUtils
 
-@testset "interop" begin
-
-@testset "base" begin
-
-JuliaContext() do ctx
-    @test isa(ctx, Context)
-
-    @test isa(convert(LLVMType, Nothing, ctx), LLVM.VoidType)
-
-    @test_throws ErrorException convert(LLVMType, Ref, ctx)
-    convert(LLVMType, Ref, ctx; allow_boxed=true)
-end
-
 @generated function add_one(i)
     JuliaContext() do ctx
         T_int = convert(LLVMType, Int, ctx)
@@ -31,6 +18,19 @@ end
 
         call_function(f, Int, Tuple{Int}, :((i,)))
     end
+end
+
+@testset "interop" begin
+
+@testcase "base" begin
+
+JuliaContext() do ctx
+    @test isa(ctx, Context)
+
+    @test isa(convert(LLVMType, Nothing, ctx), LLVM.VoidType)
+
+    @test_throws ErrorException convert(LLVMType, Ref, ctx)
+    convert(LLVMType, Ref, ctx; allow_boxed=true)
 end
 
 @test add_one(1) == 2
@@ -54,7 +54,7 @@ end
 
 end
 
-@testset "asmcall" begin
+@testcase "asmcall" begin
 
 # only asm
 
@@ -109,7 +109,7 @@ end
 
 
 if VERSION >= v"1.2.0-DEV.531"
-@testset "passes" begin
+@testcase "passes" begin
 
 
 Context() do ctx
@@ -144,7 +144,7 @@ VERSION >= v"1.5-" && @testset "pointer" begin
 
 using Core: LLVMPtr
 
-@testset "pointer operations" begin
+@testcase "pointer operations" begin
     a = LLVMPtr{Int,0}(0)
     b = LLVMPtr{Int,0}(1)
     c = LLVMPtr{UInt,0}(0)
@@ -186,7 +186,7 @@ using Core: LLVMPtr
     @test f - 1 == e
 end
 
-@testset "unsafe_load" begin
+@testcase "unsafe_load" begin
     a = Int64[1]
     ptr = reinterpret(Core.LLVMPtr{Int64,0}, pointer(a))
     @test unsafe_load(ptr) == 1
@@ -206,12 +206,12 @@ end
     @test contains(ir, r"load i64, i64\* %\d+, align 4")
 end
 
-@testset "reinterpret(Nothing, nothing)" begin
+@testcase "reinterpret(Nothing, nothing)" begin
     ptr = reinterpret(Core.LLVMPtr{Nothing,0}, C_NULL)
     @test unsafe_load(ptr) === nothing
 end
 
-@testset "TBAA" begin
+@testcase "TBAA" begin
     load(ptr) = unsafe_load(ptr)
     store(ptr) = unsafe_store!(ptr, 0)
 
@@ -229,9 +229,8 @@ end
     end
 end
 
-@testset "ghost values" begin
-    @eval struct Singleton end
-
+struct Singleton end
+@testcase "ghost values" begin
     ir = sprint(io->code_llvm(io, unsafe_load,
                               Tuple{Core.LLVMPtr{Singleton,0}}))
     @test occursin("ret void", ir)

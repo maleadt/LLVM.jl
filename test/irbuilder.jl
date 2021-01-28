@@ -1,4 +1,4 @@
-@testset "irbuilder" begin
+@testcase "irbuilder" begin
 
 let
     builder = Builder()

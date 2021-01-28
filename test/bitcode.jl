@@ -1,4 +1,4 @@
-@testset "bitcode" begin
+@testcase "bitcode" begin
 
 let
     invalid_bitcode = "invalid"

@@ -1,4 +1,4 @@
-@testset "transform" begin
+@testcase "transform" begin
 
 let
     pmb = PassManagerBuilder()

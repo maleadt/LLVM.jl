@@ -1,4 +1,4 @@
-@testset "ir" begin
+@testcase "ir" begin
 
 let
     invalid_ir = "invalid"

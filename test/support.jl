@@ -1,6 +1,6 @@
 @testset "support" begin
 
-@testset "command-line options" begin
+@testcase "command-line options" begin
 
 code = """
     using LLVM

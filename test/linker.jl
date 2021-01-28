@@ -1,4 +1,4 @@
-@testset "linker" begin
+@testcase "linker" begin
 
 Context() do ctx
 Builder(ctx) do builder

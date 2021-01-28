@@ -1,4 +1,4 @@
-@testset "pass" begin
+@testcase "passes" begin
 
 Context() do ctx
 Builder(ctx) do builder

@@ -1,4 +1,4 @@
-@testset "moduleprovider" begin
+@testcase "moduleprovider" begin
 
 Context() do ctx
 let

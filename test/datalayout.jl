@@ -1,4 +1,4 @@
-@testset "datalayout" begin
+@testcase "datalayout" begin
 
 Context() do ctx
 DataLayout("E-p:32:32-f128:128:128") do data

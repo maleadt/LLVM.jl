@@ -13,10 +13,8 @@ end
 
 @testset "core" begin
 
-@testset "context" begin
+@testcase "context" begin
 
-global global_ctx
-global_ctx = GlobalContext()
 local_ctx = Context()
 
 let
@@ -30,7 +28,7 @@ Context() do ctx end
 end
 
 
-@testset "type" begin
+@testcase "type" begin
 
 Context() do ctx
     typ = LLVM.Int1Type(ctx)
@@ -54,7 +52,7 @@ end
 # integer
 let
     typ = LLVM.Int1Type()
-    @test context(typ) == global_ctx
+    @test context(typ) == GlobalContext()
 
     show(devnull, typ)
 
@@ -124,11 +122,11 @@ end
 # structure
 let
     st = LLVM.StructType([LLVM.VoidType()])
-    @test context(st) == global_ctx
+    @test context(st) == GlobalContext()
     @test !isempty(st)
 
     st2 = LLVM.StructType("foo")
-    @test context(st2) == global_ctx
+    @test context(st2) == GlobalContext()
     @test isempty(st2)
 end
 Context() do ctx
@@ -170,7 +168,7 @@ end
 # other
 let
     typ = LLVM.VoidType()
-    @test context(typ) == global_ctx
+    @test context(typ) == GlobalContext()
 end
 Context() do ctx
     typ = LLVM.VoidType(ctx)
@@ -178,7 +176,7 @@ Context() do ctx
 end
 let
     typ = LLVM.LabelType()
-    @test context(typ) == global_ctx
+    @test context(typ) == GlobalContext()
 end
 Context() do ctx
     typ = LLVM.LabelType(ctx)
@@ -212,7 +210,7 @@ end
 end
 
 
-@testset "value" begin
+@testcase "value" begin
 
 Context() do ctx
 Builder(ctx) do builder
@@ -324,7 +322,7 @@ end
 # constants
 
 Context() do ctx
-    @testset "constants" begin
+    @testcase "constants" begin
 
     typ = LLVM.Int32Type(ctx)
     ptrtyp = LLVM.PointerType(typ)
@@ -351,7 +349,7 @@ end
 
 # scalar
 Context() do ctx
-    @testset "integer constants" begin
+    @testcase "integer constants" begin
 
     # manual construction of small values
     let
@@ -391,7 +389,7 @@ Context() do ctx
     end
 
 
-    @testset "floating point constants" begin
+    @testcase "floating point constants" begin
 
     let
         typ = LLVM.HalfType(ctx)
@@ -416,7 +414,7 @@ Context() do ctx
     end
 
 
-    @testset "array constants" begin
+    @testcase "array constants" begin
 
     # from Julia values
     let
@@ -455,7 +453,7 @@ Context() do ctx
 
     end
 
-    @testset "struct constants" begin
+    @testcase "struct constants" begin
 
     # from Julia values
     let
@@ -514,7 +512,7 @@ end
 
 # constant expressions
 Context() do ctx
-    @testset "constant expressions" begin
+    @testcase "constant expressions" begin
 
     # inline assembly
     let
@@ -634,16 +632,16 @@ end
 end
 
 
-@testset "metadata" begin
+@testcase "metadata" begin
 
-@test MDString("foo") == MDString("foo", global_ctx)
+@test MDString("foo") == MDString("foo", GlobalContext())
 
 Context() do ctx
     str = MDString("foo", ctx)
     @test string(str) == "foo"
 end
 
-@test MDNode([MDString("foo")]) == MDNode([MDString("foo", global_ctx)], global_ctx)
+@test MDNode([MDString("foo")]) == MDNode([MDString("foo", GlobalContext())], GlobalContext())
 
 Context() do ctx
     str = MDString("foo", ctx)
@@ -656,11 +654,11 @@ end
 end
 
 
-@testset "module" begin
+@testcase "module" begin
 
 let
     mod = LLVM.Module("SomeModule")
-    @test context(mod) == global_ctx
+    @test context(mod) == GlobalContext()
 
     @test name(mod) == "SomeModule"
     name!(mod, "SomeOtherName")
@@ -790,7 +788,7 @@ end
 end
 
 
-@testset "function" begin
+@testcase "function" begin
 
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
@@ -996,7 +994,7 @@ end
 end
 
 
-@testset "basic blocks" begin
+@testcase "basic blocks" begin
 
 Builder() do builder
 LLVM.Module("SomeModule") do mod
@@ -1067,7 +1065,7 @@ end
 end
 
 
-@testset "instructions" begin
+@testcase "instructions" begin
 
 Context() do ctx
 Builder(ctx) do builder

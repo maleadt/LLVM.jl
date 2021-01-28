@@ -1,4 +1,4 @@
-@testset "examples" begin
+@testcase "examples" begin
 
 function find_sources(path::String, sources=String[])
     if isdir(path)
@@ -18,13 +18,15 @@ filter!(file -> !occursin("Kaleidoscope", file), examples)
 
 cd(examples_dir) do
     examples = relpath.(examples, Ref(examples_dir))
-    @testset for example in examples
-        cmd = Base.julia_cmd()
-        if Base.JLOptions().project != C_NULL
-            cmd = `$cmd --project=$(unsafe_string(Base.JLOptions().project))`
-        end
+    for example in examples
+        @testcase "$example" begin
+            cmd = Base.julia_cmd()
+            if Base.JLOptions().project != C_NULL
+                cmd = `$cmd --project=$(unsafe_string(Base.JLOptions().project))`
+            end
 
-        @test success(pipeline(`$cmd $example`, stderr=stderr))
+            @test success(pipeline(`$cmd $example`, stderr=stderr))
+        end
     end
 end
 

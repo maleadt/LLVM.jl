@@ -1,12 +1,15 @@
 using LLVM
 
-using Test
+using Pkg
+Pkg.add(name="XUnit", rev="master")
 
-@testset "LLVM" begin
+using XUnit
+
+@testset runner=ParallelTestRunner() "LLVM" begin
 
 include("util.jl")
 
-@testset "types" begin
+@testcase "types" begin
     @test convert(Bool, LLVM.True) == true
     @test convert(Bool, LLVM.False) == false
 
@@ -16,7 +19,7 @@ include("util.jl")
     @test convert(LLVM.Bool, false) == LLVM.False
 end
 
-@testset "pass registry" begin
+@testcase "pass registry" begin
     passreg = GlobalPassRegistry()
 
     version()
@@ -57,7 +60,7 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 include("debuginfo.jl")
-if LLVM.has_orc_v1() 
+if LLVM.has_orc_v1()
     include("orc.jl")
 end
 

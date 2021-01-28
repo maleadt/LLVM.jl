@@ -1,10 +1,6 @@
 @testset "passmanager" begin
 
-let
-    mpm = ModulePassManager()
-    dispose(mpm)
-end
-
+@testcase "module pass manager" begin
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
 ModulePassManager() do mpm
@@ -12,7 +8,9 @@ ModulePassManager() do mpm
 end
 end
 end
+end
 
+@testcase "function pass manager" begin
 Context() do ctx
 LLVM.Module("SomeModule", ctx) do mod
 FunctionPassManager(mod) do fpm
@@ -22,6 +20,7 @@ FunctionPassManager(mod) do fpm
     @test !initialize!(fpm)
     @test !run!(fpm, fn)
     @test !finalize!(fpm)
+end
 end
 end
 end

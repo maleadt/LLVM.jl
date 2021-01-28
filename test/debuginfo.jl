@@ -1,4 +1,4 @@
-@testset "debuginfo" begin
+@testcase "debuginfo" begin
 
 DEBUG_METADATA_VERSION()
 

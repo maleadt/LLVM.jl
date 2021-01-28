@@ -2,7 +2,7 @@
 
 include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
 
-@testset "recursion" begin
+@testcase "recursion" begin
     program = """
         def fib(x) {
             if x < 3 then
@@ -24,7 +24,7 @@ include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
     end
 end
 
-@testset "loops" begin
+@testcase "loops" begin
     program = """
     def fib(x) {
         var a = 1, b = 1
@@ -52,7 +52,7 @@ end
     end
 end
 
-@testset "global vars" begin
+@testcase "global vars" begin
     program = """
     var x = 5
     var y = 3
