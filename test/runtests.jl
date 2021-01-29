@@ -1,7 +1,9 @@
 using LLVM
 
-using Pkg
-Pkg.add(PackageSpec(name="XUnit", rev="9b756fcda72d813dbf017f8400d7c55251ef7d1b"))
+if VERSION >= v"1.6-"
+    using Pkg
+    Pkg.add(PackageSpec(name="XUnit", rev="9b756fcda72d813dbf017f8400d7c55251ef7d1b"))
+end
 
 using XUnit
 

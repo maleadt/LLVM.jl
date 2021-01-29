@@ -140,7 +140,10 @@ end
 end
 end
 
-VERSION >= v"1.5-" && @testset "pointer" begin
+VERSION >= v"1.6-" && @testset "pointer" begin
+# NOTE: LLVMPtr is available in Julia 1.5 already, but a couple of bugs remain
+#       which are triggered by these tests (e.g. JuliaLang/julia#38958).
+
 
 using Core: LLVMPtr
 
@@ -241,7 +244,6 @@ struct Singleton end
                               Singleton}))
     @test !occursin("\bstore\b", ir)
 end
-
 end
 
 end
