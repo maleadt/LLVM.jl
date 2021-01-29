@@ -1,6 +1,0 @@
-[deps]
-InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
-XUnit = "3e3c03f2-1a94-11e9-2981-050a4ca824ab"

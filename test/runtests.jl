@@ -1,7 +1,7 @@
 using LLVM
 
 using Pkg
-Pkg.add(name="XUnit", rev="master")
+Pkg.add(PackageSpec(name="XUnit", rev="9b756fcda72d813dbf017f8400d7c55251ef7d1b"))
 
 using XUnit
 
