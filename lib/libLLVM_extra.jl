@@ -1,6 +1,5 @@
 # Julia wrapper for source: julia/src/llvm-api.cpp
 
-
 # initialization functions
 
 function LLVMInitializeAllTargetInfos()
@@ -42,7 +41,6 @@ end
 function LLVMInitializeNativeDisassembler()
     ccall(:LLVMExtraInitializeNativeDisassembler,LLVMBool,())
 end
-
 
 # infrastructure for writing LLVM passes in Julia
 
