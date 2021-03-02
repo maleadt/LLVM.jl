@@ -15,9 +15,7 @@ module API
 using CEnum
 using ..LLVM
 using ..LLVM: libllvm, @runtime_ccall
-const off_t = Csize_t
 libdir = joinpath(@__DIR__, "..", "lib")
-include(joinpath(libdir, "libLLVM_common.jl"))
 include(joinpath(libdir, "libLLVM_h.jl"))
 include(joinpath(libdir, "libLLVM_extra.jl"))
 end

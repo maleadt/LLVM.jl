@@ -39,7 +39,7 @@ struct FunctionAttrSet
     idx::API.LLVMAttributeIndex
 end
 
-function_attributes(f::Function) = FunctionAttrSet(f, API.LLVMAttributeFunctionIndex)
+function_attributes(f::Function) = FunctionAttrSet(f, reinterpret(API.LLVMAttributeIndex, API.LLVMAttributeFunctionIndex))
 parameter_attributes(f::Function, idx::Integer) = FunctionAttrSet(f, API.LLVMAttributeIndex(idx))
 return_attributes(f::Function) = FunctionAttrSet(f, API.LLVMAttributeReturnIndex)
 

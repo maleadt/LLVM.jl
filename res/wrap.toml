@@ -1,0 +1,39 @@
+[general]
+library_name = "libllvm[]"
+output_file_path = "../lib/libLLVM_h.jl"
+prologue_file_path = "./missing_defs.jl"
+epilogue_file_path = ""
+auto_detect_system_headers = true
+header_blacklist = []
+use_julia_native_enum_type = false
+is_local_header_only = true
+skip_compiler_definition = true
+smart_de_anonymize = true
+printer_blacklist = [
+    "LLVMInitializeAllTargetInfos",
+    "LLVMInitializeAllTargets",
+    "LLVMInitializeAllTargetMCs",
+    "LLVMInitializeAllAsmPrinters",
+    "LLVMInitializeAllAsmParsers",
+    "LLVMInitializeAllDisassemblers",
+    "LLVMInitializeNativeTarget",
+    "LLVMInitializeNativeAsmPrinter",
+    "LLVMInitializeNativeAsmParser",
+    "LLVMInitializeNativeDisassembler",
+    "LLVM_C_EXTERN_C_BEGIN",
+    "LLVM_C_EXTERN_C_END",
+]
+
+[codegen]
+use_julia_bool = true
+always_NUL_terminated_string = true
+is_function_strictly_typed = false
+opaque_func_arg_as_PtrCvoid = false
+opaque_as_mutable_struct = true
+
+[codegen.macro]
+macro_mode = "basic"
+
+add_comment_for_skipped_macro = false
+
+ignore_header_guards = true
