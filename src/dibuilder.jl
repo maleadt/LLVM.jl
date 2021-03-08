@@ -1,32 +1,38 @@
-export DIBuilder, DICompileUnit, DILexicalBlock, DIFunction
+export DIBuilder, DIFile, DICompileUnit, DILexicalBlock, DIFunction
 
 @checked struct DIBuilder
     ref::API.LLVMDIBuilderRef
 end
-reftype(::Type{DIBuilder}) = API.DILLVMDIBuilderRef
 
 # LLVMCreateDIBuilderDisallowUnresolved
-DIBuilder(mod::Module) = DIBuilder(API.LLVMCreateDIBuilder(ref(mod)))
+DIBuilder(mod::Module) = DIBuilder(API.LLVMCreateDIBuilder(mod))
 
-dispose(builder::DIBuilder) = API.LLVMDisposeDIBuilder(ref(builder))
-finalize(builder::DIBuilder) = API.LLVMDIBuilderFinalize(ref(builder))
+dispose(builder::DIBuilder) = API.LLVMDisposeDIBuilder(builder)
+finalize(builder::DIBuilder) = API.LLVMDIBuilderFinalize(builder)
 
-struct DICompileUnit
+Base.unsafe_convert(::Type{API.LLVMDIBuilderRef}, builder::DIBuilder) = builder.ref
+
+struct DIFile
     file::String
     dir::String
+end
+
+struct DICompileUnit
+    file::Metadata
     language::API.LLVMDWARFSourceLanguage
     producer::String
+    sysroot::String
+    sdk::String
     flags::String
     optimized::Core.Bool
     version::Int
 end
 
 function compileunit!(builder::DIBuilder, cu::DICompileUnit)
-    file = file!(builder, cu.file, cu.dir)
     md = API.LLVMDIBuilderCreateCompileUnit(
-        ref(builder),
+        builder,
         cu.language,
-        ref(file),
+        cu.file,
         cu.producer, convert(Csize_t, length(cu.producer)),
         cu.optimized ? LLVM.True : LLVM.False,
         cu.flags, convert(Csize_t, length(cu.flags)),
@@ -36,15 +42,17 @@ function compileunit!(builder::DIBuilder, cu::DICompileUnit)
         #=DWOId=# 0,
         #=SplitDebugInlining=# LLVM.True,
         #=DebugInfoForProfiling=# LLVM.False,
+        cu.sysroot, convert(Csize_t, length(cu.sysroot)),
+        cu.sdk, convert(Csize_t, length(cu.sdk)),
     )
     return Metadata(md)
 end
 
-function file!(builder::DIBuilder, filename, directory)
+function file!(builder::DIBuilder, file::DIFile)
     md = API.LLVMDIBuilderCreateFile(
-        ref(builder),
-        filename, convert(Csize_t, length(filename)),
-        directory, convert(Csize_t, length(directory))
+        builder,
+        file.file, convert(Csize_t, length(file.file)),
+        file.dir, convert(Csize_t, length(file.dir))
     )
     return Metadata(md)
 end
@@ -56,10 +64,10 @@ struct DILexicalBlock
 end
 
 function lexicalblock!(builder::DIBuilder, scope::Metadata, block::DILexicalBlock)
-    md = API.LLVMDIBuilerCreateLexicalBlock(
-        ref(builder),
-        ref(scope),
-        ref(block.file),
+    md = API.LLVMDIBuilderCreateLexicalBlock(
+        builder,
+        scope,
+        block.file,
         convert(Cuint, block.line),
         convert(Cuint, block.column)
     )
@@ -68,9 +76,9 @@ end
 
 function lexicalblock!(builder::DIBuilder, scope::Metadata, file::Metadata, discriminator)
     md = API.LLVMDIBuilderCreateLexicalBlockFile(
-        ref(builder),
-        ref(scope),
-        ref(file),
+        builder,
+        scope,
+        file,
         convert(Cuint, discriminator)
     )
     Metadata(md)
@@ -91,13 +99,13 @@ end
 
 function subprogram!(builder::DIBuilder, scope::Metadata, f::DIFunction)
     md = API.LLVMDIBuilderCreateFunction(
-        ref(builder),
-        ref(scope),
+        builder,
+        scope,
         f.name, convert(Csize_t, length(f.name)),
         f.linkageName, convert(Csize_t, length(f.linkageName)),
-        ref(f.file),
+        f.file,
         f.line,
-        ref(f.type),
+        f.type,
         f.localToUnit ? LLVM.True : LLVM.False,
         f.isDefinition ? LLVM.True : LLVM.False,
         convert(Cuint, f.scopeLine),
@@ -111,7 +119,7 @@ end
 
 function basictype!(builder::DIBuilder, name, size, encoding)
     md = LLVM.API.LLVMDIBuilderCreateBasicType(
-        ref(builder),
+        builder,
         name,
         convert(Csize_t, length(name)),
         convert(UInt64, size),
@@ -123,8 +131,8 @@ end
 
 function pointertype!(builder::DIBuilder, pointee::Metadata, size, as, align=0, name="")
     md = LLVM.API.LLVMDIBuilderCreatePointerType(
-        ref(builder),
-        ref(pointee),
+        builder,
+        pointee,
         convert(UInt64, size),
         convert(UInt32, align),
         convert(Cuint, as),
@@ -137,8 +145,8 @@ end
 function subroutinetype!(builder::DIBuilder, file::Metadata, rettype, paramtypes...)
     params = collect(ref(x) for x in (rettype, paramtypes...))
     md = LLVM.API.LLVMDIBuilderCreateSubroutineType(
-        ref(builder),
-        ref(file),
+        builder,
+        file,
         params,
         length(params),
         LLVM.API.LLVMDIFlagZero

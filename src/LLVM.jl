@@ -43,7 +43,7 @@ include("ir.jl")
 include("bitcode.jl")
 include("transform.jl")
 include("debuginfo.jl")
-if libllvm_version >= v"8.0.0"
+if Base.libllvm_version >= v"8.0.0"
     include("dibuilder.jl")
 end
 

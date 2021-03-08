@@ -63,11 +63,11 @@ end
 if LLVM.version() >=  v"8.0.0"
     include("dibuilder.jl")
 end
-
+#=
 include("Kaleidoscope.jl")
 
 include("examples.jl")
 
 include("interop.jl")
-
+=#
 end
