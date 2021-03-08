@@ -1,4 +1,4 @@
-export DIBuilder, DIFile, DICompileUnit, DILexicalBlock, DIFunction
+export DIBuilder, DIFile, DICompileUnit, DILexicalBlock, DISubprogram
 
 @checked struct DIBuilder
     ref::API.LLVMDIBuilderRef
@@ -84,7 +84,7 @@ function lexicalblock!(builder::DIBuilder, scope::Metadata, file::Metadata, disc
     Metadata(md)
 end
 
-struct DIFunction
+struct DISubprogram
     name::String
     linkageName::String
     file::Metadata
@@ -97,10 +97,10 @@ struct DIFunction
     optimized::Core.Bool
 end
 
-function subprogram!(builder::DIBuilder, scope::Metadata, f::DIFunction)
+function subprogram!(builder::DIBuilder, f::DISubprogram)
     md = API.LLVMDIBuilderCreateFunction(
         builder,
-        scope,
+        f.file,
         f.name, convert(Csize_t, length(f.name)),
         f.linkageName, convert(Csize_t, length(f.linkageName)),
         f.file,
@@ -120,8 +120,7 @@ end
 function basictype!(builder::DIBuilder, name, size, encoding)
     md = LLVM.API.LLVMDIBuilderCreateBasicType(
         builder,
-        name,
-        convert(Csize_t, length(name)),
+        name, convert(Csize_t, length(name)),
         convert(UInt64, size),
         encoding,
         LLVM.API.LLVMDIFlagZero
@@ -129,21 +128,20 @@ function basictype!(builder::DIBuilder, name, size, encoding)
     Metadata(md)
 end
 
-function pointertype!(builder::DIBuilder, pointee::Metadata, size, as, align=0, name="")
+function pointertype!(builder::DIBuilder, basetype::Metadata, size, as, align=0, name="")
     md = LLVM.API.LLVMDIBuilderCreatePointerType(
         builder,
-        pointee,
+        basetype,
         convert(UInt64, size),
         convert(UInt32, align),
         convert(Cuint, as),
-        name,
-        convert(Csize_t, length(name)),
+        name, convert(Csize_t, length(name)),
     )
     Metadata(md)
 end
 
 function subroutinetype!(builder::DIBuilder, file::Metadata, rettype, paramtypes...)
-    params = collect(ref(x) for x in (rettype, paramtypes...))
+    params = collect(x for x in (rettype, paramtypes...))
     md = LLVM.API.LLVMDIBuilderCreateSubroutineType(
         builder,
         file,

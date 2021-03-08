@@ -16,11 +16,22 @@ LLVM.Module("SomeModule", ctx) do mod
     cu_md = LLVM.compileunit!(dibuilder, cu)
 
     Builder(ctx) do builder
-        ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+        ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int64Type(ctx)])
+        rt_md = LLVM.basictype!(dibuilder, "Nothing", 0, 0)
+        param_md = LLVM.basictype!(dibuilder, "Int64", sizeof(Int64), 0)
+        dift_md = LLVM.subroutinetype!(dibuilder, file_md, rt_md, param_md)
         fn = LLVM.Function(mod, "SomeFunction", ft)
+        difn = DISubprogram(LLVM.name(fn), "linkage", file_md, 3, dift_md, true, true, 5, LLVM.API.LLVMDIFlagPublic, false)
+        difn_md = LLVM.subprogram!(dibuilder, difn)
+        LLVM.set_subprogram!(fn, difn_md)
 
         entrybb = BasicBlock(fn, "entry")
         position!(builder, entrybb)
+
+        ptr = inttoptr!(builder, parameters(fn)[1], LLVM.PointerType(LLVM.Int64Type(ctx)))
+        ptr_md = LLVM.pointertype!(dibuilder, param_md, sizeof(Ptr{Int64}), LLVM.addrspace(llvmtype(ptr)), 0, "MyPtr")
+        # TODO: LLVM.dbg_declare!(builder, mod, ptr, ptr_md)
+        val = ptrtoint!(builder, ptr, LLVM.Int64Type(ctx))
 
         block = DILexicalBlock(file_md, 1, 1)
         block_md = LLVM.lexicalblock!(dibuilder, file_md, block) # could also be file
@@ -33,11 +44,10 @@ LLVM.Module("SomeModule", ctx) do mod
 
     fun = functions(mod)["SomeFunction"]
     bb = entry(fun)
-    inst = first(instructions(bb))
+    inst = last(instructions(bb))
     @test !isempty(metadata(inst))
     inst_str = sprint(io->Base.show(io, inst))
     @test occursin("!dbg", inst_str)
-    @show mod inst
 
     @test !isempty(metadata(inst))
     mod_str = sprint(io->Base.show(io, mod))
@@ -46,6 +56,9 @@ LLVM.Module("SomeModule", ctx) do mod
     @test occursin("!DIFile", mod_str)
     @test occursin("!DILexicalBlock", mod_str)
     @test !occursin("scope: null", mod_str)
+    @test occursin("DISubprogram", mod_str)
+    @test occursin("DISubroutineType", mod_str)
+    @test occursin("DIBasicType", mod_str)
 
     strip_debuginfo!(mod)
     @test isempty(metadata(inst))
