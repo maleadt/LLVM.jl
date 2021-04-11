@@ -4,6 +4,8 @@ using LLVM_full_jll
 
 using Clang.Generators
 
+cd(@__DIR__)
+
 @add_def off_t
 
 # replace `ccall` with `@runtime_ccall`
@@ -61,6 +63,3 @@ function main()
 end
 
 isinteractive() || main()
-
-# manually clean up
-# * search `##Ctag`-prefixed enums and give them a name

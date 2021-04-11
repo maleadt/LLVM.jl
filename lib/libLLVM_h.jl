@@ -2,9 +2,6 @@ using CEnum
 
 const off_t = Csize_t
 
-const LLVM_C_STRICT_PROTOTYPES_BEGIN = nothing
-const LLVM_C_STRICT_PROTOTYPES_END = nothing
-
 
 @cenum LLVMVerifierFailureAction::UInt32 begin
     LLVMAbortProcessAction = 0
@@ -421,7 +418,7 @@ end
     LLVMModuleFlagBehaviorAppendUnique = 5
 end
 
-@cenum LLVMAttributeIndex_::Int32 begin
+@cenum __JL_Ctag_20::Int32 begin
     LLVMAttributeReturnIndex = 0
     LLVMAttributeFunctionIndex = -1
 end
@@ -448,11 +445,9 @@ function LLVMDisposeMessage(Message)
     @runtime_ccall (:LLVMDisposeMessage, libllvm[]) Cvoid (Cstring,) Message
 end
 
-# C code:
 # typedef void ( * LLVMDiagnosticHandler ) ( LLVMDiagnosticInfoRef , void * )
 const LLVMDiagnosticHandler = Ptr{Cvoid}
 
-# C code:
 # typedef void ( * LLVMYieldCallback ) ( LLVMContextRef , void * )
 const LLVMYieldCallback = Ptr{Cvoid}
 
@@ -3371,7 +3366,7 @@ end
     LLVMDWARFEmissionLineTablesOnly = 2
 end
 
-@cenum LLVMMetadataKind_::UInt32 begin
+@cenum __JL_Ctag_24::UInt32 begin
     LLVMMDStringMetadataKind = 0
     LLVMConstantAsMetadataMetadataKind = 1
     LLVMLocalAsMetadataMetadataKind = 2
@@ -3774,11 +3769,9 @@ function LLVMGetMetadataKind(Metadata)
     @runtime_ccall (:LLVMGetMetadataKind, libllvm[]) LLVMMetadataKind (LLVMMetadataRef,) Metadata
 end
 
-# C code:
 # typedef int ( * LLVMOpInfoCallback ) ( void * DisInfo , uint64_t PC , uint64_t Offset , uint64_t Size , int TagType , void * TagBuf )
 const LLVMOpInfoCallback = Ptr{Cvoid}
 
-# C code:
 # typedef const char * ( * LLVMSymbolLookupCallback ) ( void * DisInfo , uint64_t ReferenceValue , uint64_t * ReferenceType , uint64_t ReferencePC , const char * * ReferenceName )
 const LLVMSymbolLookupCallback = Ptr{Cvoid}
 
@@ -3847,7 +3840,6 @@ function LLVMGetStringErrorTypeId()
     @runtime_ccall (:LLVMGetStringErrorTypeId, libllvm[]) LLVMErrorTypeId ()
 end
 
-# C code:
 # typedef void ( * LLVMFatalErrorHandler ) ( const char * Reason )
 const LLVMFatalErrorHandler = Ptr{Cvoid}
 
@@ -4029,19 +4021,15 @@ function LLVMExecutionEngineGetErrMsg(EE, OutError)
     @runtime_ccall (:LLVMExecutionEngineGetErrMsg, libllvm[]) LLVMBool (LLVMExecutionEngineRef, Ptr{Cstring}) EE OutError
 end
 
-# C code:
 # typedef uint8_t * ( * LLVMMemoryManagerAllocateCodeSectionCallback ) ( void * Opaque , uintptr_t Size , unsigned Alignment , unsigned SectionID , const char * SectionName )
 const LLVMMemoryManagerAllocateCodeSectionCallback = Ptr{Cvoid}
 
-# C code:
 # typedef uint8_t * ( * LLVMMemoryManagerAllocateDataSectionCallback ) ( void * Opaque , uintptr_t Size , unsigned Alignment , unsigned SectionID , const char * SectionName , LLVMBool IsReadOnly )
 const LLVMMemoryManagerAllocateDataSectionCallback = Ptr{Cvoid}
 
-# C code:
 # typedef LLVMBool ( * LLVMMemoryManagerFinalizeMemoryCallback ) ( void * Opaque , char * * ErrMsg )
 const LLVMMemoryManagerFinalizeMemoryCallback = Ptr{Cvoid}
 
-# C code:
 # typedef void ( * LLVMMemoryManagerDestroyCallback ) ( void * Opaque )
 const LLVMMemoryManagerDestroyCallback = Ptr{Cvoid}
 
@@ -4371,7 +4359,6 @@ mutable struct LLVMOrcOpaqueJITDylibDefinitionGenerator end
 
 const LLVMOrcJITDylibDefinitionGeneratorRef = Ptr{LLVMOrcOpaqueJITDylibDefinitionGenerator}
 
-# C code:
 # typedef int ( * LLVMOrcSymbolPredicate ) ( LLVMOrcSymbolStringPoolEntryRef Sym , void * Ctx )
 const LLVMOrcSymbolPredicate = Ptr{Cvoid}
 
@@ -4507,11 +4494,9 @@ const LLVMOrcModuleHandle = UInt64
 
 const LLVMOrcTargetAddress = UInt64
 
-# C code:
 # typedef uint64_t ( * LLVMOrcSymbolResolverFn ) ( const char * Name , void * LookupCtx )
 const LLVMOrcSymbolResolverFn = Ptr{Cvoid}
 
-# C code:
 # typedef uint64_t ( * LLVMOrcLazyCompileCallbackFn ) ( LLVMOrcJITStackRef JITStack , void * CallbackCtx )
 const LLVMOrcLazyCompileCallbackFn = Ptr{Cvoid}
 
@@ -5087,7 +5072,6 @@ end
     LTO_DS_NOTE = 2
 end
 
-# C code:
 # typedef void ( * lto_diagnostic_handler_t ) ( lto_codegen_diagnostic_severity_t severity , const char * diag , void * ctxt )
 const lto_diagnostic_handler_t = Ptr{Cvoid}
 

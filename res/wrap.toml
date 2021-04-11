@@ -9,6 +9,7 @@ use_julia_native_enum_type = false
 is_local_header_only = true
 skip_compiler_definition = true
 smart_de_anonymize = true
+use_deterministic_symbol = true
 printer_blacklist = [
     "LLVMInitializeAllTargetInfos",
     "LLVMInitializeAllTargets",
