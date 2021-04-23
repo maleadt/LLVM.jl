@@ -11,6 +11,8 @@ skip_compiler_definition = true
 smart_de_anonymize = true
 use_deterministic_symbol = true
 printer_blacklist = [
+    "LLVM_C_STRICT_PROTOTYPES_END",
+    "LLVM_NATIVE_ARCH",
     "LLVMInitializeAllTargetInfos",
     "LLVMInitializeAllTargets",
     "LLVMInitializeAllTargetMCs",

@@ -34,26 +34,13 @@ function main()
 
     # FIXME: Clang.jl doesn't properly detect system headers
     @static if Sys.islinux()
-        push!(cppflags, "-I/usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include")
-    end
+    args = get_default_args("x86_64-linux-gnu")
+    push!(args, "-I$includedir")
+    append!(args, cppflags)
 
-    # Recursively discover LLVM C API headers (files ending in .h)
-    header_dirs = String[joinpath(includedir, "llvm-c")]
-    header_files = String[]
-    while !isempty(header_dirs)
-        parent = pop!(header_dirs)
-        children = readdir(parent)
-        for child in children
-            path = joinpath(parent, child)
-            if isdir(path)
-                push!(header_dirs, path)
-            elseif isfile(path) && endswith(path, ".h")
-                push!(header_files, path)
-            end
-        end
-    end
+    header_files = detect_headers(joinpath(includedir, "llvm-c"), args)
 
-    ctx = create_context(header_files, convert(Vector{String}, cppflags), options)
+    ctx = create_context(header_files, args, options)
 
     build!(ctx, BUILDSTAGE_NO_PRINTING)
 
