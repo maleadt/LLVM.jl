@@ -32,8 +32,6 @@ function main()
         split(readchomp(`$config --cppflags`))
     end
 
-    # FIXME: Clang.jl doesn't properly detect system headers
-    @static if Sys.islinux()
     args = get_default_args("x86_64-linux-gnu")
     push!(args, "-I$includedir")
     append!(args, cppflags)

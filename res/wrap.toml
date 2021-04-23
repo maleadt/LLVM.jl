@@ -3,12 +3,7 @@ library_name = "libllvm[]"
 output_file_path = "../lib/libLLVM_h.jl"
 prologue_file_path = "./missing_defs.jl"
 epilogue_file_path = ""
-auto_detect_system_headers = true
-header_blacklist = []
 use_julia_native_enum_type = false
-is_local_header_only = true
-skip_compiler_definition = true
-smart_de_anonymize = true
 use_deterministic_symbol = true
 printer_blacklist = [
     "LLVM_C_STRICT_PROTOTYPES_END",
@@ -36,7 +31,3 @@ opaque_as_mutable_struct = true
 
 [codegen.macro]
 macro_mode = "basic"
-
-add_comment_for_skipped_macro = false
-
-ignore_header_guards = true
