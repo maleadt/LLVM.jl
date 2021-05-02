@@ -20,6 +20,7 @@ printer_blacklist = [
     "LLVMInitializeNativeDisassembler",
     "LLVM_C_EXTERN_C_BEGIN",
     "LLVM_C_EXTERN_C_END",
+    "HUGE_VALF",
 ]
 
 [codegen]
@@ -31,3 +32,4 @@ opaque_as_mutable_struct = true
 
 [codegen.macro]
 macro_mode = "basic"
+add_comment_for_skipped_macro = false
