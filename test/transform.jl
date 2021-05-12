@@ -65,7 +65,9 @@ ModulePassManager() do pm
     scalar_repl_aggregates_ssa!(pm)
     simplify_lib_calls!(pm)
     tail_call_elimination!(pm)
-    constant_propagation!(pm)
+    if LLVM.version() < v"12"
+        constant_propagation!(pm)
+    end
     demote_memory_to_register!(pm)
     verifier!(pm)
     correlated_value_propagation!(pm)
@@ -87,7 +89,9 @@ ModulePassManager() do pm
     always_inliner!(pm)
     global_dce!(pm)
     global_optimizer!(pm)
-    ipconstant_propagation!(pm)
+    if LLVM.version() < v"12"
+        ipconstant_propagation!(pm)
+    end
     prune_eh!(pm)
     ipsccp!(pm)
     strip_dead_prototypes!(pm)
