@@ -1,10 +1,7 @@
 export OrcJIT, OrcModule, OrcTargetAddress
-export JITEventListener, GDBRegistrationListener, IntelJITEventListener,
-       OProfileJITEventListener, PerfJITEventListener
 export dispose, errormsg, compile!, remove!, add!,
        mangle, address, addressin, create_stub!, set_stub!,
        register!, unregister!, callback!
-export JITTargetMachine
 
 @checked struct OrcJIT
     ref::API.LLVMOrcJITStackRef
@@ -154,40 +151,10 @@ function callback!(orc::OrcJIT, callback, ctx)
     return OrcTargetAddress(r_address[])
 end
 
-@checked struct JITEventListener
-    ref::API.LLVMJITEventListenerRef
-end
-Base.unsafe_convert(::Type{API.LLVMJITEventListenerRef}, listener::JITEventListener) = listener.ref
-
 function register!(orc::OrcJIT, listener::JITEventListener)
     LLVM.API.LLVMOrcRegisterJITEventListener(orc, listener)
 end
 
 function unregister!(orc::OrcJIT, listener::JITEventListener)
     LLVM.API.LLVMOrcUnregisterJITEventListener(orc, listener)
-end
-
-GDBRegistrationListener()  = JITEventListener(LLVM.API.LLVMCreateGDBRegistrationListener())
-IntelJITEventListener()    = JITEventListener(LLVM.API.LLVMCreateIntelJITEventListener())
-OProfileJITEventListener() = JITEventListener(LLVM.API.LLVMCreateOProfileJITEventListener())
-PerfJITEventListener()     = JITEventListener(LLVM.API.LLVMCreatePerfJITEventListener())
-
-function JITTargetMachine(triple = LLVM.triple(), cpu = "", features = "";
-                          optlevel = LLVM.API.LLVMCodeGenLevelDefault)
-
-    # Force ELF on windows,
-    # Note: Without this call to normalize Orc get's confused
-    #       and chooses the x86_64 SysV ABI on Win x64
-    triple = LLVM.normalize(triple)
-    if Sys.iswindows()
-        triple *= "-elf"
-    end
-    target = LLVM.Target(triple=triple)
-    @debug "Configuring OrcJIT with" triple cpu features optlevel
-
-    tm = TargetMachine(target, triple, cpu, features; optlevel,
-                       reloc=LLVM.API.LLVMRelocStatic, # Generate simpler code for JIT
-                       code=LLVM.API.LLVMCodeModelJITDefault, # Required to init TM as JIT
-                       )
-    return tm
 end
