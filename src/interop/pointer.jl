@@ -175,14 +175,18 @@ Base.signed(x::LLVMPtr) = Int(x)
 
             rv = call!(builder, intr_f, actual_args)
 
-            # also convert the return value
-            if rettyp <: LLVMPtr
-                rv = bitcast!(builder, rv, T_ret)
-            elseif rettyp <: Ptr
-                rv = ptrtoint!(builder, rv, T_ret)
-            end
+            if T_ret_actual == LLVM.VoidType(ctx)
+                ret!(builder)
+            else
+                # also convert the return value
+                if rettyp <: LLVMPtr
+                    rv = bitcast!(builder, rv, T_ret)
+                elseif rettyp <: Ptr
+                    rv = ptrtoint!(builder, rv, T_ret)
+                end
 
-            ret!(builder, rv)
+                ret!(builder, rv)
+            end
         end
 
         call_function(llvm_f, rettyp, argtt, :(($(argexprs...),)))
