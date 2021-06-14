@@ -263,6 +263,9 @@ end
 
     ir = sprint(io->code_llvm(io, good, Tuple{LLVMPtr{Float64,1}}))
     @test occursin("double addrspace(1)* @llvm.ptr.annotation.p1f64(double addrspace(1)*", ir)
+
+    # test return nothing
+    LLVM.Interop.@typed_ccall("llvm.donothing", llvmcall, Cvoid, ())
 end
 
 @static LLVM.version().major >= 12 && @testset "type-preserving ccall" begin
@@ -285,6 +288,9 @@ end
 
     ir = sprint(io->code_llvm(io, good, Tuple{LLVMPtr{Float64,1}}))
     @test occursin("double addrspace(1)* @llvm.ptr.annotation.p1f64(double addrspace(1)*", ir)
+
+    # test return nothing
+    LLVM.Interop.@typed_ccall("llvm.donothing", llvmcall, Cvoid, ())
 end
 
 end
