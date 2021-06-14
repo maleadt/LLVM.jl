@@ -243,6 +243,50 @@ end
     @test !occursin("\bstore\b", ir)
 end
 
+@static LLVM.version().major == 11 && @testset "type-preserving ccall" begin
+    # XXX: does not work on Julia 1.5's LLVM 9;
+    #      do we need to use the overloaded intrinsic name there?
+    bad(ptr::Ptr{T}) where {T} = ccall("llvm.ptr.annotation", llvmcall, Ptr{T}, (Ptr{T}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
+    good(ptr::Ptr{T}) where {T} = @typed_ccall("llvm.ptr.annotation", llvmcall, Ptr{T}, (Ptr{T}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
+
+    ir = sprint(io->code_llvm(io, bad, Tuple{Ptr{Float64}}))
+    @test occursin("i64 @llvm.ptr.annotation(i64", ir)
+
+    ir = sprint(io->code_llvm(io, good, Tuple{Ptr{Float64}}))
+    @test occursin("double* @llvm.ptr.annotation.p0f64(double*", ir)
+
+    bad(ptr::LLVMPtr{T}) where {T} = ccall("llvm.ptr.annotation", llvmcall, LLVMPtr{T,1}, (LLVMPtr{T,1}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
+    good(ptr::LLVMPtr{T}) where {T} = @typed_ccall("llvm.ptr.annotation", llvmcall, LLVMPtr{T,1}, (LLVMPtr{T,1}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
+
+    ir = sprint(io->code_llvm(io, bad, Tuple{LLVMPtr{Float64,1}}))
+    @test occursin("i8 addrspace(1)* @llvm.ptr.annotation(i8 addrspace(1)*", ir)
+
+    ir = sprint(io->code_llvm(io, good, Tuple{LLVMPtr{Float64,1}}))
+    @test occursin("double addrspace(1)* @llvm.ptr.annotation.p1f64(double addrspace(1)*", ir)
+end
+
+@static LLVM.version().major >= 12 && @testset "type-preserving ccall" begin
+    # XXX: LLVM 12 adds an additional argument, which is auto-upgraded when we do
+    #      `ccall(llvmcall)`, but now when typed_ccall constructs a function manually.
+    bad(ptr::Ptr{T}) where {T} = ccall("llvm.ptr.annotation", llvmcall, Ptr{T}, (Ptr{T}, Ptr{Int8}, Ptr{Int8}, Int32, Ptr{Int8}), ptr, C_NULL, C_NULL, 0, C_NULL)
+    good(ptr::Ptr{T}) where {T} = @typed_ccall("llvm.ptr.annotation", llvmcall, Ptr{T}, (Ptr{T}, Ptr{Int8}, Ptr{Int8}, Int32, Ptr{Int8}), ptr, C_NULL, C_NULL, 0, C_NULL)
+
+    ir = sprint(io->code_llvm(io, bad, Tuple{Ptr{Float64}}))
+    @test occursin("i64 @llvm.ptr.annotation(i64", ir)
+
+    ir = sprint(io->code_llvm(io, good, Tuple{Ptr{Float64}}))
+    @test occursin("double* @llvm.ptr.annotation.p0f64(double*", ir)
+
+    bad(ptr::LLVMPtr{T}) where {T} = ccall("llvm.ptr.annotation", llvmcall, LLVMPtr{T,1}, (LLVMPtr{T,1}, Ptr{Int8}, Ptr{Int8}, Int32, Ptr{Int8}), ptr, C_NULL, C_NULL, 0, C_NULL)
+    good(ptr::LLVMPtr{T}) where {T} = @typed_ccall("llvm.ptr.annotation", llvmcall, LLVMPtr{T,1}, (LLVMPtr{T,1}, Ptr{Int8}, Ptr{Int8}, Int32, Ptr{Int8}), ptr, C_NULL, C_NULL, 0, C_NULL)
+
+    ir = sprint(io->code_llvm(io, bad, Tuple{LLVMPtr{Float64,1}}))
+    @test occursin("i8 addrspace(1)* @llvm.ptr.annotation(i8 addrspace(1)*", ir)
+
+    ir = sprint(io->code_llvm(io, good, Tuple{LLVMPtr{Float64,1}}))
+    @test occursin("double addrspace(1)* @llvm.ptr.annotation.p1f64(double addrspace(1)*", ir)
+end
+
 end
 
 end
