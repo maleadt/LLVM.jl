@@ -11,14 +11,28 @@ include("util.jl")
 include("base.jl")
 
 const libllvm = Ref{String}()
+
 module API
 using CEnum
 using ..LLVM
 using ..LLVM: libllvm, @runtime_ccall
-libdir = joinpath(@__DIR__, "..", "lib")
-include(joinpath(libdir, "libLLVM_h.jl"))
-include(joinpath(libdir, "libLLVM_extra.jl"))
+
+llvm_version = if version() < v"12"
+    "11"
+else
+    string(LLVM.version().major)
 end
+libdir = joinpath(@__DIR__, "..", "lib")
+
+if !isdir(libdir)
+    error("""
+    The LLVM API bindings for v$llvm_version do not exist.
+    You might need a newer version of LLVM.jl for this version of Julia.""")
+end
+
+include(joinpath(libdir, llvm_version, "libLLVM_h.jl"))
+include(joinpath(libdir, "libLLVM_extra.jl"))
+end # module API
 
 # LLVM API wrappers
 include("support.jl")
@@ -43,7 +57,9 @@ include("transform.jl")
 include("debuginfo.jl")
 
 has_orc_v1() = v"8" <= LLVM.version() < v"12"
-include("orc.jl")
+if has_orc_v1()
+    include("orc.jl")
+end
 
 include("interop.jl")
 
