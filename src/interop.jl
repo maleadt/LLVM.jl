@@ -13,5 +13,6 @@ if VERSION >= v"1.5-"
 include("interop/pointer.jl")
 end
 include("interop/utils.jl")
+include("interop/intrinsics.jl")
 
 end
