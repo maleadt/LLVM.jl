@@ -140,6 +140,14 @@ end
 end
 end
 
+
+@testset "intrinsics" begin
+    assume(true)
+    assume() do
+        true
+    end
+end
+
 VERSION >= v"1.5-" && @testset "pointer" begin
 
 using Core: LLVMPtr
