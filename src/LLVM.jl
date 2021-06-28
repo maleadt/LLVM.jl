@@ -30,8 +30,11 @@ if !isdir(libdir)
     You might need a newer version of LLVM.jl for this version of Julia.""")
 end
 
+import LLVMExtra_jll: libLLVMExtra
+
 include(joinpath(libdir, llvm_version, "libLLVM_h.jl"))
 include(joinpath(libdir, "libLLVM_extra.jl"))
+include(joinpath(libdir, "libLLVM_julia.jl"))
 end # module API
 
 # LLVM API wrappers
