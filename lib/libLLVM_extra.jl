@@ -111,9 +111,10 @@ end
 function LLVMAddLoadStoreVectorizerPass(PM)
     @runtime_ccall (:LLVMExtraAddLoadStoreVectorizerPass, libLLVMExtra) Cvoid (LLVMPassManagerRef,) PM
 end
-
+if LLVM.version() < v"12"
 function LLVMAddInstSimplifyPass(PM)
     @runtime_ccall (:LLVMExtraAddInstructionSimplifyPass, libLLVMExtra) Cvoid (LLVMPassManagerRef,) PM
+end
 end
 
 function LLVMGetValueContext(V)

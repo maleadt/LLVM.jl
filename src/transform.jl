@@ -119,8 +119,18 @@ scalar_repl_aggregates_ssa!(pm::PassManager) =
 define_transforms([:DCE], version() >= v"10.0")
 
 define_transforms([
-    :DivRemPairs, :LoopDistribute, :LoopFuse, :LoopLoadElimination, :InstSimplify
+    :DivRemPairs, :LoopDistribute, :LoopFuse, :LoopLoadElimination
 ], VERSION >= v"1.6.0-DEV.1503")
+
+define_transforms([:InstSimplify], version() < v"12" && VERSION >= v"1.6.0-DEV.1503")
+define_transforms([:InstructionSimplify], version() >= v"12")
+
+if version() <= v"12"
+    instruction_simplify!(pm) = inst_simplify!(pm)
+else
+    @deprecate inst_simplify!(pm) instruction_simplify!(pm)
+end
+
 
 ## vectorization transformations
 

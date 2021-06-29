@@ -41,7 +41,7 @@ ModulePassManager() do pm
     div_rem_pairs!(pm)
     ind_var_simplify!(pm)
     instruction_combining!(pm)
-    inst_simplify!(pm)
+    instruction_simplify!(pm)
     jump_threading!(pm)
     licm!(pm)
     loop_deletion!(pm)
