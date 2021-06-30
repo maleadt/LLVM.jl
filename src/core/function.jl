@@ -157,7 +157,6 @@ struct Intrinsic
     end
 
     function Intrinsic(name::String)
-        @assert version() >= v"9"
         new(API.LLVMLookupIntrinsicID(name, length(name)))
     end
 end
@@ -165,42 +164,35 @@ end
 Base.convert(::Type{UInt32}, intr::Intrinsic) = intr.id
 
 function name(intr::Intrinsic)
-    @assert version() >= v"8"
     len = Ref{Csize_t}()
     str = API.LLVMIntrinsicGetName(intr, len)
     unsafe_string(convert(Ptr{Cchar}, str), len[])
 end
 
 function name(intr::Intrinsic, params::Vector{<:LLVMType})
-    @assert version() >= v"8"
     len = Ref{Csize_t}()
     str = API.LLVMIntrinsicCopyOverloadedName(intr, params, length(params), len)
     unsafe_message(convert(Ptr{Cchar}, str), len[])
 end
 
 function isoverloaded(intr::Intrinsic)
-    @assert version() >= v"8"
     convert(Core.Bool, API.LLVMIntrinsicIsOverloaded(intr))
 end
 
 function Function(mod::Module, intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[])
-    @assert version() >= v"8"
     Value(API.LLVMGetIntrinsicDeclaration(mod, intr, params, length(params)))
 end
 
 function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[];
                   ctx::Context=GlobalContext())
-    @assert version() >= v"8"
     LLVMType(API.LLVMIntrinsicGetType(ctx, intr, params, length(params)))
 end
 
 function Base.show(io::IO, intr::Intrinsic)
     print(io, "Intrinsic($(intr.id))")
-    if version() >= v"8"
-        if isoverloaded(intr)
-            print(io, ": overloaded intrinsic")
-        else
-            print(io, ": \"$(name(intr))\"")
-        end
+    if isoverloaded(intr)
+        print(io, ": overloaded intrinsic")
+    else
+        print(io, ": \"$(name(intr))\"")
     end
 end

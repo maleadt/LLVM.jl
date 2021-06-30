@@ -181,8 +181,6 @@ end
 ## module flag iteration
 # TODO: doesn't actually iterate, since we can't list the available keys
 
-if version() >= v"8.0"
-
 export flags
 
 struct ModuleFlagDict <: AbstractDict{String,Metadata}
@@ -203,6 +201,4 @@ end
 function Base.setindex!(iter::ModuleFlagDict, val::Metadata,
                         (name, behavior)::Tuple{String, API.LLVMModuleFlagBehavior})
     API.LLVMAddModuleFlag(iter.mod, behavior, name, length(name), val)
-end
-
 end

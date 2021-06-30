@@ -692,18 +692,16 @@ LLVM.Module("SomeModule", ctx) do mod
     datalayout!(mod, dummyLayout)
     @test string(datalayout(mod)) == dummyLayout
 
-    if LLVM.version() >= v"8.0"
-        md = Metadata(ConstantInt(42, ctx))
+    md = Metadata(ConstantInt(42, ctx))
 
-        mod_flags = flags(mod)
-        mod_flags["foobar", LLVM.API.LLVMModuleFlagBehaviorError] = md
+    mod_flags = flags(mod)
+    mod_flags["foobar", LLVM.API.LLVMModuleFlagBehaviorError] = md
 
-        @test occursin("!llvm.module.flags = !{!0}", sprint(io->show(io,mod)))
-        @test occursin(r"!0 = !\{i\d+ 1, !\"foobar\", i\d+ 42\}", sprint(io->show(io,mod)))
+    @test occursin("!llvm.module.flags = !{!0}", sprint(io->show(io,mod)))
+    @test occursin(r"!0 = !\{i\d+ 1, !\"foobar\", i\d+ 42\}", sprint(io->show(io,mod)))
 
-        @test mod_flags["foobar"] == md
-        @test_throws KeyError mod_flags["foobaz"]
-    end
+    @test mod_flags["foobar"] == md
+    @test_throws KeyError mod_flags["foobaz"]
 end
 end
 
@@ -834,24 +832,20 @@ LLVM.Module("SomeModule", ctx) do mod
     intr = Intrinsic(intr_fn)
     show(devnull, intr)
 
-    if LLVM.version() >= v"8"
-        @test !isoverloaded(intr)
+    @test !isoverloaded(intr)
 
-        @test name(intr) == "llvm.trap"
+    @test name(intr) == "llvm.trap"
 
-        ft = LLVM.FunctionType(intr; ctx=ctx)
-        @test ft isa LLVM.FunctionType
-        @test return_type(ft) == LLVM.VoidType(ctx)
+    ft = LLVM.FunctionType(intr; ctx=ctx)
+    @test ft isa LLVM.FunctionType
+    @test return_type(ft) == LLVM.VoidType(ctx)
 
-        fn = LLVM.Function(mod, intr)
-        @test fn isa LLVM.Function
-        @test eltype(llvmtype(fn)) == ft
-        @test isintrinsic(fn)
-    end
+    fn = LLVM.Function(mod, intr)
+    @test fn isa LLVM.Function
+    @test eltype(llvmtype(fn)) == ft
+    @test isintrinsic(fn)
 
-    if LLVM.version() >= v"9"
-        @test intr == Intrinsic("llvm.trap")
-    end
+    @test intr == Intrinsic("llvm.trap")
 end
 end
 
@@ -865,24 +859,20 @@ LLVM.Module("SomeModule", ctx) do mod
     intr = Intrinsic(intr_fn)
     show(devnull, intr)
 
-    if LLVM.version() >= v"8"
-        @test isoverloaded(intr)
+    @test isoverloaded(intr)
 
-        @test name(intr, [LLVM.DoubleType(ctx)]) == "llvm.sin.f64"
+    @test name(intr, [LLVM.DoubleType(ctx)]) == "llvm.sin.f64"
 
-        ft = LLVM.FunctionType(intr, [LLVM.DoubleType(ctx)])
-        @test ft isa LLVM.FunctionType
-        @test return_type(ft) == LLVM.DoubleType(ctx)
+    ft = LLVM.FunctionType(intr, [LLVM.DoubleType(ctx)])
+    @test ft isa LLVM.FunctionType
+    @test return_type(ft) == LLVM.DoubleType(ctx)
 
-        fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
-        @test fn isa LLVM.Function
-        @test eltype(llvmtype(fn)) == ft
-        @test isintrinsic(fn)
-    end
+    fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
+    @test fn isa LLVM.Function
+    @test eltype(llvmtype(fn)) == ft
+    @test isintrinsic(fn)
 
-    if LLVM.version() >= v"9"
-        @test intr == Intrinsic("llvm.sin")
-    end
+    @test intr == Intrinsic("llvm.sin")
 end
 end
 
@@ -1173,7 +1163,6 @@ end
 end
 
 # new freeze instruction (used in 1.7 with JuliaLang/julia#38977)
-if LLVM.version() >= v"10.0"
 Context() do ctx
     mod = parse(LLVM.Module,  """
         define i64 @julia_f_246(i64 %0) {
@@ -1186,7 +1175,6 @@ Context() do ctx
     inst = first(instructions(bb))
     @test inst isa LLVM.FreezeInst
     dispose(mod)
-end
 end
 
 end
