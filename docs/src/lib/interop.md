@@ -8,7 +8,6 @@ Julia's global state.
 ## Base functionality
 
 ```@docs
-LLVM.Interop.JuliaContext
 Base.convert(::Type{LLVMType}, ::Type)
 LLVM.Interop.create_function
 LLVM.Interop.call_function

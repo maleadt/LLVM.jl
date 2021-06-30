@@ -1,8 +1,4 @@
-export JuliaContext, create_function, call_function, isboxed, isghosttype
-
-JuliaContext() =
-    error("Julia 1.6 does not have a global LLVM context; use the do-block version of this function to instantiate a temporary context (and use it throughout your code instead of assuming and accessing a single global context).")
-@deprecate JuliaContext(f::Base.Callable) Context(f)
+export create_function, call_function, isboxed, isghosttype
 
 """
     create_function(rettyp::LLVMType, argtyp::Vector{LLVMType}, [name::String])
@@ -11,7 +7,7 @@ Create an LLVM function, given its return type `rettyp` and a vector of argument
 `argtyp`. The function is marked for inlining, to be embedded in the caller's body.
 Returns both the newly created function, and its type.
 """
-function create_function(rettyp::LLVMType=LLVM.VoidType(JuliaContext()),
+function create_function(rettyp::LLVMType=LLVM.VoidType(Context()),
                          argtyp::Vector{<:LLVMType}=LLVMType[],
                          name::String="entry")
     ctx = context(rettyp)
@@ -56,11 +52,12 @@ function isboxed(typ::Type)
 end
 
 """
-    convert(LLVMType, typ::Type, ctx::Context; allow_boxed=true)
+    convert(LLVMType, typ::Type, [ctx::Context]; allow_boxed=true)
 
 Convert a Julia type `typ` to its LLVM representation. Fails if the type would be boxed.
+If `ctx` is specified, the return LLVM type will be valid in that context.
 """
-function Base.convert(::Type{LLVMType}, typ::Type, ctx::Context=JuliaContext();
+function Base.convert(::Type{LLVMType}, typ::Type, ctx::Union{Nothing,Context}=nothing;
                       allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
     llvmtyp = LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
@@ -69,7 +66,7 @@ function Base.convert(::Type{LLVMType}, typ::Type, ctx::Context=JuliaContext();
         error("Conversion of boxed type $typ is not allowed")
     end
 
-    if ctx != context(llvmtyp)
+    if ctx !== nothing && ctx != context(llvmtyp)
         # FIXME: Julia currently doesn't offer an API to fetch types in a specific context
 
         if llvmtyp == LLVM.VoidType(context(llvmtyp))
