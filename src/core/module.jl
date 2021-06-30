@@ -71,13 +71,6 @@ set_compiler_used!(mod::Module, values::GlobalVariable...) =
     API.LLVMExtraAppendToCompilerUsed(mod, collect(values), length(values))
 
 
-## type iteration
-
-export types
-
-@deprecate types(mod::Module) types(context(mod))
-
-
 ## metadata iteration
 
 export metadata
