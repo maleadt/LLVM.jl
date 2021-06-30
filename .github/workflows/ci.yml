@@ -21,6 +21,9 @@ jobs:
           - windows-latest
         arch:
           - x64
+        build_LLVMExtra:
+          - true
+          - false
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
@@ -37,6 +40,12 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      - name: Build LLVMExtra
+        if: ${{ matrix.build_LLVMExtra && runner.os != 'Windows'}}
+        run: |
+          pushd deps
+          julia -e 'using Pkg; pkg"activate --temp"; pkg"add Pkg Scratch Preferences LLVMExtra_jll"' -L build_local.jl
+          popd
       - uses: julia-actions/julia-buildpkg@latest
       - run: |
           git config --global user.name Tester
