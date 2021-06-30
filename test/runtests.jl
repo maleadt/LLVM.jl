@@ -1,6 +1,16 @@
-using LLVM
+# Working around https://github.com/JuliaLang/Pkg.jl/issues/2500 for CI
+test_project = first(Base.load_path())
+preferences_file = "LocalPreferences.toml"
+test_preferences_file = joinpath(dirname(test_project), "LocalPreferences.toml")
+if isfile(preferences_file) && !isfile(test_preferences_file)
+    cp(preferences_file, test_preferences_file)
+end
 
+using LLVM
+using LLVMExtra_jll
 using Test
+
+@info "Using libLLVMExtra" path=LLVMExtra_jll.libLLVMExtra
 
 @testset "LLVM" begin
 
