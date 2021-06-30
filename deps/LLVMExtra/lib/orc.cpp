@@ -1,6 +1,8 @@
-#include "Orc.h"
-#include "LLJIT.h"
 
+#include "Orc.h"
+
+#if LLVM_VERSION_MAJOR == 12
+#include "LLJIT.h"
 #include "llvm-c/LLJIT.h"
 #include "llvm-c/Orc.h"
 #include "llvm-c/OrcEE.h"
@@ -183,9 +185,45 @@ LLVMOrcMaterializationUnitRef LLVMOrcCreateCustomMaterializationUnit(
   return wrap(new OrcCAPIMaterializationUnit(
       Name, std::move(SFM), std::move(IS), Ctx, Materialize, Discard, Destroy));
 }
+LLVMOrcMaterializationUnitRef LLVMOrcLazyReexports(
+    LLVMOrcLazyCallThroughManagerRef LCTM, LLVMOrcIndirectStubsManagerRef ISM,
+    LLVMOrcJITDylibRef SourceJD, LLVMOrcCSymbolAliasMapPairs CallableAliases,
+    size_t NumPairs) {
+
+  SymbolAliasMap SAM;
+  for (size_t I = 0; I != NumPairs; ++I) {
+    auto pair = CallableAliases[I];
+    JITSymbolFlags Flags = toJITSymbolFlags(pair.Entry.Flags);
+    SymbolStringPtr Name =
+        OrcV2CAPIHelper::moveToSymbolStringPtr(unwrap(pair.Entry.Name));
+    SAM[OrcV2CAPIHelper::moveToSymbolStringPtr(unwrap(pair.Name))] =
+        SymbolAliasMapEntry(Name, Flags);
+  }
+
+  return wrap(lazyReexports(*unwrap(LCTM), *unwrap(ISM), *unwrap(SourceJD),
+                            std::move(SAM))
+                  .release());
+}
 
 LLVMOrcIRTransformLayerRef LLVMOrcLLJITGetIRTransformLayer(LLVMOrcLLJITRef J) {
   return wrap(&unwrap(J)->getIRTransformLayer());
+}
+
+void LLVMOrcIRTransformLayerEmit(LLVMOrcIRTransformLayerRef IRLayer,
+                                 LLVMOrcMaterializationResponsibilityRef MR,
+                                 LLVMOrcThreadSafeModuleRef TSM) {
+  std::unique_ptr<ThreadSafeModule> TmpTSM(unwrap(TSM));
+  unwrap(IRLayer)->emit(
+      std::unique_ptr<MaterializationResponsibility>(unwrap(MR)),
+      std::move(*TmpTSM));
+}
+
+LLVMErrorRef
+LLVMOrcThreadSafeModuleWithModuleDo(LLVMOrcThreadSafeModuleRef TSM,
+                                    LLVMOrcGenericIRModuleOperationFunction F,
+                                    void *Ctx) {
+  return wrap(unwrap(TSM)->withModuleDo(
+      [&](Module &M) { return unwrap(F(Ctx, wrap(&M))); }));
 }
 
 LLVMErrorRef LLVMOrcLLJITApplyDataLayout(LLVMOrcLLJITRef JIT, LLVMModuleRef Mod) {
@@ -197,7 +235,10 @@ LLVMErrorRef LLVMOrcLLJITApplyDataLayout(LLVMOrcLLJITRef JIT, LLVMModuleRef Mod)
   }
 
   if (M.getDataLayout() != DL) {
-      return wrap(make_error<StringError>("Added modules have incompatible DL"));
+      return wrap(
+        make_error<StringError>(
+          "Added modules have incompatible DL",
+          inconvertibleErrorCode()));
   }
   return wrap(Error::success());
 }
@@ -212,20 +253,99 @@ void LLVMOrcDisposeIndirectStubsManager(LLVMOrcIndirectStubsManagerRef ISM) {
   std::unique_ptr<IndirectStubsManager> TmpISM(unwrap(ISM));
 }
 
-LLVMOrcLazyCallThroughManagerRef LLVMOrcCreateLocalLazyCallThroughManager(
+LLVMErrorRef LLVMOrcCreateLocalLazyCallThroughManager(
     const char *TargetTriple, LLVMOrcExecutionSessionRef ES,
-    LLVMOrcJITTargetAddress ErrorHandlerAddr) {
+    LLVMOrcJITTargetAddress ErrorHandlerAddr,
+    LLVMOrcLazyCallThroughManagerRef *Result) {
     auto LCTM = createLocalLazyCallThroughManager(
       Triple(TargetTriple), *unwrap(ES), ErrorHandlerAddr);
 
-    // TODO: Return error instead of discarding it
     if (!LCTM) {
-      consumeError(LCTM.takeError());
-      return NULL;
+      return wrap(LCTM.takeError());
     }
-    return wrap(LCTM->release());
+    *Result = wrap(LCTM->release());
+    return LLVMErrorSuccess;
 }
 
 void LLVMOrcDisposeLazyCallThroughManager(LLVMOrcLazyCallThroughManagerRef LCM) {
   std::unique_ptr<LazyCallThroughManager> TmpLCM(unwrap(LCM));
 }
+
+LLVMOrcJITDylibRef LLVMOrcMaterializationResponsibilityGetTargetDylib(
+    LLVMOrcMaterializationResponsibilityRef MR) {
+  return wrap(&unwrap(MR)->getTargetJITDylib());
+}
+
+LLVMOrcExecutionSessionRef
+LLVMOrcMaterializationResponsibilityGetExecutionSession(
+    LLVMOrcMaterializationResponsibilityRef MR) {
+  return wrap(&unwrap(MR)->getExecutionSession());
+}
+
+LLVMOrcCSymbolFlagsMapPairs LLVMOrcMaterializationResponsibilityGetSymbols(
+    LLVMOrcMaterializationResponsibilityRef MR, size_t *NumPairs) {
+
+  auto Symbols = unwrap(MR)->getSymbols();
+  LLVMOrcCSymbolFlagsMapPairs Result = static_cast<LLVMOrcCSymbolFlagsMapPairs>(
+      safe_malloc(Symbols.size() * sizeof(LLVMOrcCSymbolFlagsMapPair)));
+  size_t I = 0;
+  for (auto const &pair : Symbols) {
+    auto Name = wrap(OrcV2CAPIHelper::getRawPoolEntryPtr(pair.first));
+    auto Flags = pair.second;
+    Result[I] = {Name, {Flags.getRawFlagsValue(), Flags.getTargetFlags()}};
+    I++;
+  }
+  *NumPairs = Symbols.size();
+  return Result;
+}
+
+void LLVMOrcDisposeCSymbolFlagsMap(LLVMOrcCSymbolFlagsMapPairs Pairs) {
+  free(Pairs);
+}
+
+LLVMOrcSymbolStringPoolEntryRef
+LLVMOrcMaterializationResponsibilityGetInitializerSymbol(
+    LLVMOrcMaterializationResponsibilityRef MR) {
+  auto Sym = unwrap(MR)->getInitializerSymbol();
+  return wrap(OrcV2CAPIHelper::getRawPoolEntryPtr(Sym));
+}
+
+LLVMOrcSymbolStringPoolEntryRef *
+LLVMOrcMaterializationResponsibilityGetRequestedSymbols(
+    LLVMOrcMaterializationResponsibilityRef MR, size_t *NumSymbols) {
+
+  auto Symbols = unwrap(MR)->getRequestedSymbols();
+  LLVMOrcSymbolStringPoolEntryRef *Result =
+      static_cast<LLVMOrcSymbolStringPoolEntryRef *>(safe_malloc(
+          Symbols.size() * sizeof(LLVMOrcSymbolStringPoolEntryRef)));
+  size_t I = 0;
+  for (auto &Name : Symbols) {
+    Result[I] = wrap(OrcV2CAPIHelper::getRawPoolEntryPtr(Name));
+    I++;
+  }
+  *NumSymbols = Symbols.size();
+  return Result;
+}
+
+void LLVMOrcDisposeSymbols(LLVMOrcSymbolStringPoolEntryRef *Symbols) {
+  free(Symbols);
+}
+
+LLVMErrorRef LLVMOrcMaterializationResponsibilityNotifyResolved(
+    LLVMOrcMaterializationResponsibilityRef MR, LLVMOrcCSymbolMapPairs Symbols,
+    size_t NumPairs) {
+  SymbolMap SM = toSymbolMap(Symbols, NumPairs);
+  return wrap(unwrap(MR)->notifyResolved(std::move(SM)));
+}
+
+LLVMErrorRef LLVMOrcMaterializationResponsibilityNotifyEmitted(
+    LLVMOrcMaterializationResponsibilityRef MR) {
+  return wrap(unwrap(MR)->notifyEmitted());
+}
+
+void LLVMOrcMaterializationResponsibilityFailMaterialization(
+    LLVMOrcMaterializationResponsibilityRef MR) {
+  unwrap(MR)->failMaterialization();
+}
+
+#endif // LLVM_VERSION_MAJOR == 12

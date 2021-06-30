@@ -1,8 +1,10 @@
 #ifndef LLVMEXTRA_ORC_H
 #define LLVMEXTRA_ORC_H
 
-#include <llvm-c/LLJIT.h>
-#include "Orc.h"
+#include <llvm-c/Core.h>
+#include <llvm-c/Orc.h>
+
+#if LLVM_VERSION_MAJOR == 12
 
 LLVM_C_EXTERN_C_BEGIN
 
@@ -10,8 +12,6 @@ typedef enum {
   LLVMJITSymbolGenericFlagsCallable = 1U << 2,
   LLVMJITSymbolGenericFlagsMaterializationSideEffectsOnly = 1U << 3
 } LLVMExtraJITSymbolGenericFlags;
-
-typedef uint8_t LLVMJITSymbolTargetFlags;
 
 /**
  * Represents a pair of a symbol name and LLVMJITSymbolFlags.
@@ -96,11 +96,6 @@ typedef LLVMErrorRef (*LLVMOrcGenericIRModuleOperationFunction)(
     void *Ctx, LLVMModuleRef M);
 
 /**
- * A reference to an orc::ObjectLinkingLayer instance.
- */
-typedef struct LLVMOrcOpaqueObjectLinkingLayer *LLVMOrcObjectLinkingLayerRef;
-
-/**
  * A reference to an orc::IRTransformLayer instance.
  */
 typedef struct LLVMOrcOpaqueIRTransformLayer *LLVMOrcIRTransformLayerRef;
@@ -177,25 +172,19 @@ LLVMOrcMaterializationUnitRef LLVMOrcCreateCustomMaterializationUnit(
     LLVMOrcMaterializationUnitDestroyFunction Destroy);
 
 LLVMOrcMaterializationUnitRef
-LLVMOrcCreateIRMaterializationUnit(LLVMOrcIRTransformLayerRef IL, LLVMOrcThreadSafeModuleRef TSM);
-
-LLVMOrcMaterializationUnitRef
 LLVMOrcLazyReexports(LLVMOrcLazyCallThroughManagerRef LCTM,
     LLVMOrcIndirectStubsManagerRef ISM,
     LLVMOrcJITDylibRef SourceRef,
     LLVMOrcCSymbolAliasMapPairs CallableAliases,
     size_t NumPairs);
-    // TODO: ImplSymbolMad SrcJDLoc
 
 LLVMOrcJITDylibRef LLVMOrcMaterializationResponsibilityGetTargetDylib(
     LLVMOrcMaterializationResponsibilityRef MR);
 
-// TODO(vchuravy) Test
 LLVMOrcExecutionSessionRef
 LLVMOrcMaterializationResponsibilityGetExecutionSession(
     LLVMOrcMaterializationResponsibilityRef MR);
 
-// TODO(vchuravy) Test
 LLVMOrcSymbolStringPoolEntryRef
 LLVMOrcMaterializationResponsibilityGetInitializerSymbol(
     LLVMOrcMaterializationResponsibilityRef MR);
@@ -214,28 +203,8 @@ LLVMErrorRef
 LLVMOrcMaterializationResponsibilityNotifyEmitted(
     LLVMOrcMaterializationResponsibilityRef MR);
 
-// TODO(vchuravy) Test
-LLVMErrorRef
-LLVMOrcMaterializationResponsibilityDefineMaterializing(
-    LLVMOrcMaterializationResponsibilityRef MR, LLVMOrcCSymbolMapPairs Syms,
-    size_t NumPairs);
-
-void LLVMOrcMaterializationResponsibilityDefineNonExistent(
-    LLVMOrcMaterializationResponsibilityRef MR,
-    LLVMOrcSymbolStringPoolEntryRef *Symbols, size_t NumSymbols);
-
 void LLVMOrcMaterializationResponsibilityFailMaterialization(
     LLVMOrcMaterializationResponsibilityRef MR);
-
-LLVMErrorRef
-LLVMOrcMaterializationResponsibilityReplace(
-    LLVMOrcMaterializationResponsibilityRef MR,
-    LLVMOrcMaterializationUnitRef MU);
-
-LLVMOrcMaterializationResponsibilityRef
-LLVMOrcMaterializationResponsibilityDelegate(
-    LLVMOrcMaterializationResponsibilityRef MR,
-    LLVMOrcSymbolStringPoolEntryRef *Symbols, size_t NumSymbols);
 
 /**
  * Apply the given function to the module contained in this ThreadSafeModule.
@@ -248,14 +217,6 @@ LLVMOrcThreadSafeModuleWithModuleDo(LLVMOrcThreadSafeModuleRef TSM,
 void LLVMOrcIRTransformLayerEmit(LLVMOrcIRTransformLayerRef IRTransformLayer,
                         LLVMOrcMaterializationResponsibilityRef MR,
                         LLVMOrcThreadSafeModuleRef TSM);
-
-/**
- * Set the transform function of the provided transform layer, passing through a
- * pointer to user provided context.
- */
-void LLVMOrcIRTransformLayerSetTransform(
-    LLVMOrcIRTransformLayerRef IRTransformLayer,
-    LLVMOrcIRTransformLayerTransformFunction TransformFunction, void *Ctx);
 
 /**
  * Create a LocalIndirectStubsManager from the given target triple.
@@ -271,9 +232,10 @@ LLVMOrcIndirectStubsManagerRef LLVMOrcCreateLocalIndirectStubsManager(
  */
 void LLVMOrcDisposeIndirectStubsManager(LLVMOrcIndirectStubsManagerRef ISM);
 
-LLVMOrcLazyCallThroughManagerRef LLVMOrcCreateLocalLazyCallThroughManager(
+LLVMErrorRef LLVMOrcCreateLocalLazyCallThroughManager(
     const char *TargetTriple, LLVMOrcExecutionSessionRef ES,
-    LLVMOrcJITTargetAddress ErrorHandlerAddr);
+    LLVMOrcJITTargetAddress ErrorHandlerAddr,
+    LLVMOrcLazyCallThroughManagerRef *Result);
 
 /**
  * Dispose of an LazyCallThroughManager.
@@ -283,3 +245,4 @@ void LLVMOrcDisposeLazyCallThroughManager(LLVMOrcLazyCallThroughManagerRef LCM);
 
 LLVM_C_EXTERN_C_END
 #endif
+#endif // LLVMEXTRA_ORC_H
