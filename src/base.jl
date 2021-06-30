@@ -7,7 +7,7 @@ version() = Base.libllvm_version
 function runtime_version()
     # FIXME: add a proper C API to LLVM
     version_print = unsafe_string(
-        @runtime_ccall((:_ZN4llvm16LTOCodeGenerator16getVersionStringEv, libllvm[]), Cstring, ()))
+        ccall((:_ZN4llvm16LTOCodeGenerator16getVersionStringEv, libllvm[]), Cstring, ()))
     m = match(r"LLVM version (?<version>.+)", version_print)
     m === nothing && error("Unrecognized version string: '$version_print'")
     if endswith(m[:version], "jl")

@@ -15,16 +15,18 @@ uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.1"
 
 [[Clang]]
-deps = ["CEnum", "Clang_jll", "TOML"]
-path = "/Users/gnimuc/.julia/dev/Clang"
+deps = ["CEnum", "Clang_jll", "Downloads", "Pkg", "TOML"]
+git-tree-sha1 = "c142f1cf596f41fe023d7f4aabea2065347dc10c"
+repo-rev = "master"
+repo-url = "https://github.com/JuliaInterop/Clang.jl.git"
 uuid = "40e3b903-d033-50b4-a0cc-940c62c95e31"
-version = "0.13.0"
+version = "0.14.0"
 
 [[Clang_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "libLLVM_jll"]
-git-tree-sha1 = "df205bee9db582fecbf5393a86f93426b79c0e93"
+git-tree-sha1 = "a5923c06de3178dd755f4b9411ea8922a7ae6fb8"
 uuid = "0ee61d77-7f21-5576-8119-9fcc46b10100"
-version = "11.0.1+2"
+version = "11.0.1+3"
 
 [[Dates]]
 deps = ["Printf"]
@@ -86,7 +88,7 @@ uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 
 [[Pkg]]
-deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs"]
+deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[Printf]]
@@ -136,3 +138,7 @@ uuid = "8f36deef-c2a5-5394-99ed-8e07531fb29a"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+
+[[p7zip_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
