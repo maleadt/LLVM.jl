@@ -15,7 +15,7 @@ const libllvm = Ref{String}()
 module API
 using CEnum
 using ..LLVM
-using ..LLVM: libllvm, @runtime_ccall
+using ..LLVM: libllvm
 
 llvm_version = if version() < v"12"
     "11"

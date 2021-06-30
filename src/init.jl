@@ -43,7 +43,7 @@ for backend in libllvm_backends,
     @eval begin
         export $jl_fname
         $jl_fname() =
-            $supported ? @runtime_ccall(($(QuoteNode(api_fname)),libllvm[]), Cvoid, ()) :
+            $supported ? ccall(($(QuoteNode(api_fname)),libllvm[]), Cvoid, ()) :
                          error($"The $backend back-end is not part of your LLVM library.")
 
     end
