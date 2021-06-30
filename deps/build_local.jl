@@ -30,3 +30,10 @@ set_preferences!(
     "libLLVMExtra_path" => lib_path;
     force=true,
 )
+
+set_preferences!(
+    joinpath(dirname(@__DIR__), "test", "LocalPreferences.toml"),
+    "LLVMExtra_jll",
+    "libLLVMExtra_path" => lib_path;
+    force=true,
+)
