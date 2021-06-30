@@ -53,7 +53,7 @@ populate!(mpm::ModulePassManager, pmb::PassManagerBuilder) =
 
 ## auxiliary
 
-function define_transforms(transforms, available=true)
+function define_transforms(transforms, available=true; exported=true)
     for transform in transforms
         api_fname = Symbol(:LLVM, :Add, transform, :Pass)
 
@@ -79,8 +79,8 @@ function define_transforms(transforms, available=true)
         jl_fname = Symbol(join(lowercase.(groups), '_'), '!')
 
         if available
+            exported && @eval export $jl_fname
             @eval begin
-                export $jl_fname
                 $jl_fname(pm::PassManager) = API.$api_fname(pm)
             end
         else
@@ -117,13 +117,12 @@ define_transforms([:DCE])
 define_transforms([:DivRemPairs, :LoopDistribute, :LoopFuse, :LoopLoadElimination])
 
 if version() < v"12"
+    define_transforms([:InstSimplify]; exported=false)
+
     export instruction_simplify!
-    define_transforms([:InstSimplify])
     instruction_simplify!(pm) = inst_simplify!(pm)
 else
-    export inst_simplify!
     define_transforms([:InstructionSimplify])
-    @deprecate inst_simplify!(pm) instruction_simplify!(pm)
 end
 
 
