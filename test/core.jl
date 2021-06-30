@@ -592,17 +592,15 @@ LLVM.Module("SomeModule", ctx) do mod
     threadlocalmode!(gv, LLVM.API.LLVMNotThreadLocal)
     @test threadlocalmode(gv) == LLVM.API.LLVMNotThreadLocal
 
-    if VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")
-        @test !haskey(globals(mod), "llvm.used")
-        set_used!(mod, gv)
-        @test haskey(globals(mod), "llvm.used")
-        unsafe_delete!(mod, globals(mod)["llvm.used"])
+    @test !haskey(globals(mod), "llvm.used")
+    set_used!(mod, gv)
+    @test haskey(globals(mod), "llvm.used")
+    unsafe_delete!(mod, globals(mod)["llvm.used"])
 
-        @test !haskey(globals(mod), "llvm.compiler.used")
-        set_compiler_used!(mod, gv)
-        @test haskey(globals(mod), "llvm.compiler.used")
-        unsafe_delete!(mod, globals(mod)["llvm.compiler.used"])
-    end
+    @test !haskey(globals(mod), "llvm.compiler.used")
+    set_compiler_used!(mod, gv)
+    @test haskey(globals(mod), "llvm.compiler.used")
+    unsafe_delete!(mod, globals(mod)["llvm.compiler.used"])
 
     let gvars = globals(mod)
         @test gv in gvars

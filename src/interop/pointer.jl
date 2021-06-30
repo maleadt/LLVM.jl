@@ -8,7 +8,7 @@ using Core: LLVMPtr
 
 @generated function pointerref(ptr::LLVMPtr{T,A}, i::Int, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return T.instance
-    JuliaContext() do ctx
+    Context() do ctx
         eltyp = convert(LLVMType, T, ctx)
 
         T_int = convert(LLVMType, Int, ctx)
@@ -43,7 +43,7 @@ end
 
 @generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::Int, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return
-    JuliaContext() do ctx
+    Context() do ctx
         eltyp = convert(LLVMType, T, ctx)
 
         T_int = convert(LLVMType, Int, ctx)
@@ -125,7 +125,7 @@ Base.signed(x::LLVMPtr) = Int(x)
     argexprs = Expr[:(args[$i]) for i in 1:length(args)]
 
     # build IR that calls the intrinsic, casting types if necessary
-    JuliaContext() do ctx
+    Context() do ctx
         T_ret = convert(LLVMType, rettyp, ctx)
         T_args = LLVMType[convert(LLVMType, typ, ctx) for typ in argtyps]
 

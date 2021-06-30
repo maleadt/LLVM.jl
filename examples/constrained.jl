@@ -33,7 +33,7 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
                                {F, round, fpexcept, T<:AbstractFloat, N}
     @assert N >= 0
 
-    JuliaContext() do ctx
+    Context() do ctx
         typ = convert(LLVMType, T, ctx)
 
         # create a function

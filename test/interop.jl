@@ -5,17 +5,8 @@ using InteractiveUtils
 
 @testset "base" begin
 
-JuliaContext() do ctx
-    @test isa(ctx, Context)
-
-    @test isa(convert(LLVMType, Nothing, ctx), LLVM.VoidType)
-
-    @test_throws ErrorException convert(LLVMType, Ref, ctx)
-    convert(LLVMType, Ref, ctx; allow_boxed=true)
-end
-
 @generated function add_one(i)
-    JuliaContext() do ctx
+    Context() do ctx
         T_int = convert(LLVMType, Int, ctx)
 
         f, ft = create_function(T_int, [T_int])
@@ -46,7 +37,7 @@ end
 @test !isghosttype(NonGhostType2)
 @test isboxed(NonGhostType2)
 
-JuliaContext() do ctx
+Context() do ctx
     @test isghosttype(GhostType, ctx)
     @test !isghosttype(NonGhostType1, ctx)
     @test !isghosttype(NonGhostType2, ctx)
@@ -108,7 +99,6 @@ end
 end
 
 
-if VERSION >= v"1.2.0-DEV.531"
 @testset "passes" begin
 
 
@@ -138,7 +128,6 @@ end
 end
 
 end
-end
 
 
 @testset "intrinsics" begin
@@ -147,8 +136,6 @@ end
         true
     end
 end
-
-VERSION >= v"1.5-" && @testset "pointer" begin
 
 using Core: LLVMPtr
 
@@ -202,7 +189,7 @@ end
     @test unsafe_load(ptr) == 2
 
     ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr)}))
-    if VERSION >= v"1.5.2" && Sys.iswindows() && Sys.WORD_SIZE == 32
+    if Sys.iswindows() && Sys.WORD_SIZE == 32
         # FIXME: Win32 nightly emits a i64*, even though bitstype_to_llvm uses T_int8
         @test_broken contains(ir, r"@julia_unsafe_load_\d+\(i8\*")
     else
@@ -299,8 +286,6 @@ end
 
     # test return nothing
     LLVM.Interop.@typed_ccall("llvm.donothing", llvmcall, Cvoid, ())
-end
-
 end
 
 end

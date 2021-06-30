@@ -67,12 +67,6 @@ function LLVMCreateFunctionPass(Name, Callback)
         Name, Callback)
 end
 
-function LLVMCreateBasicBlockPass(Name, Callback)
-    ccall(:LLVMExtraCreateBasicBlockPass,LLVMPassRef,
-        (Cstring, Any),
-        Name, Callback)
-end
-
 function LLVMCreateModulePass2(Name, Callback, Data)
     ccall(:LLVMExtraCreateModulePass2,LLVMPassRef,
         (Cstring, Ptr{Cvoid}, Ptr{Cvoid}),

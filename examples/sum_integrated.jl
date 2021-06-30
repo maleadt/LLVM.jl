@@ -12,7 +12,7 @@ else
     y = Int32(2)
 end
 
-JuliaContext() do ctx
+Context() do ctx
     param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
     ret_type = LLVM.Int32Type(ctx)
     sum, _ = create_function(ret_type, param_types)

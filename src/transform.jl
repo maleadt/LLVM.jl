@@ -84,10 +84,7 @@ function define_transforms(transforms, available=true)
                 $jl_fname(pm::PassManager) = API.$api_fname(pm)
             end
         else
-            @eval begin
-                export $jl_fname
-                $jl_fname(pm::PassManager) = nothing
-            end
+            # generate a run-time error?
         end
     end
 
@@ -113,32 +110,28 @@ export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!
 scalar_repl_aggregates!(pm::PassManager, threshold::Integer) =
     API.LLVMAddScalarReplAggregatesPassWithThreshold(pm, Cint(threshold))
 
-scalar_repl_aggregates_ssa!(pm::PassManager) =
-    API.LLVMAddScalarReplAggregatesPassSSA(pm)
+scalar_repl_aggregates_ssa!(pm::PassManager) = API.LLVMAddScalarReplAggregatesPassSSA(pm)
 
-define_transforms([:DCE], version() >= v"10.0")
+define_transforms([:DCE])
 
-define_transforms([
-    :DivRemPairs, :LoopDistribute, :LoopFuse, :LoopLoadElimination
-], VERSION >= v"1.6.0-DEV.1503")
+define_transforms([:DivRemPairs, :LoopDistribute, :LoopFuse, :LoopLoadElimination])
 
-define_transforms([:InstSimplify], version() < v"12" && VERSION >= v"1.6.0-DEV.1503")
-define_transforms([:InstructionSimplify], version() >= v"12")
-
-if version() <= v"12"
+if version() < v"12"
+    export instruction_simplify!
+    define_transforms([:InstSimplify])
     instruction_simplify!(pm) = inst_simplify!(pm)
 else
+    export inst_simplify!
+    define_transforms([:InstructionSimplify])
     @deprecate inst_simplify!(pm) instruction_simplify!(pm)
 end
 
 
 ## vectorization transformations
 
-define_transforms([
-    :LoopVectorize, :SLPVectorize
-])
+define_transforms([:LoopVectorize, :SLPVectorize])
 
-define_transforms([:LoadStoreVectorizer], VERSION >= v"1.6.0-DEV.1503")
+define_transforms([:LoadStoreVectorizer])
 
 ## interprocedural transformations
 
@@ -155,13 +148,3 @@ internalize!(pm::PassManager, allbutmain::Core.Bool=true) =
 
 internalize!(pm::PassManager, exports::Vector{String}) =
     API.LLVMAddInternalizePassWithExportList(pm, exports, Csize_t(length(exports)))
-
-
-## target-specific transformations
-
-export nvvm_reflect!
-
-function nvvm_reflect!(pm::PassManager, smversion=35)
-    VERSION >= v"1.5.0-DEV.138" && error("NVVMReflect pass has been removed from Julia and LLVM")
-    API.LLVMAddNVVMReflectPass(pm, smversion)
-end

@@ -140,11 +140,7 @@ function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}=T[]) where {T<:Co
         return ConstantArrayOrAggregateZero(API.LLVMConstArray(typ, Array(data), length(data)))
     end
 
-    if VERSION >= v"1.1"
-        ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
-    else
-        ca_vec = map(x->ConstantArray(typ, x), (view(data, i, ntuple(d->(:), N-1)...) for i in axes(data, 1)))
-    end
+    ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
     ca_typ = llvmtype(first(ca_vec))
 
     return ConstantArray(API.LLVMConstArray(ca_typ, ca_vec, length(ca_vec)))

@@ -9,7 +9,7 @@ struct CustomPtr{T}
 end
 
 @generated function Base.unsafe_load(p::CustomPtr{T}, i::Integer=1) where T
-    JuliaContext() do ctx
+    Context() do ctx
         # get the element type
         eltyp = convert(LLVMType, T, ctx)
 
@@ -17,11 +17,7 @@ end
         T_ptr = LLVM.PointerType(eltyp)
 
         # create a function
-        if VERSION >= v"0.7.0-DEV.1704"
-            paramtyps = [T_int, T_int]
-        else
-            paramtyps = [T_ptr, T_int]
-        end
+        paramtyps = [T_int, T_int]
         llvmf, _ = create_function(eltyp, paramtyps)
 
         # generate IR
@@ -29,11 +25,7 @@ end
             entry = BasicBlock(llvmf, "entry", ctx)
             position!(builder, entry)
 
-            if VERSION >= v"0.7.0-DEV.1704"
-                ptr = inttoptr!(builder, parameters(llvmf)[1], T_ptr)
-            else
-                ptr = parameters(llvmf)[1]
-            end
+            ptr = inttoptr!(builder, parameters(llvmf)[1], T_ptr)
 
             ptr = gep!(builder, ptr, [parameters(llvmf)[2]])
             val = load!(builder, ptr)
