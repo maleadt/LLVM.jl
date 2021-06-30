@@ -3,43 +3,43 @@
 # initialization functions
 
 function LLVMInitializeAllTargetInfos()
-    ccall(:LLVMExtraInitializeAllTargetInfos,Cvoid,())
+    ccall((:LLVMExtraInitializeAllTargetInfos, libLLVMExtra),Cvoid,())
 end
 
 function LLVMInitializeAllTargets()
-    ccall(:LLVMExtraInitializeAllTargets,Cvoid,())
+    ccall((:LLVMExtraInitializeAllTargets, libLLVMExtra),Cvoid,())
 end
 
 function LLVMInitializeAllTargetMCs()
-    ccall(:LLVMExtraInitializeAllTargetMCs,Cvoid,())
+    ccall((:LLVMExtraInitializeAllTargetMCs, libLLVMExtra),Cvoid,())
 end
 
 function LLVMInitializeAllAsmPrinters()
-    ccall(:LLVMExtraInitializeAllAsmPrinters,Cvoid,())
+    ccall((:LLVMExtraInitializeAllAsmPrinters, libLLVMExtra),Cvoid,())
 end
 
 function LLVMInitializeAllAsmParsers()
-    ccall(:LLVMExtraInitializeAllAsmParsers,Cvoid,())
+    ccall((:LLVMExtraInitializeAllAsmParsers, libLLVMExtra),Cvoid,())
 end
 
 function LLVMInitializeAllDisassemblers()
-    ccall(:LLVMExtraInitializeAllDisassemblers,Cvoid,())
+    ccall((:LLVMExtraInitializeAllDisassemblers, libLLVMExtra),Cvoid,())
 end
 
 function LLVMInitializeNativeTarget()
-    ccall(:LLVMExtraInitializeNativeTarget,LLVMBool,())
+    ccall((:LLVMExtraInitializeNativeTarget, libLLVMExtra),LLVMBool,())
 end
 
 function LLVMInitializeNativeAsmPrinter()
-    ccall(:LLVMExtraInitializeNativeAsmPrinter,LLVMBool,())
+    ccall((:LLVMExtraInitializeNativeAsmPrinter, libLLVMExtra),LLVMBool,())
 end
 
 function LLVMInitializeNativeAsmParser()
-    ccall(:LLVMExtraInitializeNativeAsmParser,LLVMBool,())
+    ccall((:LLVMExtraInitializeNativeAsmParser, libLLVMExtra),LLVMBool,())
 end
 
 function LLVMInitializeNativeDisassembler()
-    ccall(:LLVMExtraInitializeNativeDisassembler,LLVMBool,())
+    ccall((:LLVMExtraInitializeNativeDisassembler, libLLVMExtra),LLVMBool,())
 end
 
 # infrastructure for writing LLVM passes in Julia
@@ -50,31 +50,31 @@ end
 const LLVMPassRef = Ptr{LLVMOpaquePass}
 
 function LLVMAddPass(PM, P)
-    ccall(:LLVMExtraAddPass,Cvoid,
+    ccall((:LLVMExtraAddPass, libLLVMExtra),Cvoid,
         (LLVMPassManagerRef, LLVMPassRef),
         PM, P)
 end
 
 function LLVMCreateModulePass(Name, Callback)
-    ccall(:LLVMExtraCreateModulePass,LLVMPassRef,
+    ccall((:LLVMExtraCreateModulePass, libLLVMExtra),LLVMPassRef,
         (Cstring, Any),
         Name, Callback)
 end
 
 function LLVMCreateFunctionPass(Name, Callback)
-    ccall(:LLVMExtraCreateFunctionPass,LLVMPassRef,
+    ccall((:LLVMExtraCreateFunctionPass, libLLVMExtra),LLVMPassRef,
         (Cstring, Any),
         Name, Callback)
 end
 
 function LLVMCreateModulePass2(Name, Callback, Data)
-    ccall(:LLVMExtraCreateModulePass2,LLVMPassRef,
+    ccall((:LLVMExtraCreateModulePass2, libLLVMExtra),LLVMPassRef,
         (Cstring, Ptr{Cvoid}, Ptr{Cvoid}),
         Name, Callback, Data)
 end
 
 function LLVMCreateFunctionPass2(Name, Callback, Data)
-    ccall(:LLVMExtraCreateFunctionPass2,LLVMPassRef,
+    ccall((:LLVMExtraCreateFunctionPass2, libLLVMExtra),LLVMPassRef,
         (Cstring, Ptr{Cvoid}, Ptr{Cvoid}),
         Name, Callback, Data)
 end
@@ -83,65 +83,65 @@ end
 # various missing functions
 
 function LLVMAddInternalizePassWithExportList(PM, ExportList, Length)
-    ccall(:LLVMExtraAddInternalizePassWithExportList,Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
+    ccall((:LLVMExtraAddInternalizePassWithExportList, libLLVMExtra),Cvoid,(LLVMPassManagerRef,Ptr{Cstring},Csize_t), PM, ExportList, Length)
 end
 
 function LLVMAddTargetLibraryInfoByTriple(Triple, PM)
-    ccall(:LLVMExtraAddTargetLibraryInfoByTiple,Cvoid,(Cstring, LLVMPassManagerRef), Triple, PM)
+    ccall((:LLVMExtraAddTargetLibraryInfoByTiple, libLLVMExtra),Cvoid,(Cstring, LLVMPassManagerRef), Triple, PM)
 end
 
 function LLVMAddNVVMReflectPass(PM, smversion)
-    ccall(:LLVMExtraAddNVVMReflectFunctionPass,Cvoid,(LLVMPassManagerRef, Cuint), PM, smversion)
+    ccall((:LLVMExtraAddNVVMReflectFunctionPass, libLLVMExtra),Cvoid,(LLVMPassManagerRef, Cuint), PM, smversion)
 end
 
 function LLVMAddBarrierNoopPass(PM)
-    ccall(:LLVMExtraAddBarrierNoopPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall((:LLVMExtraAddBarrierNoopPass, libLLVMExtra),Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddDivRemPairsPass(PM)
-    ccall(:LLVMExtraAddDivRemPairsPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall((:LLVMExtraAddDivRemPairsPass, libLLVMExtra),Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopDistributePass(PM)
-    ccall(:LLVMExtraAddLoopDistributePass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall((:LLVMExtraAddLoopDistributePass, libLLVMExtra),Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopFusePass(PM)
-    ccall(:LLVMExtraAddLoopFusePass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall((:LLVMExtraAddLoopFusePass, libLLVMExtra),Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoopLoadEliminationPass(PM)
-    ccall(:LLVMExtraLoopLoadEliminationPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall((:LLVMExtraLoopLoadEliminationPass, libLLVMExtra),Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddLoadStoreVectorizerPass(PM)
-    ccall(:LLVMExtraAddLoadStoreVectorizerPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall((:LLVMExtraAddLoadStoreVectorizerPass, libLLVMExtra),Cvoid,(LLVMPassManagerRef,), PM)
 end
 
 if LLVM.version() < v"12"
 function LLVMAddInstSimplifyPass(PM)
-    ccall(:LLVMExtraAddInstructionSimplifyPass,Cvoid,(LLVMPassManagerRef,), PM)
+    ccall((:LLVMExtraAddInstructionSimplifyPass, libLLVMExtra),Cvoid,(LLVMPassManagerRef,), PM)
 end
 end
 
 function LLVMGetValueContext(V)
-    ccall(:LLVMExtraGetValueContext,LLVMContextRef,(LLVMValueRef,),V)
+    ccall((:LLVMExtraGetValueContext, libLLVMExtra),LLVMContextRef,(LLVMValueRef,),V)
 end
 
 function LLVMGetSourceLocation(V, index, Name, Filename, Line, Column)
-    ccall(:LLVMExtraGetSourceLocation,Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
+    ccall((:LLVMExtraGetSourceLocation, libLLVMExtra),Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
 end
 
 function LLVMExtraAppendToUsed(Mod, Values, Count)
-    ccall(:LLVMExtraAppendToUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
+    ccall((:LLVMExtraAppendToUsed, libLLVMExtra),Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
 end
 
 function LLVMExtraAppendToCompilerUsed(Mod, Values, Count)
-    ccall(:LLVMExtraAppendToCompilerUsed,Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
+    ccall((:LLVMExtraAppendToCompilerUsed, libLLVMExtra),Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
 end
 
 function LLVMExtraAddGenericAnalysisPasses(PM)
-    ccall(:LLVMExtraAddGenericAnalysisPasses, Cvoid, (LLVMPassManagerRef,), PM)
+    ccall((:LLVMExtraAddGenericAnalysisPasses, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 @cenum(LLVMDebugEmissionKind,
