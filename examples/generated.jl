@@ -32,7 +32,7 @@ end
             ret!(builder, val)
         end
 
-        call_function(llvmf, T, Tuple{Ptr{T}, Int}, :(p.ptr, Int(i-1)))
+        call_function(llvmf, T, Tuple{Ptr{T}, Int}, :(p.ptr), :(Int(i-1)))
     end
 end
 

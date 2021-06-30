@@ -57,8 +57,8 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
             ret!(builder, val)
         end
 
-        args = Expr(:tuple, (Expr(:ref, :xs, i) for i in 1:N)...)
-        call_function(llvm_f, T, Tuple{(T for i in 1:N)...}, args)
+        call_function(llvm_f, T, Tuple{(T for i in 1:N)...},
+                      (Expr(:ref, :xs, i) for i in 1:N)...)
     end
 end
 

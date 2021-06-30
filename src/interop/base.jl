@@ -1,8 +1,4 @@
-export JuliaContext, create_function, call_function, isboxed, isghosttype
-
-JuliaContext() =
-    error("Julia 1.6 does not have a global LLVM context; use the do-block version of this function to instantiate a temporary context (and use it throughout your code instead of assuming and accessing a single global context).")
-@deprecate JuliaContext(f::Base.Callable) Context(f)
+export create_function, call_function, isboxed, isghosttype
 
 """
     create_function(rettyp::LLVMType, argtyp::Vector{LLVMType}, [name::String])
@@ -11,7 +7,7 @@ Create an LLVM function, given its return type `rettyp` and a vector of argument
 `argtyp`. The function is marked for inlining, to be embedded in the caller's body.
 Returns both the newly created function, and its type.
 """
-function create_function(rettyp::LLVMType=LLVM.VoidType(JuliaContext()),
+function create_function(rettyp::LLVMType=LLVM.VoidType(Context()),
                          argtyp::Vector{<:LLVMType}=LLVMType[],
                          name::String="entry")
     ctx = context(rettyp)
@@ -26,23 +22,21 @@ function create_function(rettyp::LLVMType=LLVM.VoidType(JuliaContext()),
 end
 
 """
-    call_function(f::LLVM.Function, rettyp::Type, argtyp::Type, args::Expr)
+    call_function(f::LLVM.Function, rettyp::Type, argtyp::Type, args...)
 
 Generate a call to an LLVM function `f`, given its return type `rettyp` and a tuple-type for
 the arguments. The arguments should be passed as a tuple expression containing the argument
 values (eg. `:((1,2))`), which will be splatted into the call to the function.
 """
 function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=Tuple{},
-                       args::Expr=:())
-    # TODO: make args a Vararg{Expr} for the next breaking release
+                       args...)
     mod = LLVM.parent(llvmf)
     ir = string(mod)
     fn = LLVM.name(llvmf)
     @assert !isempty(fn)
     quote
         Base.@_inline_meta
-        # NOTE: `$args...` stopped being statically evaluatable after JuliaLang/julia#38732
-        Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $(args.args...))
+        Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $(args...))
     end
 end
 
@@ -58,11 +52,12 @@ function isboxed(typ::Type)
 end
 
 """
-    convert(LLVMType, typ::Type, ctx::Context; allow_boxed=true)
+    convert(LLVMType, typ::Type, [ctx::Context]; allow_boxed=true)
 
 Convert a Julia type `typ` to its LLVM representation. Fails if the type would be boxed.
+If `ctx` is specified, the return LLVM type will be valid in that context.
 """
-function Base.convert(::Type{LLVMType}, typ::Type, ctx::Context=JuliaContext();
+function Base.convert(::Type{LLVMType}, typ::Type, ctx::Union{Nothing,Context}=nothing;
                       allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
     llvmtyp = LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
@@ -71,7 +66,7 @@ function Base.convert(::Type{LLVMType}, typ::Type, ctx::Context=JuliaContext();
         error("Conversion of boxed type $typ is not allowed")
     end
 
-    if ctx != context(llvmtyp)
+    if ctx !== nothing && ctx != context(llvmtyp)
         # FIXME: Julia currently doesn't offer an API to fetch types in a specific context
 
         if llvmtyp == LLVM.VoidType(context(llvmtyp))

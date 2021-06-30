@@ -37,7 +37,7 @@ using Core: LLVMPtr
             ret!(builder, ld)
         end
 
-        call_function(llvm_f, T, Tuple{LLVMPtr{T,A}, Int}, :((ptr, Int(i-one(i)))))
+        call_function(llvm_f, T, Tuple{LLVMPtr{T,A}, Int}, :ptr, :(Int(i-one(i))))
     end
 end
 
@@ -74,7 +74,7 @@ end
         end
 
         call_function(llvm_f, Cvoid, Tuple{LLVMPtr{T,A}, T, Int},
-                      :((ptr, convert(T,x), Int(i-one(i)))))
+                      :ptr, :(convert(T,x)), :(Int(i-one(i))))
     end
 end
 
@@ -189,7 +189,7 @@ Base.signed(x::LLVMPtr) = Int(x)
             end
         end
 
-        call_function(llvm_f, rettyp, argtt, :(($(argexprs...),)))
+        call_function(llvm_f, rettyp, argtt, argexprs...)
     end
 end
 

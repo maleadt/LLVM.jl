@@ -24,8 +24,7 @@ export @asmcall
             end
         end
 
-        call_function(llvm_f, rettyp, argtyp,
-                      Expr(:tuple, (:(args[$i]) for i in 1:length(args))...))
+        call_function(llvm_f, rettyp, argtyp, (:(args[$i]) for i in 1:length(args))...)
     end
 end
 

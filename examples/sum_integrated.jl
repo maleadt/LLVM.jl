@@ -28,7 +28,7 @@ Context() do ctx
 
     # make Julia compile and execute the function
     push!(function_attributes(sum), EnumAttribute("alwaysinline"))
-    @eval call_sum(x, y) = $(call_function(sum, Int32, Tuple{Int32, Int32}, :(x, y)))
+    @eval call_sum(x, y) = $(call_function(sum, Int32, Tuple{Int32, Int32}, :x, :y))
 end
 
 @test call_sum(x, y) == x + y
