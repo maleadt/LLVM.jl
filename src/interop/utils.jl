@@ -1,6 +1,6 @@
 export tbaa_make_child, tbaa_addrspace
 
-function tbaa_make_child(name::String, ctx::LLVM.Context=JuliaContext(); constant::Bool=false)
+function tbaa_make_child(name::String, ctx::LLVM.Context=Context(); constant::Bool=false)
     tbaa_root = MDNode([MDString("custom_tbaa", ctx)], ctx)
     tbaa_struct_type =
         MDNode([MDString("custom_tbaa_$name", ctx),
@@ -15,4 +15,4 @@ function tbaa_make_child(name::String, ctx::LLVM.Context=JuliaContext(); constan
     return tbaa_access_tag
 end
 
-tbaa_addrspace(as, ctx::LLVM.Context=JuliaContext()) = tbaa_make_child("addrspace($(as))", ctx)
+tbaa_addrspace(as, ctx::LLVM.Context=Context()) = tbaa_make_child("addrspace($(as))", ctx)

@@ -3,7 +3,7 @@ export @asmcall
 @generated function _asmcall(::Val{asm}, ::Val{constraints}, ::Val{side_effects},
                              ::Val{rettyp}, ::Val{argtyp}, args...) where
                             {asm, constraints, side_effects, rettyp, argtyp}
-    JuliaContext() do ctx
+    Context() do ctx
         # create a function
         llvm_rettyp = convert(LLVMType, rettyp, ctx)
         llvm_argtyp = LLVMType[convert.(LLVMType, [argtyp.parameters...], Ref(ctx))...]

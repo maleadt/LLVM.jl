@@ -261,11 +261,7 @@ LLVM.Module("SomeModule", ctx) do mod
     @check_ir nuwneginst "sub nuw i32 0, %0"
 
     fneginst = fneg!(builder, float1)
-    if LLVM.version() < v"10.0.0"
-        @check_ir fneginst "fsub float -0.000000e+00, %2"
-    else
-        @check_ir fneginst "fneg float %2"
-    end
+    @check_ir fneginst "fneg float %2"
 
     notinst = not!(builder, int1)
     @check_ir notinst "xor i32 %0, -1"

@@ -69,7 +69,7 @@ end
 function add_transform_info!(pm::PassManager, tm::Union{Nothing,TargetMachine}=nothing)
     if tm !== nothing
         API.LLVMAddAnalysisPasses(tm, pm)
-    elseif VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")
+    else
         API.LLVMExtraAddGenericAnalysisPasses(pm)
     end
 end

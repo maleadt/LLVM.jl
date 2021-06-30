@@ -43,23 +43,6 @@ LLVM.Module("SomeModule", ctx) do mod
             run!(fpm, fn)
         end
     end
-
-    # basic block pass
-
-    function runOnBasicBlock(cur_bb::BasicBlock)
-        @test cur_bb == bb
-        return false
-    end
-
-    if VERSION < v"1.4.0-DEV.589"
-        let pass = BasicBlockPass("SomeBasicBlockPass", runOnBasicBlock)
-
-            FunctionPassManager(mod) do fpm
-                add!(fpm, pass)
-                run!(fpm, fn)
-            end
-        end
-    end
 end
 end
 end

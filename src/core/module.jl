@@ -64,18 +64,11 @@ inline_asm!(mod::Module, asm::String) =
 
 context(mod::Module) = Context(API.LLVMGetModuleContext(mod))
 
-if VERSION >= v"1.5" && !(v"1.6-" <= VERSION < v"1.6.0-DEV.90")
-
 set_used!(mod::Module, values::GlobalVariable...) =
     API.LLVMExtraAppendToUsed(mod, collect(values), length(values))
 
 set_compiler_used!(mod::Module, values::GlobalVariable...) =
     API.LLVMExtraAppendToCompilerUsed(mod, collect(values), length(values))
-
-else
-set_used!(mod::Module, values::GlobalVariable...) = nothing
-set_compiler_used!(mod::Module, values::GlobalVariable...) = nothing
-end
 
 
 ## type iteration
@@ -188,8 +181,6 @@ end
 ## module flag iteration
 # TODO: doesn't actually iterate, since we can't list the available keys
 
-if version() >= v"8.0"
-
 export flags
 
 struct ModuleFlagDict <: AbstractDict{String,Metadata}
@@ -210,6 +201,4 @@ end
 function Base.setindex!(iter::ModuleFlagDict, val::Metadata,
                         (name, behavior)::Tuple{String, API.LLVMModuleFlagBehavior})
     API.LLVMAddModuleFlag(iter.mod, behavior, name, length(name), val)
-end
-
 end
