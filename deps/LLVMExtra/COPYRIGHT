@@ -1,0 +1,18 @@
+Short version for non-lawyers:
+
+The LLVMExtra Project is dual-licensed under Apache 2.0 and MIT
+terms.
+
+
+Longer version:
+
+Copyrights in the LLVMExtra project are retained by their contributors. No
+copyright assignment is required to contribute to the LLVMExtra project.
+
+Some files include explicit copyright notices and/or license notices.
+For full authorship information, see the version control history.
+
+Except as otherwise noted (below and/or in individual files), Rust is
+licensed under the Apache License, Version 2.0 with LLVM Exceptions <LICENSE-APACHE> or
+<https://releases.llvm.org/12.0.0/LICENSE.TXT> or the MIT license
+<LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your option.
