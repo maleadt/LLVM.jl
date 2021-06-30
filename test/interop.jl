@@ -20,7 +20,7 @@ using InteractiveUtils
             ret!(builder, val)
         end
 
-        call_function(f, Int, Tuple{Int}, :((i,)))
+        call_function(f, Int, Tuple{Int}, :i)
     end
 end
 

@@ -26,23 +26,21 @@ function create_function(rettyp::LLVMType=LLVM.VoidType(JuliaContext()),
 end
 
 """
-    call_function(f::LLVM.Function, rettyp::Type, argtyp::Type, args::Expr)
+    call_function(f::LLVM.Function, rettyp::Type, argtyp::Type, args...)
 
 Generate a call to an LLVM function `f`, given its return type `rettyp` and a tuple-type for
 the arguments. The arguments should be passed as a tuple expression containing the argument
 values (eg. `:((1,2))`), which will be splatted into the call to the function.
 """
 function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=Tuple{},
-                       args::Expr=:())
-    # TODO: make args a Vararg{Expr} for the next breaking release
+                       args...)
     mod = LLVM.parent(llvmf)
     ir = string(mod)
     fn = LLVM.name(llvmf)
     @assert !isempty(fn)
     quote
         Base.@_inline_meta
-        # NOTE: `$args...` stopped being statically evaluatable after JuliaLang/julia#38732
-        Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $(args.args...))
+        Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $(args...))
     end
 end
 
