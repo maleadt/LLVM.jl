@@ -253,3 +253,14 @@ void LLVMExtraAddGenericAnalysisPasses(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createTargetTransformInfoWrapperPass(TargetIRAnalysis()));
 }
+
+// Bug fixes (TODO: upstream these)
+
+void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal) {
+  unwrap<GlobalVariable>(GlobalVar)
+    ->setInitializer(ConstantVal ? unwrap<Constant>(ConstantVal) : nullptr);
+}
+
+void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn) {
+  unwrap<Function>(Fn)->setPersonalityFn(PersonalityFn ? unwrap<Constant>(PersonalityFn) : nullptr);
+}
