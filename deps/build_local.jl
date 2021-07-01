@@ -1,5 +1,5 @@
 # Invoke with
-# `julia -e 'using Pkg; pkg"activate --temp"; pkg"add Pkg Scratch Preferences LLVMExtra_jll"' -L build_local.jl`
+# `julia --project=deps deps/build_local.jl`
 
 using Pkg, Scratch, Preferences, LLVMExtra_jll
 
@@ -26,13 +26,6 @@ end
 # Tell LLVMExtra_jll to load our library instead of the default artifact one
 set_preferences!(
     joinpath(dirname(@__DIR__), "LocalPreferences.toml"),
-    "LLVMExtra_jll",
-    "libLLVMExtra_path" => lib_path;
-    force=true,
-)
-
-set_preferences!(
-    joinpath(dirname(@__DIR__), "test", "LocalPreferences.toml"),
     "LLVMExtra_jll",
     "libLLVMExtra_path" => lib_path;
     force=true,

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 jobs:
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ matrix.libLLVMExtra }} libLLVMExtra
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -21,9 +21,9 @@ jobs:
           - windows-latest
         arch:
           - x64
-        build_LLVMExtra:
-          - true
-          - false
+        libLLVMExtra:
+          - local
+          - packaged
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
@@ -40,12 +40,11 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
-      - name: Build LLVMExtra
-        if: ${{ matrix.build_LLVMExtra && runner.os != 'Windows'}}
+      - name: Build libLLVMExtra
+        if: ${{ matrix.libLLVMExtra == 'local' && runner.os != 'Windows'}}
         run: |
-          pushd deps
-          julia -e 'using Pkg; pkg"activate --temp"; pkg"add Pkg Scratch Preferences LLVMExtra_jll"' -L build_local.jl
-          popd
+          julia --project=deps -e 'using Pkg; Pkg.instantiate()'
+          julia --project=deps deps/build_local.jl
       - uses: julia-actions/julia-buildpkg@latest
       - run: |
           git config --global user.name Tester
