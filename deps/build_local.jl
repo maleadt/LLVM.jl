@@ -7,6 +7,7 @@ LLVMExtra_jll = Base.UUID("dad2f222-ce93-54a1-a47d-0025e8a3acab")
 using Pkg, Scratch, Preferences, Libdl
 
 # 1. Ensure that an appropriate LLVM_full_jll is installed
+Pkg.activate(; temp=true)
 llvm_assertions = try
     cglobal(:_ZN4llvm24DisableABIBreakingChecksE, Cvoid)
     false
