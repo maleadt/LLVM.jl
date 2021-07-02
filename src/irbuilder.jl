@@ -37,12 +37,16 @@ Base.insert!(builder::Builder, inst::Instruction) =
 Base.insert!(builder::Builder, inst::Instruction, name::String) =
     API.LLVMInsertIntoBuilderWithName(builder, inst, name)
 
-debuglocation(builder::Builder) =
-    MetadataAsValue(API.LLVMGetCurrentDebugLocation(builder))
+function debuglocation(builder::Builder)
+    ref = API.LLVMGetCurrentDebugLocation2(builder)
+    ref == C_NULL ? nothing : Metadata(ref)
+end
 debuglocation!(builder::Builder) =
-    API.LLVMSetCurrentDebugLocation(builder, convert(API.LLVMValueRef, C_NULL))
+    API.LLVMSetCurrentDebugLocation2(builder, C_NULL)
+debuglocation!(builder::Builder, loc::Metadata) =
+    API.LLVMSetCurrentDebugLocation2(builder, loc)
 debuglocation!(builder::Builder, loc::MetadataAsValue) =
-    API.LLVMSetCurrentDebugLocation(builder, loc)
+    API.LLVMSetCurrentDebugLocation2(builder, Metadata(loc))
 debuglocation!(builder::Builder, inst::Instruction) =
     API.LLVMSetInstDebugLocation(builder, inst)
 
