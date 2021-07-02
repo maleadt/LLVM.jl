@@ -7,34 +7,47 @@ on:
   workflow_dispatch:
 jobs:
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ matrix.libLLVMExtra }} libLLVMExtra
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ matrix.libLLVMExtra }} libLLVMExtra - assertions=${{ matrix.assertions }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        version:
-          - '1.6'
-          - 'nightly'
-        os:
-          - ubuntu-latest
-          - macOS-latest
-          - windows-latest
-        arch:
-          - x64
-        libLLVMExtra:
-          - local
-          - packaged
+        version: ['1.6', 'nightly']
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        arch: [x64]
+        libLLVMExtra: [local, packaged]
+        assertions: [false]
         exclude:
           # our simple build_local.jl cannot build libLLVMExtra on Windows
           - os: windows-latest
             arch: x64
             libLLVMExtra: local
+        include:
+          # specially-handled assertions build
+          - os: ubuntu-latest
+            arch: x64
+            libLLVMExtra: local
+            version: '1.8'
+            assertions: true
     steps:
       - uses: actions/checkout@v2
+      # install Julia
       - uses: julia-actions/setup-julia@v1
+        if: ${{ ! matrix.assertions }}
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+      - name: Download Julia with assertions
+        if: ${{ matrix.assertions }}
+        env:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+        run: |
+          wget https://julialangnightlies.s3.amazonaws.com/assert_bin/linux/$arch/$version/julia-latest-linux64.tar.gz
+          tar -xvzf julia-latest-linux64.tar.gz
+          rm -rf julia-latest-linux64.tar.gz
+          echo $PWD/julia-*/bin >> $GITHUB_PATH
+      # prepare
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
@@ -51,7 +64,9 @@ jobs:
           julia --project=deps -e 'using Pkg; Pkg.instantiate()'
           julia --project=deps deps/build_local.jl
       - uses: julia-actions/julia-buildpkg@v1
+      # test
       - uses: julia-actions/julia-runtest@v1
+      # process results
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v1
         with:
