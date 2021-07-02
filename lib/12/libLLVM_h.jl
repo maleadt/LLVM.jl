@@ -4859,7 +4859,7 @@ end
     LLVMDWARFEmissionLineTablesOnly = 2
 end
 
-@cenum __JL_Ctag_250::UInt32 begin
+@cenum LLVMMetadataKind::UInt32 begin
     LLVMMDStringMetadataKind = 0
     LLVMConstantAsMetadataMetadataKind = 1
     LLVMLocalAsMetadataMetadataKind = 2
@@ -4895,8 +4895,6 @@ end
     LLVMDIStringTypeMetadataKind = 32
     LLVMDIGenericSubrangeMetadataKind = 33
 end
-
-const LLVMMetadataKind = Cuint
 
 const LLVMDWARFTypeEncoding = Cuint
 
