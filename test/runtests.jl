@@ -1,6 +1,6 @@
-# Working around https://github.com/JuliaLang/Pkg.jl/issues/2500 for CI
-test_project = first(Base.load_path())
-preferences_file = "LocalPreferences.toml"
+# HACK: work around Pkg.jl#2500
+test_project = Base.active_project()
+preferences_file = joinpath(dirname(@__DIR__), "LocalPreferences.toml")
 test_preferences_file = joinpath(dirname(test_project), "LocalPreferences.toml")
 if isfile(preferences_file) && !isfile(test_preferences_file)
     cp(preferences_file, test_preferences_file)
@@ -10,7 +10,7 @@ using LLVM
 using LLVMExtra_jll
 using Test
 
-@info "Using libLLVMExtra" path=LLVMExtra_jll.libLLVMExtra
+@info "Using libLLVMExtra from $(LLVM.API.libLLVMExtra)"
 
 @testset "LLVM" begin
 
@@ -67,7 +67,7 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 include("debuginfo.jl")
-if LLVM.has_orc_v1() 
+if LLVM.has_orc_v1()
     include("orc.jl")
 end
 

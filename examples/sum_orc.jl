@@ -4,16 +4,18 @@ using Test
 
 using LLVM
 
-if !LLVM.has_orc_v1()
-    exit()
-end
-
 if length(ARGS) == 2
     x, y = parse.([Int32], ARGS[1:2])
 else
     x = Int32(1)
     y = Int32(2)
 end
+
+if !LLVM.has_orc_v1()
+
+@warn "ORCv1 is not supported on this configuration"
+
+else
 
 Context() do ctx
     # Setup jit
@@ -72,3 +74,5 @@ Context() do ctx
 end
 
 @test call_sum(x, y) == x + y
+
+end

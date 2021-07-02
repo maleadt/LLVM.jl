@@ -150,3 +150,11 @@ end
     LLVMDebugEmissionKindLineTablesOnly = 2,
     LLVMDebugEmissionKindDebugDirectivesOnly = 3,
 )
+
+function LLVMExtraSetInitializer(GlobalVar, ConstantVal)
+    ccall((:LLVMExtraSetInitializer, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), GlobalVar, ConstantVal)
+end
+
+function LLVMExtraSetPersonalityFn(Fn, PersonalityFn)
+    ccall((:LLVMExtraSetPersonalityFn, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), Fn, PersonalityFn)
+end

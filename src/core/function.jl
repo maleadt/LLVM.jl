@@ -17,7 +17,7 @@ function personality(f::Function)
     return has_personality ? Function(API.LLVMGetPersonalityFn(f)) : nothing
 end
 personality!(f::Function, persfn::Union{Nothing,Function}) =
-    API.LLVMSetPersonalityFn(f, persfn===nothing ? C_NULL : persfn)
+    API.LLVMExtraSetPersonalityFn(f, persfn===nothing ? C_NULL : persfn)
 
 callconv(f::Function) = API.LLVMGetFunctionCallConv(f)
 callconv!(f::Function, cc) = API.LLVMSetFunctionCallConv(f, cc)

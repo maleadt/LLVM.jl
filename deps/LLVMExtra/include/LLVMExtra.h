@@ -58,5 +58,9 @@ void LLVMExtraAppendToCompilerUsed(LLVMModuleRef Mod,
                                    size_t Count);
 void LLVMExtraAddGenericAnalysisPasses(LLVMPassManagerRef PM);
 
+// Bug fixes
+void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);
+void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn);
+
 LLVM_C_EXTERN_C_END
 #endif

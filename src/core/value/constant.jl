@@ -369,9 +369,9 @@ function initializer(gv::GlobalVariable)
     init == C_NULL ? nothing : Value(init)
 end
 initializer!(gv::GlobalVariable, val::Constant) =
-  API.LLVMSetInitializer(gv, val)
+  API.LLVMExtraSetInitializer(gv, val)
 initializer!(gv::GlobalVariable, ::Nothing) =
-  API.LLVMSetInitializer(gv, C_NULL)
+  API.LLVMExtraSetInitializer(gv, C_NULL)
 
 isthreadlocal(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsThreadLocal(gv))
 threadlocal!(gv::GlobalVariable, bool) =

@@ -21,12 +21,12 @@ LLVM.Module("SomeModule", ctx) do mod
     position!(builder, entrybb)
     @assert position(builder) == entrybb
 
-    loc = debuglocation(builder)
-    md = MDNode([MDString("SomeMDString", ctx)], ctx)
-    debuglocation!(builder, md)
-    @test debuglocation(builder) == md
-    debuglocation!(builder)
+    @test debuglocation(builder) === nothing
+    loc = DILocation(ctx, 1, 1)
+    debuglocation!(builder, loc)
     @test debuglocation(builder) == loc
+    debuglocation!(builder)
+    @test debuglocation(builder) == nothing
 
     retinst1 = ret!(builder)
     @check_ir retinst1 "ret void"
