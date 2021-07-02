@@ -17,14 +17,13 @@ filter!(file -> readline(file) != "# EXCLUDE FROM TESTING", examples)
 filter!(file -> !occursin("Kaleidoscope", file), examples)
 
 cd(examples_dir) do
-    examples = relpath.(examples, Ref(examples_dir))
     @testset for example in examples
-        cmd = Base.julia_cmd()
-        if Base.JLOptions().project != C_NULL
-            cmd = `$cmd --project=$(unsafe_string(Base.JLOptions().project))`
+        mod = @eval module $(gensym()) end
+        @eval mod begin
+            redirect_stdout(devnull) do
+                include($example)
+            end
         end
-
-        @test success(pipeline(`$cmd $example`, stderr=stderr))
     end
 end
 
