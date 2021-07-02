@@ -34,9 +34,9 @@ version = "1.3.0"
 
 [[LLVMExtra_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "14a66c356635a678830ab38e8fc32f00a11c0a95"
+git-tree-sha1 = "146382df21a14a60348f8377e5eac0669794a47b"
 uuid = "dad2f222-ce93-54a1-a47d-0025e8a3acab"
-version = "0.0.1+0"
+version = "0.0.2+0"
 
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
