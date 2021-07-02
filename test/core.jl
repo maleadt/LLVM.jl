@@ -651,6 +651,14 @@ Context() do ctx
     @test ops[1] == str
 end
 
+Context() do ctx
+    loc = DILocation(ctx, 2, 3)
+    @test loc.line == 2
+    @test loc.column == 3
+    @test loc.scope === nothing
+    @test loc.inlined_at === nothing
+end
+
 end
 
 
