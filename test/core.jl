@@ -1153,10 +1153,6 @@ LLVM.Module("SomeModule", ctx) do mod
         @test isempty(md)
         @test !haskey(md, LLVM.MD_dbg)
     end
-    let val = ConstantInt(42, ctx)
-        md = Metadata(val)
-        @test first(operands(LLVM.Value(md, ctx))) == val
-    end
 
     @test retinst in instructions(bb3)
     delete!(bb3, retinst)
