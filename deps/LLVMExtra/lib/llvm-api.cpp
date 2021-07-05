@@ -26,95 +26,95 @@ using namespace llvm::legacy;
 //
 // The LLVMInitialize* functions and friends are defined `static inline`
 
-void LLVMExtraInitializeAllTargetInfos()
+void LLVMInitializeAllTargetInfos()
 {
     InitializeAllTargetInfos();
 }
 
-void LLVMExtraInitializeAllTargets()
+void LLVMInitializeAllTargets()
 {
     InitializeAllTargets();
 }
 
-void LLVMExtraInitializeAllTargetMCs()
+void LLVMInitializeAllTargetMCs()
 {
     InitializeAllTargetMCs();
 }
 
-void LLVMExtraInitializeAllAsmPrinters()
+void LLVMInitializeAllAsmPrinters()
 {
     InitializeAllAsmPrinters();
 }
 
-void LLVMExtraInitializeAllAsmParsers()
+void LLVMInitializeAllAsmParsers()
 {
     InitializeAllAsmParsers();
 }
 
-void LLVMExtraInitializeAllDisassemblers()
+void LLVMInitializeAllDisassemblers()
 {
     InitializeAllDisassemblers();
 }
 
-LLVMBool LLVMExtraInitializeNativeTarget()
+LLVMBool LLVMInitializeNativeTarget()
 {
     return InitializeNativeTarget();
 }
 
-LLVMBool LLVMExtraInitializeNativeAsmParser()
+LLVMBool LLVMInitializeNativeAsmParser()
 {
     return InitializeNativeTargetAsmParser();
 }
 
-LLVMBool LLVMExtraInitializeNativeAsmPrinter()
+LLVMBool LLVMInitializeNativeAsmPrinter()
 {
     return InitializeNativeTargetAsmPrinter();
 }
 
-LLVMBool LLVMExtraInitializeNativeDisassembler()
+LLVMBool LLVMInitializeNativeDisassembler()
 {
     return InitializeNativeTargetDisassembler();
 }
 
 // Various missing passes (being upstreamed)
 
-void LLVMExtraAddBarrierNoopPass(LLVMPassManagerRef PM)
+void LLVMAddBarrierNoopPass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createBarrierNoopPass());
 }
 
-void LLVMExtraAddDivRemPairsPass(LLVMPassManagerRef PM)
+void LLVMAddDivRemPairsPass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createDivRemPairsPass());
 }
 
-void LLVMExtraAddLoopDistributePass(LLVMPassManagerRef PM)
+void LLVMAddLoopDistributePass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createLoopDistributePass());
 }
 
-void LLVMExtraAddLoopFusePass(LLVMPassManagerRef PM)
+void LLVMAddLoopFusePass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createLoopFusePass());
 }
 
-void LLVMExtraLoopLoadEliminationPass(LLVMPassManagerRef PM)
+void LLVMAddLoopLoadEliminationPass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createLoopLoadEliminationPass());
 }
 
-void LLVMExtraAddLoadStoreVectorizerPass(LLVMPassManagerRef PM)
+void LLVMAddLoadStoreVectorizerPass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createLoadStoreVectorizerPass());
 }
 
-void LLVMExtraAddVectorCombinePass(LLVMPassManagerRef PM)
+void LLVMAddVectorCombinePass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createVectorCombinePass());
 }
 
 #if LLVM_VERSION_MAJOR < 12
-void LLVMExtraAddInstructionSimplifyPass(LLVMPassManagerRef PM)
+void LLVMAddInstructionSimplifyPass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createInstSimplifyLegacyPass());
 }
@@ -125,7 +125,7 @@ void LLVMExtraAddInstructionSimplifyPass(LLVMPassManagerRef PM)
 typedef struct LLVMOpaquePass *LLVMPassRef;
 DEFINE_STDCXX_CONVERSION_FUNCTIONS(Pass, LLVMPassRef)
 
-void LLVMExtraAddPass(LLVMPassManagerRef PM, LLVMPassRef P)
+void LLVMAddPass(LLVMPassManagerRef PM, LLVMPassRef P)
 {
     unwrap(PM)->add(unwrap(P));
 }
@@ -186,35 +186,35 @@ private:
 }; // namespace
 
 LLVMPassRef
-LLVMExtraCreateModulePass2(const char *Name, LLVMPassCallback Callback, void *Data)
+LLVMCreateModulePass2(const char *Name, LLVMPassCallback Callback, void *Data)
 {
     return wrap(new JuliaModulePass(Name, Callback, Data));
 }
 
 LLVMPassRef
-LLVMExtraCreateFunctionPass2(const char *Name, LLVMPassCallback Callback, void *Data)
+LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback, void *Data)
 {
     return wrap(new JuliaFunctionPass(Name, Callback, Data));
 }
 
 // Various missing functions
 
-unsigned int LLVMExtraGetDebugMDVersion()
+unsigned int LLVMGetDebugMDVersion()
 {
     return DEBUG_METADATA_VERSION;
 }
 
-LLVMContextRef LLVMExtraGetValueContext(LLVMValueRef V)
+LLVMContextRef LLVMGetValueContext(LLVMValueRef V)
 {
     return wrap(&unwrap(V)->getContext());
 }
 
-void LLVMExtraAddTargetLibraryInfoByTiple(const char *T, LLVMPassManagerRef PM)
+void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(new TargetLibraryInfoWrapperPass(Triple(T)));
 }
 
-void LLVMExtraAddInternalizePassWithExportList(
+void LLVMAddInternalizePassWithExportList(
     LLVMPassManagerRef PM, const char **ExportList, size_t Length)
 {
     auto PreserveFobj = [=](const GlobalValue &GV)
