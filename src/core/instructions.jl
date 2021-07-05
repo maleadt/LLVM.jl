@@ -86,11 +86,11 @@ Base.haskey(md::InstructionMetadataDict, kind::MD) =
 function Base.getindex(md::InstructionMetadataDict, kind::MD)
     objref = API.LLVMGetMetadata(md.inst, kind)
     objref == C_NULL && throw(KeyError(name))
-    return MetadataAsValue(objref)
+    return Metadata(MetadataAsValue(objref))
   end
 
-Base.setindex!(md::InstructionMetadataDict, node::MetadataAsValue, kind::MD) =
-    API.LLVMSetMetadata(md.inst, kind, node)
+Base.setindex!(md::InstructionMetadataDict, node::Metadata, kind::MD) =
+    API.LLVMSetMetadata(md.inst, kind, Value(node, context(md.inst)))
 
 Base.delete!(md::InstructionMetadataDict, kind::MD) =
     API.LLVMSetMetadata(md.inst, kind, C_NULL)

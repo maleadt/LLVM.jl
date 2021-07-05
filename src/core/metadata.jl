@@ -34,6 +34,7 @@ end
 end
 identify(::Type{Value}, ::Val{API.LLVMMetadataAsValueValueKind}) = MetadataAsValue
 
+# NOTE: we can't do this automatically, as we can't query the context of metadata...
 Value(md::Metadata, ctx::Context=GlobalContext()) =
     MetadataAsValue(API.LLVMMetadataAsValue(ctx, md))
 
