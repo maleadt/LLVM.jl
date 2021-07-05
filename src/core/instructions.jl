@@ -85,7 +85,7 @@ Base.haskey(md::InstructionMetadataDict, kind::MD) =
 
 function Base.getindex(md::InstructionMetadataDict, kind::MD)
     objref = API.LLVMGetMetadata(md.inst, kind)
-    objref == C_NULL && throw(KeyError(name))
+    objref == C_NULL && throw(KeyError(kind))
     return Metadata(MetadataAsValue(objref))
   end
 
