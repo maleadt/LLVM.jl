@@ -254,6 +254,16 @@ void LLVMExtraAddGenericAnalysisPasses(LLVMPassManagerRef PM)
     unwrap(PM)->add(createTargetTransformInfoWrapperPass(TargetIRAnalysis()));
 }
 
+template <typename DIT> DIT *unwrapDI(LLVMMetadataRef Ref) {
+  return (DIT *)(Ref ? unwrap<MDNode>(Ref) : nullptr);
+}
+
+const char *LLVMExtraDIScopeGetName(LLVMMetadataRef File, unsigned *Len) {
+  auto Name = unwrapDI<DIScope>(File)->getName();
+  *Len = Name.size();
+  return Name.data();
+}
+
 // Bug fixes (TODO: upstream these)
 
 void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal) {

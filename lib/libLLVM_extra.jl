@@ -147,6 +147,15 @@ end
     LLVMDebugEmissionKindDebugDirectivesOnly = 3,
 )
 
+function LLVMExtraDIScopeGetName(Scope, Len)
+    ccall((:LLVMExtraDIScopeGetName, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), Scope, Len)
+end
+
+
+# bug fixes
+
+# TODO: upstream
+
 function LLVMExtraSetInitializer(GlobalVar, ConstantVal)
     ccall((:LLVMExtraSetInitializer, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), GlobalVar, ConstantVal)
 end

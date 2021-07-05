@@ -653,10 +653,10 @@ end
 
 Context() do ctx
     loc = DILocation(ctx, 2, 3)
-    @test loc.line == 2
-    @test loc.column == 3
-    #@test loc.scope === nothing    # trips up an assertion
-    @test loc.inlined_at === nothing
+    @test LLVM.line(loc) == 2
+    @test LLVM.column(loc) == 3
+    #@test LLVM.scope(loc) === nothing    # trips up an assertion
+    @test LLVM.inlined_at(loc) === nothing
 end
 
 end

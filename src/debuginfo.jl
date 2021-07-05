@@ -7,20 +7,17 @@ export DILocation
 end
 identify(::Type{Metadata}, ::Val{API.LLVMDILocationMetadataKind}) = DILocation
 
-function Base.getproperty(location::DILocation, property::Symbol)
-    if property == :line
-        Int(API.LLVMDILocationGetLine(location))
-    elseif property == :column
-        Int(API.LLVMDILocationGetColumn(location))
-    elseif property === :scope
-        ref = API.LLVMDILocationGetScope(location)
-        ref == C_NULL ? nothing : Metadata(ref)::DIScope
-    elseif property === :inlined_at
-        ref = API.LLVMDILocationGetInlinedAt(location)
-        ref == C_NULL ? nothing : Metadata(ref)::DIScope
-    else
-        getfield(location, property)
-    end
+line(location::DILocation) = Int(API.LLVMDILocationGetLine(location))
+column(location::DILocation) = Int(API.LLVMDILocationGetColumn(location))
+
+function scope(location::DILocation)
+    ref = API.LLVMDILocationGetScope(location)
+    ref == C_NULL ? nothing : Metadata(ref)::DIScope
+end
+
+function inlined_at(location::DILocation)
+    ref = API.LLVMDILocationGetInlinedAt(location)
+    ref == C_NULL ? nothing : Metadata(ref)::DILocation
 end
 
 
@@ -48,19 +45,12 @@ for var in (:Local, :Global)
     end
 end
 
-function Base.getproperty(var::DIVariable, property::Symbol)
-    if property == :file
-        ref = API.LLVMDIVariableGetFile(var)
-        ref == C_NULL ? nothing : Metadata(ref)::DIFile
-    elseif property === :scope
-        ref = API.LLVMDIVariableGetScope(var)
-        ref == C_NULL ? nothing : Metadata(ref)::DIScope
-    elseif property == :line
-        Int(API.LLVMDIVariableGetLine(var))
-    else
-        getfield(var, property)
-    end
+function file(var::DIVariable)
+    ref = API.LLVMDIVariableGetFile(var)
+    ref == C_NULL ? nothing : Metadata(ref)::DIFile
 end
+
+line(var::DIVariable) = Int(API.LLVMDIVariableGetLine(var))
 
 
 ## scopes
@@ -68,6 +58,14 @@ end
 export DIScope, DILocalScope
 
 abstract type DIScope <: DINode end
+
+file(scope::DIScope) = DIFile(API.LLVMDIScopeGetFile(scope))
+
+function name(scope::DIScope)
+    len = Ref{Cuint}()
+    data = API.LLVMExtraDIScopeGetName(scope, len)
+    unsafe_string(convert(Ptr{Int8}, data), len[])
+end
 
 abstract type DILocalScope <: DIScope end
 
@@ -81,22 +79,22 @@ export DIFile
 end
 identify(::Type{Metadata}, ::Val{API.LLVMDIFileMetadataKind}) = DIFile
 
-function Base.getproperty(file::DIFile, property::Symbol)
-    if property == :directory
-        len = Ref{Cuint}()
-        data = API.LLVMDIFileGetDirectory(file, len)
-        unsafe_string(convert(Ptr{Int8}, data), len[])
-    elseif property == :filename
-        len = Ref{Cuint}()
-        data = API.LLVMDIFileGetFilename(file, len)
-        unsafe_string(convert(Ptr{Int8}, data), len[])
-    elseif property == :source
-        len = Ref{Cuint}()
-        data = API.LLVMDIFileGetSource(file, len)
-        unsafe_string(convert(Ptr{Int8}, data), len[])
-    else
-        getfield(file, property)
-    end
+function directory(file::DIFile)
+    len = Ref{Cuint}()
+    data = API.LLVMDIFileGetDirectory(file, len)
+    unsafe_string(convert(Ptr{Int8}, data), len[])
+end
+
+function filename(file::DIFile)
+    len = Ref{Cuint}()
+    data = API.LLVMDIFileGetFilename(file, len)
+    unsafe_string(convert(Ptr{Int8}, data), len[])
+end
+
+function source(file::DIFile)
+    len = Ref{Cuint}()
+    data = API.LLVMDIFileGetSource(file, len)
+    unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
 
@@ -117,25 +115,16 @@ for typ in (:Basic, :Derived, :Composite, :Subroutine)
     end
 end
 
-function Base.getproperty(typ::DIType, property::Symbol)
-    if property == :name
-        len = Ref{Csize_t}()
-        data = API.LLVMDITypeGetName(typ, len)
-        unsafe_string(convert(Ptr{Int8}, data), len[])
-    elseif property == :size
-        API.LLVMDITypeGetSizeInBits(typ)
-    elseif property == :offset
-        API.LLVMDITypeGetOffsetInBits(typ)
-    elseif property == :alignment
-        API.LLVMDITypeGetAlignInBits(typ)
-    elseif property == :line
-        API.LLVMDITypeGetLine(typ)
-    elseif property == :flags
-        API.LLVMDITypeGetFlags(typ)
-    else
-        getfield(typ, property)
-    end
+function name(typ::DIType)
+    len = Ref{Csize_t}()
+    data = API.LLVMDITypeGetName(typ, len)
+    unsafe_string(convert(Ptr{Int8}, data), len[])
 end
+
+Base.sizeof(typ::DIType) = 8*Int(API.LLVMDITypeGetSizeInBits(typ))
+offset(typ::DIType) = Int(API.LLVMDITypeGetOffsetInBits(typ))
+line(typ::DIType) = Int(API.LLVMDITypeGetLine(typ))
+flags(typ::DIType) = API.LLVMDITypeGetFlags(typ)
 
 
 ## subprogram
@@ -147,13 +136,7 @@ export DISubProgram
 end
 identify(::Type{Metadata}, ::Val{API.LLVMDISubprogramMetadataKind}) = DISubProgram
 
-function Base.getproperty(subprogram::DISubProgram, property::Symbol)
-    if property == :line
-        API.LLVMDITypeGetLine(subprogram)
-    else
-        getfield(subprogram, property)
-    end
-end
+line(subprogram::DISubProgram) = Int(API.LLVMDISubprogramGetLine(subprogram))
 
 
 ## other
