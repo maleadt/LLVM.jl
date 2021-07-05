@@ -720,16 +720,14 @@ LLVM.Module("SomeModule", ctx) do mod
 
     let mds = metadata(mod)
         @test keytype(mds) == String
-        @test valtype(mds) == Vector{LLVM.Metadata}
+        @test valtype(mds) == NamedMDNode
 
-        push!(mds, "SomeMDNode", node)
-
+        @test !haskey(mds, "SomeMDNode")
+        @test !(node in collect(operands(mds["SomeMDNode"])))
         @test haskey(mds, "SomeMDNode")
-        mdvals = mds["SomeMDNode"]
-        @test mdvals[1] == node
 
-        @test !haskey(mds, "SomeOtherMDNode")
-        @test_throws KeyError mds["SomeOtherMDNode"]
+        push!(operands(mds["SomeMDNode"]), node)
+        @test node in collect(operands(mds["SomeMDNode"]))
     end
 end
 end

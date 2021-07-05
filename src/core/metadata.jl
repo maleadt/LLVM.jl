@@ -104,3 +104,15 @@ identify(::Type{Metadata}, ::Val{API.LLVMMDTupleMetadataKind}) = MDTuple
 # MDTuples are commonly referred to as MDNodes, so keep that name
 MDNode(mds::Vector{<:Metadata}, ctx::Context=GlobalContext()) =
     MDTuple(API.LLVMMDNodeInContext2(ctx, mds, length(mds)))
+
+# for some reason, MDTuples are rendered ugly (`<0x5454150> = !{i64 1, i64 1}`)
+# so override that here
+function Base.show(io::IO, mime::MIME"text/plain", tuple::MDTuple)
+    print(io, "!{")
+    for (i, op) in enumerate(operands(tuple))
+        i > 1 && print(io, ", ")
+        print(io, Value(op))
+    end
+    print(io, "}")
+    return io
+end
