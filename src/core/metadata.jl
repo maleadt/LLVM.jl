@@ -37,7 +37,24 @@ identify(::Type{Value}, ::Val{API.LLVMMetadataAsValueValueKind}) = MetadataAsVal
 Value(md::Metadata, ctx::Context=GlobalContext()) =
     MetadataAsValue(API.LLVMMetadataAsValue(ctx, md))
 
-Metadata(val::MetadataAsValue) = Metadata(API.LLVMValueAsMetadata(val))
+
+## value as metadata
+
+abstract type ValueAsMetadata <: Metadata end
+
+@checked struct ConstantAsMetadata <: ValueAsMetadata
+    ref::API.LLVMMetadataRef
+end
+identify(::Type{Metadata}, ::Val{API.LLVMConstantAsMetadataMetadataKind}) = ConstantAsMetadata
+
+@checked struct LocalAsMetadata <: ValueAsMetadata
+    ref::API.LLVMMetadataRef
+end
+identify(::Type{Metadata}, ::Val{API.LLVMLocalAsMetadataMetadataKind}) = LocalAsMetadata
+
+# NOTE: this can be used to both pack e.g. constants as metadata, and to extract the
+#       metadata from an MetadataAsValue, so we don't type-assert narrowly here
+Metadata(val::Value) = Metadata(API.LLVMValueAsMetadata(val))
 
 
 ## values
