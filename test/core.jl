@@ -720,7 +720,7 @@ LLVM.Module("SomeModule", ctx) do mod
 
     let mds = metadata(mod)
         @test keytype(mds) == String
-        @test valtype(mds) == Vector{LLVM.MetadataAsValue}
+        @test valtype(mds) == Vector{LLVM.Metadata}
 
         push!(mds, "SomeMDNode", node)
 

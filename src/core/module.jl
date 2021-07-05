@@ -75,26 +75,70 @@ set_compiler_used!(mod::Module, values::GlobalVariable...) =
 
 export metadata
 
-struct ModuleMetadataDict <: AbstractDict{String,Vector{MetadataAsValue}}
+struct NamedMDNode
+    ref::API.LLVMNamedMDNodeRef
+end
+
+Base.unsafe_convert(::Type{API.LLVMNamedMDNodeRef}, node::NamedMDNode) = node.ref
+
+function Base.getproperty(node::NamedMDNode, property::Symbol)
+    if property == :name
+        len = Ref{Csize_t}()
+        data = API.LLVMGetNamedMetadataName(node, len)
+        unsafe_string(convert(Ptr{Int8}, data), len[])
+    else
+        getfield(node, property)
+    end
+end
+
+# XXX: D47179 didn't add a NamedMDNode-based API for getting the actual MD values...
+#      is the correct way of doing this?
+function Base.collect(node::NamedMDNode, mod::LLVM.Module)
+    name = node.name
+    nops = API.LLVMGetNamedMetadataNumOperands(mod, name)
+    ops = Vector{API.LLVMValueRef}(undef, nops)
+    if nops > 0
+        API.LLVMGetNamedMetadataOperands(mod, name, ops)
+    end
+    vals = MetadataAsValue[MetadataAsValue(op) for op in ops]
+    return map(Metadata, vals)
+end
+
+struct ModuleMetadataDict <: AbstractDict{String,Vector{Metadata}}
     mod::Module
 end
 
 metadata(mod::Module) = ModuleMetadataDict(mod)
 
+function Base.iterate(iter::ModuleMetadataDict, state=API.LLVMGetFirstNamedMetadata(iter.mod))
+    if state == C_NULL
+        nothing
+    else
+        node = NamedMDNode(state)
+        (node.name => collect(node, iter.mod), API.LLVMGetNextNamedMetadata(state))
+    end
+end
+
+Base.last(iter::ModuleMetadataDict) =
+    NamedMDNode(API.LLVMGetLastNamedMetadata(iter.mod))
+
+Base.isempty(iter::ModuleMetadataDict) =
+    API.LLVMGetLastNamedMetadata(iter.mod) == C_NULL
+
+Base.IteratorSize(::ModuleMetadataDict) = Base.SizeUnknown()
+
 function Base.haskey(iter::ModuleMetadataDict, name::String)
-    return API.LLVMGetNamedMetadataNumOperands(iter.mod, name) != 0
+    return API.LLVMGetNamedMetadata(iter.mod, name, length(name)) != C_NULL
 end
 
 function Base.getindex(iter::ModuleMetadataDict, name::String)
-    nops = API.LLVMGetNamedMetadataNumOperands(iter.mod, name)
-    nops == 0 && throw(KeyError(name))
-    ops = Vector{API.LLVMValueRef}(undef, nops)
-    API.LLVMGetNamedMetadataOperands(iter.mod, name, ops)
-    return MetadataAsValue[MetadataAsValue(op) for op in ops]
+    node = API.LLVMGetNamedMetadata(iter.mod, name, length(name))
+    node == C_NULL && throw(KeyError(name))
+    return collect(NamedMDNode(node), iter.mod)
 end
 
-Base.push!(iter::ModuleMetadataDict, name::String, val::MetadataAsValue) =
-    API.LLVMAddNamedMetadataOperand(iter.mod, name, val)
+Base.push!(iter::ModuleMetadataDict, name::String, val::Metadata) =
+    API.LLVMAddNamedMetadataOperand(iter.mod, name, Value(val))
 
 
 ## global variable iteration
