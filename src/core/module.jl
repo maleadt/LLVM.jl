@@ -71,9 +71,11 @@ set_compiler_used!(mod::Module, values::GlobalVariable...) =
     API.LLVMExtraAppendToCompilerUsed(mod, collect(values), length(values))
 
 
-## metadata iteration
+## named metadata iteration
 
 export metadata, NamedMDNode, operands
+
+# a named metadata note, tying together a name and a MDNode
 
 struct NamedMDNode
     parent::LLVM.Module # not exposed by the API
@@ -100,10 +102,56 @@ end
 
 operands(node::NamedMDNode) = NamedMDNodeOperands(node.parent, node.name)
 
+# the metadata operands of a named metadata node
+
+# NOTE: we don't have a simple setindex!-based API here, since LLVMAddNamedMetadataOperand
+#       adds operands, and doesn't override them.
+
+struct NamedMDNodeOperands
+    mod::LLVM.Module
+    name::String
+end
+
+# XXX: D47179 didn't add a NamedMDNode-based API for getting/setting metadata operands...
+#      so we still use the old, Module-based API here.
+
+function Base.collect(iter::NamedMDNodeOperands)
+    nops = API.LLVMGetNamedMetadataNumOperands(iter.mod, iter.name)
+    ops = Vector{API.LLVMValueRef}(undef, nops)
+    if nops > 0
+        API.LLVMGetNamedMetadataOperands(iter.mod, iter.name, ops)
+    end
+    vals = MetadataAsValue[MetadataAsValue(op) for op in ops]
+    return map(Metadata, vals)
+end
+
+Base.push!(iter::NamedMDNodeOperands, val::Metadata) =
+    API.LLVMAddNamedMetadataOperand(iter.mod, iter.name, Value(val))
+
+function Base.show(io::IO, mime::MIME"text/plain", iter::NamedMDNodeOperands)
+    print(io, "!{")
+    for (i, op) in enumerate(collect(iter))
+        i > 1 && print(io, ", ")
+        show(io, mime, op)
+    end
+    print(io, "}")
+
+    return io
+end
+
+# module metadata iteration
+
 struct ModuleMetadataIterator <: AbstractDict{String,NamedMDNode}
     mod::Module
 end
 
+"""
+    metadata(mod)
+
+Fetch the module-level named metadata. This can be inspected using a Dict-like interface.
+Mutation is different: There is no `setindex!` method, as named metadata is append-only.
+Instead, fetch the relevant metadata using `getindex`, and `push!` to its `operands(...)`.
+"""
 metadata(mod::Module) = ModuleMetadataIterator(mod)
 
 function Base.show(io::IO, mime::MIME"text/plain", iter::ModuleMetadataIterator)
@@ -141,41 +189,6 @@ function Base.getindex(iter::ModuleMetadataIterator, name::String)
     @assert ref != C_NULL
     node = NamedMDNode(iter.mod, ref)
     return node
-end
-
-# NOTE: we don't have a simple setindex!-based API here, since LLVMAddNamedMetadataOperand
-#       adds operands, and doesn't override them.
-
-struct NamedMDNodeOperands
-    mod::LLVM.Module
-    name::String
-end
-
-# XXX: D47179 didn't add a NamedMDNode-based API for getting/setting metadata operands...
-#      so we still use the old, Module-based API here.
-
-function Base.collect(iter::NamedMDNodeOperands)
-    nops = API.LLVMGetNamedMetadataNumOperands(iter.mod, iter.name)
-    ops = Vector{API.LLVMValueRef}(undef, nops)
-    if nops > 0
-        API.LLVMGetNamedMetadataOperands(iter.mod, iter.name, ops)
-    end
-    vals = MetadataAsValue[MetadataAsValue(op) for op in ops]
-    return map(Metadata, vals)
-end
-
-Base.push!(iter::NamedMDNodeOperands, val::Metadata) =
-    API.LLVMAddNamedMetadataOperand(iter.mod, iter.name, Value(val))
-
-function Base.show(io::IO, mime::MIME"text/plain", iter::NamedMDNodeOperands)
-    print(io, "!{")
-    for (i, op) in enumerate(collect(iter))
-        i > 1 && print(io, ", ")
-        show(io, mime, op)
-    end
-    print(io, "}")
-
-    return io
 end
 
 
