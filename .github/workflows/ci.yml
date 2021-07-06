@@ -58,12 +58,12 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      - uses: julia-actions/julia-buildpkg@v1
       - name: Build libLLVMExtra
         if: ${{ matrix.libLLVMExtra == 'local' }}
         run: |
           julia --project=deps -e 'using Pkg; Pkg.instantiate()'
           julia --project=deps deps/build_local.jl
-      - uses: julia-actions/julia-buildpkg@v1
       # test
       - uses: julia-actions/julia-runtest@v1
       # process results

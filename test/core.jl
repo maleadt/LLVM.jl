@@ -651,6 +651,82 @@ Context() do ctx
     @test ops[1] == str
 end
 
+@testset "debuginfo" begin
+
+Context() do ctx
+mod = parse(LLVM.Module, raw"""
+       define double @test(i64 signext %0, double %1) !dbg !5 {
+       top:
+         %2 = sitofp i64 %0 to double, !dbg !7
+         %3 = fadd double %2, %1, !dbg !18
+         ret double %3, !dbg !17
+       }
+
+       !llvm.module.flags = !{!0, !1}
+       !llvm.dbg.cu = !{!2}
+
+       !0 = !{i32 2, !"Dwarf Version", i32 4}
+       !1 = !{i32 1, !"Debug Info Version", i32 3}
+       !2 = distinct !DICompileUnit(language: DW_LANG_Julia, file: !3, producer: "julia", isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug, enums: !4, nameTableKind: GNU)
+       !3 = !DIFile(filename: "promotion.jl", directory: ".")
+       !4 = !{}
+       !5 = distinct !DISubprogram(name: "+", linkageName: "julia_+_2055", scope: null, file: !3, line: 321, type: !6, scopeLine: 321, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+       !6 = !DISubroutineType(types: !4)
+       !7 = !DILocation(line: 94, scope: !8, inlinedAt: !10)
+       !8 = distinct !DISubprogram(name: "Float64;", linkageName: "Float64", scope: !9, file: !9, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+       !9 = !DIFile(filename: "float.jl", directory: ".")
+       !10 = !DILocation(line: 7, scope: !11, inlinedAt: !13)
+       !11 = distinct !DISubprogram(name: "convert;", linkageName: "convert", scope: !12, file: !12, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+       !12 = !DIFile(filename: "number.jl", directory: ".")
+       !13 = !DILocation(line: 269, scope: !14, inlinedAt: !15)
+       !14 = distinct !DISubprogram(name: "_promote;", linkageName: "_promote", scope: !3, file: !3, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+       !15 = !DILocation(line: 292, scope: !16, inlinedAt: !17)
+       !16 = distinct !DISubprogram(name: "promote;", linkageName: "promote", scope: !3, file: !3, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+       !17 = !DILocation(line: 321, scope: !5)
+       !18 = !DILocation(line: 326, scope: !19, inlinedAt: !17)
+       !19 = distinct !DISubprogram(name: "+;", linkageName: "+", scope: !9, file: !9, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)""", ctx)
+
+    fun = functions(mod)["test"]
+    bb = first(collect(blocks(fun)))
+    inst = first(collect(instructions(bb)))
+
+    @test haskey(metadata(inst), LLVM.MD_dbg)
+    loc = metadata(inst)[LLVM.MD_dbg]
+
+    @test loc isa DILocation
+    @test LLVM.line(loc) == 94
+    @test LLVM.column(loc) == 0
+
+    scope = LLVM.scope(loc)
+    @test scope isa DISubProgram
+    @test LLVM.line(scope) == 0
+    @test LLVM.name(scope) == "Float64;"
+
+    file = LLVM.file(scope)
+    @test file isa DIFile
+    @test LLVM.filename(file) == "float.jl"
+    @test LLVM.directory(file) == "."
+    @test LLVM.source(file) == ""
+
+    loc = LLVM.inlined_at(loc)
+    @test loc isa DILocation
+    @test LLVM.line(loc) == 7
+
+    loc = LLVM.inlined_at(loc)
+    @test loc isa DILocation
+
+    loc = LLVM.inlined_at(loc)
+    @test loc isa DILocation
+
+    loc = LLVM.inlined_at(loc)
+    @test loc isa DILocation
+
+    loc = LLVM.inlined_at(loc)
+    @test loc === nothing
+end
+
+end
+
 end
 
 
@@ -712,16 +788,14 @@ LLVM.Module("SomeModule", ctx) do mod
 
     let mds = metadata(mod)
         @test keytype(mds) == String
-        @test valtype(mds) == Vector{LLVM.MetadataAsValue}
+        @test valtype(mds) == NamedMDNode
 
-        push!(mds, "SomeMDNode", node)
+        @test !haskey(mds, "SomeMDNode")
+        @test !(node in operands(mds["SomeMDNode"]))
+        @test haskey(mds, "SomeMDNode") # getindex is mutating
 
-        @test haskey(mds, "SomeMDNode")
-        mdvals = mds["SomeMDNode"]
-        @test mdvals[1] == node
-
-        @test !haskey(mds, "SomeOtherMDNode")
-        @test_throws KeyError mds["SomeOtherMDNode"]
+        push!(mds["SomeMDNode"], node)
+        @test node in operands(mds["SomeMDNode"])
     end
 end
 end
@@ -1144,10 +1218,6 @@ LLVM.Module("SomeModule", ctx) do mod
 
         @test isempty(md)
         @test !haskey(md, LLVM.MD_dbg)
-    end
-    let val = ConstantInt(42, ctx)
-        md = Metadata(val)
-        @test first(operands(LLVM.Value(md, ctx))) == val
     end
 
     @test retinst in instructions(bb3)

@@ -58,6 +58,8 @@ void LLVMExtraAppendToCompilerUsed(LLVMModuleRef Mod,
                                    size_t Count);
 void LLVMExtraAddGenericAnalysisPasses(LLVMPassManagerRef PM);
 
+const char *LLVMExtraDIScopeGetName(LLVMMetadataRef File, unsigned *Len);
+
 // Bug fixes
 void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);
 void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn);

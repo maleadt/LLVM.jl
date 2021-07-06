@@ -128,10 +128,6 @@ function LLVMGetValueContext(V)
     ccall((:LLVMExtraGetValueContext, libLLVMExtra),LLVMContextRef,(LLVMValueRef,),V)
 end
 
-function LLVMGetSourceLocation(V, index, Name, Filename, Line, Column)
-    ccall((:LLVMExtraGetSourceLocation, libLLVMExtra),Cint,(LLVMValueRef,Cint,Ptr{Cstring},Ptr{Cstring},Ptr{Cuint},Ptr{Cuint}), V, index, Name, Filename, Line, Column)
-end
-
 function LLVMExtraAppendToUsed(Mod, Values, Count)
     ccall((:LLVMExtraAppendToUsed, libLLVMExtra),Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
 end
@@ -150,6 +146,15 @@ end
     LLVMDebugEmissionKindLineTablesOnly = 2,
     LLVMDebugEmissionKindDebugDirectivesOnly = 3,
 )
+
+function LLVMExtraDIScopeGetName(Scope, Len)
+    ccall((:LLVMExtraDIScopeGetName, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), Scope, Len)
+end
+
+
+# bug fixes
+
+# TODO: upstream
 
 function LLVMExtraSetInitializer(GlobalVar, ConstantVal)
     ccall((:LLVMExtraSetInitializer, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), GlobalVar, ConstantVal)

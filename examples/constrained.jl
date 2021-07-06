@@ -53,7 +53,8 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
         Builder(ctx) do builder
             entry = BasicBlock(llvm_f, "entry", ctx)
             position!(builder, entry)
-            val = call!(builder, intrinsic, [parameters(llvm_f)..., mround, mfpexcept])
+            val = call!(builder, intrinsic,
+                        [parameters(llvm_f)..., Value(mround, ctx), Value(mfpexcept, ctx)])
             ret!(builder, val)
         end
 
