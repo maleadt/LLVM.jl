@@ -129,20 +129,8 @@ function LLVMExtraSetPersonalityFn(Fn, PersonalityFn)
     ccall((:LLVMExtraSetPersonalityFn, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), Fn, PersonalityFn)
 end
 
-function LLVMExtraAppendToUsed(Mod, Values, Count)
-    ccall((:LLVMExtraAppendToUsed, libLLVMExtra),Cvoid,(LLVMModuleRef,Ptr{LLVMValueRef},Csize_t), Mod, Values, Count)
-end
-
 function LLVMExtraDIScopeGetName(Scope, Len)
     ccall((:LLVMExtraDIScopeGetName, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), Scope, Len)
-end
-
-# bug fixes
-
-# TODO: upstream
-
-function LLVMExtraSetInitializer(GlobalVar, ConstantVal)
-    ccall((:LLVMExtraSetInitializer, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), GlobalVar, ConstantVal)
 end
 
 if version().major == 12
