@@ -57,6 +57,8 @@ identify(::Type{Metadata}, ::Val{API.LLVMLocalAsMetadataMetadataKind}) = LocalAs
 #       metadata from an MetadataAsValue, so we don't type-assert narrowly here
 Metadata(val::Value) = Metadata(API.LLVMValueAsMetadata(val))
 
+Base.convert(::Type{Metadata}, val::Value) = Metadata(val)
+
 
 ## values
 
@@ -88,7 +90,7 @@ function operands(md::MDNode)
     nops = API.LLVMGetMDNodeNumOperands(Value(md))
     ops = Vector{API.LLVMValueRef}(undef, nops)
     API.LLVMGetMDNodeOperands(Value(md), ops)
-    return Metadata[Metadata(Value(op)) for op in ops]
+    return Metadata[Value(op) for op in ops]
 end
 
 
@@ -104,6 +106,8 @@ identify(::Type{Metadata}, ::Val{API.LLVMMDTupleMetadataKind}) = MDTuple
 # MDTuples are commonly referred to as MDNodes, so keep that name
 MDNode(mds::Vector{<:Metadata}, ctx::Context=GlobalContext()) =
     MDTuple(API.LLVMMDNodeInContext2(ctx, mds, length(mds)))
+MDNode(vals::Vector, ctx::Context=GlobalContext()) =
+    MDNode(convert(Vector{Metadata}, vals), ctx)
 
 # for some reason, MDTuples are rendered ugly (`<0x5454150> = !{i64 1, i64 1}`)
 # so override that here

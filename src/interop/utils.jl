@@ -5,12 +5,12 @@ function tbaa_make_child(name::String, ctx::LLVM.Context=Context(); constant::Bo
     tbaa_struct_type =
         MDNode(Metadata[MDString("custom_tbaa_$name", ctx),
                         tbaa_root,
-                        Metadata(ConstantInt(0, ctx))], ctx)
+                        ConstantInt(0, ctx)], ctx)
     tbaa_access_tag =
         MDNode(Metadata[tbaa_struct_type,
                         tbaa_struct_type,
-                        Metadata(ConstantInt(0, ctx)),
-                        Metadata(ConstantInt(constant ? 1 : 0, ctx))], ctx)
+                        ConstantInt(0, ctx),
+                        ConstantInt(constant ? 1 : 0, ctx)], ctx)
 
     return tbaa_access_tag
 end

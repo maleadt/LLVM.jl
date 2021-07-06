@@ -78,66 +78,43 @@ export metadata, NamedMDNode, operands
 # a named metadata note, tying together a name and a MDNode
 
 struct NamedMDNode
-    parent::LLVM.Module # not exposed by the API
+    mod::LLVM.Module # not exposed by the API
     ref::API.LLVMNamedMDNodeRef
 end
 
 Base.unsafe_convert(::Type{API.LLVMNamedMDNodeRef}, node::NamedMDNode) = node.ref
 
-function Base.getproperty(node::NamedMDNode, property::Symbol)
-    if property == :name
-        len = Ref{Csize_t}()
-        data = API.LLVMGetNamedMetadataName(node, len)
-        unsafe_string(convert(Ptr{Int8}, data), len[])
-    else
-        getfield(node, property)
-    end
+function name(node::NamedMDNode)
+    len = Ref{Csize_t}()
+    data = API.LLVMGetNamedMetadataName(node, len)
+    unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", node::NamedMDNode)
-    print(io, "!$(node.name) = ")
-    show(io, mime, operands(node))
+    print(io, "!$(name(node)) = !{")
+    for (i, op) in enumerate(operands(node))
+        i > 1 && print(io, ", ")
+        show(io, mime, op)
+    end
+    print(io, "}")
     return io
-end
-
-operands(node::NamedMDNode) = NamedMDNodeOperands(node.parent, node.name)
-
-# the metadata operands of a named metadata node
-
-# NOTE: we don't have a simple setindex!-based API here, since LLVMAddNamedMetadataOperand
-#       adds operands, and doesn't override them.
-
-struct NamedMDNodeOperands
-    mod::LLVM.Module
-    name::String
 end
 
 # XXX: D47179 didn't add a NamedMDNode-based API for getting/setting metadata operands...
 #      so we still use the old, Module-based API here.
 
-function Base.collect(iter::NamedMDNodeOperands)
-    nops = API.LLVMGetNamedMetadataNumOperands(iter.mod, iter.name)
+function operands(node::NamedMDNode)
+    nops = API.LLVMGetNamedMetadataNumOperands(node.mod, name(node))
     ops = Vector{API.LLVMValueRef}(undef, nops)
     if nops > 0
-        API.LLVMGetNamedMetadataOperands(iter.mod, iter.name, ops)
+        API.LLVMGetNamedMetadataOperands(node.mod, name(node), ops)
     end
     vals = MetadataAsValue[MetadataAsValue(op) for op in ops]
     return map(Metadata, vals)
 end
 
-Base.push!(iter::NamedMDNodeOperands, val::Metadata) =
-    API.LLVMAddNamedMetadataOperand(iter.mod, iter.name, Value(val))
-
-function Base.show(io::IO, mime::MIME"text/plain", iter::NamedMDNodeOperands)
-    print(io, "!{")
-    for (i, op) in enumerate(collect(iter))
-        i > 1 && print(io, ", ")
-        show(io, mime, op)
-    end
-    print(io, "}")
-
-    return io
-end
+Base.push!(node::NamedMDNode, val::Metadata) =
+    API.LLVMAddNamedMetadataOperand(node.mod, name(node), Value(val))
 
 # module metadata iteration
 
@@ -150,7 +127,7 @@ end
 
 Fetch the module-level named metadata. This can be inspected using a Dict-like interface.
 Mutation is different: There is no `setindex!` method, as named metadata is append-only.
-Instead, fetch the relevant metadata using `getindex`, and `push!` to its `operands(...)`.
+Instead, fetch the named metadata node using `getindex`, and `push!` to it.
 """
 metadata(mod::Module) = ModuleMetadataIterator(mod)
 
@@ -168,7 +145,7 @@ function Base.iterate(iter::ModuleMetadataIterator, state=API.LLVMGetFirstNamedM
         nothing
     else
         node = NamedMDNode(iter.mod, state)
-        (node.name => node, API.LLVMGetNextNamedMetadata(state))
+        (name(node) => node, API.LLVMGetNextNamedMetadata(state))
     end
 end
 

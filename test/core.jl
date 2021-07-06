@@ -791,11 +791,11 @@ LLVM.Module("SomeModule", ctx) do mod
         @test valtype(mds) == NamedMDNode
 
         @test !haskey(mds, "SomeMDNode")
-        @test !(node in collect(operands(mds["SomeMDNode"])))
-        @test haskey(mds, "SomeMDNode")
+        @test !(node in operands(mds["SomeMDNode"]))
+        @test haskey(mds, "SomeMDNode") # getindex is mutating
 
-        push!(operands(mds["SomeMDNode"]), node)
-        @test node in collect(operands(mds["SomeMDNode"]))
+        push!(mds["SomeMDNode"], node)
+        @test node in operands(mds["SomeMDNode"])
     end
 end
 end
