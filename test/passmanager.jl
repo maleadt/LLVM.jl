@@ -6,7 +6,7 @@ let
 end
 
 Context() do ctx
-LLVM.Module("SomeModule", ctx) do mod
+LLVM.Module("SomeModule"; ctx) do mod
 ModulePassManager() do mpm
     @test !run!(mpm, mod)
 end
@@ -14,9 +14,9 @@ end
 end
 
 Context() do ctx
-LLVM.Module("SomeModule", ctx) do mod
+LLVM.Module("SomeModule"; ctx) do mod
 FunctionPassManager(mod) do fpm
-    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     @test !initialize!(fpm)

@@ -6,7 +6,7 @@ export dispose, errormsg, compile!, remove!, add!,
        register!, unregister!, callback!
 export JITTargetMachine
 
-@checked struct OrcJIT 
+@checked struct OrcJIT
     ref::API.LLVMOrcJITStackRef
 end
 
@@ -42,11 +42,11 @@ end
 
 function errormsg(orc::OrcJIT)
     # The error message is owned by `orc`, and will
-    # be disposed along-side the OrcJIT. 
+    # be disposed along-side the OrcJIT.
     unsafe_string(LLVM.API.LLVMOrcGetErrorMsg(orc))
 end
 
-struct OrcModule 
+struct OrcModule
     handle::API.LLVMOrcModuleHandle
 end
 Base.convert(::Type{API.LLVMOrcModuleHandle}, mod::OrcModule) = mod.handle
@@ -154,7 +154,7 @@ function callback!(orc::OrcJIT, callback, ctx)
     return OrcTargetAddress(r_address[])
 end
 
-@checked struct JITEventListener 
+@checked struct JITEventListener
     ref::API.LLVMJITEventListenerRef
 end
 Base.unsafe_convert(::Type{API.LLVMJITEventListenerRef}, listener::JITEventListener) = listener.ref
@@ -172,9 +172,8 @@ IntelJITEventListener()    = JITEventListener(LLVM.API.LLVMCreateIntelJITEventLi
 OProfileJITEventListener() = JITEventListener(LLVM.API.LLVMCreateOProfileJITEventListener())
 PerfJITEventListener()     = JITEventListener(LLVM.API.LLVMCreatePerfJITEventListener())
 
-function JITTargetMachine(;triple = LLVM.triple(),
-                           cpu = "", features = "",
-                           optlevel = LLVM.API.LLVMCodeGenLevelDefault)
+function JITTargetMachine(triple = LLVM.triple(), cpu = "", features = "";
+                          optlevel = LLVM.API.LLVMCodeGenLevelDefault)
 
     # Force ELF on windows,
     # Note: Without this call to normalize Orc get's confused
@@ -186,10 +185,9 @@ function JITTargetMachine(;triple = LLVM.triple(),
     target = LLVM.Target(triple=triple)
     @debug "Configuring OrcJIT with" triple cpu features optlevel
 
-    tm = TargetMachine(target, triple, cpu, features,
-                       optlevel,
-                       LLVM.API.LLVMRelocStatic, # Generate simpler code for JIT
-                       LLVM.API.LLVMCodeModelJITDefault, # Required to init TM as JIT
+    tm = TargetMachine(target, triple, cpu, features; optlevel,
+                       reloc=LLVM.API.LLVMRelocStatic, # Generate simpler code for JIT
+                       code=LLVM.API.LLVMCodeModelJITDefault, # Required to init TM as JIT
                        )
-    return tm 
+    return tm
 end

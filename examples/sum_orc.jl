@@ -28,7 +28,7 @@ Context() do ctx
     ret_type = LLVM.Int32Type(ctx)
 
     name = mangle(orc, "sum_orc.jl")
-    mod = LLVM.Module("jit", ctx)
+    mod = LLVM.Module("jit"; ctx)
     triple!(mod, triple(tm))
 
     ft = LLVM.FunctionType(ret_type, param_types)
@@ -36,7 +36,7 @@ Context() do ctx
 
     # generate IR
     Builder(ctx) do builder
-        entry = BasicBlock(sum, "entry", ctx)
+        entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 
         tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")

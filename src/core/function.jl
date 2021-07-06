@@ -184,7 +184,7 @@ function Function(mod::Module, intr::Intrinsic, params::Vector{<:LLVMType}=LLVMT
 end
 
 function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[];
-                  ctx::Context=GlobalContext())
+                      ctx::Context=only(unique(map(context, params))))
     LLVMType(API.LLVMIntrinsicGetType(ctx, intr, params, length(params)))
 end
 

@@ -11,34 +11,36 @@ else
     y = Int32(2)
 end
 
-# set-up
-mod = LLVM.Module("my_module")
+Context() do ctx
+    # set-up
+    mod = LLVM.Module("my_module"; ctx)
 
-param_types = [LLVM.Int32Type(), LLVM.Int32Type()]
-ret_type = LLVM.Int32Type()
-fun_type = LLVM.FunctionType(ret_type, param_types)
-sum = LLVM.Function(mod, "sum", fun_type)
+    param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
+    ret_type = LLVM.Int32Type(ctx)
+    fun_type = LLVM.FunctionType(ret_type, param_types)
+    sum = LLVM.Function(mod, "sum", fun_type)
 
-# generate IR
-Builder() do builder
-    entry = BasicBlock(sum, "entry")
-    position!(builder, entry)
+    # generate IR
+    Builder(ctx) do builder
+        entry = BasicBlock(sum, "entry"; ctx)
+        position!(builder, entry)
 
-    tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
-    ret!(builder, tmp)
+        tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
+        ret!(builder, tmp)
 
-    println(mod)
-    verify(mod)
-end
+        println(mod)
+        verify(mod)
+    end
 
-# analysis and execution
-Interpreter(mod) do engine
-    args = [GenericValue(LLVM.Int32Type(), x),
-            GenericValue(LLVM.Int32Type(), y)]
+    # analysis and execution
+    Interpreter(mod) do engine
+        args = [GenericValue(LLVM.Int32Type(ctx), x),
+                GenericValue(LLVM.Int32Type(ctx), y)]
 
-    res = LLVM.run(engine, sum, args)
-    @test convert(Int, res) == x + y
+        res = LLVM.run(engine, sum, args)
+        @test convert(Int, res) == x + y
 
-    dispose.(args)
-    dispose(res)
+        dispose.(args)
+        dispose(res)
+    end
 end

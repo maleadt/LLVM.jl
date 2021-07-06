@@ -27,8 +27,8 @@ end
 
 ModulePassManager() = ModulePassManager(API.LLVMCreatePassManager(), [])
 
-function ModulePassManager(f::Core.Function, args...)
-    mpm = ModulePassManager(args...)
+function ModulePassManager(f::Core.Function, args...; kwargs...)
+    mpm = ModulePassManager(args...; kwargs...)
     try
         f(mpm)
     finally
@@ -56,8 +56,8 @@ end
 FunctionPassManager(mod::Module) =
     FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(mod), [])
 
-function FunctionPassManager(f::Core.Function, args...)
-    fpm = FunctionPassManager(args...)
+function FunctionPassManager(f::Core.Function, args...; kwargs...)
+    fpm = FunctionPassManager(args...; kwargs...)
     try
         f(fpm)
     finally

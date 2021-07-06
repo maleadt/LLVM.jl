@@ -15,7 +15,7 @@ PassManagerBuilder() do pmb
     inliner!(pmb, 0)
 
     Context() do ctx
-    LLVM.Module("SomeModule", ctx) do mod
+    LLVM.Module("SomeModule"; ctx) do mod
         FunctionPassManager(mod) do fpm
             populate!(fpm, pmb)
         end
@@ -27,7 +27,7 @@ PassManagerBuilder() do pmb
 end
 
 Context() do ctx
-LLVM.Module("SomeModule", ctx) do mod
+LLVM.Module("SomeModule"; ctx) do mod
 ModulePassManager() do pm
     aggressive_dce!(pm)
     dce!(pm)

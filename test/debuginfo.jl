@@ -24,7 +24,7 @@ Context() do ctx
           !4 = !{}
           !5 = distinct !DISubprogram(name: "foo", linkageName: "foo", scope: null, file: !3, line: 1, type: !6, isLocal: false, isDefinition: true, scopeLine: 1, isOptimized: true, unit: !2)
           !6 = !DISubroutineType(types: !4)
-          !7 = !DILocation(line: 1, scope: !5)""", ctx)
+          !7 = !DILocation(line: 1, scope: !5)"""; ctx)
 
     foo = functions(mod)["foo"]
 

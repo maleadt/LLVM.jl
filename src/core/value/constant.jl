@@ -62,13 +62,13 @@ end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
 const SizeableInteger = Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
-function ConstantInt(val::T, ctx::Context) where T<:SizeableInteger
-    typ = IntType(sizeof(T)*8, ctx)
+function ConstantInt(val::T; ctx::Context) where T<:SizeableInteger
+    typ = IntType(sizeof(T)*8; ctx)
     return ConstantInt(typ, val, T<:Signed)
 end
 
 # Booleans are encoded with a single bit, so we can't use sizeof
-ConstantInt(val::Core.Bool, ctx::Context) = ConstantInt(Int1Type(ctx), val ? 1 : 0)
+ConstantInt(val::Core.Bool; ctx::Context) = ConstantInt(Int1Type(ctx), val ? 1 : 0)
 
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Unsigned} =
     convert(T, API.LLVMConstIntGetZExtValue(val))
@@ -88,11 +88,11 @@ identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
 ConstantFP(typ::FloatingPointType, val::Real) =
     ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
 
-ConstantFP(val::Float16, ctx::Context) =
+ConstantFP(val::Float16; ctx::Context) =
     ConstantFP(HalfType(ctx), val)
-ConstantFP(val::Float32, ctx::Context) =
+ConstantFP(val::Float32; ctx::Context) =
     ConstantFP(FloatType(ctx), val)
-ConstantFP(val::Float64, ctx::Context) =
+ConstantFP(val::Float64; ctx::Context) =
     ConstantFP(DoubleType(ctx), val)
 
 Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
@@ -148,16 +148,17 @@ end
 
 # shorthands with arrays of plain Julia data
 # FIXME: duplicates the ConstantInt/ConstantFP conversion rules
-ConstantArray(data::AbstractArray{T,N}, ctx::Context=GlobalContext()) where {T<:Integer,N} =
-    ConstantArray(IntType(sizeof(T)*8, ctx), ConstantInt.(data, Ref(ctx)))
-ConstantArray(data::AbstractArray{Core.Bool,N}, ctx::Context=GlobalContext()) where {N} =
-    ConstantArray(Int1Type(ctx), ConstantInt.(data, Ref(ctx)))
-ConstantArray(data::AbstractArray{Float16,N}, ctx::Context=GlobalContext()) where {N} =
-    ConstantArray(HalfType(ctx), ConstantFP.(data, Ref(ctx)))
-ConstantArray(data::AbstractArray{Float32,N}, ctx::Context=GlobalContext()) where {N} =
-    ConstantArray(FloatType(ctx), ConstantFP.(data, Ref(ctx)))
-ConstantArray(data::AbstractArray{Float64,N}, ctx::Context=GlobalContext()) where {N} =
-    ConstantArray(DoubleType(ctx), ConstantFP.(data, Ref(ctx)))
+# XXX: X[X(...)] instead of X.(...) because of empty-container inference
+ConstantArray(data::AbstractArray{T,N}; ctx::Context) where {T<:Integer,N} =
+    ConstantArray(IntType(sizeof(T)*8; ctx), ConstantInt[ConstantInt(x; ctx) for x in data])
+ConstantArray(data::AbstractArray{Core.Bool,N}; ctx::Context) where {N} =
+    ConstantArray(Int1Type(ctx), ConstantInt[ConstantInt(x; ctx) for x in data])
+ConstantArray(data::AbstractArray{Float16,N}; ctx::Context) where {N} =
+    ConstantArray(HalfType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
+ConstantArray(data::AbstractArray{Float32,N}; ctx::Context) where {N} =
+    ConstantArray(FloatType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
+ConstantArray(data::AbstractArray{Float64,N}; ctx::Context) where {N} =
+    ConstantArray(DoubleType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
 
 # convert back to known array types
 function Base.collect(ca::ConstantArray)
@@ -209,9 +210,7 @@ identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
 ConstantStructOrAggregateZero(value) = Value(value)::Union{ConstantStruct,ConstantAggregateZero}
 
 # anonymous
-ConstantStruct(values::Vector{<:Constant}; packed::Core.Bool=false) =
-    ConstantStructOrAggregateZero(API.LLVMConstStruct(values, length(values), convert(Bool, packed)))
-ConstantStruct(values::Vector{<:Constant}, ctx::Context; packed::Core.Bool=false) =
+ConstantStruct(values::Vector{<:Constant}; ctx::Context, packed::Core.Bool=false) =
     ConstantStructOrAggregateZero(API.LLVMConstStructInContext(ctx, values, length(values), convert(Bool, packed)))
 
 # named
@@ -219,7 +218,7 @@ ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
     ConstantStructOrAggregateZero(API.LLVMConstNamedStruct(typ, values, length(values)))
 
 # create a ConstantStruct from a Julia object
-function ConstantStruct(value::T, ctx::Context=GlobalContext(); name=String(nameof(T)),
+function ConstantStruct(value::T, name=String(nameof(T)); ctx::Context,
                         anonymous::Core.Bool=false, packed::Core.Bool=false) where {T}
     isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
     isprimitivetype(T) && throw(ArgumentError("Cannot create a ConstantStruct from a primitive value"))
@@ -229,16 +228,16 @@ function ConstantStruct(value::T, ctx::Context=GlobalContext(); name=String(name
         field = getfield(value, fieldname)
 
         if isa(field, Integer)
-            push!(constants, ConstantInt(field, ctx))
+            push!(constants, ConstantInt(field; ctx))
         elseif isa(field, AbstractFloat)
-            push!(constants, ConstantFP(field, ctx))
+            push!(constants, ConstantFP(field; ctx))
         else # TODO: nested structs?
             throw(ArgumentError("only structs with boolean, integer and floating point fields are allowed"))
         end
     end
 
     if anonymous
-        ConstantStruct(constants, ctx; packed=packed)
+        ConstantStruct(constants; ctx, packed)
     elseif haskey(types(ctx), name)
         typ = types(ctx)[name]
         if collect(elements(typ)) != llvmtype.(constants)
@@ -246,7 +245,7 @@ function ConstantStruct(value::T, ctx::Context=GlobalContext(); name=String(name
         end
         ConstantStruct(typ, constants)
     else
-        typ = StructType(name, ctx)
+        typ = StructType(name; ctx)
         elements!(typ, llvmtype.(constants))
         ConstantStruct(typ, constants)
     end
@@ -309,8 +308,8 @@ function section(val::GlobalValue)
   #=
   The following started to fail on LLVM 4.0:
     Context() do ctx
-      LLVM.Module("SomeModule", ctx) do mod
-        st = LLVM.StructType("SomeType", ctx)
+      LLVM.Module("SomeModule"; ctx) do mod
+        st = LLVM.StructType("SomeType"; ctx)
         ft = LLVM.FunctionType(st, [st])
         fn = LLVM.Function(mod, "SomeFunction", ft)
         section(fn) == ""

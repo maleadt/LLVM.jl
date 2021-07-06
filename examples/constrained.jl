@@ -34,7 +34,7 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
     @assert N >= 0
 
     Context() do ctx
-        typ = convert(LLVMType, T, ctx)
+        typ = convert(LLVMType, T; ctx)
 
         # create a function
         paramtyps = [typ for i in 1:N]
@@ -42,8 +42,8 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
 
         # create the intrinsic
         mtyp = LLVM.MetadataType(ctx)
-        mround = MDString(meta(round), ctx)
-        mfpexcept = MDString(meta(fpexcept), ctx)
+        mround = MDString(meta(round); ctx)
+        mfpexcept = MDString(meta(fpexcept); ctx)
         mod = LLVM.parent(llvm_f)
         intrinsic_typ = LLVM.FunctionType(typ, [paramtyps..., mtyp, mtyp])
         intrinsic = LLVM.Function(mod, "llvm.experimental.constrained.$(func(F)).$(suffix(T))",
@@ -51,10 +51,10 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
 
         # generate IR
         Builder(ctx) do builder
-            entry = BasicBlock(llvm_f, "entry", ctx)
+            entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
             val = call!(builder, intrinsic,
-                        [parameters(llvm_f)..., Value(mround, ctx), Value(mfpexcept, ctx)])
+                        [parameters(llvm_f)..., Value(mround; ctx), Value(mfpexcept; ctx)])
             ret!(builder, val)
         end
 

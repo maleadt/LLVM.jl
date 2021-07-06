@@ -19,7 +19,7 @@ Context() do ctx
 
     # generate IR
     Builder(ctx) do builder
-        entry = BasicBlock(sum, "entry", ctx)
+        entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 
         tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
@@ -27,7 +27,7 @@ Context() do ctx
     end
 
     # make Julia compile and execute the function
-    push!(function_attributes(sum), EnumAttribute("alwaysinline"))
+    push!(function_attributes(sum), EnumAttribute("alwaysinline"; ctx))
     @eval call_sum(x, y) = $(call_function(sum, Int32, Tuple{Int32, Int32}, :x, :y))
 end
 

@@ -1,23 +1,15 @@
 @testset "irbuilder" begin
 
-let
-    builder = Builder()
-    dispose(builder)
-end
-
-Builder() do builder
-end
-
 Context() do ctx
 Builder(ctx) do builder
-LLVM.Module("SomeModule", ctx) do mod
+LLVM.Module("SomeModule"; ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx),
                                                 LLVM.FloatType(ctx), LLVM.FloatType(ctx),
                                                 LLVM.PointerType(LLVM.Int32Type(ctx)),
                                                 LLVM.PointerType(LLVM.Int32Type(ctx))])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    entrybb = BasicBlock(fn, "entry")
+    entrybb = BasicBlock(fn, "entry"; ctx)
     position!(builder, entrybb)
     @assert position(builder) == entrybb
 
@@ -38,8 +30,8 @@ LLVM.Module("SomeModule", ctx) do mod
     retinst3 = ret!(builder, Value[])
     @check_ir retinst3 "ret void undef"
 
-    thenbb = BasicBlock(fn, "then")
-    elsebb = BasicBlock(fn, "else")
+    thenbb = BasicBlock(fn, "then"; ctx)
+    elsebb = BasicBlock(fn, "else"; ctx)
 
     brinst1 = br!(builder, thenbb)
     @check_ir brinst1 "br label %then"

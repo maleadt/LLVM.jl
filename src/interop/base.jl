@@ -11,12 +11,12 @@ function create_function(rettyp::LLVMType=LLVM.VoidType(Context()),
                          argtyp::Vector{<:LLVMType}=LLVMType[],
                          name::String="entry")
     ctx = context(rettyp)
-    mod = LLVM.Module("llvmcall", ctx)
+    mod = LLVM.Module("llvmcall"; ctx)
     isempty(name) && throw(ArgumentError("Function name cannot be empty"))
 
     ft = LLVM.FunctionType(rettyp, argtyp)
     f = LLVM.Function(mod, name, ft)
-    push!(function_attributes(f), EnumAttribute("alwaysinline", 0, ctx))
+    push!(function_attributes(f), EnumAttribute("alwaysinline", 0; ctx))
 
     return f, ft
 end
@@ -55,9 +55,9 @@ end
     convert(LLVMType, typ::Type, [ctx::Context]; allow_boxed=true)
 
 Convert a Julia type `typ` to its LLVM representation. Fails if the type would be boxed.
-If `ctx` is specified, the return LLVM type will be valid in that context.
+If `ctx` is specified, the returned LLVM type will be valid in that context.
 """
-function Base.convert(::Type{LLVMType}, typ::Type, ctx::Union{Nothing,Context}=nothing;
+function Base.convert(::Type{LLVMType}, typ::Type; ctx::Union{Nothing,Context}=nothing,
                       allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
     llvmtyp = LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
@@ -75,14 +75,14 @@ function Base.convert(::Type{LLVMType}, typ::Type, ctx::Union{Nothing,Context}=n
 
         # serialize
         buf = let
-            mod = LLVM.Module("")
+            mod = LLVM.Module(""; ctx=context(llvmtyp))
             gv = LLVM.GlobalVariable(mod, llvmtyp, "")
             convert(MemoryBuffer, mod)
         end
 
         # deserialize in different context
         llvmtyp = let
-            mod = parse(LLVM.Module, buf, ctx)
+            mod = parse(LLVM.Module, buf; ctx)
             gv = first(globals(mod))
             eltype(llvmtype(gv))
         end
@@ -92,17 +92,21 @@ function Base.convert(::Type{LLVMType}, typ::Type, ctx::Union{Nothing,Context}=n
 end
 
 """
-    isghosttype(t::Type, [ctx::Context])
+    isghosttype(t::Type; [ctx::Context])
     isghosttype(T::LLVMType)
 
 Check if a type is a ghost type, implying it would not be emitted by the Julia compiler.
 This only works for types created by the Julia compiler (living in its LLVM context).
 """
 isghosttype(@nospecialize(T::LLVMType)) = T == LLVM.VoidType(context(T)) || isempty(T)
-isghosttype(@nospecialize(t::Type), ctx::Context) =
-    isghosttype(convert(LLVMType, t, ctx; allow_boxed=true))
-function isghosttype(@nospecialize(t::Type))
-    Context() do ctx
-        isghosttype(t, ctx)
+function isghosttype(@nospecialize(t::Type); ctx::Union{Nothing,Context}=nothing)
+    if ctx === nothing
+        Context() do ctx′
+            T = convert(LLVMType, t; ctx=ctx′, allow_boxed=true)
+            isghosttype(T)
+        end
+    else
+        T = convert(LLVMType, t; ctx, allow_boxed=true)
+        isghosttype(T)
     end
 end

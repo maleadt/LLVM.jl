@@ -11,13 +11,12 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMBuilderRef}, builder::Builder) = builder.ref
 
-Builder() = Builder(API.LLVMCreateBuilder())
 Builder(ctx::Context) = Builder(API.LLVMCreateBuilderInContext(ctx))
 
 dispose(builder::Builder) = API.LLVMDisposeBuilder(builder)
 
-function Builder(f::Core.Function, args...)
-    builder = Builder(args...)
+function Builder(f::Core.Function, args...; kwargs...)
+    builder = Builder(args...; kwargs...)
     try
         f(builder)
     finally

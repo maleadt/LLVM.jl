@@ -3,11 +3,11 @@
 Context() do ctx
 Builder(ctx) do builder
     mod1 = let
-        mod = LLVM.Module("SomeModule", ctx)
+        mod = LLVM.Module("SomeModule"; ctx)
         ft = LLVM.FunctionType(LLVM.VoidType(ctx))
         fn = LLVM.Function(mod, "SomeFunction", ft)
 
-        entry = BasicBlock(fn, "entry")
+        entry = BasicBlock(fn, "entry"; ctx)
         position!(builder, entry)
 
         ret!(builder)
@@ -16,11 +16,11 @@ Builder(ctx) do builder
     end
 
     mod2 = let
-        mod = LLVM.Module("SomeOtherModule", ctx)
+        mod = LLVM.Module("SomeOtherModule"; ctx)
         ft = LLVM.FunctionType(LLVM.VoidType(ctx))
         fn = LLVM.Function(mod, "SomeOtherFunction", ft)
 
-        entry = BasicBlock(fn, "entry")
+        entry = BasicBlock(fn, "entry"; ctx)
         position!(builder, entry)
 
         ret!(builder)
