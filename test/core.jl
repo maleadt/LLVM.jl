@@ -1048,6 +1048,8 @@ LLVM.Module("SomeModule"; ctx) do mod
         @test collect(insts) == [brinst]
     end
 
+    unsafe_delete!(bb1, brinst)    # we'll be deleting bb2, so remove uses of it
+
     # basic block iteration
     let bbs = blocks(fn)
         @test collect(bbs) == [bb1, bb2]
