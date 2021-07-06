@@ -17,7 +17,7 @@ include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
     """
 
     LLVM.Context() do ctx
-        m = Kaleidoscope.generate_IR(program, ctx)
+        m = Kaleidoscope.generate_IR(program; ctx)
         Kaleidoscope.optimize!(m)
         v = Kaleidoscope.run(m, "entry")
         @test v == 55.0
@@ -42,7 +42,7 @@ end
     """
 
     LLVM.Context() do ctx
-        m = Kaleidoscope.generate_IR(program, ctx)
+        m = Kaleidoscope.generate_IR(program; ctx)
         Kaleidoscope.optimize!(m)
         mktemp() do path, io
             Kaleidoscope.write_objectfile(m, path)
@@ -62,7 +62,7 @@ end
     """
 
     LLVM.Context() do ctx
-        m = Kaleidoscope.generate_IR(program, ctx)
+        m = Kaleidoscope.generate_IR(program; ctx)
         Kaleidoscope.optimize!(m)
         v = Kaleidoscope.run(m, "entry")
         @test v == 13

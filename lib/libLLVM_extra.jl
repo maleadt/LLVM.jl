@@ -147,8 +147,40 @@ end
     LLVMDebugEmissionKindDebugDirectivesOnly = 3,
 )
 
+function LLVMExtraDumpMetadata(MD)
+    ccall((:LLVMExtraDumpMetadata, libLLVMExtra), Cvoid, (LLVMMetadataRef,), MD)
+end
+
+function LLVMExtraPrintMetadataToString(MD)
+    ccall((:LLVMExtraPrintMetadataToString, libLLVMExtra), Cstring, (LLVMMetadataRef,), MD)
+end
+
 function LLVMExtraDIScopeGetName(Scope, Len)
     ccall((:LLVMExtraDIScopeGetName, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), Scope, Len)
+end
+
+function LLVMExtraGetMDString2(MD, Len)
+    ccall((:LLVMExtraGetMDString2, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), MD, Len)
+end
+
+function LLVMExtraGetMDNodeNumOperands2(MD)
+    ccall((:LLVMExtraGetMDNodeNumOperands2, libLLVMExtra), Cuint, (LLVMMetadataRef,), MD)
+end
+
+function LLVMExtraGetMDNodeOperands2(MD, Dest)
+    ccall((:LLVMExtraGetMDNodeOperands2, libLLVMExtra), Cvoid, (LLVMMetadataRef, Ptr{LLVMMetadataRef}), MD, Dest)
+end
+
+function LLVMExtraGetNamedMetadataNumOperands2(NMD)
+    ccall((:LLVMExtraGetNamedMetadataNumOperands2, libLLVMExtra), Cuint, (LLVMNamedMDNodeRef,), NMD)
+end
+
+function LLVMExtraGetNamedMetadataOperands2(NMD, Dest)
+    ccall((:LLVMExtraGetNamedMetadataOperands2, libLLVMExtra), Cvoid, (LLVMNamedMDNodeRef, Ptr{LLVMMetadataRef}), NMD, Dest)
+end
+
+function LLVMExtraAddNamedMetadataOperand2(NMD, Val)
+    ccall((:LLVMExtraAddNamedMetadataOperand2, libLLVMExtra), Cvoid, (LLVMNamedMDNodeRef, LLVMMetadataRef), NMD, Val)
 end
 
 

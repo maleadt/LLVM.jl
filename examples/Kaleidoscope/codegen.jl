@@ -9,7 +9,7 @@ mutable struct CodeGen
             ctx,
             LLVM.Builder(ctx),
             CurrentScope(),
-            LLVM.Module("KaleidoscopeModule", ctx),
+            LLVM.Module("KaleidoscopeModule"; ctx),
         )
 end
 
@@ -82,7 +82,7 @@ end
 
 function codegen(cg::CodeGen, expr::CallExprAST)
     if !haskey(LLVM.functions(cg.mod), expr.callee)
-        error("encountered undeclared function $(expr.callee)")        
+        error("encountered undeclared function $(expr.callee)")
     end
     func =  LLVM.functions(cg.mod)[expr.callee]
 
@@ -117,7 +117,7 @@ function codegen(cg::CodeGen, expr::FunctionAST)
     # create new function...
     the_function = codegen(cg, expr.proto)
 
-    entry = LLVM.BasicBlock(the_function, "entry", cg.ctx)
+    entry = LLVM.BasicBlock(the_function, "entry"; cg.ctx)
     LLVM.position!(cg.builder, entry)
 
     new_scope(cg) do
@@ -137,9 +137,9 @@ end
 
 function codegen(cg::CodeGen, expr::IfExprAST)
     func = LLVM.parent(LLVM.position(cg.builder))
-    then = LLVM.BasicBlock(func, "then", cg.ctx)
-    elsee = LLVM.BasicBlock(func, "else", cg.ctx)
-    merge = LLVM.BasicBlock(func, "ifcont", cg.ctx)
+    then = LLVM.BasicBlock(func, "then"; cg.ctx)
+    elsee = LLVM.BasicBlock(func, "else"; cg.ctx)
+    merge = LLVM.BasicBlock(func, "ifcont"; cg.ctx)
 
     local phi
     new_scope(cg) do
@@ -181,7 +181,7 @@ function codegen(cg::CodeGen, expr::ForExprAST)
         LLVM.store!(cg.builder, start, alloc)
 
         # Loop block
-        loopblock = LLVM.BasicBlock(func, "loop", cg.ctx)
+        loopblock = LLVM.BasicBlock(func, "loop"; cg.ctx)
         LLVM.br!(cg.builder, loopblock)
         LLVM.position!(cg.builder, loopblock)
 
@@ -198,7 +198,7 @@ function codegen(cg::CodeGen, expr::ForExprAST)
             LLVM.ConstantFP(LLVM.DoubleType(cg.ctx), 0.0))
 
         loopendblock = position(cg.builder)
-        afterblock = LLVM.BasicBlock(func, "afterloop", cg.ctx)
+        afterblock = LLVM.BasicBlock(func, "afterloop"; cg.ctx)
 
         LLVM.br!(cg.builder, endd, loopblock, afterblock)
         LLVM.position!(cg.builder, afterblock)

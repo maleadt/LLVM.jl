@@ -24,6 +24,11 @@ function Metadata(ref::API.LLVMMetadataRef)
     return T(ref)
 end
 
+function Base.show(io::IO, md::Metadata)
+    output = unsafe_message(API.LLVMExtraPrintMetadataToString(md))
+    print(io, output)
+end
+
 
 ## metadata as value
 
@@ -34,9 +39,10 @@ end
 end
 identify(::Type{Value}, ::Val{API.LLVMMetadataAsValueValueKind}) = MetadataAsValue
 
+Value(md::Metadata; ctx::Context) = MetadataAsValue(API.LLVMMetadataAsValue(ctx, md))
+
 # NOTE: we can't do this automatically, as we can't query the context of metadata...
-Value(md::Metadata, ctx::Context=GlobalContext()) =
-    MetadataAsValue(API.LLVMMetadataAsValue(ctx, md))
+#       add wrappers to do so? would also simplify, e.g., `string(::MDString)`
 
 
 ## value as metadata
@@ -69,13 +75,12 @@ export MDString
 end
 identify(::Type{Metadata}, ::Val{API.LLVMMDStringMetadataKind}) = MDString
 
-MDString(val::String, ctx::Context=GlobalContext()) =
+MDString(val::String; ctx::Context) =
     MDString(API.LLVMMDStringInContext2(ctx, val, length(val)))
 
 function Base.string(md::MDString)
     len = Ref{Cuint}()
-    ptr = API.LLVMGetMDString(Value(md), len)
-    ptr == C_NULL && throw(ArgumentError("invalid metadata, not a MDString?"))
+    ptr = API.LLVMExtraGetMDString2(md, len)
     return unsafe_string(convert(Ptr{Int8}, ptr), len[])
 end
 
@@ -87,10 +92,10 @@ export MDNode, operands
 abstract type MDNode <: Metadata end
 
 function operands(md::MDNode)
-    nops = API.LLVMGetMDNodeNumOperands(Value(md))
-    ops = Vector{API.LLVMValueRef}(undef, nops)
-    API.LLVMGetMDNodeOperands(Value(md), ops)
-    return Metadata[Value(op) for op in ops]
+    nops = API.LLVMExtraGetMDNodeNumOperands2(md)
+    ops = Vector{API.LLVMMetadataRef}(undef, nops)
+    API.LLVMExtraGetMDNodeOperands2(md, ops)
+    return [Metadata(op) for op in ops]
 end
 
 
@@ -104,19 +109,7 @@ end
 identify(::Type{Metadata}, ::Val{API.LLVMMDTupleMetadataKind}) = MDTuple
 
 # MDTuples are commonly referred to as MDNodes, so keep that name
-MDNode(mds::Vector{<:Metadata}, ctx::Context=GlobalContext()) =
+MDNode(mds::Vector{<:Metadata}; ctx::Context) =
     MDTuple(API.LLVMMDNodeInContext2(ctx, mds, length(mds)))
-MDNode(vals::Vector, ctx::Context=GlobalContext()) =
-    MDNode(convert(Vector{Metadata}, vals), ctx)
-
-# for some reason, MDTuples are rendered ugly (`<0x5454150> = !{i64 1, i64 1}`)
-# so override that here
-function Base.show(io::IO, mime::MIME"text/plain", tuple::MDTuple)
-    print(io, "!{")
-    for (i, op) in enumerate(operands(tuple))
-        i > 1 && print(io, ", ")
-        print(io, Value(op))
-    end
-    print(io, "}")
-    return io
-end
+MDNode(vals::Vector; ctx::Context) =
+    MDNode(convert(Vector{Metadata}, vals); ctx)

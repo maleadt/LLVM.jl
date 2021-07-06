@@ -41,7 +41,7 @@ end
 # NOTE: the AttrKind enum is not exported in the C API,
 #       so we don't expose a way to construct EnumAttribute from its raw enum value
 #       (which also would conflict with the inner ref constructor)
-function EnumAttribute(kind::String, value::Integer=0, ctx::Context=GlobalContext())
+function EnumAttribute(kind::String, value::Integer=0; ctx::Context)
     enum_kind = API.LLVMGetEnumAttributeKindForName(kind, Csize_t(length(kind)))
     return EnumAttribute(API.LLVMCreateEnumAttribute(ctx, enum_kind, UInt64(value)))
 end
@@ -53,7 +53,7 @@ value(attr::EnumAttribute) = API.LLVMGetEnumAttributeValue(attr)
 
 ## string attribute
 
-StringAttribute(kind::String, value::String="", ctx::Context=GlobalContext()) =
+StringAttribute(kind::String, value::String=""; ctx::Context) =
     StringAttribute(API.LLVMCreateStringAttribute(ctx, kind, length(kind),
                                                   value, length(value)))
 

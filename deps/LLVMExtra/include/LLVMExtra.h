@@ -58,7 +58,23 @@ void LLVMExtraAppendToCompilerUsed(LLVMModuleRef Mod,
                                    size_t Count);
 void LLVMExtraAddGenericAnalysisPasses(LLVMPassManagerRef PM);
 
+void LLVMExtraDumpMetadata(LLVMMetadataRef MD);
+
+char* LLVMExtraPrintMetadataToString(LLVMMetadataRef MD);
+
 const char *LLVMExtraDIScopeGetName(LLVMMetadataRef File, unsigned *Len);
+
+const char *LLVMExtraGetMDString2(LLVMMetadataRef MD, unsigned *Length);
+
+unsigned LLVMExtraGetMDNodeNumOperands2(LLVMMetadataRef MD);
+
+void LLVMExtraGetMDNodeOperands2(LLVMMetadataRef MD, LLVMMetadataRef *Dest);
+
+unsigned LLVMExtraGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD);
+
+void LLVMExtraGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest);
+
+void LLVMExtraAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
 
 // Bug fixes
 void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);

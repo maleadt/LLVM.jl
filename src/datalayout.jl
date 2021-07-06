@@ -14,8 +14,8 @@ DataLayout(rep::String) = DataLayout(API.LLVMCreateTargetData(rep))
 
 DataLayout(tm::TargetMachine) = DataLayout(API.LLVMCreateTargetDataLayout(tm))
 
-function DataLayout(f::Core.Function, args...)
-    data = DataLayout(args...)
+function DataLayout(f::Core.Function, args...; kwargs...)
+    data = DataLayout(args...; kwargs...)
     try
         f(data)
     finally
@@ -38,12 +38,9 @@ pointersize(data::DataLayout) = API.LLVMPointerSize(data)
 pointersize(data::DataLayout, addrspace::Integer) =
     API.LLVMPointerSizeForAS(data, addrspace)
 
-intptr(data::DataLayout) = IntegerType(API.LLVMIntPtrType(data))
-intptr(data::DataLayout, addrspace::Integer) =
-    IntegerType(API.LLVMIntPtrTypeForAS(data, addrspace))
-intptr(data::DataLayout, ctx::Context) =
+intptr(data::DataLayout; ctx::Context) =
     IntegerType(API.LLVMIntPtrTypeInContext(ctx, data))
-intptr(data::DataLayout, addrspace::Integer, ctx::Context) =
+intptr(data::DataLayout, addrspace::Integer; ctx::Context) =
     IntegerType(API.LLVMIntPtrTypeForASInContext(ctx, data, addrspace))
 
 Base.sizeof(data::DataLayout, typ::LLVMType) =

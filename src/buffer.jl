@@ -17,8 +17,8 @@ function MemoryBuffer(data::Vector{T}, name::String="", copy::Core.Bool=true) wh
     end
 end
 
-function MemoryBuffer(f::Core.Function, args...)
-    membuf = MemoryBuffer(args...)
+function MemoryBuffer(f::Core.Function, args...; kwargs...)
+    membuf = MemoryBuffer(args...; kwargs...)
     try
         f(membuf)
     finally
@@ -41,8 +41,8 @@ function MemoryBufferFile(path::String)
     MemoryBuffer(out_ref[])
 end
 
-function MemoryBufferFile(f::Core.Function, args...)
-    membuf = MemoryBufferFile(args...)
+function MemoryBufferFile(f::Core.Function, args...; kwargs...)
+    membuf = MemoryBufferFile(args...; kwargs...)
     try
         f(membuf)
     finally

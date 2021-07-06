@@ -49,15 +49,12 @@ for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     jl_fname = Symbol(T, :Type)
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
-        $jl_fname() = IntegerType(API.$api_fname())
         $jl_fname(ctx::Context) =
-            IntegerType(
-                      API.$(Symbol(api_fname, :InContext))(ctx))
+            IntegerType(API.$(Symbol(api_fname, :InContext))(ctx))
     end
 end
 
-IntType(bits::Integer) = IntegerType(API.LLVMIntType(bits))
-IntType(bits::Integer, ctx::Context) =
+IntType(bits::Integer; ctx::Context) =
     IntegerType(API.LLVMIntTypeInContext(ctx, bits))
 
 width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(inttyp)
@@ -82,7 +79,6 @@ for T in [:Half, :Float, :Double]
         end
         identify(::Type{LLVMType}, ::Val{API.$enumkind}) = $api_typename
 
-        $jl_fname() = $api_typename(API.$api_fname())
         $jl_fname(ctx::Context) =
             $api_typename(API.$(Symbol(api_fname, :InContext))(ctx))
     end
@@ -180,14 +176,11 @@ export name, ispacked, isopaque, elements!
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMStructTypeKind}) = StructType
 
-function StructType(name::String, ctx::Context=GlobalContext())
+function StructType(name::String; ctx::Context)
     return StructType(API.LLVMStructCreateNamed(ctx, name))
 end
 
-StructType(elems::Vector{<:LLVMType}, packed::Core.Bool=false) =
-    StructType(API.LLVMStructType(elems, length(elems), convert(Bool, packed)))
-
-StructType(elems::Vector{<:LLVMType}, ctx::Context, packed::Core.Bool=false) =
+StructType(elems::Vector{<:LLVMType}; packed::Core.Bool=false, ctx::Context) =
     StructType(API.LLVMStructTypeInContext(ctx, elems, length(elems), convert(Bool, packed)))
 
 name(structtyp::StructType) =
@@ -244,34 +237,28 @@ end
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMVoidTypeKind}) = VoidType
 
-VoidType() = VoidType(API.LLVMVoidType())
-VoidType(ctx::Context) =
-    VoidType(API.LLVMVoidTypeInContext(ctx))
+VoidType(ctx::Context) = VoidType(API.LLVMVoidTypeInContext(ctx))
 
 @checked struct LabelType <: LLVMType
     ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMLabelTypeKind}) = LabelType
 
-LabelType() = LabelType(API.LLVMLabelType())
-LabelType(ctx::Context) =
-    LabelType(API.LLVMLabelTypeInContext(ctx))
+LabelType(ctx::Context) = LabelType(API.LLVMLabelTypeInContext(ctx))
 
 @checked struct MetadataType <: LLVMType
     ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMMetadataTypeKind}) = MetadataType
 
-MetadataType(ctx::Context) =
-    MetadataType(API.LLVMMetadataTypeInContext(ctx))
+MetadataType(ctx::Context) = MetadataType(API.LLVMMetadataTypeInContext(ctx))
 
 @checked struct TokenType <: LLVMType
     ref::API.LLVMTypeRef
 end
 identify(::Type{LLVMType}, ::Val{API.LLVMTokenTypeKind}) = TokenType
 
-TokenType(ctx::Context) =
-    TokenType(API.LLVMTokenTypeInContext(ctx))
+TokenType(ctx::Context) = TokenType(API.LLVMTokenTypeInContext(ctx))
 
 
 ## type iteration
@@ -284,7 +271,7 @@ end
 
 # FIXME: remove on LLVM 12
 function LLVMGetTypeByName2(ctx::Context, name)
-    Module("dummy", ctx) do mod
+    Module("dummy"; ctx) do mod
         API.LLVMGetTypeByName(mod, name)
     end
 end

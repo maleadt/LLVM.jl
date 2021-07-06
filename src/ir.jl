@@ -1,6 +1,6 @@
 ## reader
 
-function Base.parse(::Type{Module}, ir::String, ctx::Context=GlobalContext())
+function Base.parse(::Type{Module}, ir::String; ctx::Context)
     data = unsafe_wrap(Vector{UInt8}, ir)
     membuf = MemoryBuffer(data, "", false)
 

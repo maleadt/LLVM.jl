@@ -12,8 +12,8 @@ Base.unsafe_convert(::Type{API.LLVMModuleProviderRef}, mp::ModuleProvider) = mp.
 ModuleProvider(mod::Module) =
     ModuleProvider(API.LLVMCreateModuleProviderForExistingModule(mod))
 
-function ModuleProvider(f::Core.Function, args...)
-    mp = ModuleProvider(args...)
+function ModuleProvider(f::Core.Function, args...; kwargs...)
+    mp = ModuleProvider(args...; kwargs...)
     try
         f(mp)
     finally

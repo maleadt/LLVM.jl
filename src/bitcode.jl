@@ -1,14 +1,6 @@
 ## reader
-function Base.parse(::Type{Module}, membuf::MemoryBuffer)
-    out_ref = Ref{API.LLVMModuleRef}()
 
-    status = convert(Core.Bool, API.LLVMParseBitcode2(membuf, out_ref))
-    @assert !status # caught by diagnostics handler
-
-    Module(out_ref[])
-end
-
-function Base.parse(::Type{Module}, membuf::MemoryBuffer, ctx::Context)
+function Base.parse(::Type{Module}, membuf::MemoryBuffer; ctx::Context)
     out_ref = Ref{API.LLVMModuleRef}()
 
     status = convert(Core.Bool, API.LLVMParseBitcodeInContext2(ctx, membuf, out_ref))
@@ -17,10 +9,8 @@ function Base.parse(::Type{Module}, membuf::MemoryBuffer, ctx::Context)
     Module(out_ref[])
 end
 
-Base.parse(::Type{Module}, data::Vector) =
-    parse(Module, MemoryBuffer(data, "", false))
-Base.parse(::Type{Module}, data::Vector, ctx::Context) =
-    parse(Module, MemoryBuffer(data, "", false), ctx)
+Base.parse(::Type{Module}, data::Vector; ctx::Context) =
+    parse(Module, MemoryBuffer(data, "", false); ctx)
 
 
 ## writer

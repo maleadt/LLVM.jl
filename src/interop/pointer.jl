@@ -9,10 +9,10 @@ using Core: LLVMPtr
 @generated function pointerref(ptr::LLVMPtr{T,A}, i::Int, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return T.instance
     Context() do ctx
-        eltyp = convert(LLVMType, T, ctx)
+        eltyp = convert(LLVMType, T; ctx)
 
-        T_int = convert(LLVMType, Int, ctx)
-        T_ptr = convert(LLVMType, ptr, ctx)
+        T_int = convert(LLVMType, Int; ctx)
+        T_ptr = convert(LLVMType, ptr; ctx)
 
         T_typed_ptr = LLVM.PointerType(eltyp, A)
 
@@ -22,7 +22,7 @@ using Core: LLVMPtr
 
         # generate IR
         Builder(ctx) do builder
-            entry = BasicBlock(llvm_f, "entry", ctx)
+            entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
             typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
@@ -30,7 +30,7 @@ using Core: LLVMPtr
             ld = load!(builder, typed_ptr)
 
             if A != 0
-                metadata(ld)[LLVM.MD_tbaa] = tbaa_addrspace(A, ctx)
+                metadata(ld)[LLVM.MD_tbaa] = tbaa_addrspace(A; ctx)
             end
             alignment!(ld, align)
 
@@ -44,10 +44,10 @@ end
 @generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::Int, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return
     Context() do ctx
-        eltyp = convert(LLVMType, T, ctx)
+        eltyp = convert(LLVMType, T; ctx)
 
-        T_int = convert(LLVMType, Int, ctx)
-        T_ptr = convert(LLVMType, ptr, ctx)
+        T_int = convert(LLVMType, Int; ctx)
+        T_ptr = convert(LLVMType, ptr; ctx)
 
         T_typed_ptr = LLVM.PointerType(eltyp, A)
 
@@ -57,7 +57,7 @@ end
 
         # generate IR
         Builder(ctx) do builder
-            entry = BasicBlock(llvm_f, "entry", ctx)
+            entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
             typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
@@ -66,7 +66,7 @@ end
             st = store!(builder, val, typed_ptr)
 
             if A != 0
-                metadata(st)[LLVM.MD_tbaa] = tbaa_addrspace(A, ctx)
+                metadata(st)[LLVM.MD_tbaa] = tbaa_addrspace(A; ctx)
             end
             alignment!(st, align)
 
@@ -126,14 +126,14 @@ Base.signed(x::LLVMPtr) = Int(x)
 
     # build IR that calls the intrinsic, casting types if necessary
     Context() do ctx
-        T_ret = convert(LLVMType, rettyp, ctx)
-        T_args = LLVMType[convert(LLVMType, typ, ctx) for typ in argtyps]
+        T_ret = convert(LLVMType, rettyp; ctx)
+        T_args = LLVMType[convert(LLVMType, typ; ctx) for typ in argtyps]
 
         llvm_f, _ = create_function(T_ret, T_args)
         mod = LLVM.parent(llvm_f)
 
         Builder(ctx) do builder
-            entry = BasicBlock(llvm_f, "entry", ctx)
+            entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
             # Julia's compiler strips pointers of their element type.
@@ -144,15 +144,15 @@ Base.signed(x::LLVMPtr) = Int(x)
                 if argtyp <: LLVMPtr
                     # passed as i8*
                     T,AS = argtyp.parameters
-                    actual_typ = LLVM.PointerType(convert(LLVMType, T, ctx), AS)
+                    actual_typ = LLVM.PointerType(convert(LLVMType, T; ctx), AS)
                     actual_arg = bitcast!(builder, arg, actual_typ)
                 elseif argtyp <: Ptr
                     # passed as i64
                     T = eltype(argtyp)
-                    actual_typ = LLVM.PointerType(convert(LLVMType, T, ctx))
+                    actual_typ = LLVM.PointerType(convert(LLVMType, T; ctx))
                     actual_arg = inttoptr!(builder, arg, actual_typ)
                 else
-                    actual_typ = convert(LLVMType, argtyp, ctx)
+                    actual_typ = convert(LLVMType, argtyp; ctx)
                     actual_arg = arg
                 end
                 push!(T_actual_args, actual_typ)
@@ -162,10 +162,10 @@ Base.signed(x::LLVMPtr) = Int(x)
             # same for the return type
             if rettyp <: LLVMPtr
                 T,AS = rettyp.parameters
-                T_ret_actual = LLVM.PointerType(convert(LLVMType, T, ctx), AS)
+                T_ret_actual = LLVM.PointerType(convert(LLVMType, T; ctx), AS)
             elseif rettyp <: Ptr
                 T = eltype(rettyp)
-                T_ret_actual = LLVM.PointerType(convert(LLVMType, T, ctx))
+                T_ret_actual = LLVM.PointerType(convert(LLVMType, T; ctx))
             else
                 T_ret_actual = T_ret
             end

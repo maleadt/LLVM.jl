@@ -254,23 +254,72 @@ void LLVMExtraAddGenericAnalysisPasses(LLVMPassManagerRef PM)
     unwrap(PM)->add(createTargetTransformInfoWrapperPass(TargetIRAnalysis()));
 }
 
-template <typename DIT> DIT *unwrapDI(LLVMMetadataRef Ref) {
-  return (DIT *)(Ref ? unwrap<MDNode>(Ref) : nullptr);
+const char *LLVMExtraDIScopeGetName(LLVMMetadataRef File, unsigned *Len) {
+    auto Name = unwrap<DIScope>(File)->getName();
+    *Len = Name.size();
+    return Name.data();
 }
 
-const char *LLVMExtraDIScopeGetName(LLVMMetadataRef File, unsigned *Len) {
-  auto Name = unwrapDI<DIScope>(File)->getName();
-  *Len = Name.size();
-  return Name.data();
+void LLVMExtraDumpMetadata(LLVMMetadataRef MD) {
+  unwrap<Metadata>(MD)->print(errs(), /*M=*/nullptr, /*IsForDebug=*/true);
+}
+
+char* LLVMExtraPrintMetadataToString(LLVMMetadataRef MD) {
+  std::string buf;
+  raw_string_ostream os(buf);
+
+  if (unwrap<Metadata>(MD))
+    unwrap<Metadata>(MD)->print(os);
+  else
+    os << "Printing <null> Metadata";
+
+  os.flush();
+
+  return strdup(buf.c_str());
+}
+
+// versions of API without MetadataAsValue
+
+const char *LLVMExtraGetMDString2(LLVMMetadataRef MD, unsigned *Length) {
+    const MDString *S = unwrap<MDString>(MD);
+    *Length = S->getString().size();
+    return S->getString().data();
+}
+
+unsigned LLVMExtraGetMDNodeNumOperands2(LLVMMetadataRef MD) {
+  return unwrap<MDNode>(MD)->getNumOperands();
+}
+
+void LLVMExtraGetMDNodeOperands2(LLVMMetadataRef MD, LLVMMetadataRef *Dest) {
+  const auto *N = unwrap<MDNode>(MD);
+  const unsigned numOperands = N->getNumOperands();
+  for (unsigned i = 0; i < numOperands; i++)
+    Dest[i] = wrap(N->getOperand(i));
+}
+
+unsigned LLVMExtraGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD) {
+  return unwrap<NamedMDNode>(NMD)->getNumOperands();
+}
+
+void LLVMExtraGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD,
+                                        LLVMMetadataRef *Dest) {
+  NamedMDNode *N = unwrap<NamedMDNode>(NMD);
+  for (unsigned i=0;i<N->getNumOperands();i++)
+    Dest[i] = wrap(N->getOperand(i));
+}
+
+void LLVMExtraAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val) {
+  unwrap<NamedMDNode>(NMD)->addOperand(unwrap<MDNode>(Val));
 }
 
 // Bug fixes (TODO: upstream these)
 
 void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal) {
-  unwrap<GlobalVariable>(GlobalVar)
-    ->setInitializer(ConstantVal ? unwrap<Constant>(ConstantVal) : nullptr);
+    unwrap<GlobalVariable>(GlobalVar)
+        ->setInitializer(ConstantVal ? unwrap<Constant>(ConstantVal) : nullptr);
 }
 
 void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn) {
-  unwrap<Function>(Fn)->setPersonalityFn(PersonalityFn ? unwrap<Constant>(PersonalityFn) : nullptr);
+    unwrap<Function>(Fn)->setPersonalityFn(PersonalityFn ? unwrap<Constant>(PersonalityFn)
+                                                         : nullptr);
 }

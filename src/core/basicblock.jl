@@ -15,13 +15,9 @@ Base.unsafe_convert(::Type{API.LLVMBasicBlockRef}, bb::BasicBlock) = API.LLVMVal
     ref::API.LLVMValueRef
 end
 
-BasicBlock(f::Function, name::String) =
-    BasicBlock(API.LLVMAppendBasicBlock(f, name))
-BasicBlock(f::Function, name::String, ctx::Context) =
+BasicBlock(f::Function, name::String; ctx::Context) =
     BasicBlock(API.LLVMAppendBasicBlockInContext(ctx, f, name))
-BasicBlock(bb::BasicBlock, name::String) =
-    BasicBlock(API.LLVMInsertBasicBlock(bb, name))
-BasicBlock(bb::BasicBlock, name::String, ctx::Context) =
+BasicBlock(bb::BasicBlock, name::String; ctx::Context) =
     BasicBlock(API.LLVMInsertBasicBlockInContext(ctx, bb, name))
 
 unsafe_delete!(::Function, bb::BasicBlock) = API.LLVMDeleteBasicBlock(bb)

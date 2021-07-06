@@ -11,9 +11,9 @@ end
 @generated function Base.unsafe_load(p::CustomPtr{T}, i::Integer=1) where T
     Context() do ctx
         # get the element type
-        eltyp = convert(LLVMType, T, ctx)
+        eltyp = convert(LLVMType, T; ctx)
 
-        T_int = LLVM.IntType(sizeof(Int)*8, ctx)
+        T_int = LLVM.IntType(sizeof(Int)*8; ctx)
         T_ptr = LLVM.PointerType(eltyp)
 
         # create a function
@@ -22,7 +22,7 @@ end
 
         # generate IR
         Builder(ctx) do builder
-            entry = BasicBlock(llvmf, "entry", ctx)
+            entry = BasicBlock(llvmf, "entry"; ctx)
             position!(builder, entry)
 
             ptr = inttoptr!(builder, parameters(llvmf)[1], T_ptr)

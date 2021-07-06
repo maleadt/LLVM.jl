@@ -22,15 +22,14 @@ Base.:(==)(x::Module, y::Module) = (x.ref === y.ref)
     ref::API.LLVMTargetDataRef
 end
 
-Module(name::String) = Module(API.LLVMModuleCreateWithName(name))
-Module(name::String, ctx::Context) =
+Module(name::String; ctx::Context) =
     Module(API.LLVMModuleCreateWithNameInContext(name, ctx))
 Module(mod::Module) = Module(API.LLVMCloneModule(mod))
 
 dispose(mod::Module) = API.LLVMDisposeModule(mod)
 
-function Module(f::Core.Function, args...)
-    mod = Module(args...)
+function Module(f::Core.Function, args...; kwargs...)
+    mod = Module(args...; kwargs...)
     try
         f(mod)
     finally
@@ -100,21 +99,17 @@ function Base.show(io::IO, mime::MIME"text/plain", node::NamedMDNode)
     return io
 end
 
-# XXX: D47179 didn't add a NamedMDNode-based API for getting/setting metadata operands...
-#      so we still use the old, Module-based API here.
-
 function operands(node::NamedMDNode)
-    nops = API.LLVMGetNamedMetadataNumOperands(node.mod, name(node))
-    ops = Vector{API.LLVMValueRef}(undef, nops)
+    nops = API.LLVMExtraGetNamedMetadataNumOperands2(node)
+    ops = Vector{API.LLVMMetadataRef}(undef, nops)
     if nops > 0
-        API.LLVMGetNamedMetadataOperands(node.mod, name(node), ops)
+        API.LLVMExtraGetNamedMetadataOperands2(node, ops)
     end
-    vals = MetadataAsValue[MetadataAsValue(op) for op in ops]
-    return map(Metadata, vals)
+    return [Metadata(op) for op in ops]
 end
 
-Base.push!(node::NamedMDNode, val::Metadata) =
-    API.LLVMAddNamedMetadataOperand(node.mod, name(node), Value(val))
+Base.push!(node::NamedMDNode, val::MDNode) =
+    API.LLVMExtraAddNamedMetadataOperand2(node, val)
 
 # module metadata iteration
 
@@ -132,10 +127,13 @@ Instead, fetch the named metadata node using `getindex`, and `push!` to it.
 metadata(mod::Module) = ModuleMetadataIterator(mod)
 
 function Base.show(io::IO, mime::MIME"text/plain", iter::ModuleMetadataIterator)
-    print(io, "ModuleMetadataIterator for module $(name(iter.mod)):")
-    for (key,val) in iter
-        print(io, "\n  !$key = ")
-        show(io, mime, operands(val))
+    print(io, "ModuleMetadataIterator for module $(name(iter.mod))")
+    if !isempty(iter)
+        print(io, ":")
+        for (key,val) in iter
+            print(io, "\n  ")
+            show(io, mime, val)
+        end
     end
     return io
 end

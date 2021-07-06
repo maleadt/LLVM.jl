@@ -2,31 +2,31 @@
 
 @testset "generic values" begin
 
-let
-    val = GenericValue(LLVM.Int32Type(), -1)
+Context() do ctx
+    val = GenericValue(LLVM.Int32Type(ctx), -1)
     @test intwidth(val) == 32
     @test convert(Int, val) == -1
     dispose(val)
 end
 
-let
-    val = GenericValue(LLVM.Int32Type(), UInt(1))
+Context() do ctx
+    val = GenericValue(LLVM.Int32Type(ctx), UInt(1))
     @test convert(Int, val) == 1
     @test convert(UInt, val) == 1
     dispose(val)
 end
 
-let
-    val = GenericValue(LLVM.DoubleType(), Float32(1.1))
-    @test convert(Float32, val, LLVM.DoubleType()) == Float32(1.1)
-    @test convert(Float64, val, LLVM.DoubleType()) == Float64(Float32(1.1))
+Context() do ctx
+    val = GenericValue(LLVM.DoubleType(ctx), Float32(1.1))
+    @test convert(Float32, val, LLVM.DoubleType(ctx)) == Float32(1.1)
+    @test convert(Float64, val, LLVM.DoubleType(ctx)) == Float64(Float32(1.1))
     dispose(val)
 end
 
-let
-    val = GenericValue(LLVM.DoubleType(), 1.1)
-    @test convert(Float32, val, LLVM.DoubleType()) == Float32(1.1)
-    @test convert(Float64, val, LLVM.DoubleType()) == 1.1
+Context() do ctx
+    val = GenericValue(LLVM.DoubleType(ctx), 1.1)
+    @test convert(Float32, val, LLVM.DoubleType(ctx)) == Float32(1.1)
+    @test convert(Float64, val, LLVM.DoubleType(ctx)) == 1.1
     dispose(val)
 end
 
@@ -43,19 +43,19 @@ end
 @testset "execution engine" begin
 
 Context() do ctx
-    mod = LLVM.Module("SomeModule", ctx)
+    mod = LLVM.Module("SomeModule"; ctx)
     ExecutionEngine(mod) do mod end
 end
 
 function emit_sum(ctx::Context)
-    mod = LLVM.Module("SomeModule", ctx)
+    mod = LLVM.Module("SomeModule"; ctx)
 
     param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
     ret_type = LLVM.FunctionType(LLVM.Int32Type(ctx), param_types)
 
     sum = LLVM.Function(mod, "SomeFunctionSum", ret_type)
 
-    entry = BasicBlock(sum, "entry")
+    entry = BasicBlock(sum, "entry"; ctx)
 
     Builder(ctx) do builder
         position!(builder, entry)
@@ -70,13 +70,13 @@ function emit_sum(ctx::Context)
 end
 
 function emit_retint(ctx::Context, val)
-    mod = LLVM.Module("SomeModule", ctx)
+    mod = LLVM.Module("SomeModule"; ctx)
 
     ret_type = LLVM.FunctionType(LLVM.Int32Type(ctx))
 
     fn = LLVM.Function(mod, "SomeFunction", ret_type)
 
-    entry = BasicBlock(fn, "entry")
+    entry = BasicBlock(fn, "entry"; ctx)
 
     Builder(ctx) do builder
         position!(builder, entry)
@@ -92,16 +92,16 @@ end
 
 function emit_phi(ctx::Context)
     # if %1 > %2 then %1+2 else %2-5
-    mod = LLVM.Module("sommod", ctx)
+    mod = LLVM.Module("sommod"; ctx)
     params = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
 
     ft = LLVM.FunctionType(LLVM.Int32Type(ctx), params)
     fn = LLVM.Function(mod, "gt", ft)
 
-    entry = BasicBlock(fn, "entry")
-    then = BasicBlock(fn, "then")
-    elsee = BasicBlock(fn, "else")
-    merge = BasicBlock(fn, "ifcont")
+    entry = BasicBlock(fn, "entry"; ctx)
+    then = BasicBlock(fn, "then"; ctx)
+    elsee = BasicBlock(fn, "else"; ctx)
+    merge = BasicBlock(fn, "ifcont"; ctx)
 
     Builder(ctx) do builder
         position!(builder, entry)
@@ -134,8 +134,8 @@ end
 Context() do ctx
     mod = emit_sum(ctx)
 
-    args = [GenericValue(LLVM.Int32Type(), 1),
-            GenericValue(LLVM.Int32Type(), 2)]
+    args = [GenericValue(LLVM.Int32Type(ctx), 1),
+            GenericValue(LLVM.Int32Type(ctx), 2)]
 
     let mod = LLVM.Module(mod)
         fn = functions(mod)["SomeFunctionSum"]

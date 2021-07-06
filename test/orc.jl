@@ -4,7 +4,7 @@
     tm  = JITTargetMachine()
     OrcJIT(tm) do orc
        Context() do ctx
-            mod = LLVM.Module("jit", ctx)
+            mod = LLVM.Module("jit"; ctx)
             T_Int32 = LLVM.Int32Type(ctx)
             ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
             fn = LLVM.Function(mod, "mysum", ft)
@@ -14,7 +14,7 @@
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
             Builder(ctx) do builder
-                entry = BasicBlock(wrapper, "entry", ctx)
+                entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
                 tmp = call!(builder, fn, [parameters(wrapper)...])
@@ -58,7 +58,7 @@ end
                 end
             end
 
-            mod = LLVM.Module("jit", ctx)
+            mod = LLVM.Module("jit"; ctx)
             T_Int32 = LLVM.Int32Type(ctx)
             ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
             fn = LLVM.Function(mod, "mysum", ft)
@@ -68,7 +68,7 @@ end
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
             Builder(ctx) do builder
-                entry = BasicBlock(wrapper, "entry", ctx)
+                entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
                 tmp = call!(builder, fn, [parameters(wrapper)...])
@@ -115,7 +115,7 @@ end
     tm  = JITTargetMachine()
     OrcJIT(tm) do orc
             Context() do ctx
-            mod = LLVM.Module("jit", ctx)
+            mod = LLVM.Module("jit"; ctx)
             T_Int32 = LLVM.Int32Type(ctx)
             ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
             fn = LLVM.Function(mod, "mysum", ft)
@@ -125,7 +125,7 @@ end
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
             Builder(ctx) do builder
-                entry = BasicBlock(wrapper, "entry", ctx)
+                entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
                 tmp = call!(builder, fn, [parameters(wrapper)...])
@@ -159,7 +159,7 @@ end
     tm  = JITTargetMachine()
     OrcJIT(tm) do orc
         Context() do ctx
-            mod = LLVM.Module("jit", ctx)
+            mod = LLVM.Module("jit"; ctx)
             T_Int32 = LLVM.Int32Type(ctx)
             ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
             mysum = mangle(orc, "mysum")
@@ -170,7 +170,7 @@ end
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
             Builder(ctx) do builder
-                entry = BasicBlock(wrapper, "entry", ctx)
+                entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
                 tmp = call!(builder, fn, [parameters(wrapper)...])
@@ -210,12 +210,12 @@ end
         Context() do ctx
             sym = mangle(orc, "SomeFunction")
 
-            mod = LLVM.Module("jit", ctx)
+            mod = LLVM.Module("jit"; ctx)
             ft = LLVM.FunctionType(LLVM.VoidType(ctx))
             fn = LLVM.Function(mod, sym, ft)
 
             Builder(ctx) do builder
-                entry = BasicBlock(fn, "entry")
+                entry = BasicBlock(fn, "entry"; ctx)
                 position!(builder, entry)
                 ret!(builder)
             end
@@ -284,12 +284,12 @@ end
 
             # 1. IRGen & Optimize the module
             orc_mod = Context() do ctx
-                mod = LLVM.Module("jit", ctx)
+                mod = LLVM.Module("jit"; ctx)
                 ft = LLVM.FunctionType(LLVM.VoidType(ctx))
                 fn = LLVM.Function(mod, sym, ft)
 
                 Builder(ctx) do builder
-                    entry = BasicBlock(fn, "entry")
+                    entry = BasicBlock(fn, "entry"; ctx)
                     position!(builder, entry)
                     ret!(builder)
                 end

@@ -113,8 +113,8 @@ function dispose(engine::ExecutionEngine)
 end
 
 for x in [:ExecutionEngine, :Interpreter, :JIT]
-    @eval function $x(f::Core.Function, args...)
-        engine = $x(args...)
+    @eval function $x(f::Core.Function, args...; kwargs...)
+        engine = $x(args...; kwargs...)
         try
             f(engine)
         finally

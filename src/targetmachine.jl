@@ -10,7 +10,7 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMTargetMachineRef}, tm::TargetMachine) = tm.ref
 
-TargetMachine(t::Target, triple::String, cpu::String="", features::String="",
+TargetMachine(t::Target, triple::String, cpu::String="", features::String="";
               optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault,
               reloc::API.LLVMRelocMode=API.LLVMRelocDefault,
               code::API.LLVMCodeModel=API.LLVMCodeModelDefault) =
@@ -19,8 +19,8 @@ TargetMachine(t::Target, triple::String, cpu::String="", features::String="",
 
 dispose(tm::TargetMachine) = API.LLVMDisposeTargetMachine(tm)
 
-function TargetMachine(f::Core.Function, args...)
-    tm = TargetMachine(args...)
+function TargetMachine(f::Core.Function, args...; kwargs...)
+    tm = TargetMachine(args...; kwargs...)
     try
         f(tm)
     finally

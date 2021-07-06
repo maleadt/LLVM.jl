@@ -7,12 +7,12 @@ using InteractiveUtils
 
 @generated function add_one(i)
     Context() do ctx
-        T_int = convert(LLVMType, Int, ctx)
+        T_int = convert(LLVMType, Int; ctx)
 
         f, ft = create_function(T_int, [T_int])
 
         Builder(ctx) do builder
-            entry = BasicBlock(f, "entry", ctx)
+            entry = BasicBlock(f, "entry"; ctx)
             position!(builder, entry)
 
             val = add!(builder, parameters(f)[1], ConstantInt(T_int, 1))
@@ -38,9 +38,9 @@ end
 @test isboxed(NonGhostType2)
 
 Context() do ctx
-    @test isghosttype(GhostType, ctx)
-    @test !isghosttype(NonGhostType1, ctx)
-    @test !isghosttype(NonGhostType2, ctx)
+    @test isghosttype(GhostType; ctx)
+    @test !isghosttype(NonGhostType1; ctx)
+    @test !isghosttype(NonGhostType2; ctx)
 end
 
 end
@@ -103,7 +103,7 @@ end
 
 
 Context() do ctx
-LLVM.Module("SomeModule", ctx) do mod
+LLVM.Module("SomeModule"; ctx) do mod
 ModulePassManager() do pm
 
 demote_float16!(pm)

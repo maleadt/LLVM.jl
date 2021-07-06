@@ -2,11 +2,11 @@
 
 Context() do ctx
 Builder(ctx) do builder
-LLVM.Module("SomeModule", ctx) do mod
+LLVM.Module("SomeModule"; ctx) do mod
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    bb = BasicBlock(fn, "SomeBasicBlock")
+    bb = BasicBlock(fn, "SomeBasicBlock"; ctx)
     position!(builder, bb)
 
     ret!(builder)

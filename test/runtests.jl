@@ -14,6 +14,10 @@ using Test
 
 @testset "LLVM" begin
 
+# HACK: if a test throws within a Context() do block, displaying the LLVM value may crash
+#       because the context has been disposed already. avoid that by disabling `dispose`
+LLVM.dispose(::Context) = return
+
 include("util.jl")
 
 @testset "types" begin
