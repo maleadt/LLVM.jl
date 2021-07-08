@@ -24,6 +24,13 @@ end
         @test LLVM.lookup_dylib(es, "my.so") === jd
 
         jd_main = JITDylib(lljit)
+
+        prefix = LLVM.get_prefix(lljit)
+        dg = LLVM.CreateDynamicLibrarySearchGeneratorForProcess(prefix)
+        add!(jd_main, dg)
+
+        addr = lookup(lljit, "jl_apply_generic")
+        @test pointer(addr) != C_NULL
     end
 end
 
