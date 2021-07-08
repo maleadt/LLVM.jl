@@ -17,6 +17,13 @@ LLVMBool LLVMInitializeNativeAsmParser(void);
 LLVMBool LLVMInitializeNativeAsmPrinter(void);
 LLVMBool LLVMInitializeNativeDisassembler(void);
 
+typedef enum {
+  LLVMDebugEmissionKindNoDebug = 0,
+  LLVMDebugEmissionKindFullDebug = 1,
+  LLVMDebugEmissionKindLineTablesOnly = 2,
+  LLVMDebugEmissionKindDebugDirectivesOnly = 3
+} LLVMDebugEmissionKind;
+
 // Various missing passes (being upstreamed)
 void LLVMAddBarrierNoopPass(LLVMPassManagerRef PM);
 void LLVMAddDivRemPairsPass(LLVMPassManagerRef PM);

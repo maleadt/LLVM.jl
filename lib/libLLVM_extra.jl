@@ -40,6 +40,13 @@ function LLVMInitializeNativeDisassembler()
     ccall((:LLVMInitializeNativeDisassembler, libLLVMExtra), LLVMBool, ())
 end
 
+@cenum(LLVMDebugEmissionKind,
+    LLVMDebugEmissionKindNoDebug = 0,
+    LLVMDebugEmissionKindFullDebug = 1,
+    LLVMDebugEmissionKindLineTablesOnly = 2,
+    LLVMDebugEmissionKindDebugDirectivesOnly = 3,
+)
+
 function LLVMAddBarrierNoopPass(PM)
     ccall((:LLVMAddBarrierNoopPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
