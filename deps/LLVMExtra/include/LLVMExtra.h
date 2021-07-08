@@ -6,48 +6,55 @@
 
 LLVM_C_EXTERN_C_BEGIN
 
-void LLVMExtraInitializeAllTargetInfos();
-void LLVMExtraInitializeAllTargets();
-void LLVMExtraInitializeAllTargetMCs();
-void LLVMExtraInitializeAllAsmPrinters();
-void LLVMExtraInitializeAllAsmParsers();
-void LLVMExtraInitializeAllDisassemblers();
-LLVMBool LLVMExtraInitializeNativeTarget();
-LLVMBool LLVMExtraInitializeNativeAsmParser();
-LLVMBool LLVMExtraInitializeNativeAsmPrinter();
-LLVMBool LLVMExtraInitializeNativeDisassembler();
+void LLVMInitializeAllTargetInfos(void);
+void LLVMInitializeAllTargets(void);
+void LLVMInitializeAllTargetMCs(void);
+void LLVMInitializeAllAsmPrinters(void);
+void LLVMInitializeAllAsmParsers(void);
+void LLVMInitializeAllDisassemblers(void);
+LLVMBool LLVMInitializeNativeTarget(void);
+LLVMBool LLVMInitializeNativeAsmParser(void);
+LLVMBool LLVMInitializeNativeAsmPrinter(void);
+LLVMBool LLVMInitializeNativeDisassembler(void);
+
+typedef enum {
+  LLVMDebugEmissionKindNoDebug = 0,
+  LLVMDebugEmissionKindFullDebug = 1,
+  LLVMDebugEmissionKindLineTablesOnly = 2,
+  LLVMDebugEmissionKindDebugDirectivesOnly = 3
+} LLVMDebugEmissionKind;
 
 // Various missing passes (being upstreamed)
-void LLVMExtraAddBarrierNoopPass(LLVMPassManagerRef PM);
-void LLVMExtraAddDivRemPairsPass(LLVMPassManagerRef PM);
-void LLVMExtraAddLoopDistributePass(LLVMPassManagerRef PM);
-void LLVMExtraAddLoopFusePass(LLVMPassManagerRef PM);
-void LLVMExtraLoopLoadEliminationPass(LLVMPassManagerRef PM);
-void LLVMExtraAddLoadStoreVectorizerPass(LLVMPassManagerRef PM);
-void LLVMExtraAddVectorCombinePass(LLVMPassManagerRef PM);
+void LLVMAddBarrierNoopPass(LLVMPassManagerRef PM);
+void LLVMAddDivRemPairsPass(LLVMPassManagerRef PM);
+void LLVMAddLoopDistributePass(LLVMPassManagerRef PM);
+void LLVMAddLoopFusePass(LLVMPassManagerRef PM);
+void LLVMAddLoopLoadEliminationPass(LLVMPassManagerRef PM);
+void LLVMAddLoadStoreVectorizerPass(LLVMPassManagerRef PM);
+void LLVMAddVectorCombinePass(LLVMPassManagerRef PM);
 
 #if LLVM_VERSION_MAJOR < 12
-void LLVMExtraAddInstructionSimplifyPass(LLVMPassManagerRef PM);
+void LLVMAddInstructionSimplifyPass(LLVMPassManagerRef PM);
 #endif
 
 // Infrastructure for writing LLVM passes in Julia
 typedef struct LLVMOpaquePass *LLVMPassRef;
 
-void LLVMExtraAddPass(LLVMPassManagerRef PM, LLVMPassRef P);
+void LLVMAddPass(LLVMPassManagerRef PM, LLVMPassRef P);
 typedef LLVMBool (*LLVMPassCallback)(void *Ref, void *Data);
 
 LLVMPassRef
-LLVMExtraCreateModulePass2(const char *Name, LLVMPassCallback Callback, void *Data);
+LLVMCreateModulePass2(const char *Name, LLVMPassCallback Callback, void *Data);
 
 LLVMPassRef
-LLVMExtraCreateFunctionPass2(const char *Name, LLVMPassCallback Callback, void *Data);
+LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback, void *Data);
 
 // Various missing functions
-unsigned int LLVMExtraGetDebugMDVersion();
+unsigned int LLVMGetDebugMDVersion(void);
 
-LLVMContextRef LLVMExtraGetValueContext(LLVMValueRef V);
-void LLVMExtraAddTargetLibraryInfoByTiple(const char *T, LLVMPassManagerRef PM);
-void LLVMExtraAddInternalizePassWithExportList(
+LLVMContextRef LLVMGetValueContext(LLVMValueRef V);
+void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
+void LLVMAddInternalizePassWithExportList(
     LLVMPassManagerRef PM, const char **ExportList, size_t Length);
 
 void LLVMExtraAppendToUsed(LLVMModuleRef Mod,

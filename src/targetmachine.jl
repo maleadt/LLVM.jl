@@ -3,6 +3,7 @@
 export TargetMachine, dispose,
        target, triple, cpu, features, asm_verbosity!,
        emit, add_transform_info!, add_library_info!
+export JITTargetMachine
 
 @checked struct TargetMachine
     ref::API.LLVMTargetMachineRef
@@ -75,3 +76,25 @@ function add_transform_info!(pm::PassManager, tm::Union{Nothing,TargetMachine}=n
 end
 add_library_info!(pm::PassManager, triple::String) =
     API.LLVMAddTargetLibraryInfoByTriple(triple, pm)
+
+function JITTargetMachine(triple = LLVM.triple(),
+                          cpu = "", features = "";
+                          optlevel = LLVM.API.LLVMCodeGenLevelDefault)
+
+    # Force ELF on windows,
+    # Note: Without this call to normalize Orc get's confused
+    #       and chooses the x86_64 SysV ABI on Win x64
+    triple = LLVM.normalize(triple)
+    if Sys.iswindows()
+        triple *= "-elf"
+    end
+    target = LLVM.Target(triple=triple)
+    @debug "Configuring OrcJIT with" triple cpu features optlevel
+
+    tm = TargetMachine(target, triple, cpu, features;
+                       optlevel,
+                       reloc = LLVM.API.LLVMRelocStatic, # Generate simpler code for JIT
+                       code = LLVM.API.LLVMCodeModelJITDefault, # Required to init TM as JIT
+                       )
+    return tm
+end

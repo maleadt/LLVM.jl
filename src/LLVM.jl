@@ -59,10 +59,16 @@ include("bitcode.jl")
 include("transform.jl")
 include("debuginfo.jl")
 include("dibuilder.jl")
+include("jitevents.jl")
 
 has_orc_v1() = v"8" <= LLVM.version() < v"12"
 if has_orc_v1()
     include("orc.jl")
+end
+
+has_orc_v2() = v"12" <= LLVM.version()
+if has_orc_v2()
+    include("orcv2.jl")
 end
 
 include("interop.jl")

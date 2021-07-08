@@ -74,6 +74,10 @@ include("debuginfo.jl")
 if LLVM.has_orc_v1()
     include("orc.jl")
 end
+if LLVM.has_orc_v2()
+    include("orcv2.jl")
+end
+
 
 include("Kaleidoscope.jl")
 

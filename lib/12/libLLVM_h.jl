@@ -993,6 +993,8 @@ const LLVMOrcJITTargetAddress = UInt64
 @cenum LLVMJITSymbolGenericFlags::UInt32 begin
     LLVMJITSymbolGenericFlagsExported = 1
     LLVMJITSymbolGenericFlagsWeak = 2
+    LLVMJITSymbolGenericFlagsCallable = 4
+    LLVMJITSymbolGenericFlagsMaterializationSideEffectsOnly = 8
 end
 
 const LLVMJITTargetSymbolFlags = UInt8

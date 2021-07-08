@@ -116,14 +116,7 @@ define_transforms([:DCE])
 
 define_transforms([:DivRemPairs, :LoopDistribute, :LoopFuse, :LoopLoadElimination])
 
-if version() < v"12"
-    define_transforms([:InstSimplify]; exported=false)
-
-    export instruction_simplify!
-    instruction_simplify!(pm) = inst_simplify!(pm)
-else
-    define_transforms([:InstructionSimplify])
-end
+define_transforms([:InstructionSimplify])
 
 
 ## vectorization transformations
