@@ -76,3 +76,7 @@ end
 function apply_datalayout!(lljit::LLJIT, mod::LLVM.Module)
     LLVM.API.LLVMOrcLLJITApplyDataLayout(lljit, mod)
 end
+
+function get_prefix(lljit::LLJIT)
+    return API.LLVMOrcLLJITGetGlobalPrefix(lljit)
+end

@@ -176,6 +176,23 @@ function JITDylib(es::ExecutionSession, name; bare=false)
     JITDylib(ref)
 end
 
+@checked struct DefinitionGenerator
+    ref::API.LLVMOrcDefinitionGeneratorRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcDefinitionGeneratorRef}, dg::DefinitionGenerator) = dg.ref
+
+function add!(jd::JITDylib, dg::DefinitionGenerator)
+    API.LLVMOrcJITDylibAddGenerator(jd, dg)
+end
+
+function CreateDynamicLibrarySearchGeneratorForProcess(prefix)
+    ref = Ref{API.LLVMOrcDefinitionGeneratorRef}()
+    @check API.LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess(ref, prefix, C_NULL, C_NULL)
+    DefinitionGenerator(ref[])
+end
+
+# LLVMOrcCreateCustomCAPIDefinitionGenerator(F, Ctx)
+
 function lookup_dylib(es::ExecutionSession, name)
     ref = API.LLVMOrcExecutionSessionGetJITDylibByName(es, name)
     if ref == C_NULL
