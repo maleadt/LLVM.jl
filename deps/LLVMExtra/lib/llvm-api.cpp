@@ -323,3 +323,20 @@ void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn) {
     unwrap<Function>(Fn)->setPersonalityFn(PersonalityFn ? unwrap<Constant>(PersonalityFn)
                                                          : nullptr);
 }
+
+#if LLVM_VERSION_MAJOR == 12
+LLVMAttributeRef LLVMCreateTypeAttribute(LLVMContextRef C, unsigned KindID,
+                                         LLVMTypeRef type_ref) {
+  auto &Ctx = *unwrap(C);
+  auto AttrKind = (Attribute::AttrKind)KindID;
+  return wrap(Attribute::get(Ctx, AttrKind, unwrap(type_ref)));
+}
+
+LLVMTypeRef LLVMGetTypeAttributeValue(LLVMAttributeRef A) {
+  auto Attr = unwrap(A);
+  return wrap(Attr.getValueAsType());
+}
+LLVMBool LLVMIsTypeAttribute(LLVMAttributeRef A) {
+  return unwrap(A).isTypeAttribute();
+}
+#endif

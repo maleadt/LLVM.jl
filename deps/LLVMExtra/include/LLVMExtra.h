@@ -1,6 +1,7 @@
 #ifndef LLVMEXTRA_H
 #define LLVMEXTRA_H
 
+#include "llvm/Config/llvm-config.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 
@@ -86,6 +87,21 @@ void LLVMExtraAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef V
 // Bug fixes
 void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);
 void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn);
+
+// https://reviews.llvm.org/D97763
+#if LLVM_VERSION_MAJOR == 12
+/**
+ * Create a type attribute
+ */
+LLVMAttributeRef LLVMCreateTypeAttribute(LLVMContextRef C, unsigned KindID,
+                                         LLVMTypeRef type_ref);
+
+/**
+ * Get the type attribute's value.
+ */
+LLVMTypeRef LLVMGetTypeAttributeValue(LLVMAttributeRef A);
+LLVMBool LLVMIsTypeAttribute(LLVMAttributeRef A);
+#endif
 
 LLVM_C_EXTERN_C_END
 #endif

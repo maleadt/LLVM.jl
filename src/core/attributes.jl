@@ -2,7 +2,7 @@
 # itself.
 
 export Attribute,
-       EnumAttribute, StringAttribute,
+       EnumAttribute, StringAttribute, TypeAttribute,
        kind, value
 
 abstract type Attribute end
@@ -17,6 +17,10 @@ end
     ref::API.LLVMAttributeRef
 end
 
+@checked struct TypeAttribute <: Attribute
+    ref::API.LLVMAttributeRef
+end
+
 # TODO: make the identify mechanism flexible enough to cover cases like this one,
 #       and not only Value and Type
 
@@ -27,6 +31,11 @@ function Attribute(ref::API.LLVMAttributeRef)
     elseif convert(Core.Bool, API.LLVMIsStringAttribute(ref))
         return StringAttribute(ref)
     else
+        @static if LLVM.version() >= v"12"
+            if convert(Core.Bool, API.LLVMIsTypeAttribute(ref))
+                return TypeAttribute(ref)
+            end
+        end
         error("unknown attribute kind")
     end
 end
@@ -67,4 +76,17 @@ function value(attr::StringAttribute)
     len = Ref{Cuint}()
     data = API.LLVMGetStringAttributeValue(attr, len)
     return unsafe_string(convert(Ptr{Int8}, data), len[])
+end
+
+## type attribute
+
+function TypeAttribute(kind::String, value::LLVMType; ctx::Context)
+    enum_kind = API.LLVMGetEnumAttributeKindForName(kind, Csize_t(length(kind)))
+    return TypeAttribute(API.LLVMCreateTypeAttribute(ctx, enum_kind, value))
+end
+
+kind(attr::TypeAttribute) = API.LLVMGetEnumAttributeKind(attr)
+
+function value(attr::TypeAttribute)
+    return LLVMType(API.LLVMGetTypeAttributeValue(attr))
 end
