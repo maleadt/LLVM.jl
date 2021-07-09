@@ -942,15 +942,17 @@ LLVM.Module("SomeModule"; ctx) do mod
             @test length(attrs) == 0
         end
 
-        let attr = TypeAttribute("sret", LLVM.Int32Type(ctx); ctx)
-            @test kind(attr) != 0
-            @test value(attr) ==  LLVM.Int32Type(ctx)
+        if LLVM.version() >= v"12"
+            let attr = TypeAttribute("sret", LLVM.Int32Type(ctx); ctx)
+                @test kind(attr) != 0
+                @test value(attr) ==  LLVM.Int32Type(ctx)
 
-            push!(attrs, attr)
-            @test collect(attrs) == [attr]
+                push!(attrs, attr)
+                @test collect(attrs) == [attr]
 
-            delete!(attrs, attr)
-            @test length(attrs) == 0
+                delete!(attrs, attr)
+                @test length(attrs) == 0
+            end
         end
     end
 

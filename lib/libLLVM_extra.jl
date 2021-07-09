@@ -178,6 +178,18 @@ end
 
 if version().major == 12
 
+function LLVMCreateTypeAttribute(C, KindID, type_ref)
+    ccall((:LLVMCreateTypeAttribute, libLLVMExtra), LLVMAttributeRef, (LLVMContextRef, Cuint, LLVMTypeRef), C, KindID, type_ref)
+end
+
+function LLVMGetTypeAttributeValue(A)
+    ccall((:LLVMGetTypeAttributeValue, libLLVMExtra), LLVMTypeRef, (LLVMAttributeRef,), A)
+end
+
+function LLVMIsTypeAttribute(A)
+    ccall((:LLVMIsTypeAttribute, libLLVMExtra), LLVMBool, (LLVMAttributeRef,), A)
+end
+
 struct LLVMOrcCSymbolFlagsMapPair
     Name::LLVMOrcSymbolStringPoolEntryRef
     Flags::LLVMJITSymbolFlags
