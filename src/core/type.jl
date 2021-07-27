@@ -3,6 +3,8 @@ export LLVMType, issized, context, show
 # subtypes are expected to have a 'ref::API.LLVMTypeRef' field
 abstract type LLVMType end
 
+Base.eltype(typ::LLVMType) = Any
+
 Base.unsafe_convert(::Type{API.LLVMTypeRef}, typ::LLVMType) = typ.ref
 
 identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
