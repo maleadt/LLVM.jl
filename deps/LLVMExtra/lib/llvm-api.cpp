@@ -278,6 +278,29 @@ char* LLVMExtraPrintMetadataToString(LLVMMetadataRef MD) {
   return strdup(buf.c_str());
 }
 
+#if LLVM_VERSION_MAJOR >= 12
+void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM,
+                                   int BonusInstThreshold,
+                                   LLVMBool ForwardSwitchCondToPhi,
+                                   LLVMBool ConvertSwitchToLookupTable,
+                                   LLVMBool NeedCanonicalLoop,
+                                   LLVMBool HoistCommonInsts,
+                                   LLVMBool SinkCommonInsts,
+                                   LLVMBool SimplifyCondBranch,
+                                   LLVMBool FoldTwoEntryPHINode)
+{
+    auto simplifyCFGOptions = SimplifyCFGOptions().bonusInstThreshold(BonusInstThreshold)
+                                                  .forwardSwitchCondToPhi(ForwardSwitchCondToPhi)
+                                                  .convertSwitchToLookupTable(ConvertSwitchToLookupTable)
+                                                  .needCanonicalLoops(NeedCanonicalLoop)
+                                                  .hoistCommonInsts(HoistCommonInsts)
+                                                  .sinkCommonInsts(SinkCommonInsts)
+                                                  .setSimplifyCondBranch(SimplifyCondBranch)
+                                                  .setFoldTwoEntryPHINode(FoldTwoEntryPHINode);
+    unwrap(PM)->add(createCFGSimplificationPass(simplifyCFGOptions));
+}
+#endif
+
 // versions of API without MetadataAsValue
 
 const char *LLVMExtraGetMDString2(LLVMMetadataRef MD, unsigned *Length) {
