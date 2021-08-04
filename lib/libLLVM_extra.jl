@@ -140,6 +140,16 @@ function LLVMExtraDIScopeGetName(Scope, Len)
     ccall((:LLVMExtraDIScopeGetName, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), Scope, Len)
 end
 
+function LLVMAddCFGSimplificationPass2(PM, BonusInstThreshold, ForwardSwitchCondToPhi,
+                                       ConvertSwitchToLookupTable, NeedCanonicalLoop,
+                                       HoistCommonInsts, SinkCommonInsts,
+                                       SimplifyCondBranch, FoldTwoEntryPHINode)
+    ccall((:LLVMAddCFGSimplificationPass2, libLLVMExtra), Cvoid,
+          (LLVMPassManagerRef, Cint, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool),
+          PM, BonusInstThreshold, ForwardSwitchCondToPhi, ConvertSwitchToLookupTable, NeedCanonicalLoop,
+          HoistCommonInsts, SinkCommonInsts, SimplifyCondBranch, FoldTwoEntryPHINode)
+end
+
 # bug fixes
 
 # TODO: upstream

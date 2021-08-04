@@ -34,6 +34,9 @@ ModulePassManager() do pm
     bit_tracking_dce!(pm)
     alignment_from_assumptions!(pm)
     cfgsimplification!(pm)
+    if LLVM.version() >= v"12"
+        cfgsimplification!(pm; hoist_common_insts=true)
+    end
     dead_store_elimination!(pm)
     scalarizer!(pm)
     merged_load_store_motion!(pm)

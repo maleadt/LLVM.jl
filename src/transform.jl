@@ -95,7 +95,7 @@ end
 ## scalar transformations
 
 define_transforms([
-    :AggressiveDCE, :BitTrackingDCE, :AlignmentFromAssumptions, :CFGSimplification,
+    :AggressiveDCE, :BitTrackingDCE, :AlignmentFromAssumptions,
     :DeadStoreElimination, :Scalarizer, :MergedLoadStoreMotion, :GVN, :IndVarSimplify,
     :InstructionCombining, :JumpThreading, :LICM, :LoopDeletion, :LoopIdiom, :LoopRotate,
     :LoopReroll, :LoopUnroll, :LoopUnswitch, :MemCpyOpt, :PartiallyInlineLibCalls,
@@ -105,7 +105,7 @@ define_transforms([
     :LowerExpectIntrinsic, :TypeBasedAliasAnalysis, :ScopedNoAliasAA, :BasicAliasAnalysis
 ])
 
-export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!
+export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!, cfgsimplification!
 
 scalar_repl_aggregates!(pm::PassManager, threshold::Integer) =
     API.LLVMAddScalarReplAggregatesPassWithThreshold(pm, Cint(threshold))
@@ -118,6 +118,27 @@ define_transforms([:DivRemPairs, :LoopDistribute, :LoopFuse, :LoopLoadEliminatio
 
 define_transforms([:InstructionSimplify])
 
+if version() >= v"12"
+    cfgsimplification!(pm::PassManager;
+                       bonus_inst_threshold=1,
+                       forward_switch_cond_to_phi=false,
+                       convert_switch_to_lookup_table=false,
+                       need_canonical_loop=true,
+                       hoist_common_insts=false,
+                       sink_common_insts=false,
+                       simplify_cond_branch=true,
+                       fold_two_entry_phi_node=true) =
+        API.LLVMAddCFGSimplificationPass2(pm, bonus_inst_threshold,
+                                          forward_switch_cond_to_phi,
+                                          convert_switch_to_lookup_table,
+                                          need_canonical_loop,
+                                          hoist_common_insts,
+                                          sink_common_insts,
+                                          simplify_cond_branch,
+                                          fold_two_entry_phi_node)
+else
+    define_transforms([:CFGSimplification])
+end
 
 ## vectorization transformations
 

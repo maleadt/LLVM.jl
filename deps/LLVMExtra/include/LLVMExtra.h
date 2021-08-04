@@ -84,6 +84,18 @@ void LLVMExtraGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef 
 
 void LLVMExtraAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
 
+#if LLVM_VERSION_MAJOR >= 12
+void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM,
+                                   int BonusInstThreshold,
+                                   LLVMBool ForwardSwitchCondToPhi,
+                                   LLVMBool ConvertSwitchToLookupTable,
+                                   LLVMBool NeedCanonicalLoop,
+                                   LLVMBool HoistCommonInsts,
+                                   LLVMBool SinkCommonInsts,
+                                   LLVMBool SimplifyCondBranch,
+                                   LLVMBool FoldTwoEntryPHINode);
+#endif
+
 // Bug fixes
 void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);
 void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn);
