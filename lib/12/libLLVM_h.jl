@@ -130,1195 +130,6 @@ mutable struct LLVMOpaqueBinary end
 
 const LLVMBinaryRef = Ptr{LLVMOpaqueBinary}
 
-function LLVMParseBitcode(MemBuf, OutModule, OutMessage)
-    ccall((:LLVMParseBitcode, libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), MemBuf, OutModule, OutMessage)
-end
-
-function LLVMParseBitcode2(MemBuf, OutModule)
-    ccall((:LLVMParseBitcode2, libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutModule)
-end
-
-function LLVMParseBitcodeInContext(ContextRef, MemBuf, OutModule, OutMessage)
-    ccall((:LLVMParseBitcodeInContext, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutModule, OutMessage)
-end
-
-function LLVMParseBitcodeInContext2(ContextRef, MemBuf, OutModule)
-    ccall((:LLVMParseBitcodeInContext2, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), ContextRef, MemBuf, OutModule)
-end
-
-function LLVMGetBitcodeModuleInContext(ContextRef, MemBuf, OutM, OutMessage)
-    ccall((:LLVMGetBitcodeModuleInContext, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
-end
-
-function LLVMGetBitcodeModuleInContext2(ContextRef, MemBuf, OutM)
-    ccall((:LLVMGetBitcodeModuleInContext2, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), ContextRef, MemBuf, OutM)
-end
-
-function LLVMGetBitcodeModule(MemBuf, OutM, OutMessage)
-    ccall((:LLVMGetBitcodeModule, libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), MemBuf, OutM, OutMessage)
-end
-
-function LLVMGetBitcodeModule2(MemBuf, OutM)
-    ccall((:LLVMGetBitcodeModule2, libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutM)
-end
-
-const lto_bool_t = Bool
-
-@cenum lto_symbol_attributes::UInt32 begin
-    LTO_SYMBOL_ALIGNMENT_MASK = 31
-    LTO_SYMBOL_PERMISSIONS_MASK = 224
-    LTO_SYMBOL_PERMISSIONS_CODE = 160
-    LTO_SYMBOL_PERMISSIONS_DATA = 192
-    LTO_SYMBOL_PERMISSIONS_RODATA = 128
-    LTO_SYMBOL_DEFINITION_MASK = 1792
-    LTO_SYMBOL_DEFINITION_REGULAR = 256
-    LTO_SYMBOL_DEFINITION_TENTATIVE = 512
-    LTO_SYMBOL_DEFINITION_WEAK = 768
-    LTO_SYMBOL_DEFINITION_UNDEFINED = 1024
-    LTO_SYMBOL_DEFINITION_WEAKUNDEF = 1280
-    LTO_SYMBOL_SCOPE_MASK = 14336
-    LTO_SYMBOL_SCOPE_INTERNAL = 2048
-    LTO_SYMBOL_SCOPE_HIDDEN = 4096
-    LTO_SYMBOL_SCOPE_PROTECTED = 8192
-    LTO_SYMBOL_SCOPE_DEFAULT = 6144
-    LTO_SYMBOL_SCOPE_DEFAULT_CAN_BE_HIDDEN = 10240
-    LTO_SYMBOL_COMDAT = 16384
-    LTO_SYMBOL_ALIAS = 32768
-end
-
-@cenum lto_debug_model::UInt32 begin
-    LTO_DEBUG_MODEL_NONE = 0
-    LTO_DEBUG_MODEL_DWARF = 1
-end
-
-@cenum lto_codegen_model::UInt32 begin
-    LTO_CODEGEN_PIC_MODEL_STATIC = 0
-    LTO_CODEGEN_PIC_MODEL_DYNAMIC = 1
-    LTO_CODEGEN_PIC_MODEL_DYNAMIC_NO_PIC = 2
-    LTO_CODEGEN_PIC_MODEL_DEFAULT = 3
-end
-
-mutable struct LLVMOpaqueLTOModule end
-
-const lto_module_t = Ptr{LLVMOpaqueLTOModule}
-
-mutable struct LLVMOpaqueLTOCodeGenerator end
-
-const lto_code_gen_t = Ptr{LLVMOpaqueLTOCodeGenerator}
-
-mutable struct LLVMOpaqueThinLTOCodeGenerator end
-
-const thinlto_code_gen_t = Ptr{LLVMOpaqueThinLTOCodeGenerator}
-
-function lto_get_version()
-    ccall((:lto_get_version, libllvm[]), Cstring, ())
-end
-
-function lto_get_error_message()
-    ccall((:lto_get_error_message, libllvm[]), Cstring, ())
-end
-
-function lto_module_is_object_file(path)
-    ccall((:lto_module_is_object_file, libllvm[]), lto_bool_t, (Cstring,), path)
-end
-
-function lto_module_is_object_file_for_target(path, target_triple_prefix)
-    ccall((:lto_module_is_object_file_for_target, libllvm[]), lto_bool_t, (Cstring, Cstring), path, target_triple_prefix)
-end
-
-function lto_module_has_objc_category(mem, length)
-    ccall((:lto_module_has_objc_category, libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t), mem, length)
-end
-
-function lto_module_is_object_file_in_memory(mem, length)
-    ccall((:lto_module_is_object_file_in_memory, libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t), mem, length)
-end
-
-function lto_module_is_object_file_in_memory_for_target(mem, length, target_triple_prefix)
-    ccall((:lto_module_is_object_file_in_memory_for_target, libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, target_triple_prefix)
-end
-
-function lto_module_create(path)
-    ccall((:lto_module_create, libllvm[]), lto_module_t, (Cstring,), path)
-end
-
-function lto_module_create_from_memory(mem, length)
-    ccall((:lto_module_create_from_memory, libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t), mem, length)
-end
-
-function lto_module_create_from_memory_with_path(mem, length, path)
-    ccall((:lto_module_create_from_memory_with_path, libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, path)
-end
-
-function lto_module_create_in_local_context(mem, length, path)
-    ccall((:lto_module_create_in_local_context, libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, path)
-end
-
-function lto_module_create_in_codegen_context(mem, length, path, cg)
-    ccall((:lto_module_create_in_codegen_context, libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring, lto_code_gen_t), mem, length, path, cg)
-end
-
-function lto_module_create_from_fd(fd, path, file_size)
-    ccall((:lto_module_create_from_fd, libllvm[]), lto_module_t, (Cint, Cstring, Csize_t), fd, path, file_size)
-end
-
-function lto_module_create_from_fd_at_offset(fd, path, file_size, map_size, offset)
-    ccall((:lto_module_create_from_fd_at_offset, libllvm[]), lto_module_t, (Cint, Cstring, Csize_t, Csize_t, off_t), fd, path, file_size, map_size, offset)
-end
-
-function lto_module_dispose(mod)
-    ccall((:lto_module_dispose, libllvm[]), Cvoid, (lto_module_t,), mod)
-end
-
-function lto_module_get_target_triple(mod)
-    ccall((:lto_module_get_target_triple, libllvm[]), Cstring, (lto_module_t,), mod)
-end
-
-function lto_module_set_target_triple(mod, triple)
-    ccall((:lto_module_set_target_triple, libllvm[]), Cvoid, (lto_module_t, Cstring), mod, triple)
-end
-
-function lto_module_get_num_symbols(mod)
-    ccall((:lto_module_get_num_symbols, libllvm[]), Cuint, (lto_module_t,), mod)
-end
-
-function lto_module_get_symbol_name(mod, index)
-    ccall((:lto_module_get_symbol_name, libllvm[]), Cstring, (lto_module_t, Cuint), mod, index)
-end
-
-function lto_module_get_symbol_attribute(mod, index)
-    ccall((:lto_module_get_symbol_attribute, libllvm[]), lto_symbol_attributes, (lto_module_t, Cuint), mod, index)
-end
-
-function lto_module_get_linkeropts(mod)
-    ccall((:lto_module_get_linkeropts, libllvm[]), Cstring, (lto_module_t,), mod)
-end
-
-function lto_module_get_macho_cputype(mod, out_cputype, out_cpusubtype)
-    ccall((:lto_module_get_macho_cputype, libllvm[]), lto_bool_t, (lto_module_t, Ptr{Cuint}, Ptr{Cuint}), mod, out_cputype, out_cpusubtype)
-end
-
-@cenum lto_codegen_diagnostic_severity_t::UInt32 begin
-    LTO_DS_ERROR = 0
-    LTO_DS_WARNING = 1
-    LTO_DS_REMARK = 3
-    LTO_DS_NOTE = 2
-end
-
-# typedef void ( * lto_diagnostic_handler_t ) ( lto_codegen_diagnostic_severity_t severity , const char * diag , void * ctxt )
-const lto_diagnostic_handler_t = Ptr{Cvoid}
-
-function lto_codegen_set_diagnostic_handler(arg1, arg2, arg3)
-    ccall((:lto_codegen_set_diagnostic_handler, libllvm[]), Cvoid, (lto_code_gen_t, lto_diagnostic_handler_t, Ptr{Cvoid}), arg1, arg2, arg3)
-end
-
-function lto_codegen_create()
-    ccall((:lto_codegen_create, libllvm[]), lto_code_gen_t, ())
-end
-
-function lto_codegen_create_in_local_context()
-    ccall((:lto_codegen_create_in_local_context, libllvm[]), lto_code_gen_t, ())
-end
-
-function lto_codegen_dispose(arg1)
-    ccall((:lto_codegen_dispose, libllvm[]), Cvoid, (lto_code_gen_t,), arg1)
-end
-
-function lto_codegen_add_module(cg, mod)
-    ccall((:lto_codegen_add_module, libllvm[]), lto_bool_t, (lto_code_gen_t, lto_module_t), cg, mod)
-end
-
-function lto_codegen_set_module(cg, mod)
-    ccall((:lto_codegen_set_module, libllvm[]), Cvoid, (lto_code_gen_t, lto_module_t), cg, mod)
-end
-
-function lto_codegen_set_debug_model(cg, arg2)
-    ccall((:lto_codegen_set_debug_model, libllvm[]), lto_bool_t, (lto_code_gen_t, lto_debug_model), cg, arg2)
-end
-
-function lto_codegen_set_pic_model(cg, arg2)
-    ccall((:lto_codegen_set_pic_model, libllvm[]), lto_bool_t, (lto_code_gen_t, lto_codegen_model), cg, arg2)
-end
-
-function lto_codegen_set_cpu(cg, cpu)
-    ccall((:lto_codegen_set_cpu, libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, cpu)
-end
-
-function lto_codegen_set_assembler_path(cg, path)
-    ccall((:lto_codegen_set_assembler_path, libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, path)
-end
-
-function lto_codegen_set_assembler_args(cg, args, nargs)
-    ccall((:lto_codegen_set_assembler_args, libllvm[]), Cvoid, (lto_code_gen_t, Ptr{Cstring}, Cint), cg, args, nargs)
-end
-
-function lto_codegen_add_must_preserve_symbol(cg, symbol)
-    ccall((:lto_codegen_add_must_preserve_symbol, libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, symbol)
-end
-
-function lto_codegen_write_merged_modules(cg, path)
-    ccall((:lto_codegen_write_merged_modules, libllvm[]), lto_bool_t, (lto_code_gen_t, Cstring), cg, path)
-end
-
-function lto_codegen_compile(cg, length)
-    ccall((:lto_codegen_compile, libllvm[]), Ptr{Cvoid}, (lto_code_gen_t, Ptr{Csize_t}), cg, length)
-end
-
-function lto_codegen_compile_to_file(cg, name)
-    ccall((:lto_codegen_compile_to_file, libllvm[]), lto_bool_t, (lto_code_gen_t, Ptr{Cstring}), cg, name)
-end
-
-function lto_codegen_optimize(cg)
-    ccall((:lto_codegen_optimize, libllvm[]), lto_bool_t, (lto_code_gen_t,), cg)
-end
-
-function lto_codegen_compile_optimized(cg, length)
-    ccall((:lto_codegen_compile_optimized, libllvm[]), Ptr{Cvoid}, (lto_code_gen_t, Ptr{Csize_t}), cg, length)
-end
-
-function lto_api_version()
-    ccall((:lto_api_version, libllvm[]), Cuint, ())
-end
-
-function lto_codegen_debug_options(cg, arg2)
-    ccall((:lto_codegen_debug_options, libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, arg2)
-end
-
-function lto_codegen_debug_options_array(cg, arg2, number)
-    ccall((:lto_codegen_debug_options_array, libllvm[]), Cvoid, (lto_code_gen_t, Ptr{Cstring}, Cint), cg, arg2, number)
-end
-
-function lto_initialize_disassembler()
-    ccall((:lto_initialize_disassembler, libllvm[]), Cvoid, ())
-end
-
-function lto_codegen_set_should_internalize(cg, ShouldInternalize)
-    ccall((:lto_codegen_set_should_internalize, libllvm[]), Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldInternalize)
-end
-
-function lto_codegen_set_should_embed_uselists(cg, ShouldEmbedUselists)
-    ccall((:lto_codegen_set_should_embed_uselists, libllvm[]), Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldEmbedUselists)
-end
-
-mutable struct LLVMOpaqueLTOInput end
-
-const lto_input_t = Ptr{LLVMOpaqueLTOInput}
-
-function lto_input_create(buffer, buffer_size, path)
-    ccall((:lto_input_create, libllvm[]), lto_input_t, (Ptr{Cvoid}, Csize_t, Cstring), buffer, buffer_size, path)
-end
-
-function lto_input_dispose(input)
-    ccall((:lto_input_dispose, libllvm[]), Cvoid, (lto_input_t,), input)
-end
-
-function lto_input_get_num_dependent_libraries(input)
-    ccall((:lto_input_get_num_dependent_libraries, libllvm[]), Cuint, (lto_input_t,), input)
-end
-
-function lto_input_get_dependent_library(input, index, size)
-    ccall((:lto_input_get_dependent_library, libllvm[]), Cstring, (lto_input_t, Csize_t, Ptr{Csize_t}), input, index, size)
-end
-
-function lto_runtime_lib_symbols_list(size)
-    ccall((:lto_runtime_lib_symbols_list, libllvm[]), Ptr{Cstring}, (Ptr{Csize_t},), size)
-end
-
-struct LTOObjectBuffer
-    Buffer::Cstring
-    Size::Csize_t
-end
-
-function thinlto_create_codegen()
-    ccall((:thinlto_create_codegen, libllvm[]), thinlto_code_gen_t, ())
-end
-
-function thinlto_codegen_dispose(cg)
-    ccall((:thinlto_codegen_dispose, libllvm[]), Cvoid, (thinlto_code_gen_t,), cg)
-end
-
-function thinlto_codegen_add_module(cg, identifier, data, length)
-    ccall((:thinlto_codegen_add_module, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cstring, Cint), cg, identifier, data, length)
-end
-
-function thinlto_codegen_process(cg)
-    ccall((:thinlto_codegen_process, libllvm[]), Cvoid, (thinlto_code_gen_t,), cg)
-end
-
-function thinlto_module_get_num_objects(cg)
-    ccall((:thinlto_module_get_num_objects, libllvm[]), Cuint, (thinlto_code_gen_t,), cg)
-end
-
-function thinlto_module_get_object(cg, index)
-    ccall((:thinlto_module_get_object, libllvm[]), LTOObjectBuffer, (thinlto_code_gen_t, Cuint), cg, index)
-end
-
-function thinlto_module_get_num_object_files(cg)
-    ccall((:thinlto_module_get_num_object_files, libllvm[]), Cuint, (thinlto_code_gen_t,), cg)
-end
-
-function thinlto_module_get_object_file(cg, index)
-    ccall((:thinlto_module_get_object_file, libllvm[]), Cstring, (thinlto_code_gen_t, Cuint), cg, index)
-end
-
-function thinlto_codegen_set_pic_model(cg, arg2)
-    ccall((:thinlto_codegen_set_pic_model, libllvm[]), lto_bool_t, (thinlto_code_gen_t, lto_codegen_model), cg, arg2)
-end
-
-function thinlto_codegen_set_savetemps_dir(cg, save_temps_dir)
-    ccall((:thinlto_codegen_set_savetemps_dir, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, save_temps_dir)
-end
-
-function thinlto_set_generated_objects_dir(cg, save_temps_dir)
-    ccall((:thinlto_set_generated_objects_dir, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, save_temps_dir)
-end
-
-function thinlto_codegen_set_cpu(cg, cpu)
-    ccall((:thinlto_codegen_set_cpu, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, cpu)
-end
-
-function thinlto_codegen_disable_codegen(cg, disable)
-    ccall((:thinlto_codegen_disable_codegen, libllvm[]), Cvoid, (thinlto_code_gen_t, lto_bool_t), cg, disable)
-end
-
-function thinlto_codegen_set_codegen_only(cg, codegen_only)
-    ccall((:thinlto_codegen_set_codegen_only, libllvm[]), Cvoid, (thinlto_code_gen_t, lto_bool_t), cg, codegen_only)
-end
-
-function thinlto_debug_options(options, number)
-    ccall((:thinlto_debug_options, libllvm[]), Cvoid, (Ptr{Cstring}, Cint), options, number)
-end
-
-function lto_module_is_thinlto(mod)
-    ccall((:lto_module_is_thinlto, libllvm[]), lto_bool_t, (lto_module_t,), mod)
-end
-
-function thinlto_codegen_add_must_preserve_symbol(cg, name, length)
-    ccall((:thinlto_codegen_add_must_preserve_symbol, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cint), cg, name, length)
-end
-
-function thinlto_codegen_add_cross_referenced_symbol(cg, name, length)
-    ccall((:thinlto_codegen_add_cross_referenced_symbol, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cint), cg, name, length)
-end
-
-function thinlto_codegen_set_cache_dir(cg, cache_dir)
-    ccall((:thinlto_codegen_set_cache_dir, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, cache_dir)
-end
-
-function thinlto_codegen_set_cache_pruning_interval(cg, interval)
-    ccall((:thinlto_codegen_set_cache_pruning_interval, libllvm[]), Cvoid, (thinlto_code_gen_t, Cint), cg, interval)
-end
-
-function thinlto_codegen_set_final_cache_size_relative_to_available_space(cg, percentage)
-    ccall((:thinlto_codegen_set_final_cache_size_relative_to_available_space, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, percentage)
-end
-
-function thinlto_codegen_set_cache_entry_expiration(cg, expiration)
-    ccall((:thinlto_codegen_set_cache_entry_expiration, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, expiration)
-end
-
-function thinlto_codegen_set_cache_size_bytes(cg, max_size_bytes)
-    ccall((:thinlto_codegen_set_cache_size_bytes, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, max_size_bytes)
-end
-
-function thinlto_codegen_set_cache_size_megabytes(cg, max_size_megabytes)
-    ccall((:thinlto_codegen_set_cache_size_megabytes, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, max_size_megabytes)
-end
-
-function thinlto_codegen_set_cache_size_files(cg, max_size_files)
-    ccall((:thinlto_codegen_set_cache_size_files, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, max_size_files)
-end
-
-mutable struct LLVMOpaquePassManagerBuilder end
-
-const LLVMPassManagerBuilderRef = Ptr{LLVMOpaquePassManagerBuilder}
-
-function LLVMPassManagerBuilderCreate()
-    ccall((:LLVMPassManagerBuilderCreate, libllvm[]), LLVMPassManagerBuilderRef, ())
-end
-
-function LLVMPassManagerBuilderDispose(PMB)
-    ccall((:LLVMPassManagerBuilderDispose, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef,), PMB)
-end
-
-function LLVMPassManagerBuilderSetOptLevel(PMB, OptLevel)
-    ccall((:LLVMPassManagerBuilderSetOptLevel, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, OptLevel)
-end
-
-function LLVMPassManagerBuilderSetSizeLevel(PMB, SizeLevel)
-    ccall((:LLVMPassManagerBuilderSetSizeLevel, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, SizeLevel)
-end
-
-function LLVMPassManagerBuilderSetDisableUnitAtATime(PMB, Value)
-    ccall((:LLVMPassManagerBuilderSetDisableUnitAtATime, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
-end
-
-function LLVMPassManagerBuilderSetDisableUnrollLoops(PMB, Value)
-    ccall((:LLVMPassManagerBuilderSetDisableUnrollLoops, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
-end
-
-function LLVMPassManagerBuilderSetDisableSimplifyLibCalls(PMB, Value)
-    ccall((:LLVMPassManagerBuilderSetDisableSimplifyLibCalls, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
-end
-
-function LLVMPassManagerBuilderUseInlinerWithThreshold(PMB, Threshold)
-    ccall((:LLVMPassManagerBuilderUseInlinerWithThreshold, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, Threshold)
-end
-
-function LLVMPassManagerBuilderPopulateFunctionPassManager(PMB, PM)
-    ccall((:LLVMPassManagerBuilderPopulateFunctionPassManager, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
-end
-
-function LLVMPassManagerBuilderPopulateModulePassManager(PMB, PM)
-    ccall((:LLVMPassManagerBuilderPopulateModulePassManager, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
-end
-
-function LLVMPassManagerBuilderPopulateLTOPassManager(PMB, PM, Internalize, RunInliner)
-    ccall((:LLVMPassManagerBuilderPopulateLTOPassManager, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef, LLVMBool, LLVMBool), PMB, PM, Internalize, RunInliner)
-end
-
-function LLVMAddCoroEarlyPass(PM)
-    ccall((:LLVMAddCoroEarlyPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroSplitPass(PM)
-    ccall((:LLVMAddCoroSplitPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroElidePass(PM)
-    ccall((:LLVMAddCoroElidePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroCleanupPass(PM)
-    ccall((:LLVMAddCoroCleanupPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints(PMB)
-    ccall((:LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef,), PMB)
-end
-
-function LLVMAddLowerSwitchPass(PM)
-    ccall((:LLVMAddLowerSwitchPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddPromoteMemoryToRegisterPass(PM)
-    ccall((:LLVMAddPromoteMemoryToRegisterPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddAddDiscriminatorsPass(PM)
-    ccall((:LLVMAddAddDiscriminatorsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-mutable struct LLVMOpaqueError end
-
-const LLVMErrorRef = Ptr{LLVMOpaqueError}
-
-const LLVMErrorTypeId = Ptr{Cvoid}
-
-function LLVMGetErrorTypeId(Err)
-    ccall((:LLVMGetErrorTypeId, libllvm[]), LLVMErrorTypeId, (LLVMErrorRef,), Err)
-end
-
-function LLVMConsumeError(Err)
-    ccall((:LLVMConsumeError, libllvm[]), Cvoid, (LLVMErrorRef,), Err)
-end
-
-function LLVMGetErrorMessage(Err)
-    ccall((:LLVMGetErrorMessage, libllvm[]), Cstring, (LLVMErrorRef,), Err)
-end
-
-function LLVMDisposeErrorMessage(ErrMsg)
-    ccall((:LLVMDisposeErrorMessage, libllvm[]), Cvoid, (Cstring,), ErrMsg)
-end
-
-function LLVMGetStringErrorTypeId()
-    ccall((:LLVMGetStringErrorTypeId, libllvm[]), LLVMErrorTypeId, ())
-end
-
-function LLVMCreateStringError(ErrMsg)
-    ccall((:LLVMCreateStringError, libllvm[]), LLVMErrorRef, (Cstring,), ErrMsg)
-end
-
-@cenum LLVMByteOrdering::UInt32 begin
-    LLVMBigEndian = 0
-    LLVMLittleEndian = 1
-end
-
-mutable struct LLVMOpaqueTargetData end
-
-const LLVMTargetDataRef = Ptr{LLVMOpaqueTargetData}
-
-mutable struct LLVMOpaqueTargetLibraryInfotData end
-
-const LLVMTargetLibraryInfoRef = Ptr{LLVMOpaqueTargetLibraryInfotData}
-
-function LLVMInitializeNVPTXTargetInfo()
-    ccall((:LLVMInitializeNVPTXTargetInfo, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUTargetInfo()
-    ccall((:LLVMInitializeAMDGPUTargetInfo, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyTargetInfo()
-    ccall((:LLVMInitializeWebAssemblyTargetInfo, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeBPFTargetInfo()
-    ccall((:LLVMInitializeBPFTargetInfo, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeX86TargetInfo()
-    ccall((:LLVMInitializeX86TargetInfo, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeNVPTXTarget()
-    ccall((:LLVMInitializeNVPTXTarget, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUTarget()
-    ccall((:LLVMInitializeAMDGPUTarget, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyTarget()
-    ccall((:LLVMInitializeWebAssemblyTarget, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeBPFTarget()
-    ccall((:LLVMInitializeBPFTarget, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeX86Target()
-    ccall((:LLVMInitializeX86Target, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeNVPTXTargetMC()
-    ccall((:LLVMInitializeNVPTXTargetMC, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUTargetMC()
-    ccall((:LLVMInitializeAMDGPUTargetMC, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyTargetMC()
-    ccall((:LLVMInitializeWebAssemblyTargetMC, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeBPFTargetMC()
-    ccall((:LLVMInitializeBPFTargetMC, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeX86TargetMC()
-    ccall((:LLVMInitializeX86TargetMC, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeNVPTXAsmPrinter()
-    ccall((:LLVMInitializeNVPTXAsmPrinter, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUAsmPrinter()
-    ccall((:LLVMInitializeAMDGPUAsmPrinter, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyAsmPrinter()
-    ccall((:LLVMInitializeWebAssemblyAsmPrinter, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeBPFAsmPrinter()
-    ccall((:LLVMInitializeBPFAsmPrinter, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeX86AsmPrinter()
-    ccall((:LLVMInitializeX86AsmPrinter, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUAsmParser()
-    ccall((:LLVMInitializeAMDGPUAsmParser, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyAsmParser()
-    ccall((:LLVMInitializeWebAssemblyAsmParser, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeBPFAsmParser()
-    ccall((:LLVMInitializeBPFAsmParser, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeX86AsmParser()
-    ccall((:LLVMInitializeX86AsmParser, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUDisassembler()
-    ccall((:LLVMInitializeAMDGPUDisassembler, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyDisassembler()
-    ccall((:LLVMInitializeWebAssemblyDisassembler, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeBPFDisassembler()
-    ccall((:LLVMInitializeBPFDisassembler, libllvm[]), Cvoid, ())
-end
-
-function LLVMInitializeX86Disassembler()
-    ccall((:LLVMInitializeX86Disassembler, libllvm[]), Cvoid, ())
-end
-
-function LLVMGetModuleDataLayout(M)
-    ccall((:LLVMGetModuleDataLayout, libllvm[]), LLVMTargetDataRef, (LLVMModuleRef,), M)
-end
-
-function LLVMSetModuleDataLayout(M, DL)
-    ccall((:LLVMSetModuleDataLayout, libllvm[]), Cvoid, (LLVMModuleRef, LLVMTargetDataRef), M, DL)
-end
-
-function LLVMCreateTargetData(StringRep)
-    ccall((:LLVMCreateTargetData, libllvm[]), LLVMTargetDataRef, (Cstring,), StringRep)
-end
-
-function LLVMDisposeTargetData(TD)
-    ccall((:LLVMDisposeTargetData, libllvm[]), Cvoid, (LLVMTargetDataRef,), TD)
-end
-
-function LLVMAddTargetLibraryInfo(TLI, PM)
-    ccall((:LLVMAddTargetLibraryInfo, libllvm[]), Cvoid, (LLVMTargetLibraryInfoRef, LLVMPassManagerRef), TLI, PM)
-end
-
-function LLVMCopyStringRepOfTargetData(TD)
-    ccall((:LLVMCopyStringRepOfTargetData, libllvm[]), Cstring, (LLVMTargetDataRef,), TD)
-end
-
-function LLVMByteOrder(TD)
-    ccall((:LLVMByteOrder, libllvm[]), LLVMByteOrdering, (LLVMTargetDataRef,), TD)
-end
-
-function LLVMPointerSize(TD)
-    ccall((:LLVMPointerSize, libllvm[]), Cuint, (LLVMTargetDataRef,), TD)
-end
-
-function LLVMPointerSizeForAS(TD, AS)
-    ccall((:LLVMPointerSizeForAS, libllvm[]), Cuint, (LLVMTargetDataRef, Cuint), TD, AS)
-end
-
-function LLVMIntPtrType(TD)
-    ccall((:LLVMIntPtrType, libllvm[]), LLVMTypeRef, (LLVMTargetDataRef,), TD)
-end
-
-function LLVMIntPtrTypeForAS(TD, AS)
-    ccall((:LLVMIntPtrTypeForAS, libllvm[]), LLVMTypeRef, (LLVMTargetDataRef, Cuint), TD, AS)
-end
-
-function LLVMIntPtrTypeInContext(C, TD)
-    ccall((:LLVMIntPtrTypeInContext, libllvm[]), LLVMTypeRef, (LLVMContextRef, LLVMTargetDataRef), C, TD)
-end
-
-function LLVMIntPtrTypeForASInContext(C, TD, AS)
-    ccall((:LLVMIntPtrTypeForASInContext, libllvm[]), LLVMTypeRef, (LLVMContextRef, LLVMTargetDataRef, Cuint), C, TD, AS)
-end
-
-function LLVMSizeOfTypeInBits(TD, Ty)
-    ccall((:LLVMSizeOfTypeInBits, libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
-end
-
-function LLVMStoreSizeOfType(TD, Ty)
-    ccall((:LLVMStoreSizeOfType, libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
-end
-
-function LLVMABISizeOfType(TD, Ty)
-    ccall((:LLVMABISizeOfType, libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
-end
-
-function LLVMABIAlignmentOfType(TD, Ty)
-    ccall((:LLVMABIAlignmentOfType, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
-end
-
-function LLVMCallFrameAlignmentOfType(TD, Ty)
-    ccall((:LLVMCallFrameAlignmentOfType, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
-end
-
-function LLVMPreferredAlignmentOfType(TD, Ty)
-    ccall((:LLVMPreferredAlignmentOfType, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
-end
-
-function LLVMPreferredAlignmentOfGlobal(TD, GlobalVar)
-    ccall((:LLVMPreferredAlignmentOfGlobal, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMValueRef), TD, GlobalVar)
-end
-
-function LLVMElementAtOffset(TD, StructTy, Offset)
-    ccall((:LLVMElementAtOffset, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMTypeRef, Culonglong), TD, StructTy, Offset)
-end
-
-function LLVMOffsetOfElement(TD, StructTy, Element)
-    ccall((:LLVMOffsetOfElement, libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef, Cuint), TD, StructTy, Element)
-end
-
-mutable struct LLVMOpaqueTargetMachine end
-
-const LLVMTargetMachineRef = Ptr{LLVMOpaqueTargetMachine}
-
-mutable struct LLVMTarget end
-
-const LLVMTargetRef = Ptr{LLVMTarget}
-
-@cenum LLVMCodeGenOptLevel::UInt32 begin
-    LLVMCodeGenLevelNone = 0
-    LLVMCodeGenLevelLess = 1
-    LLVMCodeGenLevelDefault = 2
-    LLVMCodeGenLevelAggressive = 3
-end
-
-@cenum LLVMRelocMode::UInt32 begin
-    LLVMRelocDefault = 0
-    LLVMRelocStatic = 1
-    LLVMRelocPIC = 2
-    LLVMRelocDynamicNoPic = 3
-    LLVMRelocROPI = 4
-    LLVMRelocRWPI = 5
-    LLVMRelocROPI_RWPI = 6
-end
-
-@cenum LLVMCodeModel::UInt32 begin
-    LLVMCodeModelDefault = 0
-    LLVMCodeModelJITDefault = 1
-    LLVMCodeModelTiny = 2
-    LLVMCodeModelSmall = 3
-    LLVMCodeModelKernel = 4
-    LLVMCodeModelMedium = 5
-    LLVMCodeModelLarge = 6
-end
-
-@cenum LLVMCodeGenFileType::UInt32 begin
-    LLVMAssemblyFile = 0
-    LLVMObjectFile = 1
-end
-
-function LLVMGetFirstTarget()
-    ccall((:LLVMGetFirstTarget, libllvm[]), LLVMTargetRef, ())
-end
-
-function LLVMGetNextTarget(T)
-    ccall((:LLVMGetNextTarget, libllvm[]), LLVMTargetRef, (LLVMTargetRef,), T)
-end
-
-function LLVMGetTargetFromName(Name)
-    ccall((:LLVMGetTargetFromName, libllvm[]), LLVMTargetRef, (Cstring,), Name)
-end
-
-function LLVMGetTargetFromTriple(Triple, T, ErrorMessage)
-    ccall((:LLVMGetTargetFromTriple, libllvm[]), LLVMBool, (Cstring, Ptr{LLVMTargetRef}, Ptr{Cstring}), Triple, T, ErrorMessage)
-end
-
-function LLVMGetTargetName(T)
-    ccall((:LLVMGetTargetName, libllvm[]), Cstring, (LLVMTargetRef,), T)
-end
-
-function LLVMGetTargetDescription(T)
-    ccall((:LLVMGetTargetDescription, libllvm[]), Cstring, (LLVMTargetRef,), T)
-end
-
-function LLVMTargetHasJIT(T)
-    ccall((:LLVMTargetHasJIT, libllvm[]), LLVMBool, (LLVMTargetRef,), T)
-end
-
-function LLVMTargetHasTargetMachine(T)
-    ccall((:LLVMTargetHasTargetMachine, libllvm[]), LLVMBool, (LLVMTargetRef,), T)
-end
-
-function LLVMTargetHasAsmBackend(T)
-    ccall((:LLVMTargetHasAsmBackend, libllvm[]), LLVMBool, (LLVMTargetRef,), T)
-end
-
-function LLVMCreateTargetMachine(T, Triple, CPU, Features, Level, Reloc, CodeModel)
-    ccall((:LLVMCreateTargetMachine, libllvm[]), LLVMTargetMachineRef, (LLVMTargetRef, Cstring, Cstring, Cstring, LLVMCodeGenOptLevel, LLVMRelocMode, LLVMCodeModel), T, Triple, CPU, Features, Level, Reloc, CodeModel)
-end
-
-function LLVMDisposeTargetMachine(T)
-    ccall((:LLVMDisposeTargetMachine, libllvm[]), Cvoid, (LLVMTargetMachineRef,), T)
-end
-
-function LLVMGetTargetMachineTarget(T)
-    ccall((:LLVMGetTargetMachineTarget, libllvm[]), LLVMTargetRef, (LLVMTargetMachineRef,), T)
-end
-
-function LLVMGetTargetMachineTriple(T)
-    ccall((:LLVMGetTargetMachineTriple, libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
-end
-
-function LLVMGetTargetMachineCPU(T)
-    ccall((:LLVMGetTargetMachineCPU, libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
-end
-
-function LLVMGetTargetMachineFeatureString(T)
-    ccall((:LLVMGetTargetMachineFeatureString, libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
-end
-
-function LLVMCreateTargetDataLayout(T)
-    ccall((:LLVMCreateTargetDataLayout, libllvm[]), LLVMTargetDataRef, (LLVMTargetMachineRef,), T)
-end
-
-function LLVMSetTargetMachineAsmVerbosity(T, VerboseAsm)
-    ccall((:LLVMSetTargetMachineAsmVerbosity, libllvm[]), Cvoid, (LLVMTargetMachineRef, LLVMBool), T, VerboseAsm)
-end
-
-function LLVMTargetMachineEmitToFile(T, M, Filename, codegen, ErrorMessage)
-    ccall((:LLVMTargetMachineEmitToFile, libllvm[]), LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, Cstring, LLVMCodeGenFileType, Ptr{Cstring}), T, M, Filename, codegen, ErrorMessage)
-end
-
-function LLVMTargetMachineEmitToMemoryBuffer(T, M, codegen, ErrorMessage, OutMemBuf)
-    ccall((:LLVMTargetMachineEmitToMemoryBuffer, libllvm[]), LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, LLVMCodeGenFileType, Ptr{Cstring}, Ptr{LLVMMemoryBufferRef}), T, M, codegen, ErrorMessage, OutMemBuf)
-end
-
-function LLVMGetDefaultTargetTriple()
-    ccall((:LLVMGetDefaultTargetTriple, libllvm[]), Cstring, ())
-end
-
-function LLVMNormalizeTargetTriple(triple)
-    ccall((:LLVMNormalizeTargetTriple, libllvm[]), Cstring, (Cstring,), triple)
-end
-
-function LLVMGetHostCPUName()
-    ccall((:LLVMGetHostCPUName, libllvm[]), Cstring, ())
-end
-
-function LLVMGetHostCPUFeatures()
-    ccall((:LLVMGetHostCPUFeatures, libllvm[]), Cstring, ())
-end
-
-function LLVMAddAnalysisPasses(T, PM)
-    ccall((:LLVMAddAnalysisPasses, libllvm[]), Cvoid, (LLVMTargetMachineRef, LLVMPassManagerRef), T, PM)
-end
-
-const LLVMOrcJITTargetAddress = UInt64
-
-@cenum LLVMJITSymbolGenericFlags::UInt32 begin
-    LLVMJITSymbolGenericFlagsExported = 1
-    LLVMJITSymbolGenericFlagsWeak = 2
-    LLVMJITSymbolGenericFlagsCallable = 4
-    LLVMJITSymbolGenericFlagsMaterializationSideEffectsOnly = 8
-end
-
-const LLVMJITTargetSymbolFlags = UInt8
-
-struct LLVMJITSymbolFlags
-    GenericFlags::UInt8
-    TargetFlags::UInt8
-end
-
-struct LLVMJITEvaluatedSymbol
-    Address::LLVMOrcJITTargetAddress
-    Flags::LLVMJITSymbolFlags
-end
-
-mutable struct LLVMOrcOpaqueExecutionSession end
-
-const LLVMOrcExecutionSessionRef = Ptr{LLVMOrcOpaqueExecutionSession}
-
-# typedef void ( * LLVMOrcErrorReporterFunction ) ( void * Ctx , LLVMErrorRef Err )
-const LLVMOrcErrorReporterFunction = Ptr{Cvoid}
-
-mutable struct LLVMOrcOpaqueSymbolStringPool end
-
-const LLVMOrcSymbolStringPoolRef = Ptr{LLVMOrcOpaqueSymbolStringPool}
-
-mutable struct LLVMOrcOpaqueSymbolStringPoolEntry end
-
-const LLVMOrcSymbolStringPoolEntryRef = Ptr{LLVMOrcOpaqueSymbolStringPoolEntry}
-
-struct LLVMJITCSymbolMapPair
-    Name::LLVMOrcSymbolStringPoolEntryRef
-    Sym::LLVMJITEvaluatedSymbol
-end
-
-const LLVMOrcCSymbolMapPairs = Ptr{LLVMJITCSymbolMapPair}
-
-@cenum LLVMOrcLookupKind::UInt32 begin
-    LLVMOrcLookupKindStatic = 0
-    LLVMOrcLookupKindDLSym = 1
-end
-
-@cenum LLVMOrcJITDylibLookupFlags::UInt32 begin
-    LLVMOrcJITDylibLookupFlagsMatchExportedSymbolsOnly = 0
-    LLVMOrcJITDylibLookupFlagsMatchAllSymbols = 1
-end
-
-@cenum LLVMOrcSymbolLookupFlags::UInt32 begin
-    LLVMOrcSymbolLookupFlagsRequiredSymbol = 0
-    LLVMOrcSymbolLookupFlagsWeaklyReferencedSymbol = 1
-end
-
-struct LLVMOrcCLookupSetElement
-    Name::LLVMOrcSymbolStringPoolEntryRef
-    LookupFlags::LLVMOrcSymbolLookupFlags
-end
-
-const LLVMOrcCLookupSet = Ptr{LLVMOrcCLookupSetElement}
-
-mutable struct LLVMOrcOpaqueMaterializationUnit end
-
-const LLVMOrcMaterializationUnitRef = Ptr{LLVMOrcOpaqueMaterializationUnit}
-
-mutable struct LLVMOrcOpaqueJITDylib end
-
-const LLVMOrcJITDylibRef = Ptr{LLVMOrcOpaqueJITDylib}
-
-mutable struct LLVMOrcOpaqueResourceTracker end
-
-const LLVMOrcResourceTrackerRef = Ptr{LLVMOrcOpaqueResourceTracker}
-
-mutable struct LLVMOrcOpaqueDefinitionGenerator end
-
-const LLVMOrcDefinitionGeneratorRef = Ptr{LLVMOrcOpaqueDefinitionGenerator}
-
-mutable struct LLVMOrcOpaqueLookupState end
-
-const LLVMOrcLookupStateRef = Ptr{LLVMOrcOpaqueLookupState}
-
-# typedef LLVMErrorRef ( * LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction ) ( LLVMOrcDefinitionGeneratorRef GeneratorObj , void * Ctx , LLVMOrcLookupStateRef * LookupState , LLVMOrcLookupKind Kind , LLVMOrcJITDylibRef JD , LLVMOrcJITDylibLookupFlags JDLookupFlags , LLVMOrcCLookupSet LookupSet , size_t LookupSetSize )
-const LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction = Ptr{Cvoid}
-
-# typedef int ( * LLVMOrcSymbolPredicate ) ( void * Ctx , LLVMOrcSymbolStringPoolEntryRef Sym )
-const LLVMOrcSymbolPredicate = Ptr{Cvoid}
-
-mutable struct LLVMOrcOpaqueThreadSafeContext end
-
-const LLVMOrcThreadSafeContextRef = Ptr{LLVMOrcOpaqueThreadSafeContext}
-
-mutable struct LLVMOrcOpaqueThreadSafeModule end
-
-const LLVMOrcThreadSafeModuleRef = Ptr{LLVMOrcOpaqueThreadSafeModule}
-
-mutable struct LLVMOrcOpaqueJITTargetMachineBuilder end
-
-const LLVMOrcJITTargetMachineBuilderRef = Ptr{LLVMOrcOpaqueJITTargetMachineBuilder}
-
-mutable struct LLVMOrcOpaqueObjectLayer end
-
-const LLVMOrcObjectLayerRef = Ptr{LLVMOrcOpaqueObjectLayer}
-
-function LLVMOrcExecutionSessionSetErrorReporter(ES, ReportError, Ctx)
-    ccall((:LLVMOrcExecutionSessionSetErrorReporter, libllvm[]), Cvoid, (LLVMOrcExecutionSessionRef, LLVMOrcErrorReporterFunction, Ptr{Cvoid}), ES, ReportError, Ctx)
-end
-
-function LLVMOrcExecutionSessionGetSymbolStringPool(ES)
-    ccall((:LLVMOrcExecutionSessionGetSymbolStringPool, libllvm[]), LLVMOrcSymbolStringPoolRef, (LLVMOrcExecutionSessionRef,), ES)
-end
-
-function LLVMOrcSymbolStringPoolClearDeadEntries(SSP)
-    ccall((:LLVMOrcSymbolStringPoolClearDeadEntries, libllvm[]), Cvoid, (LLVMOrcSymbolStringPoolRef,), SSP)
-end
-
-function LLVMOrcExecutionSessionIntern(ES, Name)
-    ccall((:LLVMOrcExecutionSessionIntern, libllvm[]), LLVMOrcSymbolStringPoolEntryRef, (LLVMOrcExecutionSessionRef, Cstring), ES, Name)
-end
-
-function LLVMOrcRetainSymbolStringPoolEntry(S)
-    ccall((:LLVMOrcRetainSymbolStringPoolEntry, libllvm[]), Cvoid, (LLVMOrcSymbolStringPoolEntryRef,), S)
-end
-
-function LLVMOrcReleaseSymbolStringPoolEntry(S)
-    ccall((:LLVMOrcReleaseSymbolStringPoolEntry, libllvm[]), Cvoid, (LLVMOrcSymbolStringPoolEntryRef,), S)
-end
-
-function LLVMOrcSymbolStringPoolEntryStr(S)
-    ccall((:LLVMOrcSymbolStringPoolEntryStr, libllvm[]), Cstring, (LLVMOrcSymbolStringPoolEntryRef,), S)
-end
-
-function LLVMOrcReleaseResourceTracker(RT)
-    ccall((:LLVMOrcReleaseResourceTracker, libllvm[]), Cvoid, (LLVMOrcResourceTrackerRef,), RT)
-end
-
-function LLVMOrcResourceTrackerTransferTo(SrcRT, DstRT)
-    ccall((:LLVMOrcResourceTrackerTransferTo, libllvm[]), Cvoid, (LLVMOrcResourceTrackerRef, LLVMOrcResourceTrackerRef), SrcRT, DstRT)
-end
-
-function LLVMOrcResourceTrackerRemove(RT)
-    ccall((:LLVMOrcResourceTrackerRemove, libllvm[]), LLVMErrorRef, (LLVMOrcResourceTrackerRef,), RT)
-end
-
-function LLVMOrcDisposeDefinitionGenerator(DG)
-    ccall((:LLVMOrcDisposeDefinitionGenerator, libllvm[]), Cvoid, (LLVMOrcDefinitionGeneratorRef,), DG)
-end
-
-function LLVMOrcDisposeMaterializationUnit(MU)
-    ccall((:LLVMOrcDisposeMaterializationUnit, libllvm[]), Cvoid, (LLVMOrcMaterializationUnitRef,), MU)
-end
-
-function LLVMOrcAbsoluteSymbols(Syms, NumPairs)
-    ccall((:LLVMOrcAbsoluteSymbols, libllvm[]), LLVMOrcMaterializationUnitRef, (LLVMOrcCSymbolMapPairs, Csize_t), Syms, NumPairs)
-end
-
-function LLVMOrcExecutionSessionCreateBareJITDylib(ES, Name)
-    ccall((:LLVMOrcExecutionSessionCreateBareJITDylib, libllvm[]), LLVMOrcJITDylibRef, (LLVMOrcExecutionSessionRef, Cstring), ES, Name)
-end
-
-function LLVMOrcExecutionSessionCreateJITDylib(ES, Result, Name)
-    ccall((:LLVMOrcExecutionSessionCreateJITDylib, libllvm[]), LLVMErrorRef, (LLVMOrcExecutionSessionRef, Ptr{LLVMOrcJITDylibRef}, Cstring), ES, Result, Name)
-end
-
-function LLVMOrcExecutionSessionGetJITDylibByName(ES, Name)
-    ccall((:LLVMOrcExecutionSessionGetJITDylibByName, libllvm[]), LLVMOrcJITDylibRef, (LLVMOrcExecutionSessionRef, Cstring), ES, Name)
-end
-
-function LLVMOrcJITDylibCreateResourceTracker(JD)
-    ccall((:LLVMOrcJITDylibCreateResourceTracker, libllvm[]), LLVMOrcResourceTrackerRef, (LLVMOrcJITDylibRef,), JD)
-end
-
-function LLVMOrcJITDylibGetDefaultResourceTracker(JD)
-    ccall((:LLVMOrcJITDylibGetDefaultResourceTracker, libllvm[]), LLVMOrcResourceTrackerRef, (LLVMOrcJITDylibRef,), JD)
-end
-
-function LLVMOrcJITDylibDefine(JD, MU)
-    ccall((:LLVMOrcJITDylibDefine, libllvm[]), LLVMErrorRef, (LLVMOrcJITDylibRef, LLVMOrcMaterializationUnitRef), JD, MU)
-end
-
-function LLVMOrcJITDylibClear(JD)
-    ccall((:LLVMOrcJITDylibClear, libllvm[]), LLVMErrorRef, (LLVMOrcJITDylibRef,), JD)
-end
-
-function LLVMOrcJITDylibAddGenerator(JD, DG)
-    ccall((:LLVMOrcJITDylibAddGenerator, libllvm[]), Cvoid, (LLVMOrcJITDylibRef, LLVMOrcDefinitionGeneratorRef), JD, DG)
-end
-
-function LLVMOrcCreateCustomCAPIDefinitionGenerator(F, Ctx)
-    ccall((:LLVMOrcCreateCustomCAPIDefinitionGenerator, libllvm[]), LLVMOrcDefinitionGeneratorRef, (LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction, Ptr{Cvoid}), F, Ctx)
-end
-
-function LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess(Result, GlobalPrefx, Filter, FilterCtx)
-    ccall((:LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess, libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcDefinitionGeneratorRef}, Cchar, LLVMOrcSymbolPredicate, Ptr{Cvoid}), Result, GlobalPrefx, Filter, FilterCtx)
-end
-
-function LLVMOrcCreateNewThreadSafeContext()
-    ccall((:LLVMOrcCreateNewThreadSafeContext, libllvm[]), LLVMOrcThreadSafeContextRef, ())
-end
-
-function LLVMOrcThreadSafeContextGetContext(TSCtx)
-    ccall((:LLVMOrcThreadSafeContextGetContext, libllvm[]), LLVMContextRef, (LLVMOrcThreadSafeContextRef,), TSCtx)
-end
-
-function LLVMOrcDisposeThreadSafeContext(TSCtx)
-    ccall((:LLVMOrcDisposeThreadSafeContext, libllvm[]), Cvoid, (LLVMOrcThreadSafeContextRef,), TSCtx)
-end
-
-function LLVMOrcCreateNewThreadSafeModule(M, TSCtx)
-    ccall((:LLVMOrcCreateNewThreadSafeModule, libllvm[]), LLVMOrcThreadSafeModuleRef, (LLVMModuleRef, LLVMOrcThreadSafeContextRef), M, TSCtx)
-end
-
-function LLVMOrcDisposeThreadSafeModule(TSM)
-    ccall((:LLVMOrcDisposeThreadSafeModule, libllvm[]), Cvoid, (LLVMOrcThreadSafeModuleRef,), TSM)
-end
-
-function LLVMOrcJITTargetMachineBuilderDetectHost(Result)
-    ccall((:LLVMOrcJITTargetMachineBuilderDetectHost, libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcJITTargetMachineBuilderRef},), Result)
-end
-
-function LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(TM)
-    ccall((:LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine, libllvm[]), LLVMOrcJITTargetMachineBuilderRef, (LLVMTargetMachineRef,), TM)
-end
-
-function LLVMOrcDisposeJITTargetMachineBuilder(JTMB)
-    ccall((:LLVMOrcDisposeJITTargetMachineBuilder, libllvm[]), Cvoid, (LLVMOrcJITTargetMachineBuilderRef,), JTMB)
-end
-
-function LLVMOrcDisposeObjectLayer(ObjLayer)
-    ccall((:LLVMOrcDisposeObjectLayer, libllvm[]), Cvoid, (LLVMOrcObjectLayerRef,), ObjLayer)
-end
-
-# typedef LLVMOrcObjectLayerRef ( * LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction ) ( void * Ctx , LLVMOrcExecutionSessionRef ES , const char * Triple )
-const LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction = Ptr{Cvoid}
-
-mutable struct LLVMOrcOpaqueLLJITBuilder end
-
-const LLVMOrcLLJITBuilderRef = Ptr{LLVMOrcOpaqueLLJITBuilder}
-
-mutable struct LLVMOrcOpaqueLLJIT end
-
-const LLVMOrcLLJITRef = Ptr{LLVMOrcOpaqueLLJIT}
-
-function LLVMOrcCreateLLJITBuilder()
-    ccall((:LLVMOrcCreateLLJITBuilder, libllvm[]), LLVMOrcLLJITBuilderRef, ())
-end
-
-function LLVMOrcDisposeLLJITBuilder(Builder)
-    ccall((:LLVMOrcDisposeLLJITBuilder, libllvm[]), Cvoid, (LLVMOrcLLJITBuilderRef,), Builder)
-end
-
-function LLVMOrcLLJITBuilderSetJITTargetMachineBuilder(Builder, JTMB)
-    ccall((:LLVMOrcLLJITBuilderSetJITTargetMachineBuilder, libllvm[]), Cvoid, (LLVMOrcLLJITBuilderRef, LLVMOrcJITTargetMachineBuilderRef), Builder, JTMB)
-end
-
-function LLVMOrcLLJITBuilderSetObjectLinkingLayerCreator(Builder, F, Ctx)
-    ccall((:LLVMOrcLLJITBuilderSetObjectLinkingLayerCreator, libllvm[]), Cvoid, (LLVMOrcLLJITBuilderRef, LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction, Ptr{Cvoid}), Builder, F, Ctx)
-end
-
-function LLVMOrcCreateLLJIT(Result, Builder)
-    ccall((:LLVMOrcCreateLLJIT, libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcLLJITRef}, LLVMOrcLLJITBuilderRef), Result, Builder)
-end
-
-function LLVMOrcDisposeLLJIT(J)
-    ccall((:LLVMOrcDisposeLLJIT, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef,), J)
-end
-
-function LLVMOrcLLJITGetExecutionSession(J)
-    ccall((:LLVMOrcLLJITGetExecutionSession, libllvm[]), LLVMOrcExecutionSessionRef, (LLVMOrcLLJITRef,), J)
-end
-
-function LLVMOrcLLJITGetMainJITDylib(J)
-    ccall((:LLVMOrcLLJITGetMainJITDylib, libllvm[]), LLVMOrcJITDylibRef, (LLVMOrcLLJITRef,), J)
-end
-
-function LLVMOrcLLJITGetTripleString(J)
-    ccall((:LLVMOrcLLJITGetTripleString, libllvm[]), Cstring, (LLVMOrcLLJITRef,), J)
-end
-
-function LLVMOrcLLJITGetGlobalPrefix(J)
-    ccall((:LLVMOrcLLJITGetGlobalPrefix, libllvm[]), Cchar, (LLVMOrcLLJITRef,), J)
-end
-
-function LLVMOrcLLJITMangleAndIntern(J, UnmangledName)
-    ccall((:LLVMOrcLLJITMangleAndIntern, libllvm[]), LLVMOrcSymbolStringPoolEntryRef, (LLVMOrcLLJITRef, Cstring), J, UnmangledName)
-end
-
-function LLVMOrcLLJITAddObjectFile(J, JD, ObjBuffer)
-    ccall((:LLVMOrcLLJITAddObjectFile, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcJITDylibRef, LLVMMemoryBufferRef), J, JD, ObjBuffer)
-end
-
-function LLVMOrcLLJITAddObjectFileWithRT(J, RT, ObjBuffer)
-    ccall((:LLVMOrcLLJITAddObjectFileWithRT, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcResourceTrackerRef, LLVMMemoryBufferRef), J, RT, ObjBuffer)
-end
-
-function LLVMOrcLLJITAddLLVMIRModule(J, JD, TSM)
-    ccall((:LLVMOrcLLJITAddLLVMIRModule, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcJITDylibRef, LLVMOrcThreadSafeModuleRef), J, JD, TSM)
-end
-
-function LLVMOrcLLJITAddLLVMIRModuleWithRT(J, JD, TSM)
-    ccall((:LLVMOrcLLJITAddLLVMIRModuleWithRT, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcResourceTrackerRef, LLVMOrcThreadSafeModuleRef), J, JD, TSM)
-end
-
-function LLVMOrcLLJITLookup(J, Result, Name)
-    ccall((:LLVMOrcLLJITLookup, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, Ptr{LLVMOrcJITTargetAddress}, Cstring), J, Result, Name)
-end
-
-@cenum LLVMLinkerMode::UInt32 begin
-    LLVMLinkerDestroySource = 0
-    LLVMLinkerPreserveSource_Removed = 1
-end
-
-function LLVMLinkModules2(Dest, Src)
-    ccall((:LLVMLinkModules2, libllvm[]), LLVMBool, (LLVMModuleRef, LLVMModuleRef), Dest, Src)
-end
-
-function LLVMAddLoopVectorizePass(PM)
-    ccall((:LLVMAddLoopVectorizePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddSLPVectorizePass(PM)
-    ccall((:LLVMAddSLPVectorizePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddInstructionCombiningPass(PM)
-    ccall((:LLVMAddInstructionCombiningPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
 function LLVMWriteBitcodeToFile(M, Path)
     ccall((:LLVMWriteBitcodeToFile, libllvm[]), Cint, (LLVMModuleRef, Cstring), M, Path)
 end
@@ -1335,20 +146,30 @@ function LLVMWriteBitcodeToMemoryBuffer(M)
     ccall((:LLVMWriteBitcodeToMemoryBuffer, libllvm[]), LLVMMemoryBufferRef, (LLVMModuleRef,), M)
 end
 
-function LLVMLoadLibraryPermanently(Filename)
-    ccall((:LLVMLoadLibraryPermanently, libllvm[]), LLVMBool, (Cstring,), Filename)
+@cenum LLVMVerifierFailureAction::UInt32 begin
+    LLVMAbortProcessAction = 0
+    LLVMPrintMessageAction = 1
+    LLVMReturnStatusAction = 2
 end
 
-function LLVMParseCommandLineOptions(argc, argv, Overview)
-    ccall((:LLVMParseCommandLineOptions, libllvm[]), Cvoid, (Cint, Ptr{Cstring}, Cstring), argc, argv, Overview)
+function LLVMVerifyModule(M, Action, OutMessage)
+    ccall((:LLVMVerifyModule, libllvm[]), LLVMBool, (LLVMModuleRef, LLVMVerifierFailureAction, Ptr{Cstring}), M, Action, OutMessage)
 end
 
-function LLVMSearchForAddressOfSymbol(symbolName)
-    ccall((:LLVMSearchForAddressOfSymbol, libllvm[]), Ptr{Cvoid}, (Cstring,), symbolName)
+function LLVMVerifyFunction(Fn, Action)
+    ccall((:LLVMVerifyFunction, libllvm[]), LLVMBool, (LLVMValueRef, LLVMVerifierFailureAction), Fn, Action)
 end
 
-function LLVMAddSymbol(symbolName, symbolValue)
-    ccall((:LLVMAddSymbol, libllvm[]), Cvoid, (Cstring, Ptr{Cvoid}), symbolName, symbolValue)
+function LLVMViewFunctionCFG(Fn)
+    ccall((:LLVMViewFunctionCFG, libllvm[]), Cvoid, (LLVMValueRef,), Fn)
+end
+
+function LLVMViewFunctionCFGOnly(Fn)
+    ccall((:LLVMViewFunctionCFGOnly, libllvm[]), Cvoid, (LLVMValueRef,), Fn)
+end
+
+function LLVMAddAggressiveInstCombinerPass(PM)
+    ccall((:LLVMAddAggressiveInstCombinerPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 @cenum LLVMRemarkType::UInt32 begin
@@ -1481,152 +302,21 @@ function LLVMRemarkVersion()
     ccall((:LLVMRemarkVersion, libllvm[]), UInt32, ())
 end
 
-function LLVMInitializeCore(R)
-    ccall((:LLVMInitializeCore, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
+@cenum LLVMLinkerMode::UInt32 begin
+    LLVMLinkerDestroySource = 0
+    LLVMLinkerPreserveSource_Removed = 1
 end
 
-function LLVMInitializeTransformUtils(R)
-    ccall((:LLVMInitializeTransformUtils, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
+function LLVMLinkModules2(Dest, Src)
+    ccall((:LLVMLinkModules2, libllvm[]), LLVMBool, (LLVMModuleRef, LLVMModuleRef), Dest, Src)
 end
 
-function LLVMInitializeScalarOpts(R)
-    ccall((:LLVMInitializeScalarOpts, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
+function LLVMParseIRInContext(ContextRef, MemBuf, OutM, OutMessage)
+    ccall((:LLVMParseIRInContext, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
 end
 
-function LLVMInitializeObjCARCOpts(R)
-    ccall((:LLVMInitializeObjCARCOpts, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeVectorization(R)
-    ccall((:LLVMInitializeVectorization, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeInstCombine(R)
-    ccall((:LLVMInitializeInstCombine, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeAggressiveInstCombiner(R)
-    ccall((:LLVMInitializeAggressiveInstCombiner, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeIPO(R)
-    ccall((:LLVMInitializeIPO, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeInstrumentation(R)
-    ccall((:LLVMInitializeInstrumentation, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeAnalysis(R)
-    ccall((:LLVMInitializeAnalysis, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeIPA(R)
-    ccall((:LLVMInitializeIPA, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeCodeGen(R)
-    ccall((:LLVMInitializeCodeGen, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeTarget(R)
-    ccall((:LLVMInitializeTarget, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-@cenum LLVMComdatSelectionKind::UInt32 begin
-    LLVMAnyComdatSelectionKind = 0
-    LLVMExactMatchComdatSelectionKind = 1
-    LLVMLargestComdatSelectionKind = 2
-    LLVMNoDuplicatesComdatSelectionKind = 3
-    LLVMSameSizeComdatSelectionKind = 4
-end
-
-function LLVMGetOrInsertComdat(M, Name)
-    ccall((:LLVMGetOrInsertComdat, libllvm[]), LLVMComdatRef, (LLVMModuleRef, Cstring), M, Name)
-end
-
-function LLVMGetComdat(V)
-    ccall((:LLVMGetComdat, libllvm[]), LLVMComdatRef, (LLVMValueRef,), V)
-end
-
-function LLVMSetComdat(V, C)
-    ccall((:LLVMSetComdat, libllvm[]), Cvoid, (LLVMValueRef, LLVMComdatRef), V, C)
-end
-
-function LLVMGetComdatSelectionKind(C)
-    ccall((:LLVMGetComdatSelectionKind, libllvm[]), LLVMComdatSelectionKind, (LLVMComdatRef,), C)
-end
-
-function LLVMSetComdatSelectionKind(C, Kind)
-    ccall((:LLVMSetComdatSelectionKind, libllvm[]), Cvoid, (LLVMComdatRef, LLVMComdatSelectionKind), C, Kind)
-end
-
-function LLVMAddAggressiveInstCombinerPass(PM)
-    ccall((:LLVMAddAggressiveInstCombinerPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddArgumentPromotionPass(PM)
-    ccall((:LLVMAddArgumentPromotionPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddConstantMergePass(PM)
-    ccall((:LLVMAddConstantMergePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddMergeFunctionsPass(PM)
-    ccall((:LLVMAddMergeFunctionsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCalledValuePropagationPass(PM)
-    ccall((:LLVMAddCalledValuePropagationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddDeadArgEliminationPass(PM)
-    ccall((:LLVMAddDeadArgEliminationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddFunctionAttrsPass(PM)
-    ccall((:LLVMAddFunctionAttrsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddFunctionInliningPass(PM)
-    ccall((:LLVMAddFunctionInliningPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddAlwaysInlinerPass(PM)
-    ccall((:LLVMAddAlwaysInlinerPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddGlobalDCEPass(PM)
-    ccall((:LLVMAddGlobalDCEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddGlobalOptimizerPass(PM)
-    ccall((:LLVMAddGlobalOptimizerPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddPruneEHPass(PM)
-    ccall((:LLVMAddPruneEHPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddIPSCCPPass(PM)
-    ccall((:LLVMAddIPSCCPPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddInternalizePass(arg1, AllButMain)
-    ccall((:LLVMAddInternalizePass, libllvm[]), Cvoid, (LLVMPassManagerRef, Cuint), arg1, AllButMain)
-end
-
-function LLVMAddInternalizePassWithMustPreservePredicate(PM, Context, MustPreserve)
-    ccall((:LLVMAddInternalizePassWithMustPreservePredicate, libllvm[]), Cvoid, (LLVMPassManagerRef, Ptr{Cvoid}, Ptr{Cvoid}), PM, Context, MustPreserve)
-end
-
-function LLVMAddStripDeadPrototypesPass(PM)
-    ccall((:LLVMAddStripDeadPrototypesPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddStripSymbolsPass(PM)
-    ccall((:LLVMAddStripSymbolsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMAddInstructionCombiningPass(PM)
+    ccall((:LLVMAddInstructionCombiningPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 # typedef void ( * LLVMFatalErrorHandler ) ( const char * Reason )
@@ -1941,12 +631,16 @@ end
     LLVMModuleFlagBehaviorAppendUnique = 5
 end
 
-@cenum __JL_Ctag_246::Int32 begin
+@cenum __JL_Ctag_125::Int32 begin
     LLVMAttributeReturnIndex = 0
     LLVMAttributeFunctionIndex = -1
 end
 
 const LLVMAttributeIndex = Cuint
+
+function LLVMInitializeCore(R)
+    ccall((:LLVMInitializeCore, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
+end
 
 function LLVMShutdown()
     ccall((:LLVMShutdown, libllvm[]), Cvoid, ())
@@ -2038,6 +732,14 @@ function LLVMGetEnumAttributeValue(A)
     ccall((:LLVMGetEnumAttributeValue, libllvm[]), UInt64, (LLVMAttributeRef,), A)
 end
 
+function LLVMCreateTypeAttribute(C, KindID, type_ref)
+    ccall((:LLVMCreateTypeAttribute, libllvm[]), LLVMAttributeRef, (LLVMContextRef, Cuint, LLVMTypeRef), C, KindID, type_ref)
+end
+
+function LLVMGetTypeAttributeValue(A)
+    ccall((:LLVMGetTypeAttributeValue, libllvm[]), LLVMTypeRef, (LLVMAttributeRef,), A)
+end
+
 function LLVMCreateStringAttribute(C, K, KLength, V, VLength)
     ccall((:LLVMCreateStringAttribute, libllvm[]), LLVMAttributeRef, (LLVMContextRef, Cstring, Cuint, Cstring, Cuint), C, K, KLength, V, VLength)
 end
@@ -2056,6 +758,10 @@ end
 
 function LLVMIsStringAttribute(A)
     ccall((:LLVMIsStringAttribute, libllvm[]), LLVMBool, (LLVMAttributeRef,), A)
+end
+
+function LLVMIsTypeAttribute(A)
+    ccall((:LLVMIsTypeAttribute, libllvm[]), LLVMBool, (LLVMAttributeRef,), A)
 end
 
 function LLVMGetTypeByName2(C, Name)
@@ -4861,7 +3567,7 @@ end
     LLVMDWARFEmissionLineTablesOnly = 2
 end
 
-@cenum LLVMMetadataKind::UInt32 begin
+@cenum __JL_Ctag_129::UInt32 begin
     LLVMMDStringMetadataKind = 0
     LLVMConstantAsMetadataMetadataKind = 1
     LLVMLocalAsMetadataMetadataKind = 2
@@ -4897,6 +3603,8 @@ end
     LLVMDIStringTypeMetadataKind = 32
     LLVMDIGenericSubrangeMetadataKind = 33
 end
+
+const LLVMMetadataKind = Cuint
 
 const LLVMDWARFTypeEncoding = Cuint
 
@@ -5260,221 +3968,625 @@ function LLVMGetMetadataKind(Metadata)
     ccall((:LLVMGetMetadataKind, libllvm[]), LLVMMetadataKind, (LLVMMetadataRef,), Metadata)
 end
 
-const LLVMDisasmContextRef = Ptr{Cvoid}
-
-# typedef int ( * LLVMOpInfoCallback ) ( void * DisInfo , uint64_t PC , uint64_t Offset , uint64_t Size , int TagType , void * TagBuf )
-const LLVMOpInfoCallback = Ptr{Cvoid}
-
-struct LLVMOpInfoSymbol1
-    Present::UInt64
-    Name::Cstring
-    Value::UInt64
+function LLVMAddLowerSwitchPass(PM)
+    ccall((:LLVMAddLowerSwitchPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-struct LLVMOpInfo1
-    AddSymbol::LLVMOpInfoSymbol1
-    SubtractSymbol::LLVMOpInfoSymbol1
-    Value::UInt64
-    VariantKind::UInt64
+function LLVMAddPromoteMemoryToRegisterPass(PM)
+    ccall((:LLVMAddPromoteMemoryToRegisterPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-# typedef const char * ( * LLVMSymbolLookupCallback ) ( void * DisInfo , uint64_t ReferenceValue , uint64_t * ReferenceType , uint64_t ReferencePC , const char * * ReferenceName )
-const LLVMSymbolLookupCallback = Ptr{Cvoid}
-
-function LLVMCreateDisasm(TripleName, DisInfo, TagType, GetOpInfo, SymbolLookUp)
-    ccall((:LLVMCreateDisasm, libllvm[]), LLVMDisasmContextRef, (Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), TripleName, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+function LLVMAddAddDiscriminatorsPass(PM)
+    ccall((:LLVMAddAddDiscriminatorsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMCreateDisasmCPU(Triple, CPU, DisInfo, TagType, GetOpInfo, SymbolLookUp)
-    ccall((:LLVMCreateDisasmCPU, libllvm[]), LLVMDisasmContextRef, (Cstring, Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), Triple, CPU, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+function LLVMInitializeTransformUtils(R)
+    ccall((:LLVMInitializeTransformUtils, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMCreateDisasmCPUFeatures(Triple, CPU, Features, DisInfo, TagType, GetOpInfo, SymbolLookUp)
-    ccall((:LLVMCreateDisasmCPUFeatures, libllvm[]), LLVMDisasmContextRef, (Cstring, Cstring, Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), Triple, CPU, Features, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+function LLVMInitializeScalarOpts(R)
+    ccall((:LLVMInitializeScalarOpts, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMSetDisasmOptions(DC, Options)
-    ccall((:LLVMSetDisasmOptions, libllvm[]), Cint, (LLVMDisasmContextRef, UInt64), DC, Options)
+function LLVMInitializeObjCARCOpts(R)
+    ccall((:LLVMInitializeObjCARCOpts, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMDisasmDispose(DC)
-    ccall((:LLVMDisasmDispose, libllvm[]), Cvoid, (LLVMDisasmContextRef,), DC)
+function LLVMInitializeVectorization(R)
+    ccall((:LLVMInitializeVectorization, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMDisasmInstruction(DC, Bytes, BytesSize, PC, OutString, OutStringSize)
-    ccall((:LLVMDisasmInstruction, libllvm[]), Csize_t, (LLVMDisasmContextRef, Ptr{UInt8}, UInt64, UInt64, Cstring, Csize_t), DC, Bytes, BytesSize, PC, OutString, OutStringSize)
+function LLVMInitializeInstCombine(R)
+    ccall((:LLVMInitializeInstCombine, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMParseIRInContext(ContextRef, MemBuf, OutM, OutMessage)
-    ccall((:LLVMParseIRInContext, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
+function LLVMInitializeAggressiveInstCombiner(R)
+    ccall((:LLVMInitializeAggressiveInstCombiner, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMAddAggressiveDCEPass(PM)
-    ccall((:LLVMAddAggressiveDCEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMInitializeIPO(R)
+    ccall((:LLVMInitializeIPO, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMAddDCEPass(PM)
-    ccall((:LLVMAddDCEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMInitializeInstrumentation(R)
+    ccall((:LLVMInitializeInstrumentation, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMAddBitTrackingDCEPass(PM)
-    ccall((:LLVMAddBitTrackingDCEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMInitializeAnalysis(R)
+    ccall((:LLVMInitializeAnalysis, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMAddAlignmentFromAssumptionsPass(PM)
-    ccall((:LLVMAddAlignmentFromAssumptionsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMInitializeIPA(R)
+    ccall((:LLVMInitializeIPA, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMAddCFGSimplificationPass(PM)
-    ccall((:LLVMAddCFGSimplificationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMInitializeCodeGen(R)
+    ccall((:LLVMInitializeCodeGen, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMAddDeadStoreEliminationPass(PM)
-    ccall((:LLVMAddDeadStoreEliminationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMInitializeTarget(R)
+    ccall((:LLVMInitializeTarget, libllvm[]), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMAddScalarizerPass(PM)
-    ccall((:LLVMAddScalarizerPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+mutable struct LLVMOpaqueSectionIterator end
+
+const LLVMSectionIteratorRef = Ptr{LLVMOpaqueSectionIterator}
+
+mutable struct LLVMOpaqueSymbolIterator end
+
+const LLVMSymbolIteratorRef = Ptr{LLVMOpaqueSymbolIterator}
+
+mutable struct LLVMOpaqueRelocationIterator end
+
+const LLVMRelocationIteratorRef = Ptr{LLVMOpaqueRelocationIterator}
+
+@cenum LLVMBinaryType::UInt32 begin
+    LLVMBinaryTypeArchive = 0
+    LLVMBinaryTypeMachOUniversalBinary = 1
+    LLVMBinaryTypeCOFFImportFile = 2
+    LLVMBinaryTypeIR = 3
+    LLVMBinaryTypeWinRes = 4
+    LLVMBinaryTypeCOFF = 5
+    LLVMBinaryTypeELF32L = 6
+    LLVMBinaryTypeELF32B = 7
+    LLVMBinaryTypeELF64L = 8
+    LLVMBinaryTypeELF64B = 9
+    LLVMBinaryTypeMachO32L = 10
+    LLVMBinaryTypeMachO32B = 11
+    LLVMBinaryTypeMachO64L = 12
+    LLVMBinaryTypeMachO64B = 13
+    LLVMBinaryTypeWasm = 14
 end
 
-function LLVMAddMergedLoadStoreMotionPass(PM)
-    ccall((:LLVMAddMergedLoadStoreMotionPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMCreateBinary(MemBuf, Context, ErrorMessage)
+    ccall((:LLVMCreateBinary, libllvm[]), LLVMBinaryRef, (LLVMMemoryBufferRef, LLVMContextRef, Ptr{Cstring}), MemBuf, Context, ErrorMessage)
 end
 
-function LLVMAddGVNPass(PM)
-    ccall((:LLVMAddGVNPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMDisposeBinary(BR)
+    ccall((:LLVMDisposeBinary, libllvm[]), Cvoid, (LLVMBinaryRef,), BR)
 end
 
-function LLVMAddNewGVNPass(PM)
-    ccall((:LLVMAddNewGVNPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMBinaryCopyMemoryBuffer(BR)
+    ccall((:LLVMBinaryCopyMemoryBuffer, libllvm[]), LLVMMemoryBufferRef, (LLVMBinaryRef,), BR)
 end
 
-function LLVMAddIndVarSimplifyPass(PM)
-    ccall((:LLVMAddIndVarSimplifyPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMBinaryGetType(BR)
+    ccall((:LLVMBinaryGetType, libllvm[]), LLVMBinaryType, (LLVMBinaryRef,), BR)
 end
 
-function LLVMAddInstructionSimplifyPass(PM)
-    ccall((:LLVMAddInstructionSimplifyPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMMachOUniversalBinaryCopyObjectForArch(BR, Arch, ArchLen, ErrorMessage)
+    ccall((:LLVMMachOUniversalBinaryCopyObjectForArch, libllvm[]), LLVMBinaryRef, (LLVMBinaryRef, Cstring, Csize_t, Ptr{Cstring}), BR, Arch, ArchLen, ErrorMessage)
 end
 
-function LLVMAddJumpThreadingPass(PM)
-    ccall((:LLVMAddJumpThreadingPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMObjectFileCopySectionIterator(BR)
+    ccall((:LLVMObjectFileCopySectionIterator, libllvm[]), LLVMSectionIteratorRef, (LLVMBinaryRef,), BR)
 end
 
-function LLVMAddLICMPass(PM)
-    ccall((:LLVMAddLICMPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMObjectFileIsSectionIteratorAtEnd(BR, SI)
+    ccall((:LLVMObjectFileIsSectionIteratorAtEnd, libllvm[]), LLVMBool, (LLVMBinaryRef, LLVMSectionIteratorRef), BR, SI)
 end
 
-function LLVMAddLoopDeletionPass(PM)
-    ccall((:LLVMAddLoopDeletionPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMObjectFileCopySymbolIterator(BR)
+    ccall((:LLVMObjectFileCopySymbolIterator, libllvm[]), LLVMSymbolIteratorRef, (LLVMBinaryRef,), BR)
 end
 
-function LLVMAddLoopIdiomPass(PM)
-    ccall((:LLVMAddLoopIdiomPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMObjectFileIsSymbolIteratorAtEnd(BR, SI)
+    ccall((:LLVMObjectFileIsSymbolIteratorAtEnd, libllvm[]), LLVMBool, (LLVMBinaryRef, LLVMSymbolIteratorRef), BR, SI)
 end
 
-function LLVMAddLoopRotatePass(PM)
-    ccall((:LLVMAddLoopRotatePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMDisposeSectionIterator(SI)
+    ccall((:LLVMDisposeSectionIterator, libllvm[]), Cvoid, (LLVMSectionIteratorRef,), SI)
 end
 
-function LLVMAddLoopRerollPass(PM)
-    ccall((:LLVMAddLoopRerollPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMMoveToNextSection(SI)
+    ccall((:LLVMMoveToNextSection, libllvm[]), Cvoid, (LLVMSectionIteratorRef,), SI)
 end
 
-function LLVMAddLoopUnrollPass(PM)
-    ccall((:LLVMAddLoopUnrollPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMMoveToContainingSection(Sect, Sym)
+    ccall((:LLVMMoveToContainingSection, libllvm[]), Cvoid, (LLVMSectionIteratorRef, LLVMSymbolIteratorRef), Sect, Sym)
 end
 
-function LLVMAddLoopUnrollAndJamPass(PM)
-    ccall((:LLVMAddLoopUnrollAndJamPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMDisposeSymbolIterator(SI)
+    ccall((:LLVMDisposeSymbolIterator, libllvm[]), Cvoid, (LLVMSymbolIteratorRef,), SI)
 end
 
-function LLVMAddLoopUnswitchPass(PM)
-    ccall((:LLVMAddLoopUnswitchPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMMoveToNextSymbol(SI)
+    ccall((:LLVMMoveToNextSymbol, libllvm[]), Cvoid, (LLVMSymbolIteratorRef,), SI)
 end
 
-function LLVMAddLowerAtomicPass(PM)
-    ccall((:LLVMAddLowerAtomicPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSectionName(SI)
+    ccall((:LLVMGetSectionName, libllvm[]), Cstring, (LLVMSectionIteratorRef,), SI)
 end
 
-function LLVMAddMemCpyOptPass(PM)
-    ccall((:LLVMAddMemCpyOptPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSectionSize(SI)
+    ccall((:LLVMGetSectionSize, libllvm[]), UInt64, (LLVMSectionIteratorRef,), SI)
 end
 
-function LLVMAddPartiallyInlineLibCallsPass(PM)
-    ccall((:LLVMAddPartiallyInlineLibCallsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSectionContents(SI)
+    ccall((:LLVMGetSectionContents, libllvm[]), Cstring, (LLVMSectionIteratorRef,), SI)
 end
 
-function LLVMAddReassociatePass(PM)
-    ccall((:LLVMAddReassociatePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSectionAddress(SI)
+    ccall((:LLVMGetSectionAddress, libllvm[]), UInt64, (LLVMSectionIteratorRef,), SI)
 end
 
-function LLVMAddSCCPPass(PM)
-    ccall((:LLVMAddSCCPPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSectionContainsSymbol(SI, Sym)
+    ccall((:LLVMGetSectionContainsSymbol, libllvm[]), LLVMBool, (LLVMSectionIteratorRef, LLVMSymbolIteratorRef), SI, Sym)
 end
 
-function LLVMAddScalarReplAggregatesPass(PM)
-    ccall((:LLVMAddScalarReplAggregatesPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetRelocations(Section)
+    ccall((:LLVMGetRelocations, libllvm[]), LLVMRelocationIteratorRef, (LLVMSectionIteratorRef,), Section)
 end
 
-function LLVMAddScalarReplAggregatesPassSSA(PM)
-    ccall((:LLVMAddScalarReplAggregatesPassSSA, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMDisposeRelocationIterator(RI)
+    ccall((:LLVMDisposeRelocationIterator, libllvm[]), Cvoid, (LLVMRelocationIteratorRef,), RI)
 end
 
-function LLVMAddScalarReplAggregatesPassWithThreshold(PM, Threshold)
-    ccall((:LLVMAddScalarReplAggregatesPassWithThreshold, libllvm[]), Cvoid, (LLVMPassManagerRef, Cint), PM, Threshold)
+function LLVMIsRelocationIteratorAtEnd(Section, RI)
+    ccall((:LLVMIsRelocationIteratorAtEnd, libllvm[]), LLVMBool, (LLVMSectionIteratorRef, LLVMRelocationIteratorRef), Section, RI)
 end
 
-function LLVMAddSimplifyLibCallsPass(PM)
-    ccall((:LLVMAddSimplifyLibCallsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMMoveToNextRelocation(RI)
+    ccall((:LLVMMoveToNextRelocation, libllvm[]), Cvoid, (LLVMRelocationIteratorRef,), RI)
 end
 
-function LLVMAddTailCallEliminationPass(PM)
-    ccall((:LLVMAddTailCallEliminationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSymbolName(SI)
+    ccall((:LLVMGetSymbolName, libllvm[]), Cstring, (LLVMSymbolIteratorRef,), SI)
 end
 
-function LLVMAddDemoteMemoryToRegisterPass(PM)
-    ccall((:LLVMAddDemoteMemoryToRegisterPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSymbolAddress(SI)
+    ccall((:LLVMGetSymbolAddress, libllvm[]), UInt64, (LLVMSymbolIteratorRef,), SI)
 end
 
-function LLVMAddVerifierPass(PM)
-    ccall((:LLVMAddVerifierPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSymbolSize(SI)
+    ccall((:LLVMGetSymbolSize, libllvm[]), UInt64, (LLVMSymbolIteratorRef,), SI)
 end
 
-function LLVMAddCorrelatedValuePropagationPass(PM)
-    ccall((:LLVMAddCorrelatedValuePropagationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetRelocationOffset(RI)
+    ccall((:LLVMGetRelocationOffset, libllvm[]), UInt64, (LLVMRelocationIteratorRef,), RI)
 end
 
-function LLVMAddEarlyCSEPass(PM)
-    ccall((:LLVMAddEarlyCSEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetRelocationSymbol(RI)
+    ccall((:LLVMGetRelocationSymbol, libllvm[]), LLVMSymbolIteratorRef, (LLVMRelocationIteratorRef,), RI)
 end
 
-function LLVMAddEarlyCSEMemSSAPass(PM)
-    ccall((:LLVMAddEarlyCSEMemSSAPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetRelocationType(RI)
+    ccall((:LLVMGetRelocationType, libllvm[]), UInt64, (LLVMRelocationIteratorRef,), RI)
 end
 
-function LLVMAddLowerExpectIntrinsicPass(PM)
-    ccall((:LLVMAddLowerExpectIntrinsicPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetRelocationTypeName(RI)
+    ccall((:LLVMGetRelocationTypeName, libllvm[]), Cstring, (LLVMRelocationIteratorRef,), RI)
 end
 
-function LLVMAddLowerConstantIntrinsicsPass(PM)
-    ccall((:LLVMAddLowerConstantIntrinsicsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetRelocationValueString(RI)
+    ccall((:LLVMGetRelocationValueString, libllvm[]), Cstring, (LLVMRelocationIteratorRef,), RI)
 end
 
-function LLVMAddTypeBasedAliasAnalysisPass(PM)
-    ccall((:LLVMAddTypeBasedAliasAnalysisPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+mutable struct LLVMOpaqueObjectFile end
+
+const LLVMObjectFileRef = Ptr{LLVMOpaqueObjectFile}
+
+function LLVMCreateObjectFile(MemBuf)
+    ccall((:LLVMCreateObjectFile, libllvm[]), LLVMObjectFileRef, (LLVMMemoryBufferRef,), MemBuf)
 end
 
-function LLVMAddScopedNoAliasAAPass(PM)
-    ccall((:LLVMAddScopedNoAliasAAPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMDisposeObjectFile(ObjectFile)
+    ccall((:LLVMDisposeObjectFile, libllvm[]), Cvoid, (LLVMObjectFileRef,), ObjectFile)
 end
 
-function LLVMAddBasicAliasAnalysisPass(PM)
-    ccall((:LLVMAddBasicAliasAnalysisPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMGetSections(ObjectFile)
+    ccall((:LLVMGetSections, libllvm[]), LLVMSectionIteratorRef, (LLVMObjectFileRef,), ObjectFile)
 end
 
-function LLVMAddUnifyFunctionExitNodesPass(PM)
-    ccall((:LLVMAddUnifyFunctionExitNodesPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMIsSectionIteratorAtEnd(ObjectFile, SI)
+    ccall((:LLVMIsSectionIteratorAtEnd, libllvm[]), LLVMBool, (LLVMObjectFileRef, LLVMSectionIteratorRef), ObjectFile, SI)
+end
+
+function LLVMGetSymbols(ObjectFile)
+    ccall((:LLVMGetSymbols, libllvm[]), LLVMSymbolIteratorRef, (LLVMObjectFileRef,), ObjectFile)
+end
+
+function LLVMIsSymbolIteratorAtEnd(ObjectFile, SI)
+    ccall((:LLVMIsSymbolIteratorAtEnd, libllvm[]), LLVMBool, (LLVMObjectFileRef, LLVMSymbolIteratorRef), ObjectFile, SI)
+end
+
+mutable struct LLVMOpaqueError end
+
+const LLVMErrorRef = Ptr{LLVMOpaqueError}
+
+const LLVMErrorTypeId = Ptr{Cvoid}
+
+function LLVMGetErrorTypeId(Err)
+    ccall((:LLVMGetErrorTypeId, libllvm[]), LLVMErrorTypeId, (LLVMErrorRef,), Err)
+end
+
+function LLVMConsumeError(Err)
+    ccall((:LLVMConsumeError, libllvm[]), Cvoid, (LLVMErrorRef,), Err)
+end
+
+function LLVMGetErrorMessage(Err)
+    ccall((:LLVMGetErrorMessage, libllvm[]), Cstring, (LLVMErrorRef,), Err)
+end
+
+function LLVMDisposeErrorMessage(ErrMsg)
+    ccall((:LLVMDisposeErrorMessage, libllvm[]), Cvoid, (Cstring,), ErrMsg)
+end
+
+function LLVMGetStringErrorTypeId()
+    ccall((:LLVMGetStringErrorTypeId, libllvm[]), LLVMErrorTypeId, ())
+end
+
+function LLVMCreateStringError(ErrMsg)
+    ccall((:LLVMCreateStringError, libllvm[]), LLVMErrorRef, (Cstring,), ErrMsg)
+end
+
+@cenum LLVMByteOrdering::UInt32 begin
+    LLVMBigEndian = 0
+    LLVMLittleEndian = 1
+end
+
+mutable struct LLVMOpaqueTargetData end
+
+const LLVMTargetDataRef = Ptr{LLVMOpaqueTargetData}
+
+mutable struct LLVMOpaqueTargetLibraryInfotData end
+
+const LLVMTargetLibraryInfoRef = Ptr{LLVMOpaqueTargetLibraryInfotData}
+
+function LLVMInitializeNVPTXTargetInfo()
+    ccall((:LLVMInitializeNVPTXTargetInfo, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeAMDGPUTargetInfo()
+    ccall((:LLVMInitializeAMDGPUTargetInfo, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeWebAssemblyTargetInfo()
+    ccall((:LLVMInitializeWebAssemblyTargetInfo, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeBPFTargetInfo()
+    ccall((:LLVMInitializeBPFTargetInfo, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeX86TargetInfo()
+    ccall((:LLVMInitializeX86TargetInfo, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeNVPTXTarget()
+    ccall((:LLVMInitializeNVPTXTarget, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeAMDGPUTarget()
+    ccall((:LLVMInitializeAMDGPUTarget, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeWebAssemblyTarget()
+    ccall((:LLVMInitializeWebAssemblyTarget, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeBPFTarget()
+    ccall((:LLVMInitializeBPFTarget, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeX86Target()
+    ccall((:LLVMInitializeX86Target, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeNVPTXTargetMC()
+    ccall((:LLVMInitializeNVPTXTargetMC, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeAMDGPUTargetMC()
+    ccall((:LLVMInitializeAMDGPUTargetMC, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeWebAssemblyTargetMC()
+    ccall((:LLVMInitializeWebAssemblyTargetMC, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeBPFTargetMC()
+    ccall((:LLVMInitializeBPFTargetMC, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeX86TargetMC()
+    ccall((:LLVMInitializeX86TargetMC, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeNVPTXAsmPrinter()
+    ccall((:LLVMInitializeNVPTXAsmPrinter, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeAMDGPUAsmPrinter()
+    ccall((:LLVMInitializeAMDGPUAsmPrinter, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeWebAssemblyAsmPrinter()
+    ccall((:LLVMInitializeWebAssemblyAsmPrinter, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeBPFAsmPrinter()
+    ccall((:LLVMInitializeBPFAsmPrinter, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeX86AsmPrinter()
+    ccall((:LLVMInitializeX86AsmPrinter, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeAMDGPUAsmParser()
+    ccall((:LLVMInitializeAMDGPUAsmParser, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeWebAssemblyAsmParser()
+    ccall((:LLVMInitializeWebAssemblyAsmParser, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeBPFAsmParser()
+    ccall((:LLVMInitializeBPFAsmParser, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeX86AsmParser()
+    ccall((:LLVMInitializeX86AsmParser, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeAMDGPUDisassembler()
+    ccall((:LLVMInitializeAMDGPUDisassembler, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeWebAssemblyDisassembler()
+    ccall((:LLVMInitializeWebAssemblyDisassembler, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeBPFDisassembler()
+    ccall((:LLVMInitializeBPFDisassembler, libllvm[]), Cvoid, ())
+end
+
+function LLVMInitializeX86Disassembler()
+    ccall((:LLVMInitializeX86Disassembler, libllvm[]), Cvoid, ())
+end
+
+function LLVMGetModuleDataLayout(M)
+    ccall((:LLVMGetModuleDataLayout, libllvm[]), LLVMTargetDataRef, (LLVMModuleRef,), M)
+end
+
+function LLVMSetModuleDataLayout(M, DL)
+    ccall((:LLVMSetModuleDataLayout, libllvm[]), Cvoid, (LLVMModuleRef, LLVMTargetDataRef), M, DL)
+end
+
+function LLVMCreateTargetData(StringRep)
+    ccall((:LLVMCreateTargetData, libllvm[]), LLVMTargetDataRef, (Cstring,), StringRep)
+end
+
+function LLVMDisposeTargetData(TD)
+    ccall((:LLVMDisposeTargetData, libllvm[]), Cvoid, (LLVMTargetDataRef,), TD)
+end
+
+function LLVMAddTargetLibraryInfo(TLI, PM)
+    ccall((:LLVMAddTargetLibraryInfo, libllvm[]), Cvoid, (LLVMTargetLibraryInfoRef, LLVMPassManagerRef), TLI, PM)
+end
+
+function LLVMCopyStringRepOfTargetData(TD)
+    ccall((:LLVMCopyStringRepOfTargetData, libllvm[]), Cstring, (LLVMTargetDataRef,), TD)
+end
+
+function LLVMByteOrder(TD)
+    ccall((:LLVMByteOrder, libllvm[]), LLVMByteOrdering, (LLVMTargetDataRef,), TD)
+end
+
+function LLVMPointerSize(TD)
+    ccall((:LLVMPointerSize, libllvm[]), Cuint, (LLVMTargetDataRef,), TD)
+end
+
+function LLVMPointerSizeForAS(TD, AS)
+    ccall((:LLVMPointerSizeForAS, libllvm[]), Cuint, (LLVMTargetDataRef, Cuint), TD, AS)
+end
+
+function LLVMIntPtrType(TD)
+    ccall((:LLVMIntPtrType, libllvm[]), LLVMTypeRef, (LLVMTargetDataRef,), TD)
+end
+
+function LLVMIntPtrTypeForAS(TD, AS)
+    ccall((:LLVMIntPtrTypeForAS, libllvm[]), LLVMTypeRef, (LLVMTargetDataRef, Cuint), TD, AS)
+end
+
+function LLVMIntPtrTypeInContext(C, TD)
+    ccall((:LLVMIntPtrTypeInContext, libllvm[]), LLVMTypeRef, (LLVMContextRef, LLVMTargetDataRef), C, TD)
+end
+
+function LLVMIntPtrTypeForASInContext(C, TD, AS)
+    ccall((:LLVMIntPtrTypeForASInContext, libllvm[]), LLVMTypeRef, (LLVMContextRef, LLVMTargetDataRef, Cuint), C, TD, AS)
+end
+
+function LLVMSizeOfTypeInBits(TD, Ty)
+    ccall((:LLVMSizeOfTypeInBits, libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+end
+
+function LLVMStoreSizeOfType(TD, Ty)
+    ccall((:LLVMStoreSizeOfType, libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+end
+
+function LLVMABISizeOfType(TD, Ty)
+    ccall((:LLVMABISizeOfType, libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+end
+
+function LLVMABIAlignmentOfType(TD, Ty)
+    ccall((:LLVMABIAlignmentOfType, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+end
+
+function LLVMCallFrameAlignmentOfType(TD, Ty)
+    ccall((:LLVMCallFrameAlignmentOfType, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+end
+
+function LLVMPreferredAlignmentOfType(TD, Ty)
+    ccall((:LLVMPreferredAlignmentOfType, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMTypeRef), TD, Ty)
+end
+
+function LLVMPreferredAlignmentOfGlobal(TD, GlobalVar)
+    ccall((:LLVMPreferredAlignmentOfGlobal, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMValueRef), TD, GlobalVar)
+end
+
+function LLVMElementAtOffset(TD, StructTy, Offset)
+    ccall((:LLVMElementAtOffset, libllvm[]), Cuint, (LLVMTargetDataRef, LLVMTypeRef, Culonglong), TD, StructTy, Offset)
+end
+
+function LLVMOffsetOfElement(TD, StructTy, Element)
+    ccall((:LLVMOffsetOfElement, libllvm[]), Culonglong, (LLVMTargetDataRef, LLVMTypeRef, Cuint), TD, StructTy, Element)
+end
+
+mutable struct LLVMOpaqueTargetMachine end
+
+const LLVMTargetMachineRef = Ptr{LLVMOpaqueTargetMachine}
+
+mutable struct LLVMTarget end
+
+const LLVMTargetRef = Ptr{LLVMTarget}
+
+@cenum LLVMCodeGenOptLevel::UInt32 begin
+    LLVMCodeGenLevelNone = 0
+    LLVMCodeGenLevelLess = 1
+    LLVMCodeGenLevelDefault = 2
+    LLVMCodeGenLevelAggressive = 3
+end
+
+@cenum LLVMRelocMode::UInt32 begin
+    LLVMRelocDefault = 0
+    LLVMRelocStatic = 1
+    LLVMRelocPIC = 2
+    LLVMRelocDynamicNoPic = 3
+    LLVMRelocROPI = 4
+    LLVMRelocRWPI = 5
+    LLVMRelocROPI_RWPI = 6
+end
+
+@cenum LLVMCodeModel::UInt32 begin
+    LLVMCodeModelDefault = 0
+    LLVMCodeModelJITDefault = 1
+    LLVMCodeModelTiny = 2
+    LLVMCodeModelSmall = 3
+    LLVMCodeModelKernel = 4
+    LLVMCodeModelMedium = 5
+    LLVMCodeModelLarge = 6
+end
+
+@cenum LLVMCodeGenFileType::UInt32 begin
+    LLVMAssemblyFile = 0
+    LLVMObjectFile = 1
+end
+
+function LLVMGetFirstTarget()
+    ccall((:LLVMGetFirstTarget, libllvm[]), LLVMTargetRef, ())
+end
+
+function LLVMGetNextTarget(T)
+    ccall((:LLVMGetNextTarget, libllvm[]), LLVMTargetRef, (LLVMTargetRef,), T)
+end
+
+function LLVMGetTargetFromName(Name)
+    ccall((:LLVMGetTargetFromName, libllvm[]), LLVMTargetRef, (Cstring,), Name)
+end
+
+function LLVMGetTargetFromTriple(Triple, T, ErrorMessage)
+    ccall((:LLVMGetTargetFromTriple, libllvm[]), LLVMBool, (Cstring, Ptr{LLVMTargetRef}, Ptr{Cstring}), Triple, T, ErrorMessage)
+end
+
+function LLVMGetTargetName(T)
+    ccall((:LLVMGetTargetName, libllvm[]), Cstring, (LLVMTargetRef,), T)
+end
+
+function LLVMGetTargetDescription(T)
+    ccall((:LLVMGetTargetDescription, libllvm[]), Cstring, (LLVMTargetRef,), T)
+end
+
+function LLVMTargetHasJIT(T)
+    ccall((:LLVMTargetHasJIT, libllvm[]), LLVMBool, (LLVMTargetRef,), T)
+end
+
+function LLVMTargetHasTargetMachine(T)
+    ccall((:LLVMTargetHasTargetMachine, libllvm[]), LLVMBool, (LLVMTargetRef,), T)
+end
+
+function LLVMTargetHasAsmBackend(T)
+    ccall((:LLVMTargetHasAsmBackend, libllvm[]), LLVMBool, (LLVMTargetRef,), T)
+end
+
+function LLVMCreateTargetMachine(T, Triple, CPU, Features, Level, Reloc, CodeModel)
+    ccall((:LLVMCreateTargetMachine, libllvm[]), LLVMTargetMachineRef, (LLVMTargetRef, Cstring, Cstring, Cstring, LLVMCodeGenOptLevel, LLVMRelocMode, LLVMCodeModel), T, Triple, CPU, Features, Level, Reloc, CodeModel)
+end
+
+function LLVMDisposeTargetMachine(T)
+    ccall((:LLVMDisposeTargetMachine, libllvm[]), Cvoid, (LLVMTargetMachineRef,), T)
+end
+
+function LLVMGetTargetMachineTarget(T)
+    ccall((:LLVMGetTargetMachineTarget, libllvm[]), LLVMTargetRef, (LLVMTargetMachineRef,), T)
+end
+
+function LLVMGetTargetMachineTriple(T)
+    ccall((:LLVMGetTargetMachineTriple, libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
+end
+
+function LLVMGetTargetMachineCPU(T)
+    ccall((:LLVMGetTargetMachineCPU, libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
+end
+
+function LLVMGetTargetMachineFeatureString(T)
+    ccall((:LLVMGetTargetMachineFeatureString, libllvm[]), Cstring, (LLVMTargetMachineRef,), T)
+end
+
+function LLVMCreateTargetDataLayout(T)
+    ccall((:LLVMCreateTargetDataLayout, libllvm[]), LLVMTargetDataRef, (LLVMTargetMachineRef,), T)
+end
+
+function LLVMSetTargetMachineAsmVerbosity(T, VerboseAsm)
+    ccall((:LLVMSetTargetMachineAsmVerbosity, libllvm[]), Cvoid, (LLVMTargetMachineRef, LLVMBool), T, VerboseAsm)
+end
+
+function LLVMTargetMachineEmitToFile(T, M, Filename, codegen, ErrorMessage)
+    ccall((:LLVMTargetMachineEmitToFile, libllvm[]), LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, Cstring, LLVMCodeGenFileType, Ptr{Cstring}), T, M, Filename, codegen, ErrorMessage)
+end
+
+function LLVMTargetMachineEmitToMemoryBuffer(T, M, codegen, ErrorMessage, OutMemBuf)
+    ccall((:LLVMTargetMachineEmitToMemoryBuffer, libllvm[]), LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, LLVMCodeGenFileType, Ptr{Cstring}, Ptr{LLVMMemoryBufferRef}), T, M, codegen, ErrorMessage, OutMemBuf)
+end
+
+function LLVMGetDefaultTargetTriple()
+    ccall((:LLVMGetDefaultTargetTriple, libllvm[]), Cstring, ())
+end
+
+function LLVMNormalizeTargetTriple(triple)
+    ccall((:LLVMNormalizeTargetTriple, libllvm[]), Cstring, (Cstring,), triple)
+end
+
+function LLVMGetHostCPUName()
+    ccall((:LLVMGetHostCPUName, libllvm[]), Cstring, ())
+end
+
+function LLVMGetHostCPUFeatures()
+    ccall((:LLVMGetHostCPUFeatures, libllvm[]), Cstring, ())
+end
+
+function LLVMAddAnalysisPasses(T, PM)
+    ccall((:LLVMAddAnalysisPasses, libllvm[]), Cvoid, (LLVMTargetMachineRef, LLVMPassManagerRef), T, PM)
 end
 
 function LLVMLinkInMCJIT()
@@ -5661,6 +4773,239 @@ function LLVMCreatePerfJITEventListener()
     ccall((:LLVMCreatePerfJITEventListener, libllvm[]), LLVMJITEventListenerRef, ())
 end
 
+const LLVMOrcJITTargetAddress = UInt64
+
+@cenum LLVMJITSymbolGenericFlags::UInt32 begin
+    LLVMJITSymbolGenericFlagsExported = 1
+    LLVMJITSymbolGenericFlagsWeak = 2
+end
+
+const LLVMJITTargetSymbolFlags = UInt8
+
+struct LLVMJITSymbolFlags
+    GenericFlags::UInt8
+    TargetFlags::UInt8
+end
+
+struct LLVMJITEvaluatedSymbol
+    Address::LLVMOrcJITTargetAddress
+    Flags::LLVMJITSymbolFlags
+end
+
+mutable struct LLVMOrcOpaqueExecutionSession end
+
+const LLVMOrcExecutionSessionRef = Ptr{LLVMOrcOpaqueExecutionSession}
+
+# typedef void ( * LLVMOrcErrorReporterFunction ) ( void * Ctx , LLVMErrorRef Err )
+const LLVMOrcErrorReporterFunction = Ptr{Cvoid}
+
+mutable struct LLVMOrcOpaqueSymbolStringPool end
+
+const LLVMOrcSymbolStringPoolRef = Ptr{LLVMOrcOpaqueSymbolStringPool}
+
+mutable struct LLVMOrcOpaqueSymbolStringPoolEntry end
+
+const LLVMOrcSymbolStringPoolEntryRef = Ptr{LLVMOrcOpaqueSymbolStringPoolEntry}
+
+struct LLVMJITCSymbolMapPair
+    Name::LLVMOrcSymbolStringPoolEntryRef
+    Sym::LLVMJITEvaluatedSymbol
+end
+
+const LLVMOrcCSymbolMapPairs = Ptr{LLVMJITCSymbolMapPair}
+
+@cenum LLVMOrcLookupKind::UInt32 begin
+    LLVMOrcLookupKindStatic = 0
+    LLVMOrcLookupKindDLSym = 1
+end
+
+@cenum LLVMOrcJITDylibLookupFlags::UInt32 begin
+    LLVMOrcJITDylibLookupFlagsMatchExportedSymbolsOnly = 0
+    LLVMOrcJITDylibLookupFlagsMatchAllSymbols = 1
+end
+
+@cenum LLVMOrcSymbolLookupFlags::UInt32 begin
+    LLVMOrcSymbolLookupFlagsRequiredSymbol = 0
+    LLVMOrcSymbolLookupFlagsWeaklyReferencedSymbol = 1
+end
+
+struct LLVMOrcCLookupSetElement
+    Name::LLVMOrcSymbolStringPoolEntryRef
+    LookupFlags::LLVMOrcSymbolLookupFlags
+end
+
+const LLVMOrcCLookupSet = Ptr{LLVMOrcCLookupSetElement}
+
+mutable struct LLVMOrcOpaqueMaterializationUnit end
+
+const LLVMOrcMaterializationUnitRef = Ptr{LLVMOrcOpaqueMaterializationUnit}
+
+mutable struct LLVMOrcOpaqueJITDylib end
+
+const LLVMOrcJITDylibRef = Ptr{LLVMOrcOpaqueJITDylib}
+
+mutable struct LLVMOrcOpaqueResourceTracker end
+
+const LLVMOrcResourceTrackerRef = Ptr{LLVMOrcOpaqueResourceTracker}
+
+mutable struct LLVMOrcOpaqueDefinitionGenerator end
+
+const LLVMOrcDefinitionGeneratorRef = Ptr{LLVMOrcOpaqueDefinitionGenerator}
+
+mutable struct LLVMOrcOpaqueLookupState end
+
+const LLVMOrcLookupStateRef = Ptr{LLVMOrcOpaqueLookupState}
+
+# typedef LLVMErrorRef ( * LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction ) ( LLVMOrcDefinitionGeneratorRef GeneratorObj , void * Ctx , LLVMOrcLookupStateRef * LookupState , LLVMOrcLookupKind Kind , LLVMOrcJITDylibRef JD , LLVMOrcJITDylibLookupFlags JDLookupFlags , LLVMOrcCLookupSet LookupSet , size_t LookupSetSize )
+const LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction = Ptr{Cvoid}
+
+# typedef int ( * LLVMOrcSymbolPredicate ) ( void * Ctx , LLVMOrcSymbolStringPoolEntryRef Sym )
+const LLVMOrcSymbolPredicate = Ptr{Cvoid}
+
+mutable struct LLVMOrcOpaqueThreadSafeContext end
+
+const LLVMOrcThreadSafeContextRef = Ptr{LLVMOrcOpaqueThreadSafeContext}
+
+mutable struct LLVMOrcOpaqueThreadSafeModule end
+
+const LLVMOrcThreadSafeModuleRef = Ptr{LLVMOrcOpaqueThreadSafeModule}
+
+mutable struct LLVMOrcOpaqueJITTargetMachineBuilder end
+
+const LLVMOrcJITTargetMachineBuilderRef = Ptr{LLVMOrcOpaqueJITTargetMachineBuilder}
+
+mutable struct LLVMOrcOpaqueObjectLayer end
+
+const LLVMOrcObjectLayerRef = Ptr{LLVMOrcOpaqueObjectLayer}
+
+function LLVMOrcExecutionSessionSetErrorReporter(ES, ReportError, Ctx)
+    ccall((:LLVMOrcExecutionSessionSetErrorReporter, libllvm[]), Cvoid, (LLVMOrcExecutionSessionRef, LLVMOrcErrorReporterFunction, Ptr{Cvoid}), ES, ReportError, Ctx)
+end
+
+function LLVMOrcExecutionSessionGetSymbolStringPool(ES)
+    ccall((:LLVMOrcExecutionSessionGetSymbolStringPool, libllvm[]), LLVMOrcSymbolStringPoolRef, (LLVMOrcExecutionSessionRef,), ES)
+end
+
+function LLVMOrcSymbolStringPoolClearDeadEntries(SSP)
+    ccall((:LLVMOrcSymbolStringPoolClearDeadEntries, libllvm[]), Cvoid, (LLVMOrcSymbolStringPoolRef,), SSP)
+end
+
+function LLVMOrcExecutionSessionIntern(ES, Name)
+    ccall((:LLVMOrcExecutionSessionIntern, libllvm[]), LLVMOrcSymbolStringPoolEntryRef, (LLVMOrcExecutionSessionRef, Cstring), ES, Name)
+end
+
+function LLVMOrcRetainSymbolStringPoolEntry(S)
+    ccall((:LLVMOrcRetainSymbolStringPoolEntry, libllvm[]), Cvoid, (LLVMOrcSymbolStringPoolEntryRef,), S)
+end
+
+function LLVMOrcReleaseSymbolStringPoolEntry(S)
+    ccall((:LLVMOrcReleaseSymbolStringPoolEntry, libllvm[]), Cvoid, (LLVMOrcSymbolStringPoolEntryRef,), S)
+end
+
+function LLVMOrcSymbolStringPoolEntryStr(S)
+    ccall((:LLVMOrcSymbolStringPoolEntryStr, libllvm[]), Cstring, (LLVMOrcSymbolStringPoolEntryRef,), S)
+end
+
+function LLVMOrcReleaseResourceTracker(RT)
+    ccall((:LLVMOrcReleaseResourceTracker, libllvm[]), Cvoid, (LLVMOrcResourceTrackerRef,), RT)
+end
+
+function LLVMOrcResourceTrackerTransferTo(SrcRT, DstRT)
+    ccall((:LLVMOrcResourceTrackerTransferTo, libllvm[]), Cvoid, (LLVMOrcResourceTrackerRef, LLVMOrcResourceTrackerRef), SrcRT, DstRT)
+end
+
+function LLVMOrcResourceTrackerRemove(RT)
+    ccall((:LLVMOrcResourceTrackerRemove, libllvm[]), LLVMErrorRef, (LLVMOrcResourceTrackerRef,), RT)
+end
+
+function LLVMOrcDisposeDefinitionGenerator(DG)
+    ccall((:LLVMOrcDisposeDefinitionGenerator, libllvm[]), Cvoid, (LLVMOrcDefinitionGeneratorRef,), DG)
+end
+
+function LLVMOrcDisposeMaterializationUnit(MU)
+    ccall((:LLVMOrcDisposeMaterializationUnit, libllvm[]), Cvoid, (LLVMOrcMaterializationUnitRef,), MU)
+end
+
+function LLVMOrcAbsoluteSymbols(Syms, NumPairs)
+    ccall((:LLVMOrcAbsoluteSymbols, libllvm[]), LLVMOrcMaterializationUnitRef, (LLVMOrcCSymbolMapPairs, Csize_t), Syms, NumPairs)
+end
+
+function LLVMOrcExecutionSessionCreateBareJITDylib(ES, Name)
+    ccall((:LLVMOrcExecutionSessionCreateBareJITDylib, libllvm[]), LLVMOrcJITDylibRef, (LLVMOrcExecutionSessionRef, Cstring), ES, Name)
+end
+
+function LLVMOrcExecutionSessionCreateJITDylib(ES, Result, Name)
+    ccall((:LLVMOrcExecutionSessionCreateJITDylib, libllvm[]), LLVMErrorRef, (LLVMOrcExecutionSessionRef, Ptr{LLVMOrcJITDylibRef}, Cstring), ES, Result, Name)
+end
+
+function LLVMOrcExecutionSessionGetJITDylibByName(ES, Name)
+    ccall((:LLVMOrcExecutionSessionGetJITDylibByName, libllvm[]), LLVMOrcJITDylibRef, (LLVMOrcExecutionSessionRef, Cstring), ES, Name)
+end
+
+function LLVMOrcJITDylibCreateResourceTracker(JD)
+    ccall((:LLVMOrcJITDylibCreateResourceTracker, libllvm[]), LLVMOrcResourceTrackerRef, (LLVMOrcJITDylibRef,), JD)
+end
+
+function LLVMOrcJITDylibGetDefaultResourceTracker(JD)
+    ccall((:LLVMOrcJITDylibGetDefaultResourceTracker, libllvm[]), LLVMOrcResourceTrackerRef, (LLVMOrcJITDylibRef,), JD)
+end
+
+function LLVMOrcJITDylibDefine(JD, MU)
+    ccall((:LLVMOrcJITDylibDefine, libllvm[]), LLVMErrorRef, (LLVMOrcJITDylibRef, LLVMOrcMaterializationUnitRef), JD, MU)
+end
+
+function LLVMOrcJITDylibClear(JD)
+    ccall((:LLVMOrcJITDylibClear, libllvm[]), LLVMErrorRef, (LLVMOrcJITDylibRef,), JD)
+end
+
+function LLVMOrcJITDylibAddGenerator(JD, DG)
+    ccall((:LLVMOrcJITDylibAddGenerator, libllvm[]), Cvoid, (LLVMOrcJITDylibRef, LLVMOrcDefinitionGeneratorRef), JD, DG)
+end
+
+function LLVMOrcCreateCustomCAPIDefinitionGenerator(F, Ctx)
+    ccall((:LLVMOrcCreateCustomCAPIDefinitionGenerator, libllvm[]), LLVMOrcDefinitionGeneratorRef, (LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction, Ptr{Cvoid}), F, Ctx)
+end
+
+function LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess(Result, GlobalPrefx, Filter, FilterCtx)
+    ccall((:LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess, libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcDefinitionGeneratorRef}, Cchar, LLVMOrcSymbolPredicate, Ptr{Cvoid}), Result, GlobalPrefx, Filter, FilterCtx)
+end
+
+function LLVMOrcCreateNewThreadSafeContext()
+    ccall((:LLVMOrcCreateNewThreadSafeContext, libllvm[]), LLVMOrcThreadSafeContextRef, ())
+end
+
+function LLVMOrcThreadSafeContextGetContext(TSCtx)
+    ccall((:LLVMOrcThreadSafeContextGetContext, libllvm[]), LLVMContextRef, (LLVMOrcThreadSafeContextRef,), TSCtx)
+end
+
+function LLVMOrcDisposeThreadSafeContext(TSCtx)
+    ccall((:LLVMOrcDisposeThreadSafeContext, libllvm[]), Cvoid, (LLVMOrcThreadSafeContextRef,), TSCtx)
+end
+
+function LLVMOrcCreateNewThreadSafeModule(M, TSCtx)
+    ccall((:LLVMOrcCreateNewThreadSafeModule, libllvm[]), LLVMOrcThreadSafeModuleRef, (LLVMModuleRef, LLVMOrcThreadSafeContextRef), M, TSCtx)
+end
+
+function LLVMOrcDisposeThreadSafeModule(TSM)
+    ccall((:LLVMOrcDisposeThreadSafeModule, libllvm[]), Cvoid, (LLVMOrcThreadSafeModuleRef,), TSM)
+end
+
+function LLVMOrcJITTargetMachineBuilderDetectHost(Result)
+    ccall((:LLVMOrcJITTargetMachineBuilderDetectHost, libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcJITTargetMachineBuilderRef},), Result)
+end
+
+function LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(TM)
+    ccall((:LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine, libllvm[]), LLVMOrcJITTargetMachineBuilderRef, (LLVMTargetMachineRef,), TM)
+end
+
+function LLVMOrcDisposeJITTargetMachineBuilder(JTMB)
+    ccall((:LLVMOrcDisposeJITTargetMachineBuilder, libllvm[]), Cvoid, (LLVMOrcJITTargetMachineBuilderRef,), JTMB)
+end
+
+function LLVMOrcDisposeObjectLayer(ObjLayer)
+    ccall((:LLVMOrcDisposeObjectLayer, libllvm[]), Cvoid, (LLVMOrcObjectLayerRef,), ObjLayer)
+end
+
 function LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager(ES)
     ccall((:LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager, libllvm[]), LLVMOrcObjectLayerRef, (LLVMOrcExecutionSessionRef,), ES)
 end
@@ -5669,221 +5014,886 @@ function LLVMOrcRTDyldObjectLinkingLayerRegisterJITEventListener(RTDyldObjLinkin
     ccall((:LLVMOrcRTDyldObjectLinkingLayerRegisterJITEventListener, libllvm[]), Cvoid, (LLVMOrcObjectLayerRef, LLVMJITEventListenerRef), RTDyldObjLinkingLayer, Listener)
 end
 
-@cenum LLVMVerifierFailureAction::UInt32 begin
-    LLVMAbortProcessAction = 0
-    LLVMPrintMessageAction = 1
-    LLVMReturnStatusAction = 2
+function LLVMAddAggressiveDCEPass(PM)
+    ccall((:LLVMAddAggressiveDCEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMVerifyModule(M, Action, OutMessage)
-    ccall((:LLVMVerifyModule, libllvm[]), LLVMBool, (LLVMModuleRef, LLVMVerifierFailureAction, Ptr{Cstring}), M, Action, OutMessage)
+function LLVMAddDCEPass(PM)
+    ccall((:LLVMAddDCEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMVerifyFunction(Fn, Action)
-    ccall((:LLVMVerifyFunction, libllvm[]), LLVMBool, (LLVMValueRef, LLVMVerifierFailureAction), Fn, Action)
+function LLVMAddBitTrackingDCEPass(PM)
+    ccall((:LLVMAddBitTrackingDCEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMViewFunctionCFG(Fn)
-    ccall((:LLVMViewFunctionCFG, libllvm[]), Cvoid, (LLVMValueRef,), Fn)
+function LLVMAddAlignmentFromAssumptionsPass(PM)
+    ccall((:LLVMAddAlignmentFromAssumptionsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMViewFunctionCFGOnly(Fn)
-    ccall((:LLVMViewFunctionCFGOnly, libllvm[]), Cvoid, (LLVMValueRef,), Fn)
+function LLVMAddCFGSimplificationPass(PM)
+    ccall((:LLVMAddCFGSimplificationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-mutable struct LLVMOpaqueSectionIterator end
-
-const LLVMSectionIteratorRef = Ptr{LLVMOpaqueSectionIterator}
-
-mutable struct LLVMOpaqueSymbolIterator end
-
-const LLVMSymbolIteratorRef = Ptr{LLVMOpaqueSymbolIterator}
-
-mutable struct LLVMOpaqueRelocationIterator end
-
-const LLVMRelocationIteratorRef = Ptr{LLVMOpaqueRelocationIterator}
-
-@cenum LLVMBinaryType::UInt32 begin
-    LLVMBinaryTypeArchive = 0
-    LLVMBinaryTypeMachOUniversalBinary = 1
-    LLVMBinaryTypeCOFFImportFile = 2
-    LLVMBinaryTypeIR = 3
-    LLVMBinaryTypeWinRes = 4
-    LLVMBinaryTypeCOFF = 5
-    LLVMBinaryTypeELF32L = 6
-    LLVMBinaryTypeELF32B = 7
-    LLVMBinaryTypeELF64L = 8
-    LLVMBinaryTypeELF64B = 9
-    LLVMBinaryTypeMachO32L = 10
-    LLVMBinaryTypeMachO32B = 11
-    LLVMBinaryTypeMachO64L = 12
-    LLVMBinaryTypeMachO64B = 13
-    LLVMBinaryTypeWasm = 14
+function LLVMAddDeadStoreEliminationPass(PM)
+    ccall((:LLVMAddDeadStoreEliminationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMCreateBinary(MemBuf, Context, ErrorMessage)
-    ccall((:LLVMCreateBinary, libllvm[]), LLVMBinaryRef, (LLVMMemoryBufferRef, LLVMContextRef, Ptr{Cstring}), MemBuf, Context, ErrorMessage)
+function LLVMAddScalarizerPass(PM)
+    ccall((:LLVMAddScalarizerPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMDisposeBinary(BR)
-    ccall((:LLVMDisposeBinary, libllvm[]), Cvoid, (LLVMBinaryRef,), BR)
+function LLVMAddMergedLoadStoreMotionPass(PM)
+    ccall((:LLVMAddMergedLoadStoreMotionPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMBinaryCopyMemoryBuffer(BR)
-    ccall((:LLVMBinaryCopyMemoryBuffer, libllvm[]), LLVMMemoryBufferRef, (LLVMBinaryRef,), BR)
+function LLVMAddGVNPass(PM)
+    ccall((:LLVMAddGVNPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMBinaryGetType(BR)
-    ccall((:LLVMBinaryGetType, libllvm[]), LLVMBinaryType, (LLVMBinaryRef,), BR)
+function LLVMAddNewGVNPass(PM)
+    ccall((:LLVMAddNewGVNPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMMachOUniversalBinaryCopyObjectForArch(BR, Arch, ArchLen, ErrorMessage)
-    ccall((:LLVMMachOUniversalBinaryCopyObjectForArch, libllvm[]), LLVMBinaryRef, (LLVMBinaryRef, Cstring, Csize_t, Ptr{Cstring}), BR, Arch, ArchLen, ErrorMessage)
+function LLVMAddIndVarSimplifyPass(PM)
+    ccall((:LLVMAddIndVarSimplifyPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMObjectFileCopySectionIterator(BR)
-    ccall((:LLVMObjectFileCopySectionIterator, libllvm[]), LLVMSectionIteratorRef, (LLVMBinaryRef,), BR)
+function LLVMAddInstructionSimplifyPass(PM)
+    ccall((:LLVMAddInstructionSimplifyPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMObjectFileIsSectionIteratorAtEnd(BR, SI)
-    ccall((:LLVMObjectFileIsSectionIteratorAtEnd, libllvm[]), LLVMBool, (LLVMBinaryRef, LLVMSectionIteratorRef), BR, SI)
+function LLVMAddJumpThreadingPass(PM)
+    ccall((:LLVMAddJumpThreadingPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMObjectFileCopySymbolIterator(BR)
-    ccall((:LLVMObjectFileCopySymbolIterator, libllvm[]), LLVMSymbolIteratorRef, (LLVMBinaryRef,), BR)
+function LLVMAddLICMPass(PM)
+    ccall((:LLVMAddLICMPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMObjectFileIsSymbolIteratorAtEnd(BR, SI)
-    ccall((:LLVMObjectFileIsSymbolIteratorAtEnd, libllvm[]), LLVMBool, (LLVMBinaryRef, LLVMSymbolIteratorRef), BR, SI)
+function LLVMAddLoopDeletionPass(PM)
+    ccall((:LLVMAddLoopDeletionPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMDisposeSectionIterator(SI)
-    ccall((:LLVMDisposeSectionIterator, libllvm[]), Cvoid, (LLVMSectionIteratorRef,), SI)
+function LLVMAddLoopIdiomPass(PM)
+    ccall((:LLVMAddLoopIdiomPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMMoveToNextSection(SI)
-    ccall((:LLVMMoveToNextSection, libllvm[]), Cvoid, (LLVMSectionIteratorRef,), SI)
+function LLVMAddLoopRotatePass(PM)
+    ccall((:LLVMAddLoopRotatePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMMoveToContainingSection(Sect, Sym)
-    ccall((:LLVMMoveToContainingSection, libllvm[]), Cvoid, (LLVMSectionIteratorRef, LLVMSymbolIteratorRef), Sect, Sym)
+function LLVMAddLoopRerollPass(PM)
+    ccall((:LLVMAddLoopRerollPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMDisposeSymbolIterator(SI)
-    ccall((:LLVMDisposeSymbolIterator, libllvm[]), Cvoid, (LLVMSymbolIteratorRef,), SI)
+function LLVMAddLoopUnrollPass(PM)
+    ccall((:LLVMAddLoopUnrollPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMMoveToNextSymbol(SI)
-    ccall((:LLVMMoveToNextSymbol, libllvm[]), Cvoid, (LLVMSymbolIteratorRef,), SI)
+function LLVMAddLoopUnrollAndJamPass(PM)
+    ccall((:LLVMAddLoopUnrollAndJamPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSectionName(SI)
-    ccall((:LLVMGetSectionName, libllvm[]), Cstring, (LLVMSectionIteratorRef,), SI)
+function LLVMAddLoopUnswitchPass(PM)
+    ccall((:LLVMAddLoopUnswitchPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSectionSize(SI)
-    ccall((:LLVMGetSectionSize, libllvm[]), UInt64, (LLVMSectionIteratorRef,), SI)
+function LLVMAddLowerAtomicPass(PM)
+    ccall((:LLVMAddLowerAtomicPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSectionContents(SI)
-    ccall((:LLVMGetSectionContents, libllvm[]), Cstring, (LLVMSectionIteratorRef,), SI)
+function LLVMAddMemCpyOptPass(PM)
+    ccall((:LLVMAddMemCpyOptPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSectionAddress(SI)
-    ccall((:LLVMGetSectionAddress, libllvm[]), UInt64, (LLVMSectionIteratorRef,), SI)
+function LLVMAddPartiallyInlineLibCallsPass(PM)
+    ccall((:LLVMAddPartiallyInlineLibCallsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSectionContainsSymbol(SI, Sym)
-    ccall((:LLVMGetSectionContainsSymbol, libllvm[]), LLVMBool, (LLVMSectionIteratorRef, LLVMSymbolIteratorRef), SI, Sym)
+function LLVMAddReassociatePass(PM)
+    ccall((:LLVMAddReassociatePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetRelocations(Section)
-    ccall((:LLVMGetRelocations, libllvm[]), LLVMRelocationIteratorRef, (LLVMSectionIteratorRef,), Section)
+function LLVMAddSCCPPass(PM)
+    ccall((:LLVMAddSCCPPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMDisposeRelocationIterator(RI)
-    ccall((:LLVMDisposeRelocationIterator, libllvm[]), Cvoid, (LLVMRelocationIteratorRef,), RI)
+function LLVMAddScalarReplAggregatesPass(PM)
+    ccall((:LLVMAddScalarReplAggregatesPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMIsRelocationIteratorAtEnd(Section, RI)
-    ccall((:LLVMIsRelocationIteratorAtEnd, libllvm[]), LLVMBool, (LLVMSectionIteratorRef, LLVMRelocationIteratorRef), Section, RI)
+function LLVMAddScalarReplAggregatesPassSSA(PM)
+    ccall((:LLVMAddScalarReplAggregatesPassSSA, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMMoveToNextRelocation(RI)
-    ccall((:LLVMMoveToNextRelocation, libllvm[]), Cvoid, (LLVMRelocationIteratorRef,), RI)
+function LLVMAddScalarReplAggregatesPassWithThreshold(PM, Threshold)
+    ccall((:LLVMAddScalarReplAggregatesPassWithThreshold, libllvm[]), Cvoid, (LLVMPassManagerRef, Cint), PM, Threshold)
 end
 
-function LLVMGetSymbolName(SI)
-    ccall((:LLVMGetSymbolName, libllvm[]), Cstring, (LLVMSymbolIteratorRef,), SI)
+function LLVMAddSimplifyLibCallsPass(PM)
+    ccall((:LLVMAddSimplifyLibCallsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSymbolAddress(SI)
-    ccall((:LLVMGetSymbolAddress, libllvm[]), UInt64, (LLVMSymbolIteratorRef,), SI)
+function LLVMAddTailCallEliminationPass(PM)
+    ccall((:LLVMAddTailCallEliminationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSymbolSize(SI)
-    ccall((:LLVMGetSymbolSize, libllvm[]), UInt64, (LLVMSymbolIteratorRef,), SI)
+function LLVMAddDemoteMemoryToRegisterPass(PM)
+    ccall((:LLVMAddDemoteMemoryToRegisterPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetRelocationOffset(RI)
-    ccall((:LLVMGetRelocationOffset, libllvm[]), UInt64, (LLVMRelocationIteratorRef,), RI)
+function LLVMAddVerifierPass(PM)
+    ccall((:LLVMAddVerifierPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetRelocationSymbol(RI)
-    ccall((:LLVMGetRelocationSymbol, libllvm[]), LLVMSymbolIteratorRef, (LLVMRelocationIteratorRef,), RI)
+function LLVMAddCorrelatedValuePropagationPass(PM)
+    ccall((:LLVMAddCorrelatedValuePropagationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetRelocationType(RI)
-    ccall((:LLVMGetRelocationType, libllvm[]), UInt64, (LLVMRelocationIteratorRef,), RI)
+function LLVMAddEarlyCSEPass(PM)
+    ccall((:LLVMAddEarlyCSEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetRelocationTypeName(RI)
-    ccall((:LLVMGetRelocationTypeName, libllvm[]), Cstring, (LLVMRelocationIteratorRef,), RI)
+function LLVMAddEarlyCSEMemSSAPass(PM)
+    ccall((:LLVMAddEarlyCSEMemSSAPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetRelocationValueString(RI)
-    ccall((:LLVMGetRelocationValueString, libllvm[]), Cstring, (LLVMRelocationIteratorRef,), RI)
+function LLVMAddLowerExpectIntrinsicPass(PM)
+    ccall((:LLVMAddLowerExpectIntrinsicPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-mutable struct LLVMOpaqueObjectFile end
-
-const LLVMObjectFileRef = Ptr{LLVMOpaqueObjectFile}
-
-function LLVMCreateObjectFile(MemBuf)
-    ccall((:LLVMCreateObjectFile, libllvm[]), LLVMObjectFileRef, (LLVMMemoryBufferRef,), MemBuf)
+function LLVMAddLowerConstantIntrinsicsPass(PM)
+    ccall((:LLVMAddLowerConstantIntrinsicsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMDisposeObjectFile(ObjectFile)
-    ccall((:LLVMDisposeObjectFile, libllvm[]), Cvoid, (LLVMObjectFileRef,), ObjectFile)
+function LLVMAddTypeBasedAliasAnalysisPass(PM)
+    ccall((:LLVMAddTypeBasedAliasAnalysisPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSections(ObjectFile)
-    ccall((:LLVMGetSections, libllvm[]), LLVMSectionIteratorRef, (LLVMObjectFileRef,), ObjectFile)
+function LLVMAddScopedNoAliasAAPass(PM)
+    ccall((:LLVMAddScopedNoAliasAAPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMIsSectionIteratorAtEnd(ObjectFile, SI)
-    ccall((:LLVMIsSectionIteratorAtEnd, libllvm[]), LLVMBool, (LLVMObjectFileRef, LLVMSectionIteratorRef), ObjectFile, SI)
+function LLVMAddBasicAliasAnalysisPass(PM)
+    ccall((:LLVMAddBasicAliasAnalysisPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMGetSymbols(ObjectFile)
-    ccall((:LLVMGetSymbols, libllvm[]), LLVMSymbolIteratorRef, (LLVMObjectFileRef,), ObjectFile)
+function LLVMAddUnifyFunctionExitNodesPass(PM)
+    ccall((:LLVMAddUnifyFunctionExitNodesPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMIsSymbolIteratorAtEnd(ObjectFile, SI)
-    ccall((:LLVMIsSymbolIteratorAtEnd, libllvm[]), LLVMBool, (LLVMObjectFileRef, LLVMSymbolIteratorRef), ObjectFile, SI)
+function LLVMAddArgumentPromotionPass(PM)
+    ccall((:LLVMAddArgumentPromotionPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-const LTO_API_VERSION = 27
+function LLVMAddConstantMergePass(PM)
+    ccall((:LLVMAddConstantMergePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
 
-const LLVMErrorSuccess = 0
+function LLVMAddMergeFunctionsPass(PM)
+    ccall((:LLVMAddMergeFunctionsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
 
-const LLVM_DEFAULT_TARGET_TRIPLE = "x86_64-linux-gnu"
+function LLVMAddCalledValuePropagationPass(PM)
+    ccall((:LLVMAddCalledValuePropagationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddDeadArgEliminationPass(PM)
+    ccall((:LLVMAddDeadArgEliminationPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddFunctionAttrsPass(PM)
+    ccall((:LLVMAddFunctionAttrsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddFunctionInliningPass(PM)
+    ccall((:LLVMAddFunctionInliningPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddAlwaysInlinerPass(PM)
+    ccall((:LLVMAddAlwaysInlinerPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddGlobalDCEPass(PM)
+    ccall((:LLVMAddGlobalDCEPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddGlobalOptimizerPass(PM)
+    ccall((:LLVMAddGlobalOptimizerPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddPruneEHPass(PM)
+    ccall((:LLVMAddPruneEHPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddIPSCCPPass(PM)
+    ccall((:LLVMAddIPSCCPPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddInternalizePass(arg1, AllButMain)
+    ccall((:LLVMAddInternalizePass, libllvm[]), Cvoid, (LLVMPassManagerRef, Cuint), arg1, AllButMain)
+end
+
+function LLVMAddInternalizePassWithMustPreservePredicate(PM, Context, MustPreserve)
+    ccall((:LLVMAddInternalizePassWithMustPreservePredicate, libllvm[]), Cvoid, (LLVMPassManagerRef, Ptr{Cvoid}, Ptr{Cvoid}), PM, Context, MustPreserve)
+end
+
+function LLVMAddStripDeadPrototypesPass(PM)
+    ccall((:LLVMAddStripDeadPrototypesPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddStripSymbolsPass(PM)
+    ccall((:LLVMAddStripSymbolsPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+@cenum LLVMComdatSelectionKind::UInt32 begin
+    LLVMAnyComdatSelectionKind = 0
+    LLVMExactMatchComdatSelectionKind = 1
+    LLVMLargestComdatSelectionKind = 2
+    LLVMNoDuplicatesComdatSelectionKind = 3
+    LLVMSameSizeComdatSelectionKind = 4
+end
+
+function LLVMGetOrInsertComdat(M, Name)
+    ccall((:LLVMGetOrInsertComdat, libllvm[]), LLVMComdatRef, (LLVMModuleRef, Cstring), M, Name)
+end
+
+function LLVMGetComdat(V)
+    ccall((:LLVMGetComdat, libllvm[]), LLVMComdatRef, (LLVMValueRef,), V)
+end
+
+function LLVMSetComdat(V, C)
+    ccall((:LLVMSetComdat, libllvm[]), Cvoid, (LLVMValueRef, LLVMComdatRef), V, C)
+end
+
+function LLVMGetComdatSelectionKind(C)
+    ccall((:LLVMGetComdatSelectionKind, libllvm[]), LLVMComdatSelectionKind, (LLVMComdatRef,), C)
+end
+
+function LLVMSetComdatSelectionKind(C, Kind)
+    ccall((:LLVMSetComdatSelectionKind, libllvm[]), Cvoid, (LLVMComdatRef, LLVMComdatSelectionKind), C, Kind)
+end
+
+function LLVMParseBitcode(MemBuf, OutModule, OutMessage)
+    ccall((:LLVMParseBitcode, libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), MemBuf, OutModule, OutMessage)
+end
+
+function LLVMParseBitcode2(MemBuf, OutModule)
+    ccall((:LLVMParseBitcode2, libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutModule)
+end
+
+function LLVMParseBitcodeInContext(ContextRef, MemBuf, OutModule, OutMessage)
+    ccall((:LLVMParseBitcodeInContext, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutModule, OutMessage)
+end
+
+function LLVMParseBitcodeInContext2(ContextRef, MemBuf, OutModule)
+    ccall((:LLVMParseBitcodeInContext2, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), ContextRef, MemBuf, OutModule)
+end
+
+function LLVMGetBitcodeModuleInContext(ContextRef, MemBuf, OutM, OutMessage)
+    ccall((:LLVMGetBitcodeModuleInContext, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
+end
+
+function LLVMGetBitcodeModuleInContext2(ContextRef, MemBuf, OutM)
+    ccall((:LLVMGetBitcodeModuleInContext2, libllvm[]), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), ContextRef, MemBuf, OutM)
+end
+
+function LLVMGetBitcodeModule(MemBuf, OutM, OutMessage)
+    ccall((:LLVMGetBitcodeModule, libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), MemBuf, OutM, OutMessage)
+end
+
+function LLVMGetBitcodeModule2(MemBuf, OutM)
+    ccall((:LLVMGetBitcodeModule2, libllvm[]), LLVMBool, (LLVMMemoryBufferRef, Ptr{LLVMModuleRef}), MemBuf, OutM)
+end
+
+const LLVMDisasmContextRef = Ptr{Cvoid}
+
+# typedef int ( * LLVMOpInfoCallback ) ( void * DisInfo , uint64_t PC , uint64_t Offset , uint64_t Size , int TagType , void * TagBuf )
+const LLVMOpInfoCallback = Ptr{Cvoid}
+
+struct LLVMOpInfoSymbol1
+    Present::UInt64
+    Name::Cstring
+    Value::UInt64
+end
+
+struct LLVMOpInfo1
+    AddSymbol::LLVMOpInfoSymbol1
+    SubtractSymbol::LLVMOpInfoSymbol1
+    Value::UInt64
+    VariantKind::UInt64
+end
+
+# typedef const char * ( * LLVMSymbolLookupCallback ) ( void * DisInfo , uint64_t ReferenceValue , uint64_t * ReferenceType , uint64_t ReferencePC , const char * * ReferenceName )
+const LLVMSymbolLookupCallback = Ptr{Cvoid}
+
+function LLVMCreateDisasm(TripleName, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+    ccall((:LLVMCreateDisasm, libllvm[]), LLVMDisasmContextRef, (Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), TripleName, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+end
+
+function LLVMCreateDisasmCPU(Triple, CPU, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+    ccall((:LLVMCreateDisasmCPU, libllvm[]), LLVMDisasmContextRef, (Cstring, Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), Triple, CPU, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+end
+
+function LLVMCreateDisasmCPUFeatures(Triple, CPU, Features, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+    ccall((:LLVMCreateDisasmCPUFeatures, libllvm[]), LLVMDisasmContextRef, (Cstring, Cstring, Cstring, Ptr{Cvoid}, Cint, LLVMOpInfoCallback, LLVMSymbolLookupCallback), Triple, CPU, Features, DisInfo, TagType, GetOpInfo, SymbolLookUp)
+end
+
+function LLVMSetDisasmOptions(DC, Options)
+    ccall((:LLVMSetDisasmOptions, libllvm[]), Cint, (LLVMDisasmContextRef, UInt64), DC, Options)
+end
+
+function LLVMDisasmDispose(DC)
+    ccall((:LLVMDisasmDispose, libllvm[]), Cvoid, (LLVMDisasmContextRef,), DC)
+end
+
+function LLVMDisasmInstruction(DC, Bytes, BytesSize, PC, OutString, OutStringSize)
+    ccall((:LLVMDisasmInstruction, libllvm[]), Csize_t, (LLVMDisasmContextRef, Ptr{UInt8}, UInt64, UInt64, Cstring, Csize_t), DC, Bytes, BytesSize, PC, OutString, OutStringSize)
+end
+
+# typedef LLVMOrcObjectLayerRef ( * LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction ) ( void * Ctx , LLVMOrcExecutionSessionRef ES , const char * Triple )
+const LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction = Ptr{Cvoid}
+
+mutable struct LLVMOrcOpaqueLLJITBuilder end
+
+const LLVMOrcLLJITBuilderRef = Ptr{LLVMOrcOpaqueLLJITBuilder}
+
+mutable struct LLVMOrcOpaqueLLJIT end
+
+const LLVMOrcLLJITRef = Ptr{LLVMOrcOpaqueLLJIT}
+
+function LLVMOrcCreateLLJITBuilder()
+    ccall((:LLVMOrcCreateLLJITBuilder, libllvm[]), LLVMOrcLLJITBuilderRef, ())
+end
+
+function LLVMOrcDisposeLLJITBuilder(Builder)
+    ccall((:LLVMOrcDisposeLLJITBuilder, libllvm[]), Cvoid, (LLVMOrcLLJITBuilderRef,), Builder)
+end
+
+function LLVMOrcLLJITBuilderSetJITTargetMachineBuilder(Builder, JTMB)
+    ccall((:LLVMOrcLLJITBuilderSetJITTargetMachineBuilder, libllvm[]), Cvoid, (LLVMOrcLLJITBuilderRef, LLVMOrcJITTargetMachineBuilderRef), Builder, JTMB)
+end
+
+function LLVMOrcLLJITBuilderSetObjectLinkingLayerCreator(Builder, F, Ctx)
+    ccall((:LLVMOrcLLJITBuilderSetObjectLinkingLayerCreator, libllvm[]), Cvoid, (LLVMOrcLLJITBuilderRef, LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction, Ptr{Cvoid}), Builder, F, Ctx)
+end
+
+function LLVMOrcCreateLLJIT(Result, Builder)
+    ccall((:LLVMOrcCreateLLJIT, libllvm[]), LLVMErrorRef, (Ptr{LLVMOrcLLJITRef}, LLVMOrcLLJITBuilderRef), Result, Builder)
+end
+
+function LLVMOrcDisposeLLJIT(J)
+    ccall((:LLVMOrcDisposeLLJIT, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITGetExecutionSession(J)
+    ccall((:LLVMOrcLLJITGetExecutionSession, libllvm[]), LLVMOrcExecutionSessionRef, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITGetMainJITDylib(J)
+    ccall((:LLVMOrcLLJITGetMainJITDylib, libllvm[]), LLVMOrcJITDylibRef, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITGetTripleString(J)
+    ccall((:LLVMOrcLLJITGetTripleString, libllvm[]), Cstring, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITGetGlobalPrefix(J)
+    ccall((:LLVMOrcLLJITGetGlobalPrefix, libllvm[]), Cchar, (LLVMOrcLLJITRef,), J)
+end
+
+function LLVMOrcLLJITMangleAndIntern(J, UnmangledName)
+    ccall((:LLVMOrcLLJITMangleAndIntern, libllvm[]), LLVMOrcSymbolStringPoolEntryRef, (LLVMOrcLLJITRef, Cstring), J, UnmangledName)
+end
+
+function LLVMOrcLLJITAddObjectFile(J, JD, ObjBuffer)
+    ccall((:LLVMOrcLLJITAddObjectFile, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcJITDylibRef, LLVMMemoryBufferRef), J, JD, ObjBuffer)
+end
+
+function LLVMOrcLLJITAddObjectFileWithRT(J, RT, ObjBuffer)
+    ccall((:LLVMOrcLLJITAddObjectFileWithRT, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcResourceTrackerRef, LLVMMemoryBufferRef), J, RT, ObjBuffer)
+end
+
+function LLVMOrcLLJITAddLLVMIRModule(J, JD, TSM)
+    ccall((:LLVMOrcLLJITAddLLVMIRModule, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcJITDylibRef, LLVMOrcThreadSafeModuleRef), J, JD, TSM)
+end
+
+function LLVMOrcLLJITAddLLVMIRModuleWithRT(J, JD, TSM)
+    ccall((:LLVMOrcLLJITAddLLVMIRModuleWithRT, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMOrcResourceTrackerRef, LLVMOrcThreadSafeModuleRef), J, JD, TSM)
+end
+
+function LLVMOrcLLJITLookup(J, Result, Name)
+    ccall((:LLVMOrcLLJITLookup, libllvm[]), LLVMErrorRef, (LLVMOrcLLJITRef, Ptr{LLVMOrcJITTargetAddress}, Cstring), J, Result, Name)
+end
+
+function LLVMLoadLibraryPermanently(Filename)
+    ccall((:LLVMLoadLibraryPermanently, libllvm[]), LLVMBool, (Cstring,), Filename)
+end
+
+function LLVMParseCommandLineOptions(argc, argv, Overview)
+    ccall((:LLVMParseCommandLineOptions, libllvm[]), Cvoid, (Cint, Ptr{Cstring}, Cstring), argc, argv, Overview)
+end
+
+function LLVMSearchForAddressOfSymbol(symbolName)
+    ccall((:LLVMSearchForAddressOfSymbol, libllvm[]), Ptr{Cvoid}, (Cstring,), symbolName)
+end
+
+function LLVMAddSymbol(symbolName, symbolValue)
+    ccall((:LLVMAddSymbol, libllvm[]), Cvoid, (Cstring, Ptr{Cvoid}), symbolName, symbolValue)
+end
+
+const lto_bool_t = Bool
+
+@cenum lto_symbol_attributes::UInt32 begin
+    LTO_SYMBOL_ALIGNMENT_MASK = 31
+    LTO_SYMBOL_PERMISSIONS_MASK = 224
+    LTO_SYMBOL_PERMISSIONS_CODE = 160
+    LTO_SYMBOL_PERMISSIONS_DATA = 192
+    LTO_SYMBOL_PERMISSIONS_RODATA = 128
+    LTO_SYMBOL_DEFINITION_MASK = 1792
+    LTO_SYMBOL_DEFINITION_REGULAR = 256
+    LTO_SYMBOL_DEFINITION_TENTATIVE = 512
+    LTO_SYMBOL_DEFINITION_WEAK = 768
+    LTO_SYMBOL_DEFINITION_UNDEFINED = 1024
+    LTO_SYMBOL_DEFINITION_WEAKUNDEF = 1280
+    LTO_SYMBOL_SCOPE_MASK = 14336
+    LTO_SYMBOL_SCOPE_INTERNAL = 2048
+    LTO_SYMBOL_SCOPE_HIDDEN = 4096
+    LTO_SYMBOL_SCOPE_PROTECTED = 8192
+    LTO_SYMBOL_SCOPE_DEFAULT = 6144
+    LTO_SYMBOL_SCOPE_DEFAULT_CAN_BE_HIDDEN = 10240
+    LTO_SYMBOL_COMDAT = 16384
+    LTO_SYMBOL_ALIAS = 32768
+end
+
+@cenum lto_debug_model::UInt32 begin
+    LTO_DEBUG_MODEL_NONE = 0
+    LTO_DEBUG_MODEL_DWARF = 1
+end
+
+@cenum lto_codegen_model::UInt32 begin
+    LTO_CODEGEN_PIC_MODEL_STATIC = 0
+    LTO_CODEGEN_PIC_MODEL_DYNAMIC = 1
+    LTO_CODEGEN_PIC_MODEL_DYNAMIC_NO_PIC = 2
+    LTO_CODEGEN_PIC_MODEL_DEFAULT = 3
+end
+
+mutable struct LLVMOpaqueLTOModule end
+
+const lto_module_t = Ptr{LLVMOpaqueLTOModule}
+
+mutable struct LLVMOpaqueLTOCodeGenerator end
+
+const lto_code_gen_t = Ptr{LLVMOpaqueLTOCodeGenerator}
+
+mutable struct LLVMOpaqueThinLTOCodeGenerator end
+
+const thinlto_code_gen_t = Ptr{LLVMOpaqueThinLTOCodeGenerator}
+
+function lto_get_version()
+    ccall((:lto_get_version, libllvm[]), Cstring, ())
+end
+
+function lto_get_error_message()
+    ccall((:lto_get_error_message, libllvm[]), Cstring, ())
+end
+
+function lto_module_is_object_file(path)
+    ccall((:lto_module_is_object_file, libllvm[]), lto_bool_t, (Cstring,), path)
+end
+
+function lto_module_is_object_file_for_target(path, target_triple_prefix)
+    ccall((:lto_module_is_object_file_for_target, libllvm[]), lto_bool_t, (Cstring, Cstring), path, target_triple_prefix)
+end
+
+function lto_module_has_objc_category(mem, length)
+    ccall((:lto_module_has_objc_category, libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t), mem, length)
+end
+
+function lto_module_is_object_file_in_memory(mem, length)
+    ccall((:lto_module_is_object_file_in_memory, libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t), mem, length)
+end
+
+function lto_module_is_object_file_in_memory_for_target(mem, length, target_triple_prefix)
+    ccall((:lto_module_is_object_file_in_memory_for_target, libllvm[]), lto_bool_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, target_triple_prefix)
+end
+
+function lto_module_create(path)
+    ccall((:lto_module_create, libllvm[]), lto_module_t, (Cstring,), path)
+end
+
+function lto_module_create_from_memory(mem, length)
+    ccall((:lto_module_create_from_memory, libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t), mem, length)
+end
+
+function lto_module_create_from_memory_with_path(mem, length, path)
+    ccall((:lto_module_create_from_memory_with_path, libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, path)
+end
+
+function lto_module_create_in_local_context(mem, length, path)
+    ccall((:lto_module_create_in_local_context, libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring), mem, length, path)
+end
+
+function lto_module_create_in_codegen_context(mem, length, path, cg)
+    ccall((:lto_module_create_in_codegen_context, libllvm[]), lto_module_t, (Ptr{Cvoid}, Csize_t, Cstring, lto_code_gen_t), mem, length, path, cg)
+end
+
+function lto_module_create_from_fd(fd, path, file_size)
+    ccall((:lto_module_create_from_fd, libllvm[]), lto_module_t, (Cint, Cstring, Csize_t), fd, path, file_size)
+end
+
+function lto_module_create_from_fd_at_offset(fd, path, file_size, map_size, offset)
+    ccall((:lto_module_create_from_fd_at_offset, libllvm[]), lto_module_t, (Cint, Cstring, Csize_t, Csize_t, off_t), fd, path, file_size, map_size, offset)
+end
+
+function lto_module_dispose(mod)
+    ccall((:lto_module_dispose, libllvm[]), Cvoid, (lto_module_t,), mod)
+end
+
+function lto_module_get_target_triple(mod)
+    ccall((:lto_module_get_target_triple, libllvm[]), Cstring, (lto_module_t,), mod)
+end
+
+function lto_module_set_target_triple(mod, triple)
+    ccall((:lto_module_set_target_triple, libllvm[]), Cvoid, (lto_module_t, Cstring), mod, triple)
+end
+
+function lto_module_get_num_symbols(mod)
+    ccall((:lto_module_get_num_symbols, libllvm[]), Cuint, (lto_module_t,), mod)
+end
+
+function lto_module_get_symbol_name(mod, index)
+    ccall((:lto_module_get_symbol_name, libllvm[]), Cstring, (lto_module_t, Cuint), mod, index)
+end
+
+function lto_module_get_symbol_attribute(mod, index)
+    ccall((:lto_module_get_symbol_attribute, libllvm[]), lto_symbol_attributes, (lto_module_t, Cuint), mod, index)
+end
+
+function lto_module_get_linkeropts(mod)
+    ccall((:lto_module_get_linkeropts, libllvm[]), Cstring, (lto_module_t,), mod)
+end
+
+function lto_module_get_macho_cputype(mod, out_cputype, out_cpusubtype)
+    ccall((:lto_module_get_macho_cputype, libllvm[]), lto_bool_t, (lto_module_t, Ptr{Cuint}, Ptr{Cuint}), mod, out_cputype, out_cpusubtype)
+end
+
+@cenum lto_codegen_diagnostic_severity_t::UInt32 begin
+    LTO_DS_ERROR = 0
+    LTO_DS_WARNING = 1
+    LTO_DS_REMARK = 3
+    LTO_DS_NOTE = 2
+end
+
+# typedef void ( * lto_diagnostic_handler_t ) ( lto_codegen_diagnostic_severity_t severity , const char * diag , void * ctxt )
+const lto_diagnostic_handler_t = Ptr{Cvoid}
+
+function lto_codegen_set_diagnostic_handler(arg1, arg2, arg3)
+    ccall((:lto_codegen_set_diagnostic_handler, libllvm[]), Cvoid, (lto_code_gen_t, lto_diagnostic_handler_t, Ptr{Cvoid}), arg1, arg2, arg3)
+end
+
+function lto_codegen_create()
+    ccall((:lto_codegen_create, libllvm[]), lto_code_gen_t, ())
+end
+
+function lto_codegen_create_in_local_context()
+    ccall((:lto_codegen_create_in_local_context, libllvm[]), lto_code_gen_t, ())
+end
+
+function lto_codegen_dispose(arg1)
+    ccall((:lto_codegen_dispose, libllvm[]), Cvoid, (lto_code_gen_t,), arg1)
+end
+
+function lto_codegen_add_module(cg, mod)
+    ccall((:lto_codegen_add_module, libllvm[]), lto_bool_t, (lto_code_gen_t, lto_module_t), cg, mod)
+end
+
+function lto_codegen_set_module(cg, mod)
+    ccall((:lto_codegen_set_module, libllvm[]), Cvoid, (lto_code_gen_t, lto_module_t), cg, mod)
+end
+
+function lto_codegen_set_debug_model(cg, arg2)
+    ccall((:lto_codegen_set_debug_model, libllvm[]), lto_bool_t, (lto_code_gen_t, lto_debug_model), cg, arg2)
+end
+
+function lto_codegen_set_pic_model(cg, arg2)
+    ccall((:lto_codegen_set_pic_model, libllvm[]), lto_bool_t, (lto_code_gen_t, lto_codegen_model), cg, arg2)
+end
+
+function lto_codegen_set_cpu(cg, cpu)
+    ccall((:lto_codegen_set_cpu, libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, cpu)
+end
+
+function lto_codegen_set_assembler_path(cg, path)
+    ccall((:lto_codegen_set_assembler_path, libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, path)
+end
+
+function lto_codegen_set_assembler_args(cg, args, nargs)
+    ccall((:lto_codegen_set_assembler_args, libllvm[]), Cvoid, (lto_code_gen_t, Ptr{Cstring}, Cint), cg, args, nargs)
+end
+
+function lto_codegen_add_must_preserve_symbol(cg, symbol)
+    ccall((:lto_codegen_add_must_preserve_symbol, libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, symbol)
+end
+
+function lto_codegen_write_merged_modules(cg, path)
+    ccall((:lto_codegen_write_merged_modules, libllvm[]), lto_bool_t, (lto_code_gen_t, Cstring), cg, path)
+end
+
+function lto_codegen_compile(cg, length)
+    ccall((:lto_codegen_compile, libllvm[]), Ptr{Cvoid}, (lto_code_gen_t, Ptr{Csize_t}), cg, length)
+end
+
+function lto_codegen_compile_to_file(cg, name)
+    ccall((:lto_codegen_compile_to_file, libllvm[]), lto_bool_t, (lto_code_gen_t, Ptr{Cstring}), cg, name)
+end
+
+function lto_codegen_optimize(cg)
+    ccall((:lto_codegen_optimize, libllvm[]), lto_bool_t, (lto_code_gen_t,), cg)
+end
+
+function lto_codegen_compile_optimized(cg, length)
+    ccall((:lto_codegen_compile_optimized, libllvm[]), Ptr{Cvoid}, (lto_code_gen_t, Ptr{Csize_t}), cg, length)
+end
+
+function lto_api_version()
+    ccall((:lto_api_version, libllvm[]), Cuint, ())
+end
+
+function lto_codegen_debug_options(cg, arg2)
+    ccall((:lto_codegen_debug_options, libllvm[]), Cvoid, (lto_code_gen_t, Cstring), cg, arg2)
+end
+
+function lto_codegen_debug_options_array(cg, arg2, number)
+    ccall((:lto_codegen_debug_options_array, libllvm[]), Cvoid, (lto_code_gen_t, Ptr{Cstring}, Cint), cg, arg2, number)
+end
+
+function lto_initialize_disassembler()
+    ccall((:lto_initialize_disassembler, libllvm[]), Cvoid, ())
+end
+
+function lto_codegen_set_should_internalize(cg, ShouldInternalize)
+    ccall((:lto_codegen_set_should_internalize, libllvm[]), Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldInternalize)
+end
+
+function lto_codegen_set_should_embed_uselists(cg, ShouldEmbedUselists)
+    ccall((:lto_codegen_set_should_embed_uselists, libllvm[]), Cvoid, (lto_code_gen_t, lto_bool_t), cg, ShouldEmbedUselists)
+end
+
+mutable struct LLVMOpaqueLTOInput end
+
+const lto_input_t = Ptr{LLVMOpaqueLTOInput}
+
+function lto_input_create(buffer, buffer_size, path)
+    ccall((:lto_input_create, libllvm[]), lto_input_t, (Ptr{Cvoid}, Csize_t, Cstring), buffer, buffer_size, path)
+end
+
+function lto_input_dispose(input)
+    ccall((:lto_input_dispose, libllvm[]), Cvoid, (lto_input_t,), input)
+end
+
+function lto_input_get_num_dependent_libraries(input)
+    ccall((:lto_input_get_num_dependent_libraries, libllvm[]), Cuint, (lto_input_t,), input)
+end
+
+function lto_input_get_dependent_library(input, index, size)
+    ccall((:lto_input_get_dependent_library, libllvm[]), Cstring, (lto_input_t, Csize_t, Ptr{Csize_t}), input, index, size)
+end
+
+function lto_runtime_lib_symbols_list(size)
+    ccall((:lto_runtime_lib_symbols_list, libllvm[]), Ptr{Cstring}, (Ptr{Csize_t},), size)
+end
+
+struct LTOObjectBuffer
+    Buffer::Cstring
+    Size::Csize_t
+end
+
+function thinlto_create_codegen()
+    ccall((:thinlto_create_codegen, libllvm[]), thinlto_code_gen_t, ())
+end
+
+function thinlto_codegen_dispose(cg)
+    ccall((:thinlto_codegen_dispose, libllvm[]), Cvoid, (thinlto_code_gen_t,), cg)
+end
+
+function thinlto_codegen_add_module(cg, identifier, data, length)
+    ccall((:thinlto_codegen_add_module, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cstring, Cint), cg, identifier, data, length)
+end
+
+function thinlto_codegen_process(cg)
+    ccall((:thinlto_codegen_process, libllvm[]), Cvoid, (thinlto_code_gen_t,), cg)
+end
+
+function thinlto_module_get_num_objects(cg)
+    ccall((:thinlto_module_get_num_objects, libllvm[]), Cuint, (thinlto_code_gen_t,), cg)
+end
+
+function thinlto_module_get_object(cg, index)
+    ccall((:thinlto_module_get_object, libllvm[]), LTOObjectBuffer, (thinlto_code_gen_t, Cuint), cg, index)
+end
+
+function thinlto_module_get_num_object_files(cg)
+    ccall((:thinlto_module_get_num_object_files, libllvm[]), Cuint, (thinlto_code_gen_t,), cg)
+end
+
+function thinlto_module_get_object_file(cg, index)
+    ccall((:thinlto_module_get_object_file, libllvm[]), Cstring, (thinlto_code_gen_t, Cuint), cg, index)
+end
+
+function thinlto_codegen_set_pic_model(cg, arg2)
+    ccall((:thinlto_codegen_set_pic_model, libllvm[]), lto_bool_t, (thinlto_code_gen_t, lto_codegen_model), cg, arg2)
+end
+
+function thinlto_codegen_set_savetemps_dir(cg, save_temps_dir)
+    ccall((:thinlto_codegen_set_savetemps_dir, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, save_temps_dir)
+end
+
+function thinlto_set_generated_objects_dir(cg, save_temps_dir)
+    ccall((:thinlto_set_generated_objects_dir, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, save_temps_dir)
+end
+
+function thinlto_codegen_set_cpu(cg, cpu)
+    ccall((:thinlto_codegen_set_cpu, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, cpu)
+end
+
+function thinlto_codegen_disable_codegen(cg, disable)
+    ccall((:thinlto_codegen_disable_codegen, libllvm[]), Cvoid, (thinlto_code_gen_t, lto_bool_t), cg, disable)
+end
+
+function thinlto_codegen_set_codegen_only(cg, codegen_only)
+    ccall((:thinlto_codegen_set_codegen_only, libllvm[]), Cvoid, (thinlto_code_gen_t, lto_bool_t), cg, codegen_only)
+end
+
+function thinlto_debug_options(options, number)
+    ccall((:thinlto_debug_options, libllvm[]), Cvoid, (Ptr{Cstring}, Cint), options, number)
+end
+
+function lto_module_is_thinlto(mod)
+    ccall((:lto_module_is_thinlto, libllvm[]), lto_bool_t, (lto_module_t,), mod)
+end
+
+function thinlto_codegen_add_must_preserve_symbol(cg, name, length)
+    ccall((:thinlto_codegen_add_must_preserve_symbol, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cint), cg, name, length)
+end
+
+function thinlto_codegen_add_cross_referenced_symbol(cg, name, length)
+    ccall((:thinlto_codegen_add_cross_referenced_symbol, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring, Cint), cg, name, length)
+end
+
+function thinlto_codegen_set_cache_dir(cg, cache_dir)
+    ccall((:thinlto_codegen_set_cache_dir, libllvm[]), Cvoid, (thinlto_code_gen_t, Cstring), cg, cache_dir)
+end
+
+function thinlto_codegen_set_cache_pruning_interval(cg, interval)
+    ccall((:thinlto_codegen_set_cache_pruning_interval, libllvm[]), Cvoid, (thinlto_code_gen_t, Cint), cg, interval)
+end
+
+function thinlto_codegen_set_final_cache_size_relative_to_available_space(cg, percentage)
+    ccall((:thinlto_codegen_set_final_cache_size_relative_to_available_space, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, percentage)
+end
+
+function thinlto_codegen_set_cache_entry_expiration(cg, expiration)
+    ccall((:thinlto_codegen_set_cache_entry_expiration, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, expiration)
+end
+
+function thinlto_codegen_set_cache_size_bytes(cg, max_size_bytes)
+    ccall((:thinlto_codegen_set_cache_size_bytes, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, max_size_bytes)
+end
+
+function thinlto_codegen_set_cache_size_megabytes(cg, max_size_megabytes)
+    ccall((:thinlto_codegen_set_cache_size_megabytes, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, max_size_megabytes)
+end
+
+function thinlto_codegen_set_cache_size_files(cg, max_size_files)
+    ccall((:thinlto_codegen_set_cache_size_files, libllvm[]), Cvoid, (thinlto_code_gen_t, Cuint), cg, max_size_files)
+end
+
+function LLVMAddLoopVectorizePass(PM)
+    ccall((:LLVMAddLoopVectorizePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddSLPVectorizePass(PM)
+    ccall((:LLVMAddSLPVectorizePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+mutable struct LLVMOpaquePassManagerBuilder end
+
+const LLVMPassManagerBuilderRef = Ptr{LLVMOpaquePassManagerBuilder}
+
+function LLVMPassManagerBuilderCreate()
+    ccall((:LLVMPassManagerBuilderCreate, libllvm[]), LLVMPassManagerBuilderRef, ())
+end
+
+function LLVMPassManagerBuilderDispose(PMB)
+    ccall((:LLVMPassManagerBuilderDispose, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef,), PMB)
+end
+
+function LLVMPassManagerBuilderSetOptLevel(PMB, OptLevel)
+    ccall((:LLVMPassManagerBuilderSetOptLevel, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, OptLevel)
+end
+
+function LLVMPassManagerBuilderSetSizeLevel(PMB, SizeLevel)
+    ccall((:LLVMPassManagerBuilderSetSizeLevel, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, SizeLevel)
+end
+
+function LLVMPassManagerBuilderSetDisableUnitAtATime(PMB, Value)
+    ccall((:LLVMPassManagerBuilderSetDisableUnitAtATime, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+end
+
+function LLVMPassManagerBuilderSetDisableUnrollLoops(PMB, Value)
+    ccall((:LLVMPassManagerBuilderSetDisableUnrollLoops, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+end
+
+function LLVMPassManagerBuilderSetDisableSimplifyLibCalls(PMB, Value)
+    ccall((:LLVMPassManagerBuilderSetDisableSimplifyLibCalls, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+end
+
+function LLVMPassManagerBuilderUseInlinerWithThreshold(PMB, Threshold)
+    ccall((:LLVMPassManagerBuilderUseInlinerWithThreshold, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, Threshold)
+end
+
+function LLVMPassManagerBuilderPopulateFunctionPassManager(PMB, PM)
+    ccall((:LLVMPassManagerBuilderPopulateFunctionPassManager, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
+end
+
+function LLVMPassManagerBuilderPopulateModulePassManager(PMB, PM)
+    ccall((:LLVMPassManagerBuilderPopulateModulePassManager, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
+end
+
+function LLVMPassManagerBuilderPopulateLTOPassManager(PMB, PM, Internalize, RunInliner)
+    ccall((:LLVMPassManagerBuilderPopulateLTOPassManager, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef, LLVMBool, LLVMBool), PMB, PM, Internalize, RunInliner)
+end
+
+function LLVMAddCoroEarlyPass(PM)
+    ccall((:LLVMAddCoroEarlyPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddCoroSplitPass(PM)
+    ccall((:LLVMAddCoroSplitPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddCoroElidePass(PM)
+    ccall((:LLVMAddCoroElidePass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddCoroCleanupPass(PM)
+    ccall((:LLVMAddCoroCleanupPass, libllvm[]), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints(PMB)
+    ccall((:LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints, libllvm[]), Cvoid, (LLVMPassManagerBuilderRef,), PMB)
+end
+
+const REMARKS_API_VERSION = 1
+
+const LLVM_DEFAULT_TARGET_TRIPLE = "x86_64-apple-darwin14"
 
 const LLVM_ENABLE_THREADS = 1
 
 const LLVM_HAS_ATOMICS = 1
 
-const LLVM_HOST_TRIPLE = "x86_64-linux-gnu"
+const LLVM_HOST_TRIPLE = "x86_64-apple-darwin14"
 
 const LLVM_NATIVE_ASMPARSER = LLVMInitializeX86AsmParser
 
@@ -5899,25 +5909,25 @@ const LLVM_NATIVE_TARGETMC = LLVMInitializeX86TargetMC
 
 const LLVM_ON_UNIX = 1
 
-const LLVM_USE_INTEL_JITEVENTS = 1
+const LLVM_USE_INTEL_JITEVENTS = 0
 
 const LLVM_USE_OPROFILE = 0
 
-const LLVM_USE_PERF = 1
+const LLVM_USE_PERF = 0
 
 const LLVM_VERSION_MAJOR = 12
 
 const LLVM_VERSION_MINOR = 0
 
-const LLVM_VERSION_PATCH = 0
+const LLVM_VERSION_PATCH = 1
 
-const LLVM_VERSION_STRING = "12.0.0jl"
+const LLVM_VERSION_STRING = "12.0.1jl"
 
 const LLVM_FORCE_ENABLE_STATS = 0
 
 const LLVM_ENABLE_NEW_PASS_MANAGER = 0
 
-const REMARKS_API_VERSION = 1
+const LLVMErrorSuccess = 0
 
 const LLVMDisassembler_VariantKind_None = 0
 
@@ -5980,4 +5990,6 @@ const LLVMDisassembler_Option_AsmPrinterVariant = 4
 const LLVMDisassembler_Option_SetInstrComments = 8
 
 const LLVMDisassembler_Option_PrintLatency = 16
+
+const LTO_API_VERSION = 27
 
