@@ -7,8 +7,8 @@ using Libdl
 
 ## source code includes
 
-include("util.jl")
 include("base.jl")
+include("version.jl")
 
 const libllvm = Ref{String}()
 
@@ -60,6 +60,7 @@ include("transform.jl")
 include("debuginfo.jl")
 include("dibuilder.jl")
 include("jitevents.jl")
+include("utils.jl")
 
 has_orc_v1() = v"8" <= LLVM.version() < v"12"
 if has_orc_v1()

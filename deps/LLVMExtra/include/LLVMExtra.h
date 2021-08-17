@@ -115,5 +115,21 @@ LLVMTypeRef LLVMGetTypeAttributeValue(LLVMAttributeRef A);
 LLVMBool LLVMIsTypeAttribute(LLVMAttributeRef A);
 #endif
 
+typedef enum {
+  LLVMCloneFunctionChangeTypeLocalChangesOnly = 0,
+  LLVMCloneFunctionChangeTypeGlobalChanges = 1,
+  LLVMCloneFunctionChangeTypeDifferentModule = 2,
+  LLVMCloneFunctionChangeTypeClonedModule = 3
+} LLVMCloneFunctionChangeType;
+
+void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
+                           LLVMValueRef *ValueMap, unsigned ValueMapElements,
+                           LLVMCloneFunctionChangeType Changes,
+                           const char *NameSuffix,
+                           LLVMTypeRef (*TypeMapper)(LLVMTypeRef, void *),
+                           void *TypeMapperData,
+                           LLVMValueRef (*Materializer)(LLVMValueRef, void *),
+                           void *MaterializerData);
+
 LLVM_C_EXTERN_C_END
 #endif
