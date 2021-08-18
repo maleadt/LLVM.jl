@@ -156,29 +156,23 @@ default_dest(switch::Instruction) =
 
 export successors
 
-struct TerminatorSuccessorSet
+struct TerminatorSuccessorSet <: AbstractVector{BasicBlock}
     term::Instruction
 end
 
 successors(term::Instruction) = TerminatorSuccessorSet(term)
 
-Base.eltype(::TerminatorSuccessorSet) = BasicBlock
+Base.size(iter::TerminatorSuccessorSet) = (API.LLVMGetNumSuccessors(iter.term),)
 
-function Base.getindex(iter::TerminatorSuccessorSet, i)
+Base.IndexStyle(::TerminatorSuccessorSet) = IndexLinear()
+
+function Base.getindex(iter::TerminatorSuccessorSet, i::Int)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
     return BasicBlock(API.LLVMGetSuccessor(iter.term, i-1))
 end
 
-Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i) =
+Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i::Int) =
     API.LLVMSetSuccessor(iter.term, i-1, bb)
-
-function Base.iterate(iter::TerminatorSuccessorSet, i=1)
-    i >= length(iter) + 1 ? nothing : (iter[i], i+1)
-end
-
-Base.length(iter::TerminatorSuccessorSet) = API.LLVMGetNumSuccessors(iter.term)
-
-Base.lastindex(iter::TerminatorSuccessorSet) = length(iter)
 
 
 ## phi nodes
@@ -187,15 +181,17 @@ Base.lastindex(iter::TerminatorSuccessorSet) = length(iter)
 
 export PhiIncomingSet
 
-struct PhiIncomingSet
+struct PhiIncomingSet <: AbstractVector{Tuple{Value,BasicBlock}}
     phi::Instruction
 end
 
 incoming(phi::Instruction) = PhiIncomingSet(phi)
 
-Base.eltype(::PhiIncomingSet) = Tuple{Value,BasicBlock}
+Base.size(iter::PhiIncomingSet) = (API.LLVMCountIncoming(iter.phi),)
 
-function Base.getindex(iter::PhiIncomingSet, i)
+Base.IndexStyle(::PhiIncomingSet) = IndexLinear()
+
+function Base.getindex(iter::PhiIncomingSet, i::Int)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
     return tuple(Value(API.LLVMGetIncomingValue(iter.phi, i-1)),
                        BasicBlock(API.LLVMGetIncomingBlock(iter.phi, i-1)))
@@ -203,10 +199,7 @@ end
 
 function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{V, BasicBlock}} where V <: Value)
     vals, blocks = zip(args...)
-    API.LLVMAddIncoming(iter.phi, collect(vals),
-                        collect(blocks), length(args))
+    API.LLVMAddIncoming(iter.phi, collect(vals), collect(blocks), length(args))
 end
 
 Base.push!(iter::PhiIncomingSet, args::Tuple{<:Value, BasicBlock}) = append!(iter, [args])
-
-Base.length(iter::PhiIncomingSet) = API.LLVMCountIncoming(iter.phi)
