@@ -60,7 +60,7 @@
             # we always need to map all arguments
             value_map = Dict{LLVM.Value, LLVM.Value}(
                 old_param => new_param for (old_param, new_param) in
-                                           zip(parameters(f), parameters(new_f)))
+                                            zip(parameters(f), parameters(new_f)))
 
             function type_mapper(typ)
                 if typ == LLVM.Int32Type(ctx)

@@ -41,7 +41,7 @@ function clone(f::Function; value_map::Dict{Value,Value}=Dict{Value,Value}())
     argtypes = LLVMType[]
 
     # The user might be deleting arguments to the function by specifying them in
-    # the VMap.  If so, we need to not add the arguments to the arg ty vector
+    # the VMap. If so, we need to not add the arguments to the arg ty vector
     for arg in parameters(f)
         if !in(arg, keys(value_map))    # Haven't mapped the argument to anything yet?
             push!(argtypes, llvmtype(arg))
@@ -49,11 +49,13 @@ function clone(f::Function; value_map::Dict{Value,Value}=Dict{Value,Value}())
     end
 
     # Create a new function type...
-    fty = FunctionType(return_type(eltype(llvmtype(f))), argtypes)   # TODO: isVarArg
+    vararg = isvararg(eltype(llvmtype(f)))
+    fty = FunctionType(return_type(eltype(llvmtype(f))), argtypes; vararg)
 
     # Create the new function...
     new_f = Function(parent(f), name(f), fty)
-    # TODO: address space, linkage
+    linkage!(new_f, linkage(f))
+    # TODO: address space
 
     # Loop over the arguments, copying the names of the mapped arguments over...
     for (arg, new_arg) in zip(parameters(f), parameters(new_f))
