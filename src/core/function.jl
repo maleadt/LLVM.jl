@@ -10,6 +10,8 @@ identify(::Type{Value}, ::Val{API.LLVMFunctionValueKind}) = Function
 Function(mod::Module, name::String, ft::FunctionType) =
     Function(API.LLVMAddFunction(mod, name, ft))
 
+Base.empty!(f::Function) = API.LLVMFunctionDeleteBody(f)
+
 unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(f)
 
 function personality(f::Function)
