@@ -131,5 +131,7 @@ void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
                            LLVMValueRef (*Materializer)(LLVMValueRef, void *),
                            void *MaterializerData);
 
+void LLVMFunctionDeleteBody(LLVMValueRef Func);
+
 LLVM_C_EXTERN_C_END
 #endif

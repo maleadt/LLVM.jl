@@ -1018,6 +1018,9 @@ LLVM.Module("SomeModule"; ctx) do mod
 
         @test collect(bbs) == [entrybb]
     end
+
+    empty!(fn)
+    @test isempty(blocks(fn))
 end
 end
 

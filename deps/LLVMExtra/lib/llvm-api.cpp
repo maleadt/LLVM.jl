@@ -414,3 +414,7 @@ void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
                     TypeMapper ? &TheTypeRemapper : nullptr,
                     Materializer ? &TheMaterializer : nullptr);
 }
+
+void LLVMFunctionDeleteBody(LLVMValueRef Func) {
+    unwrap<Function>(Func)->deleteBody();
+}
