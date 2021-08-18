@@ -8,6 +8,7 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/GlobalValue.h>
 #include <llvm/IR/Instruction.h>
+#include <llvm/IR/Instructions.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/TargetSelect.h>
@@ -17,6 +18,7 @@
 #if LLVM_VERSION_MAJOR < 12
 #include <llvm/Transforms/Scalar/InstSimplifyPass.h>
 #endif
+#include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
 
 using namespace llvm;
@@ -363,3 +365,52 @@ LLVMBool LLVMIsTypeAttribute(LLVMAttributeRef A) {
   return unwrap(A).isTypeAttribute();
 }
 #endif
+
+class ExternalTypeRemapper : public ValueMapTypeRemapper {
+public:
+  ExternalTypeRemapper(LLVMTypeRef (*fptr)(LLVMTypeRef, void *), void *data)
+      : fptr(fptr), data(data) {}
+
+private:
+  Type *remapType(Type *SrcTy) override {
+    return unwrap(fptr(wrap(SrcTy), data));
+  }
+
+  LLVMTypeRef (*fptr)(LLVMTypeRef, void *);
+  void *data;
+};
+
+class ExternalValueMaterializer : public ValueMaterializer {
+public:
+  ExternalValueMaterializer(LLVMValueRef (*fptr)(LLVMValueRef, void *),
+                            void *data)
+      : fptr(fptr), data(data) {}
+
+private:
+  Value *materialize(Value *V) override { return unwrap(fptr(wrap(V), data)); }
+
+  LLVMValueRef (*fptr)(LLVMValueRef, void *);
+  void *data;
+};
+
+void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
+                           LLVMValueRef *ValueMap, unsigned ValueMapElements,
+                           LLVMCloneFunctionChangeType Changes,
+                           const char *NameSuffix,
+                           LLVMTypeRef (*TypeMapper)(LLVMTypeRef, void *),
+                           void *TypeMapperData,
+                           LLVMValueRef (*Materializer)(LLVMValueRef, void *),
+                           void *MaterializerData) {
+  // NOTE: we ignore returns cloned, and don't return the code info
+  SmallVector<ReturnInst *, 8> Returns;
+
+  ValueToValueMapTy VMap;
+  for (unsigned i = 0; i < ValueMapElements; ++i)
+    VMap[unwrap(ValueMap[2 * i])] = unwrap(ValueMap[2 * i + 1]);
+  ExternalTypeRemapper TheTypeRemapper(TypeMapper, TypeMapperData);
+  ExternalValueMaterializer TheMaterializer(Materializer, MaterializerData);
+  CloneFunctionInto(unwrap<Function>(NewFunc), unwrap<Function>(OldFunc), VMap,
+                    Changes, Returns, NameSuffix, nullptr,
+                    TypeMapper ? &TheTypeRemapper : nullptr,
+                    Materializer ? &TheMaterializer : nullptr);
+}

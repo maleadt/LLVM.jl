@@ -18,7 +18,7 @@ using Test
 #       because the context has been disposed already. avoid that by disabling `dispose`
 LLVM.dispose(::Context) = return
 
-include("util.jl")
+include("helpers.jl")
 
 @testset "types" begin
     @test convert(Bool, LLVM.True) == true
@@ -71,6 +71,7 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 include("debuginfo.jl")
+include("utils.jl")
 if LLVM.has_orc_v1()
     include("orc.jl")
 end

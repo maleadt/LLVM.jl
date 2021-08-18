@@ -323,3 +323,14 @@ function LLVMOrcLLJITApplyDataLayout(J, Mod)
 end
 
 end # version
+
+@cenum LLVMCloneFunctionChangeType::UInt32 begin
+    LLVMCloneFunctionChangeTypeLocalChangesOnly = 0
+    LLVMCloneFunctionChangeTypeGlobalChanges = 1
+    LLVMCloneFunctionChangeTypeDifferentModule = 2
+    LLVMCloneFunctionChangeTypeClonedModule = 3
+end
+
+function LLVMCloneFunctionInto(NewFunc, OldFunc, ValueMap, ValueMapElements, Changes, NameSuffix, TypeMapper, TypeMapperData, Materializer, MaterializerData)
+    ccall((:LLVMCloneFunctionInto, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, LLVMCloneFunctionChangeType, Cstring, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}), NewFunc, OldFunc, ValueMap, ValueMapElements, Changes, NameSuffix, TypeMapper, TypeMapperData, Materializer, MaterializerData)
+end
