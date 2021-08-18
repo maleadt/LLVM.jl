@@ -6,15 +6,17 @@ abstract type User <: Value end
 
 export operands
 
-struct UserOperandSet
+struct UserOperandSet <: AbstractVector{Value}
     user::User
 end
 
 operands(user::User) = UserOperandSet(user)
 
-Base.eltype(::UserOperandSet) = Value
+Base.size(iter::UserOperandSet) = (API.LLVMGetNumOperands(iter.user),)
 
-function Base.getindex(iter::UserOperandSet, i::Integer)   # TODO: otherwise unitrange indexing errors
+Base.IndexStyle(::UserOperandSet) = IndexLinear()
+
+function Base.getindex(iter::UserOperandSet, i::Int)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
     return Value(API.LLVMGetOperand(iter.user, i-1))
 end
@@ -25,7 +27,3 @@ Base.setindex!(iter::UserOperandSet, val::Value, i) =
 function Base.iterate(iter::UserOperandSet, i=1)
     i >= length(iter) + 1 ? nothing : (iter[i], i+1)
 end
-
-Base.length(iter::UserOperandSet) = API.LLVMGetNumOperands(iter.user)
-
-Base.lastindex(iter::UserOperandSet) = length(iter)

@@ -83,15 +83,17 @@ export Argument, parameters
 end
 identify(::Type{Value}, ::Val{API.LLVMArgumentValueKind}) = Argument
 
-struct FunctionParameterSet
+struct FunctionParameterSet <: AbstractVector{Argument}
     f::Function
 end
 
 parameters(f::Function) = FunctionParameterSet(f)
 
-Base.eltype(::FunctionParameterSet) = Argument
+Base.size(iter::FunctionParameterSet) = (API.LLVMCountParams(iter.f),)
 
-function Base.getindex(iter::FunctionParameterSet, i)
+Base.IndexStyle(::FunctionParameterSet) = IndexLinear()
+
+function Base.getindex(iter::FunctionParameterSet, i::Int)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
     return Argument(API.LLVMGetParam(iter.f, i-1))
 end
@@ -100,13 +102,7 @@ function Base.iterate(iter::FunctionParameterSet, state=API.LLVMGetFirstParam(it
     state == C_NULL ? nothing : (Argument(state), API.LLVMGetNextParam(state))
 end
 
-Base.last(iter::FunctionParameterSet) =
-    Argument(API.LLVMGetLastParam(iter.f))
-
-Base.isempty(iter::FunctionParameterSet) =
-    API.LLVMGetLastParam(iter.f) == C_NULL
-
-Base.length(iter::FunctionParameterSet) = API.LLVMCountParams(iter.f)
+Base.last(iter::FunctionParameterSet) = Argument(API.LLVMGetLastParam(iter.f))
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionParameterSet)
@@ -131,11 +127,10 @@ function Base.iterate(iter::FunctionBlockSet, state=API.LLVMGetFirstBasicBlock(i
     state == C_NULL ? nothing : (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
 end
 
-Base.last(iter::FunctionBlockSet) =
-    BasicBlock(API.LLVMGetLastBasicBlock(iter.f))
+Base.first(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetFirstBasicBlock(iter.f))
+Base.last(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetLastBasicBlock(iter.f))
 
-Base.isempty(iter::FunctionBlockSet) =
-    API.LLVMGetLastBasicBlock(iter.f) == C_NULL
+Base.isempty(iter::FunctionBlockSet) = length(iter) == 0
 
 Base.length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(iter.f)
 
