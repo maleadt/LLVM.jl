@@ -19,7 +19,7 @@ abstract type Instruction <: User end
 @checked struct PointerNull <: Constant
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMConstantPointerNullValueKind] = PointerNull
+register(PointerNull, API.LLVMConstantPointerNullValueKind)
 
 PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
 
@@ -27,7 +27,7 @@ PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
 @checked struct UndefValue <: Constant
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMUndefValueValueKind] = UndefValue
+register(UndefValue, API.LLVMUndefValueValueKind)
 
 UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 
@@ -39,7 +39,7 @@ export ConstantInt, ConstantFP
 @checked struct ConstantInt <: Constant
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMConstantIntValueKind] = ConstantInt
+register(ConstantInt, API.LLVMConstantIntValueKind)
 
 # NOTE: fixed set for dispatch, also because we can't rely on sizeof(T)==width(T)
 const WideInteger = Union{Int64, UInt64}
@@ -83,7 +83,7 @@ Base.convert(::Type{Core.Bool}, val::ConstantInt) = convert(Int, val) != 0
 @checked struct ConstantFP <: Constant
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMConstantFPValueKind] = ConstantFP
+register(ConstantFP, API.LLVMConstantFPValueKind)
 
 ConstantFP(typ::FloatingPointType, val::Real) =
     ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
@@ -106,7 +106,7 @@ export ConstantAggregateZero
 @checked struct ConstantAggregateZero <: Constant
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMConstantAggregateZeroValueKind] = ConstantAggregateZero
+register(ConstantAggregateZero, API.LLVMConstantAggregateZeroValueKind)
 
 # array interface
 # FIXME: can we reuse the ::ConstantArray functionality with ConstantAggregateZero values?
@@ -127,8 +127,8 @@ abstract type ConstantAggregate <: Constant end
 @checked struct ConstantArray <: ConstantAggregate
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMConstantArrayValueKind] = ConstantArray
-value_kinds[API.LLVMConstantDataArrayValueKind] = ConstantArray
+register(ConstantArray, API.LLVMConstantArrayValueKind)
+register(ConstantArray, API.LLVMConstantDataArrayValueKind)
 
 ConstantArrayOrAggregateZero(value) = Value(value)::Union{ConstantArray,ConstantAggregateZero}
 
@@ -205,7 +205,7 @@ end
 @checked struct ConstantStruct <: ConstantAggregate
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMConstantStructValueKind] = ConstantStruct
+register(ConstantStruct, API.LLVMConstantStructValueKind)
 
 ConstantStructOrAggregateZero(value) = Value(value)::Union{ConstantStruct,ConstantAggregateZero}
 
@@ -256,7 +256,7 @@ end
 @checked struct ConstantVector <: ConstantAggregate
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMConstantVectorValueKind] = ConstantVector
+register(ConstantVector, API.LLVMConstantVectorValueKind)
 
 
 ## constant expressions
@@ -266,7 +266,7 @@ export ConstantExpr, ConstantAggregate, ConstantArray, ConstantStruct, ConstantV
 @checked struct ConstantExpr <: Constant
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMConstantExprValueKind] = ConstantExpr
+register(ConstantExpr, API.LLVMConstantExprValueKind)
 
 
 ## inline assembly
@@ -274,7 +274,7 @@ value_kinds[API.LLVMConstantExprValueKind] = ConstantExpr
 @checked struct InlineAsm <: Constant
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMInlineAsmValueKind] = InlineAsm
+register(InlineAsm, API.LLVMInlineAsmValueKind)
 
 InlineAsm(typ::FunctionType, asm::String, constraints::String,
           side_effects::Core.Bool, align_stack::Core.Bool=false) =
@@ -352,7 +352,7 @@ export GlobalVariable, unsafe_delete!,
 @checked struct GlobalVariable <: GlobalObject
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMGlobalVariableValueKind] = GlobalVariable
+register(GlobalVariable, API.LLVMGlobalVariableValueKind)
 
 GlobalVariable(mod::Module, typ::LLVMType, name::String) =
     GlobalVariable(API.LLVMAddGlobal(mod, typ, name))

@@ -8,11 +8,15 @@ abstract type Value end
 
 Base.unsafe_convert(::Type{API.LLVMValueRef}, val::Value) = val.ref
 
-const value_kinds = Dict{API.LLVMValueKind, Type{<:Value}}()
+const value_kinds = Vector{Type}(fill(Nothing, typemax(API.LLVMValueKind)+1))
 function identify(::Type{Value}, ref::API.LLVMValueRef)
     kind = API.LLVMGetValueKind(ref)
-    haskey(value_kinds, kind) || error("Unknown value kind $kind")
-    return value_kinds[kind]
+    typ = @inbounds value_kinds[kind+1]
+    typ === Nothing && error("Unknown value kind $kind")
+    return typ
+end
+function register(T::Type{<:Value}, kind::API.LLVMValueKind)
+    value_kinds[kind+1] = T
 end
 
 function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Value

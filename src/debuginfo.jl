@@ -5,7 +5,7 @@ export DILocation
 @checked struct DILocation <: MDNode
     ref::API.LLVMMetadataRef
 end
-metadata_kinds[API.LLVMDILocationMetadataKind] = DILocation
+register(DILocation, API.LLVMDILocationMetadataKind)
 
 line(location::DILocation) = Int(API.LLVMDILocationGetLine(location))
 column(location::DILocation) = Int(API.LLVMDILocationGetColumn(location))
@@ -41,7 +41,7 @@ for var in (:Local, :Global)
         @checked struct $var_name <: DIVariable
             ref::API.LLVMMetadataRef
         end
-        metadata_kinds[API.$var_kind] = $var_name
+        register($var_name, API.$var_kind)
     end
 end
 
@@ -77,7 +77,7 @@ export DIFile
 @checked struct DIFile <: DIScope
     ref::API.LLVMMetadataRef
 end
-metadata_kinds[API.LLVMDIFileMetadataKind] = DIFile
+register(DIFile, API.LLVMDIFileMetadataKind)
 
 function directory(file::DIFile)
     len = Ref{Cuint}()
@@ -111,7 +111,7 @@ for typ in (:Basic, :Derived, :Composite, :Subroutine)
         @checked struct $typ_name <: DIType
             ref::API.LLVMMetadataRef
         end
-        metadata_kinds[API.$typ_kind] = $typ_name
+        register($typ_name, API.$typ_kind)
     end
 end
 
@@ -134,7 +134,7 @@ export DISubProgram
 @checked struct DISubProgram <: DIScope
     ref::API.LLVMMetadataRef
 end
-metadata_kinds[API.LLVMDISubprogramMetadataKind] = DISubProgram
+register(DISubProgram, API.LLVMDISubprogramMetadataKind)
 
 line(subprogram::DISubProgram) = Int(API.LLVMDISubprogramGetLine(subprogram))
 

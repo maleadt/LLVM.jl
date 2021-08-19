@@ -4,13 +4,17 @@ export Instruction, unsafe_delete!,
        predicate_int, predicate_real
 
 # forward definition of Instruction in src/core/value/constant.jl
-value_kinds[API.LLVMInstructionValueKind] = Instruction
+register(Instruction, API.LLVMInstructionValueKind)
 
-const instruction_opcodes = Dict{API.LLVMOpcode, Type{<:Instruction}}()
+const instruction_opcodes = Vector{Type}(fill(Nothing, typemax(API.LLVMOpcode)+1))
 function identify(::Type{Instruction}, ref::API.LLVMValueRef)
     opcode = API.LLVMGetInstructionOpcode(ref)
-    haskey(instruction_opcodes, opcode) || error("Unknown instruction opcode $opcode")
-    return instruction_opcodes[opcode]
+    typ = @inbounds instruction_opcodes[opcode+1]
+    typ === Nothing && error("Unknown type opcode $opcode")
+    return typ
+end
+function register(T::Type{<:Instruction}, opcode::API.LLVMOpcode)
+    instruction_opcodes[opcode+1] = T
 end
 
 function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
@@ -120,7 +124,7 @@ for op in opcodes
         @checked struct $typename <: Instruction
             ref::API.LLVMValueRef
         end
-        instruction_opcodes[API.$enum] = $typename
+        register($typename, API.$enum)
     end
 end
 

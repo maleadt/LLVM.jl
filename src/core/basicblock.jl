@@ -5,7 +5,7 @@ export BasicBlock, unsafe_delete!,
 @checked struct BasicBlock <: Value
     ref::API.LLVMValueRef
 end
-value_kinds[API.LLVMBasicBlockValueKind] = BasicBlock
+register(BasicBlock, API.LLVMBasicBlockValueKind)
 
 BasicBlock(ref::API.LLVMBasicBlockRef) = BasicBlock(API.LLVMBasicBlockAsValue(ref))
 Base.unsafe_convert(::Type{API.LLVMBasicBlockRef}, bb::BasicBlock) = API.LLVMValueAsBasicBlock(bb)
