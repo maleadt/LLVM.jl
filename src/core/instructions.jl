@@ -13,9 +13,9 @@ function identify(::Type{Instruction}, ref::API.LLVMValueRef)
     return instruction_opcodes[opcode]
 end
 
-@inline function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
+function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
-    @static if Base.JLOptions().debug_level >= 2
+    if Base.JLOptions().debug_level >= 2
         T′ = identify(Instruction, ref)
         if T != T′
             error("invalid conversion of $T′ instruction reference to $T")

@@ -10,6 +10,10 @@ using LLVM
 using LLVMExtra_jll
 using Test
 
+if Base.JLOptions().debug_level < 2
+    @warn "It is recommended to run the LLVM.jl test suite with -g2"
+end
+
 @info "Using libLLVMExtra from $(LLVM.API.libLLVMExtra)"
 
 @testset "LLVM" begin

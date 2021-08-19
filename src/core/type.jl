@@ -14,9 +14,9 @@ function identify(::Type{LLVMType}, ref::API.LLVMTypeRef)
     return type_kinds[kind]
 end
 
-@inline function refcheck(::Type{T}, ref::API.LLVMTypeRef) where T<:LLVMType
+function refcheck(::Type{T}, ref::API.LLVMTypeRef) where T<:LLVMType
     ref==C_NULL && throw(UndefRefError())
-    @static if Base.JLOptions().debug_level >= 2
+    if Base.JLOptions().debug_level >= 2
         T′ = identify(LLVMType, ref)
         if T != T′
             error("invalid conversion of $T′ type reference to $T")

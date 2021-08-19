@@ -12,9 +12,9 @@ function identify(::Type{Metadata}, ref::API.LLVMMetadataRef)
     return metadata_kinds[kind]
 end
 
-@inline function refcheck(::Type{T}, ref::API.LLVMMetadataRef) where T<:Metadata
+function refcheck(::Type{T}, ref::API.LLVMMetadataRef) where T<:Metadata
     ref==C_NULL && throw(UndefRefError())
-    @static if Base.JLOptions().debug_level >= 2
+    if Base.JLOptions().debug_level >= 2
         T′ = identify(Metadata, ref)
         if T != T′
             error("invalid conversion of $T′ metadata reference to $T")
