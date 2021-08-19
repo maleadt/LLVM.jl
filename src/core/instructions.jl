@@ -15,9 +15,11 @@ end
 
 @inline function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
-    T′ = identify(Instruction, ref)
-    if T != T′
-        error("invalid conversion of $T′ instruction reference to $T")
+    @static if Base.JLOptions().debug_level >= 2
+        T′ = identify(Instruction, ref)
+        if T != T′
+            error("invalid conversion of $T′ instruction reference to $T")
+        end
     end
 end
 

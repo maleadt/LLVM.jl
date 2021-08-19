@@ -14,9 +14,11 @@ end
 
 @inline function refcheck(::Type{T}, ref::API.LLVMMetadataRef) where T<:Metadata
     ref==C_NULL && throw(UndefRefError())
-    T′ = identify(Metadata, ref)
-    if T != T′
-        error("invalid conversion of $T′ metadata reference to $T")
+    @static if Base.JLOptions().debug_level >= 2
+        T′ = identify(Metadata, ref)
+        if T != T′
+            error("invalid conversion of $T′ metadata reference to $T")
+        end
     end
 end
 
