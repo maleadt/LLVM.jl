@@ -7,15 +7,24 @@ Base.eltype(typ::LLVMType) = Any
 
 Base.unsafe_convert(::Type{API.LLVMTypeRef}, typ::LLVMType) = typ.ref
 
-identify(::Type{LLVMType}, ref::API.LLVMTypeRef) =
-    identify(LLVMType, Val{API.LLVMGetTypeKind(ref)}())
-identify(::Type{LLVMType}, ::Val{K}) where {K} = error("Unknown type kind $K")
+const type_kinds = Vector{Type}(fill(Nothing, typemax(API.LLVMTypeKind)+1))
+function identify(::Type{LLVMType}, ref::API.LLVMTypeRef)
+    kind = API.LLVMGetTypeKind(ref)
+    typ = @inbounds type_kinds[kind+1]
+    typ === Nothing && error("Unknown type kind $kind")
+    return typ
+end
+function register(T::Type{<:LLVMType}, kind::API.LLVMTypeKind)
+    type_kinds[kind+1] = T
+end
 
-@inline function refcheck(::Type{T}, ref::API.LLVMTypeRef) where T<:LLVMType
+function refcheck(::Type{T}, ref::API.LLVMTypeRef) where T<:LLVMType
     ref==C_NULL && throw(UndefRefError())
-    T′ = identify(LLVMType, ref)
-    if T != T′
-        error("invalid conversion of $T′ type reference to $T")
+    if Base.JLOptions().debug_level >= 2
+        T′ = identify(LLVMType, ref)
+        if T != T′
+            error("invalid conversion of $T′ type reference to $T")
+        end
     end
 end
 
@@ -45,7 +54,7 @@ export width
 @checked struct IntegerType <: LLVMType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMIntegerTypeKind}) = IntegerType
+register(IntegerType, API.LLVMIntegerTypeKind)
 
 for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     jl_fname = Symbol(T, :Type)
@@ -79,7 +88,7 @@ for T in [:Half, :Float, :Double]
         @checked struct $api_typename <: FloatingPointType
             ref::API.LLVMTypeRef
         end
-        identify(::Type{LLVMType}, ::Val{API.$enumkind}) = $api_typename
+        register($api_typename, API.$enumkind)
 
         $jl_fname(ctx::Context) =
             $api_typename(API.$(Symbol(api_fname, :InContext))(ctx))
@@ -94,7 +103,7 @@ export isvararg, return_type, parameters
 @checked struct FunctionType <: LLVMType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMFunctionTypeKind}) = FunctionType
+register(FunctionType, API.LLVMFunctionTypeKind)
 
 FunctionType(rettyp::LLVMType, params::Vector{<:LLVMType}=LLVMType[];
              vararg::Core.Bool=false) =
@@ -133,7 +142,7 @@ Base.eltype(typ::SequentialType) = LLVMType(API.LLVMGetElementType(typ))
 @checked struct PointerType <: SequentialType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMPointerTypeKind}) = PointerType
+register(PointerType, API.LLVMPointerTypeKind)
 
 function PointerType(eltyp::LLVMType, addrspace=0)
     return PointerType(API.LLVMPointerType(eltyp, addrspace))
@@ -146,7 +155,7 @@ addrspace(ptrtyp::PointerType) =
 @checked struct ArrayType <: SequentialType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMArrayTypeKind}) = ArrayType
+register(ArrayType, API.LLVMArrayTypeKind)
 
 function ArrayType(eltyp::LLVMType, count)
     return ArrayType(API.LLVMArrayType(eltyp, count))
@@ -160,7 +169,7 @@ Base.isempty(@nospecialize(T::ArrayType)) = length(T) == 0 || isempty(eltype(T))
 @checked struct VectorType <: SequentialType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMVectorTypeKind}) = VectorType
+register(VectorType, API.LLVMVectorTypeKind)
 
 function VectorType(eltyp::LLVMType, count)
     return VectorType(API.LLVMVectorType(eltyp, count))
@@ -176,7 +185,7 @@ export name, ispacked, isopaque, elements!
 @checked struct StructType <: SequentialType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMStructTypeKind}) = StructType
+register(StructType, API.LLVMStructTypeKind)
 
 function StructType(name::String; ctx::Context)
     return StructType(API.LLVMStructCreateNamed(ctx, name))
@@ -237,28 +246,28 @@ end
 @checked struct VoidType <: LLVMType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMVoidTypeKind}) = VoidType
+register(VoidType, API.LLVMVoidTypeKind)
 
 VoidType(ctx::Context) = VoidType(API.LLVMVoidTypeInContext(ctx))
 
 @checked struct LabelType <: LLVMType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMLabelTypeKind}) = LabelType
+register(LabelType, API.LLVMLabelTypeKind)
 
 LabelType(ctx::Context) = LabelType(API.LLVMLabelTypeInContext(ctx))
 
 @checked struct MetadataType <: LLVMType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMMetadataTypeKind}) = MetadataType
+register(MetadataType, API.LLVMMetadataTypeKind)
 
 MetadataType(ctx::Context) = MetadataType(API.LLVMMetadataTypeInContext(ctx))
 
 @checked struct TokenType <: LLVMType
     ref::API.LLVMTypeRef
 end
-identify(::Type{LLVMType}, ::Val{API.LLVMTokenTypeKind}) = TokenType
+register(TokenType, API.LLVMTokenTypeKind)
 
 TokenType(ctx::Context) = TokenType(API.LLVMTokenTypeInContext(ctx))
 

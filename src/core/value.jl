@@ -8,15 +8,24 @@ abstract type Value end
 
 Base.unsafe_convert(::Type{API.LLVMValueRef}, val::Value) = val.ref
 
-identify(::Type{Value}, ref::API.LLVMValueRef) =
-    identify(Value, Val{API.LLVMGetValueKind(ref)}())
-identify(::Type{Value}, ::Val{K}) where {K} = error("Unknown value kind $K")
+const value_kinds = Vector{Type}(fill(Nothing, typemax(API.LLVMValueKind)+1))
+function identify(::Type{Value}, ref::API.LLVMValueRef)
+    kind = API.LLVMGetValueKind(ref)
+    typ = @inbounds value_kinds[kind+1]
+    typ === Nothing && error("Unknown value kind $kind")
+    return typ
+end
+function register(T::Type{<:Value}, kind::API.LLVMValueKind)
+    value_kinds[kind+1] = T
+end
 
-@inline function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Value
+function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Value
     ref==C_NULL && throw(UndefRefError())
-    T′ = identify(Value, ref)
-    if T != T′
-        error("invalid conversion of $T′ value reference to $T")
+    if Base.JLOptions().debug_level >= 2
+        T′ = identify(Value, ref)
+        if T != T′
+            error("invalid conversion of $T′ value reference to $T")
+        end
     end
 end
 

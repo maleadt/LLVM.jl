@@ -5,7 +5,7 @@ export unsafe_delete!,
        entry
 
 # forward declaration of Function in src/core/basicblock.jl
-identify(::Type{Value}, ::Val{API.LLVMFunctionValueKind}) = Function
+register(Function, API.LLVMFunctionValueKind)
 
 Function(mod::Module, name::String, ft::FunctionType) =
     Function(API.LLVMAddFunction(mod, name, ft))
@@ -81,7 +81,7 @@ export Argument, parameters
 @checked struct Argument <: Value
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMArgumentValueKind}) = Argument
+register(Argument, API.LLVMArgumentValueKind)
 
 struct FunctionParameterSet <: AbstractVector{Argument}
     f::Function
@@ -115,24 +115,39 @@ end
 
 export blocks
 
-struct FunctionBlockSet
+struct FunctionBlockSet <: AbstractVector{BasicBlock}
     f::Function
+    cache::Vector{API.LLVMValueRef}
+
+    FunctionBlockSet(f::Function) = new(f, BasicBlock[])
 end
 
 blocks(f::Function) = FunctionBlockSet(f)
 
-Base.eltype(::FunctionBlockSet) = BasicBlock
+Base.size(iter::FunctionBlockSet) = (Int(API.LLVMCountBasicBlocks(iter.f)),)
+
+Base.first(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetFirstBasicBlock(iter.f))
+Base.last(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetLastBasicBlock(iter.f))
 
 function Base.iterate(iter::FunctionBlockSet, state=API.LLVMGetFirstBasicBlock(iter.f))
     state == C_NULL ? nothing : (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
 end
 
-Base.first(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetFirstBasicBlock(iter.f))
-Base.last(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetLastBasicBlock(iter.f))
-
-Base.isempty(iter::FunctionBlockSet) = length(iter) == 0
-
-Base.length(iter::FunctionBlockSet) = API.LLVMCountBasicBlocks(iter.f)
+# provide a random access interface by maintaining a cache of blocks
+function Base.getindex(iter::FunctionBlockSet, i::Int)
+    i <= 0 && throw(BoundsError(iter, i))
+    i == 1 && return first(iter)
+    while i > length(iter.cache)
+        next = if isempty(iter.cache)
+            iterate(iter)
+        else
+            iterate(iter, iter.cache[end])
+        end
+        next === nothing && throw(BoundsError(iter, i))
+        push!(iter.cache, next[2])
+    end
+    return BasicBlock(iter.cache[i-1])
+end
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionBlockSet)

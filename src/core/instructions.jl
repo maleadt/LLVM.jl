@@ -4,17 +4,26 @@ export Instruction, unsafe_delete!,
        predicate_int, predicate_real
 
 # forward definition of Instruction in src/core/value/constant.jl
-identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
+register(Instruction, API.LLVMInstructionValueKind)
 
-identify(::Type{Instruction}, ref::API.LLVMValueRef) =
-    identify(Instruction, Val{API.LLVMGetInstructionOpcode(ref)}())
-identify(::Type{Instruction}, ::Val{K}) where {K} = error("Unknown instruction kind $K")
+const instruction_opcodes = Vector{Type}(fill(Nothing, typemax(API.LLVMOpcode)+1))
+function identify(::Type{Instruction}, ref::API.LLVMValueRef)
+    opcode = API.LLVMGetInstructionOpcode(ref)
+    typ = @inbounds instruction_opcodes[opcode+1]
+    typ === Nothing && error("Unknown type opcode $opcode")
+    return typ
+end
+function register(T::Type{<:Instruction}, opcode::API.LLVMOpcode)
+    instruction_opcodes[opcode+1] = T
+end
 
-@inline function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
+function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
-    T′ = identify(Instruction, ref)
-    if T != T′
-        error("invalid conversion of $T′ instruction reference to $T")
+    if Base.JLOptions().debug_level >= 2
+        T′ = identify(Instruction, ref)
+        if T != T′
+            error("invalid conversion of $T′ instruction reference to $T")
+        end
     end
 end
 
@@ -115,7 +124,7 @@ for op in opcodes
         @checked struct $typename <: Instruction
             ref::API.LLVMValueRef
         end
-        identify(::Type{Instruction}, ::Val{API.$enum}) = $typename
+        register($typename, API.$enum)
     end
 end
 
