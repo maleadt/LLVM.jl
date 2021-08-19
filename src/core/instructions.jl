@@ -4,11 +4,14 @@ export Instruction, unsafe_delete!,
        predicate_int, predicate_real
 
 # forward definition of Instruction in src/core/value/constant.jl
-identify(::Type{Value}, ::Val{API.LLVMInstructionValueKind}) = Instruction
+value_kinds[API.LLVMInstructionValueKind] = Instruction
 
-identify(::Type{Instruction}, ref::API.LLVMValueRef) =
-    identify(Instruction, Val{API.LLVMGetInstructionOpcode(ref)}())
-identify(::Type{Instruction}, ::Val{K}) where {K} = error("Unknown instruction kind $K")
+const instruction_opcodes = Dict{API.LLVMOpcode, Type{<:Instruction}}()
+function identify(::Type{Instruction}, ref::API.LLVMValueRef)
+    opcode = API.LLVMGetInstructionOpcode(ref)
+    haskey(instruction_opcodes, opcode) || error("Unknown instruction opcode $opcode")
+    return instruction_opcodes[opcode]
+end
 
 @inline function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
@@ -115,7 +118,7 @@ for op in opcodes
         @checked struct $typename <: Instruction
             ref::API.LLVMValueRef
         end
-        identify(::Type{Instruction}, ::Val{API.$enum}) = $typename
+        instruction_opcodes[API.$enum] = $typename
     end
 end
 

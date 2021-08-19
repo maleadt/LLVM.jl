@@ -19,7 +19,7 @@ abstract type Instruction <: User end
 @checked struct PointerNull <: Constant
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMConstantPointerNullValueKind}) = PointerNull
+value_kinds[API.LLVMConstantPointerNullValueKind] = PointerNull
 
 PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
 
@@ -27,7 +27,7 @@ PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
 @checked struct UndefValue <: Constant
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMUndefValueValueKind}) = UndefValue
+value_kinds[API.LLVMUndefValueValueKind] = UndefValue
 
 UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 
@@ -39,7 +39,7 @@ export ConstantInt, ConstantFP
 @checked struct ConstantInt <: Constant
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMConstantIntValueKind}) = ConstantInt
+value_kinds[API.LLVMConstantIntValueKind] = ConstantInt
 
 # NOTE: fixed set for dispatch, also because we can't rely on sizeof(T)==width(T)
 const WideInteger = Union{Int64, UInt64}
@@ -83,7 +83,7 @@ Base.convert(::Type{Core.Bool}, val::ConstantInt) = convert(Int, val) != 0
 @checked struct ConstantFP <: Constant
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMConstantFPValueKind}) = ConstantFP
+value_kinds[API.LLVMConstantFPValueKind] = ConstantFP
 
 ConstantFP(typ::FloatingPointType, val::Real) =
     ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
@@ -106,7 +106,7 @@ export ConstantAggregateZero
 @checked struct ConstantAggregateZero <: Constant
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMConstantAggregateZeroValueKind}) = ConstantAggregateZero
+value_kinds[API.LLVMConstantAggregateZeroValueKind] = ConstantAggregateZero
 
 # array interface
 # FIXME: can we reuse the ::ConstantArray functionality with ConstantAggregateZero values?
@@ -127,8 +127,8 @@ abstract type ConstantAggregate <: Constant end
 @checked struct ConstantArray <: ConstantAggregate
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMConstantArrayValueKind}) = ConstantArray
-identify(::Type{Value}, ::Val{API.LLVMConstantDataArrayValueKind}) = ConstantArray
+value_kinds[API.LLVMConstantArrayValueKind] = ConstantArray
+value_kinds[API.LLVMConstantDataArrayValueKind] = ConstantArray
 
 ConstantArrayOrAggregateZero(value) = Value(value)::Union{ConstantArray,ConstantAggregateZero}
 
@@ -205,7 +205,7 @@ end
 @checked struct ConstantStruct <: ConstantAggregate
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMConstantStructValueKind}) = ConstantStruct
+value_kinds[API.LLVMConstantStructValueKind] = ConstantStruct
 
 ConstantStructOrAggregateZero(value) = Value(value)::Union{ConstantStruct,ConstantAggregateZero}
 
@@ -256,7 +256,7 @@ end
 @checked struct ConstantVector <: ConstantAggregate
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMConstantVectorValueKind}) = ConstantVector
+value_kinds[API.LLVMConstantVectorValueKind] = ConstantVector
 
 
 ## constant expressions
@@ -266,7 +266,7 @@ export ConstantExpr, ConstantAggregate, ConstantArray, ConstantStruct, ConstantV
 @checked struct ConstantExpr <: Constant
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
+value_kinds[API.LLVMConstantExprValueKind] = ConstantExpr
 
 
 ## inline assembly
@@ -274,7 +274,7 @@ identify(::Type{Value}, ::Val{API.LLVMConstantExprValueKind}) = ConstantExpr
 @checked struct InlineAsm <: Constant
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMInlineAsmValueKind}) = InlineAsm
+value_kinds[API.LLVMInlineAsmValueKind] = InlineAsm
 
 InlineAsm(typ::FunctionType, asm::String, constraints::String,
           side_effects::Core.Bool, align_stack::Core.Bool=false) =
@@ -352,7 +352,7 @@ export GlobalVariable, unsafe_delete!,
 @checked struct GlobalVariable <: GlobalObject
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMGlobalVariableValueKind}) = GlobalVariable
+value_kinds[API.LLVMGlobalVariableValueKind] = GlobalVariable
 
 GlobalVariable(mod::Module, typ::LLVMType, name::String) =
     GlobalVariable(API.LLVMAddGlobal(mod, typ, name))

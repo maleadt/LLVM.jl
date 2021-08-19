@@ -5,7 +5,7 @@ export unsafe_delete!,
        entry
 
 # forward declaration of Function in src/core/basicblock.jl
-identify(::Type{Value}, ::Val{API.LLVMFunctionValueKind}) = Function
+value_kinds[API.LLVMFunctionValueKind] = Function
 
 Function(mod::Module, name::String, ft::FunctionType) =
     Function(API.LLVMAddFunction(mod, name, ft))
@@ -81,7 +81,7 @@ export Argument, parameters
 @checked struct Argument <: Value
     ref::API.LLVMValueRef
 end
-identify(::Type{Value}, ::Val{API.LLVMArgumentValueKind}) = Argument
+value_kinds[API.LLVMArgumentValueKind] = Argument
 
 struct FunctionParameterSet <: AbstractVector{Argument}
     f::Function
