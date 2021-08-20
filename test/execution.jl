@@ -137,7 +137,7 @@ Context() do ctx
     args = [GenericValue(LLVM.Int32Type(ctx), 1),
             GenericValue(LLVM.Int32Type(ctx), 2)]
 
-    let mod = LLVM.Module(mod)
+    let mod = copy(mod)
         fn = functions(mod)["SomeFunctionSum"]
         Interpreter(mod) do engine
             res = LLVM.run(engine, fn, args)

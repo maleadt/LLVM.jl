@@ -24,7 +24,9 @@ end
 
 Module(name::String; ctx::Context) =
     Module(API.LLVMModuleCreateWithNameInContext(name, ctx))
+
 Module(mod::Module) = Module(API.LLVMCloneModule(mod))
+Base.copy(mod::Module) = Module(mod)
 
 dispose(mod::Module) = API.LLVMDisposeModule(mod)
 
