@@ -77,11 +77,10 @@ width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(inttyp)
 #       we add it for convenience of typechecking generic values (see execution.jl)
  abstract type FloatingPointType <: LLVMType end
 
-# NOTE: we don't handle the obscure types here (:X86FP80, :FP128, :PPCFP128),
-#       they would also need special casing as LLVMPPCFP128Type != LLVMPPC_FP128TypeKind
-for T in [:Half, :Float, :Double]
-    jl_fname = Symbol(T, :Type)
-    api_typename = Symbol(:LLVM, T)
+for T in [:Half, :Float, :Double, :FP128, :X86_FP80, :PPC_FP128]
+    CleanT = Symbol(replace(String(T), "_"=>""))    # only the type kind retains the underscore
+    jl_fname = Symbol(CleanT, :Type)
+    api_typename = Symbol(:LLVM, CleanT)
     api_fname = Symbol(:LLVM, jl_fname)
     enumkind = Symbol(:LLVM, T, :TypeKind)
     @eval begin

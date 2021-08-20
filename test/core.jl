@@ -384,6 +384,18 @@ Context() do ctx
         c = ConstantFP(typ, 1.1)
         @test convert(Float64, c) == 1.1
     end
+    let
+        typ = LLVM.X86FP80Type(ctx)
+        # TODO: how to construct full-width constants?
+        c = ConstantFP(typ, 1.1)
+        @test convert(Float64, c) == 1.1
+    end
+    for T in [LLVM.FP128Type, LLVM.PPCFP128Type]
+        typ = T(ctx)
+        # TODO: how to construct full-width constants?
+        c = ConstantFP(typ, 1.1)
+        @test convert(Float64, c) == 1.1
+    end
     for T in [Float16, Float32, Float64]
         c = ConstantFP(typemax(T); ctx)
         @test convert(T, c) == typemax(T)
