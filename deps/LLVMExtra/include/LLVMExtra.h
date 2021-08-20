@@ -133,5 +133,7 @@ void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
 
 void LLVMFunctionDeleteBody(LLVMValueRef Func);
 
+void LLVMDestroyConstant(LLVMValueRef Const);
+
 LLVM_C_EXTERN_C_END
 #endif

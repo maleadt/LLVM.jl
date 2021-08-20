@@ -511,6 +511,160 @@ Context() do ctx
         @check_ir asm "void ()* asm \"nop\", \"\""
     end
 
+    # integer
+    let
+        val = LLVM.ConstantInt(Int32(42); ctx)
+
+        for f = [const_neg, const_nswneg, const_nuwneg]
+            ce = f(val)::LLVM.Constant
+            @check_ir ce "i32 -42"
+        end
+
+        ce = const_not(val)::LLVM.Constant
+        @check_ir ce "i32 -43"
+
+        other_val = LLVM.ConstantInt(Int32(2); ctx)
+
+        for f in [const_add, const_nswadd, const_nuwadd]
+            ce = f(val, other_val)::LLVM.Constant
+            @check_ir ce "i32 44"
+        end
+
+        for f in [const_sub, const_nswsub, const_nuwsub]
+            ce = f(val, other_val)::LLVM.Constant
+            @check_ir ce "i32 40"
+        end
+
+        for f in [const_mul, const_nswmul, const_nuwmul]
+            ce = f(val, other_val)::LLVM.Constant
+            @check_ir ce "i32 84"
+        end
+
+        for f in [const_udiv, const_sdiv]
+            ce = f(val, other_val)::LLVM.Constant
+            @check_ir ce "i32 21"
+
+            ce = f(val, other_val; exact=true) # TODO: test that differs::LLVM.Constant
+            @check_ir ce "i32 21"
+        end
+
+        for f in [const_urem, const_srem]
+            ce = f(val, other_val)::LLVM.Constant
+            @check_ir ce "i32 0"
+        end
+
+        ce = const_and(val, other_val)::LLVM.Constant
+        @check_ir ce "i32 2"
+
+        ce = const_or(val, other_val)::LLVM.Constant
+        @check_ir ce "i32 42"
+
+        ce = const_xor(val, other_val)::LLVM.Constant
+        @check_ir ce "i32 40"
+
+        ce = const_icmp(LLVM.API.LLVMIntUGT, val, other_val)::LLVM.Constant
+        @check_ir ce "i1 true"
+
+        ce = const_shl(val, other_val)::LLVM.Constant
+        @check_ir ce "i32 168"
+
+        for f in [const_lshr, const_ashr]
+            ce = f(val, other_val)::LLVM.Constant
+            @check_ir ce "i32 10"
+        end
+
+        for f in [const_trunc, const_truncorbitcast]
+            ce = const_trunc(val, LLVM.Int16Type(ctx))::LLVM.Constant
+            @check_ir ce "i16 42"
+        end
+
+        for f in [const_sext, const_zext, const_sextorbitcast, const_zextorbitcast]
+            ce = f(val, LLVM.Int64Type(ctx))::LLVM.Constant
+            @check_ir ce "i64 42"
+        end
+
+        for f in [const_uitofp, const_sitofp]
+            ce = f(val, LLVM.FloatType(ctx))::LLVM.Constant
+            @check_ir ce "float 4.200000e+01"
+        end
+
+        ce = const_bitcast(val, LLVM.FloatType(ctx))::LLVM.Constant
+        @check_ir ce "float 0x36F5000000000000"
+
+        ce = const_intcast(val, LLVM.Int64Type(ctx), true)::LLVM.Constant
+        @check_ir ce "i64 42"
+
+        ce = const_intcast(val, LLVM.Int16Type(ctx), true)::LLVM.Constant
+        @check_ir ce "i16 42"
+    end
+
+    # floating-point
+    let
+        val = LLVM.ConstantFP(Float32(42.); ctx)
+
+        ce = const_fneg(val)::LLVM.Constant
+        @check_ir ce "float -4.200000e+01"
+
+        other_val = LLVM.ConstantFP(Float32(2.); ctx)
+
+        ce = const_fadd(val, other_val)::LLVM.Constant
+        @check_ir ce "float 4.400000e+01"
+
+        ce = const_fsub(val, other_val)::LLVM.Constant
+        @check_ir ce "float 4.000000e+01"
+
+        ce = const_fmul(val, other_val)::LLVM.Constant
+        @check_ir ce "float 8.400000e+01"
+
+        ce = const_fdiv(val, other_val)::LLVM.Constant
+        @check_ir ce "float 2.100000e+01"
+
+        ce = const_frem(val, other_val)::LLVM.Constant
+        @check_ir ce "float 0.000000e+00"
+
+        ce = const_fcmp(LLVM.API.LLVMRealUGT, val, other_val)::LLVM.Constant
+        @check_ir ce "i1 true"
+
+        for f in [const_fptrunc, const_fpcast]
+            ce = f(val, LLVM.HalfType(ctx))::LLVM.Constant
+            @check_ir ce "half 0xH5140"
+        end
+
+        for f in [const_fpext, const_fpcast]
+            ce = f(val, LLVM.DoubleType(ctx))::LLVM.Constant
+            @check_ir ce "double 4.200000e+01"
+        end
+
+        for f in [const_fptoui, const_fptosi]
+            ce = const_fptoui(val, LLVM.Int32Type(ctx))::LLVM.Constant
+            @check_ir ce "i32 42"
+        end
+    end
+
+    # pointer
+    let
+        ptr = LLVM.PointerNull(LLVM.PointerType(LLVM.Int32Type(ctx)))
+
+        ce = const_ptrtoint(ptr, LLVM.Int32Type(ctx))::LLVM.Constant
+        @check_ir ce "i32 0"
+
+        ce = const_inttoptr(ce, llvmtype(ptr))::LLVM.Constant
+        @check_ir ce "i32* null"
+
+        @test isempty(uses(ptr))
+        for f in [const_addrspacecast, const_pointercast]
+            ce = f(ptr, LLVM.PointerType(LLVM.Int32Type(ctx), 1))::LLVM.Constant
+            @check_ir ce "i32 addrspace(1)* addrspacecast (i32* null to i32 addrspace(1)*)"
+
+            # deletion of a constant
+            @test !isempty(uses(ptr))
+            LLVM.unsafe_destroy!(ce)
+            @test isempty(uses(ptr))
+        end
+    end
+
+    # gep, inbounds_gep, select, extractelement, insertelement, shufflevector, exactvalue, insertvalue
+
     end
 end
 

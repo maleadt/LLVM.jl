@@ -418,3 +418,7 @@ void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
 void LLVMFunctionDeleteBody(LLVMValueRef Func) {
     unwrap<Function>(Func)->deleteBody();
 }
+
+void LLVMDestroyConstant(LLVMValueRef Const) {
+    unwrap<Constant>(Const)->destroyConstant();
+}

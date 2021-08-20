@@ -338,3 +338,7 @@ end
 function LLVMFunctionDeleteBody(Func)
     ccall((:LLVMFunctionDeleteBody, libLLVMExtra), Cvoid, (LLVMValueRef,), Func)
 end
+
+function LLVMDestroyConstant(Const)
+    ccall((:LLVMDestroyConstant, libLLVMExtra), Cvoid, (LLVMValueRef,), Const)
+end
