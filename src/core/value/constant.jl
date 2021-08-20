@@ -9,6 +9,8 @@ isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(val))
 
 abstract type Constant <: User end
 
+unsafe_destroy!(constant::Constant) = API.LLVMDestroyConstant(constant)
+
 # forward declarations
 @checked mutable struct Module
     ref::API.LLVMModuleRef
@@ -120,9 +122,13 @@ Base.collect(caz::ConstantAggregateZero) = Value[]
 
 ## regular aggregate
 
+export ConstantAggregate
+
 abstract type ConstantAggregate <: Constant end
 
 # arrays
+
+export ConstantArray
 
 @checked struct ConstantArray <: ConstantAggregate
     ref::API.LLVMValueRef
@@ -202,6 +208,8 @@ end
 
 # structs
 
+export ConstantStruct
+
 @checked struct ConstantStruct <: ConstantAggregate
     ref::API.LLVMValueRef
 end
@@ -253,6 +261,8 @@ end
 
 # vectors
 
+export ConstantVector
+
 @checked struct ConstantVector <: ConstantAggregate
     ref::API.LLVMValueRef
 end
@@ -261,15 +271,207 @@ register(ConstantVector, API.LLVMConstantVectorValueKind)
 
 ## constant expressions
 
-export ConstantExpr, ConstantAggregate, ConstantArray, ConstantStruct, ConstantVector, InlineAsm
+export ConstantExpr,
+
+       const_neg, const_nswneg, const_nuwneg, const_fneg, const_not, const_add,
+       const_nswadd, const_nuwadd, const_fadd, const_sub, const_nswsub, const_nuwsub,
+       const_fsub, const_mul, const_nswmul, const_nuwmul, const_fmul, const_udiv,
+       const_sdiv, const_fdiv, const_urem, const_srem, const_frem, const_and, const_or,
+       const_xor, const_icmp, const_fcmp, const_shl, const_lshr, const_ashr, const_gep,
+       const_inbounds_gep, const_trunc, const_sext, const_zext, const_fptrunc, const_fpext,
+       const_uitofp, const_sitofp, const_fptoui, const_fptosi, const_ptrtoint,
+       const_inttoptr, const_bitcast, const_addrspacecast, const_zextorbitcast,
+       const_sextorbitcast, const_truncorbitcast, const_pointercast, const_intcast,
+       const_fpcast, const_select, const_extractelement, const_insertelement,
+       const_shufflevector, const_extractvalue, const_insertvalue
 
 @checked struct ConstantExpr <: Constant
     ref::API.LLVMValueRef
 end
 register(ConstantExpr, API.LLVMConstantExprValueKind)
 
+opcode(ce::ConstantExpr) = API.LLVMGetConstOpcode(ce)
+
+const_neg(val::Constant) =
+    Value(API.LLVMConstNeg(val))
+
+const_nswneg(val::Constant) =
+    Value(API.LLVMConstNSWNeg(val))
+
+const_nuwneg(val::Constant) =
+    Value(API.LLVMConstNUWNeg(val))
+
+const_fneg(val::Constant) =
+    Value(API.LLVMConstFNeg(val))
+
+const_not(val::Constant) =
+    Value(API.LLVMConstNot(val))
+
+const_add(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstAdd(lhs, rhs))
+
+const_nswadd(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstNSWAdd(lhs, rhs))
+
+const_nuwadd(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstNUWAdd(lhs, rhs))
+
+const_fadd(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstFAdd(lhs, rhs))
+
+const_sub(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstSub(lhs, rhs))
+
+const_nswsub(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstNSWSub(lhs, rhs))
+
+const_nuwsub(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstNUWSub(lhs, rhs))
+
+const_fsub(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstFSub(lhs, rhs))
+
+const_mul(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstMul(lhs, rhs))
+
+const_nswmul(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstNSWMul(lhs, rhs))
+
+const_nuwmul(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstNUWMul(lhs, rhs))
+
+const_fmul(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstFMul(lhs, rhs))
+
+const_udiv(lhs::Constant, rhs::Constant; exact::Base.Bool=false) =
+    Value(exact ? API.LLVMConstExactUDiv(lhs, rhs) : API.LLVMConstUDiv(lhs, rhs))
+
+const_sdiv(lhs::Constant, rhs::Constant; exact::Base.Bool=false) =
+    Value(exact ? API.LLVMConstExactSDiv(lhs, rhs) : API.LLVMConstSDiv(lhs, rhs))
+
+const_fdiv(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstFDiv(lhs, rhs))
+
+const_urem(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstURem(lhs, rhs))
+
+const_srem(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstSRem(lhs, rhs))
+
+const_frem(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstFRem(lhs, rhs))
+
+const_and(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstAnd(lhs, rhs))
+
+const_or(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstOr(lhs, rhs))
+
+const_xor(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstXor(lhs, rhs))
+
+const_icmp(Predicate::API.LLVMIntPredicate, lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstICmp(Predicate, lhs, rhs))
+
+const_fcmp(Predicate::API.LLVMRealPredicate, lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstFCmp(Predicate, lhs, rhs))
+
+const_shl(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstShl(lhs, rhs))
+
+const_lshr(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstLShr(lhs, rhs))
+
+const_ashr(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstAShr(lhs, rhs))
+
+const_gep(val::Constant, Indices::Vector{<:Constant}) =
+   Value(API.LLVMConstGEP(val, Indices, length(Indices)))
+
+const_inbounds_gep(val::Constant, Indices::Vector{<:Constant}) =
+   Value(API.LLVMConstInBoundsGEP(val, Indices, length(indices)))
+
+const_trunc(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstTrunc(val, ToType))
+
+const_sext(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstSExt(val, ToType))
+
+const_zext(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstZExt(val, ToType))
+
+const_fptrunc(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPTrunc(val, ToType))
+
+const_fpext(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPExt(val, ToType))
+
+const_uitofp(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstUIToFP(val, ToType))
+
+const_sitofp(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstSIToFP(val, ToType))
+
+const_fptoui(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPToUI(val, ToType))
+
+const_fptosi(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPToSI(val, ToType))
+
+const_ptrtoint(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstPtrToInt(val, ToType))
+
+const_inttoptr(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstIntToPtr(val, ToType))
+
+const_bitcast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstBitCast(val, ToType))
+
+const_addrspacecast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstAddrSpaceCast(val, ToType))
+
+const_zextorbitcast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstZExtOrBitCast(val, ToType))
+
+const_sextorbitcast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstSExtOrBitCast(val, ToType))
+
+const_truncorbitcast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstTruncOrBitCast(val, ToType))
+
+const_pointercast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstPointerCast(val, ToType))
+
+const_intcast(val::Constant, ToType::LLVMType, isSigned::Base.Bool) =
+    Value(API.LLVMConstIntCast(val, ToType, isSigned))
+
+const_fpcast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPCast(val, ToType))
+
+const_select(cond::Constant, if_true::Value, if_false::Value) =
+    Value(API.LLVMConstSelect(cond, if_true, if_false))
+
+const_extractelement(vector::Constant, index::Constant) =
+    Value(API.LLVMConstExtractElement(vector ,index))
+
+const_insertelement(vector::Constant, element::Value, index::Constant) =
+    Value(API.LLVMConstInsertElement(vector ,element, index))
+
+const_shufflevector(vector1::Constant, vector2::Constant, mask::Constant) =
+    Value(API.LLVMConstShuffleVector(vector1, vector2, mask))
+
+const_extractvalue(agg::Constant, Idx::Vector{<:Integer}) =
+   Value(API.LLVMConstExtractValue(agg, Idx, length(Idx)))
+
+const_insertvalue(agg::Constant, element::Constant, Idx::Vector{<:Integer}) =
+   Value(API.LLVMConstInsertValue(agg, element, Idx, length(Idx)))
+
+# TODO: alignof, sizeof, block_address
+
 
 ## inline assembly
+
+export InlineAsm
 
 @checked struct InlineAsm <: Constant
     ref::API.LLVMValueRef
