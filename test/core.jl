@@ -727,7 +727,7 @@ end
 
 Context() do ctx
 LLVM.Module("SomeModule"; ctx) do mod
-    clone = LLVM.Module(mod)
+    clone = copy(mod)
     @test mod != clone
     @test context(clone) == ctx
     dispose(clone)
