@@ -1,4 +1,4 @@
-export null, isnull, all_ones, UndefValue, PointerNull
+export null, isnull, all_ones
 
 null(typ::LLVMType) = Value(API.LLVMConstNull(typ))
 
@@ -18,7 +18,14 @@ end
 abstract type Instruction <: User end
 
 
-@checked struct PointerNull <: Constant
+## data
+
+export ConstantData, PointerNull, UndefValue, ConstantInt, ConstantFP
+
+abstract type ConstantData <: Constant end
+
+
+@checked struct PointerNull <: ConstantData
     ref::API.LLVMValueRef
 end
 register(PointerNull, API.LLVMConstantPointerNullValueKind)
@@ -26,7 +33,7 @@ register(PointerNull, API.LLVMConstantPointerNullValueKind)
 PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
 
 
-@checked struct UndefValue <: Constant
+@checked struct UndefValue <: ConstantData
     ref::API.LLVMValueRef
 end
 register(UndefValue, API.LLVMUndefValueValueKind)
@@ -34,11 +41,7 @@ register(UndefValue, API.LLVMUndefValueValueKind)
 UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 
 
-## scalar
-
-export ConstantInt, ConstantFP
-
-@checked struct ConstantInt <: Constant
+@checked struct ConstantInt <: ConstantData
     ref::API.LLVMValueRef
 end
 register(ConstantInt, API.LLVMConstantIntValueKind)
@@ -82,7 +85,7 @@ Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
 Base.convert(::Type{Core.Bool}, val::ConstantInt) = convert(Int, val) != 0
 
 
-@checked struct ConstantFP <: Constant
+@checked struct ConstantFP <: ConstantData
     ref::API.LLVMValueRef
 end
 register(ConstantFP, API.LLVMConstantFPValueKind)
@@ -101,11 +104,28 @@ Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
     convert(T, API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}()))
 
 
-## aggregate zero
+# sequential
+
+export ConstantDataSequential, ConstantDataArray, ConstantDataVector
+
+abstract type ConstantDataSequential <: Constant end
+
+@checked struct ConstantDataArray <: ConstantDataSequential
+    ref::API.LLVMValueRef
+end
+register(ConstantDataArray, API.LLVMConstantDataArrayValueKind)
+
+@checked struct ConstantDataVector <: ConstantDataSequential
+    ref::API.LLVMValueRef
+end
+register(ConstantDataVector, API.LLVMConstantDataVectorValueKind)
+
+
+# aggregate zero
 
 export ConstantAggregateZero
 
-@checked struct ConstantAggregateZero <: Constant
+@checked struct ConstantAggregateZero <: ConstantData
     ref::API.LLVMValueRef
 end
 register(ConstantAggregateZero, API.LLVMConstantAggregateZeroValueKind)
