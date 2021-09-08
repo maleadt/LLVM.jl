@@ -57,6 +57,7 @@ ModulePassManager() do pm
     loop_fuse!(pm)
     loop_load_elimination!(pm)
     mem_cpy_opt!(pm)
+    merge_functions!(pm)
 
     partially_inline_lib_calls!(pm)
     lower_switch!(pm)
