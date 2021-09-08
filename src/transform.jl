@@ -102,7 +102,8 @@ define_transforms([
     :LowerSwitch, :PromoteMemoryToRegister, :Reassociate, :SCCP, :ScalarReplAggregates,
     :SimplifyLibCalls, :TailCallElimination, :ConstantPropagation, :DemoteMemoryToRegister,
     :Verifier, :CorrelatedValuePropagation, :EarlyCSE, :EarlyCSEMemSSA,
-    :LowerExpectIntrinsic, :TypeBasedAliasAnalysis, :ScopedNoAliasAA, :BasicAliasAnalysis
+    :LowerExpectIntrinsic, :TypeBasedAliasAnalysis, :ScopedNoAliasAA, :BasicAliasAnalysis,
+    :MergeFunctions
 ])
 
 export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!, cfgsimplification!
