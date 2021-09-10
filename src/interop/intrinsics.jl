@@ -15,7 +15,11 @@ export trap, assume
     Nothing, Tuple{Bool}, cond)
 
 # do-block syntax
-@inline function assume(f::F, val...) where {F}
-    assume(f(val...))
+@inline function assume(f::F) where {F}
+    assume(f())
+    return
+end
+@inline function assume(f::F, val) where {F}
+    assume(f(val))
     return val
 end

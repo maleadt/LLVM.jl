@@ -131,10 +131,13 @@ end
 
 
 @testset "intrinsics" begin
-    assume(true)
-    assume() do
+    @test assume(true) === nothing
+    @test assume() do
         true
-    end
+    end === nothing
+    @test assume(rand()) do x
+        0 <= x <= 1
+    end isa Float64
 end
 
 using Core: LLVMPtr
