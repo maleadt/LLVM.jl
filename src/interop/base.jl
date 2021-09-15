@@ -34,9 +34,16 @@ function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=
     ir = string(mod)
     fn = LLVM.name(llvmf)
     @assert !isempty(fn)
-    quote
-        Base.@_inline_meta
-        Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $(args...))
+    if VERSION >= v"1.8.0-DEV.410"
+        quote
+            Base.@inline
+            Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $(args...))
+        end
+    else
+        quote
+            Base.@_inline_meta
+            Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $(args...))
+        end
     end
 end
 
