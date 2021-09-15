@@ -6,7 +6,7 @@ export @typed_ccall
 
 using Core: LLVMPtr
 
-@generated function pointerref(ptr::LLVMPtr{T,A}, i::Int, ::Val{align}) where {T,A,align}
+@generated function pointerref(ptr::LLVMPtr{T,A}, i::Integer, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return T.instance
     Context() do ctx
         eltyp = convert(LLVMType, T; ctx)
@@ -41,7 +41,7 @@ using Core: LLVMPtr
     end
 end
 
-@generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::Int, ::Val{align}) where {T,A,align}
+@generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::Integer, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return
     Context() do ctx
         eltyp = convert(LLVMType, T; ctx)
@@ -79,10 +79,10 @@ end
 end
 
 Base.unsafe_load(ptr::Core.LLVMPtr, i::Integer=1, align::Val=Val(1)) =
-    pointerref(ptr, Int(i), align)
+    pointerref(ptr, i, align)
 
 Base.unsafe_store!(ptr::Core.LLVMPtr{T}, x, i::Integer=1, align::Val=Val(1)) where {T} =
-    pointerset(ptr, convert(T, x), Int(i), align)
+    pointerset(ptr, convert(T, x), i, align)
 
 
 # pointer operations
