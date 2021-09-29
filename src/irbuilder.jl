@@ -347,6 +347,13 @@ call!(builder::Builder, Fn::Value, Args::Vector{<:Value},
     Instruction(API.LLVMBuildCallWithOpBundle(builder, Fn, Args, length(Args), Bundles,
                                               length(Bundles), Name))
 
+# convenience function that performs the OperandBundle(Iterator|Use)->Def conversion
+call!(builder::Builder, Fn::Value, Args::Vector{<:Value},
+      Bundles, Name::String="") =
+    Instruction(API.LLVMBuildCallWithOpBundle(builder, Fn, Args, length(Args),
+                                              OperandBundleDef.(Bundles),
+                                              length(Bundles), Name))
+
 va_arg!(builder::Builder, List::Value, Ty::LLVMType, Name::String="") =
     Instruction(API.LLVMBuildVAArg(builder, List, Ty, Name))
 

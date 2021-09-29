@@ -382,6 +382,10 @@ end
                 @test LLVM.tag_name(bundle3) == "unknown"
                 @test LLVM.inputs(bundle3) == inputs
                 @test sprint(io->print(io, bundle3)) == "\"unknown\"(i32 1, i64 2)"
+
+                # creating a call should perform the necessary conversion automatically
+                call!(builder, functions(mod)["x"], Value[], operand_bundles(inst))
+                call!(builder, functions(mod)["x"], Value[], [bundle2])
             end
         end
     end
