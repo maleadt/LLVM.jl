@@ -281,3 +281,112 @@ end
 end
 
 end
+
+
+@testset "operand bundles" begin
+    ir = """
+        declare void @x()
+        declare void @y()
+        declare void @z()
+
+        define void @f() {
+            call void @x()
+            call void @y() [ "deopt"(i32 1, i64 2) ]
+            call void @z() [ "deopt"(), "unknown"(i8* null) ]
+            ret void
+        }
+
+        define void @g() {
+            ret void
+        }
+        """
+    Context() do ctx
+        mod = parse(LLVM.Module, ir; ctx)
+
+        @testset "iteration" begin
+            f = functions(mod)["f"]
+            bb = first(blocks(f))
+            cx, cy, cz = instructions(bb)
+
+            ## operands includes the function, and each operand bundle input separately
+            @test length(operands(cx)) == 1
+            @test length(operands(cy)) == 3
+            @test length(operands(cz)) == 2
+
+            ## arguments excludes all those
+            @test length(arguments(cx)) == 0
+            @test length(arguments(cy)) == 0
+            @test length(arguments(cz)) == 0
+
+            let bundles = operand_bundles(cx)
+                @test isempty(bundles)
+            end
+
+            let bundles = operand_bundles(cy)
+                @test length(bundles) == 1
+                bundle = first(bundles)
+                @test LLVM.tag_name(bundle) == "deopt"
+                @test sprint(io->print(io, bundle)) == "\"deopt\"(i32 1, i64 2)"
+
+                inputs = LLVM.inputs(bundle)
+                @test length(inputs) == 2
+                @test inputs[1] == LLVM.ConstantInt(Int32(1); ctx)
+                @test inputs[2] == LLVM.ConstantInt(Int64(2); ctx)
+            end
+
+            let bundles = operand_bundles(cz)
+                @test length(bundles) == 2
+                let bundle = bundles[1]
+                    inputs = LLVM.inputs(bundle)
+                    @test length(inputs) == 0
+                    @test sprint(io->print(io, bundle)) == "\"deopt\"()"
+                end
+                let bundle = bundles[2]
+                    inputs = LLVM.inputs(bundle)
+                    @test length(inputs) == 1
+                    @test sprint(io->print(io, bundle)) == "\"unknown\"(i8* null)"
+                end
+            end
+        end
+
+        @testset "creation" begin
+            g = functions(mod)["g"]
+            bb = first(blocks(g))
+            inst = first(instructions(bb))
+
+            # direct creation
+            inputs = [LLVM.ConstantInt(Int32(1); ctx), LLVM.ConstantInt(Int64(2); ctx)]
+            bundle1 = OperandBundleDef("unknown", inputs)
+            @test bundle1 isa OperandBundleDef
+            @test LLVM.tag_name(bundle1) == "unknown"
+            @test LLVM.inputs(bundle1) == inputs
+            @test sprint(io->print(io, bundle1)) == "\"unknown\"(i32 1, i64 2)"
+
+            # use in a call
+            Builder(ctx) do builder
+                position!(builder, inst)
+                inst = call!(builder, functions(mod)["x"], Value[], [bundle1])
+
+                bundles = operand_bundles(inst)
+                @test length(bundles) == 1
+
+                bundle2 = bundles[1]
+                @test bundle2 isa OperandBundleUse
+                @test LLVM.tag_name(bundle2) == "unknown"
+                @test LLVM.inputs(bundle2) == inputs
+                @test sprint(io->print(io, bundle2)) == "\"unknown\"(i32 1, i64 2)"
+
+                # creating from a use
+                bundle3 = OperandBundleDef(bundle2)
+                @test bundle3 isa OperandBundleDef
+                @test LLVM.tag_name(bundle3) == "unknown"
+                @test LLVM.inputs(bundle3) == inputs
+                @test sprint(io->print(io, bundle3)) == "\"unknown\"(i32 1, i64 2)"
+
+                # creating a call should perform the necessary conversion automatically
+                call!(builder, functions(mod)["x"], Value[], operand_bundles(inst))
+                call!(builder, functions(mod)["x"], Value[], [bundle2])
+            end
+        end
+    end
+end

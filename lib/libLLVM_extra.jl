@@ -342,3 +342,68 @@ end
 function LLVMDestroyConstant(Const)
     ccall((:LLVMDestroyConstant, libLLVMExtra), Cvoid, (LLVMValueRef,), Const)
 end
+
+mutable struct LLVMOpaqueOperandBundleUse end
+
+const LLVMOperandBundleUseRef = Ptr{LLVMOpaqueOperandBundleUse}
+
+function LLVMGetNumOperandBundles(Instr)
+    ccall((:LLVMGetNumOperandBundles, libLLVMExtra), Cuint, (LLVMValueRef,), Instr)
+end
+
+function LLVMGetOperandBundle(Val, Index)
+    ccall((:LLVMGetOperandBundle, libLLVMExtra), LLVMOperandBundleUseRef, (LLVMValueRef, Cuint), Val, Index)
+end
+
+function LLVMDisposeOperandBundleUse(Bundle)
+    ccall((:LLVMDisposeOperandBundleUse, libLLVMExtra), Cvoid, (LLVMOperandBundleUseRef,), Bundle)
+end
+
+function LLVMGetOperandBundleUseTagID(Bundle)
+    ccall((:LLVMGetOperandBundleUseTagID, libLLVMExtra), UInt32, (LLVMOperandBundleUseRef,), Bundle)
+end
+
+function LLVMGetOperandBundleUseTagName(Bundle, Length)
+    ccall((:LLVMGetOperandBundleUseTagName, libLLVMExtra), Cstring, (LLVMOperandBundleUseRef, Ptr{Cuint}), Bundle, Length)
+end
+
+function LLVMGetOperandBundleUseNumInputs(Bundle)
+    ccall((:LLVMGetOperandBundleUseNumInputs, libLLVMExtra), Cuint, (LLVMOperandBundleUseRef,), Bundle)
+end
+
+function LLVMGetOperandBundleUseInputs(Bundle, Dest)
+    ccall((:LLVMGetOperandBundleUseInputs, libLLVMExtra), Cvoid, (LLVMOperandBundleUseRef, Ptr{LLVMValueRef}), Bundle, Dest)
+end
+
+mutable struct LLVMOpaqueOperandBundleDef end
+
+const LLVMOperandBundleDefRef = Ptr{LLVMOpaqueOperandBundleDef}
+
+function LLVMOperandBundleDefFromUse(Bundle)
+    ccall((:LLVMOperandBundleDefFromUse, libLLVMExtra), LLVMOperandBundleDefRef, (LLVMOperandBundleUseRef,), Bundle)
+end
+
+function LLVMCreateOperandBundleDef(Tag, Inputs, NumInputs)
+    ccall((:LLVMCreateOperandBundleDef, libLLVMExtra), LLVMOperandBundleDefRef, (Cstring, Ptr{LLVMValueRef}, Cuint), Tag, Inputs, NumInputs)
+end
+
+function LLVMDisposeOperandBundleDef(Bundle)
+    ccall((:LLVMDisposeOperandBundleDef, libLLVMExtra), Cvoid, (LLVMOperandBundleDefRef,), Bundle)
+end
+
+function LLVMGetOperandBundleDefTag(Bundle, Length)
+    ccall((:LLVMGetOperandBundleDefTag, libLLVMExtra), Cstring, (LLVMOperandBundleDefRef, Ptr{Cuint}), Bundle, Length)
+end
+
+function LLVMGetOperandBundleDefNumInputs(Bundle)
+    ccall((:LLVMGetOperandBundleDefNumInputs, libLLVMExtra), Cuint, (LLVMOperandBundleDefRef,), Bundle)
+end
+
+function LLVMGetOperandBundleDefInputs(Bundle, Dest)
+    ccall((:LLVMGetOperandBundleDefInputs, libLLVMExtra), Cvoid, (LLVMOperandBundleDefRef, Ptr{LLVMValueRef}), Bundle, Dest)
+end
+
+function LLVMBuildCallWithOpBundle(B, Fn, Args, NumArgs, Bundles, NumBundles, Name)
+    ccall((:LLVMBuildCallWithOpBundle, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Ptr{LLVMOperandBundleDefRef}, Cuint, Cstring), B, Fn, Args, NumArgs, Bundles, NumBundles, Name)
+end
+

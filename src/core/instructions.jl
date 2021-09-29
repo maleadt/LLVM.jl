@@ -131,18 +131,112 @@ end
 
 ## call sites and invocations
 
+# TODO: add this to the actual type hierarchy
+const CallBase = Union{CallBrInst, CallInst, InvokeInst}
+
 export callconv, callconv!,
        istailcall, tailcall!,
-       called_value
+       called_value, arguments,
+       OperandBundleUse, OperandBundleDef, operand_bundles
 
-callconv(inst::Instruction) = API.LLVMGetInstructionCallConv(inst)
-callconv!(inst::Instruction, cc) =
+callconv(inst::CallBase) = API.LLVMGetInstructionCallConv(inst)
+callconv!(inst::CallBase, cc) =
     API.LLVMSetInstructionCallConv(inst, cc)
 
-istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(inst))
-tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(inst, convert(Bool, bool))
+istailcall(inst::CallBase) = convert(Core.Bool, API.LLVMIsTailCall(inst))
+tailcall!(inst::CallBase, bool) = API.LLVMSetTailCall(inst, convert(Bool, bool))
 
-called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(inst))
+called_value(inst::CallBase) = Value(API.LLVMGetCalledValue(inst))
+
+function arguments(inst::CallBase)
+    nargs = API.LLVMGetNumArgOperands(inst)
+    operands(inst)[1:nargs]
+end
+
+# operand bundles
+
+# XXX: these objects are just C structures, whose lifetime isn't tied to LLVM IR structures.
+#      that means we need to create a copy when passing them to Julia, necessitating disposal.
+
+@checked mutable struct OperandBundleUse
+    ref::API.LLVMOperandBundleUseRef
+end
+Base.unsafe_convert(::Type{API.LLVMOperandBundleUseRef}, bundle::OperandBundleUse) =
+    bundle.ref
+
+struct OperandBundleIterator <: AbstractVector{OperandBundleUse}
+    inst::Instruction
+end
+
+operand_bundles(inst::Instruction) = OperandBundleIterator(inst)
+
+Base.size(iter::OperandBundleIterator) = (API.LLVMGetNumOperandBundles(iter.inst),)
+
+Base.IndexStyle(::OperandBundleIterator) = IndexLinear()
+
+function Base.getindex(iter::OperandBundleIterator, i::Int)
+    @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
+    bundle = OperandBundleUse(API.LLVMGetOperandBundle(iter.inst, i-1))
+    finalizer(bundle) do obj
+        API.LLVMDisposeOperandBundleUse(obj)
+    end
+end
+
+tag_id(bundle::OperandBundleUse) = API.LLVMGetOperandBundleTagID(bundle)
+
+function tag_name(bundle::OperandBundleUse)
+    len = Ref{Cuint}()
+    data = API.LLVMGetOperandBundleUseTagName(bundle, len)
+    unsafe_string(convert(Ptr{Int8}, data), len[])
+end
+
+function inputs(bundle::OperandBundleUse)
+    nvals = API.LLVMGetOperandBundleUseNumInputs(bundle)
+    vals = Vector{API.LLVMValueRef}(undef, nvals)
+    API.LLVMGetOperandBundleUseInputs(bundle, vals)
+    return [Value(val) for val in vals]
+end
+
+@checked mutable struct OperandBundleDef
+    ref::API.LLVMOperandBundleDefRef
+end
+Base.unsafe_convert(::Type{API.LLVMOperandBundleDefRef}, bundle::OperandBundleDef) =
+    bundle.ref
+
+function tag_name(bundle::OperandBundleDef)
+    len = Ref{Cuint}()
+    data = API.LLVMGetOperandBundleDefTag(bundle, len)
+    unsafe_string(convert(Ptr{Int8}, data), len[])
+end
+
+function OperandBundleDef(bundle_use::OperandBundleUse)
+    bundle_def = OperandBundleDef(API.LLVMOperandBundleDefFromUse(bundle_use))
+    finalizer(bundle_def) do obj
+        API.LLVMDisposeOperandBundleDef(obj)
+    end
+end
+
+function OperandBundleDef(tag::String, inputs::Vector{<:Value}=Value[])
+    bundle = OperandBundleDef(API.LLVMCreateOperandBundleDef(tag, inputs, length(inputs)))
+    finalizer(bundle) do obj
+        API.LLVMDisposeOperandBundleDef(obj)
+    end
+end
+
+function inputs(bundle::OperandBundleDef)
+    nvals = API.LLVMGetOperandBundleDefNumInputs(bundle)
+    vals = Vector{API.LLVMValueRef}(undef, nvals)
+    API.LLVMGetOperandBundleDefInputs(bundle, vals)
+    return [Value(val) for val in vals]
+end
+
+function Base.show(io::IO, bundle::Union{OperandBundleUse,OperandBundleDef})
+    # mimic how bundles are rendered in LLVM IR
+    print(io, "\"", tag_name(bundle), "\"(")
+    join(io, inputs(bundle), ", ")
+    print(io, ")")
+end
+
 
 
 ## terminators

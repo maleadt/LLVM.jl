@@ -61,7 +61,7 @@ end
 include("support.jl")
 include("core.jl")
 include("linker.jl")
-include("irbuilder.jl")
+include("instructions.jl")
 include("buffer.jl")
 include("bitcode.jl")
 include("ir.jl")
