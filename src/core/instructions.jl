@@ -131,23 +131,24 @@ end
 
 ## call sites and invocations
 
-# TODO: restrict these to CallBase instructions
+# TODO: add this to the actual type hierarchy
+const CallBase = Union{CallBrInst, CallInst, InvokeInst}
 
 export callconv, callconv!,
        istailcall, tailcall!,
        called_value, arguments,
        OperandBundleUse, OperandBundleDef, operand_bundles
 
-callconv(inst::Instruction) = API.LLVMGetInstructionCallConv(inst)
-callconv!(inst::Instruction, cc) =
+callconv(inst::CallBase) = API.LLVMGetInstructionCallConv(inst)
+callconv!(inst::CallBase, cc) =
     API.LLVMSetInstructionCallConv(inst, cc)
 
-istailcall(inst::Instruction) = convert(Core.Bool, API.LLVMIsTailCall(inst))
-tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(inst, convert(Bool, bool))
+istailcall(inst::CallBase) = convert(Core.Bool, API.LLVMIsTailCall(inst))
+tailcall!(inst::CallBase, bool) = API.LLVMSetTailCall(inst, convert(Bool, bool))
 
-called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(inst))
+called_value(inst::CallBase) = Value(API.LLVMGetCalledValue(inst))
 
-function arguments(inst::Instruction)
+function arguments(inst::CallBase)
     nargs = API.LLVMGetNumArgOperands(inst)
     operands(inst)[1:nargs]
 end
