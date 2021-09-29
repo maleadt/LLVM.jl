@@ -135,7 +135,7 @@ end
 
 export callconv, callconv!,
        istailcall, tailcall!,
-       called_value, num_arg_operands,
+       called_value, arguments,
        OperandBundleUse, OperandBundleDef, operand_bundles
 
 callconv(inst::Instruction) = API.LLVMGetInstructionCallConv(inst)
@@ -147,7 +147,10 @@ tailcall!(inst::Instruction, bool) = API.LLVMSetTailCall(inst, convert(Bool, boo
 
 called_value(inst::Instruction) = Value(API.LLVMGetCalledValue(inst))
 
-num_arg_operands(inst::Instruction) = Int(API.LLVMGetNumArgOperands(inst))
+function arguments(inst::Instruction)
+    nargs = API.LLVMGetNumArgOperands(inst)
+    operands(inst)[1:nargs]
+end
 
 # operand bundles
 

@@ -313,10 +313,10 @@ end
             @test length(operands(cy)) == 3
             @test length(operands(cz)) == 2
 
-            ## num_arg_operands excludes all those
-            @test num_arg_operands(cx) == 0
-            @test num_arg_operands(cy) == 0
-            @test num_arg_operands(cz) == 0
+            ## arguments excludes all those
+            @test length(arguments(cx)) == 0
+            @test length(arguments(cy)) == 0
+            @test length(arguments(cz)) == 0
 
             let bundles = operand_bundles(cx)
                 @test isempty(bundles)
