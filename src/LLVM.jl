@@ -30,6 +30,35 @@ if !isdir(libdir)
     You might need a newer version of LLVM.jl for this version of Julia.""")
 end
 
+# verify the LLVM library before importing LLVMExtra_jll (which may fail)
+using Libdl
+function loaded_llvm()
+    # we only support working with the copy of LLVM that Julia uses, because we have
+    # additional library calls compiled in the Julia binary which cannot be used with
+    # another copy of LLVM. loading multiple copies of LLVM typically breaks anyhow.
+    if Base.libllvm_path() === nothing
+        error("""Cannot find the LLVM library loaded by Julia.
+
+                 Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
+                 If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
+    end
+    path = Base.libllvm_path()
+
+    # our JLL doesn't support LLVM with assertions yet, so loading LLVMExtra might fail.
+    # TODO: don't have LLVMExtra_jll eagerly dlopen so that we can verify this in __init__?
+    lib = Libdl.dlopen(path)
+    if Libdl.dlsym(lib, "_ZN4llvm23EnableABIBreakingChecksE"; throw_error=false) !== nothing
+        @warn """You are using a version of Julia that links against a build of LLVM with assertions enabled.
+
+                 This is not supported out-of-the-box, and you need a build of libLLVMExtra that supports this.
+                 Use `deps/build_local.jl` for that, add the resulting LocalPreferences.toml to your project
+                 and add a direct dependency on LLVMExtra_jll to pick up those preferences."""
+    end
+
+    return String(path)
+end
+loaded_llvm()
+
 import LLVMExtra_jll: libLLVMExtra
 
 include(joinpath(libdir, llvm_version, "libLLVM_h.jl"))
@@ -81,19 +110,7 @@ include("deprecated.jl")
 
 function __init__()
     # find the libLLVM loaded by Julia
-    #
-    # we only support working with the copy of LLVM that Julia uses, because we have
-    # additional library calls compiled in the Julia binary which cannot be used with
-    # another copy of LLVM. loading multiple copies of LLVM typically breaks anyhow.
-    libllvm[] = let
-        path = Base.libllvm_path()
-        if path === nothing
-            error("""Cannot find the LLVM library loaded by Julia.
-                     Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
-                     If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
-        end
-        String(path)
-    end
+    libllvm[] = API.loaded_llvm()
 
     @debug "Using LLVM $(version()) at $(Libdl.dlpath(libllvm[]))"
     if version() !== runtime_version()
