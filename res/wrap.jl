@@ -26,9 +26,7 @@ function main()
 
     ctx = create_context(header_files, args, options)
 
-    build!(ctx, BUILDSTAGE_NO_PRINTING)
-
-    build!(ctx, BUILDSTAGE_PRINTING_ONLY)
+    build!(ctx)
 end
 
 isinteractive() || main()
