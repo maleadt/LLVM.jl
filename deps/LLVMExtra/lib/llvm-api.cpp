@@ -116,6 +116,21 @@ void LLVMAddVectorCombinePass(LLVMPassManagerRef PM)
     unwrap(PM)->add(createVectorCombinePass());
 }
 
+void LLVMAddSpeculativeExecutionIfHasBranchDivergencePass(LLVMPassManagerRef PM)
+{
+    unwrap(PM)->add(createSpeculativeExecutionIfHasBranchDivergencePass());
+}
+
+void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM)
+{
+    unwrap(PM)->add(createSimpleLoopUnrollPass());
+}
+
+void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM)
+{
+    unwrap(PM)->add(createInductiveRangeCheckEliminationPass());
+}
+
 #if LLVM_VERSION_MAJOR < 12
 void LLVMAddInstructionSimplifyPass(LLVMPassManagerRef PM)
 {

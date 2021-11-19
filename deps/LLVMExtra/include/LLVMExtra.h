@@ -33,6 +33,9 @@ void LLVMAddLoopFusePass(LLVMPassManagerRef PM);
 void LLVMAddLoopLoadEliminationPass(LLVMPassManagerRef PM);
 void LLVMAddLoadStoreVectorizerPass(LLVMPassManagerRef PM);
 void LLVMAddVectorCombinePass(LLVMPassManagerRef PM);
+void LLVMAddSpeculativeExecutionIfHasBranchDivergencePass(LLVMPassManagerRef PM);
+void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM);
+void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM);
 
 #if LLVM_VERSION_MAJOR < 12
 void LLVMAddInstructionSimplifyPass(LLVMPassManagerRef PM);

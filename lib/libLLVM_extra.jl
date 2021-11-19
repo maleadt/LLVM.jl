@@ -75,6 +75,18 @@ function LLVMAddVectorCombinePass(PM)
     ccall((:LLVMAddVectorCombinePass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
+function LLVMAddSpeculativeExecutionIfHasBranchDivergencePass(PM)
+    ccall((:LLVMAddSpeculativeExecutionIfHasBranchDivergencePass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddSimpleLoopUnrollPass(PM)
+    ccall((:LLVMAddSimpleLoopUnrollPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
+function LLVMAddInductiveRangeCheckEliminationPass(PM)
+    ccall((:LLVMAddInductiveRangeCheckEliminationPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
 if version() < v"12"
 function LLVMAddInstructionSimplifyPass(PM)
     ccall((:LLVMAddInstructionSimplifyPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)

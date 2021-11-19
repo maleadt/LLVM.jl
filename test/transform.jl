@@ -84,6 +84,9 @@ ModulePassManager() do pm
     loop_vectorize!(pm)
     slpvectorize!(pm)
     load_store_vectorizer!(pm)
+    speculative_execution_if_has_branch_divergence!(pm)
+    simple_loop_unroll!(pm)
+    inductive_range_check_elimination!(pm)
 
     argument_promotion!(pm)
     constant_merge!(pm)
