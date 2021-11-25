@@ -19,8 +19,10 @@ using ..LLVM: libllvm
 
 llvm_version = if version() < v"12"
     "11"
+elseif version().major == 12
+    "12"
 else
-    string(LLVM.version().major)
+    "13"
 end
 libdir = joinpath(@__DIR__, "..", "lib")
 
