@@ -198,7 +198,7 @@ function LLVMExtraAddNamedMetadataOperand2(NMD, Val)
     ccall((:LLVMExtraAddNamedMetadataOperand2, libLLVMExtra), Cvoid, (LLVMNamedMDNodeRef, LLVMMetadataRef), NMD, Val)
 end
 
-if version().major == 12
+if v"12" <= version() < v"13"
 
 function LLVMCreateTypeAttribute(C, KindID, type_ref)
     ccall((:LLVMCreateTypeAttribute, libLLVMExtra), LLVMAttributeRef, (LLVMContextRef, Cuint, LLVMTypeRef), C, KindID, type_ref)

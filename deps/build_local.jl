@@ -9,7 +9,7 @@ using Pkg, Scratch, Preferences, Libdl
 # 1. Ensure that an appropriate LLVM_full_jll is installed
 Pkg.activate(; temp=true)
 llvm_assertions = try
-    cglobal(:_ZN4llvm24DisableABIBreakingChecksE, Cvoid)
+    cglobal((:_ZN4llvm24DisableABIBreakingChecksE, Base.libllvm_path()), Cvoid)
     false
 catch
     true
