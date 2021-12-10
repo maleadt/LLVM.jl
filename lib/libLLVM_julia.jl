@@ -55,3 +55,7 @@ end
 function LLVMAddJuliaLICMPass(PM)
     ccall(:LLVMExtraJuliaLICMPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
+
+function LLVMAddCPUFeaturesPass(PM)
+    ccall(:LLVMExtraAddCPUFeaturesPass,Cvoid,(LLVMPassManagerRef,), PM)
+end

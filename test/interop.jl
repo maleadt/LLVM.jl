@@ -122,6 +122,7 @@ lower_simdloop!(pm)
 remove_ni!(pm)
 late_lower_gc_frame!(pm)
 final_lower_gc!(pm)
+cpu_features!(pm)
 
 end
 end
