@@ -157,5 +157,9 @@ LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata);
 void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New);
 void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
 
+#if LLVM_VERSION_MAJOR >= 12
+LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
+#endif
+
 LLVM_C_EXTERN_C_END
 #endif

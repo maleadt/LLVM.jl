@@ -25,6 +25,10 @@ Context() do ctx end
 
 @dispose ctx=Context() begin end
 
+@dispose ctx=Context() begin
+    @test LLVM.supports_typed_pointers(ctx) isa Bool
+end
+
 end
 
 

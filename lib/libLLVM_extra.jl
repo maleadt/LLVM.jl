@@ -406,3 +406,9 @@ end
 function LLVMReplaceMDNodeOperandWith(MD, I, New)
     ccall((:LLVMReplaceMDNodeOperandWith, libLLVMExtra), Cvoid, (LLVMMetadataRef, Cuint, LLVMMetadataRef), MD, I, New)
 end
+
+if version() > v"12"
+function LLVMContextSupportsTypedPointers(Ctx)
+    ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
+end
+end
