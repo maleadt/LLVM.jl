@@ -165,5 +165,27 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        const char *Name);
 void LLVMAdjustPassManager(LLVMTargetMachineRef TM, LLVMPassManagerBuilderRef PMB);
 
+typedef void (*LLVMPassManagerBuilderExtensionFunction)(
+    void *Ctx, LLVMPassManagerBuilderRef PMB, LLVMPassManagerRef PM);
+
+typedef enum {
+    EP_EarlyAsPossible,
+    EP_ModuleOptimizerEarly,
+    EP_LoopOptimizerEnd,
+    EP_ScalarOptimizerLate,
+    EP_OptimizerLast,
+    EP_VectorizerStart,
+    EP_EnabledOnOptLevel0,
+    EP_Peephole,
+    EP_LateLoopOptimizations,
+    EP_CGSCCOptimizerLate,
+    EP_FullLinkTimeOptimizationEarly,
+    EP_FullLinkTimeOptimizationLast,
+} LLVMPassManagerBuilderExtensionPointTy;
+
+void LLVMPassManagerBuilderAddExtension(LLVMPassManagerBuilderRef PMB,
+                                        LLVMPassManagerBuilderExtensionPointTy Ty,
+                                        LLVMPassManagerBuilderExtensionFunction Fn, void *Ctx);
+
 LLVM_C_EXTERN_C_END
 #endif
