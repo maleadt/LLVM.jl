@@ -21,6 +21,7 @@
 #endif
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
+#include <llvm/Target/TargetMachine.h>
 
 using namespace llvm;
 using namespace llvm::legacy;
@@ -547,4 +548,10 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
 
     return wrap(unwrap(B)->CreateCall(FnT, unwrap(Fn), makeArrayRef(unwrap(Args), NumArgs),
                                       BundleArray, Name));
+}
+
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(TargetMachine, LLVMTargetMachineRef)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(PassManagerBuilder, LLVMPassManagerBuilderRef)
+void LLVMAdjustPassManager(LLVMTargetMachineRef TM, LLVMPassManagerBuilderRef PMB) {
+  unwrap(TM)->adjustPassManager(*unwrap(PMB));
 }

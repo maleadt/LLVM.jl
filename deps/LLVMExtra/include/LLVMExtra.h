@@ -4,6 +4,10 @@
 #include "llvm/Config/llvm-config.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
+typedef struct LLVMOpaqueTargetMachine *LLVMTargetMachineRef;
+// Can't include TargetMachine since that would inclue LLVMInitializeNativeTarget
+// #include <llvm-c/TargetMachine.h>
+#include <llvm-c/Transforms/PassManagerBuilder.h>
 
 LLVM_C_EXTERN_C_BEGIN
 
@@ -159,6 +163,7 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        LLVMValueRef *Args, unsigned NumArgs,
                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
                                        const char *Name);
+void LLVMAdjustPassManager(LLVMTargetMachineRef TM, LLVMPassManagerBuilderRef PMB);
 
 LLVM_C_EXTERN_C_END
 #endif

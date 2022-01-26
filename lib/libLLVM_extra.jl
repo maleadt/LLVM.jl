@@ -419,3 +419,6 @@ function LLVMBuildCallWithOpBundle(B, Fn, Args, NumArgs, Bundles, NumBundles, Na
     ccall((:LLVMBuildCallWithOpBundle, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Ptr{LLVMOperandBundleDefRef}, Cuint, Cstring), B, Fn, Args, NumArgs, Bundles, NumBundles, Name)
 end
 
+function LLVMAdjustPassManager(TM, PMB)
+    ccall((:LLVMAdjustPassManager, libLLVMExtra), Cvoid, (LLVMTargetMachineRef, LLVMPassManagerBuilderRef), TM, PMB)
+end
