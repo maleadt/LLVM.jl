@@ -18,6 +18,10 @@ PassManagerBuilder() do pmb
         adjust!(pmb, tm)
     end
 
+    extend!(pmb, LLVM.API.EP_EarlyAsPossible) do pmb, pm
+        verifier!(pm)
+    end
+
     Context() do ctx
     LLVM.Module("SomeModule"; ctx) do mod
         FunctionPassManager(mod) do fpm

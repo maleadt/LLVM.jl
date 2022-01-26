@@ -422,3 +422,25 @@ end
 function LLVMAdjustPassManager(TM, PMB)
     ccall((:LLVMAdjustPassManager, libLLVMExtra), Cvoid, (LLVMTargetMachineRef, LLVMPassManagerBuilderRef), TM, PMB)
 end
+
+const LLVMPassManagerBuilderExtensionFunction = Ptr{Cvoid}
+
+# See llvm/include/llvm/Transforms/IPO/PassManagerBuilder.h
+@cenum LLVMPassManagerBuilderExtensionPointTy::UInt32 begin
+    EP_EarlyAsPossible = 0
+    EP_ModuleOptimizerEarly = 1
+    EP_LoopOptimizerEnd = 2
+    EP_ScalarOptimizerLate = 3
+    EP_OptimizerLast = 4
+    EP_VectorizerStart = 5
+    EP_EnabledOnOptLevel0 = 6
+    EP_Peephole = 7
+    EP_LateLoopOptimizations= 8
+    EP_CGSCCOptimizerLate = 9
+    EP_FullLinkTimeOptimizationEarly = 10
+    EP_FullLinkTimeOptimizationLast = 11
+end
+
+function LLVMPassManagerBuilderAddExtension(PMB, Ty, Fn, Ctx)
+    ccall((:LLVMPassManagerBuilderAddExtension, libLLVMExtra), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerBuilderExtensionPointTy, LLVMPassManagerBuilderExtensionFunction, Ptr{Cvoid}), PMB, Ty, Fn, Ctx)
+end
