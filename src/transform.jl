@@ -3,7 +3,7 @@
 export PassManagerBuilder, dispose,
        optlevel!, sizelevel!,
        unit_at_a_time!, unroll_loops!, simplify_libcalls!, inliner!,
-       populate!
+       populate!, adjust!
 
 @checked struct PassManagerBuilder
     ref::API.LLVMPassManagerBuilderRef
@@ -50,6 +50,8 @@ populate!(fpm::FunctionPassManager, pmb::PassManagerBuilder) =
 populate!(mpm::ModulePassManager, pmb::PassManagerBuilder) =
     API.LLVMPassManagerBuilderPopulateModulePassManager(pmb, mpm)
 
+adjust!(pmb::PassManagerBuilder, tm::TargetMachine) =
+    API.LLVMAdjustPassManager(tm, pmb)
 
 ## auxiliary
 

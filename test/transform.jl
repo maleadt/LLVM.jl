@@ -14,6 +14,10 @@ PassManagerBuilder() do pmb
     simplify_libcalls!(pmb, false)
     inliner!(pmb, 0)
 
+    TargetMachine() do tm
+        adjust!(pmb, tm)
+    end
+
     Context() do ctx
     LLVM.Module("SomeModule"; ctx) do mod
         FunctionPassManager(mod) do fpm
