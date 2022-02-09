@@ -42,20 +42,32 @@ for backend in libllvm_backends,
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
         export $jl_fname
-        $jl_fname() =
-            $supported ? ccall(($(QuoteNode(api_fname)),libllvm[]), Cvoid, ()) :
-                         error($"The $backend back-end is not part of your LLVM library.")
-
+        function $jl_fname(error_on_use=true)
+            if $supported
+                ccall(($(QuoteNode(api_fname)),libllvm[]), Cvoid, ())
+            elseif error_on_use
+                error($"The $backend back-end is not part of your LLVM library.")
+            end
+        end
     end
 end
 
-# same, for initializing subsystems for all back-ends at once
+# same, for initializing subsystems for all back-ends at once,
+# reimplementes InitializeAll*s from the C-API which is `static inline`
 for component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
     jl_fname = Symbol(:Initialize, :All, component, :s)
-    api_fname = Symbol(:LLVM, jl_fname)
+    exprs = Expr[]
+    for backend in libllvm_backends
+        fname = Symbol(:Initialize, backend, component)
+        push!(exprs, :($fname(false)))
+    end
+
     @eval begin
         export $jl_fname
-        $jl_fname() = API.$api_fname()
+        function $jl_fname()
+            $(exprs...)
+            nothing
+        end
     end
 end
 

@@ -1,29 +1,5 @@
 using CEnum
 
-function LLVMInitializeAllTargetInfos()
-    ccall((:LLVMInitializeAllTargetInfos, libLLVMExtra), Cvoid, ())
-end
-
-function LLVMInitializeAllTargets()
-    ccall((:LLVMInitializeAllTargets, libLLVMExtra), Cvoid, ())
-end
-
-function LLVMInitializeAllTargetMCs()
-    ccall((:LLVMInitializeAllTargetMCs, libLLVMExtra), Cvoid, ())
-end
-
-function LLVMInitializeAllAsmPrinters()
-    ccall((:LLVMInitializeAllAsmPrinters, libLLVMExtra), Cvoid, ())
-end
-
-function LLVMInitializeAllAsmParsers()
-    ccall((:LLVMInitializeAllAsmParsers, libLLVMExtra), Cvoid, ())
-end
-
-function LLVMInitializeAllDisassemblers()
-    ccall((:LLVMInitializeAllDisassemblers, libLLVMExtra), Cvoid, ())
-end
-
 function LLVMInitializeNativeTarget()
     ccall((:LLVMInitializeNativeTarget, libLLVMExtra), LLVMBool, ())
 end
