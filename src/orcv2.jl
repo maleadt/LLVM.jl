@@ -341,6 +341,11 @@ function CustomMaterializationUnit(name, symbols, materialize, discard, init=C_N
     return this
 end
 
+function absolute_symbols(symbols)
+    ref = API.LLVMOrcAbsoluteSymbols(symbols, length(symbols))
+    MaterializationUnit(ref)
+end
+
 @checked struct IndirectStubsManager
     ref::API.LLVMOrcIndirectStubsManagerRef
 end

@@ -84,9 +84,9 @@ end
     LLJIT(;tm=JITTargetMachine()) do lljit
         jd = JITDylib(lljit)
 
-        ThreadSafeContext() do ts_ctx
+        sym = "SomeFunction"
+        obj = ThreadSafeContext() do ts_ctx
             ctx = context(ts_ctx)
-            sym = "SomeFunction"
 
             mod = LLVM.Module("jit"; ctx)
             ft = LLVM.FunctionType(LLVM.VoidType(ctx))
@@ -100,16 +100,69 @@ end
             verify(mod)
 
             tm  = JITTargetMachine()
-            obj = emit(tm, mod, LLVM.API.LLVMObjectFile)
+            return emit(tm, mod, LLVM.API.LLVMObjectFile)
+        end
+        add!(lljit, jd, MemoryBuffer(obj))
+
+        addr = lookup(lljit, sym)
+
+        @test pointer(addr) != C_NULL
+
+        empty!(jd)
+        @test_throws LLVMException lookup(lljit, sym)
+    end
+
+    LLJIT(;tm=JITTargetMachine()) do lljit
+        jd = JITDylib(lljit)
+
+        sym = "SomeFunction"
+        obj = ThreadSafeContext() do ts_ctx
+            ctx = context(ts_ctx)
+
+            mod = LLVM.Module("jit"; ctx)
+            ft = LLVM.FunctionType(LLVM.Int32Type(ctx))
+            fn = LLVM.Function(mod, sym, ft)
+
+            gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(ctx), "gv")
+            LLVM.extinit!(gv, true)
+
+            Builder(ctx) do builder
+                entry = BasicBlock(fn, "entry"; ctx)
+                position!(builder, entry)
+                val = load!(builder, gv)
+                ret!(builder, val)
+            end
+            verify(mod)
+
+            tm  = JITTargetMachine()
+            return emit(tm, mod, LLVM.API.LLVMObjectFile)
+        end
+
+        data = Ref{Int32}(42)
+        GC.@preserve data begin
+            address = LLVM.API.LLVMOrcJITTargetAddress(
+                reinterpret(UInt, Base.unsafe_convert(Ptr{Int32}, data)))
+            flags = LLVM.API.LLVMJITSymbolFlags(
+                LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
+            symbol = LLVM.API.LLVMJITEvaluatedSymbol(
+                address, flags)
+            gv = LLVM.API.LLVMJITCSymbolMapPair(
+                    mangle(lljit, "gv"), symbol)
+
+            mu = LLVM.absolute_symbols(Ref(gv))
+            LLVM.define(jd, mu)
+
             add!(lljit, jd, MemoryBuffer(obj))
 
             addr = lookup(lljit, sym)
-
             @test pointer(addr) != C_NULL
 
-            empty!(jd)
-            @test_throws LLVMException lookup(lljit, sym)
+            @test ccall(pointer(addr), Int32, ()) == 42
+            data[] = -1
+            @test ccall(pointer(addr), Int32, ()) == -1
         end
+        empty!(jd)
+        @test_throws LLVMException lookup(lljit, sym)
     end
 end
 
