@@ -7,12 +7,6 @@
 
 LLVM_C_EXTERN_C_BEGIN
 
-void LLVMInitializeAllTargetInfos(void);
-void LLVMInitializeAllTargets(void);
-void LLVMInitializeAllTargetMCs(void);
-void LLVMInitializeAllAsmPrinters(void);
-void LLVMInitializeAllAsmParsers(void);
-void LLVMInitializeAllDisassemblers(void);
 LLVMBool LLVMInitializeNativeTarget(void);
 LLVMBool LLVMInitializeNativeAsmParser(void);
 LLVMBool LLVMInitializeNativeAsmPrinter(void);

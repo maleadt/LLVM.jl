@@ -29,36 +29,6 @@ using namespace llvm::legacy;
 //
 // The LLVMInitialize* functions and friends are defined `static inline`
 
-void LLVMInitializeAllTargetInfos()
-{
-    InitializeAllTargetInfos();
-}
-
-void LLVMInitializeAllTargets()
-{
-    InitializeAllTargets();
-}
-
-void LLVMInitializeAllTargetMCs()
-{
-    InitializeAllTargetMCs();
-}
-
-void LLVMInitializeAllAsmPrinters()
-{
-    InitializeAllAsmPrinters();
-}
-
-void LLVMInitializeAllAsmParsers()
-{
-    InitializeAllAsmParsers();
-}
-
-void LLVMInitializeAllDisassemblers()
-{
-    InitializeAllDisassemblers();
-}
-
 LLVMBool LLVMInitializeNativeTarget()
 {
     return InitializeNativeTarget();
