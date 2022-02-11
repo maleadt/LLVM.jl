@@ -6,24 +6,28 @@ LLVMExtra_jll = Base.UUID("dad2f222-ce93-54a1-a47d-0025e8a3acab")
 
 using Pkg, Scratch, Preferences, Libdl
 
-# 1. Ensure that an appropriate LLVM_full_jll is installed
-Pkg.activate(; temp=true)
-llvm_assertions = try
-    cglobal((:_ZN4llvm24DisableABIBreakingChecksE, Base.libllvm_path()), Cvoid)
-    false
-catch
-    true
-end
-LLVM = if llvm_assertions
-    Pkg.add(name="LLVM_full_assert_jll", version=Base.libllvm_version)
-    using LLVM_full_assert_jll
-    LLVM_full_assert_jll
+if length(ARGS) == 1
+    LLVM_DIR = ARGS[1]
 else
-    Pkg.add(name="LLVM_full_jll", version=Base.libllvm_version)
-    using LLVM_full_jll
-    LLVM_full_jll
+    # 1. Ensure that an appropriate LLVM_full_jll is installed
+    Pkg.activate(; temp=true)
+    llvm_assertions = try
+        cglobal((:_ZN4llvm24DisableABIBreakingChecksE, Base.libllvm_path()), Cvoid)
+        false
+    catch
+        true
+    end
+    LLVM = if llvm_assertions
+        Pkg.add(name="LLVM_full_assert_jll", version=Base.libllvm_version)
+        using LLVM_full_assert_jll
+        LLVM_full_assert_jll
+    else
+        Pkg.add(name="LLVM_full_jll", version=Base.libllvm_version)
+        using LLVM_full_jll
+        LLVM_full_jll
+    end
+    LLVM_DIR = joinpath(LLVM.artifact_dir, "lib", "cmake", "llvm")
 end
-LLVM_DIR = joinpath(LLVM.artifact_dir, "lib", "cmake", "llvm")
 
 # 2. Get a scratch directory
 scratch_dir = get_scratch!(LLVMExtra_jll, "build")
