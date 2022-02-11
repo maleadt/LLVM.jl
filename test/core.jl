@@ -1047,7 +1047,7 @@ LLVM.Module("SomeModule"; ctx) do mod
 
     fn = LLVM.Function(mod, intr)
     @test fn isa LLVM.Function
-    @test eltype(llvmtype(fn)) == ft
+    @test llvmeltype(fn) == ft
     @test isintrinsic(fn)
 
     @test intr == Intrinsic("llvm.trap")
@@ -1074,7 +1074,7 @@ LLVM.Module("SomeModule"; ctx) do mod
 
     fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
     @test fn isa LLVM.Function
-    @test eltype(llvmtype(fn)) == ft
+    @test llvmeltype(fn) == ft
     @test isintrinsic(fn)
 
     @test intr == Intrinsic("llvm.sin")

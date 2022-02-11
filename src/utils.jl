@@ -49,8 +49,8 @@ function clone(f::Function; value_map::Dict{Value,Value}=Dict{Value,Value}())
     end
 
     # Create a new function type...
-    vararg = isvararg(eltype(llvmtype(f)))
-    fty = FunctionType(return_type(eltype(llvmtype(f))), argtypes; vararg)
+    vararg = isvararg(llvmeltype(f))
+    fty = FunctionType(return_type(llvmeltype(f)), argtypes; vararg)
 
     # Create the new function...
     new_f = Function(parent(f), name(f), fty)
