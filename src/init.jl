@@ -25,7 +25,7 @@ const libllvm_backends = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :
 
 function backends()
     filter(libllvm_backends) do backend
-        library = Libdl.dlopen(libllvm[])
+        library = Libdl.dlopen(libllvm)
         initializer = "LLVMInitialize$(backend)Target"
         Libdl.dlsym_e(library, initializer) !== C_NULL
     end
@@ -36,7 +36,7 @@ for backend in libllvm_backends,
     component in [:Target, :AsmPrinter, :AsmParser, :Disassembler, :TargetInfo, :TargetMC]
 
     initializer = "LLVMInitialize$(backend)Target"
-    supported = :(Libdl.dlsym_e(Libdl.dlopen(libllvm[]), $initializer) !== C_NULL)
+    supported = :(Libdl.dlsym_e(Libdl.dlopen(libllvm), $initializer) !== C_NULL)
 
     jl_fname = Symbol(:Initialize, backend, component)
     api_fname = Symbol(:LLVM, jl_fname)
@@ -44,7 +44,7 @@ for backend in libllvm_backends,
         export $jl_fname
         function $jl_fname(error_on_use=true)
             if $supported
-                ccall(($(QuoteNode(api_fname)),libllvm[]), Cvoid, ())
+                ccall(($(QuoteNode(api_fname)),libllvm), Cvoid, ())
             elseif error_on_use
                 error($"The $backend back-end is not part of your LLVM library.")
             end
