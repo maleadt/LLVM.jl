@@ -22,51 +22,56 @@ export backends
 const libllvm_backends = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai,
                           :MSP430, :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ,
                           :VE, :WebAssembly, :X86, :XCore]
+const libllvm_components = [:Target, :TargetInfo, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
 
-function backends()
-    filter(libllvm_backends) do backend
-        library = Libdl.dlopen(libllvm)
+# discover supported back-ends and their components by looking at available symbols.
+# this reimplements LLVM macros and `static inline` functions that are hard to call.
+Libdl.dlopen(libllvm) do library
+    supported_backends = filter(libllvm_backends) do backend
         initializer = "LLVMInitialize$(backend)Target"
-        Libdl.dlsym_e(library, initializer) !== C_NULL
+        Libdl.dlsym(library, initializer; throw_error=false) !== nothing
     end
-end
+    @eval backends() = $supported_backends
 
-# generate subsystem initialization routines for every back-end
-for backend in libllvm_backends,
-    component in [:Target, :AsmPrinter, :AsmParser, :Disassembler, :TargetInfo, :TargetMC]
+    # generate subsystem initialization routines for every back-end
+    supported_components = Dict(component => [] for component in libllvm_components)
+    for backend in libllvm_backends
+        backend_supported = backend in supported_backends
 
-    initializer = "LLVMInitialize$(backend)Target"
-    supported = :(Libdl.dlsym_e(Libdl.dlopen(libllvm), $initializer) !== C_NULL)
+        for component in libllvm_components
+            jl_fname = Symbol(:Initialize, backend, component)
+            @eval export $jl_fname
 
-    jl_fname = Symbol(:Initialize, backend, component)
-    api_fname = Symbol(:LLVM, jl_fname)
-    @eval begin
-        export $jl_fname
-        function $jl_fname(error_on_use=true)
-            if $supported
-                ccall(($(QuoteNode(api_fname)),libllvm), Cvoid, ())
-            elseif error_on_use
-                error($"The $backend back-end is not part of your LLVM library.")
+            api_fname = Symbol(:LLVM, jl_fname)
+            if backend_supported
+                component_supported = Libdl.dlsym(library, api_fname; throw_error=false) !== nothing
+                if component_supported
+                    push!(supported_components[component], backend)
+                    @eval $jl_fname() = ccall(($(QuoteNode(api_fname)),libllvm), Cvoid, ())
+                else
+                    @eval $jl_fname() = error($"The $backend back-end does not contain a $component component.")
+                end
+            else
+                @eval $jl_fname() = error($"The $backend back-end is not part of your LLVM library.")
             end
         end
     end
-end
 
-# same, for initializing subsystems for all back-ends at once,
-# reimplementes InitializeAll*s from the C-API which is `static inline`
-for component in [:TargetInfo, :Target, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
-    jl_fname = Symbol(:Initialize, :All, component, :s)
-    exprs = Expr[]
-    for backend in libllvm_backends
-        fname = Symbol(:Initialize, backend, component)
-        push!(exprs, :($fname(false)))
-    end
+    # same, for initializing subsystems for all back-ends at once
+    for component in keys(supported_components)
+        jl_fname = Symbol(:Initialize, :All, component, :s)
+        exprs = Expr[]
+        for backend in supported_components[component]
+            fname = Symbol(:Initialize, backend, component)
+            push!(exprs, :($fname()))
+        end
 
-    @eval begin
-        export $jl_fname
-        function $jl_fname()
-            $(exprs...)
-            nothing
+        @eval begin
+            export $jl_fname
+            function $jl_fname()
+                $(exprs...)
+                return
+            end
         end
     end
 end
