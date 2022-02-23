@@ -4,7 +4,7 @@
 # the pre-built LLVMExtra_jll might not be loadable on this platform
 LLVMExtra_jll = Base.UUID("dad2f222-ce93-54a1-a47d-0025e8a3acab")
 
-using Pkg, Scratch, Preferences, Libdl
+using Pkg, Scratch, Preferences, Libdl, CMake_jll
 
 # 1. Ensure that an appropriate LLVM_full_jll is installed
 Pkg.activate(; temp=true)
@@ -32,8 +32,8 @@ source_dir = joinpath(@__DIR__, "LLVMExtra")
 
 # Build!
 @info "Building" source_dir scratch_dir LLVM_DIR
-run(`cmake -DLLVM_DIR=$(LLVM_DIR) -B$(scratch_dir) -S$(source_dir)`)
-run(`cmake --build $(scratch_dir)`)
+run(`$(cmake()) -DLLVM_DIR=$(LLVM_DIR) -B$(scratch_dir) -S$(source_dir)`)
+run(`$(cmake()) --build $(scratch_dir)`)
 
 # Discover built libraries
 built_libs = filter(readdir(joinpath(scratch_dir, "lib"))) do file
