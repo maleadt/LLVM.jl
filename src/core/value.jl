@@ -40,9 +40,10 @@ end
 
 ## general APIs
 
-export llvmtype, name, name!, replace_uses!, isconstant, isundef, context
+export llvmtype, llvmeltype, name, name!, replace_uses!, isconstant, isundef, context
 
 llvmtype(val::Value) = LLVMType(API.LLVMTypeOf(val))
+llvmeltype(val::Value) = eltype(llvmtype(val))
 
 name(val::Value) = unsafe_string(API.LLVMGetValueName(val))
 name!(val::Value, name::String) = API.LLVMSetValueName(val, name)

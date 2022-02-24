@@ -133,7 +133,7 @@ register(ConstantAggregateZero, API.LLVMConstantAggregateZeroValueKind)
 # array interface
 # FIXME: can we reuse the ::ConstantArray functionality with ConstantAggregateZero values?
 #        probably works fine if we just get rid of the refcheck
-Base.eltype(caz::ConstantAggregateZero) = eltype(llvmtype(caz))
+Base.eltype(caz::ConstantAggregateZero) = llvmeltype(caz)
 Base.size(caz::ConstantAggregateZero) = (0,)
 Base.length(caz::ConstantAggregateZero) = 0
 Base.axes(caz::ConstantAggregateZero) = (Base.OneTo(0),)
@@ -196,7 +196,7 @@ function Base.collect(ca::ConstantArray)
 end
 
 # array interface
-Base.eltype(ca::ConstantArray) = eltype(llvmtype(ca))
+Base.eltype(ca::ConstantArray) = llvmeltype(ca)
 function Base.size(ca::ConstantArray)
     dims = Int[]
     typ = llvmtype(ca)
