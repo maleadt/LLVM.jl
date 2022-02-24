@@ -49,3 +49,7 @@ set_preferences!(
     "libLLVMExtra_path" => lib_path;
     force=true,
 )
+
+# Copy the preferences to `test/` as well to work around Pkg.jl#2500
+cp(joinpath(dirname(@__DIR__), "LocalPreferences.toml"),
+   joinpath(dirname(@__DIR__), "test", "LocalPreferences.toml"))
