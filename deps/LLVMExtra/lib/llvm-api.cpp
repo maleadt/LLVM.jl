@@ -21,6 +21,8 @@
 #endif
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
+#include <llvm/Target/TargetMachine.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 using namespace llvm;
 using namespace llvm::legacy;
@@ -517,4 +519,18 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
 
     return wrap(unwrap(B)->CreateCall(FnT, unwrap(Fn), makeArrayRef(unwrap(Args), NumArgs),
                                       BundleArray, Name));
+}
+
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(TargetMachine, LLVMTargetMachineRef)
+void LLVMAdjustPassManager(LLVMTargetMachineRef TM, LLVMPassManagerBuilderRef PMB) {
+  unwrap(TM)->adjustPassManager(*unwrap(PMB));
+}
+
+void LLVMPassManagerBuilderAddExtension(LLVMPassManagerBuilderRef PMB,
+                                        LLVMPassManagerBuilderExtensionPointTy Ty,
+                                        LLVMPassManagerBuilderExtensionFunction Fn, void *Ctx) {
+  PassManagerBuilder &Builder = *unwrap(PMB);
+  Builder.addExtension((PassManagerBuilder::ExtensionPointTy)Ty,
+    [&](const PassManagerBuilder &Builder, legacy::PassManagerBase &PM) {
+        Fn(Ctx, wrap(const_cast<PassManagerBuilder*>(&Builder)), wrap(&PM)); });
 }

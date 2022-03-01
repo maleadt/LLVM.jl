@@ -3,11 +3,17 @@
 export PassManagerBuilder, dispose,
        optlevel!, sizelevel!,
        unit_at_a_time!, unroll_loops!, simplify_libcalls!, inliner!,
-       populate!
+       populate!, adjust!, extend!
+
+mutable struct Callback
+    fn
+end
 
 @checked struct PassManagerBuilder
     ref::API.LLVMPassManagerBuilderRef
+    rooted::Vector{Callback}
 end
+PassManagerBuilder(ref) = PassManagerBuilder(ref, Callback[])
 
 Base.unsafe_convert(::Type{API.LLVMPassManagerBuilderRef}, pmb::PassManagerBuilder) = pmb.ref
 
@@ -50,6 +56,23 @@ populate!(fpm::FunctionPassManager, pmb::PassManagerBuilder) =
 populate!(mpm::ModulePassManager, pmb::PassManagerBuilder) =
     API.LLVMPassManagerBuilderPopulateModulePassManager(pmb, mpm)
 
+adjust!(pmb::PassManagerBuilder, tm::TargetMachine) =
+    API.LLVMAdjustPassManager(tm, pmb)
+
+function extend_callback(ctx, pmb, pm)
+    cb = Base.unsafe_pointer_to_objref(ctx)
+    cb.fn(PassManagerBuilder(pmb), PassManager(pm))
+    return nothing
+end
+
+function extend!(pmb::PassManagerBuilder, ep, fn)
+    cb = Callback(fn)
+    push!(pmb.rooted, cb) # root through pmb
+    c_cb = @cfunction(extend_callback, Cvoid, (Ptr{Cvoid}, API.LLVMPassManagerBuilderRef, API.LLVMPassManagerRef))
+    API.LLVMPassManagerBuilderAddExtension(pmb, ep, c_cb, Base.pointer_from_objref(cb))
+end
+
+extend!(fn, pmb::PassManagerBuilder, ep) = extend!(pmb, ep, fn)
 
 ## auxiliary
 

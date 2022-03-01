@@ -18,6 +18,12 @@ TargetMachine(t::Target, triple::String, cpu::String="", features::String="";
     TargetMachine(API.LLVMCreateTargetMachine(t, triple, cpu, features, optlevel,
                                               reloc, code))
 
+function TargetMachine()
+    host_triple = triple()
+    host_t = Target(triple=host_triple)
+    TargetMachine(host_t, host_triple)
+end
+
 dispose(tm::TargetMachine) = API.LLVMDisposeTargetMachine(tm)
 
 function TargetMachine(f::Core.Function, args...; kwargs...)

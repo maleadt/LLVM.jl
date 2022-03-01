@@ -4,6 +4,10 @@
 #include "llvm/Config/llvm-config.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
+typedef struct LLVMOpaqueTargetMachine *LLVMTargetMachineRef;
+// Can't include TargetMachine since that would inclue LLVMInitializeNativeTarget
+// #include <llvm-c/TargetMachine.h>
+#include <llvm-c/Transforms/PassManagerBuilder.h>
 
 LLVM_C_EXTERN_C_BEGIN
 
@@ -153,6 +157,29 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        LLVMValueRef *Args, unsigned NumArgs,
                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
                                        const char *Name);
+void LLVMAdjustPassManager(LLVMTargetMachineRef TM, LLVMPassManagerBuilderRef PMB);
+
+typedef void (*LLVMPassManagerBuilderExtensionFunction)(
+    void *Ctx, LLVMPassManagerBuilderRef PMB, LLVMPassManagerRef PM);
+
+typedef enum {
+    EP_EarlyAsPossible,
+    EP_ModuleOptimizerEarly,
+    EP_LoopOptimizerEnd,
+    EP_ScalarOptimizerLate,
+    EP_OptimizerLast,
+    EP_VectorizerStart,
+    EP_EnabledOnOptLevel0,
+    EP_Peephole,
+    EP_LateLoopOptimizations,
+    EP_CGSCCOptimizerLate,
+    EP_FullLinkTimeOptimizationEarly,
+    EP_FullLinkTimeOptimizationLast,
+} LLVMPassManagerBuilderExtensionPointTy;
+
+void LLVMPassManagerBuilderAddExtension(LLVMPassManagerBuilderRef PMB,
+                                        LLVMPassManagerBuilderExtensionPointTy Ty,
+                                        LLVMPassManagerBuilderExtensionFunction Fn, void *Ctx);
 
 LLVM_C_EXTERN_C_END
 #endif
