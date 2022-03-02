@@ -31,9 +31,12 @@ isdir(scratch_dir) && rm(scratch_dir; recursive=true)
 source_dir = joinpath(@__DIR__, "LLVMExtra")
 
 # Build!
-@info "Building" source_dir scratch_dir LLVM_DIR
-run(`$(cmake()) -DLLVM_DIR=$(LLVM_DIR) -B$(scratch_dir) -S$(source_dir)`)
-run(`$(cmake()) --build $(scratch_dir)`)
+mktempdir() do build_dir
+    @info "Building" source_dir scratch_dir build_dir LLVM_DIR
+    run(`$(cmake()) -DLLVM_DIR=$(LLVM_DIR) -DCMAKE_INSTALL_PREFIX=$(scratch_dir) -B$(build_dir) -S$(source_dir)`)
+    run(`$(cmake()) --build $(build_dir)`)
+    run(`$(cmake()) --install $(build_dir)`)
+end
 
 # Discover built libraries
 built_libs = filter(readdir(joinpath(scratch_dir, "lib"))) do file
