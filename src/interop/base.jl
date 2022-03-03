@@ -47,35 +47,53 @@ function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=
     end
 end
 
+
 """
-    isboxed(typ::Type)
+    isboxed(typ::Type; [ctx::Context])
 
 Return if a type would be boxed when instantiated in the code generator.
 """
-function isboxed(typ::Type)
+function isboxed(typ::Type; ctx::Union{Nothing,Context}=nothing)
     isboxed_ref = Ref{Bool}()
-    ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef, (Any, Ptr{Bool}), typ, isboxed_ref)
+    if VERSION >= v"1.9.0-DEV.115"
+        if ctx === nothing
+            Context() do ctx
+                ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
+                      (Any, LLVM.API.LLVMContextRef, Ptr{Bool}), typ, ctx, isboxed_ref)
+            end
+        else
+            ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
+                  (Any, LLVM.API.LLVMContextRef, Ptr{Bool}), typ, ctx, isboxed_ref)
+        end
+    else
+        ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
+              (Any, Ptr{Bool}), typ, isboxed_ref)
+    end
     return isboxed_ref[]
 end
 
 """
-    convert(LLVMType, typ::Type, [ctx::Context]; allow_boxed=true)
+    convert(LLVMType, typ::Type, ctx::Context; allow_boxed=true)
 
-Convert a Julia type `typ` to its LLVM representation. Fails if the type would be boxed.
-If `ctx` is specified, the returned LLVM type will be valid in that context.
+Convert a Julia type `typ` to its LLVM representation in context `ctx`.
+The `allow_boxed` argument determines whether boxed types are allowed.
 """
-function Base.convert(::Type{LLVMType}, typ::Type; ctx::Union{Nothing,Context}=nothing,
+function Base.convert(::Type{LLVMType}, typ::Type; ctx::Context,
                       allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
-    llvmtyp = LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-                             (Any, Ptr{Bool}), typ, isboxed_ref))
+    llvmtyp = if VERSION >= v"1.9.0-DEV.115"
+        LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
+                        (Any, Context, Ptr{Bool}), typ, ctx, isboxed_ref))
+    else
+        LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
+                        (Any, Ptr{Bool}), typ, isboxed_ref))
+    end
     if !allow_boxed && isboxed_ref[]
         error("Conversion of boxed type $typ is not allowed")
     end
 
-    if ctx !== nothing && ctx != context(llvmtyp)
-        # FIXME: Julia currently doesn't offer an API to fetch types in a specific context
-
+    # HACK: older versions of Julia don't offer an API to fetch types in a specific context
+    if VERSION < v"1.9.0-DEV.115" && ctx != context(llvmtyp)
         if llvmtyp == LLVM.VoidType(context(llvmtyp))
             return LLVM.VoidType(ctx)
         end

@@ -32,12 +32,13 @@ end
 end
 @eval mutable struct NonGhostType2 end
 
+@test isboxed(NonGhostType2)
 @test isghosttype(GhostType)
 @test !isghosttype(NonGhostType1)
 @test !isghosttype(NonGhostType2)
-@test isboxed(NonGhostType2)
 
 Context() do ctx
+    @test isboxed(NonGhostType2; ctx)
     @test isghosttype(GhostType; ctx)
     @test !isghosttype(NonGhostType1; ctx)
     @test !isghosttype(NonGhostType2; ctx)
