@@ -68,7 +68,7 @@ include("utils.jl")
 if LLVM.has_orc_v1()
     include("orc.jl")
 end
-if LLVM.has_orc_v2()
+if LLVM.has_orc_v2() && !(LLVM.version() < v"13" && LLVM.is_asserts())
     include("orcv2.jl")
 end
 
