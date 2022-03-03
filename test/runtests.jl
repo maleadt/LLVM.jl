@@ -1,12 +1,9 @@
 using LLVM
-using LLVMExtra_jll
 using Test
 
 if Base.JLOptions().debug_level < 2
     @warn "It is recommended to run the LLVM.jl test suite with -g2"
 end
-
-@info "Using libLLVMExtra from $(LLVM.API.libLLVMExtra)"
 
 @testset "LLVM" begin
 
@@ -71,7 +68,7 @@ include("utils.jl")
 if LLVM.has_orc_v1()
     include("orc.jl")
 end
-if LLVM.has_orc_v2()
+if LLVM.has_orc_v2() && !(LLVM.version() < v"13" && LLVM.is_asserts())
     include("orcv2.jl")
 end
 

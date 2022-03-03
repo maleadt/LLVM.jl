@@ -12,21 +12,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.6', '^1.7', 'nightly']
+        version: ['1.6', '1.7', '^1.8.0-beta1', 'nightly']
         os: [ubuntu-latest, macOS-latest, windows-latest]
         arch: [x64]
-        libLLVMExtra: [local, packaged]
+        libLLVMExtra: [packaged]
         assertions: [false]
-        exclude:
-          # our simple build_local.jl cannot build libLLVMExtra on Windows
-          - os: windows-latest
-            arch: x64
-            libLLVMExtra: local
         include:
-          # specially-handled assertions build
+          # special test with a locally-built libLLVMExtra
           - os: ubuntu-latest
             arch: x64
             libLLVMExtra: local
+            version: '1.7'
+            assertions: true
+          # special test with LLVM assertions enabled
+          # TODO: enable this across all versions
+          #       (needs LLVM.jl fixes, and julia-actions/setup-julia support)
+          - os: ubuntu-latest
+            arch: x64
+            libLLVMExtra: packaged
+            version: '1.7'
+            assertions: true
+          - os: ubuntu-latest
+            arch: x64
+            libLLVMExtra: packaged
             version: '1.8'
             assertions: true
     steps:

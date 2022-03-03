@@ -18,3 +18,9 @@ function runtime_version()
         VersionNumber(m[:version])
     end
 end
+
+function is_asserts()
+    Libdl.dlopen(libllvm) do handle
+        Libdl.dlsym(handle, "_ZN4llvm23EnableABIBreakingChecksE"; throw_error=false) !== nothing
+    end
+end

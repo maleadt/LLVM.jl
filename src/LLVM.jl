@@ -18,17 +18,6 @@ if libllvm === nothing
              If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
 end
 
-# our JLL doesn't support LLVM with assertions yet, so loading LLVMExtra might fail.
-Libdl.dlopen(libllvm) do handle
-    if Libdl.dlsym(handle, "_ZN4llvm23EnableABIBreakingChecksE"; throw_error=false) !== nothing
-        @warn """You are using a version of Julia that links against a build of LLVM with assertions enabled.
-
-                    This is not supported out-of-the-box, and you need a build of libLLVMExtra that supports this.
-                    Use `deps/build_local.jl` for that, add the resulting LocalPreferences.toml to your project
-                    and add a direct dependency on LLVMExtra_jll to pick up those preferences."""
-    end
-end
-
 module API
 using CEnum
 using ..LLVM
