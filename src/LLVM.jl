@@ -10,27 +10,23 @@ using Libdl
 include("base.jl")
 include("version.jl")
 
-const libllvm = Base.libllvm_path()
-if libllvm === nothing
-    error("""Cannot find the LLVM library loaded by Julia.
-
-             Please use a version of Julia that has been built with USE_LLVM_SHLIB=1 (like the official binaries).
-             If you are, please file an issue and attach the output of `Libdl.dllist()`.""")
-end
+# we don't embed the full path to LLVM, because the location might be different at run time.
+const libllvm = basename(String(Base.libllvm_path()))
+const libllvm_version = Base.libllvm_version
 
 module API
 using CEnum
 using ..LLVM
 using ..LLVM: libllvm
 
-llvm_version = if version() < v"12"
+const llvm_version = if version() < v"12"
     "11"
 elseif version().major == 12
     "12"
 else
     "13"
 end
-libdir = joinpath(@__DIR__, "..", "lib")
+const libdir = joinpath(@__DIR__, "..", "lib")
 
 if !isdir(libdir)
     error("""
@@ -87,13 +83,20 @@ include("deprecated.jl")
 ## initialization
 
 function __init__()
+    @debug "Using LLVM $libllvm_version at $(Base.libllvm_path())"
+
     # sanity checks
-    @debug "Using LLVM $(version()) at $libllvm"
-    if libllvm != Base.libllvm_path()
-        @error "Mismatch between LLVM library used during precompilation ($libllvm) and the current run-time situation ($(Base.libllvm_path())). Please recompile the package."
+    if libllvm_version != Base.libllvm_version
+        # this checks that the precompilation image isn't being used
+        # after having upgraded Julia and the contained LLVM library.
+        @error """LLVM.jl was precompiled for LLVM $libllvm_version, whereas you are now using LLVM $(Base.libllvm_version).
+                  Please re-compile LLVM.jl."""
     end
     if version() !== runtime_version()
-        @error "Using a different version of LLVM ($(runtime_version())) than the one shipped with Julia ($(version())); this is unsupported"
+        # this is probably caused by a combination of USE_SYSTEM_LLVM
+        # and an LLVM upgrade without recompiling Julia.
+        @error """Julia was compiled for LLVM $(version()), whereas you are now using LLVM $(runtime_version()).
+                  Please re-compile Julia and LLVM.jl (but note that USE_SYSTEM_LLVM is not a supported configuration)."""
     end
 
     _install_handlers()

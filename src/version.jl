@@ -2,7 +2,7 @@
 
 export version
 
-version() = Base.libllvm_version
+version() = libllvm_version
 
 function runtime_version()
     # FIXME: add a proper C API to LLVM
