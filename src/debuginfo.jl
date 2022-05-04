@@ -139,6 +139,16 @@ register(DISubProgram, API.LLVMDISubprogramMetadataKind)
 line(subprogram::DISubProgram) = Int(API.LLVMDISubprogramGetLine(subprogram))
 
 
+## compile unit
+
+export DICompileUnit
+
+@checked struct DICompileUnit <: DIScope
+    ref::API.LLVMMetadataRef
+end
+register(DICompileUnit, API.LLVMDICompileUnitMetadataKind)
+
+
 ## other
 
 export DEBUG_METADATA_VERSION, strip_debuginfo!
