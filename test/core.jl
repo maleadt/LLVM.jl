@@ -779,6 +779,33 @@ end
 Context() do ctx
     str = MDString("foo"; ctx)
     @test string(str) == "foo"
+
+    # wrap as Value
+    val = Value(str; ctx)
+    @test val isa LLVM.MetadataAsValue
+
+    # back to Metadata
+    md = Metadata(val)
+    @test md == str
+
+    # more specific conversion
+    @test convert(MDString, val) == str
+end
+
+Context() do ctx
+    int = ConstantInt(42; ctx)
+    @test convert(Int, int) == 42
+
+    # wrap as Metadata
+    md = Metadata(int)
+    @test md isa LLVM.ValueAsMetadata
+
+    # back to Value
+    val = Value(md; ctx)
+    @test val == int
+
+    # more specific conversion
+    @test convert(ConstantInt, val) == int
 end
 
 Context() do ctx

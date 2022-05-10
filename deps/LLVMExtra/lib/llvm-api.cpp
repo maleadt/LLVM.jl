@@ -518,3 +518,11 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
     return wrap(unwrap(B)->CreateCall(FnT, unwrap(Fn), makeArrayRef(unwrap(Args), NumArgs),
                                       BundleArray, Name));
 }
+
+LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata) {
+  auto *MD = unwrap(Metadata);
+  if (auto *VAM = dyn_cast<ValueAsMetadata>(MD))
+    return wrap(VAM->getValue());
+  else
+    return wrap(MetadataAsValue::get(*unwrap(C), MD));
+}
