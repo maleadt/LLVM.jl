@@ -48,7 +48,11 @@ end
 end
 register(MetadataAsValue, API.LLVMMetadataAsValueValueKind)
 
-Value(md::Metadata; ctx::Context) = MetadataAsValue(API.LLVMMetadataAsValue(ctx, md))
+# NOTE: this can be used to both pack e.g. metadata as a value, and to extract the
+#       value from an ValueAsMetadata, so we don't type-assert narrowly here
+Value(md::Metadata; ctx::Context) = Value(API.LLVMMetadataAsValue2(ctx, md))
+
+Base.convert(T::Type{<:Value}, val::Metadata) = Value(val)::T
 
 # NOTE: we can't do this automatically, as we can't query the context of metadata...
 #       add wrappers to do so? would also simplify, e.g., `string(::MDString)`
@@ -72,7 +76,7 @@ register(LocalAsMetadata, API.LLVMLocalAsMetadataMetadataKind)
 #       metadata from an MetadataAsValue, so we don't type-assert narrowly here
 Metadata(val::Value) = Metadata(API.LLVMValueAsMetadata(val))
 
-Base.convert(::Type{Metadata}, val::Value) = Metadata(val)
+Base.convert(T::Type{<:Metadata}, val::Value) = Metadata(val)::T
 
 
 ## values
