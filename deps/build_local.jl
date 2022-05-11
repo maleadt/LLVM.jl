@@ -55,4 +55,4 @@ set_preferences!(
 
 # Copy the preferences to `test/` as well to work around Pkg.jl#2500
 cp(joinpath(dirname(@__DIR__), "LocalPreferences.toml"),
-   joinpath(dirname(@__DIR__), "test", "LocalPreferences.toml"))
+   joinpath(dirname(@__DIR__), "test", "LocalPreferences.toml"); force=true)
