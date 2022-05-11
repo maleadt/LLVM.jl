@@ -816,6 +816,34 @@ Context() do ctx
 end
 
 Context() do ctx
+    mod = LLVM.Module("SomeModule"; ctx)
+    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+    f1 = LLVM.Function(mod, "f1", ft)
+
+    push!(metadata(mod)["function"], MDNode([f1]; ctx))
+    @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f1
+
+    f2 = LLVM.Function(mod, "f2", ft)
+    replace_metadata_uses!(f1, f2)
+    @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f2
+end
+
+# different type; requires a hack
+Context() do ctx
+    mod = LLVM.Module("SomeModule"; ctx)
+    ft1 = LLVM.FunctionType(LLVM.VoidType(ctx))
+    f1 = LLVM.Function(mod, "f1", ft1)
+
+    push!(metadata(mod)["function"], MDNode([f1]; ctx))
+    @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f1
+
+    ft2 = LLVM.FunctionType(LLVM.Int32Type(ctx))
+    f2 = LLVM.Function(mod, "f2", ft2)
+    replace_metadata_uses!(f1, f2)
+    @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f2
+end
+
+Context() do ctx
     str = MDString("foo"; ctx)
     node = MDNode([str]; ctx)
     ops = operands(node)

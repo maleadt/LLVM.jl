@@ -526,3 +526,11 @@ LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata) {
   else
     return wrap(MetadataAsValue::get(*unwrap(C), MD));
 }
+
+void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New) {
+  ValueAsMetadata::handleRAUW(unwrap<Value>(Old), unwrap<Value>(New));
+}
+
+void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New) {
+    unwrap<MDNode>(MD)->replaceOperandWith(I, unwrap(New));
+}
