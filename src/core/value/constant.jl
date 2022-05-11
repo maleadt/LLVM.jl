@@ -20,7 +20,7 @@ abstract type Instruction <: User end
 
 ## data
 
-export ConstantData, PointerNull, UndefValue, ConstantInt, ConstantFP
+export ConstantData, PointerNull, UndefValue, PoisonValue, ConstantInt, ConstantFP
 
 abstract type ConstantData <: Constant end
 
@@ -40,6 +40,14 @@ register(UndefValue, API.LLVMUndefValueValueKind)
 
 UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 
+@static if version() >= v"12"
+@checked struct PoisonValue <: ConstantData # XXX: actually <: UndefValue
+    ref::API.LLVMValueRef
+end
+register(PoisonValue, API.LLVMPoisonValueValueKind)
+
+PoisonValue(typ::LLVMType) = PoisonValue(API.LLVMGetPoison(typ))
+end
 
 @checked struct ConstantInt <: ConstantData
     ref::API.LLVMValueRef

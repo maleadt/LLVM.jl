@@ -322,6 +322,13 @@ Context() do ctx
         @test val isa LLVM.Constant
     end
 
+    if LLVM.version() >= v"12"
+        let val = PoisonValue(typ)
+            @test ispoison(val)
+            @test val isa LLVM.Constant
+        end
+    end
+
     end
 end
 
