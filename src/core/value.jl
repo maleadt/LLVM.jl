@@ -40,7 +40,7 @@ end
 
 ## general APIs
 
-export llvmtype, llvmeltype, name, name!, replace_uses!, isconstant, isundef, ispoison, context
+export llvmtype, llvmeltype, name, name!, replace_uses!, replace_metadata_uses!, isconstant, isundef, ispoison, context
 
 llvmtype(val::Value) = LLVMType(API.LLVMTypeOf(val))
 llvmeltype(val::Value) = eltype(llvmtype(val))
@@ -54,6 +54,39 @@ function Base.show(io::IO, val::Value)
 end
 
 replace_uses!(old::Value, new::Value) = API.LLVMReplaceAllUsesWith(old, new)
+
+function replace_metadata_uses!(old::Value, new::Value)
+    if llvmtype(old) == llvmtype(new)
+        API.LLVMReplaceAllMetadataUsesWith(old, new)
+    else
+        # NOTE: LLVM does not support replacing values of different types, either using
+        #       regular RAUW or only on metadata. The latter should probably be supported.
+        #       Instead, we replace by a bitcast to the old type.
+        compat_new = const_bitcast(new, llvmtype(old))
+        replace_metadata_uses!(old, compat_new)
+
+        # the above is often invalid, e.g. for module-level metadata identifying functions.
+        # so we peek into such metadata and try to get rid of the bitcast. see also
+        # https://discourse.llvm.org/t/replacing-module-metadata-uses-of-function/62431/4
+        mod = LLVM.parent(new)
+        while !isa(mod, LLVM.Module)
+            mod = LLVM.parent(new)
+        end
+        ctx = context(mod)
+        function recurse(md)
+            for (i, op) in enumerate(operands(md))
+                if op isa ValueAsMetadata && Value(op; ctx) == compat_new
+                    LLVM.replace_operand(md, i, Metadata(new))
+                elseif isa(op, MDTuple)
+                    recurse(op)
+                end
+            end
+        end
+        for (key, md) in metadata(mod)
+            recurse(md)
+        end
+    end
+end
 
 isconstant(val::Value) = convert(Core.Bool, API.LLVMIsConstant(val))
 

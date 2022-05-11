@@ -398,3 +398,11 @@ end
 function LLVMMetadataAsValue2(C, MD)
     ccall((:LLVMMetadataAsValue2, libLLVMExtra), LLVMValueRef, (LLVMContextRef, LLVMMetadataRef), C, MD)
 end
+
+function LLVMReplaceAllMetadataUsesWith(OldVal, NewVal)
+    ccall((:LLVMReplaceAllMetadataUsesWith, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), OldVal, NewVal)
+end
+
+function LLVMReplaceMDNodeOperandWith(MD, I, New)
+    ccall((:LLVMReplaceMDNodeOperandWith, libLLVMExtra), Cvoid, (LLVMMetadataRef, Cuint, LLVMMetadataRef), MD, I, New)
+end

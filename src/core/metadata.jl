@@ -111,6 +111,11 @@ function operands(md::MDNode)
     return [Metadata(op) for op in ops]
 end
 
+# TODO: setindex?
+function replace_operand(md::MDNode, i, new::Metadata)
+    API.LLVMReplaceMDNodeOperandWith(md, i-1, new)
+end
+
 
 ## tuples
 

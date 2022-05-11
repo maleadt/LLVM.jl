@@ -154,6 +154,8 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
                                        const char *Name);
 LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata);
+void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New);
+void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
 
 LLVM_C_EXTERN_C_END
 #endif
