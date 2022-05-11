@@ -40,7 +40,7 @@ end
 
 ## general APIs
 
-export llvmtype, llvmeltype, name, name!, replace_uses!, isconstant, isundef, context
+export llvmtype, llvmeltype, name, name!, replace_uses!, isconstant, isundef, ispoison, context
 
 llvmtype(val::Value) = LLVMType(API.LLVMTypeOf(val))
 llvmeltype(val::Value) = eltype(llvmtype(val))
@@ -58,6 +58,8 @@ replace_uses!(old::Value, new::Value) = API.LLVMReplaceAllUsesWith(old, new)
 isconstant(val::Value) = convert(Core.Bool, API.LLVMIsConstant(val))
 
 isundef(val::Value) = convert(Core.Bool, API.LLVMIsUndef(val))
+
+ispoison(val::Value) = convert(Core.Bool, API.LLVMIsPoison(val))
 
 context(val::Value) = Context(API.LLVMGetValueContext(val))
 
