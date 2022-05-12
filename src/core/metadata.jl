@@ -108,7 +108,7 @@ function operands(md::MDNode)
     nops = API.LLVMExtraGetMDNodeNumOperands2(md)
     ops = Vector{API.LLVMMetadataRef}(undef, nops)
     API.LLVMExtraGetMDNodeOperands2(md, ops)
-    return [Metadata(op) for op in ops]
+    return [op == C_NULL ? nothing : Metadata(op) for op in ops]
 end
 
 # TODO: setindex?
@@ -131,3 +131,10 @@ MDNode(mds::Vector{<:Metadata}; ctx::Context) =
     MDTuple(API.LLVMMDNodeInContext2(ctx, mds, length(mds)))
 MDNode(vals::Vector; ctx::Context) =
     MDNode(convert(Vector{Metadata}, vals); ctx)
+
+# we support passing `nothing`, but convert it to a non-exported `MDNull` instance
+# so that we can keep everything as a subtype of `Metadata`
+struct MDNull <: Metadata end
+Base.convert(::Type{Metadata}, ::Nothing) = MDNull()
+Base.unsafe_convert(::Type{API.LLVMMetadataRef}, md::MDNull) =
+    convert(API.LLVMMetadataRef, C_NULL)
