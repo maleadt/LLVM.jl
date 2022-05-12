@@ -246,23 +246,14 @@ end
 @testset "type-preserving ccall" begin
     # NOTE: the auto-upgrader will remangle these intrinsics, but only if they were
     #       specified in the first place (`if Name.startswith("ptr.annotation.")`)
-    bad(ptr::Ptr{T}) where {T} = ccall("llvm.ptr.annotation.p0i64", llvmcall, Ptr{T}, (Ptr{T}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
-    good(ptr::Ptr{T}) where {T} = @typed_ccall("llvm.ptr.annotation.p0i64", llvmcall, Ptr{T}, (Ptr{T}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
+    annotated(ptr::Ptr{T}) where {T} = @typed_ccall("llvm.ptr.annotation.p0i64", llvmcall, Ptr{T}, (Ptr{T}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
 
-    ir = sprint(io->code_llvm(io, bad, Tuple{Ptr{Float64}}))
-    @test occursin("i64 @llvm.ptr.annotation.p0i64(i64", ir)
-
-    ir = sprint(io->code_llvm(io, good, Tuple{Ptr{Float64}}))
+    ir = sprint(io->code_llvm(io, annotated, Tuple{Ptr{Float64}}))
     @test occursin("double* @llvm.ptr.annotation.p0f64(double*", ir)
 
-    bad(ptr::LLVMPtr{T}) where {T} = ccall("llvm.ptr.annotation.p0i64", llvmcall, LLVMPtr{T,1}, (LLVMPtr{T,1}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
-    good(ptr::LLVMPtr{T}) where {T} = @typed_ccall("llvm.ptr.annotation.p0i64", llvmcall, LLVMPtr{T,1}, (LLVMPtr{T,1}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
+    annotated(ptr::LLVMPtr{T}) where {T} = @typed_ccall("llvm.ptr.annotation.p0i64", llvmcall, LLVMPtr{T,1}, (LLVMPtr{T,1}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
 
-    ir = sprint(io->code_llvm(io, bad, Tuple{LLVMPtr{Float64,1}}))
-    # XXX: why isn't this remangled to p1i8? and why doesn't it currently assert somewhere?
-    @test occursin("i8 addrspace(1)* @llvm.ptr.annotation.p0i64(i8 addrspace(1)*", ir)
-
-    ir = sprint(io->code_llvm(io, good, Tuple{LLVMPtr{Float64,1}}))
+    ir = sprint(io->code_llvm(io, annotated, Tuple{LLVMPtr{Float64,1}}))
     @test occursin("double addrspace(1)* @llvm.ptr.annotation.p1f64(double addrspace(1)*", ir)
 
     # test return nothing
