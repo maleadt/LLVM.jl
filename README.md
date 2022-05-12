@@ -2,9 +2,9 @@
 
 *A Julia wrapper for the LLVM C API.*
 
-| **Documentation**                                                         | **Build Status**                                                                                                                     | **Coverage**                    |
-|:-------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------:|:-------------------------------:|
-| [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url] [![PkgEval][pkgeval-img]][pkgeval-url] | [![][codecov-img]][codecov-url] |
+| **Documentation**                                                         | **Build Status**                                                     | **Coverage**                    |
+|:-------------------------------------------------------------------------:|:--------------------------------------------------------------------:|:-------------------------------:|
+| [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][github-img]][github-url] [![PkgEval][pkgeval-img]][pkgeval-url] | [![][codecov-img]][codecov-url] |
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: http://maleadt.github.io/LLVM.jl/stable
@@ -12,11 +12,8 @@
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: http://maleadt.github.io/LLVM.jl/dev
 
-[travis-img]: https://api.travis-ci.com/maleadt/LLVM.jl.svg?branch=master
-[travis-url]: https://travis-ci.com/maleadt/LLVM.jl
-
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/5069m449yvvkyn9q/branch/master?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/maleadt/llvm-jl
+[github-img]: https://github.com/maleadt/LLVM.jl/actions/workflows/ci.yml/badge.svg
+[github-url]: https://github.com/maleadt/LLVM.jl/actions/workflows/ci.yml
 
 [pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LLVM.svg
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LLVM.html
