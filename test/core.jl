@@ -851,6 +851,23 @@ Context() do ctx
     @test ops[1] == str
 end
 
+# null metadata, represented as null pointers in the API, by `nothing` in Julia
+Context() do ctx
+    ir = """
+            !0 = !{i32 42, null, !"string"}
+            !foo = !{!0}
+        """
+    mod = parse(LLVM.Module, ir; ctx)
+
+    foo_md = operands(metadata(mod)["foo"])[1]
+    @test operands(foo_md)[1] !== nothing
+    @test operands(foo_md)[2] === nothing
+    @test operands(foo_md)[3] !== nothing
+
+    bar_md = MDNode([ConstantInt(Int32(42); ctx), nothing, MDString("string"; ctx)]; ctx)
+    @test foo_md == bar_md
+end
+
 @testset "debuginfo" begin
 
 Context() do ctx
