@@ -30,8 +30,10 @@ MONOTONIC = :monotonic
         @test atomic_pointerref_monotonic(p1) === r1[]
         @test Interop.atomic_pointerref(p1, MONOTONIC) === r1[]
         @test Interop.atomic_pointerref(p1, Val(:monotonic)) === r1[]
-        @test Interop.atomic_pointerref(p1, Val(:monotonic)) ===
-              Core.Intrinsics.atomic_pointerref(sp1, :monotonic)
+        if VERSION ≥ v"1.7"
+            @test Interop.atomic_pointerref(p1, Val(:monotonic)) ===
+                  Core.Intrinsics.atomic_pointerref(sp1, :monotonic)
+        end
 
         types = typeof((p1, Val(:sequentially_consistent)))
         ir = sprint(io -> code_llvm(io, Interop.atomic_pointerref, types))
@@ -53,14 +55,16 @@ MONOTONIC = :monotonic
             r1[]
         end === val
 
-        val = r1[] + one(r1[])
-        r2[] = r1[]
-        @test begin
-            Interop.atomic_pointerset(p1, val, Val(:monotonic))
-            r1[]
-        end === begin
-            Core.Intrinsics.atomic_pointerset(sp2, val, :monotonic)
-            r2[]
+        if VERSION ≥ v"1.7"
+            val = r1[] + one(r1[])
+            r2[] = r1[]
+            @test begin
+                Interop.atomic_pointerset(p1, val, Val(:monotonic))
+                r1[]
+            end === begin
+                Core.Intrinsics.atomic_pointerset(sp2, val, :monotonic)
+                r2[]
+            end
         end
 
         types = typeof((p1, val, Val(:sequentially_consistent)))
@@ -94,14 +98,16 @@ MONOTONIC = :monotonic
                 r1[]
             end === op(old, val)
 
-            r1[] = r2[] = old
-            val = one(old)
-            @test begin
-                Interop.atomic_pointermodify(p1, op, val, Val(:monotonic))
-                r1[]
-            end === begin
-                Core.Intrinsics.atomic_pointermodify(sp2, op, val, :monotonic)
-                r2[]
+            if VERSION ≥ v"1.7"
+                r1[] = r2[] = old
+                val = one(old)
+                @test begin
+                    Interop.atomic_pointermodify(p1, op, val, Val(:monotonic))
+                    r1[]
+                end === begin
+                    Core.Intrinsics.atomic_pointermodify(sp2, op, val, :monotonic)
+                    r2[]
+                end
             end
 
             types = typeof((p1, op, val, Val(:sequentially_consistent)))
@@ -135,10 +141,12 @@ MONOTONIC = :monotonic
         val = one(old)
         @test (Interop.atomic_pointerswap(p1, val, Val(:monotonic)), r1[]) === (old, val)
 
-        r1[] = r2[] = old
-        val = one(old)
-        @test (Interop.atomic_pointerswap(p1, val, Val(:monotonic)), r1[]) ===
-              (Core.Intrinsics.atomic_pointerswap(sp2, val, :monotonic), r2[])
+        if VERSION ≥ v"1.7"
+            r1[] = r2[] = old
+            val = one(old)
+            @test (Interop.atomic_pointerswap(p1, val, Val(:monotonic)), r1[]) ===
+                  (Core.Intrinsics.atomic_pointerswap(sp2, val, :monotonic), r2[])
+        end
 
         types = typeof((p1, val, Val(:sequentially_consistent)))
         ir = sprint(io -> code_llvm(io, Interop.atomic_pointerswap, types))

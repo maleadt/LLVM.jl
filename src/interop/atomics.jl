@@ -369,7 +369,7 @@ end
     old = atomic_pointerref(ptr, fail_order)
     while true
         new = op(old, x)
-        (; old, success) = atomic_pointerreplace(ptr, old, new, order, fail_order)
+        (old, success) = atomic_pointerreplace(ptr, old, new, order, fail_order)
         success && return old => new
     end
 end
