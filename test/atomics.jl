@@ -2,6 +2,8 @@ using InteractiveUtils
 using LLVM.Interop
 using Test
 
+@testset "atomics" begin
+
 coreptr(r::Base.RefValue) = reinterpret(Ptr{eltype(r)}, pointer_from_objref(r))
 llvmptr(r::Base.RefValue) = reinterpret(Core.LLVMPtr{eltype(r),0}, pointer_from_objref(r))
 
@@ -213,4 +215,6 @@ B64(x) = reinterpret(B64, convert(Int64, x))
         @test Interop.atomic_pointerreplace(ptr, B64(789), B64(123), ord, ord) ===
               (old = B64(123), success = false)
     end
+end
+
 end
