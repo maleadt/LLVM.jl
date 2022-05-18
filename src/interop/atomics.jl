@@ -86,10 +86,11 @@ const _llvm_from_julia_ordering = (
     sequentially_consistent = LLVM.API.LLVMAtomicOrderingSequentiallyConsistent,
 )
 
-const AllOrdering = Union{map(x -> Val{x}, keys(_llvm_from_julia_ordering))...}
-const AtomicOrdering = Union{
-    map(x -> x === :not_atomic ? Union{} : Val{x}, keys(_llvm_from_julia_ordering))...,
-}
+_julia_ordering(p) =
+    Union{map(x -> p(x) ? Val{x} : Union{}, keys(_llvm_from_julia_ordering))...}
+
+const AllOrdering = _julia_ordering(_ -> true)
+const AtomicOrdering = _julia_ordering(!=(:not_atomic))
 
 const LLVMOrderingVal = Union{map(x -> Val{x}, values(_llvm_from_julia_ordering))...}
 
@@ -526,8 +527,8 @@ end
     ptr::LLVMPtr{T},
     expected::T,
     desired::T,
-    success_order::AtomicOrdering,
-    fail_order::AtomicOrdering,
+    success_order::_julia_ordering(∉((:not_atomic, :unordered))),
+    fail_order::_julia_ordering(∉((:not_atomic, :unordered, :release, :acquire_release))),
 ) where {T} = llvm_atomic_cas(
     ptr,
     expected,
