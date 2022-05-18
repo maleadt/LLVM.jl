@@ -129,6 +129,18 @@ for op in opcodes
 end
 
 
+## atomics
+
+export ordering, ordering!
+
+# Ordering getter/setter are supported only for a subset of instructions
+# https://github.com/llvm/llvm-project/blob/llvmorg-14.0.3/llvm/lib/IR/Core.cpp#L3779-L3798
+
+ordering(val::Union{LoadInst,StoreInst,AtomicRMWInst}) = API.LLVMGetOrdering(val)
+ordering!(val::Union{LoadInst,StoreInst}, ord::API.LLVMAtomicOrdering) =
+    API.LLVMSetOrdering(val, ord)
+
+
 ## call sites and invocations
 
 # TODO: add this to the actual type hierarchy
