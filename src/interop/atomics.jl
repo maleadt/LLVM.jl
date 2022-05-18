@@ -86,7 +86,11 @@ const _llvm_from_julia_ordering = (
     sequentially_consistent = LLVM.API.LLVMAtomicOrderingSequentiallyConsistent,
 )
 
-const Ordering = Union{map(x -> Val{x}, keys(_llvm_from_julia_ordering))...}
+const AllOrdering = Union{map(x -> Val{x}, keys(_llvm_from_julia_ordering))...}
+const AtomicOrdering = Union{
+    map(x -> x === :not_atomic ? Union{} : Val{x}, keys(_llvm_from_julia_ordering))...,
+}
+
 const LLVMOrderingVal = Union{map(x -> Val{x}, values(_llvm_from_julia_ordering))...}
 
 is_stronger_than_monotonic(order::Symbol) =
@@ -158,7 +162,7 @@ end
     end
 end
 
-@generated function atomic_pointerref(ptr::LLVMPtr{T,A}, order::Ordering) where {T,A}
+@generated function atomic_pointerref(ptr::LLVMPtr{T,A}, order::AllOrdering) where {T,A}
     sizeof(T) == 0 && return T.instance
     llvm_order = _valueof(llvm_from_julia_ordering(order()))
     Context() do ctx
@@ -193,7 +197,11 @@ end
     end
 end
 
-@generated function atomic_pointerset(ptr::LLVMPtr{T,A}, x::T, order::Ordering) where {T,A}
+@generated function atomic_pointerset(
+    ptr::LLVMPtr{T,A},
+    x::T,
+    order::AllOrdering,
+) where {T,A}
     if sizeof(T) == 0
         # Mimicking what `Core.Intrinsics.atomic_pointerset` generates.
         # See: https://github.com/JuliaLang/julia/blob/v1.7.2/src/cgutils.cpp#L1570-L1572
@@ -306,9 +314,21 @@ end
 
 @inline function atomic_pointermodify(
     ptr::LLVMPtr{T},
+    op,
+    x::T,
+    ::Val{:not_atomic},
+) where {T}
+    old = atomic_pointerref(ptr, Val(:not_atomic))
+    new = op(old, x)
+    atomic_pointerset(ptr, new, Val(:not_atomic))
+    return old => new
+end
+
+@inline function atomic_pointermodify(
+    ptr::LLVMPtr{T},
     ::typeof(right),
     x::T,
-    order::Ordering,
+    order::AtomicOrdering,
 ) where {T}
     old = llvm_atomic_op(
         Val(LLVM.API.LLVMAtomicRMWBinOpXchg),
@@ -351,7 +371,7 @@ for (opname, op, llvmop) in binoptable
             ptr::LLVMPtr{$T},
             ::$(typeof(op)),
             x::$T,
-            order::Ordering,
+            order::AtomicOrdering,
         )
             old = llvm_atomic_op($(Val(llvmop)), ptr, x, llvm_from_julia_ordering(order))
             return old => $op(old, x)
@@ -363,7 +383,12 @@ end
 @inline atomic_pointerswap(pointer, new, order) =
     first(atomic_pointermodify(pointer, right, new, order))
 
-@inline function atomic_pointermodify(ptr::LLVMPtr{T}, op, x::T, order::Ordering) where {T}
+@inline function atomic_pointermodify(
+    ptr::LLVMPtr{T},
+    op,
+    x::T,
+    order::AllOrdering,
+) where {T}
     # Should `fail_order` be stronger?  Ref: https://github.com/JuliaLang/julia/issues/45256
     fail_order = Val(:monotonic)
     old = atomic_pointerref(ptr, fail_order)
@@ -483,12 +508,29 @@ end
     return atomic_pointerreplace(pointer, expected, desired, so, fo)
 end
 
+@inline function atomic_pointerreplace(
+    ptr::LLVMPtr{T},
+    expected::T,
+    desired::T,
+    ::Val{:not_atomic},
+    ::Val{:not_atomic},
+) where {T}
+    old = atomic_pointerref(ptr, Val(:not_atomic))
+    if old === expected
+        atomic_pointerset(ptr, desired, Val(:not_atomic))
+        success = true
+    else
+        success = false
+    end
+    return (; old, success)
+end
+
 @inline atomic_pointerreplace(
     ptr::LLVMPtr{T},
     expected::T,
     desired::T,
-    success_order::Ordering,
-    fail_order::Ordering,
+    success_order::AtomicOrdering,
+    fail_order::AtomicOrdering,
 ) where {T} = llvm_atomic_cas(
     ptr,
     expected,
