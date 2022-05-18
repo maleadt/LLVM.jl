@@ -149,6 +149,10 @@ LLVM.Module("SomeModule"; ctx) do mod
     alignment!(loadinst, 4)
     @test alignment(loadinst) == 4
 
+    ordering!(loadinst, LLVM.API.LLVMAtomicOrderingSequentiallyConsistent)
+    @check_ir loadinst "load atomic i32, i32* %4 seq_cst"
+    @test ordering(loadinst) == LLVM.API.LLVMAtomicOrderingSequentiallyConsistent
+
     storeinst = store!(builder, int1, ptr1)
     @check_ir storeinst "store i32 %0, i32* %4"
 
