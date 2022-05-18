@@ -214,14 +214,11 @@ end
     llvm_order = _valueof(llvm_from_julia_ordering(order()))
     Context() do ctx
         eltyp = convert(LLVMType, T; ctx)
-
-        T_int = convert(LLVMType, Int; ctx)
         T_ptr = convert(LLVMType, ptr; ctx)
-
         T_typed_ptr = LLVM.PointerType(eltyp, A)
 
         # create a function
-        param_types = [T_ptr, eltyp, T_int]
+        param_types = [T_ptr, eltyp]
         llvm_f, _ = create_function(LLVM.VoidType(ctx), param_types)
 
         # generate IR
