@@ -9,6 +9,9 @@ let
 end
 
 TargetMachine(host_t, host_triple) do tm
+end
+
+@dispose tm=TargetMachine(host_t, host_triple) begin
     @test target(tm) == host_t
     @test triple(tm) == host_triple
     @test cpu(tm) == ""
@@ -16,9 +19,7 @@ TargetMachine(host_t, host_triple) do tm
     asm_verbosity!(tm, true)
 
     # emission
-    Context() do ctx
-    Builder(ctx) do builder
-    LLVM.Module("SomeModule"; ctx) do mod
+    @dispose ctx=Context() builder=Builder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
         ft = LLVM.FunctionType(LLVM.VoidType(ctx))
         fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -36,22 +37,18 @@ TargetMachine(host_t, host_triple) do tm
 
         @test_throws LLVMException emit(tm, mod, LLVM.API.LLVMAssemblyFile, "/")
     end
-    end
-    end
 
-    Context() do ctx
-    LLVM.Module("SomeModule"; ctx) do mod
-        FunctionPassManager(mod) do fpm
+    @dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
+        @dispose fpm=FunctionPassManager(mod) begin
             add_transform_info!(fpm)
             add_transform_info!(fpm, tm)
             add_library_info!(fpm, triple(tm))
         end
-        ModulePassManager() do mpm
+        @dispose mpm=ModulePassManager() begin
             add_transform_info!(mpm)
             add_transform_info!(mpm, tm)
             add_library_info!(mpm, triple(tm))
         end
-    end
     end
 
     DataLayout(tm)

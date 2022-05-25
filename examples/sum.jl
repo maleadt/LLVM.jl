@@ -11,7 +11,7 @@ else
     y = Int32(2)
 end
 
-Context() do ctx
+@dispose ctx=Context() begin
     # set-up
     mod = LLVM.Module("my_module"; ctx)
 
@@ -21,7 +21,7 @@ Context() do ctx
     sum = LLVM.Function(mod, "sum", fun_type)
 
     # generate IR
-    Builder(ctx) do builder
+    @dispose builder=Builder(ctx) begin
         entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 
@@ -33,7 +33,7 @@ Context() do ctx
     end
 
     # analysis and execution
-    Interpreter(mod) do engine
+    @dispose engine=Interpreter(mod) begin
         args = [GenericValue(LLVM.Int32Type(ctx), x),
                 GenericValue(LLVM.Int32Type(ctx), y)]
 

@@ -537,8 +537,8 @@ linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
 function section(val::GlobalValue)
   #=
   The following started to fail on LLVM 4.0:
-    Context() do ctx
-      LLVM.Module("SomeModule"; ctx) do mod
+    @dispose ctx=Context() begin
+      @dispose mod=LLVM.Module("SomeModule"; ctx) begin
         st = LLVM.StructType("SomeType"; ctx)
         ft = LLVM.FunctionType(st, [st])
         fn = LLVM.Function(mod, "SomeFunction", ft)

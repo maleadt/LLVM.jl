@@ -1,13 +1,21 @@
 @testset "ir" begin
 
-Context() do ctx
+@dispose ctx=Context() begin
     invalid_ir = "invalid"
     @test_throws LLVMException parse(LLVM.Module, invalid_ir; ctx)
 end
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do source_mod
+@dispose ctx=Context() begin
+    let builder = Builder(ctx)
+        dispose(builder)
+    end
+
+    Builder(ctx) do builder
+    end
+end
+
+
+@dispose ctx=Context() builder=Builder(ctx) source_mod=LLVM.Module("SomeModule"; ctx) begin
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(source_mod, "SomeFunction", ft)
 
@@ -27,8 +35,6 @@ LLVM.Module("SomeModule"; ctx) do source_mod
         @test haskey(functions(mod), "SomeFunction")
         dispose(mod)
     end
-end
-end
 end
 
 end

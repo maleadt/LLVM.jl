@@ -1,7 +1,6 @@
 @testset "linker" begin
 
-Context() do ctx
-Builder(ctx) do builder
+@dispose ctx=Context() builder=Builder(ctx) begin
     mod1 = let
         mod = LLVM.Module("SomeModule"; ctx)
         ft = LLVM.FunctionType(LLVM.VoidType(ctx))
@@ -31,7 +30,6 @@ Builder(ctx) do builder
     link!(mod1, mod2)
     @test haskey(functions(mod1), "SomeFunction")
     @test haskey(functions(mod1), "SomeOtherFunction")
-end
 end
 
 end

@@ -23,7 +23,7 @@ Base.show(io::IO, cg::CodeGen) = print(io, "CodeGen")
 
 function create_entry_block_allocation(cg::CodeGen, fn::LLVM.Function, varname::String)
     local alloc
-    LLVM.Builder(cg.ctx) do builder
+    LLVM.@dispose builder=LLVM.Builder(cg.ctx) begin
         # Set the builder at the start of the function
         entry_block = LLVM.entry(fn)
         if isempty(LLVM.instructions(entry_block))

@@ -16,7 +16,7 @@ function generate_IR(str; ctx::LLVM.Context)
 end
 
 function optimize!(mod::LLVM.Module)
-    LLVM.ModulePassManager() do pass_manager
+    LLVM.@dispose pass_manager=LLVM.ModulePassManager() begin
         LLVM.instruction_combining!(pass_manager)
         LLVM.reassociate!(pass_manager)
         LLVM.gvn!(pass_manager)
@@ -29,7 +29,7 @@ end
 
 function run(mod::LLVM.Module, entry::String)
     res_jl = 0.0
-    LLVM.JIT(mod) do engine
+    LLVM.@dispose engine=LLVM.JIT(mod) begin
         if !haskey(LLVM.functions(engine), entry)
             error("did not find entry function '$entry' in module")
         end
@@ -44,7 +44,7 @@ end
 function write_objectfile(mod::LLVM.Module, path::String)
     host_triple = Sys.MACHINE # LLVM.triple() might be wrong (see LLVM.jl#108)
     host_t = LLVM.Target(triple=host_triple)
-    LLVM.TargetMachine(host_t, host_triple) do tm
+    LLVM.@dispose tm=LLVM.TargetMachine(host_t, host_triple) begin
         LLVM.emit(tm, mod, LLVM.API.LLVMObjectFile, path)
     end
 end

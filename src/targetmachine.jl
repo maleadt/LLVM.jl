@@ -79,7 +79,7 @@ add_library_info!(pm::PassManager, triple::String) =
 
 function JITTargetMachine(triple = LLVM.triple(),
                           cpu = "", features = "";
-                          optlevel = LLVM.API.LLVMCodeGenLevelDefault)
+                          optlevel = API.LLVMCodeGenLevelDefault)
 
     # Force ELF on windows,
     # Note: Without this call to normalize Orc get's confused
@@ -93,8 +93,8 @@ function JITTargetMachine(triple = LLVM.triple(),
 
     tm = TargetMachine(target, triple, cpu, features;
                        optlevel,
-                       reloc = LLVM.API.LLVMRelocStatic, # Generate simpler code for JIT
-                       code = LLVM.API.LLVMCodeModelJITDefault, # Required to init TM as JIT
+                       reloc = API.LLVMRelocStatic, # Generate simpler code for JIT
+                       code = API.LLVMCodeModelJITDefault, # Required to init TM as JIT
                        )
     return tm
 end

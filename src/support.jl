@@ -11,7 +11,7 @@ end
 Permanently add the symbol `name` with the value `ptr`. These symbols are searched
 before any libraries.
 """
-add_symbol(name, ptr) = LLVM.API.LLVMAddSymbol(name, ptr)
+add_symbol(name, ptr) = API.LLVMAddSymbol(name, ptr)
 
 """
     load_library_permantly(path)
@@ -19,11 +19,11 @@ add_symbol(name, ptr) = LLVM.API.LLVMAddSymbol(name, ptr)
 This function permanently loads the dynamic library at the given path.
 It is safe to call this function multiple times for the same library.
 """
-load_library_permantly(path) = LLVM.API.LLVMLoadLibraryPermanently(path)
+load_library_permantly(path) = API.LLVMLoadLibraryPermanently(path)
 
 """
     find_symbol(name)
 
 Search the global symbols for `name` and return the pointer to it.
 """
-find_symbol(name) = LLVM.API.LLVMSearchForAddressOfSymbol(name)
+find_symbol(name) = API.LLVMSearchForAddressOfSymbol(name)
