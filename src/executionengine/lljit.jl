@@ -75,7 +75,7 @@ end
 
 if version() < v"13"
 function apply_datalayout!(lljit::LLJIT, mod::LLVM.Module)
-    LLVM.API.LLVMOrcLLJITApplyDataLayout(lljit, mod)
+    API.LLVMOrcLLJITApplyDataLayout(lljit, mod)
 end
 else
 function datalayout(lljit::LLJIT)

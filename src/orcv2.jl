@@ -46,7 +46,7 @@ end
 Base.unsafe_convert(::Type{API.LLVMOrcObjectLayerRef}, oll::ObjectLinkingLayer) = oll.ref
 
 function ObjectLinkingLayer(es::ExecutionSession)
-    ref = LLVM.API.LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager(es)
+    ref = API.LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager(es)
     ObjectLinkingLayer(ref)
 end
 
@@ -62,7 +62,7 @@ mutable struct ObjectLinkingLayerCreator
     cb
 end
 
-function ollc_callback(ctx::Ptr{Cvoid}, es::LLVM.API.LLVMOrcExecutionSessionRef, triple::Ptr{Cchar})
+function ollc_callback(ctx::Ptr{Cvoid}, es::API.LLVMOrcExecutionSessionRef, triple::Ptr{Cchar})
     es = ExecutionSession(es)
     triple = Base.unsafe_string(triple)
 
@@ -80,8 +80,8 @@ end
 """
 function linkinglayercreator!(builder::LLJITBuilder, creator::ObjectLinkingLayerCreator)
     cb = @cfunction(ollc_callback,
-                    LLVM.API.LLVMOrcObjectLayerRef,
-                    (Ptr{Cvoid}, LLVM.API.LLVMOrcExecutionSessionRef, Ptr{Cchar}))
+                    API.LLVMOrcObjectLayerRef,
+                    (Ptr{Cvoid}, API.LLVMOrcExecutionSessionRef, Ptr{Cchar}))
     linkinglayercreator!(builder, cb, Base.pointer_from_objref(creator))
 end
 
@@ -376,6 +376,6 @@ function dispose(lcm::LazyCallThroughManager)
 end
 
 function reexports(lctm::LazyCallThroughManager, ism::IndirectStubsManager, jd::JITDylib, symbols)
-    ref = LLVM.API.LLVMOrcLazyReexports(lctm, ism, jd, symbols, length(symbols))
+    ref = API.LLVMOrcLazyReexports(lctm, ism, jd, symbols, length(symbols))
     MaterializationUnit(ref)
 end

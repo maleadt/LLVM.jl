@@ -9,7 +9,7 @@ struct CustomPtr{T}
 end
 
 @generated function Base.unsafe_load(p::CustomPtr{T}, i::Integer=1) where T
-    Context() do ctx
+    @dispose ctx=Context() begin
         # get the element type
         eltyp = convert(LLVMType, T; ctx)
 
@@ -21,7 +21,7 @@ end
         llvmf, _ = create_function(eltyp, paramtyps)
 
         # generate IR
-        Builder(ctx) do builder
+        @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvmf, "entry"; ctx)
             position!(builder, entry)
 

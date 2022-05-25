@@ -2,7 +2,7 @@
 
 DEBUG_METADATA_VERSION()
 
-Context() do ctx
+@dispose ctx=Context() begin
       mod = parse(LLVM.Module,  """
           define void @foo() !dbg !5 {
           top:

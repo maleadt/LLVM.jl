@@ -6,6 +6,9 @@ let
 end
 
 PassManagerBuilder() do pmb
+end
+
+@dispose pmb=PassManagerBuilder() begin
     optlevel!(pmb, 0)
     sizelevel!(pmb, 0)
 
@@ -14,21 +17,17 @@ PassManagerBuilder() do pmb
     simplify_libcalls!(pmb, false)
     inliner!(pmb, 0)
 
-    Context() do ctx
-    LLVM.Module("SomeModule"; ctx) do mod
-        FunctionPassManager(mod) do fpm
+    @dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
+        @dispose fpm=FunctionPassManager(mod) begin
             populate!(fpm, pmb)
         end
-        ModulePassManager() do mpm
+        @dispose mpm=ModulePassManager() begin
             populate!(mpm, pmb)
         end
     end
-    end
 end
 
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
-ModulePassManager() do pm
+@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) pm=ModulePassManager() begin
     aggressive_dce!(pm)
     dce!(pm)
     bit_tracking_dce!(pm)
@@ -107,8 +106,6 @@ ModulePassManager() do pm
     internalize!(pm, true)
     internalize!(pm, false)
     internalize!(pm, ["SomeFunction", "SomeOtherFunction"])
-end
-end
 end
 
 end

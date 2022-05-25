@@ -1,8 +1,6 @@
 @testset "irbuilder" begin
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do mod
+@dispose ctx=Context() builder=Builder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx),
                                                 LLVM.FloatType(ctx), LLVM.FloatType(ctx),
                                                 LLVM.PointerType(LLVM.Int32Type(ctx)),
@@ -281,8 +279,6 @@ LLVM.Module("SomeModule"; ctx) do mod
 
     position!(builder)
 end
-end
-end
 
 end
 
@@ -304,7 +300,7 @@ end
             ret void
         }
         """
-    Context() do ctx
+    @dispose ctx=Context() begin
         mod = parse(LLVM.Module, ir; ctx)
 
         @testset "iteration" begin
@@ -367,7 +363,7 @@ end
             @test sprint(io->print(io, bundle1)) == "\"unknown\"(i32 1, i64 2)"
 
             # use in a call
-            Builder(ctx) do builder
+            @dispose builder=Builder(ctx) begin
                 position!(builder, inst)
                 inst = call!(builder, functions(mod)["x"], Value[], [bundle1])
 

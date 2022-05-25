@@ -1,10 +1,19 @@
 @testset "datalayout" begin
 
-Context() do ctx
-DataLayout("E-p:32:32-f128:128:128") do data
-    @test string(data) == "E-p:32:32-f128:128:128"
+dlstr = "E-p:32:32-f128:128:128"
 
-    @test occursin("E-p:32:32-f128:128:128", sprint(io->show(io,data)))
+let
+    data = DataLayout(dlstr)
+    dispose(data)
+end
+
+DataLayout(dlstr) do data
+end
+
+@dispose ctx=Context() data=DataLayout(dlstr) begin
+    @test string(data) == dlstr
+
+    @test occursin(dlstr, sprint(io->show(io,data)))
 
     @test byteorder(data) == LLVM.API.LLVMBigEndian
     @test pointersize(data) == pointersize(data, 0) == 4
@@ -15,7 +24,7 @@ DataLayout("E-p:32:32-f128:128:128") do data
 
     @test abi_alignment(data, LLVM.Int32Type(ctx)) == frame_alignment(data, LLVM.Int32Type(ctx)) == preferred_alignment(data, LLVM.Int32Type(ctx)) == 4
 
-    LLVM.Module("SomeModule"; ctx) do mod
+    @dispose mod=LLVM.Module("SomeModule"; ctx) begin
         gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
         @test preferred_alignment(data, gv) == 4
 
@@ -28,7 +37,6 @@ DataLayout("E-p:32:32-f128:128:128") do data
         @test element_at(data, st, 4) == 1
         @test offsetof(data, st, 1) == 4
     end
-end
 end
 
 end

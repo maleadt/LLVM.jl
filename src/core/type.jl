@@ -281,7 +281,7 @@ end
 
 # FIXME: remove on LLVM 12
 function LLVMGetTypeByName2(ctx::Context, name)
-    Module("dummy"; ctx) do mod
+    @dispose mod=Module("dummy"; ctx) begin
         API.LLVMGetTypeByName(mod, name)
     end
 end

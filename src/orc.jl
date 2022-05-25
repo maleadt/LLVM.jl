@@ -40,7 +40,7 @@ end
 function errormsg(orc::OrcJIT)
     # The error message is owned by `orc`, and will
     # be disposed along-side the OrcJIT.
-    unsafe_string(LLVM.API.LLVMOrcGetErrorMsg(orc))
+    unsafe_string(API.LLVMOrcGetErrorMsg(orc))
 end
 
 struct OrcModule
@@ -99,7 +99,7 @@ function compile!(orc::OrcJIT, mod::Module, resolver = @cfunction(resolver, UInt
 end
 
 function Base.delete!(orc::OrcJIT, mod::OrcModule)
-    LLVM.API.LLVMOrcRemoveModule(orc, mod)
+    API.LLVMOrcRemoveModule(orc, mod)
 end
 
 function add!(orc::OrcJIT, obj::MemoryBuffer, resolver = @cfunction(resolver, UInt64, (Cstring, Ptr{Cvoid})), resolver_ctx = orc)
@@ -110,9 +110,9 @@ end
 
 function mangle(orc::OrcJIT, name)
     r_symbol = Ref{Cstring}()
-    LLVM.API.LLVMOrcGetMangledSymbol(orc, r_symbol, name)
+    API.LLVMOrcGetMangledSymbol(orc, r_symbol, name)
     symbol = unsafe_string(r_symbol[])
-    LLVM.API.LLVMOrcDisposeMangledSymbol(r_symbol[])
+    API.LLVMOrcDisposeMangledSymbol(r_symbol[])
     return symbol
 end
 
@@ -126,11 +126,11 @@ Base.pointer(addr::OrcTargetAddress) = reinterpret(Ptr{Cvoid}, addr.ptr % UInt) 
 OrcTargetAddress(ptr::Ptr{Cvoid}) = OrcTargetAddress(reinterpret(UInt, ptr))
 
 function create_stub!(orc::OrcJIT, name, initial)
-    LLVM.API.LLVMOrcCreateIndirectStub(orc, name, initial)
+    API.LLVMOrcCreateIndirectStub(orc, name, initial)
 end
 
 function set_stub!(orc::OrcJIT, name, new)
-    LLVM.API.LLVMOrcSetIndirectStubPointer(orc, name, new)
+    API.LLVMOrcSetIndirectStubPointer(orc, name, new)
 end
 
 function address(orc::OrcJIT, name)
@@ -152,9 +152,9 @@ function callback!(orc::OrcJIT, callback, ctx)
 end
 
 function register!(orc::OrcJIT, listener::JITEventListener)
-    LLVM.API.LLVMOrcRegisterJITEventListener(orc, listener)
+    API.LLVMOrcRegisterJITEventListener(orc, listener)
 end
 
 function unregister!(orc::OrcJIT, listener::JITEventListener)
-    LLVM.API.LLVMOrcUnregisterJITEventListener(orc, listener)
+    API.LLVMOrcUnregisterJITEventListener(orc, listener)
 end

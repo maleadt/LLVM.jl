@@ -2,28 +2,28 @@
 
 @testset "generic values" begin
 
-Context() do ctx
+@dispose ctx=Context() begin
     val = GenericValue(LLVM.Int32Type(ctx), -1)
     @test intwidth(val) == 32
     @test convert(Int, val) == -1
     dispose(val)
 end
 
-Context() do ctx
+@dispose ctx=Context() begin
     val = GenericValue(LLVM.Int32Type(ctx), UInt(1))
     @test convert(Int, val) == 1
     @test convert(UInt, val) == 1
     dispose(val)
 end
 
-Context() do ctx
+@dispose ctx=Context() begin
     val = GenericValue(LLVM.DoubleType(ctx), Float32(1.1))
     @test convert(Float32, val, LLVM.DoubleType(ctx)) == Float32(1.1)
     @test convert(Float64, val, LLVM.DoubleType(ctx)) == Float64(Float32(1.1))
     dispose(val)
 end
 
-Context() do ctx
+@dispose ctx=Context() begin
     val = GenericValue(LLVM.DoubleType(ctx), 1.1)
     @test convert(Float32, val, LLVM.DoubleType(ctx)) == Float32(1.1)
     @test convert(Float64, val, LLVM.DoubleType(ctx)) == 1.1
@@ -42,9 +42,9 @@ end
 
 @testset "execution engine" begin
 
-Context() do ctx
+@dispose ctx=Context() begin
     mod = LLVM.Module("SomeModule"; ctx)
-    ExecutionEngine(mod) do mod end
+    @dispose engine=ExecutionEngine(mod) begin end
 end
 
 function emit_sum(ctx::Context)
@@ -57,7 +57,7 @@ function emit_sum(ctx::Context)
 
     entry = BasicBlock(sum, "entry"; ctx)
 
-    Builder(ctx) do builder
+    @dispose builder=Builder(ctx) begin
         position!(builder, entry)
 
         tmp = add!(builder, parameters(sum)[1], parameters(sum)[2])
@@ -78,7 +78,7 @@ function emit_retint(ctx::Context, val)
 
     entry = BasicBlock(fn, "entry"; ctx)
 
-    Builder(ctx) do builder
+    @dispose builder=Builder(ctx) begin
         position!(builder, entry)
 
         ret!(builder, ConstantInt(LLVM.Int32Type(ctx), val))
@@ -103,7 +103,7 @@ function emit_phi(ctx::Context)
     elsee = BasicBlock(fn, "else"; ctx)
     merge = BasicBlock(fn, "ifcont"; ctx)
 
-    Builder(ctx) do builder
+    @dispose builder=Builder(ctx) begin
         position!(builder, entry)
 
         cond = LLVM.icmp!(builder, LLVM.API.LLVMIntSGT, parameters(fn)[1], parameters(fn)[2], "ifcond")
@@ -131,15 +131,25 @@ function emit_phi(ctx::Context)
     return mod
 end
 
-Context() do ctx
+@dispose ctx=Context() begin
     mod = emit_sum(ctx)
 
     args = [GenericValue(LLVM.Int32Type(ctx), 1),
             GenericValue(LLVM.Int32Type(ctx), 2)]
 
     let mod = copy(mod)
-        fn = functions(mod)["SomeFunctionSum"]
+        engine = Interpreter(mod)
+        dispose(engine)
+    end
+
+    let mod = copy(mod)
         Interpreter(mod) do engine
+        end
+    end
+
+    let mod = copy(mod)
+        fn = functions(mod)["SomeFunctionSum"]
+        @dispose engine=Interpreter(mod) begin
             res = LLVM.run(engine, fn, args)
             @test convert(Int, res) == 3
             dispose(res)
@@ -148,39 +158,63 @@ Context() do ctx
     end
 
     dispose.(args)
+end
+
+@dispose ctx=Context() begin
+    let mod = emit_retint(ctx, 42)
+        engine = JIT(mod)
+        dispose(engine)
+    end
 
     let mod = emit_retint(ctx, 42)
-        fn = functions(mod)["SomeFunction"]
         JIT(mod) do engine
-            res = LLVM.run(engine, fn)
-            @test convert(Int, res) == 42
-            dispose(res)
         end
-        @test_throws UndefRefError show(mod)
     end
 
     let mod = emit_retint(ctx, 42)
         fn = functions(mod)["SomeFunction"]
-        ExecutionEngine(mod) do engine
+        @dispose engine=JIT(mod) begin
             res = LLVM.run(engine, fn)
             @test convert(Int, res) == 42
             dispose(res)
         end
         @test_throws UndefRefError show(mod)
     end
+end
 
-    args1 =
-    [GenericValue(LLVM.Int32Type(ctx), 1),
-    GenericValue(LLVM.Int32Type(ctx), 2)]
+@dispose ctx=Context() begin
+    let mod = emit_retint(ctx, 42)
+        engine = ExecutionEngine(mod)
+        dispose(engine)
+    end
 
-    args2 =
-    [GenericValue(LLVM.Int32Type(ctx), 2),
-    GenericValue(LLVM.Int32Type(ctx), 1)]
+    let mod = emit_retint(ctx, 42)
+        ExecutionEngine(mod) do engine
+        end
+    end
+
+    let mod = emit_retint(ctx, 42)
+        fn = functions(mod)["SomeFunction"]
+        @dispose engine=ExecutionEngine(mod) begin
+            res = LLVM.run(engine, fn)
+            @test convert(Int, res) == 42
+            dispose(res)
+        end
+        @test_throws UndefRefError show(mod)
+    end
+end
+
+@dispose ctx=Context() begin
+    args1 = [GenericValue(LLVM.Int32Type(ctx), 1),
+             GenericValue(LLVM.Int32Type(ctx), 2)]
+
+    args2 = [GenericValue(LLVM.Int32Type(ctx), 2),
+             GenericValue(LLVM.Int32Type(ctx), 1)]
 
     for (args, true_res) in ((args1, -3), (args2, 4))
         let mod = emit_phi(ctx)
             fn = functions(mod)["gt"]
-            Interpreter(mod) do engine
+            @dispose engine=Interpreter(mod) begin
                 res = LLVM.run(engine, fn, args)
                 @test convert(Int, res) == true_res
                 dispose(res)
@@ -190,7 +224,7 @@ Context() do ctx
     end
 
     let mod1 = emit_sum(ctx), mod2 = emit_retint(ctx, 42)
-        Interpreter(mod1) do engine
+        @dispose engine=Interpreter(mod1) begin
             @test_throws ErrorException collect(functions(engine))
             @test haskey(functions(engine), "SomeFunctionSum")
             @test functions(engine)["SomeFunctionSum"] isa LLVM.Function

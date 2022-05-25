@@ -65,3 +65,45 @@ end
 @inline function refcheck(::Type, ref::Ptr)
     ref==C_NULL && throw(UndefRefError())
 end
+
+
+## helper macro for disposing resources without do-block syntax
+
+export @dispose
+
+"""
+    LLVM.@dispose foo=Foo() bar=Bar() begin
+        ...
+    end
+
+Helper macro for disposing resources (by calling the `LLVM.dispose` function for every
+resource in reverse order) after executing a block of code. This is often equivalent to
+calling the recourse constructor with do-block syntax, but without using (potentially
+costly) closures.
+"""
+macro dispose(ex...)
+    resources = ex[1:end-1]
+    code = ex[end]
+
+    Meta.isexpr(code, :block) ||
+        error("Expected a code block as final argument to LLVM.@dispose")
+
+    cleanup = quote
+    end
+    for res in reverse(resources)
+        Meta.isexpr(res, :(=)) ||
+            error("Resource arguments to LLVM.@dispose should be assignments")
+        push!(cleanup.args, :(LLVM.dispose($(res.args[1]))))
+    end
+
+    ex = quote
+        let $(resources...)
+            try
+                $code
+            finally
+                $(cleanup.args...)
+            end
+        end
+    end
+    esc(ex)
+end

@@ -22,7 +22,7 @@ function codegen!(mod::LLVM.Module, name, tm)
     sum = LLVM.Function(mod, name, ft)
 
     # generate IR
-    Builder(ctx) do builder
+    @dispose builder=Builder(ctx) begin
         entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 
@@ -32,7 +32,7 @@ function codegen!(mod::LLVM.Module, name, tm)
 
     verify(mod)
 
-    ModulePassManager() do pm
+    @dispose pm=ModulePassManager() begin
         add_library_info!(pm, triple(mod))
         add_transform_info!(pm, tm)
         run!(pm, mod)
@@ -61,7 +61,7 @@ if LLVM.has_orc_v2()
     finalizer(LLVM.dispose, lljit)
     JIT = lljit
 else
-    Context() do ctx
+    @dispose ctx=Context() begin
         # Setup jit
         tm = JITTargetMachine()
 

@@ -8,7 +8,7 @@ using Core: LLVMPtr
 
 @generated function pointerref(ptr::LLVMPtr{T,A}, i::Integer, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return T.instance
-    Context() do ctx
+    @dispose ctx=Context() begin
         eltyp = convert(LLVMType, T; ctx)
 
         T_int = convert(LLVMType, Int; ctx)
@@ -21,7 +21,7 @@ using Core: LLVMPtr
         llvm_f, _ = create_function(eltyp, param_types)
 
         # generate IR
-        Builder(ctx) do builder
+        @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
@@ -43,7 +43,7 @@ end
 
 @generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::Integer, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return
-    Context() do ctx
+    @dispose ctx=Context() begin
         eltyp = convert(LLVMType, T; ctx)
 
         T_int = convert(LLVMType, Int; ctx)
@@ -56,7 +56,7 @@ end
         llvm_f, _ = create_function(LLVM.VoidType(ctx), param_types)
 
         # generate IR
-        Builder(ctx) do builder
+        @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
@@ -125,14 +125,14 @@ Base.signed(x::LLVMPtr) = Int(x)
     argexprs = Expr[:(args[$i]) for i in 1:length(args)]
 
     # build IR that calls the intrinsic, casting types if necessary
-    Context() do ctx
+    @dispose ctx=Context() begin
         T_ret = convert(LLVMType, rettyp; ctx)
         T_args = LLVMType[convert(LLVMType, typ; ctx) for typ in argtyps]
 
         llvm_f, _ = create_function(T_ret, T_args)
         mod = LLVM.parent(llvm_f)
 
-        Builder(ctx) do builder
+        @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 

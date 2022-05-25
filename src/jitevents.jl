@@ -6,7 +6,7 @@ export JITEventListener, GDBRegistrationListener, IntelJITEventListener,
 end
 Base.unsafe_convert(::Type{API.LLVMJITEventListenerRef}, listener::JITEventListener) = listener.ref
 
-GDBRegistrationListener()  = JITEventListener(LLVM.API.LLVMCreateGDBRegistrationListener())
-IntelJITEventListener()    = JITEventListener(LLVM.API.LLVMCreateIntelJITEventListener())
-OProfileJITEventListener() = JITEventListener(LLVM.API.LLVMCreateOProfileJITEventListener())
-PerfJITEventListener()     = JITEventListener(LLVM.API.LLVMCreatePerfJITEventListener())
+GDBRegistrationListener()  = JITEventListener(API.LLVMCreateGDBRegistrationListener())
+IntelJITEventListener()    = JITEventListener(API.LLVMCreateIntelJITEventListener())
+OProfileJITEventListener() = JITEventListener(API.LLVMCreateOProfileJITEventListener())
+PerfJITEventListener()     = JITEventListener(API.LLVMCreatePerfJITEventListener())

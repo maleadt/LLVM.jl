@@ -1,5 +1,19 @@
 @testset "orcv2" begin
 
+let lljit=LLJIT()
+    dispose(lljit)
+end
+
+LLJIT() do lljit
+end
+
+let ctx = ThreadSafeContext()
+    dispose(ctx)
+end
+
+ThreadSafeContext() do ctx
+end
+
 @testset "ThreadSafeModule" begin
     ts_mod = ThreadSafeModule("jit")
     @test_throws LLVMException ts_mod() do mod
@@ -13,7 +27,7 @@
 end
 
 @testset "JITDylib" begin
-    LLJIT() do lljit
+    @dispose lljit=LLJIT() begin
         es = ExecutionSession(lljit)
 
         @test LLVM.lookup_dylib(es, "my.so") === nothing
@@ -35,14 +49,14 @@ end
 end
 
 @testset "Undefined Symbol" begin
-    LLJIT() do lljit
+    @dispose lljit=LLJIT() begin
         @test_throws LLVMException lookup(lljit, string(gensym()))
     end
 
-    LLJIT(;tm=JITTargetMachine()) do lljit
+    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
         jd = JITDylib(lljit)
 
-        ThreadSafeContext() do ts_ctx
+        @dispose ts_ctx=ThreadSafeContext() begin
             ctx = context(ts_ctx)
             mod = LLVM.Module("jit"; ctx)
 
@@ -54,7 +68,7 @@ end
             fname = "wrapper"
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
-            Builder(ctx) do builder
+            @dispose builder=Builder(ctx) begin
                 entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
@@ -65,7 +79,7 @@ end
             # TODO: Get TM from lljit?
             tm = JITTargetMachine()
             triple!(mod, triple(lljit))
-            ModulePassManager() do pm
+            @dispose pm=ModulePassManager() begin
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
                 run!(pm, mod)
@@ -81,18 +95,18 @@ end
 end
 
 @testset "Loading ObjectFile" begin
-    LLJIT(;tm=JITTargetMachine()) do lljit
+    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
         jd = JITDylib(lljit)
 
         sym = "SomeFunction"
-        obj = ThreadSafeContext() do ts_ctx
+        obj = @dispose ts_ctx=ThreadSafeContext() begin
             ctx = context(ts_ctx)
 
             mod = LLVM.Module("jit"; ctx)
             ft = LLVM.FunctionType(LLVM.VoidType(ctx))
             fn = LLVM.Function(mod, sym, ft)
 
-            Builder(ctx) do builder
+            @dispose builder=Builder(ctx) begin
                 entry = BasicBlock(fn, "entry"; ctx)
                 position!(builder, entry)
                 ret!(builder)
@@ -112,11 +126,11 @@ end
         @test_throws LLVMException lookup(lljit, sym)
     end
 
-    LLJIT(;tm=JITTargetMachine()) do lljit
+    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
         jd = JITDylib(lljit)
 
         sym = "SomeFunction"
-        obj = ThreadSafeContext() do ts_ctx
+        obj = @dispose ts_ctx=ThreadSafeContext() begin
             ctx = context(ts_ctx)
 
             mod = LLVM.Module("jit"; ctx)
@@ -126,7 +140,7 @@ end
             gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(ctx), "gv")
             LLVM.extinit!(gv, true)
 
-            Builder(ctx) do builder
+            @dispose builder=Builder(ctx) begin
                 entry = BasicBlock(fn, "entry"; ctx)
                 position!(builder, entry)
                 val = load!(builder, gv)
@@ -179,10 +193,10 @@ end
     GC.@preserve ollc begin
         builder = LLJITBuilder()
         linkinglayercreator!(builder, ollc)
-        LLJIT(builder) do lljit
+        @dispose lljit=LLJIT(builder) begin
             jd = JITDylib(lljit)
 
-            ThreadSafeContext() do ts_ctx
+            @dispose ts_ctx=ThreadSafeContext() begin
                 ctx = context(ts_ctx)
                 sym = "SomeFunctionOLL"
 
@@ -190,7 +204,7 @@ end
                 ft = LLVM.FunctionType(LLVM.VoidType(ctx))
                 fn = LLVM.Function(mod, sym, ft)
 
-                Builder(ctx) do builder
+                @dispose builder=Builder(ctx) begin
                     entry = BasicBlock(fn, "entry"; ctx)
                     position!(builder, entry)
                     ret!(builder)
@@ -210,7 +224,7 @@ end
 end
 
 @testset "Lazy" begin
-    LLJIT() do lljit
+    @dispose lljit=LLJIT() begin
         jd = JITDylib(lljit)
         es = ExecutionSession(lljit)
 
@@ -255,7 +269,7 @@ end
                     fn = LLVM.Function(mod, "foo", ft)
 
                     # generate IR
-                    Builder(ctx) do builder
+                    @dispose builder=Builder(ctx) begin
                         entry = BasicBlock(fn, "entry"; ctx)
                         position!(builder, entry)
 
