@@ -1,6 +1,6 @@
 ## data layout
 
-export DataLayout, dispose,
+export DataLayout,
        byteorder, pointersize, intptr,
        sizeof, storage_size, abi_size,
        abi_alignment, frame_alignment, preferred_alignment,
@@ -12,18 +12,12 @@ Base.unsafe_convert(::Type{API.LLVMTargetDataRef}, dl::DataLayout) = dl.ref
 
 DataLayout(rep::String) = DataLayout(API.LLVMCreateTargetData(rep))
 
-DataLayout(tm::TargetMachine) = DataLayout(API.LLVMCreateTargetDataLayout(tm))
-
-function DataLayout(f::Core.Function, args...; kwargs...)
-    data = DataLayout(args...; kwargs...)
-    try
-        f(data)
-    finally
-        dispose(data)
-    end
+function DataLayout(tm::TargetMachine)
+    data = DataLayout(API.LLVMCreateTargetDataLayout(tm))
+    finalizer(unsafe_dispose!, data)
 end
 
-dispose(data::DataLayout) = API.LLVMDisposeTargetData(data)
+unsafe_dispose!(data::DataLayout) = API.LLVMDisposeTargetData(data)
 
 Base.string(data::DataLayout) =
     unsafe_message(API.LLVMCopyStringRepOfTargetData(data))

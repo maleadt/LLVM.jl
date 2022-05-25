@@ -8,7 +8,9 @@ export unsafe_delete!,
 register(Function, API.LLVMFunctionValueKind)
 
 Function(mod::Module, name::String, ft::FunctionType) =
-    Function(API.LLVMAddFunction(mod, name, ft))
+    Function(API.LLVMAddFunction(mod, name, ft), mod)
+
+context(fun::Function) = context(fun.mod)
 
 Base.empty!(f::Function) = API.LLVMFunctionDeleteBody(f)
 
@@ -80,6 +82,7 @@ export Argument, parameters
 
 @checked struct Argument <: Value
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(Argument, API.LLVMArgumentValueKind)
 
@@ -95,20 +98,22 @@ Base.IndexStyle(::FunctionParameterSet) = IndexLinear()
 
 function Base.getindex(iter::FunctionParameterSet, i::Int)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
-    return Argument(API.LLVMGetParam(iter.f, i-1))
+    return Argument(API.LLVMGetParam(iter.f, i-1), context(iter.f))
 end
 
 function Base.iterate(iter::FunctionParameterSet, state=API.LLVMGetFirstParam(iter.f))
-    state == C_NULL ? nothing : (Argument(state), API.LLVMGetNextParam(state))
+    state == C_NULL ? nothing : (Argument(state, context(iter.f)),
+                                 API.LLVMGetNextParam(state))
 end
 
-Base.last(iter::FunctionParameterSet) = Argument(API.LLVMGetLastParam(iter.f))
+Base.last(iter::FunctionParameterSet) =
+    Argument(API.LLVMGetLastParam(iter.f), context(iter.f))
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionParameterSet)
     elems = Vector{API.LLVMValueRef}(undef, length(iter))
     API.LLVMGetParams(iter.f, elems)
-    return map(el->Argument(el), elems)
+    return map(el->Argument(el, context(iter.f)), elems)
 end
 
 # basic block iteration
@@ -126,11 +131,14 @@ blocks(f::Function) = FunctionBlockSet(f)
 
 Base.size(iter::FunctionBlockSet) = (Int(API.LLVMCountBasicBlocks(iter.f)),)
 
-Base.first(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetFirstBasicBlock(iter.f))
-Base.last(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetLastBasicBlock(iter.f))
+Base.first(iter::FunctionBlockSet) =
+    BasicBlock(API.LLVMGetFirstBasicBlock(iter.f), context(iter.f))
+Base.last(iter::FunctionBlockSet) =
+    BasicBlock(API.LLVMGetLastBasicBlock(iter.f), context(iter.f))
 
 function Base.iterate(iter::FunctionBlockSet, state=API.LLVMGetFirstBasicBlock(iter.f))
-    state == C_NULL ? nothing : (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
+    state == C_NULL ? nothing : (BasicBlock(state, context(iter.f)),
+                                 API.LLVMGetNextBasicBlock(state))
 end
 
 # provide a random access interface by maintaining a cache of blocks
@@ -146,14 +154,14 @@ function Base.getindex(iter::FunctionBlockSet, i::Int)
         next === nothing && throw(BoundsError(iter, i))
         push!(iter.cache, next[2])
     end
-    return BasicBlock(iter.cache[i-1])
+    return BasicBlock(iter.cache[i-1], context(iter.f))
 end
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionBlockSet)
     elems = Vector{API.LLVMValueRef}(undef, length(iter))
     API.LLVMGetBasicBlocks(iter.f, elems)
-    return BasicBlock[BasicBlock(elem) for elem in elems]
+    return BasicBlock[BasicBlock(elem, context(iter.f)) for elem in elems]
 end
 
 # intrinsics
@@ -195,12 +203,13 @@ function isoverloaded(intr::Intrinsic)
 end
 
 function Function(mod::Module, intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[])
-    Value(API.LLVMGetIntrinsicDeclaration(mod, intr, params, length(params)))
+    # XXX: this was Value() -- can this ever be a non-Function?
+    Function(API.LLVMGetIntrinsicDeclaration(mod, intr, params, length(params)), mod)
 end
 
 function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[];
                       ctx::Context=only(unique(map(context, params))))
-    LLVMType(API.LLVMIntrinsicGetType(ctx, intr, params, length(params)))
+    LLVMType(API.LLVMIntrinsicGetType(ctx, intr, params, length(params)), ctx)
 end
 
 function Base.show(io::IO, intr::Intrinsic)

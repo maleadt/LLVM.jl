@@ -27,11 +27,14 @@ function refcheck(::Type{T}, ref::API.LLVMMetadataRef) where T<:Metadata
 end
 
 # Construct a concretely typed metadata object from an abstract metadata ref
-function Metadata(ref::API.LLVMMetadataRef)
+function Metadata(ref::API.LLVMMetadataRef, ctx::Context)
     ref == C_NULL && throw(UndefRefError())
     T = identify(Metadata, ref)
-    return T(ref)
+    return T(ref, ctx)::Metadata
 end
+
+# metadata subtypes are expected to have a context field
+context(md::Metadata) = md.ctx
 
 function Base.show(io::IO, md::Metadata)
     output = unsafe_message(API.LLVMExtraPrintMetadataToString(md))
@@ -45,12 +48,13 @@ end
 
 @checked struct MetadataAsValue <: Value
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(MetadataAsValue, API.LLVMMetadataAsValueValueKind)
 
 # NOTE: this can be used to both pack e.g. metadata as a value, and to extract the
 #       value from an ValueAsMetadata, so we don't type-assert narrowly here
-Value(md::Metadata; ctx::Context) = Value(API.LLVMMetadataAsValue2(ctx, md))
+Value(md::Metadata; ctx::Context) = Value(API.LLVMMetadataAsValue2(ctx, md), ctx)
 
 Base.convert(T::Type{<:Value}, val::Metadata) = Value(val)::T
 
@@ -64,6 +68,7 @@ abstract type ValueAsMetadata <: Metadata end
 
 @checked struct ConstantAsMetadata <: ValueAsMetadata
     ref::API.LLVMMetadataRef
+    ctx::Context
 end
 register(ConstantAsMetadata, API.LLVMConstantAsMetadataMetadataKind)
 
@@ -74,7 +79,7 @@ register(LocalAsMetadata, API.LLVMLocalAsMetadataMetadataKind)
 
 # NOTE: this can be used to both pack e.g. constants as metadata, and to extract the
 #       metadata from an MetadataAsValue, so we don't type-assert narrowly here
-Metadata(val::Value) = Metadata(API.LLVMValueAsMetadata(val))
+Metadata(val::Value) = Metadata(API.LLVMValueAsMetadata(val), ctx)
 
 Base.convert(T::Type{<:Metadata}, val::Value) = Metadata(val)::T
 
@@ -85,11 +90,12 @@ export MDString
 
 @checked struct MDString <: Metadata
     ref::API.LLVMMetadataRef
+    ctx::Context
 end
 register(MDString, API.LLVMMDStringMetadataKind)
 
 MDString(val::String; ctx::Context) =
-    MDString(API.LLVMMDStringInContext2(ctx, val, length(val)))
+    MDString(API.LLVMMDStringInContext2(ctx, val, length(val)), ctx)
 
 function Base.string(md::MDString)
     len = Ref{Cuint}()
@@ -108,7 +114,7 @@ function operands(md::MDNode)
     nops = API.LLVMExtraGetMDNodeNumOperands2(md)
     ops = Vector{API.LLVMMetadataRef}(undef, nops)
     API.LLVMExtraGetMDNodeOperands2(md, ops)
-    return [op == C_NULL ? nothing : Metadata(op) for op in ops]
+    return [op == C_NULL ? nothing : Metadata(op, context(md)) for op in ops]
 end
 
 # TODO: setindex?
@@ -123,12 +129,13 @@ export MDTuple
 
 @checked struct MDTuple <: MDNode
     ref::API.LLVMMetadataRef
+    ctx::Context
 end
 register(MDTuple, API.LLVMMDTupleMetadataKind)
 
 # MDTuples are commonly referred to as MDNodes, so keep that name
 MDNode(mds::Vector{<:Metadata}; ctx::Context) =
-    MDTuple(API.LLVMMDNodeInContext2(ctx, mds, length(mds)))
+    MDTuple(API.LLVMMDNodeInContext2(ctx, mds, length(mds)), ctx)
 MDNode(vals::Vector; ctx::Context) =
     MDNode(convert(Vector{Metadata}, vals); ctx)
 

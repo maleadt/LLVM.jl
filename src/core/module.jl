@@ -1,7 +1,6 @@
 # Modules represent the top-level structure in an LLVM program.
 
-export dispose,
-       name, name!,
+export name, name!,
        triple, triple!,
        datalayout, datalayout!,
        context, inline_asm!,
@@ -18,25 +17,25 @@ end
 Base.:(==)(x::Module, y::Module) = (x.ref === y.ref)
 
 # forward declarations
-@checked struct DataLayout
+@checked mutable struct DataLayout
     ref::API.LLVMTargetDataRef
 end
 
-Module(name::String; ctx::Context) =
-    Module(API.LLVMModuleCreateWithNameInContext(name, ctx))
+function Module(name::String; ctx::Context)
+    mod = Module(API.LLVMModuleCreateWithNameInContext(name, ctx), ctx)
+    finalizer(unsafe_dispose!, mod)
+end
 
-Module(mod::Module) = Module(API.LLVMCloneModule(mod))
+function Module(mod::Module)
+    mod = Module(API.LLVMCloneModule(mod), context(mod))
+    finalizer(unsafe_dispose!, mod)
+end
 Base.copy(mod::Module) = Module(mod)
 
-dispose(mod::Module) = API.LLVMDisposeModule(mod)
-
-function Module(f::Core.Function, args...; kwargs...)
-    mod = Module(args...; kwargs...)
-    try
-        f(mod)
-    finally
-        dispose(mod)
-    end
+function unsafe_dispose!(mod::Module)
+    # modules can be consumed externally
+    mod.ref == C_NULL && return
+    API.LLVMDisposeModule(mod)
 end
 
 function Base.show(io::IO, mod::Module)
@@ -63,7 +62,8 @@ datalayout!(mod::Module, layout::DataLayout) =
 inline_asm!(mod::Module, asm::String) =
     API.LLVMSetModuleInlineAsm(mod, asm)
 
-context(mod::Module) = Context(API.LLVMGetModuleContext(mod))
+#context(mod::Module) = Context(API.LLVMGetModuleContext(mod))
+context(mod::Module) = mod.ctx
 
 set_used!(mod::Module, values::GlobalVariable...) =
     API.LLVMExtraAppendToUsed(mod, collect(values), length(values))
@@ -149,6 +149,10 @@ function Base.iterate(iter::ModuleMetadataIterator, state=API.LLVMGetFirstNamedM
     end
 end
 
+# XXX: do we want to iterate this like such, returning pairs?
+#      can't we just use `LLVM.name` to get back the name?
+#      or should it be a proper dict?
+
 Base.last(iter::ModuleMetadataIterator) =
     NamedMDNode(iter.mod, API.LLVMGetLastNamedMetadata(iter.mod))
 
@@ -219,11 +223,11 @@ functions(mod::Module) = ModuleFunctionSet(mod)
 Base.eltype(::ModuleFunctionSet) = Function
 
 function Base.iterate(iter::ModuleFunctionSet, state=API.LLVMGetFirstFunction(iter.mod))
-    state == C_NULL ? nothing : (Function(state), API.LLVMGetNextFunction(state))
+    state == C_NULL ? nothing : (Function(state, iter.mod), API.LLVMGetNextFunction(state))
 end
 
 Base.last(iter::ModuleFunctionSet) =
-    Function(API.LLVMGetLastFunction(iter.mod))
+    Function(API.LLVMGetLastFunction(iter.mod), iter.mod)
 
 Base.isempty(iter::ModuleFunctionSet) =
     API.LLVMGetLastFunction(iter.mod) == C_NULL
@@ -239,7 +243,7 @@ end
 function Base.getindex(iter::ModuleFunctionSet, name::String)
     objref = API.LLVMGetNamedFunction(iter.mod, name)
     objref == C_NULL && throw(KeyError(name))
-    return Function(objref)
+    return Function(objref, iter.mod)
 end
 
 

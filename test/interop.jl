@@ -6,12 +6,12 @@ using InteractiveUtils
 @testset "base" begin
 
 @generated function add_one(i)
-    Context() do ctx
+    let ctx = Context()
         T_int = convert(LLVMType, Int; ctx)
 
         f, ft = create_function(T_int, [T_int])
 
-        Builder(ctx) do builder
+        let builder = Builder(ctx)
             entry = BasicBlock(f, "entry"; ctx)
             position!(builder, entry)
 
@@ -37,7 +37,7 @@ end
 @test !isghosttype(NonGhostType1)
 @test !isghosttype(NonGhostType2)
 
-Context() do ctx
+let ctx = Context()
     @test isboxed(NonGhostType2; ctx)
     @test isghosttype(GhostType; ctx)
     @test !isghosttype(NonGhostType1; ctx)
@@ -103,9 +103,9 @@ end
 @testset "passes" begin
 
 
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
-ModulePassManager() do pm
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
+let pm = ModulePassManager()
 
 demote_float16!(pm)
 julia_licm!(pm)

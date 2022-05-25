@@ -2,8 +2,8 @@
 
 @testset "Undefined Symbol" begin
     tm  = JITTargetMachine()
-    OrcJIT(tm) do orc
-       Context() do ctx
+    let orc = OrcJIT(tm)
+       let ctx = Context()
             mod = LLVM.Module("jit"; ctx)
             T_Int32 = LLVM.Int32Type(ctx)
             ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
@@ -13,7 +13,7 @@
             fname = mangle(orc, "wrapper")
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
-            Builder(ctx) do builder
+            let builder = Builder(ctx)
                 entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
@@ -22,7 +22,7 @@
             end
 
             triple!(mod, triple(tm))
-            ModulePassManager() do pm
+            let pm = ModulePassManager()
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
                 run!(pm, mod)
@@ -39,8 +39,8 @@ end
 
 @testset "Custom Resolver" begin
     tm  = JITTargetMachine()
-    OrcJIT(tm) do orc
-       Context() do ctx
+    let orc = OrcJIT(tm)
+       let ctx = Context()
             known_functions = Dict{String, OrcTargetAddress}()
             fnames = Dict{String, Int}()
             function lookup(name, ctx)
@@ -67,7 +67,7 @@ end
             fname = mangle(orc, "wrapper")
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
-            Builder(ctx) do builder
+            let builder = Builder(ctx)
                 entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
@@ -76,7 +76,7 @@ end
             end
 
             triple!(mod, triple(tm))
-            ModulePassManager() do pm
+            let pm = ModulePassManager()
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
                 run!(pm, mod)
@@ -113,8 +113,8 @@ end
 
 @testset "Default Resolver + Stub" begin
     tm  = JITTargetMachine()
-    OrcJIT(tm) do orc
-            Context() do ctx
+    let orc = OrcJIT(tm)
+            let ctx = Context()
             mod = LLVM.Module("jit"; ctx)
             T_Int32 = LLVM.Int32Type(ctx)
             ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
@@ -124,7 +124,7 @@ end
             fname = mangle(orc, "wrapper")
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
-            Builder(ctx) do builder
+            let builder = Builder(ctx)
                 entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
@@ -133,7 +133,7 @@ end
             end
 
             triple!(mod, triple(tm))
-            ModulePassManager() do pm
+            let pm = ModulePassManager()
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
                 run!(pm, mod)
@@ -157,8 +157,8 @@ end
 
 @testset "Default Resolver + Global Symbol" begin
     tm  = JITTargetMachine()
-    OrcJIT(tm) do orc
-        Context() do ctx
+    let orc = OrcJIT(tm)
+        let ctx = Context()
             mod = LLVM.Module("jit"; ctx)
             T_Int32 = LLVM.Int32Type(ctx)
             ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
@@ -169,7 +169,7 @@ end
             fname = mangle(orc, "wrapper")
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
-            Builder(ctx) do builder
+            let builder = Builder(ctx)
                 entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
@@ -178,7 +178,7 @@ end
             end
 
             triple!(mod, triple(tm))
-            ModulePassManager() do pm
+            let pm = ModulePassManager()
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
                 run!(pm, mod)
@@ -206,15 +206,15 @@ end
 
 @testset "Loading ObjectFile" begin
     tm  = JITTargetMachine()
-    OrcJIT(tm) do orc
-        Context() do ctx
+    let orc = OrcJIT(tm)
+        let ctx = Context()
             sym = mangle(orc, "SomeFunction")
 
             mod = LLVM.Module("jit"; ctx)
             ft = LLVM.FunctionType(LLVM.VoidType(ctx))
             fn = LLVM.Function(mod, sym, ft)
 
-            Builder(ctx) do builder
+            let builder = Builder(ctx)
                 entry = BasicBlock(fn, "entry"; ctx)
                 position!(builder, entry)
                 ret!(builder)
@@ -234,8 +234,8 @@ end
 
 @testset "Stubs" begin
     tm  = JITTargetMachine()
-    OrcJIT(tm) do orc
-        Context() do ctx
+    let orc = OrcJIT(tm)
+        let ctx = Context()
             toggle = Ref{Bool}(false)
             on()  = (toggle[] = true; nothing)
             off() = (toggle[] = false; nothing)
@@ -274,7 +274,7 @@ end
 
 @testset "callback!" begin
     tm  = JITTargetMachine()
-    OrcJIT(tm) do orc
+    let orc = OrcJIT(tm)
         triggered = Ref{Bool}(false)
 
         # Setup the lazy callback for creating a module
@@ -283,12 +283,12 @@ end
             sym = mangle(orc, "SomeFunction")
 
             # 1. IRGen & Optimize the module
-            orc_mod = Context() do ctx
+            orc_mod = let ctx = Context()
                 mod = LLVM.Module("jit"; ctx)
                 ft = LLVM.FunctionType(LLVM.VoidType(ctx))
                 fn = LLVM.Function(mod, sym, ft)
 
-                Builder(ctx) do builder
+                let builder = Builder(ctx)
                     entry = BasicBlock(fn, "entry"; ctx)
                     position!(builder, entry)
                     ret!(builder)
@@ -296,7 +296,7 @@ end
                 verify(mod)
 
                 triple!(mod, triple(tm))
-                ModulePassManager() do pm
+                let pm = ModulePassManager()
                     add_library_info!(pm, triple(mod))
                     add_transform_info!(pm, tm)
                     run!(pm, mod)

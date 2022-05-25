@@ -1,10 +1,11 @@
 export OrcJIT, OrcModule, OrcTargetAddress
-export dispose, errormsg, compile!, remove!, add!,
+export errormsg, compile!, remove!, add!,
        mangle, address, addressin, create_stub!, set_stub!,
        register!, unregister!, callback!
 
-@checked struct OrcJIT
+@checked mutable struct OrcJIT
     ref::API.LLVMOrcJITStackRef
+    tm::TargetMachine
 end
 
 Base.unsafe_convert(::Type{API.LLVMOrcJITStackRef}, orc::OrcJIT) = orc.ref
@@ -21,21 +22,11 @@ Creates a OrcJIT stack based on the provided target machine.
     Takes ownership of the provided target machine.
 """
 function OrcJIT(tm::TargetMachine)
-    OrcJIT(API.LLVMOrcCreateInstance(tm))
+    orc = OrcJIT(API.LLVMOrcCreateInstance(tm))
+    finalizer(unsafe_dispose!, orc)
 end
 
-function dispose(orc::OrcJIT)
-    API.LLVMOrcDisposeInstance(orc)
-end
-
-function OrcJIT(f::Core.Function, tm::TargetMachine)
-    orc = OrcJIT(tm)
-    try
-        f(orc)
-    finally
-        dispose(orc)
-    end
-end
+unsafe_dispose!(orc::OrcJIT) = API.LLVMOrcDisposeInstance(orc)
 
 function errormsg(orc::OrcJIT)
     # The error message is owned by `orc`, and will
@@ -43,8 +34,9 @@ function errormsg(orc::OrcJIT)
     unsafe_string(LLVM.API.LLVMOrcGetErrorMsg(orc))
 end
 
-struct OrcModule
+@checked struct OrcModule
     handle::API.LLVMOrcModuleHandle
+    orc::OrcJIT
 end
 Base.convert(::Type{API.LLVMOrcModuleHandle}, mod::OrcModule) = mod.handle
 
@@ -88,24 +80,28 @@ function resolver(name, ctx)
     return UInt64(reinterpret(UInt, ptr))
 end
 
-function compile!(orc::OrcJIT, mod::Module, resolver = @cfunction(resolver, UInt64, (Cstring, Ptr{Cvoid})), resolver_ctx = orc; lazy=false)
+function compile!(orc::OrcJIT, mod::Module,
+                  resolver=@cfunction(resolver, UInt64, (Cstring, Ptr{Cvoid})),
+                                      resolver_ctx = orc; lazy=false)
     r_mod = Ref{API.LLVMOrcModuleHandle}()
     if lazy
         API.LLVMOrcAddLazilyCompiledIR(orc, r_mod, mod, resolver, resolver_ctx)
     else
         API.LLVMOrcAddEagerlyCompiledIR(orc, r_mod, mod, resolver, resolver_ctx)
     end
-    OrcModule(r_mod[])
+    OrcModule(r_mod[], orc)
 end
 
 function Base.delete!(orc::OrcJIT, mod::OrcModule)
     LLVM.API.LLVMOrcRemoveModule(orc, mod)
 end
 
-function add!(orc::OrcJIT, obj::MemoryBuffer, resolver = @cfunction(resolver, UInt64, (Cstring, Ptr{Cvoid})), resolver_ctx = orc)
+function add!(orc::OrcJIT, obj::MemoryBuffer,
+              resolver=@cfunction(resolver, UInt64, (Cstring, Ptr{Cvoid})),
+                                  resolver_ctx = orc)
     r_mod = Ref{API.LLVMOrcModuleHandle}()
     API.LLVMOrcAddObjectFile(orc, r_mod, obj, resolver, resolver_ctx)
-    return OrcModule(r_mod[])
+    return OrcModule(r_mod[], orc)
 end
 
 function mangle(orc::OrcJIT, name)

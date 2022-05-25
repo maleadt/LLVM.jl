@@ -33,7 +33,7 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
                                {F, round, fpexcept, T<:AbstractFloat, N}
     @assert N >= 0
 
-    Context() do ctx
+    let ctx = Context()
         typ = convert(LLVMType, T; ctx)
 
         # create a function
@@ -50,7 +50,7 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
                                 intrinsic_typ)
 
         # generate IR
-        Builder(ctx) do builder
+        let builder = Builder(ctx)
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
             val = call!(builder, intrinsic,

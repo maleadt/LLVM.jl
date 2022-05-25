@@ -1,7 +1,7 @@
 @testset "datalayout" begin
 
-Context() do ctx
-DataLayout("E-p:32:32-f128:128:128") do data
+let ctx = Context()
+let data = DataLayout("E-p:32:32-f128:128:128")
     @test string(data) == "E-p:32:32-f128:128:128"
 
     @test occursin("E-p:32:32-f128:128:128", sprint(io->show(io,data)))
@@ -15,7 +15,7 @@ DataLayout("E-p:32:32-f128:128:128") do data
 
     @test abi_alignment(data, LLVM.Int32Type(ctx)) == frame_alignment(data, LLVM.Int32Type(ctx)) == preferred_alignment(data, LLVM.Int32Type(ctx)) == 4
 
-    LLVM.Module("SomeModule"; ctx) do mod
+    let mod = LLVM.Module("SomeModule"; ctx)
         gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
         @test preferred_alignment(data, gv) == 4
 

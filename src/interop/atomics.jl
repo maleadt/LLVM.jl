@@ -166,7 +166,7 @@ end
 @generated function atomic_pointerref(ptr::LLVMPtr{T,A}, order::AllOrdering) where {T,A}
     sizeof(T) == 0 && return T.instance
     llvm_order = _valueof(llvm_from_julia_ordering(order()))
-    Context() do ctx
+    let ctx = Context()
         eltyp = convert(LLVMType, T; ctx)
 
         T_ptr = convert(LLVMType, ptr; ctx)
@@ -178,7 +178,7 @@ end
         llvm_f, _ = create_function(eltyp, param_types)
 
         # generate IR
-        Builder(ctx) do builder
+        let builder = Builder(ctx)
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
@@ -213,7 +213,7 @@ end
         end
     end
     llvm_order = _valueof(llvm_from_julia_ordering(order()))
-    Context() do ctx
+    let ctx = Context()
         eltyp = convert(LLVMType, T; ctx)
         T_ptr = convert(LLVMType, ptr; ctx)
         T_typed_ptr = LLVM.PointerType(eltyp, A)
@@ -223,7 +223,7 @@ end
         llvm_f, _ = create_function(LLVM.VoidType(ctx), param_types)
 
         # generate IR
-        Builder(ctx) do builder
+        let builder = Builder(ctx)
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
@@ -273,7 +273,7 @@ const AtomicRMWBinOpVal = Union{(Val{binop} for (_, _, binop) in binoptable)...}
     val::T,
     order::LLVMOrderingVal,
 ) where {T,A}
-    Context() do ctx
+    let ctx = Context()
         T_val = convert(LLVMType, T; ctx)
         T_ptr = convert(LLVMType, ptr; ctx)
 
@@ -281,7 +281,7 @@ const AtomicRMWBinOpVal = Union{(Val{binop} for (_, _, binop) in binoptable)...}
 
         llvm_f, _ = create_function(T_val, [T_ptr, T_val])
 
-        Builder(ctx) do builder
+        let builder = Builder(ctx)
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
@@ -406,7 +406,7 @@ end
 ) where {T,A}
     llvm_success = _valueof(success_order())
     llvm_fail = _valueof(fail_order())
-    Context() do ctx
+    let ctx = Context()
         T_val = convert(LLVMType, T; ctx)
         T_pointee = T_val
         if T_val isa LLVM.FloatingPointType
@@ -420,7 +420,7 @@ end
 
         llvm_f, _ = create_function(T_val, [T_ptr, T_val, T_val, T_success])
 
-        Builder(ctx) do builder
+        let builder = Builder(ctx)
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 

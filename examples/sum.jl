@@ -11,7 +11,7 @@ else
     y = Int32(2)
 end
 
-Context() do ctx
+let ctx = Context()
     # set-up
     mod = LLVM.Module("my_module"; ctx)
 
@@ -21,7 +21,7 @@ Context() do ctx
     sum = LLVM.Function(mod, "sum", fun_type)
 
     # generate IR
-    Builder(ctx) do builder
+    let builder = Builder(ctx)
         entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 
@@ -33,14 +33,11 @@ Context() do ctx
     end
 
     # analysis and execution
-    Interpreter(mod) do engine
+    let engine = Interpreter(mod)
         args = [GenericValue(LLVM.Int32Type(ctx), x),
                 GenericValue(LLVM.Int32Type(ctx), y)]
 
         res = LLVM.run(engine, sum, args)
         @test convert(Int, res) == x + y
-
-        dispose.(args)
-        dispose(res)
     end
 end

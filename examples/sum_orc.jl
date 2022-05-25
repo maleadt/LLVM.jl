@@ -22,7 +22,7 @@ function codegen!(mod::LLVM.Module, name, tm)
     sum = LLVM.Function(mod, name, ft)
 
     # generate IR
-    Builder(ctx) do builder
+    let builder = Builder(ctx)
         entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 
@@ -32,7 +32,7 @@ function codegen!(mod::LLVM.Module, name, tm)
 
     verify(mod)
 
-    ModulePassManager() do pm
+    let pm = ModulePassManager()
         add_library_info!(pm, triple(mod))
         add_transform_info!(pm, tm)
         run!(pm, mod)
@@ -50,7 +50,6 @@ if LLVM.has_orc_v2()
     name = "sum_orc.jl"
     tm = JITTargetMachine()
     ts_mod(m->codegen!(m, name, tm))
-    dispose(tm)
 
     jd = JITDylib(lljit)
     add!(lljit, jd, ts_mod)
@@ -58,10 +57,9 @@ if LLVM.has_orc_v2()
 
     @eval call_sum(x, y) = ccall($(pointer(addr)), Int32, (Int32, Int32), x, y)
 
-    finalizer(LLVM.dispose, lljit)
     JIT = lljit
 else
-    Context() do ctx
+    let ctx = Context()
         # Setup jit
         tm = JITTargetMachine()
 

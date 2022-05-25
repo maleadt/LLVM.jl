@@ -1,28 +1,21 @@
 @testset "passmanager" begin
 
-let
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     mpm = ModulePassManager()
-    dispose(mpm)
-end
-
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
-ModulePassManager() do mpm
     @test !run!(mpm, mod)
 end
 end
-end
 
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
-FunctionPassManager(mod) do fpm
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
+    fpm = FunctionPassManager(mod)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     @test !initialize!(fpm)
     @test !run!(fpm, fn)
     @test !finalize!(fpm)
-end
 end
 end
 

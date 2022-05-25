@@ -15,20 +15,16 @@ end
 
 @testset "context" begin
 
-let
-    ctx = Context()
+let ctx = Context()
     @assert ctx != GlobalContext()
-    dispose(ctx)
 end
-
-Context() do ctx end
 
 end
 
 
 @testset "type" begin
 
-Context() do ctx
+let ctx = Context()
     typ = LLVM.Int1Type(ctx)
     @test typeof(typ.ref) == LLVM.API.LLVMTypeRef                 # untyped
 
@@ -49,7 +45,7 @@ Context() do ctx
 end
 
 # integer
-Context() do ctx
+let ctx = Context()
     typ = LLVM.Int1Type(ctx)
     @test context(typ) == ctx
 
@@ -61,7 +57,7 @@ end
 # floating-point
 
 # function
-Context() do ctx
+let ctx = Context()
     x = LLVM.Int1Type(ctx)
     y = [LLVM.Int8Type(ctx), LLVM.Int16Type(ctx)]
     ft = LLVM.FunctionType(x, y)
@@ -74,7 +70,7 @@ Context() do ctx
 end
 
 # sequential
-Context() do ctx
+let ctx = Context()
     eltyp = LLVM.Int32Type(ctx)
 
     ptrtyp = LLVM.PointerType(eltyp)
@@ -86,7 +82,7 @@ Context() do ctx
     ptrtyp = LLVM.PointerType(eltyp, 1)
     @test addrspace(ptrtyp) == 1
 end
-Context() do ctx
+let ctx = Context()
     eltyp = LLVM.Int32Type(ctx)
 
     arrtyp = LLVM.ArrayType(eltyp, 2)
@@ -96,13 +92,13 @@ Context() do ctx
 
     @test length(arrtyp) == 2
 end
-Context() do ctx
+let ctx = Context()
     eltyp = LLVM.Int32Type(ctx)
 
     arrtyp = LLVM.ArrayType(eltyp, 0)
     @test isempty(arrtyp)
 end
-Context() do ctx
+let ctx = Context()
     eltyp = LLVM.Int32Type(ctx)
 
     vectyp = LLVM.VectorType(eltyp, 2)
@@ -113,7 +109,7 @@ Context() do ctx
 end
 
 # structure
-Context() do ctx
+let ctx = Context()
     elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]
 
     let st = LLVM.StructType(elem; ctx)
@@ -150,25 +146,25 @@ Context() do ctx
 end
 
 # other
-Context() do ctx
+let ctx = Context()
     typ = LLVM.VoidType(ctx)
     @test context(typ) == ctx
 end
-Context() do ctx
+let ctx = Context()
     typ = LLVM.LabelType(ctx)
     @test context(typ) == ctx
 end
-Context() do ctx
+let ctx = Context()
     typ = LLVM.MetadataType(ctx)
     @test context(typ) == ctx
 end
-Context() do ctx
+let ctx = Context()
     typ = LLVM.TokenType(ctx)
     @test context(typ) == ctx
 end
 
 # type iteration
-Context() do ctx
+let ctx = Context()
     st = LLVM.StructType("SomeType"; ctx)
 
     let ts = types(ctx)
@@ -188,9 +184,9 @@ end
 
 @testset "value" begin
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let builder = Builder(ctx)
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -227,9 +223,9 @@ end
 
 # usage
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let builder = Builder(ctx)
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -270,7 +266,7 @@ end
 
 # users
 
-Context() do ctx
+let ctx = Context()
     # operand iteration
     mod = parse(LLVM.Module,  """
         define void @fun(i32) {
@@ -293,13 +289,11 @@ Context() do ctx
             @test collect(ops) == []
         end
     end
-
-    dispose(mod)
 end
 
 # constants
 
-Context() do ctx
+let ctx = Context()
     @testset "constants" begin
 
     typ = LLVM.Int32Type(ctx)
@@ -333,7 +327,7 @@ Context() do ctx
 end
 
 # scalar
-Context() do ctx
+let ctx = Context()
     @testset "integer constants" begin
 
     # manual construction of small values
@@ -508,7 +502,7 @@ Context() do ctx
 end
 
 # constant expressions
-Context() do ctx
+let ctx = Context()
     @testset "constant expressions" begin
 
     # inline assembly
@@ -676,8 +670,8 @@ Context() do ctx
 end
 
 # global values
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     st = LLVM.StructType("SomeType"; ctx)
     ft = LLVM.FunctionType(st, [st])
     fn = LLVM.Function(mod, "SomeFunction", ft)
@@ -710,8 +704,8 @@ end
 end
 
 # global variables
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     @test isempty(globals(mod))
     gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
     @test !isempty(globals(mod))
@@ -759,8 +753,8 @@ LLVM.Module("SomeModule"; ctx) do mod
 end
 end
 
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     st = LLVM.StructType("SomeType"; ctx)
     gv = GlobalVariable(mod, st, "SomeGlobal")
 
@@ -770,8 +764,8 @@ LLVM.Module("SomeModule"; ctx) do mod
 end
 end
 
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal", 1)
 
     @test addrspace(llvmtype(gv)) == 1
@@ -783,7 +777,7 @@ end
 
 @testset "metadata" begin
 
-Context() do ctx
+let ctx = Context()
     str = MDString("foo"; ctx)
     @test string(str) == "foo"
 
@@ -799,7 +793,7 @@ Context() do ctx
     @test convert(MDString, val) == str
 end
 
-Context() do ctx
+let ctx = Context()
     int = ConstantInt(42; ctx)
     @test convert(Int, int) == 42
 
@@ -815,7 +809,7 @@ Context() do ctx
     @test convert(ConstantInt, val) == int
 end
 
-Context() do ctx
+let ctx = Context()
     mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     f1 = LLVM.Function(mod, "f1", ft)
@@ -829,7 +823,7 @@ Context() do ctx
 end
 
 # different type; requires a hack
-Context() do ctx
+let ctx = Context()
     mod = LLVM.Module("SomeModule"; ctx)
     ft1 = LLVM.FunctionType(LLVM.VoidType(ctx))
     f1 = LLVM.Function(mod, "f1", ft1)
@@ -843,7 +837,7 @@ Context() do ctx
     @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f2
 end
 
-Context() do ctx
+let ctx = Context()
     str = MDString("foo"; ctx)
     node = MDNode([str]; ctx)
     ops = operands(node)
@@ -852,7 +846,7 @@ Context() do ctx
 end
 
 # null metadata, represented as null pointers in the API, by `nothing` in Julia
-Context() do ctx
+let ctx = Context()
     ir = """
             !0 = !{i32 42, null, !"string"}
             !foo = !{!0}
@@ -870,7 +864,7 @@ end
 
 @testset "debuginfo" begin
 
-Context() do ctx
+let ctx = Context()
 mod = parse(LLVM.Module, raw"""
        define double @test(i64 signext %0, double %1) !dbg !5 {
        top:
@@ -949,7 +943,7 @@ end
 
 @testset "module" begin
 
-Context() do ctx
+let ctx = Context()
     mod = LLVM.Module("SomeModule"; ctx)
     @test context(mod) == ctx
 
@@ -958,12 +952,11 @@ Context() do ctx
     @test name(mod) == "SomeOtherName"
 end
 
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     clone = copy(mod)
     @test mod != clone
     @test context(clone) == ctx
-    dispose(clone)
 
     show(devnull, mod)
 
@@ -992,8 +985,8 @@ end
 end
 
 # metadata iteration
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     node = MDNode([MDString("SomeMDString"; ctx)]; ctx)
 
     let mds = metadata(mod)
@@ -1011,8 +1004,8 @@ end
 end
 
 # global variable iteration
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     dummygv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
 
     let gvs = globals(mod)
@@ -1037,8 +1030,8 @@ end
 end
 
 # function iteration
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     st = LLVM.StructType("SomeType"; ctx)
     ft = LLVM.FunctionType(st, [st])
     @test isempty(functions(mod))
@@ -1072,8 +1065,8 @@ end
 
 @testset "function" begin
 
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -1107,8 +1100,8 @@ end
 end
 
 # non-overloaded intrinsic
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     intr_ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     intr_fn = LLVM.Function(mod, "llvm.trap", intr_ft)
     @test isintrinsic(intr_fn)
@@ -1134,8 +1127,8 @@ end
 end
 
 # overloaded intrinsic
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     intr_ft = LLVM.FunctionType(LLVM.DoubleType(ctx), [LLVM.DoubleType(ctx)])
     intr_fn = LLVM.Function(mod, "llvm.sin.f64", intr_ft)
     @test isintrinsic(intr_fn)
@@ -1161,8 +1154,8 @@ end
 end
 
 # attributes
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -1220,8 +1213,8 @@ end
 end
 
 # parameter iteration
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -1244,8 +1237,8 @@ end
 end
 
 # basic block iteration
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(mod, "SomeFunction", ft)
     @test isempty(blocks(fn))
@@ -1278,9 +1271,9 @@ end
 
 @testset "basic blocks" begin
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let builder = Builder(ctx)
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -1340,9 +1333,9 @@ end
 
 @testset "instructions" begin
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let builder = Builder(ctx)
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(mod, "SomeFunction", ft)
     @test isempty(parameters(fn))
@@ -1442,7 +1435,7 @@ end
 end
 
 # new freeze instruction (used in 1.7 with JuliaLang/julia#38977)
-Context() do ctx
+let ctx = Context()
     mod = parse(LLVM.Module,  """
         define i64 @julia_f_246(i64 %0) {
         top:
@@ -1453,7 +1446,6 @@ Context() do ctx
     bb = first(blocks(f))
     inst = first(instructions(bb))
     @test inst isa LLVM.FreezeInst
-    dispose(mod)
 end
 
 end

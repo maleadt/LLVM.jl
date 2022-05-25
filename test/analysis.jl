@@ -1,8 +1,8 @@
 @testset "analysis" begin
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let builder = Builder(ctx)
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.Int32Type(ctx))
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -17,9 +17,9 @@ end
 end
 end
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do mod
+let ctx = Context()
+let builder = Builder(ctx)
+let mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(mod, "SomeFunction", ft)
 

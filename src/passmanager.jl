@@ -1,5 +1,5 @@
 export PassManager,
-       add!, dispose
+       add!
 
 # subtypes are expected to have a 'ref::API.LLVMPassManagerRef' field
 abstract type PassManager end
@@ -11,7 +11,7 @@ function add!(pm::PassManager, pass::Pass)
     API.LLVMAddPass(pm, pass)
 end
 
-dispose(pm::PassManager) = API.LLVMDisposePassManager(pm)
+unsafe_dispose!(pm::PassManager) = API.LLVMDisposePassManager(pm)
 
 
 #
@@ -20,25 +20,18 @@ dispose(pm::PassManager) = API.LLVMDisposePassManager(pm)
 
 export ModulePassManager, run!
 
-@checked struct ModulePassManager <: PassManager
+@checked mutable struct ModulePassManager <: PassManager
     ref::API.LLVMPassManagerRef
     roots::Vector{Any}
 end
 
-ModulePassManager() = ModulePassManager(API.LLVMCreatePassManager(), [])
-
-function ModulePassManager(f::Core.Function, args...; kwargs...)
-    mpm = ModulePassManager(args...; kwargs...)
-    try
-        f(mpm)
-    finally
-        dispose(mpm)
-    end
+function ModulePassManager()
+    mpm = ModulePassManager(API.LLVMCreatePassManager(), [])
+    finalizer(unsafe_dispose!, mpm)
 end
 
 run!(mpm::ModulePassManager, mod::Module) =
     convert(Core.Bool, API.LLVMRunPassManager(mpm, mod))
-
 
 
 #
@@ -48,21 +41,15 @@ run!(mpm::ModulePassManager, mod::Module) =
 export FunctionPassManager,
        initialize!, finalize!, run!
 
-@checked struct FunctionPassManager <: PassManager
+@checked mutable struct FunctionPassManager <: PassManager
     ref::API.LLVMPassManagerRef
+    mod::Module
     roots::Vector{Any}
 end
 
-FunctionPassManager(mod::Module) =
-    FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(mod), [])
-
-function FunctionPassManager(f::Core.Function, args...; kwargs...)
-    fpm = FunctionPassManager(args...; kwargs...)
-    try
-        f(fpm)
-    finally
-        dispose(fpm)
-    end
+function FunctionPassManager(mod::Module)
+    fpm = FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(mod), mod, [])
+    finalizer(unsafe_dispose!, fpm)
 end
 
 initialize!(fpm::FunctionPassManager) =

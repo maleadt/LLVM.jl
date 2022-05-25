@@ -1,11 +1,6 @@
 @testset "transform" begin
 
-let
-    pmb = PassManagerBuilder()
-    dispose(pmb)
-end
-
-PassManagerBuilder() do pmb
+let pmb = PassManagerBuilder()
     optlevel!(pmb, 0)
     sizelevel!(pmb, 0)
 
@@ -14,21 +9,21 @@ PassManagerBuilder() do pmb
     simplify_libcalls!(pmb, false)
     inliner!(pmb, 0)
 
-    Context() do ctx
-    LLVM.Module("SomeModule"; ctx) do mod
-        FunctionPassManager(mod) do fpm
+    let ctx = Context()
+    let mod = LLVM.Module("SomeModule"; ctx)
+        let fpm = FunctionPassManager(mod)
             populate!(fpm, pmb)
         end
-        ModulePassManager() do mpm
+        let mpm = ModulePassManager()
             populate!(mpm, pmb)
         end
     end
     end
 end
 
-Context() do ctx
-LLVM.Module("SomeModule"; ctx) do mod
-ModulePassManager() do pm
+let ctx = Context()
+let mod = LLVM.Module("SomeModule"; ctx)
+let pm = ModulePassManager()
     aggressive_dce!(pm)
     dce!(pm)
     bit_tracking_dce!(pm)

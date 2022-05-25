@@ -13,7 +13,8 @@ function Base.parse(::Type{Module}, ir::String; ctx::Context)
         throw(LLVMException(error))
     end
 
-    Module(out_ref[])
+    mod = Module(out_ref[], ctx)
+    finalizer(unsafe_dispose!, mod)
 end
 
 

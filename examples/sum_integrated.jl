@@ -12,13 +12,13 @@ else
     y = Int32(2)
 end
 
-Context() do ctx
+let ctx = Context()
     param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
     ret_type = LLVM.Int32Type(ctx)
     sum, _ = create_function(ret_type, param_types)
 
     # generate IR
-    Builder(ctx) do builder
+    let builder = Builder(ctx)
         entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 

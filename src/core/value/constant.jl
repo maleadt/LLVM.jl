@@ -14,6 +14,7 @@ unsafe_destroy!(constant::Constant) = API.LLVMDestroyConstant(constant)
 # forward declarations
 @checked mutable struct Module
     ref::API.LLVMModuleRef
+    ctx::Context
 end
 abstract type Instruction <: User end
 
@@ -27,14 +28,16 @@ abstract type ConstantData <: Constant end
 
 @checked struct PointerNull <: ConstantData
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(PointerNull, API.LLVMConstantPointerNullValueKind)
 
-PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
+PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ), context(typ))
 
 
 @checked struct UndefValue <: ConstantData
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(UndefValue, API.LLVMUndefValueValueKind)
 
@@ -43,6 +46,7 @@ UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 @static if version() >= v"12"
 @checked struct PoisonValue <: ConstantData # XXX: actually <: UndefValue
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(PoisonValue, API.LLVMPoisonValueValueKind)
 
@@ -51,6 +55,7 @@ end
 
 @checked struct ConstantInt <: ConstantData
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantInt, API.LLVMConstantIntValueKind)
 
@@ -95,6 +100,7 @@ Base.convert(::Type{Core.Bool}, val::ConstantInt) = convert(Int, val) != 0
 
 @checked struct ConstantFP <: ConstantData
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantFP, API.LLVMConstantFPValueKind)
 
@@ -120,11 +126,13 @@ abstract type ConstantDataSequential <: Constant end
 
 @checked struct ConstantDataArray <: ConstantDataSequential
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantDataArray, API.LLVMConstantDataArrayValueKind)
 
 @checked struct ConstantDataVector <: ConstantDataSequential
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantDataVector, API.LLVMConstantDataVectorValueKind)
 
@@ -135,6 +143,7 @@ export ConstantAggregateZero
 
 @checked struct ConstantAggregateZero <: ConstantData
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantAggregateZero, API.LLVMConstantAggregateZeroValueKind)
 
@@ -160,6 +169,7 @@ export ConstantArray
 
 @checked struct ConstantArray <: ConstantAggregate
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantArray, API.LLVMConstantArrayValueKind)
 register(ConstantArray, API.LLVMConstantDataArrayValueKind)
@@ -240,6 +250,7 @@ export ConstantStruct
 
 @checked struct ConstantStruct <: ConstantAggregate
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantStruct, API.LLVMConstantStructValueKind)
 
@@ -293,6 +304,7 @@ export ConstantVector
 
 @checked struct ConstantVector <: ConstantAggregate
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantVector, API.LLVMConstantVectorValueKind)
 
@@ -315,6 +327,7 @@ export ConstantExpr,
 
 @checked struct ConstantExpr <: Constant
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(ConstantExpr, API.LLVMConstantExprValueKind)
 
@@ -503,6 +516,7 @@ export InlineAsm
 
 @checked struct InlineAsm <: Constant
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(InlineAsm, API.LLVMInlineAsmValueKind)
 
@@ -526,7 +540,7 @@ export GlobalValue,
        unnamed_addr, unnamed_addr!,
        alignment, alignment!
 
-parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(val))
+parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(val), context(val))
 
 isdeclaration(val::GlobalValue) = convert(Core.Bool, API.LLVMIsDeclaration(val))
 
@@ -537,8 +551,8 @@ linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
 function section(val::GlobalValue)
   #=
   The following started to fail on LLVM 4.0:
-    Context() do ctx
-      LLVM.Module("SomeModule"; ctx) do mod
+    let ctx = Context()
+      let mod = LLVM.Module("SomeModule"; ctx)
         st = LLVM.StructType("SomeType"; ctx)
         ft = LLVM.FunctionType(st, [st])
         fn = LLVM.Function(mod, "SomeFunction", ft)
@@ -581,6 +595,7 @@ export GlobalVariable, unsafe_delete!,
 
 @checked struct GlobalVariable <: GlobalObject
     ref::API.LLVMValueRef
+    ctx::Context
 end
 register(GlobalVariable, API.LLVMGlobalVariableValueKind)
 

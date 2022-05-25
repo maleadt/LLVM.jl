@@ -2,7 +2,7 @@
 
 DEBUG_METADATA_VERSION()
 
-Context() do ctx
+let ctx = Context()
       mod = parse(LLVM.Module,  """
           define void @foo() !dbg !5 {
           top:

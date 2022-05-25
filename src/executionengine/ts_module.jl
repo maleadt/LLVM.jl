@@ -1,39 +1,29 @@
-@checked struct ThreadSafeContext
+@checked mutable struct ThreadSafeContext
     ref::API.LLVMOrcThreadSafeContextRef
 end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeContextRef}, ctx::ThreadSafeContext) = ctx.ref
 
 function ThreadSafeContext()
-    ref = API.LLVMOrcCreateNewThreadSafeContext()
-    ThreadSafeContext(ref)
+    ctx = ThreadSafeContext(API.LLVMOrcCreateNewThreadSafeContext())
+    finalizer(unsafe_dispose!, ctx)
 end
 
-function ThreadSafeContext(f::Core.Function)
-    ctx = ThreadSafeContext()
-    try
-        f(ctx)
-    finally
-        dispose(ctx)
-    end
-end
+context(ctx::ThreadSafeContext) = Context(API.LLVMOrcThreadSafeContextGetContext(ctx))
 
-function context(ctx::ThreadSafeContext)
-    ref = API.LLVMOrcThreadSafeContextGetContext(ctx)
-    Context(ref)
-end
-
-function dispose(ctx::ThreadSafeContext)
+function unsafe_dispose!(ctx::ThreadSafeContext)
     API.LLVMOrcDisposeThreadSafeContext(ctx)
 end
 
-@checked struct ThreadSafeModule
+@checked mutable struct ThreadSafeModule
     ref::API.LLVMOrcThreadSafeModuleRef
+    mod::Module
+    ctx::ThreadSafeContext
 end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeModuleRef}, mod::ThreadSafeModule) = mod.ref
 
 function ThreadSafeModule(mod::Module; ctx::ThreadSafeContext)
-    ref = API.LLVMOrcCreateNewThreadSafeModule(mod, ctx)
-    ThreadSafeModule(ref)
+    tsmod = ThreadSafeModule(API.LLVMOrcCreateNewThreadSafeModule(mod, ctx), mod, ctx)
+    finalizer(unsafe_dispose!, tsmod)
 end
 
 """
@@ -42,13 +32,12 @@ end
 Construct a ThreadSafeModule from a fresh LLVM.Module and a private context.
 """
 function ThreadSafeModule(name::String)
-    ThreadSafeContext() do ctx
-        mod = LLVM.Module(name; ctx=context(ctx))
-        ThreadSafeModule(mod; ctx)
-    end
+    ctx = ThreadSafeContext()
+    mod = LLVM.Module(name; ctx=context(ctx))
+    ThreadSafeModule(mod; ctx)
 end
 
-function dispose(mod::ThreadSafeModule)
+function unsafe_dispose!(mod::ThreadSafeModule)
     API.LLVMOrcDisposeThreadSafeModule(mod)
 end
 

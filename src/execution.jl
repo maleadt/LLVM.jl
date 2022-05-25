@@ -3,24 +3,28 @@
 # TODO: this is a _very_ ugly wrapper, but hard to improve since we can't deduce the type
 #       of a GenericValue, and need to pass concrete LLVM type objects to the API
 
-export GenericValue, dispose,
+export GenericValue,
        intwidth
 
-@checked struct GenericValue
+@checked mutable struct GenericValue
     ref::API.LLVMGenericValueRef
 end
 
 Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = val.ref
 
-GenericValue(typ::IntegerType, N::Signed) =
-    GenericValue(
+function GenericValue(typ::IntegerType, N::Signed)
+    val = GenericValue(
         API.LLVMCreateGenericValueOfInt(typ,
                                         reinterpret(Culonglong, convert(Int64, N)), True))
+    finalizer(unsafe_dispose!, val)
+end
 
-GenericValue(typ::IntegerType, N::Unsigned) =
-    GenericValue(
+function GenericValue(typ::IntegerType, N::Unsigned)
+    val = GenericValue(
         API.LLVMCreateGenericValueOfInt(typ,
                                         reinterpret(Culonglong, convert(UInt64, N)), False))
+    finalizer(unsafe_dispose!, val)
+end
 
 intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(val)
 
@@ -45,7 +49,7 @@ GenericValue(ptr::Ptr) =
 Base.convert(::Type{Ptr{T}}, val::GenericValue) where {T} =
     convert(Ptr{T}, API.LLVMGenericValueToPointer(val))
 
-dispose(val::GenericValue) = API.LLVMDisposeGenericValue(val)
+unsafe_dispose!(val::GenericValue) = API.LLVMDisposeGenericValue(val)
 
 
 ## execution engine
@@ -53,8 +57,9 @@ dispose(val::GenericValue) = API.LLVMDisposeGenericValue(val)
 export ExecutionEngine, Interpreter, JIT,
        run
 
-@checked struct ExecutionEngine
+@checked mutable struct ExecutionEngine
     ref::API.LLVMExecutionEngineRef
+    # NOTE: context kept alive via module
     mods::Set{Module}
 end
 
@@ -72,7 +77,8 @@ function ExecutionEngine(mod::Module)
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    engine = ExecutionEngine(out_ref[], Set([mod]))
+    finalizer(unsafe_dispose!, engine)
 end
 function Interpreter(mod::Module)
     API.LLVMLinkInInterpreter()
@@ -87,7 +93,8 @@ function Interpreter(mod::Module)
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    engine = ExecutionEngine(out_ref[], Set([mod]))
+    finalizer(unsafe_dispose!, engine)
 end
 function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault)
     API.LLVMLinkInMCJIT()
@@ -102,24 +109,15 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    engine = ExecutionEngine(out_ref[], Set([mod]))
+    finalizer(unsafe_dispose!, engine)
 end
 
-function dispose(engine::ExecutionEngine)
+function unsafe_dispose!(engine::ExecutionEngine)
+    API.LLVMDisposeExecutionEngine(engine)
+    # NOTE: this destroys the underlying modules
     for mod in engine.mods
         mod.ref = C_NULL
-    end
-    API.LLVMDisposeExecutionEngine(engine)
-end
-
-for x in [:ExecutionEngine, :Interpreter, :JIT]
-    @eval function $x(f::Core.Function, args...; kwargs...)
-        engine = $x(args...; kwargs...)
-        try
-            f(engine)
-        finally
-            dispose(engine)
-        end
     end
 end
 

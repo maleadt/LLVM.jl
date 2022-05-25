@@ -1,33 +1,26 @@
 ## target machine
 
-export TargetMachine, dispose,
+export TargetMachine,
        target, triple, cpu, features, asm_verbosity!,
        emit, add_transform_info!, add_library_info!
 export JITTargetMachine
 
-@checked struct TargetMachine
+@checked mutable struct TargetMachine
     ref::API.LLVMTargetMachineRef
 end
 
 Base.unsafe_convert(::Type{API.LLVMTargetMachineRef}, tm::TargetMachine) = tm.ref
 
-TargetMachine(t::Target, triple::String, cpu::String="", features::String="";
-              optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault,
-              reloc::API.LLVMRelocMode=API.LLVMRelocDefault,
-              code::API.LLVMCodeModel=API.LLVMCodeModelDefault) =
-    TargetMachine(API.LLVMCreateTargetMachine(t, triple, cpu, features, optlevel,
-                                              reloc, code))
-
-dispose(tm::TargetMachine) = API.LLVMDisposeTargetMachine(tm)
-
-function TargetMachine(f::Core.Function, args...; kwargs...)
-    tm = TargetMachine(args...; kwargs...)
-    try
-        f(tm)
-    finally
-        dispose(tm)
-    end
+function TargetMachine(t::Target, triple::String, cpu::String="", features::String="";
+                       optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault,
+                       reloc::API.LLVMRelocMode=API.LLVMRelocDefault,
+                       code::API.LLVMCodeModel=API.LLVMCodeModelDefault)
+    tm = TargetMachine(API.LLVMCreateTargetMachine(t, triple, cpu, features, optlevel,
+                                                   reloc, code))
+    finalizer(unsafe_dispose!, tm)
 end
+
+unsafe_dispose!(tm::TargetMachine) = API.LLVMDisposeTargetMachine(tm)
 
 target(tm::TargetMachine) = Target(API.LLVMGetTargetMachineTarget(tm))
 triple(tm::TargetMachine) = unsafe_message(API.LLVMGetTargetMachineTriple(tm))

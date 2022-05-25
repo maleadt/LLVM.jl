@@ -28,22 +28,21 @@ function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
 end
 
 # Construct a concretely typed instruction object from an abstract value ref
-function Instruction(ref::API.LLVMValueRef)
+function Instruction(ref::API.LLVMValueRef, ctx::Context)
     ref == C_NULL && throw(UndefRefError())
     T = identify(Instruction, ref)
-    return T(ref)
+    return T(ref, ctx)::Instruction
 end
 
-Instruction(inst::Instruction) =
-    Instruction(API.LLVMInstructionClone(inst))
+# instruction subtypes are expected to have a context field
+context(inst::Instruction) = inst.ctx
 
-unsafe_delete!(::BasicBlock, inst::Instruction) =
-    API.LLVMInstructionEraseFromParent(inst)
-Base.delete!(::BasicBlock, inst::Instruction) =
-    API.LLVMInstructionRemoveFromParent(inst)
+Instruction(inst::Instruction) = Instruction(API.LLVMInstructionClone(inst))
 
-parent(inst::Instruction) =
-    BasicBlock(API.LLVMGetInstructionParent(inst))
+unsafe_delete!(::BasicBlock, inst::Instruction) = API.LLVMInstructionEraseFromParent(inst)
+Base.delete!(::BasicBlock, inst::Instruction) = API.LLVMInstructionRemoveFromParent(inst)
+
+parent(inst::Instruction) = BasicBlock(API.LLVMGetInstructionParent(inst), context(inst))
 
 opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(inst)
 
@@ -95,7 +94,8 @@ Base.haskey(md::InstructionMetadataDict, kind::MD) =
 function Base.getindex(md::InstructionMetadataDict, kind::MD)
     objref = API.LLVMGetMetadata(md.inst, kind)
     objref == C_NULL && throw(KeyError(kind))
-    return Metadata(MetadataAsValue(objref))
+    ctx = context(md.inst)
+    return Metadata(MetadataAsValue(objref, ctx), ctx)
   end
 
 Base.setindex!(md::InstructionMetadataDict, node::Metadata, kind::MD) =
@@ -123,6 +123,7 @@ for op in opcodes
     @eval begin
         @checked struct $typename <: Instruction
             ref::API.LLVMValueRef
+            ctx::Context
         end
         register($typename, API.$enum)
     end
@@ -260,12 +261,12 @@ isterminator(inst::Instruction) = API.LLVMIsATerminatorInst(inst) != C_NULL
 isconditional(br::Instruction) = convert(Core.Bool, API.LLVMIsConditional(br))
 
 condition(br::Instruction) =
-    Value(API.LLVMGetCondition(br))
+    Value(API.LLVMGetCondition(br), context(br))
 condition!(br::Instruction, cond::Value) =
     API.LLVMSetCondition(br, cond)
 
 default_dest(switch::Instruction) =
-    BasicBlock(API.LLVMGetSwitchDefaultDest(switch))
+    BasicBlock(API.LLVMGetSwitchDefaultDest(switch), context(switch))
 
 # successor iteration
 
@@ -283,7 +284,7 @@ Base.IndexStyle(::TerminatorSuccessorSet) = IndexLinear()
 
 function Base.getindex(iter::TerminatorSuccessorSet, i::Int)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
-    return BasicBlock(API.LLVMGetSuccessor(iter.term, i-1))
+    return BasicBlock(API.LLVMGetSuccessor(iter.term, i-1), context(iter.term))
 end
 
 Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i::Int) =
@@ -307,9 +308,10 @@ Base.size(iter::PhiIncomingSet) = (API.LLVMCountIncoming(iter.phi),)
 Base.IndexStyle(::PhiIncomingSet) = IndexLinear()
 
 function Base.getindex(iter::PhiIncomingSet, i::Int)
+    ctx = context(iter.phu)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
-    return tuple(Value(API.LLVMGetIncomingValue(iter.phi, i-1)),
-                       BasicBlock(API.LLVMGetIncomingBlock(iter.phi, i-1)))
+    return tuple(Value(API.LLVMGetIncomingValue(iter.phi, i-1), ctx),
+                       BasicBlock(API.LLVMGetIncomingBlock(iter.phi, i-1), ctx))
 end
 
 function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{V, BasicBlock}} where V <: Value)

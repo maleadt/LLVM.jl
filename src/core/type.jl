@@ -7,6 +7,12 @@ Base.eltype(typ::LLVMType) = Any
 
 Base.unsafe_convert(::Type{API.LLVMTypeRef}, typ::LLVMType) = typ.ref
 
+# XXX: do we want these? they yield values
+
+# Base.sizeof(typ::LLVMType) = Value(API.LLVMSizeOf(typ))
+
+# alignof(typ::LLVMType) = Value(API.LLVMAlignOf(typ))
+
 const type_kinds = Vector{Type}(fill(Nothing, typemax(API.LLVMTypeKind)+1))
 function identify(::Type{LLVMType}, ref::API.LLVMTypeRef)
     kind = API.LLVMGetTypeKind(ref)
@@ -29,15 +35,18 @@ function refcheck(::Type{T}, ref::API.LLVMTypeRef) where T<:LLVMType
 end
 
 # Construct a concretely typed type object from an abstract type ref
-function LLVMType(ref::API.LLVMTypeRef)
+function LLVMType(ref::API.LLVMTypeRef, ctx::Context)
     ref == C_NULL && throw(UndefRefError())
     T = identify(LLVMType, ref)
-    return T(ref)::LLVMType
+    return T(ref, ctx)::LLVMType
 end
+
+# LLVM type subtypes are expected to have a context field
+context(typ::LLVMType) = typ.ctx
+#context(typ::LLVMType) = Context(API.LLVMGetTypeContext(typ))
 
 issized(typ::LLVMType) =
     convert(Core.Bool, API.LLVMTypeIsSized(typ))
-context(typ::LLVMType) = Context(API.LLVMGetTypeContext(typ))
 
 function Base.show(io::IO, typ::LLVMType)
     output = unsafe_message(API.LLVMPrintTypeToString(typ))
@@ -53,6 +62,7 @@ export width
 
 @checked struct IntegerType <: LLVMType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(IntegerType, API.LLVMIntegerTypeKind)
 
@@ -61,7 +71,7 @@ for T in [:Int1, :Int8, :Int16, :Int32, :Int64, :Int128]
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
         $jl_fname(ctx::Context) =
-            IntegerType(API.$(Symbol(api_fname, :InContext))(ctx))
+            IntegerType(API.$(Symbol(api_fname, :InContext))(ctx), ctx)
     end
 end
 
@@ -86,11 +96,12 @@ for T in [:Half, :Float, :Double, :FP128, :X86_FP80, :PPC_FP128]
     @eval begin
         @checked struct $api_typename <: FloatingPointType
             ref::API.LLVMTypeRef
+            ctx::Context
         end
         register($api_typename, API.$enumkind)
 
         $jl_fname(ctx::Context) =
-            $api_typename(API.$(Symbol(api_fname, :InContext))(ctx))
+            $api_typename(API.$(Symbol(api_fname, :InContext))(ctx), ctx)
     end
 end
 
@@ -101,13 +112,14 @@ export isvararg, return_type, parameters
 
 @checked struct FunctionType <: LLVMType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(FunctionType, API.LLVMFunctionTypeKind)
 
 FunctionType(rettyp::LLVMType, params::Vector{<:LLVMType}=LLVMType[];
              vararg::Core.Bool=false) =
-    FunctionType(API.LLVMFunctionType(rettyp, params,
-                                      length(params), convert(Bool, vararg)))
+    FunctionType(API.LLVMFunctionType(rettyp, params, length(params),
+                                      convert(Bool, vararg)), context(rettyp))
 
 isvararg(ft::FunctionType) =
     convert(Core.Bool, API.LLVMIsFunctionVarArg(ft))
@@ -140,11 +152,12 @@ Base.eltype(typ::SequentialType) = LLVMType(API.LLVMGetElementType(typ))
 
 @checked struct PointerType <: SequentialType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(PointerType, API.LLVMPointerTypeKind)
 
 function PointerType(eltyp::LLVMType, addrspace=0)
-    return PointerType(API.LLVMPointerType(eltyp, addrspace))
+    return PointerType(API.LLVMPointerType(eltyp, addrspace), context(eltyp))
 end
 
 addrspace(ptrtyp::PointerType) =
@@ -153,11 +166,12 @@ addrspace(ptrtyp::PointerType) =
 
 @checked struct ArrayType <: SequentialType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(ArrayType, API.LLVMArrayTypeKind)
 
 function ArrayType(eltyp::LLVMType, count)
-    return ArrayType(API.LLVMArrayType(eltyp, count))
+    return ArrayType(API.LLVMArrayType(eltyp, count), ctx)
 end
 
 Base.length(arrtyp::ArrayType) = API.LLVMGetArrayLength(arrtyp)
@@ -167,6 +181,7 @@ Base.isempty(@nospecialize(T::ArrayType)) = length(T) == 0 || isempty(eltype(T))
 
 @checked struct VectorType <: SequentialType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(VectorType, API.LLVMVectorTypeKind)
 
@@ -183,11 +198,12 @@ export name, ispacked, isopaque, elements!
 
 @checked struct StructType <: SequentialType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(StructType, API.LLVMStructTypeKind)
 
 function StructType(name::String; ctx::Context)
-    return StructType(API.LLVMStructCreateNamed(ctx, name))
+    return StructType(API.LLVMStructCreateNamed(ctx, name), ctx)
 end
 
 StructType(elems::Vector{<:LLVMType}; packed::Core.Bool=false, ctx::Context) =
@@ -213,9 +229,10 @@ export elements
 
 struct StructTypeElementSet
     typ::StructType
+    ctx::Context
 end
 
-elements(typ::StructType) = StructTypeElementSet(typ)
+elements(typ::StructType) = StructTypeElementSet(typ, ctx)
 
 Base.eltype(::StructTypeElementSet) = LLVMType
 
@@ -244,31 +261,35 @@ end
 
 @checked struct VoidType <: LLVMType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(VoidType, API.LLVMVoidTypeKind)
 
-VoidType(ctx::Context) = VoidType(API.LLVMVoidTypeInContext(ctx))
+VoidType(ctx::Context) = VoidType(API.LLVMVoidTypeInContext(ctx), ctx)
 
 @checked struct LabelType <: LLVMType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(LabelType, API.LLVMLabelTypeKind)
 
-LabelType(ctx::Context) = LabelType(API.LLVMLabelTypeInContext(ctx))
+LabelType(ctx::Context) = LabelType(API.LLVMLabelTypeInContext(ctx), ctx)
 
 @checked struct MetadataType <: LLVMType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(MetadataType, API.LLVMMetadataTypeKind)
 
-MetadataType(ctx::Context) = MetadataType(API.LLVMMetadataTypeInContext(ctx))
+MetadataType(ctx::Context) = MetadataType(API.LLVMMetadataTypeInContext(ctx), ctx)
 
 @checked struct TokenType <: LLVMType
     ref::API.LLVMTypeRef
+    ctx::Context
 end
 register(TokenType, API.LLVMTokenTypeKind)
 
-TokenType(ctx::Context) = TokenType(API.LLVMTokenTypeInContext(ctx))
+TokenType(ctx::Context) = TokenType(API.LLVMTokenTypeInContext(ctx), ctx)
 
 
 ## type iteration
@@ -281,9 +302,8 @@ end
 
 # FIXME: remove on LLVM 12
 function LLVMGetTypeByName2(ctx::Context, name)
-    Module("dummy"; ctx) do mod
-        API.LLVMGetTypeByName(mod, name)
-    end
+    mod = Module("dummy"; ctx)
+    API.LLVMGetTypeByName(mod, name)
 end
 
 types(ctx::Context) = ContextTypeDict(ctx)

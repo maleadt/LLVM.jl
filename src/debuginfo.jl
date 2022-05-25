@@ -4,6 +4,7 @@ export DILocation
 
 @checked struct DILocation <: MDNode
     ref::API.LLVMMetadataRef
+    ctx::Context
 end
 register(DILocation, API.LLVMDILocationMetadataKind)
 
@@ -40,6 +41,7 @@ for var in (:Local, :Global)
     @eval begin
         @checked struct $var_name <: DIVariable
             ref::API.LLVMMetadataRef
+            ctx::Context
         end
         register($var_name, API.$var_kind)
     end
@@ -76,6 +78,7 @@ export DIFile
 
 @checked struct DIFile <: DIScope
     ref::API.LLVMMetadataRef
+    ctx::Context
 end
 register(DIFile, API.LLVMDIFileMetadataKind)
 
@@ -110,6 +113,7 @@ for typ in (:Basic, :Derived, :Composite, :Subroutine)
     @eval begin
         @checked struct $typ_name <: DIType
             ref::API.LLVMMetadataRef
+            ctx::Context
         end
         register($typ_name, API.$typ_kind)
     end
@@ -133,6 +137,7 @@ export DISubProgram
 
 @checked struct DISubProgram <: DIScope
     ref::API.LLVMMetadataRef
+    ctx::Context
 end
 register(DISubProgram, API.LLVMDISubprogramMetadataKind)
 
@@ -145,6 +150,7 @@ export DICompileUnit
 
 @checked struct DICompileUnit <: DIScope
     ref::API.LLVMMetadataRef
+    ctx::Context
 end
 register(DICompileUnit, API.LLVMDICompileUnitMetadataKind)
 

@@ -1,13 +1,13 @@
 @testset "bitcode" begin
 
-Context() do ctx
+let ctx = Context()
     invalid_bitcode = "invalid"
     @test_throws LLVMException parse(LLVM.Module, unsafe_wrap(Vector{UInt8}, invalid_bitcode); ctx)
 end
 
-Context() do ctx
-Builder(ctx) do builder
-LLVM.Module("SomeModule"; ctx) do source_mod
+let ctx = Context()
+let builder = Builder(ctx)
+let source_mod = LLVM.Module("SomeModule"; ctx)
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(source_mod, "SomeFunction", ft)
 
@@ -25,7 +25,6 @@ LLVM.Module("SomeModule"; ctx) do source_mod
         mod = parse(LLVM.Module, bitcode_buf; ctx)
         verify(mod)
         @test haskey(functions(mod), "SomeFunction")
-        dispose(mod)
     end
 
 
@@ -35,7 +34,6 @@ LLVM.Module("SomeModule"; ctx) do source_mod
         mod = parse(LLVM.Module, bitcode; ctx)
         verify(mod)
         @test haskey(functions(mod), "SomeFunction")
-        dispose(mod)
     end
 
     mktemp() do path, io

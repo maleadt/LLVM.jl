@@ -30,12 +30,15 @@ function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Value
 end
 
 # Construct a concretely typed value object from an abstract value ref
-function Value(ref::API.LLVMValueRef)
+function Value(ref::API.LLVMValueRef, ctx::Context)
     ref == C_NULL && throw(UndefRefError())
     T = identify(Value, ref)
-    return T(ref)
+    return T(ref, ctx)::Value
 end
 
+# value subtypes are expected to have a context field
+context(val::Value) = val.ctx
+#context(val::Value) = Context(API.LLVMGetValueContext(val))
 
 
 ## general APIs
@@ -93,8 +96,6 @@ isconstant(val::Value) = convert(Core.Bool, API.LLVMIsConstant(val))
 isundef(val::Value) = convert(Core.Bool, API.LLVMIsUndef(val))
 
 ispoison(val::Value) = convert(Core.Bool, API.LLVMIsPoison(val))
-
-context(val::Value) = Context(API.LLVMGetValueContext(val))
 
 
 ## user values

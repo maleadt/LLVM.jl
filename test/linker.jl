@@ -1,7 +1,7 @@
 @testset "linker" begin
 
-Context() do ctx
-Builder(ctx) do builder
+let ctx = Context()
+let builder = Builder(ctx)
     mod1 = let
         mod = LLVM.Module("SomeModule"; ctx)
         ft = LLVM.FunctionType(LLVM.VoidType(ctx))

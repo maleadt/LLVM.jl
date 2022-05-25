@@ -57,7 +57,7 @@ function isboxed(typ::Type; ctx::Union{Nothing,Context}=nothing)
     isboxed_ref = Ref{Bool}()
     if VERSION >= v"1.9.0-DEV.115"
         if ctx === nothing
-            Context() do ctx
+            let ctx = Context()
                 ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
                       (Any, LLVM.API.LLVMContextRef, Ptr{Bool}), typ, ctx, isboxed_ref)
             end
@@ -83,10 +83,10 @@ function Base.convert(::Type{LLVMType}, typ::Type; ctx::Context,
     isboxed_ref = Ref{Bool}()
     llvmtyp = if VERSION >= v"1.9.0-DEV.115"
         LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-                        (Any, Context, Ptr{Bool}), typ, ctx, isboxed_ref))
+                        (Any, Context, Ptr{Bool}), typ, ctx, isboxed_ref), ctx)
     else
         LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-                        (Any, Ptr{Bool}), typ, isboxed_ref))
+                        (Any, Ptr{Bool}), typ, isboxed_ref), ctx)
     end
     if !allow_boxed && isboxed_ref[]
         error("Conversion of boxed type $typ is not allowed")
@@ -126,7 +126,7 @@ This only works for types created by the Julia compiler (living in its LLVM cont
 isghosttype(@nospecialize(T::LLVMType)) = T == LLVM.VoidType(context(T)) || isempty(T)
 function isghosttype(@nospecialize(t::Type); ctx::Union{Nothing,Context}=nothing)
     if ctx === nothing
-        Context() do ctx′
+        let ctx′ = Context()
             T = convert(LLVMType, t; ctx=ctx′, allow_boxed=true)
             isghosttype(T)
         end

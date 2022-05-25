@@ -2,7 +2,7 @@
 
 @testset "ThreadSafeModule" begin
     ts_mod = ThreadSafeModule("jit")
-    @test_throws LLVMException ts_mod() do mod
+    let mod = @test_throws LLVMException ts_mod()
         error("Error")
     end
     run = Ref{Bool}(false)
@@ -13,7 +13,7 @@
 end
 
 @testset "JITDylib" begin
-    LLJIT() do lljit
+    let lljit = LLJIT()
         es = ExecutionSession(lljit)
 
         @test LLVM.lookup_dylib(es, "my.so") === nothing
@@ -35,14 +35,14 @@ end
 end
 
 @testset "Undefined Symbol" begin
-    LLJIT() do lljit
+    let lljit = LLJIT()
         @test_throws LLVMException lookup(lljit, string(gensym()))
     end
 
-    LLJIT(;tm=JITTargetMachine()) do lljit
+    let lljit = LLJIT(;tm=JITTargetMachine())
         jd = JITDylib(lljit)
 
-        ThreadSafeContext() do ts_ctx
+        let ts_ctx = ThreadSafeContext()
             ctx = context(ts_ctx)
             mod = LLVM.Module("jit"; ctx)
 
@@ -54,7 +54,7 @@ end
             fname = "wrapper"
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
-            Builder(ctx) do builder
+            let builder = Builder(ctx)
                 entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
@@ -65,7 +65,7 @@ end
             # TODO: Get TM from lljit?
             tm = JITTargetMachine()
             triple!(mod, triple(lljit))
-            ModulePassManager() do pm
+            let pm = ModulePassManager()
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
                 run!(pm, mod)
@@ -81,18 +81,18 @@ end
 end
 
 @testset "Loading ObjectFile" begin
-    LLJIT(;tm=JITTargetMachine()) do lljit
+    let lljit = LLJIT(;tm=JITTargetMachine())
         jd = JITDylib(lljit)
 
         sym = "SomeFunction"
-        obj = ThreadSafeContext() do ts_ctx
+        let ts_ctx = obj = ThreadSafeContext()
             ctx = context(ts_ctx)
 
             mod = LLVM.Module("jit"; ctx)
             ft = LLVM.FunctionType(LLVM.VoidType(ctx))
             fn = LLVM.Function(mod, sym, ft)
 
-            Builder(ctx) do builder
+            let builder = Builder(ctx)
                 entry = BasicBlock(fn, "entry"; ctx)
                 position!(builder, entry)
                 ret!(builder)
@@ -112,11 +112,11 @@ end
         @test_throws LLVMException lookup(lljit, sym)
     end
 
-    LLJIT(;tm=JITTargetMachine()) do lljit
+    let lljit = LLJIT(;tm=JITTargetMachine())
         jd = JITDylib(lljit)
 
         sym = "SomeFunction"
-        obj = ThreadSafeContext() do ts_ctx
+        let ts_ctx = obj = ThreadSafeContext()
             ctx = context(ts_ctx)
 
             mod = LLVM.Module("jit"; ctx)
@@ -126,7 +126,7 @@ end
             gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(ctx), "gv")
             LLVM.extinit!(gv, true)
 
-            Builder(ctx) do builder
+            let builder = Builder(ctx)
                 entry = BasicBlock(fn, "entry"; ctx)
                 position!(builder, entry)
                 val = load!(builder, gv)
@@ -179,10 +179,10 @@ end
     GC.@preserve ollc begin
         builder = LLJITBuilder()
         linkinglayercreator!(builder, ollc)
-        LLJIT(builder) do lljit
+        let lljit = LLJIT(builder)
             jd = JITDylib(lljit)
 
-            ThreadSafeContext() do ts_ctx
+            let ts_ctx = ThreadSafeContext()
                 ctx = context(ts_ctx)
                 sym = "SomeFunctionOLL"
 
@@ -190,7 +190,7 @@ end
                 ft = LLVM.FunctionType(LLVM.VoidType(ctx))
                 fn = LLVM.Function(mod, sym, ft)
 
-                Builder(ctx) do builder
+                let builder = Builder(ctx)
                     entry = BasicBlock(fn, "entry"; ctx)
                     position!(builder, entry)
                     ret!(builder)
@@ -210,77 +210,73 @@ end
 end
 
 @testset "Lazy" begin
-    LLJIT() do lljit
+    let lljit = LLJIT()
         jd = JITDylib(lljit)
         es = ExecutionSession(lljit)
 
         lctm = LLVM.LocalLazyCallThroughManager(triple(lljit), es)
         ism = LLVM.LocalIndirectStubsManager(triple(lljit))
-        try
-            # 1. define entry symbol
-            entry_sym = "foo_entry"
-            flags = LLVM.API.LLVMJITSymbolFlags(
-                LLVM.API.LLVMJITSymbolGenericFlagsCallable |
-                LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
-            entry = LLVM.API.LLVMOrcCSymbolAliasMapPair(
-                mangle(lljit, entry_sym),
-                LLVM.API.LLVMOrcCSymbolAliasMapEntry(
-                    mangle(lljit, "foo"), flags))
 
-            mu = LLVM.reexports(lctm, ism, jd, Ref(entry))
-            LLVM.define(jd, mu)
+        # 1. define entry symbol
+        entry_sym = "foo_entry"
+        flags = LLVM.API.LLVMJITSymbolFlags(
+            LLVM.API.LLVMJITSymbolGenericFlagsCallable |
+            LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
+        entry = LLVM.API.LLVMOrcCSymbolAliasMapPair(
+            mangle(lljit, entry_sym),
+            LLVM.API.LLVMOrcCSymbolAliasMapEntry(
+                mangle(lljit, "foo"), flags))
 
-            # 2. Lookup address of entry symbol
-            addr = lookup(lljit, entry_sym)
-            @test pointer(addr) != C_NULL
+        mu = LLVM.reexports(lctm, ism, jd, Ref(entry))
+        LLVM.define(jd, mu)
 
-            # 3. add MU that will call back into the compiler
-            sym = LLVM.API.LLVMOrcCSymbolFlagsMapPair(mangle(lljit, "foo"), flags)
+        # 2. Lookup address of entry symbol
+        addr = lookup(lljit, entry_sym)
+        @test pointer(addr) != C_NULL
 
-            function materialize(mr)
-                syms = LLVM.get_requested_symbols(mr)
-                @assert length(syms) == 1
+        # 3. add MU that will call back into the compiler
+        sym = LLVM.API.LLVMOrcCSymbolFlagsMapPair(mangle(lljit, "foo"), flags)
 
-                # syms contains mangled symbols
-                # we need to emit an unmangled one
+        function materialize(mr)
+            syms = LLVM.get_requested_symbols(mr)
+            @assert length(syms) == 1
 
-                TSM = ThreadSafeModule("jit")
-                TSM() do mod
-                    LLVM.apply_datalayout!(lljit, mod)
+            # syms contains mangled symbols
+            # we need to emit an unmangled one
 
-                    ctx = context(mod)
-                    T_Int32 = LLVM.Int32Type(ctx)
-                    ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
+            TSM = ThreadSafeModule("jit")
+            let mod = TSM()
+                LLVM.apply_datalayout!(lljit, mod)
 
-                    fn = LLVM.Function(mod, "foo", ft)
+                ctx = context(mod)
+                T_Int32 = LLVM.Int32Type(ctx)
+                ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
 
-                    # generate IR
-                    Builder(ctx) do builder
-                        entry = BasicBlock(fn, "entry"; ctx)
-                        position!(builder, entry)
+                fn = LLVM.Function(mod, "foo", ft)
 
-                        tmp = add!(builder, parameters(fn)...)
-                        ret!(builder, tmp)
-                    end
+                # generate IR
+                let builder = Builder(ctx)
+                    entry = BasicBlock(fn, "entry"; ctx)
+                    position!(builder, entry)
+
+                    tmp = add!(builder, parameters(fn)...)
+                    ret!(builder, tmp)
                 end
-
-                il = LLVM.IRTransformLayer(lljit)
-                LLVM.emit(il, mr, TSM)
-
-                return nothing
             end
 
-            function discard(jd, sym)
-            end
+            il = LLVM.IRTransformLayer(lljit)
+            LLVM.emit(il, mr, TSM)
 
-            mu = LLVM.CustomMaterializationUnit("fooMU", Ref(sym), materialize, discard)
-            LLVM.define(jd, mu)
-
-            @test ccall(pointer(addr), Int32, (Int32, Int32), 1, 2) == 3
-        finally
-            dispose(lctm)
-            dispose(ism)
+            return nothing
         end
+
+        function discard(jd, sym)
+        end
+
+        mu = LLVM.CustomMaterializationUnit("fooMU", Ref(sym), materialize, discard)
+        LLVM.define(jd, mu)
+
+        @test ccall(pointer(addr), Int32, (Int32, Int32), 1, 2) == 3
     end
 end
 

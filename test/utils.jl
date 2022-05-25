@@ -1,7 +1,7 @@
 @testset "utils" begin
 
 @testset "cloning" begin
-    Context() do ctx
+    let ctx = Context()
         # set-up
         mod = LLVM.Module("my_module"; ctx)
 
@@ -11,7 +11,7 @@
         f = LLVM.Function(mod, "f", fun_type)
 
         # generate IR
-        Builder(ctx) do builder
+        let builder = Builder(ctx)
             entry = BasicBlock(f, "entry"; ctx)
             position!(builder, entry)
 

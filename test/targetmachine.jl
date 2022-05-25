@@ -3,12 +3,7 @@
 host_triple = triple()
 host_t = Target(triple=host_triple)
 
-let
-    tm = TargetMachine(host_t, host_triple)
-    dispose(tm)
-end
-
-TargetMachine(host_t, host_triple) do tm
+let tm = TargetMachine(host_t, host_triple)
     @test target(tm) == host_t
     @test triple(tm) == host_triple
     @test cpu(tm) == ""
@@ -16,9 +11,9 @@ TargetMachine(host_t, host_triple) do tm
     asm_verbosity!(tm, true)
 
     # emission
-    Context() do ctx
-    Builder(ctx) do builder
-    LLVM.Module("SomeModule"; ctx) do mod
+    let ctx = Context()
+    let builder = Builder(ctx)
+    let mod = LLVM.Module("SomeModule"; ctx)
         ft = LLVM.FunctionType(LLVM.VoidType(ctx))
         fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -39,14 +34,14 @@ TargetMachine(host_t, host_triple) do tm
     end
     end
 
-    Context() do ctx
-    LLVM.Module("SomeModule"; ctx) do mod
-        FunctionPassManager(mod) do fpm
+    let ctx = Context()
+    let mod = LLVM.Module("SomeModule"; ctx)
+        let fpm = FunctionPassManager(mod)
             add_transform_info!(fpm)
             add_transform_info!(fpm, tm)
             add_library_info!(fpm, triple(tm))
         end
-        ModulePassManager() do mpm
+        let mpm = ModulePassManager()
             add_transform_info!(mpm)
             add_transform_info!(mpm, tm)
             add_library_info!(mpm, triple(tm))

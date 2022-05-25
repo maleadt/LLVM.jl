@@ -1,8 +1,8 @@
 # Contexts are execution states for the core LLVM IR system.
 
-export Context, dispose, GlobalContext
+export Context, GlobalContext
 
-@checked struct Context
+@checked mutable struct Context
     ref::API.LLVMContextRef
 end
 
@@ -11,19 +11,10 @@ Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 function Context()
     ctx = Context(API.LLVMContextCreate())
     _install_handlers(ctx)
-    ctx
+    finalizer(unsafe_dispose!, ctx)
 end
 
-dispose(ctx::Context) = API.LLVMContextDispose(ctx)
-
-function Context(f::Core.Function)
-    ctx = Context()
-    try
-        f(ctx)
-    finally
-        dispose(ctx)
-    end
-end
+unsafe_dispose!(ctx::Context) = API.LLVMContextDispose(ctx)
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())
 

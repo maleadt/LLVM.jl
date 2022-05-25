@@ -6,12 +6,11 @@ export ObjectLinkingLayer, register!
 
 include("executionengine/utils.jl")
 
-@checked struct TargetMachineBuilder
+@checked mutable struct TargetMachineBuilder
     ref::API.LLVMOrcJITTargetMachineBuilderRef
 end
 Base.unsafe_convert(::Type{API.LLVMOrcJITTargetMachineBuilderRef},
                     tmb::TargetMachineBuilder) = tmb.ref
-
 
 function TargetMachineBuilder()
     ref = Ref{API.LLVMOrcJITTargetMachineBuilderRef}()
@@ -20,37 +19,39 @@ function TargetMachineBuilder()
 end
 
 function TargetMachineBuilder(tm::TargetMachine)
-    tmb = API.LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(tm)
-    TargetMachineBuilder(tmb)
+    ref = API.LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(tm)
+    tmb = TargetMachineBuilder(ref)
+    finalizer(unsafe_dispose!, tmb)
 end
 
-function dispose(tmb::TargetMachineBuilder)
-    API.LLVMOrcDisposeJITTargetMachineBuilder(tmb)
-end
+unsafe_dispose!(tmb::TargetMachineBuilder) = API.LLVMOrcDisposeJITTargetMachineBuilder(tmb)
 
 include("executionengine/lljit.jl")
 
 @checked struct ExecutionSession
     ref::API.LLVMOrcExecutionSessionRef
+    lljit::LLJIT
 end
 Base.unsafe_convert(::Type{API.LLVMOrcExecutionSessionRef}, es::ExecutionSession) = es.ref
 
 function ExecutionSession(lljit::LLJIT)
-    es = API.LLVMOrcLLJITGetExecutionSession(lljit)
-    ExecutionSession(es)
+    ref = API.LLVMOrcLLJITGetExecutionSession(lljit)
+    ExecutionSession(ref, lljit)
 end
 
-@checked struct ObjectLinkingLayer
+@checked mutable struct ObjectLinkingLayer
     ref::API.LLVMOrcObjectLayerRef
+    es::ExecutionSession
 end
 Base.unsafe_convert(::Type{API.LLVMOrcObjectLayerRef}, oll::ObjectLinkingLayer) = oll.ref
 
 function ObjectLinkingLayer(es::ExecutionSession)
-    ref = LLVM.API.LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager(es)
-    ObjectLinkingLayer(ref)
+    ref = API.LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager(es)
+    oll = ObjectLinkingLayer(ref, es)
+    finalizer(unsafe_dispose!, oll)
 end
 
-function dispose(oll::ObjectLinkingLayer)
+function unsafe_dispose!(oll::ObjectLinkingLayer)
     API.LLVMOrcDisposeObjectLayer(oll)
 end
 
@@ -62,7 +63,7 @@ mutable struct ObjectLinkingLayerCreator
     cb
 end
 
-function ollc_callback(ctx::Ptr{Cvoid}, es::LLVM.API.LLVMOrcExecutionSessionRef, triple::Ptr{Cchar})
+function ollc_callback(ctx::Ptr{Cvoid}, es::API.LLVMOrcExecutionSessionRef, triple::Ptr{Cchar})
     es = ExecutionSession(es)
     triple = Base.unsafe_string(triple)
 
@@ -80,8 +81,8 @@ end
 """
 function linkinglayercreator!(builder::LLJITBuilder, creator::ObjectLinkingLayerCreator)
     cb = @cfunction(ollc_callback,
-                    LLVM.API.LLVMOrcObjectLayerRef,
-                    (Ptr{Cvoid}, LLVM.API.LLVMOrcExecutionSessionRef, Ptr{Cchar}))
+                    API.LLVMOrcObjectLayerRef,
+                    (Ptr{Cvoid}, API.LLVMOrcExecutionSessionRef, Ptr{Cchar}))
     linkinglayercreator!(builder, cb, Base.pointer_from_objref(creator))
 end
 
@@ -346,36 +347,36 @@ function absolute_symbols(symbols)
     MaterializationUnit(ref)
 end
 
-@checked struct IndirectStubsManager
+@checked mutable struct IndirectStubsManager
     ref::API.LLVMOrcIndirectStubsManagerRef
 end
 Base.unsafe_convert(::Type{API.LLVMOrcIndirectStubsManagerRef}, ism::IndirectStubsManager) = ism.ref
 
 function LocalIndirectStubsManager(triple)
-    ref = API.LLVMOrcCreateLocalIndirectStubsManager(triple)
-    IndirectStubsManager(ref)
+    ism = IndirectStubsManager(API.LLVMOrcCreateLocalIndirectStubsManager(triple))
+    finalizer(unsafe_dispose!, ism)
 end
 
-function dispose(ism::IndirectStubsManager)
-    API.LLVMOrcDisposeIndirectStubsManager(ism)
-end
+unsafe_dispose!(ism::IndirectStubsManager) = API.LLVMOrcDisposeIndirectStubsManager(ism)
 
 @checked mutable struct LazyCallThroughManager
     ref::API.LLVMOrcLazyCallThroughManagerRef
+    es::ExecutionSession
 end
 Base.unsafe_convert(::Type{API.LLVMOrcLazyCallThroughManagerRef}, lcm::LazyCallThroughManager) = lcm.ref
 
 function LocalLazyCallThroughManager(triple, es)
     ref = Ref{API.LLVMOrcLazyCallThroughManagerRef}()
     @check API.LLVMOrcCreateLocalLazyCallThroughManager(triple, es, C_NULL, ref)
-    LazyCallThroughManager(ref[])
+    lcm = LazyCallThroughManager(ref[], es)
+    finalizer(unsafe_dispose!, lcm)
 end
 
-function dispose(lcm::LazyCallThroughManager)
+function unsafe_dispose!(lcm::LazyCallThroughManager)
     API.LLVMOrcDisposeLazyCallThroughManager(lcm)
 end
 
 function reexports(lctm::LazyCallThroughManager, ism::IndirectStubsManager, jd::JITDylib, symbols)
-    ref = LLVM.API.LLVMOrcLazyReexports(lctm, ism, jd, symbols, length(symbols))
+    ref = API.LLVMOrcLazyReexports(lctm, ism, jd, symbols, length(symbols))
     MaterializationUnit(ref)
 end

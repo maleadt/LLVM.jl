@@ -1,28 +1,22 @@
 ## pass manager builder
 
-export PassManagerBuilder, dispose,
+export PassManagerBuilder,
        optlevel!, sizelevel!,
        unit_at_a_time!, unroll_loops!, simplify_libcalls!, inliner!,
        populate!
 
-@checked struct PassManagerBuilder
+@checked mutable struct PassManagerBuilder
     ref::API.LLVMPassManagerBuilderRef
 end
 
 Base.unsafe_convert(::Type{API.LLVMPassManagerBuilderRef}, pmb::PassManagerBuilder) = pmb.ref
 
-PassManagerBuilder() = PassManagerBuilder(API.LLVMPassManagerBuilderCreate())
-
-dispose(pmb::PassManagerBuilder) = API.LLVMPassManagerBuilderDispose(pmb)
-
-function PassManagerBuilder(f::Core.Function)
-    pmb = PassManagerBuilder()
-    try
-        f(pmb)
-    finally
-        dispose(pmb)
-    end
+function PassManagerBuilder()
+    pmb = PassManagerBuilder(API.LLVMPassManagerBuilderCreate())
+    finalizer(unsafe_dispose!, pmb)
 end
+
+unsafe_dispose!(pmb::PassManagerBuilder) = API.LLVMPassManagerBuilderDispose(pmb)
 
 # 0 = -O0, 1 = -O1, 2 = -O2, 3 = -O3
 optlevel!(pmb::PassManagerBuilder, level::Integer) =

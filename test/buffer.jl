@@ -2,31 +2,20 @@
 
 data = rand(UInt8, 8)
 
-let
-    membuf = MemoryBuffer(data)
-    dispose(membuf)
-end
-
 @test_throws LLVMException MemoryBufferFile("nonexisting")
 
-MemoryBuffer(data) do membuf
+let membuf = MemoryBuffer(data)
     @test pointer(data) != pointer(membuf)
     @test length(membuf) == length(data)
     @test convert(Vector{UInt8}, membuf) == data
 end
 
-MemoryBuffer(data, "SomeBuffer", false) do membuf
+let membuf = MemoryBuffer(data, "SomeBuffer", false)
     @test pointer(data) == pointer(membuf)
 end
 
 mktemp() do path, _
-    let
-        membuf = MemoryBufferFile(path)
-        dispose(membuf)
-    end
-
-    MemoryBufferFile(path) do membuf
-    end
+    membuf = MemoryBufferFile(path)
 end
 
 end

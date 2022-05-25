@@ -11,14 +11,17 @@ Base.unsafe_convert(::Type{API.LLVMAttributeRef}, attr::Attribute) = attr.ref
 
 @checked struct EnumAttribute <: Attribute
     ref::API.LLVMAttributeRef
+    ctx::Context
 end
 
 @checked struct StringAttribute <: Attribute
     ref::API.LLVMAttributeRef
+    ctx::Context
 end
 
 @checked struct TypeAttribute <: Attribute
     ref::API.LLVMAttributeRef
+    ctx::Context
 end
 
 # TODO: make the identify mechanism flexible enough to cover cases like this one,
@@ -52,7 +55,7 @@ end
 #       (which also would conflict with the inner ref constructor)
 function EnumAttribute(kind::String, value::Integer=0; ctx::Context)
     enum_kind = API.LLVMGetEnumAttributeKindForName(kind, Csize_t(length(kind)))
-    return EnumAttribute(API.LLVMCreateEnumAttribute(ctx, enum_kind, UInt64(value)))
+    return EnumAttribute(API.LLVMCreateEnumAttribute(ctx, enum_kind, UInt64(value)), ctx)
 end
 
 kind(attr::EnumAttribute) = API.LLVMGetEnumAttributeKind(attr)
@@ -64,7 +67,7 @@ value(attr::EnumAttribute) = API.LLVMGetEnumAttributeValue(attr)
 
 StringAttribute(kind::String, value::String=""; ctx::Context) =
     StringAttribute(API.LLVMCreateStringAttribute(ctx, kind, length(kind),
-                                                  value, length(value)))
+                                                  value, length(value)), ctx)
 
 function kind(attr::StringAttribute)
     len = Ref{Cuint}()
@@ -82,7 +85,7 @@ end
 
 function TypeAttribute(kind::String, value::LLVMType; ctx::Context)
     enum_kind = API.LLVMGetEnumAttributeKindForName(kind, Csize_t(length(kind)))
-    return TypeAttribute(API.LLVMCreateTypeAttribute(ctx, enum_kind, value))
+    return TypeAttribute(API.LLVMCreateTypeAttribute(ctx, enum_kind, value), ctx)
 end
 
 kind(attr::TypeAttribute) = API.LLVMGetEnumAttributeKind(attr)
