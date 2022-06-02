@@ -193,8 +193,10 @@ end
 StructType(elems::Vector{<:LLVMType}; packed::Core.Bool=false, ctx::Context) =
     StructType(API.LLVMStructTypeInContext(ctx, elems, length(elems), convert(Bool, packed)))
 
-name(structtyp::StructType) =
-    unsafe_string(API.LLVMGetStructName(structtyp))
+function name(structtyp::StructType)
+    cstr = API.LLVMGetStructName(structtyp)
+    cstr == C_NULL ? nothing : unsafe_string(cstr)
+end
 ispacked(structtyp::StructType) =
     convert(Core.Bool, API.LLVMIsPackedStruct(structtyp))
 isopaque(structtyp::StructType) =

@@ -122,6 +122,7 @@ end
         @test context(st) == ctx
         @test !ispacked(st)
         @test !isopaque(st)
+        @test name(st) === nothing
 
         let elem_it = elements(st)
             @test eltype(elem_it) == LLVMType
