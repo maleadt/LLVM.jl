@@ -4,7 +4,8 @@
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx),
                                                 LLVM.FloatType(ctx), LLVM.FloatType(ctx),
                                                 LLVM.PointerType(LLVM.Int32Type(ctx)),
-                                                LLVM.PointerType(LLVM.Int32Type(ctx))])
+                                                LLVM.PointerType(LLVM.Int32Type(ctx)),
+                                                LLVM.PointerType(LLVM.Int8Type(ctx))])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     entrybb = BasicBlock(fn, "entry"; ctx)
@@ -16,7 +17,7 @@
     debuglocation!(builder, loc)
     @test debuglocation(builder) == loc
     debuglocation!(builder)
-    @test debuglocation(builder) == nothing
+    @test debuglocation(builder) === nothing
 
     retinst1 = ret!(builder)
     @check_ir retinst1 "ret void"
@@ -134,15 +135,30 @@
     array_allocainst = array_alloca!(builder, LLVM.Int32Type(ctx), int1)
     @check_ir array_allocainst "alloca i32, i32 %0"
 
-    # mallocinst = malloc!(builder, LLVM.Int32Type(ctx))
-    # @check_ir mallocinst "bitcast i8* %malloccall to i32*"
+    mallocinst = malloc!(builder, LLVM.Int32Type(ctx))
+    @check_ir mallocinst r"bitcast i8\* %.+ to i32\*"
+    @check_ir operands(mallocinst)[1] r"call i8\* @malloc\(.+\)"
 
-    ptr1 = parameters(fn)[5]
+    i8ptr = parameters(fn)[6]
 
-    freeinst = free!(builder, ptr1)
+    array_mallocinst = array_malloc!(builder, LLVM.Int8Type(ctx), ConstantInt(Int32(42); ctx))
+    @check_ir array_mallocinst r"call i8\* @malloc\(.+, i32 42\)"
+
+    memsetisnt = memset!(builder, i8ptr, ConstantInt(Int8(1); ctx), ConstantInt(Int32(2); ctx), 4)
+    @check_ir memsetisnt r"call void @llvm.memset.p0i8.i32\(i8\* align 4 %.+, i8 1, i32 2, i1 false\)"
+
+    memcpyinst = memcpy!(builder, allocainst, 4, i8ptr, 8, ConstantInt(Int32(32); ctx))
+    @check_ir memcpyinst r"call void @llvm.memcpy.p0i8.p0i8.i32\(i8\* align 4 %.+, i8\* align 8 %.+, i32 32, i1 false\)"
+
+    memmoveinst = memmove!(builder, allocainst, 4, i8ptr, 8, ConstantInt(Int32(32); ctx))
+    @check_ir memmoveinst r"call void @llvm.memmove.p0i8.p0i8.i32\(i8\* align 4 %.+, i8\* align 8 %.+, i32 32, i1 false\)"
+
+    i32ptr1 = parameters(fn)[5]
+
+    freeinst = free!(builder, i32ptr1)
     @check_ir freeinst "tail call void @free"
 
-    loadinst = load!(builder, ptr1)
+    loadinst = load!(builder, i32ptr1)
     @check_ir loadinst "load i32, i32* %4"
     alignment!(loadinst, 4)
     @test alignment(loadinst) == 4
@@ -151,16 +167,16 @@
     @check_ir loadinst "load atomic i32, i32* %4 seq_cst"
     @test ordering(loadinst) == LLVM.API.LLVMAtomicOrderingSequentiallyConsistent
 
-    storeinst = store!(builder, int1, ptr1)
+    storeinst = store!(builder, int1, i32ptr1)
     @check_ir storeinst "store i32 %0, i32* %4"
 
     fenceinst = fence!(builder, LLVM.API.LLVMAtomicOrderingNotAtomic)
     @check_ir fenceinst "fence"
 
-    gepinst = gep!(builder, ptr1, [int1])
+    gepinst = gep!(builder, i32ptr1, [int1])
     @check_ir gepinst "getelementptr i32, i32* %4, i32 %0"
 
-    gepinst1 = inbounds_gep!(builder, ptr1, [int1])
+    gepinst1 = inbounds_gep!(builder, i32ptr1, [int1])
     @check_ir gepinst1 "getelementptr inbounds i32, i32* %4, i32 %0"
 
     truncinst = trunc!(builder, int1, LLVM.Int16Type(ctx))
@@ -190,7 +206,7 @@
     fpextinst = fpext!(builder, float1, LLVM.DoubleType(ctx))
     @check_ir fpextinst "fpext float %2 to double"
 
-    ptrtointinst = ptrtoint!(builder, ptr1, LLVM.Int32Type(ctx))
+    ptrtointinst = ptrtoint!(builder, i32ptr1, LLVM.Int32Type(ctx))
     @check_ir ptrtointinst "ptrtoint i32* %4 to i32"
 
     inttoptrinst = inttoptr!(builder, int1, LLVM.PointerType(LLVM.Int32Type(ctx)))
@@ -199,11 +215,11 @@
     bitcastinst = bitcast!(builder, int1, LLVM.FloatType(ctx))
     @check_ir bitcastinst "bitcast i32 %0 to float"
 
-    ptr1typ = llvmtype(ptr1)
-    ptr2typ = LLVM.PointerType(ptr1typ, 2)
+    i32ptr1typ = llvmtype(i32ptr1)
+    i32ptr1typ2 = LLVM.PointerType(eltype(i32ptr1typ), 2)
 
-    addrspacecastinst = addrspacecast!(builder, ptr1, ptr2typ)
-    @check_ir addrspacecastinst "addrspacecast i32* %4 to i32* addrspace(2)*"
+    addrspacecastinst = addrspacecast!(builder, i32ptr1, i32ptr1typ2)
+    @check_ir addrspacecastinst "addrspacecast i32* %4 to i32 addrspace(2)*"
 
     zextorbitcastinst = zextorbitcast!(builder, int1, LLVM.FloatType(ctx))
     @check_ir zextorbitcastinst "bitcast i32 %0 to float"
@@ -217,9 +233,9 @@
     castinst = cast!(builder, LLVM.API.LLVMBitCast, int1, LLVM.FloatType(ctx))
     @check_ir castinst "bitcast i32 %0 to float"
 
-    ptr3typ = LLVM.PointerType(LLVM.FloatType(ctx))
+    floatptrtyp = LLVM.PointerType(LLVM.FloatType(ctx))
 
-    pointercastinst = pointercast!(builder, ptr1, ptr3typ)
+    pointercastinst = pointercast!(builder, i32ptr1, floatptrtyp)
     @check_ir pointercastinst "bitcast i32* %4 to float*"
 
     intcastinst = intcast!(builder, int1, LLVM.Int64Type(ctx))
@@ -272,10 +288,10 @@
     isnotnullinst = isnotnull!(builder, int1)
     @check_ir isnotnullinst "icmp ne i32 %0, 0"
 
-    ptr2 = parameters(fn)[6]
+    i32ptr2 = parameters(fn)[6]
 
-    ptrdiffinst = ptrdiff!(builder, ptr1, ptr2)
-    @check_ir ptrdiffinst "sdiv exact i64 %71, ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i64)"
+    ptrdiffinst = ptrdiff!(builder, i32ptr1, i32ptr2)
+    @check_ir ptrdiffinst r"sdiv exact i64 %.+, ptrtoint \(i32\* getelementptr \(i32, i32\* null, i32 1\) to i64\)"
 
     position!(builder)
 end
