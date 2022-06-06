@@ -70,8 +70,8 @@ export ret!, br!, switch!, indirectbr!, invoke!, resume!, unreachable!,
 
        extract_value!, insert_value!,
 
-       alloca!, array_alloca!, malloc!, array_malloc!, free!, load!, store!, fence!,
-       atomic_rmw!, atomic_cmpxchg!, gep!, inbounds_gep!, struct_gep!,
+       alloca!, array_alloca!, malloc!, array_malloc!, memset!, memcpy!, memmove!, free!,
+       load!, store!, fence!, atomic_rmw!, atomic_cmpxchg!, gep!, inbounds_gep!, struct_gep!,
 
        trunc!, zext!, sext!, fptoui!, fptosi!, uitofp!, sitofp!, fptrunc!, fpext!,
        ptrtoint!, inttoptr!, bitcast!, addrspacecast!, zextorbitcast!, sextorbitcast!,
@@ -233,6 +233,15 @@ malloc!(builder::Builder, Ty::LLVMType, Name::String="") =
 
 array_malloc!(builder::Builder, Ty::LLVMType, Val::Value, Name::String="") =
     Instruction(API.LLVMBuildArrayMalloc(builder, Ty, Val, Name))
+
+memset!(builder::Builder, Ptr::Value, Val::Value, Len::Value, Align::Integer) =
+    Instruction(API.LLVMBuildMemSet(builder, Ptr, Val, Len, Align))
+
+memcpy!(builder::Builder, Dst::Value, DstAlign::Integer, Src::Value, SrcAlign::Integer, Size::Value) =
+    Instruction(API.LLVMBuildMemCpy(builder, Dst, DstAlign, Src, SrcAlign, Size))
+
+memmove!(builder::Builder, Dst::Value, DstAlign::Integer, Src::Value, SrcAlign::Integer, Size::Value) =
+    Instruction(API.LLVMBuildMemMove(builder, Dst, DstAlign, Src, SrcAlign, Size))
 
 free!(builder::Builder, PointerVal::Value) =
     Instruction(API.LLVMBuildFree(builder, PointerVal))

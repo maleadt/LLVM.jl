@@ -1,5 +1,6 @@
 macro check_ir(inst, str)
     quote
-        @test occursin($(esc(str)), string($(esc(inst))))
+        inst = string($(esc(inst)))
+        @test occursin($(str), inst)
     end
 end
