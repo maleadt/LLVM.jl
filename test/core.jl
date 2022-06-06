@@ -48,6 +48,7 @@ end
 
     @test issized(LLVM.Int1Type(ctx))
     @test !issized(LLVM.VoidType(ctx))
+    @test_throws ErrorException sizeof(typ)
 end
 
 # integer
@@ -216,6 +217,7 @@ end
     show(devnull, val)
 
     @test llvmtype(val) == LLVM.PointerType(typ)
+    @test_throws ErrorException sizeof(val)
     @test name(val) == "foo"
     @test !isconstant(val)
     @test !isundef(val)

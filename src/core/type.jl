@@ -4,6 +4,9 @@ export LLVMType, issized, context, show
 abstract type LLVMType end
 
 Base.eltype(typ::LLVMType) = Any
+Base.sizeof(typ::LLVMType) = error("LLVM types are not sized")
+# TODO: expose LLVMSizeOf/LLVMAlignOf, yielding run-time values?
+# XXX: can we query type sizes from the data layout or target?
 
 Base.unsafe_convert(::Type{API.LLVMTypeRef}, typ::LLVMType) = typ.ref
 
