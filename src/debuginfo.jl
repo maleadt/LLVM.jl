@@ -50,6 +50,11 @@ function file(var::DIVariable)
     ref == C_NULL ? nothing : Metadata(ref)::DIFile
 end
 
+function scope(var::DIVariable)
+    ref = API.LLVMDIVariableGetScope(var)
+    ref == C_NULL ? nothing : Metadata(ref)::DIScope
+end
+
 line(var::DIVariable) = Int(API.LLVMDIVariableGetLine(var))
 
 
@@ -64,6 +69,7 @@ file(scope::DIScope) = DIFile(API.LLVMDIScopeGetFile(scope))
 function name(scope::DIScope)
     len = Ref{Cuint}()
     data = API.LLVMExtraDIScopeGetName(scope, len)
+    data == C_NULL && return nothing
     unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
@@ -82,18 +88,21 @@ register(DIFile, API.LLVMDIFileMetadataKind)
 function directory(file::DIFile)
     len = Ref{Cuint}()
     data = API.LLVMDIFileGetDirectory(file, len)
+    data == C_NULL && return nothing
     unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
 function filename(file::DIFile)
     len = Ref{Cuint}()
     data = API.LLVMDIFileGetFilename(file, len)
+    data == C_NULL && return nothing
     unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
 function source(file::DIFile)
     len = Ref{Cuint}()
     data = API.LLVMDIFileGetSource(file, len)
+    data == C_NULL && return nothing
     unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
@@ -118,6 +127,7 @@ end
 function name(typ::DIType)
     len = Ref{Csize_t}()
     data = API.LLVMDITypeGetName(typ, len)
+    data == C_NULL && return nothing
     unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
