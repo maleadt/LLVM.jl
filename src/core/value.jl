@@ -37,13 +37,15 @@ function Value(ref::API.LLVMValueRef)
 end
 
 
-
 ## general APIs
 
 export llvmtype, llvmeltype, name, name!, replace_uses!, replace_metadata_uses!, isconstant, isundef, ispoison, context
 
 llvmtype(val::Value) = LLVMType(API.LLVMTypeOf(val))
 llvmeltype(val::Value) = eltype(llvmtype(val))
+
+# defer size queries to the LLVM type (where we'll error)
+Base.sizeof(val::Value) = sizeof(llvmtype(val))
 
 name(val::Value) = unsafe_string(API.LLVMGetValueName(val))
 name!(val::Value, name::String) = API.LLVMSetValueName(val, name)
