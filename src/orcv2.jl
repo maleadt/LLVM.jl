@@ -224,6 +224,40 @@ Base.cconvert(::Type{API.LLVMOrcDefinitionGeneratorRef}, dg::CustomDefinitionGen
 # todo: Delete
 const CUSTOM_DG_ROOTS = Base.IdSet{CustomDefinitionGenerator}()
 
+function DynamicLibDefinitionGenerator(path)
+    handle = Libdl.dlopen(path)
+
+    function libdl_definitions(kind, JD, lookupFlags, lookupSet)
+        @assert kind == API.LLVMOrcLookupKindStatic
+        @assert lookupFlags == API.LLVMOrcJITDylibLookupFlagsMatchAllSymbols
+
+        symbols = API.LLVMJITCSymbolMapPair[]
+        for lookup in lookupSet
+            if lookup.LookupFlags == API.LLVMOrcSymbolLookupFlagsRequiredSymbol
+                name = LLVMSymbol(lookup.Name)
+                ptr = Libdl.dlsym(handle, name; throw_error=false)
+
+                if ptr !== C_NULL
+                    LLVM.retain(name)
+                    address = API.LLVMOrcJITTargetAddress(
+                        reinterpret(UInt, ptr))
+                    flags = API.LLVMJITSymbolFlags(
+                        API.LLVMJITSymbolGenericFlagsCallable, 0)
+                    symbol = API.LLVMJITEvaluatedSymbol(address, flags)
+                    push!(symbols, API.LLVMJITCSymbolMapPair(name, symbol))
+                end
+            else
+                @warn "Unkown" lookup.LookupFlags
+            end
+        end
+        mu = absolute_symbols(symbols)
+        define(JD, mu)
+        # TODO: API.LLVMErrorSuccess is not a LLVMErrorRef
+        return reinterpret(API.LLVMErrorRef, API.LLVMErrorSuccess)
+    end
+    return LLVM.CustomDefinitionGenerator(libdl_definitions)
+end
+
 function lookup_dylib(es::ExecutionSession, name)
     ref = API.LLVMOrcExecutionSessionGetJITDylibByName(es, name)
     if ref == C_NULL
