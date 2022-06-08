@@ -176,12 +176,13 @@ function JITDylib(es::ExecutionSession, name; bare=false)
     JITDylib(ref)
 end
 
-@checked struct DefinitionGenerator
+abstract type AbstractDefinitionGenerator end
+@checked struct DefinitionGenerator <: AbstractDefinitionGenerator
     ref::API.LLVMOrcDefinitionGeneratorRef
 end
 Base.unsafe_convert(::Type{API.LLVMOrcDefinitionGeneratorRef}, dg::DefinitionGenerator) = dg.ref
 
-function add!(jd::JITDylib, dg::DefinitionGenerator)
+function add!(jd::JITDylib, dg::AbstractDefinitionGenerator)
     API.LLVMOrcJITDylibAddGenerator(jd, dg)
 end
 
@@ -191,7 +192,37 @@ function CreateDynamicLibrarySearchGeneratorForProcess(prefix)
     DefinitionGenerator(ref[])
 end
 
-# LLVMOrcCreateCustomCAPIDefinitionGenerator(F, Ctx)
+# We can do this async by copying content of `LookupState` and setting it to
+# C_NULL and returning ErrorSuccess. We then would need to call `LookupContinue`
+# but that function seems to be missing from teh CAPI.
+# Note LookupSet get's destroyed when we return here
+function DefinitionGeneratorTryToGenerateFunction(GeneratorObj::API.LLVMOrcDefinitionGeneratorRef, ctx::Ptr{Cvoid}, LookupState::Ptr{API.LLVMOrcLookupStateRef}, Kind::API.LLVMOrcLookupKind, JD::API.LLVMOrcJITDylibRef, JDLookupFlags::API.LLVMOrcJITDylibLookupFlags, LookupSet::API.LLVMOrcCLookupSet, LookupSetSize::Csize_t)::API.LLVMErrorRef
+    dg = Base.unsafe_pointer_to_objref(ctx)::CustomDefinitionGenerator
+    @assert dg.dg.ref === GeneratorObj
+    lookupSet = Base.unsafe_wrap(Array, LookupSet, LookupSetSize, own=false)
+    return dg.callback(Kind, JITDylib(JD), JDLookupFlags, lookupSet)::API.LLVMErrorRef
+end
+
+mutable struct CustomDefinitionGenerator <: AbstractDefinitionGenerator
+    callback
+    dg::DefinitionGenerator
+    function CustomDefinitionGenerator(callback)
+        this = new(callback)
+        push!(CUSTOM_DG_ROOTS, this)
+
+        ref = API.LLVMOrcCreateCustomCAPIDefinitionGenerator(
+            @cfunction(DefinitionGeneratorTryToGenerateFunction, API.LLVMErrorRef, (API.LLVMOrcDefinitionGeneratorRef, Ptr{Cvoid}, Ptr{API.LLVMOrcLookupStateRef}, API.LLVMOrcLookupKind, API.LLVMOrcJITDylibRef, API.LLVMOrcJITDylibLookupFlags, API.LLVMOrcCLookupSet, Csize_t)),
+            Base.pointer_from_objref(this)
+        )
+
+        this.dg = DefinitionGenerator(ref)
+        return this
+    end
+end
+Base.cconvert(::Type{API.LLVMOrcDefinitionGeneratorRef}, dg::CustomDefinitionGenerator) = dg.dg
+
+# todo: Delete
+const CUSTOM_DG_ROOTS = Base.IdSet{CustomDefinitionGenerator}()
 
 function lookup_dylib(es::ExecutionSession, name)
     ref = API.LLVMOrcExecutionSessionGetJITDylibByName(es, name)
