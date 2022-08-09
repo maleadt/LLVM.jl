@@ -8,10 +8,7 @@ code = """
 """
 
 out = Pipe()
-cmd = Base.julia_cmd()
-if Base.JLOptions().project != C_NULL
-    cmd = `$cmd --project=$(unsafe_string(Base.JLOptions().project))`
-end
+cmd = `$(Base.julia_cmd()) --project=$(Base.active_project())`
 run(pipeline(`$cmd -e $code`, stdout=out, stderr=out))
 close(out.in)
 
