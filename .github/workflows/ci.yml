@@ -6,17 +6,19 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  binary_test:
+  test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.6', '1.7', '^1.8.0-beta3', 'nightly']
+        version: ['1.6', '1.7', '1.8', 'nightly']
         os: [ubuntu-latest, macOS-latest, windows-latest]
         arch: [x64]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
@@ -32,55 +34,10 @@ jobs:
             ${{ runner.os }}-test-
             ${{ runner.os }}-
       - uses: julia-actions/julia-buildpkg@v1
-      - name: Run tests
-        run: |
-          julia --project -e 'using Pkg; Pkg.test(; coverage=true, julia_args=`-g2`)'
-      - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v1
-        with:
-          file: lcov.info
-
-  # development versions of Julia, built with assertions enabled.
-  # we also build LLVMExtra from source here.
-  source_test:
-    name: Julia ${{ matrix.branch }} - ${{ matrix.os }} - ${{ matrix.arch }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        branch: ['release-1.7', 'release-1.8', 'master']
-        os: [ubuntu-latest, macOS-latest]
-        arch: [x64]
-        assertions: [false]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
-        with:
-          repository: 'JuliaLang/julia'
-          ref: ${{ matrix.branch }}
-          path: 'julia'
-      - name: Compile Julia
-        run: |
-          make -C julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
-          echo $PWD/julia/usr/bin >> $GITHUB_PATH
-      - uses: actions/cache@v1
-        env:
-          cache-name: cache-artifacts
-        with:
-          path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
-      - uses: julia-actions/julia-buildpkg@v1
       - name: Build libLLVMExtra
-        run: |
-          julia --project=deps -e 'using Pkg; Pkg.instantiate()'
-          julia --project=deps deps/build_local.jl
+        run: julia --project=deps deps/build_ci.jl
       - name: Run tests
-        run: |
-          julia --project -e 'using Pkg; Pkg.test(; coverage=true, julia_args=`-g2`)'
+        run: julia --project -e 'using Pkg; Pkg.test(; coverage=true, julia_args=`-g2`)'
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v1
         with:

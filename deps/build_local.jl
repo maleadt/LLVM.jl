@@ -1,10 +1,16 @@
-# Invoke with
-# `julia --project=deps deps/build_local.jl`
+# build a local version of LLVMExtra
 
-# the pre-built LLVMExtra_jll might not be loadable on this platform
-LLVMExtra_jll = Base.UUID("dad2f222-ce93-54a1-a47d-0025e8a3acab")
+using Pkg
+Pkg.activate(@__DIR__)
+Pkg.instantiate()
+
+if haskey(ENV, "GITHUB_ACTIONS")
+    println("::warning ::Using a locally-built LLVMExtra; A bump of LLVMExtra_jll will be required before releasing LLVM.jl.")
+end
 
 using Pkg, Scratch, Preferences, Libdl, CMake_jll
+
+LLVM = Base.UUID("929cbde3-209d-540e-8aea-75f648917ca0")
 
 # 1. Ensure that an appropriate LLVM_full_jll is installed
 Pkg.activate(; temp=true)
@@ -26,7 +32,7 @@ end
 LLVM_DIR = joinpath(LLVM.artifact_dir, "lib", "cmake", "llvm")
 
 # 2. Get a scratch directory
-scratch_dir = get_scratch!(LLVMExtra_jll, "build")
+scratch_dir = get_scratch!(LLVM, "build")
 isdir(scratch_dir) && rm(scratch_dir; recursive=true)
 source_dir = joinpath(@__DIR__, "LLVMExtra")
 
