@@ -6,8 +6,14 @@ export clone_into!, clone
 
 type_mapper_callback(typ, type_mapper) =
     Base.unsafe_convert(API.LLVMTypeRef, type_mapper[](LLVMType(typ)))
-materializer_callback(val, materializer) =
-    Base.unsafe_convert(API.LLVMValueRef, materializer[](Value(val)))
+function materializer_callback(val, materializer)
+    new_val = materializer[](Value(val))
+    if new_val === nothing
+        return Base.unsafe_convert(API.LLVMValueRef, C_NULL)
+    else
+        return Base.unsafe_convert(API.LLVMValueRef, new_val)
+    end
+end
 
 function clone_into!(new::Function, old::Function;
                      value_map::Dict{Value,Value}=Dict{Value,Value}(),

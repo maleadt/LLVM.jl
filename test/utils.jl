@@ -71,7 +71,7 @@
             end
             function materializer(val)
                 # not needed here
-                error()
+                error("")
             end
             clone_into!(new_f, f; value_map, type_mapper, materializer)
 
