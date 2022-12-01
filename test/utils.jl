@@ -14,9 +14,13 @@
         @dispose builder=Builder(ctx) begin
             entry = BasicBlock(f, "entry"; ctx)
             position!(builder, entry)
-
+            ptr = const_inttoptr(
+                ConstantInt(0xdeadbeef%UInt; ctx),
+                LLVM.PointerType(LLVM.Int32Type(ctx)))
             tmp = add!(builder, parameters(f)[1], parameters(f)[2], "tmp")
-            ret!(builder, tmp)
+            tmp2 = load!(builder, ptr)
+            tmp3 = add!(builder, tmp, tmp2)
+            ret!(builder, tmp3)
 
             verify(mod)
         end
@@ -70,8 +74,12 @@
                 end
             end
             function materializer(val)
+                if val isa Union{LLVM.ConstantExpr, ConstantInt}
+                    # test that we can return nothing
+                    return nothing
+                end
                 # not needed here
-                error()
+                error("")
             end
             clone_into!(new_f, f; value_map, type_mapper, materializer)
 
