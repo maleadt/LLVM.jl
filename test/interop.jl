@@ -254,6 +254,24 @@ end
 
     # test return nothing
     LLVM.Interop.@typed_ccall("llvm.donothing", llvmcall, Cvoid, ())
+
+    # test passing constant values
+    let
+        a = [42]
+        b = [0]
+
+        memcpy(dst, src, len) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (Ptr{Int}, Ptr{Int}, Int, Bool), dst, src, len, Val(false))
+        memcpy(b, a, 1)
+        @test b == [42]
+
+        ir = sprint(io->code_llvm(io, memcpy, Tuple{Vector{Int}, Vector{Int}, Int}))
+        @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* .+, i64\* .+, i64 .+, i1 false\)", ir)
+
+        memcpy_volatile(dst, src, len) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (Ptr{Int}, Ptr{Int}, Int, Bool), dst, src, len, Val(true))
+        ir = sprint(io->code_llvm(io, memcpy_volatile, Tuple{Vector{Int}, Vector{Int}, Int}))
+        @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* .+, i64\* .+, i64 .+, i1 true\)", ir)
+
+    end
 end
 
 end

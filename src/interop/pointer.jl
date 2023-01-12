@@ -122,7 +122,7 @@ Base.signed(x::LLVMPtr) = Int(x)
     rettyp = rettyp.parameters[1]
     argtt = argtt.parameters[1]
     argtyps = DataType[argtt.parameters...]
-    argexprs = Expr[:(args[$i]) for i in 1:length(args)]
+    argexprs = Any[:(args[$i]) for i in 1:length(args)]
 
     # build IR that calls the intrinsic, casting types if necessary
     @dispose ctx=Context() begin
@@ -140,7 +140,7 @@ Base.signed(x::LLVMPtr) = Int(x)
             # reconstruct those so that we can accurately look up intrinsics.
             T_actual_args = LLVMType[]
             actual_args = LLVM.Value[]
-            for (arg, argtyp) in zip(parameters(llvm_f),argtyps)
+            for (i, (arg, argtyp, argval)) in enumerate(zip(parameters(llvm_f), argtyps, args))
                 if argtyp <: LLVMPtr
                     # passed as i8*
                     T,AS = argtyp.parameters
@@ -154,11 +154,24 @@ Base.signed(x::LLVMPtr) = Int(x)
                 elseif argtyp <: Bool
                     # passed as i8
                     T = eltype(argtyp)
+                    ## special case: i1s are often expected to be immediates,
+                    ##               so support Val(...) to encode constants.
+                    ## TODO: generalize this to other kinds of values?
                     actual_typ = LLVM.Int1Type(ctx)
-                    actual_arg = trunc!(builder, arg, actual_typ)
+                    actual_arg = if argval <: Val
+                        LLVM.ConstantInt(actual_typ, argval.parameters[1])
+                    else
+                        trunc!(builder, arg, actual_typ)
+                    end
                 else
                     actual_typ = convert(LLVMType, argtyp; ctx)
                     actual_arg = arg
+                end
+                if argval <: Val
+                    # HACK: we've constructed a function accepting all args, including the
+                    #       constant ones, so we need to pass _something_ (even if unused).
+                    #       we can avoid this by accurately keeping track of argument types.
+                    argexprs[i] = argval.parameters[1]
                 end
                 push!(T_actual_args, actual_typ)
                 push!(actual_args, actual_arg)
@@ -202,6 +215,7 @@ end
 # e.g., passing booleans as i1 instead of i8, using typed LLVM pointers, etc.
 # this may be needed when selecting LLVM intrinsics, to avoid assertion failures, or when
 # the back-end actually emits different code depending on types (e.g. SPIR-V and atomics).
+# `Val(...)`-typed values will be passed as constants (currently only supported for Bool).
 #
 # NOTE: this will become unnecessary when LLVM switches to typeless pointers,
 #       or if and when Julia goes back to emitting exact types when passing pointers.
@@ -216,7 +230,13 @@ macro typed_ccall(intrinsic, cc, rettyp, argtyps, args...)
         :($var = $arg)
     end
     arg_exprs = map(zip(vars,argtyps.args)) do (var,typ)
-        :(Base.unsafe_convert($typ, Base.cconvert($typ, $var)))
+        quote
+            if $var isa Val
+                Val(Base.unsafe_convert($typ, Base.cconvert($typ, typeof($var).parameters[1])))
+            else
+                Base.unsafe_convert($typ, Base.cconvert($typ, $var))
+            end
+        end
     end
 
     esc(quote
