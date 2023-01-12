@@ -19,3 +19,10 @@ LLVM.Interop.call_function
 ```@docs
 LLVM.Interop.@asmcall
 ```
+
+
+## LLVM type support
+
+```@docs
+LLVM.Interop.@typed_ccall
+```

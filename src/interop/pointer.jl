@@ -234,14 +234,19 @@ Base.signed(x::LLVMPtr) = Int(x)
     end
 end
 
-# perform a `ccall(intrinsic, llvmcall)` with more accurate types for calling intrinsics,
-# e.g., passing booleans as i1 instead of i8, using typed LLVM pointers, etc.
-# this may be needed when selecting LLVM intrinsics, to avoid assertion failures, or when
-# the back-end actually emits different code depending on types (e.g. SPIR-V and atomics).
-# for select types, `Val(...)`-typed values will be passed as constants.
-#
-# NOTE: this will become unnecessary when LLVM switches to typeless pointers,
-#       or if and when Julia goes back to emitting exact types when passing pointers.
+"""
+    @typed_ccall(intrinsic, llvmcall, rettyp, (argtyps...), args...))
+
+Perform a `ccall` while more accurately preserving argument types like LLVM expects them:
+
+- `Bool`s are passed as `i1`, not `i8`;
+- Pointers (both `Ptr` and `Core.LLVMPtr`) are passed as typed pointers (instead of resp.
+  `i8*` and `i64`);
+- `Val`-typed arguments will be passed as constants, if supported.
+
+These features can be useful to call LLVM intrinsics, which may expect a specific set of
+argument types.
+"""
 macro typed_ccall(intrinsic, cc, rettyp, argtyps, args...)
     # destructure and validate the arguments
     cc == :llvmcall || error("Can only use @typed_ccall with the llvmcall calling convention")
