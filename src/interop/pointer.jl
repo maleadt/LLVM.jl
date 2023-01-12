@@ -145,11 +145,26 @@ Base.signed(x::LLVMPtr) = Int(x)
                     # passed as i8*
                     T,AS = argtyp.parameters
                     actual_typ = LLVM.PointerType(convert(LLVMType, T; ctx), AS)
-                    actual_arg = bitcast!(builder, arg, actual_typ)
+                    actual_arg = if argval <: Val && argval.parameters[1] == C_NULL
+                        LLVM.PointerNull(actual_typ)
+                    elseif argval <: Val
+                        intptr = LLVM.ConstantInt(LLVM.Int64Type(ctx), Int(argval.parameters[1]))
+                        const_inttoptr(intptr, actual_typ)
+                    else
+                        bitcast!(builder, arg, actual_typ)
+                    end
                 elseif argtyp <: Ptr
                     # passed as i64
                     T = eltype(argtyp)
                     actual_typ = LLVM.PointerType(convert(LLVMType, T; ctx))
+                    actual_arg = if argval <: Val && argval.parameters[1] == C_NULL
+                        LLVM.PointerNull(actual_typ)
+                    elseif argval <: Val
+                        intptr = LLVM.ConstantInt(LLVM.Int64Type(ctx), Int(argval.parameters[1]))
+                        const_inttoptr(intptr, actual_typ)
+                    else
+                        inttoptr!(builder, arg, actual_typ)
+                    end
                     actual_arg = inttoptr!(builder, arg, actual_typ)
                 elseif argtyp <: Bool
                     # passed as i8
