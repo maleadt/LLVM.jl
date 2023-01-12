@@ -151,6 +151,11 @@ Base.signed(x::LLVMPtr) = Int(x)
                     T = eltype(argtyp)
                     actual_typ = LLVM.PointerType(convert(LLVMType, T; ctx))
                     actual_arg = inttoptr!(builder, arg, actual_typ)
+                elseif argtyp <: Bool
+                    # passed as i8
+                    T = eltype(argtyp)
+                    actual_typ = LLVM.Int1Type(ctx)
+                    actual_arg = trunc!(builder, arg, actual_typ)
                 else
                     actual_typ = convert(LLVMType, argtyp; ctx)
                     actual_arg = arg
@@ -193,7 +198,8 @@ Base.signed(x::LLVMPtr) = Int(x)
     end
 end
 
-# perform a `ccall(intrinsic, llvmcall)` with accurate pointer types for calling intrinsic.
+# perform a `ccall(intrinsic, llvmcall)` with more accurate types for calling intrinsics,
+# e.g., passing booleans as i1 instead of i8, using typed LLVM pointers, etc.
 # this may be needed when selecting LLVM intrinsics, to avoid assertion failures, or when
 # the back-end actually emits different code depending on types (e.g. SPIR-V and atomics).
 #
