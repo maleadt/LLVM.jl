@@ -115,7 +115,7 @@ Base.unsigned(x::LLVMPtr) = UInt(x)
 Base.signed(x::LLVMPtr) = Int(x)
 
 
-# pointer type-preserving ccall
+# type-preserving ccall
 
 @generated function _typed_llvmcall(::Val{intr}, rettyp, argtt, args...) where {intr}
     # make types available for direct use in this generator
@@ -201,14 +201,16 @@ Base.signed(x::LLVMPtr) = Int(x)
             end
 
             # same for the return type
-            if rettyp <: LLVMPtr
+            T_ret_actual = if rettyp <: LLVMPtr
                 T,AS = rettyp.parameters
-                T_ret_actual = LLVM.PointerType(convert(LLVMType, T; ctx), AS)
+                LLVM.PointerType(convert(LLVMType, T; ctx), AS)
             elseif rettyp <: Ptr
                 T = eltype(rettyp)
-                T_ret_actual = LLVM.PointerType(convert(LLVMType, T; ctx))
+                LLVM.PointerType(convert(LLVMType, T; ctx))
+            elseif rettyp <: Bool
+                LLVM.Int1Type(ctx)
             else
-                T_ret_actual = T_ret
+                T_ret
             end
 
             intr_ft = LLVM.FunctionType(T_ret_actual, T_actual_args)
@@ -220,10 +222,14 @@ Base.signed(x::LLVMPtr) = Int(x)
                 ret!(builder)
             else
                 # also convert the return value
-                if rettyp <: LLVMPtr
-                    rv = bitcast!(builder, rv, T_ret)
+                rv = if rettyp <: LLVMPtr
+                    bitcast!(builder, rv, T_ret)
                 elseif rettyp <: Ptr
-                    rv = ptrtoint!(builder, rv, T_ret)
+                    ptrtoint!(builder, rv, T_ret)
+                elseif rettyp <: Bool
+                    zext!(builder, rv, T_ret)
+                else
+                    rv
                 end
 
                 ret!(builder, rv)

@@ -255,6 +255,14 @@ end
     # test return nothing
     LLVM.Interop.@typed_ccall("llvm.donothing", llvmcall, Cvoid, ())
 
+    # test return Bool
+    expect_bool(val, expected_val) = LLVM.Interop.@typed_ccall("llvm.expect.i1", llvmcall, Bool, (Bool,Bool), val, expected_val)
+    @test expect_bool(true, false)
+
+    # test return non-special type
+    expect_int(val, expected_val) = LLVM.Interop.@typed_ccall("llvm.expect.i64", llvmcall, Int, (Int,Int), val, expected_val)
+    @test expect_int(42, 0) == 42
+
     # test passing constant values
     let
         a = [42]
