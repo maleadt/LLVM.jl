@@ -278,6 +278,10 @@ end
         const_llvmptrs(len) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (LLVMPtr{Int,0}, LLVMPtr{Int,0}, Int, Bool), Val(LLVMPtr{Int,0}(0)), Val(LLVMPtr{Int,0}(1)), len, Val(true))
         ir = sprint(io->code_llvm(io, const_llvmptrs, Tuple{Int}))
         @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* null, i64\* inttoptr \(i64 1 to i64\*\), i64 .+, i1 true\)", ir)
+
+        const_int(dst, src) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (Ptr{Int}, Ptr{Int}, Int, Bool), dst, src, Val(999), Val(false))
+        ir = sprint(io->code_llvm(io, const_int, Tuple{Vector{Int}, Vector{Int}}))
+        @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* .+, i64\* .+, i64 999, i1 false\)", ir)
     end
 end
 

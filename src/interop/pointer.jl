@@ -141,14 +141,25 @@ Base.signed(x::LLVMPtr) = Int(x)
             T_actual_args = LLVMType[]
             actual_args = LLVM.Value[]
             for (i, (arg, argtyp, argval)) in enumerate(zip(parameters(llvm_f), argtyps, args))
+                # if the value is a Val, we'll try to emit it as a constant
+                const_arg = if argval <: Val
+                    # also pass the actual value for the fallback path (and to simplify
+                    # construction of the LLVM function, where we can ignore constants)
+                    argexprs[i] = argval.parameters[1]
+
+                    argval.parameters[1]
+                else
+                    nothing
+                end
+
                 if argtyp <: LLVMPtr
                     # passed as i8*
                     T,AS = argtyp.parameters
                     actual_typ = LLVM.PointerType(convert(LLVMType, T; ctx), AS)
-                    actual_arg = if argval <: Val && argval.parameters[1] == C_NULL
+                    actual_arg = if const_arg == C_NULL
                         LLVM.PointerNull(actual_typ)
-                    elseif argval <: Val
-                        intptr = LLVM.ConstantInt(LLVM.Int64Type(ctx), Int(argval.parameters[1]))
+                    elseif const_arg !== nothing
+                        intptr = LLVM.ConstantInt(LLVM.Int64Type(ctx), Int(const_arg))
                         const_inttoptr(intptr, actual_typ)
                     else
                         bitcast!(builder, arg, actual_typ)
@@ -157,10 +168,10 @@ Base.signed(x::LLVMPtr) = Int(x)
                     # passed as i64
                     T = eltype(argtyp)
                     actual_typ = LLVM.PointerType(convert(LLVMType, T; ctx))
-                    actual_arg = if argval <: Val && argval.parameters[1] == C_NULL
+                    actual_arg = if const_arg == C_NULL
                         LLVM.PointerNull(actual_typ)
-                    elseif argval <: Val
-                        intptr = LLVM.ConstantInt(LLVM.Int64Type(ctx), Int(argval.parameters[1]))
+                    elseif const_arg !== nothing
+                        intptr = LLVM.ConstantInt(LLVM.Int64Type(ctx), Int(const_arg))
                         const_inttoptr(intptr, actual_typ)
                     else
                         inttoptr!(builder, arg, actual_typ)
@@ -169,24 +180,21 @@ Base.signed(x::LLVMPtr) = Int(x)
                 elseif argtyp <: Bool
                     # passed as i8
                     T = eltype(argtyp)
-                    ## special case: i1s are often expected to be immediates,
-                    ##               so support Val(...) to encode constants.
-                    ## TODO: generalize this to other kinds of values?
                     actual_typ = LLVM.Int1Type(ctx)
-                    actual_arg = if argval <: Val
-                        LLVM.ConstantInt(actual_typ, argval.parameters[1])
+                    actual_arg = if const_arg !== nothing
+                        LLVM.ConstantInt(actual_typ, const_arg)
                     else
                         trunc!(builder, arg, actual_typ)
                     end
                 else
                     actual_typ = convert(LLVMType, argtyp; ctx)
-                    actual_arg = arg
-                end
-                if argval <: Val
-                    # HACK: we've constructed a function accepting all args, including the
-                    #       constant ones, so we need to pass _something_ (even if unused).
-                    #       we can avoid this by accurately keeping track of argument types.
-                    argexprs[i] = argval.parameters[1]
+                    actual_arg = if const_arg isa Integer
+                        LLVM.ConstantInt(actual_typ, argval.parameters[1])
+                    elseif const_arg isa AbstractFloat
+                        LLVM.ConstantFP(actual_typ, argval.parameters[1])
+                    else
+                        arg
+                    end
                 end
                 push!(T_actual_args, actual_typ)
                 push!(actual_args, actual_arg)
@@ -230,7 +238,7 @@ end
 # e.g., passing booleans as i1 instead of i8, using typed LLVM pointers, etc.
 # this may be needed when selecting LLVM intrinsics, to avoid assertion failures, or when
 # the back-end actually emits different code depending on types (e.g. SPIR-V and atomics).
-# `Val(...)`-typed values will be passed as constants (currently only supported for Bool).
+# for select types, `Val(...)`-typed values will be passed as constants.
 #
 # NOTE: this will become unnecessary when LLVM switches to typeless pointers,
 #       or if and when Julia goes back to emitting exact types when passing pointers.
