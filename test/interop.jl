@@ -254,6 +254,43 @@ end
 
     # test return nothing
     LLVM.Interop.@typed_ccall("llvm.donothing", llvmcall, Cvoid, ())
+
+    # test return Bool
+    expect_bool(val, expected_val) = LLVM.Interop.@typed_ccall("llvm.expect.i1", llvmcall, Bool, (Bool,Bool), val, expected_val)
+    @test expect_bool(true, false)
+
+    # test return non-special type
+    expect_int(val, expected_val) = LLVM.Interop.@typed_ccall("llvm.expect.i64", llvmcall, Int, (Int,Int), val, expected_val)
+    @test expect_int(42, 0) == 42
+
+    # test passing constant values
+    let
+        a = [42]
+        b = [0]
+        memcpy(dst, src, len) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (Ptr{Int}, Ptr{Int}, Int, Bool), dst, src, len, Val(false))
+        memcpy(b, a, 1)
+        @test b == [42]
+
+        const_bool_false = memcpy
+        ir = sprint(io->code_llvm(io, memcpy, Tuple{Vector{Int}, Vector{Int}, Int}))
+        @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* .+, i64\* .+, i64 .+, i1 false\)", ir)
+
+        const_bool_true(dst, src, len) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (Ptr{Int}, Ptr{Int}, Int, Bool), dst, src, len, Val(true))
+        ir = sprint(io->code_llvm(io, const_bool_true, Tuple{Vector{Int}, Vector{Int}, Int}))
+        @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* .+, i64\* .+, i64 .+, i1 true\)", ir)
+
+        const_ptrs(len) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (Ptr{Int}, Ptr{Int}, Int, Bool), Val(Ptr{Int}(0)), Val(Ptr{Int}(1)), len, Val(true))
+        ir = sprint(io->code_llvm(io, const_ptrs, Tuple{Int}))
+        @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* null, i64\* inttoptr \(i64 1 to i64\*\), i64 .+, i1 true\)", ir)
+
+        const_llvmptrs(len) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (LLVMPtr{Int,0}, LLVMPtr{Int,0}, Int, Bool), Val(LLVMPtr{Int,0}(0)), Val(LLVMPtr{Int,0}(1)), len, Val(true))
+        ir = sprint(io->code_llvm(io, const_llvmptrs, Tuple{Int}))
+        @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* null, i64\* inttoptr \(i64 1 to i64\*\), i64 .+, i1 true\)", ir)
+
+        const_int(dst, src) = LLVM.Interop.@typed_ccall("llvm.memcpy.p0.p0.i64", llvmcall, Cvoid, (Ptr{Int}, Ptr{Int}, Int, Bool), dst, src, Val(999), Val(false))
+        ir = sprint(io->code_llvm(io, const_int, Tuple{Vector{Int}, Vector{Int}}))
+        @test occursin(r"call void @llvm.memcpy.p0i64.p0i64.i64\(i64\* .+, i64\* .+, i64 999, i1 false\)", ir)
+    end
 end
 
 end
