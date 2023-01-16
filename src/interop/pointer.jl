@@ -241,7 +241,7 @@ Base.signed(x::LLVMPtr) = Int(x)
 end
 
 """
-    @typed_ccall(intrinsic, llvmcall, rettyp, (argtyps...), args...))
+    @typed_ccall(intrinsic, llvmcall, rettyp, (argtyps...), args...)
 
 Perform a `ccall` while more accurately preserving argument types like LLVM expects them:
 
