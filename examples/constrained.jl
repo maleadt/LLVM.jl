@@ -12,10 +12,6 @@
 using LLVM
 using LLVM.Interop
 
-# TODO: select the right intrinsic overload (https://github.com/maleadt/LLVM.jl/issues/112)
-suffix(::Type{Float64}) = "f64"
-suffix(::Type{Float32}) = "f32"
-
 # map Julia functions to llvm intrinsic
 func(::Type{typeof(+)}) = "fadd"
 
@@ -45,15 +41,14 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
         mround = MDString(meta(round); ctx)
         mfpexcept = MDString(meta(fpexcept); ctx)
         mod = LLVM.parent(llvm_f)
-        intrinsic_typ = LLVM.FunctionType(typ, [paramtyps..., mtyp, mtyp])
-        intrinsic = LLVM.Function(mod, "llvm.experimental.constrained.$(func(F)).$(suffix(T))",
-                                intrinsic_typ)
+        intrinsic = Intrinsic("llvm.experimental.constrained.$(func(F))")
+        intrinsic_fun = LLVM.Function(mod, intrinsic, [typ])
 
         # generate IR
         @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
-            val = call!(builder, intrinsic,
+            val = call!(builder, intrinsic_fun,
                         [parameters(llvm_f)..., Value(mround; ctx), Value(mfpexcept; ctx)])
             ret!(builder, val)
         end
@@ -69,7 +64,5 @@ using Test
 @test cadd(1.0, 2.0) == 3.0
 
 using InteractiveUtils
-io = IOBuffer()
-code_llvm(io, cadd, (Float32, Float32))
-seekstart(io)
-@test occursin("@llvm.experimental.constrained.fadd.f32", String(take!(io)))
+ir = sprint(io->code_llvm(io, cadd, (Float32, Float32)))
+@test occursin("@llvm.experimental.constrained.fadd.f32", ir)
