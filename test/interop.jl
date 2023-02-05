@@ -202,6 +202,19 @@ end
     @test contains(ir, r"load i64, i64\* %\d+, align 4")
 end
 
+@testset "reinterpret with addrspacecast" begin
+    ptr = reinterpret(Core.LLVMPtr{Int64, 4}, C_NULL)
+    for eltype_dest in (Int64, Int32), AS_dest in (4, 3)
+        T_dest = Core.LLVMPtr{eltype_dest, AS_dest}
+        ir = sprint(io->code_llvm(io, reinterpret, Tuple{Type{T_dest}, typeof(ptr)}))
+        if AS_dest == 3
+            @test contains(ir, r"addrspacecast i8 addrspace\(4\)\* %\d+ to i8 addrspace\(3\)\*")
+        else
+            @test !contains(ir, r"addrspacecast i8 addrspace\(4\)\* %\d+ to i8 addrspace\(3\)\*")
+        end
+    end
+end
+
 @testset "reinterpret(Nothing, nothing)" begin
     ptr = reinterpret(Core.LLVMPtr{Nothing,0}, C_NULL)
     @test unsafe_load(ptr) === nothing

@@ -114,6 +114,31 @@ Base.:(+)(x::Integer, y::LLVMPtr) = y + x
 Base.unsigned(x::LLVMPtr) = UInt(x)
 Base.signed(x::LLVMPtr) = Int(x)
 
+@generated function Base.reinterpret(::Type{LLVMPtr{TDest, ASDest}}, src::LLVMPtr{TSrc, ASSrc}) where {TDest, ASDest, TSrc, ASSrc}
+    @dispose ctx=Context() begin
+        T_dest = convert(LLVMType, LLVMPtr{TDest, ASDest}; ctx)
+        T_src = convert(LLVMType, LLVMPtr{TSrc, ASSrc}; ctx)
+
+        llvm_f, _ = create_function(T_dest, [T_src])
+        mod = LLVM.parent(llvm_f)
+
+        @dispose builder=Builder(ctx) begin
+            entry = BasicBlock(llvm_f, "entry"; ctx)
+            position!(builder, entry)
+
+            dest_ptr = if ASDest != ASSrc
+                addrspacecast!(builder, parameters(llvm_f)[1], T_dest)
+            else
+                parameters(llvm_f)[1]
+            end
+            ret!(builder, bitcast!(builder, dest_ptr, T_dest))
+        end
+
+        call_function(llvm_f, LLVMPtr{TDest, ASDest},
+                      Tuple{LLVMPtr{TSrc, ASSrc}}, :src)
+    end
+end
+
 
 # type-preserving ccall
 
