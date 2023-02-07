@@ -114,7 +114,7 @@ Base.:(+)(x::Integer, y::LLVMPtr) = y + x
 Base.unsigned(x::LLVMPtr) = UInt(x)
 Base.signed(x::LLVMPtr) = Int(x)
 
-@generated function Base.reinterpret(::Type{LLVMPtr{TDest, ASDest}}, src::LLVMPtr{TSrc, ASSrc}) where {TDest, ASDest, TSrc, ASSrc}
+@generated function addrspacecast(::Type{LLVMPtr{TDest, ASDest}}, src::LLVMPtr{TSrc, ASSrc}) where {TDest, ASDest, TSrc, ASSrc}
     @dispose ctx=Context() begin
         T_dest = convert(LLVMType, LLVMPtr{TDest, ASDest}; ctx)
         T_src = convert(LLVMType, LLVMPtr{TSrc, ASSrc}; ctx)
