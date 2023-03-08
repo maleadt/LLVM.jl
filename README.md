@@ -2,9 +2,7 @@
 
 *A Julia wrapper for the LLVM C API.*
 
-| **Documentation**                                                         | **Build Status**                                                     | **Coverage**                    |
-|:-------------------------------------------------------------------------:|:--------------------------------------------------------------------:|:-------------------------------:|
-| [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][github-img]][github-url] [![PkgEval][pkgeval-img]][pkgeval-url] | [![][codecov-img]][codecov-url] |
+[![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] [![][github-img]][github-url] [![PkgEval][pkgeval-img]][pkgeval-url] [![][codecov-img]][codecov-url]
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: http://maleadt.github.io/LLVM.jl/stable
