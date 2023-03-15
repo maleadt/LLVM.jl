@@ -2634,6 +2634,10 @@ function LLVMPointerType(ElementType, AddressSpace)
     ccall((:LLVMPointerType, libllvm), LLVMTypeRef, (LLVMTypeRef, Cuint), ElementType, AddressSpace)
 end
 
+function LLVMPointerTypeInContext(C, AddressSpace)
+    ccall((:LLVMPointerTypeInContext, libllvm), LLVMTypeRef, (LLVMContextRef, Cuint), C, AddressSpace)
+end
+
 function LLVMGetPointerAddressSpace(PointerTy)
     ccall((:LLVMGetPointerAddressSpace, libllvm), Cuint, (LLVMTypeRef,), PointerTy)
 end
@@ -3278,10 +3282,6 @@ function LLVMConstNUWAdd(LHSConstant, RHSConstant)
     ccall((:LLVMConstNUWAdd, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
-function LLVMConstFAdd(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFAdd, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
 function LLVMConstSub(LHSConstant, RHSConstant)
     ccall((:LLVMConstSub, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
@@ -3294,9 +3294,6 @@ function LLVMConstNUWSub(LHSConstant, RHSConstant)
     ccall((:LLVMConstNUWSub, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
-function LLVMConstFSub(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFSub, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
 
 function LLVMConstMul(LHSConstant, RHSConstant)
     ccall((:LLVMConstMul, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
@@ -3308,42 +3305,6 @@ end
 
 function LLVMConstNUWMul(LHSConstant, RHSConstant)
     ccall((:LLVMConstNUWMul, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstFMul(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFMul, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstUDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstUDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstExactUDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstExactUDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstSDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstSDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstExactSDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstExactSDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstFDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstURem(LHSConstant, RHSConstant)
-    ccall((:LLVMConstURem, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstSRem(LHSConstant, RHSConstant)
-    ccall((:LLVMConstSRem, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstFRem(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFRem, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstAnd(LHSConstant, RHSConstant)
@@ -3484,14 +3445,6 @@ end
 
 function LLVMConstShuffleVector(VectorAConstant, VectorBConstant, MaskConstant)
     ccall((:LLVMConstShuffleVector, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), VectorAConstant, VectorBConstant, MaskConstant)
-end
-
-function LLVMConstExtractValue(AggConstant, IdxList, NumIdx)
-    ccall((:LLVMConstExtractValue, libllvm), LLVMValueRef, (LLVMValueRef, Ptr{Cuint}, Cuint), AggConstant, IdxList, NumIdx)
-end
-
-function LLVMConstInsertValue(AggConstant, ElementValueConstant, IdxList, NumIdx)
-    ccall((:LLVMConstInsertValue, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef, Ptr{Cuint}, Cuint), AggConstant, ElementValueConstant, IdxList, NumIdx)
 end
 
 function LLVMBlockAddress(F, BB)
@@ -3672,6 +3625,10 @@ end
 
 function LLVMAddAlias(M, Ty, Aliasee, Name)
     ccall((:LLVMAddAlias, libllvm), LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, LLVMValueRef, Cstring), M, Ty, Aliasee, Name)
+end
+
+function LLVMAddAlias2(M, Ty, Aliasee, Name)
+    ccall((:LLVMAddAlias2, libllvm), LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, LLVMValueRef, Cstring), M, Ty, Aliasee, Name)
 end
 
 function LLVMGetNamedGlobalAlias(M, Name, NameLen)
@@ -4792,6 +4749,10 @@ end
 
 function LLVMBuildPtrDiff(arg1, LHS, RHS, Name)
     ccall((:LLVMBuildPtrDiff, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+end
+
+function LLVMBuildPtrDiff2(arg1, Ty, LHS, RHS, Name)
+    ccall((:LLVMBuildPtrDiff2, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, Ty, LHS, RHS, Name)
 end
 
 function LLVMBuildFence(B, ordering, singleThread, Name)

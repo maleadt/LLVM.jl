@@ -23,9 +23,13 @@ const llvm_version = if version() < v"12"
     "11"
 elseif version().major == 12
     "12"
-else
+elseif version() < v"15"
     "13"
+else
+    "15"
 end
+
+
 const libdir = joinpath(@__DIR__, "..", "lib")
 
 if !isdir(libdir)
@@ -40,6 +44,7 @@ include(joinpath(libdir, "libLLVM_extra.jl"))
 include(joinpath(libdir, "libLLVM_julia.jl"))
 end # module API
 
+const has_opaque_ptr() = version() >= v"15"
 # LLVM API wrappers
 include("support.jl")
 include("types.jl")

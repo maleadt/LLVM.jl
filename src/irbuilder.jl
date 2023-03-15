@@ -108,6 +108,22 @@ indirectbr!(builder::Builder, Addr::Value, NumDests::Integer=10) =
 invoke!(builder::Builder, Fn::Value, Args::Vector{<:Value}, Then::BasicBlock, Catch::BasicBlock, Name::String="") =
     Instruction(API.LLVMBuildInvoke(builder, Fn, Args, length(Args), Then, Catch, Name))
 
+function invoke!(builder::Builder, Fn::Value, Args::Vector{<:Value}, Then::BasicBlock, Catch::BasicBlock, Name::String="")
+    if has_opaque_ptr()
+        throw(error("Typed Pointers not supported on this version"))
+    else
+        return Instruction(API.LLVMBuildInvoke(builder, Fn, Args, length(Args), Then, Catch, Name))
+    end
+end
+
+function invoke!(builder::Builder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value}, Then::BasicBlock, Catch::BasicBlock, Name::String="")
+    if has_opaque_ptr()
+        return Instruction(API.LLVMBuildInvoke2(builder, Ty, Fn, Args, length(Args), Then, Catch, Name))
+    else
+        return Instruction(API.LLVMBuildInvoke(builder, Fn, Args, length(Args), Then, Catch, Name))
+    end
+end
+
 resume!(builder::Builder, Exn::Value) =
     Instruction(API.LLVMBuildResume(builder, Exn))
 
@@ -246,8 +262,21 @@ memmove!(builder::Builder, Dst::Value, DstAlign::Integer, Src::Value, SrcAlign::
 free!(builder::Builder, PointerVal::Value) =
     Instruction(API.LLVMBuildFree(builder, PointerVal))
 
-load!(builder::Builder, PointerVal::Value, Name::String="") =
-    Instruction(API.LLVMBuildLoad(builder, PointerVal, Name))
+function load!(builder::Builder, PointerVal::Value, Name::String="")
+    if has_opaque_ptr()
+        throw(error("Typed Pointers not supported on this version"))
+    else
+        return Instruction(API.LLVMBuildLoad(builder, PointerVal, Name))
+    end
+end
+
+function load!(builder::Builder, Ty::LLVMType, PointerVal::Value, Name::String="")
+    if !has_opaque_ptr()
+        return load!(builder, PointerVal, Name)
+    else
+        return Instruction(API.LLVMBuildLoad2(builder, Ty, PointerVal, Name))
+    end
+end
 
 store!(builder::Builder, Val::Value, Ptr::Value) =
     Instruction(API.LLVMBuildStore(builder, Val, Ptr))
@@ -261,15 +290,53 @@ atomic_rmw!(builder::Builder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Value
 atomic_cmpxchg!(builder::Builder, Ptr::Value, Cmp::Value, New::Value, SuccessOrdering::API.LLVMAtomicOrdering, FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Core.Bool) =
     Instruction(API.LLVMBuildAtomicCmpXchg(builder, Ptr, Cmp, New, SuccessOrdering,FailureOrdering, convert(Bool, SingleThread)))
 
-gep!(builder::Builder, Pointer::Value, Indices::Vector{<:Value}, Name::String="") =
-    Value(API.LLVMBuildGEP(builder, Pointer, Indices, length(Indices), Name))
+function gep!(builder::Builder, Pointer::Value, Indices::Vector{<:Value}, Name::String="")
+    if has_opaque_ptr()
+        throw(error("Typed Pointers not supported on this version"))
+    else
+        return Value(API.LLVMBuildGEP(builder, Pointer, Indices, length(Indices), Name))
+    end
+end
 
-inbounds_gep!(builder::Builder, Pointer::Value, Indices::Vector{<:Value}, Name::String="") =
-    Value(API.LLVMBuildInBoundsGEP(builder, Pointer, Indices, length(Indices), Name))
+function gep!(builder::Builder, Ty::LLVMType, Pointer::Value, Indices::Vector{<:Value}, Name::String="")
+    if has_opaque_ptr()
+        return Value(API.LLVMBuildGEP2(builder, Ty, Pointer, Indices, length(Indices), Name))
+    else
+        return Value(API.LLVMBuildGEP(builder, Pointer, Indices, length(Indices), Name))
+    end
+end
 
-struct_gep!(builder::Builder, Pointer::Value, Idx, Name::String="") =
-    Value(API.LLVMBuildStructGEP(builder, Pointer, Idx, Name))
+function inbounds_gep!(builder::Builder, Pointer::Value, Indices::Vector{<:Value}, Name::String="")
+    if has_opaque_ptr()
+        throw(error("Typed Pointers not supported on this version"))
+    else
+        return Value(API.LLVMBuildInBoundsGEP(builder, Pointer, Indices, length(Indices), Name))
+    end
+end
 
+function inbounds_gep!(builder::Builder, Ty::LLVMType, Pointer::Value, Indices::Vector{<:Value}, Name::String="")
+    if has_opaque_ptr()
+        return Value(API.LLVMBuildInBoundsGEP2(builder, Ty, Pointer, Indices, length(Indices), Name))
+    else
+        return Value(API.LLVMBuildInBoundsGEP(builder, Pointer, Indices, length(Indices), Name))
+    end
+end
+
+function struct_gep!(builder::Builder, Pointer::Value, Idx, Name::String="")
+    if has_opaque_ptr()
+        throw(error("Typed Pointers not supported on this version"))
+    else
+        return Value(API.LLVMBuildStructGEP(builder, Pointer, Idx, Name))
+    end
+end
+
+function struct_gep!(builder::Builder, Ty::LLVMType, Pointer::Value, Idx, Name::String="")
+    if has_opaque_ptr()
+        return Value(API.LLVMBuildStructGEP2(builder,Ty, Pointer, Idx, Name))
+    else
+        return Value(API.LLVMBuildStructGEP(builder, Pointer, Idx, Name))
+    end
+end
 
 # conversion operations
 
@@ -325,7 +392,7 @@ cast!(builder::Builder, Op::API.LLVMOpcode, Val::Value, DestTy::LLVMType, Name::
     Value(API.LLVMBuildCast(builder, Op, Val, DestTy, Name))
 
 pointercast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
-    Value(API.LLVMBuildPointerCast(builder, Val, DestTy, Name))
+    Value(API.LLVMBuildPointerCast(builder, Val, DestTy, Name)) #Maybe this should error with opaque?
 
 intcast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
     Value(API.LLVMBuildIntCast(builder, Val, DestTy, Name))
@@ -348,8 +415,21 @@ phi!(builder::Builder, Ty::LLVMType, Name::String="") =
 select!(builder::Builder, If::Value, Then::Value, Else::Value, Name::String="") =
     Value(API.LLVMBuildSelect(builder, If, Then, Else, Name))
 
-call!(builder::Builder, Fn::Value, Args::Vector{<:Value}=Value[], Name::String="") =
-    Instruction(API.LLVMBuildCall(builder, Fn, Args, length(Args), Name))
+function call!(builder::Builder, Fn::Value, Args::Vector{<:Value}=Value[], Name::String="")
+    if has_opaque_ptr()
+        throw(error("Typed Pointers not supported on this version"))
+    else
+        return Instruction(API.LLVMBuildCall(builder, Fn, Args, length(Args), Name))
+    end
+end
+
+function call!(builder::Builder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value}=Value[], Name::String="")
+    if has_opaque_ptr()
+        return Instruction(API.LLVMBuildCall2(builder, Ty, Fn, Args, length(Args), Name))
+    else
+        return Instruction(API.LLVMBuildCall(builder, Fn, Args, length(Args), Name))
+    end
+end
 
 call!(builder::Builder, Fn::Value, Args::Vector{<:Value},
       Bundles::Vector{OperandBundleDef}, Name::String="") =
@@ -401,3 +481,19 @@ isnotnull!(builder::Builder, Val::Value, Name::String="") =
 
 ptrdiff!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
     Value(API.LLVMBuildPtrDiff(builder, LHS, RHS, Name))
+
+function ptrdiff!(builder::Builder, LHS::Value, RHS::Value, Name::String="")
+    if has_opaque_ptr()
+        throw(error("Typed Pointers not supported on this version"))
+    else
+        return Value(API.LLVMBuildPtrDiff(builder, LHS, RHS, Name))
+    end
+end
+
+function ptrdiff!(builder::Builder, Ty::LLVMType, LHS::Value, RHS::Value, Name::String="")
+    if has_opaque_ptr()
+        return Value(API.LLVMBuildPtrDiff2(builder, Ty, LHS, RHS, Name))
+    else
+        return Value(API.LLVMBuildPtrDiff(builder, LHS, RHS, Name))
+    end
+end

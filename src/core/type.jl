@@ -150,8 +150,20 @@ function PointerType(eltyp::LLVMType, addrspace=0)
     return PointerType(API.LLVMPointerType(eltyp, addrspace))
 end
 
+if has_opaque_ptr()
+
+function PointerType(ctx::Context, addrspace=0)
+    return PointerType(API.LLVMPointerTypeInContext(ctx, addrspace))
+end
+
+Base.eltype(typ::PointerType) =
+    throw(error("Taking the type of an opaque pointer is illegal"))
+
+end
 addrspace(ptrtyp::PointerType) =
     API.LLVMGetPointerAddressSpace(ptrtyp)
+
+
 
 
 @checked struct ArrayType <: SequentialType

@@ -181,9 +181,12 @@ end
         @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
-
-            typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
-            ld = load!(builder, typed_ptr)
+            if !has_opaque_ptr()
+                typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
+                ld = load!(builder, typed_ptr)
+            else
+                ld = load!(builder, eltype, parameters(llvm_f)[1])
+            end
             ordering!(ld, llvm_order)
 
             if A != 0
