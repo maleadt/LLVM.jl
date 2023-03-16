@@ -507,16 +507,26 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        LLVMValueRef *Args, unsigned NumArgs,
                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
                                        const char *Name) {
+
+    // TODO make opaque pointer compatibly
     Value *V = unwrap(Fn);
-    FunctionType *FnT =
-        cast<FunctionType>(cast<PointerType>(V->getType())->getElementType());
+    #if LLVM_VERSION_MAJOR <= 14
+        FunctionType *FnT =
+            cast<FunctionType>(cast<PointerType>(V->getType())->getElementType());
+    #else
+        FunctionType *FnT =
+            cast<FunctionType>(cast<PointerType>(V->getType())->getPointerElementType()); // deprecated
+    #endif
 
     SmallVector<OperandBundleDef, 1> BundleArray;
     for (auto *Bundle : makeArrayRef(Bundles, NumBundles))
         BundleArray.push_back(*unwrap<OperandBundleDef>(Bundle));
 
-    return wrap(unwrap(B)->CreateCall(FnT, unwrap(Fn), makeArrayRef(unwrap(Args), NumArgs),
-                                      BundleArray, Name));
+    llvm::IRBuilder<> *Builder = unwrap(B);
+    llvm::ArrayRef<llvm::Value*> args = makeArrayRef(unwrap(Args), NumArgs);
+
+    llvm::CallInst *CI = Builder->CreateCall(FnT, unwrap(Fn), args ,BundleArray, Name);
+    return wrap(CI);
 }
 
 LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata) {
