@@ -63,6 +63,10 @@ function LLVMAddInductiveRangeCheckEliminationPass(PM)
     ccall((:LLVMAddInductiveRangeCheckEliminationPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
+function LLVMAddSimpleLoopUnswitchLegacyPass(PM)
+    ccall((:LLVMAddSimpleLoopUnswitchLegacyPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
 if version() < v"12"
 function LLVMAddInstructionSimplifyPass(PM)
     ccall((:LLVMAddInstructionSimplifyPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
