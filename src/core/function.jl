@@ -10,6 +10,8 @@ register(Function, API.LLVMFunctionValueKind)
 Function(mod::Module, name::String, ft::FunctionType) =
     Function(API.LLVMAddFunction(mod, name, ft))
 
+FunctionType(Fn::Function) = FunctionType(API.LLVMGetFunctionType(Fn))
+
 Base.empty!(f::Function) = API.LLVMFunctionDeleteBody(f)
 
 unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(f)

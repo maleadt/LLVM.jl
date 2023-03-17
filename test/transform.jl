@@ -51,7 +51,7 @@ end
     loop_rotate!(pm)
     loop_reroll!(pm)
     loop_unroll!(pm)
-    loop_unswitch!(pm)
+    simple_loop_unswitch_legacy!(pm)
     loop_distribute!(pm)
     loop_fuse!(pm)
     loop_load_elimination!(pm)
@@ -86,8 +86,9 @@ end
     speculative_execution_if_has_branch_divergence!(pm)
     simple_loop_unroll!(pm)
     inductive_range_check_elimination!(pm)
-
-    argument_promotion!(pm)
+    if !has_opaque_ptr()
+        argument_promotion!(pm)
+    end
     constant_merge!(pm)
     dead_arg_elimination!(pm)
     function_attrs!(pm)

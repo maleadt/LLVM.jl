@@ -27,8 +27,8 @@ end
 
             ptr = inttoptr!(builder, parameters(llvmf)[1], T_ptr)
 
-            ptr = gep!(builder, ptr, [parameters(llvmf)[2]])
-            val = load!(builder, ptr)
+            ptr = gep!(builder, eltyp, ptr, [parameters(llvmf)[2]])
+            val = load!(builder, eltyp, ptr)
             ret!(builder, val)
         end
 

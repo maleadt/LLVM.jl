@@ -152,12 +152,12 @@ end
 
 if has_opaque_ptr()
 
-function PointerType(ctx::Context, addrspace=0)
-    return PointerType(API.LLVMPointerTypeInContext(ctx, addrspace))
-end
+    function PointerType(ctx::Context, addrspace=0)
+        return PointerType(API.LLVMPointerTypeInContext(ctx, addrspace))
+    end
 
-Base.eltype(typ::PointerType) =
-    throw(error("Taking the type of an opaque pointer is illegal"))
+    Base.eltype(typ::PointerType) =
+        throw(error("Taking the type of an opaque pointer is illegal"))
 
 end
 addrspace(ptrtyp::PointerType) =

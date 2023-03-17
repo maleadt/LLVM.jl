@@ -420,3 +420,11 @@ end
 function LLVMConstDataArray(ElementTy, Data, NumElements)
     ccall((:LLVMConstDataArray, libLLVMExtra), LLVMValueRef, (LLVMTypeRef, Ptr{Cvoid}, Cuint), ElementTy, Data, NumElements)
 end
+
+function LLVMGetFunctionType(Fn)
+    ccall((:LLVMGetFunctionType,libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), Fn)
+end
+
+function LLVMGetType(V)
+    ccall((:LLVMGetType, libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), V)
+end

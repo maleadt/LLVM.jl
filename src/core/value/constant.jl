@@ -472,14 +472,10 @@ function const_gep(val::Constant, Indices::Vector{<:Constant})
 end
 
 function const_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
-    if has_opaque_ptr()
-        return Value(API.LLVMConstGEP2(val, Ty, Indices, length(Indices)))
-    else
-        return Value(API.LLVMConstGEP(val, Indices, length(Indices)))
-    end
+    return Value(API.LLVMConstGEP2(val, Ty, Indices, length(Indices)))
 end
 
-function const_gep(val::Constant, Indices::Vector{<:Constant})
+function const_inbounds_gep(val::Constant, Indices::Vector{<:Constant})
     if has_opaque_ptr()
         throw(error("Typed Pointers not supported on this version"))
     else
@@ -487,12 +483,8 @@ function const_gep(val::Constant, Indices::Vector{<:Constant})
     end
 end
 
-function const_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
-    if has_opaque_ptr()
-        return Value(API.LLVMConstInBoundsGEP2(val, Ty, Indices, length(Indices)))
-    else
-        return Value(API.LLVMConstInBoundsGEP(val, Indices, length(Indices)))
-    end
+function const_inbounds_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
+    return Value(API.LLVMConstInBoundsGEP2(val, Ty, Indices, length(Indices)))
 end
 
 const_trunc(val::Constant, ToType::LLVMType) =

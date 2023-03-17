@@ -13,9 +13,7 @@ using Core: LLVMPtr
 
         T_int = convert(LLVMType, Int; ctx)
         T_ptr = convert(LLVMType, ptr; ctx)
-
         T_typed_ptr = LLVM.PointerType(eltyp, A)
-
         # create a function
         param_types = [T_ptr, T_int]
         llvm_f, _ = create_function(eltyp, param_types)
@@ -24,11 +22,14 @@ using Core: LLVMPtr
         @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
-
-            typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
-            typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[2]])
-            ld = load!(builder, typed_ptr)
-
+            if !LLVM.has_opaque_ptr()
+                typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
+                typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[2]])
+                ld = load!(builder, typed_ptr)
+            else
+                ptr = inbounds_gep!(builder, eltyp, parameters(llvm_f)[1],[parameters(llvm_f)[2]])
+                ld = load!(builder, eltyp, ptr)
+            end
             if A != 0
                 metadata(ld)[LLVM.MD_tbaa] = tbaa_addrspace(A; ctx)
             end
@@ -36,7 +37,6 @@ using Core: LLVMPtr
 
             ret!(builder, ld)
         end
-
         call_function(llvm_f, T, Tuple{LLVMPtr{T,A}, Int}, :ptr, :(Int(i-one(i))))
     end
 end
@@ -59,12 +59,16 @@ end
         @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
-
-            typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
-            typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[3]])
-            val = parameters(llvm_f)[2]
-            st = store!(builder, val, typed_ptr)
-
+            if !LLVM.has_opaque_ptr()
+                typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
+                typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[3]])
+                val = parameters(llvm_f)[2]
+                st = store!(builder, val, typed_ptr)
+            else
+                ptr = inbounds_gep!(builder, eltyp, parameters(llvm_f)[1], [parameters(llvm_f)[3]])
+                val = parameters(llvm_f)[2]
+                st = store!(builder, val, ptr)
+            end
             if A != 0
                 metadata(st)[LLVM.MD_tbaa] = tbaa_addrspace(A; ctx)
             end
@@ -241,7 +245,7 @@ end
             intr_ft = LLVM.FunctionType(T_ret_actual, T_actual_args)
             intr_f = LLVM.Function(mod, String(intr), intr_ft)
 
-            rv = call!(builder, intr_f, actual_args)
+            rv = call!(builder, intr_ft, intr_f, actual_args)
 
             if T_ret_actual == LLVM.VoidType(ctx)
                 ret!(builder)
