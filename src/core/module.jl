@@ -267,3 +267,30 @@ function Base.setindex!(iter::ModuleFlagDict, val::Metadata,
                         (name, behavior)::Tuple{String, API.LLVMModuleFlagBehavior})
     API.LLVMAddModuleFlag(iter.mod, behavior, name, length(name), val)
 end
+
+
+## sdk version
+
+export sdk_version, sdk_version!
+
+function sdk_version!(mod::Module, version::VersionNumber)
+    entries = Int32[version.major]
+    if version.minor != 0 || version.patch != 0
+        push!(entries, version.minor)
+        if version.patch != 0
+            push!(entries, version.patch)
+        end
+        # cannot represent prerelease or build metadata
+    end
+    md = Metadata(ConstantDataArray(entries; ctx=context(mod)))
+
+    flags(mod)["SDK Version", LLVM.API.LLVMModuleFlagBehaviorWarning] = md
+end
+
+function sdk_version(mod::Module)
+    haskey(flags(mod), "SDK Version") || return nothing
+    md = flags(mod)["SDK Version"]
+    c = Value(md; ctx=context(mod))
+    entries = collect(c)
+    VersionNumber(map(val->convert(Int, val), entries)...)
+end
