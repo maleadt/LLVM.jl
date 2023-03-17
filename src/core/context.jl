@@ -27,7 +27,7 @@ end
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())
 
-if version() > v"12"
+if version() > v"13.0.0"
     supports_typed_pointers(ctx::Context) = API.LLVMContextSupportsTypedPointers(ctx) == 1
 else
     supports_typed_pointers(ctx::Context) = false
