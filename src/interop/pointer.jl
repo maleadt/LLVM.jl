@@ -13,7 +13,9 @@ using Core: LLVMPtr
 
         T_int = convert(LLVMType, Int; ctx)
         T_ptr = convert(LLVMType, ptr; ctx)
+
         T_typed_ptr = LLVM.PointerType(eltyp, A)
+
         # create a function
         param_types = [T_ptr, T_int]
         llvm_f, _ = create_function(eltyp, param_types)
@@ -37,6 +39,7 @@ using Core: LLVMPtr
 
             ret!(builder, ld)
         end
+        
         call_function(llvm_f, T, Tuple{LLVMPtr{T,A}, Int}, :ptr, :(Int(i-one(i))))
     end
 end

@@ -94,7 +94,7 @@ end
     ptrtyp = LLVM.PointerType(eltyp)
 
     if LLVM.supports_typed_pointers(ctx)
-    @test eltype(ptrtyp) == eltyp
+        @test eltype(ptrtyp) == eltyp
     end
 
     @test context(ptrtyp) == context(eltyp)
@@ -104,7 +104,6 @@ end
     ptrtyp = LLVM.PointerType(eltyp, 1)
     @test addrspace(ptrtyp) == 1
 end
-
 @dispose ctx=Context() begin
     eltyp = LLVM.Int32Type(ctx)
 
@@ -562,6 +561,7 @@ end
             @check_ir asm "ptr asm \"nop\", \"\""
         end
     end
+
     # integer
     let
         val = LLVM.ConstantInt(Int32(42); ctx)
@@ -575,7 +575,6 @@ end
         @check_ir ce "i32 -43"
 
         other_val = LLVM.ConstantInt(Int32(2); ctx)
-
 
         for f in [const_add, const_nswadd, const_nuwadd]
             ce = f(val, other_val)::LLVM.Constant
@@ -605,6 +604,7 @@ end
                 @check_ir ce "i32 0"
             end
         end
+        
         ce = const_and(val, other_val)::LLVM.Constant
         @check_ir ce "i32 2"
 
@@ -1146,6 +1146,7 @@ end
         @test isempty(fns)
     end
 end
+
 # non-overloaded intrinsic
 @dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
     intr_ft = LLVM.FunctionType(LLVM.VoidType(ctx))
@@ -1162,8 +1163,10 @@ end
     ft = LLVM.FunctionType(intr; ctx=ctx)
     @test ft isa LLVM.FunctionType
     @test return_type(ft) == LLVM.VoidType(ctx)
+
     fn = LLVM.Function(mod, intr)
     @test fn isa LLVM.Function
+
     if LLVM.supports_typed_pointers(ctx)
         @test llvmeltype(fn) == ft
     end
@@ -1198,7 +1201,6 @@ end
 
     @test intr == Intrinsic("llvm.sin")
 end
-
 
 # attributes
 @dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin

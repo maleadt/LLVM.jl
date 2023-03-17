@@ -29,7 +29,6 @@ else
     "15"
 end
 
-
 const libdir = joinpath(@__DIR__, "..", "lib")
 
 if !isdir(libdir)

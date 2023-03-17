@@ -4,4 +4,3 @@ macro check_ir(inst, str)
         @test occursin($(str), inst)
     end
 end
-
