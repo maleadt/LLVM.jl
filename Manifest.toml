@@ -34,9 +34,9 @@ version = "1.4.1"
 
 [[LLVMExtra_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl", "TOML"]
-git-tree-sha1 = "1fbc1c5dac58bd6c6183347b67ab6c2f0ce6c582"
+git-tree-sha1 = "070e4b5b65827f82c16ae0916376cb47377aa1b5"
 uuid = "dad2f222-ce93-54a1-a47d-0025e8a3acab"
-version = "0.0.17+0"
+version = "0.0.18+0"
 
 [[LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
