@@ -556,3 +556,8 @@ LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
   return unwrap(C)->supportsTypedPointers();
 }
 #endif
+
+LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data, unsigned NumElements) {
+    StringRef S((const char *)Data, NumElements * unwrap(ElementTy)->getPrimitiveSizeInBits() / 8);
+    return wrap(ConstantDataArray::getRaw(S, NumElements, unwrap(ElementTy)));
+}

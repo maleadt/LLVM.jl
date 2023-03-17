@@ -163,7 +163,7 @@ function ArrayType(eltyp::LLVMType, count)
     return ArrayType(API.LLVMArrayType(eltyp, count))
 end
 
-Base.length(arrtyp::ArrayType) = API.LLVMGetArrayLength(arrtyp)
+Base.length(arrtyp::ArrayType) = Int(API.LLVMGetArrayLength(arrtyp))
 
 Base.isempty(@nospecialize(T::ArrayType)) = length(T) == 0 || isempty(eltype(T))
 
