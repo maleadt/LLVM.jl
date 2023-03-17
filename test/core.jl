@@ -412,29 +412,23 @@ end
     end
 
 
-    @testset "array constants" begin
+    @testset "array aggregate constants" begin
 
     # from Julia values
     let
-        vec = Int32[1,2,3,4]
+        vec = Int128[1,2,3,4]
         ca = ConstantArray(vec; ctx)
+        @test ca isa ConstantArray
         @test size(vec) == size(ca)
         @test length(vec) == length(ca)
         @test ca[1] == ConstantInt(vec[1]; ctx)
         @test collect(ca) == ConstantInt.(vec; ctx)
     end
     let
-        vec = Float32[1.1f0,2.2f0,3.3f0,4.4f0]
-        ca = ConstantArray(vec; ctx)
-        @test size(vec) == size(ca)
-        @test length(vec) == length(ca)
-        @test ca[1] == ConstantFP(vec[1]; ctx)
-        @test collect(ca) == ConstantFP.(vec; ctx)
-    end
-    let
         # tests for ConstantAggregateZero, constructed indirectly.
         # should behave similarly to ConstantArray since it can get returned there.
         ca = ConstantArray(Int[]; ctx)
+        @test ca isa ConstantAggregateZero
         @test size(ca) == (0,)
         @test length(ca) == 0
         @test isempty(collect(ca))
@@ -451,7 +445,7 @@ end
 
     end
 
-    @testset "struct constants" begin
+    @testset "struct aggregate constants" begin
 
     # from Julia values
     let
@@ -503,6 +497,36 @@ end
     end
     let
         @test_throws ArgumentError ConstantStruct(1; ctx)
+    end
+
+    end
+
+
+    @testset "array data constants" begin
+
+    let
+        vec = Int32[1,2,3,4]
+        eltyp = LLVM.Int32Type(ctx)
+        cda = ConstantDataArray(eltyp, vec)
+        @test cda isa ConstantDataArray
+        @test llvmtype(cda) == LLVM.ArrayType(eltyp, 4)
+        @test collect(cda) == ConstantInt.(vec; ctx)
+    end
+
+    # from Julia values
+    for T in [Int8, Int16, Int32, Int64]
+        vec = T[1,2,3,4]
+        cda = ConstantDataArray(vec; ctx)
+        @test cda isa ConstantDataArray
+        @test size(vec) == size(cda)
+        @test collect(cda) == ConstantInt.(vec; ctx)
+    end
+    for T in [Float32, Float64]
+        vec = T[1,2,3,4]
+        cda = ConstantDataArray(vec; ctx)
+        @test cda isa ConstantDataArray
+        @test size(vec) == size(cda)
+        @test collect(cda) == ConstantFP.(vec; ctx)
     end
 
     end
