@@ -428,3 +428,7 @@ end
 function LLVMGetType(V)
     ccall((:LLVMGetType, libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), V)
 end
+
+function LLVMGetBuilderContext(B)
+    ccall((:LLVMGetBuilderContext, libLLVMExtra), LLVMContextRef, (LLVMBuilderRef,), B)
+end

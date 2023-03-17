@@ -51,6 +51,7 @@ LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback, void *Data)
 // Various missing functions
 unsigned int LLVMGetDebugMDVersion(void);
 
+LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef B);
 LLVMContextRef LLVMGetValueContext(LLVMValueRef V);
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
 void LLVMAddInternalizePassWithExportList(

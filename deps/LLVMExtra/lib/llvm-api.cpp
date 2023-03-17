@@ -203,6 +203,11 @@ LLVMContextRef LLVMGetValueContext(LLVMValueRef V)
     return wrap(&unwrap(V)->getContext());
 }
 
+LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef B)
+{
+    return wrap(&unwrap(B)->getContext());
+}
+
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(new TargetLibraryInfoWrapperPass(Triple(T)));
