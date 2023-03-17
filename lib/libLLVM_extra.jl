@@ -63,6 +63,10 @@ function LLVMAddInductiveRangeCheckEliminationPass(PM)
     ccall((:LLVMAddInductiveRangeCheckEliminationPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
+function LLVMAddSimpleLoopUnswitchLegacyPass(PM)
+    ccall((:LLVMAddSimpleLoopUnswitchLegacyPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
 if version() < v"12"
 function LLVMAddInstructionSimplifyPass(PM)
     ccall((:LLVMAddInstructionSimplifyPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
@@ -405,4 +409,10 @@ end
 
 function LLVMReplaceMDNodeOperandWith(MD, I, New)
     ccall((:LLVMReplaceMDNodeOperandWith, libLLVMExtra), Cvoid, (LLVMMetadataRef, Cuint, LLVMMetadataRef), MD, I, New)
+end
+
+if version() > v"12"
+function LLVMContextSupportsTypedPointers(Ctx)
+    ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
+end
 end

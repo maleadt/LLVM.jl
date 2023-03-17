@@ -30,6 +30,7 @@ void LLVMAddVectorCombinePass(LLVMPassManagerRef PM);
 void LLVMAddSpeculativeExecutionIfHasBranchDivergencePass(LLVMPassManagerRef PM);
 void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM);
 void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM);
+void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM);
 
 #if LLVM_VERSION_MAJOR < 12
 void LLVMAddInstructionSimplifyPass(LLVMPassManagerRef PM);
@@ -156,6 +157,10 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
 LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata);
 void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New);
 void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
+
+#if LLVM_VERSION_MAJOR >= 12
+LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
+#endif
 
 LLVM_C_EXTERN_C_END
 #endif

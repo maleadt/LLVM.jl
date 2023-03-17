@@ -15,6 +15,7 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/Scalar/SimpleLoopUnswitch.h>
 #include <llvm/Transforms/Vectorize.h>
 #if LLVM_VERSION_MAJOR < 12
 #include <llvm/Transforms/Scalar/InstSimplifyPass.h>
@@ -99,6 +100,11 @@ void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM)
 void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(createInductiveRangeCheckEliminationPass());
+}
+
+void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM)
+{
+    unwrap(PM)->add(createSimpleLoopUnswitchLegacyPass());
 }
 
 #if LLVM_VERSION_MAJOR < 12
@@ -544,3 +550,9 @@ void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New) {
 void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New) {
     unwrap<MDNode>(MD)->replaceOperandWith(I, unwrap(New));
 }
+
+#if LLVM_VERSION_MAJOR > 12
+LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
+  return unwrap(C)->supportsTypedPointers();
+}
+#endif
