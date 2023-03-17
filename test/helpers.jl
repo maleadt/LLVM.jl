@@ -5,4 +5,3 @@ macro check_ir(inst, str)
     end
 end
 
-has_opaque_ptr() = LLVM.has_opaque_ptr()

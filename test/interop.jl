@@ -194,19 +194,19 @@ end
         # FIXME: Win32 nightly emits a i64*, even though bitstype_to_llvm uses T_int8
         @test_broken contains(ir, r"@julia_unsafe_load_\d+\(i8\*")
     else
-        if !has_opaque_ptr()
+        if LLVM.version() <= v"14"
             @test contains(ir, r"@julia_unsafe_load_\d+\(i8\*")
         else
             @test contains(ir, r"@julia_unsafe_load_\d+\(ptr")
         end
     end
-    if !has_opaque_ptr()
+    if LLVM.version() <= v"14"
         @test contains(ir, r"load i64, i64\* %\d+, align 1")
     else
         @test contains(ir, r"load i64, ptr %\d+, align 1")
     end
     ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr), Int, Val{4}}))
-    if !has_opaque_ptr()
+    if LLVM.version() <= v"14"
         @test contains(ir, r"load i64, i64\* %\d+, align 4")
     else
         @test contains(ir, r"load i64, ptr %\d+, align 4")
@@ -218,7 +218,7 @@ end
     for eltype_dest in (Int64, Int32), AS_dest in (4, 3)
         T_dest = Core.LLVMPtr{eltype_dest, AS_dest}
         ir = sprint(io->code_llvm(io, LLVM.Interop.addrspacecast, Tuple{Type{T_dest}, typeof(ptr)}))
-        if !has_opaque_ptr()
+        if LLVM.version() <= v"14"
             if AS_dest == 3
                 @test contains(ir, r"addrspacecast i8 addrspace\(4\)\* %\d+ to i8 addrspace\(3\)\*")
             else
@@ -271,7 +271,7 @@ end
     @test !occursin("\bstore\b", ir)
 end
 
-if !has_opaque_ptr()
+if LLVM.version() <= v"14"
     @testset "type-preserving ccall" begin
         # NOTE: the auto-upgrader will remangle these intrinsics, but only if they were
         #       specified in the first place (`if Name.startswith("ptr.annotation.")`)

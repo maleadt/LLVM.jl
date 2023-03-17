@@ -22,7 +22,7 @@ using Core: LLVMPtr
         @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
-            if !LLVM.has_opaque_ptr()
+            if LLVM.supports_typed_pointers(ctx)
                 typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
                 typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[2]])
                 ld = load!(builder, typed_ptr)
@@ -59,7 +59,7 @@ end
         @dispose builder=Builder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
-            if !LLVM.has_opaque_ptr()
+            if LLVM.supports_typed_pointers(ctx)
                 typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
                 typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[3]])
                 val = parameters(llvm_f)[2]

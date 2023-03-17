@@ -44,7 +44,6 @@ include(joinpath(libdir, "libLLVM_extra.jl"))
 include(joinpath(libdir, "libLLVM_julia.jl"))
 end # module API
 
-const has_opaque_ptr() = version() >= v"15"
 # LLVM API wrappers
 include("support.jl")
 include("types.jl")

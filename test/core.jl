@@ -92,8 +92,8 @@ end
     eltyp = LLVM.Int32Type(ctx)
 
     ptrtyp = LLVM.PointerType(eltyp)
-    
-    if !has_opaque_ptr()
+
+    if LLVM.supports_typed_pointers(ctx)
     @test eltype(ptrtyp) == eltyp
     end
 
@@ -549,17 +549,17 @@ end
     @testset "constant expressions" begin
 
     # inline assembly
-    if has_opaque_ptr()
+    if LLVM.supports_typed_pointers(ctx)
         let
             ft = LLVM.FunctionType(LLVM.VoidType(ctx))
             asm = InlineAsm(ft, "nop", "", false)
-            @check_ir asm "ptr asm \"nop\", \"\""
+            @check_ir asm "void ()* asm \"nop\", \"\""
         end
     else
         let
             ft = LLVM.FunctionType(LLVM.VoidType(ctx))
             asm = InlineAsm(ft, "nop", "", false)
-            @check_ir asm "void ()* asm \"nop\", \"\""
+            @check_ir asm "ptr asm \"nop\", \"\""
         end
     end
     # integer
@@ -591,7 +591,7 @@ end
             ce = f(val, other_val)::LLVM.Constant
             @check_ir ce "i32 84"
         end
-        if !has_opaque_ptr()
+        if LLVM.version() < v"15"
             for f in [const_udiv, const_sdiv]
                 ce = f(val, other_val)::LLVM.Constant
                 @check_ir ce "i32 21"
@@ -658,7 +658,7 @@ end
         @check_ir ce "float -4.200000e+01"
 
         other_val = LLVM.ConstantFP(Float32(2.); ctx)
-        if !has_opaque_ptr()
+        if LLVM.version() < v"15"
             ce = const_fadd(val, other_val)::LLVM.Constant
             @check_ir ce "float 4.400000e+01"
 
@@ -701,7 +701,7 @@ end
         @check_ir ce "i32 0"
 
         ce = const_inttoptr(ce, llvmtype(ptr))::LLVM.Constant
-        if !has_opaque_ptr()
+        if LLVM.supports_typed_pointers(ctx)
             @check_ir ce "i32* null"
         else
             @check_ir ce "ptr null"
@@ -709,7 +709,7 @@ end
         @test isempty(uses(ptr))
         for f in [const_addrspacecast, const_pointercast]
             ce = f(ptr, LLVM.PointerType(LLVM.Int32Type(ctx), 1))::LLVM.Constant
-            if !has_opaque_ptr()
+            if LLVM.supports_typed_pointers(ctx)
                 @check_ir ce "i32 addrspace(1)* addrspacecast (i32* null to i32 addrspace(1)*)"
             else
                 @check_ir ce "ptr addrspace(1) addrspacecast (ptr null to ptr addrspace(1))"
@@ -1164,7 +1164,7 @@ end
     @test return_type(ft) == LLVM.VoidType(ctx)
     fn = LLVM.Function(mod, intr)
     @test fn isa LLVM.Function
-    if !has_opaque_ptr()
+    if LLVM.supports_typed_pointers(ctx)
         @test llvmeltype(fn) == ft
     end
     @test isintrinsic(fn)
@@ -1191,7 +1191,7 @@ end
 
     fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
     @test fn isa LLVM.Function
-    if !has_opaque_ptr()
+    if LLVM.supports_typed_pointers(ctx)
         @test llvmeltype(fn) == ft
     end
     @test isintrinsic(fn)

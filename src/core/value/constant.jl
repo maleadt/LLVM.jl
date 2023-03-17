@@ -464,7 +464,7 @@ const_ashr(lhs::Constant, rhs::Constant) =
     Value(API.LLVMConstAShr(lhs, rhs))
 
 function const_gep(val::Constant, Indices::Vector{<:Constant})
-    if has_opaque_ptr()
+    if !supports_typed_pointers(context(val))
         throw(error("Typed Pointers not supported on this version"))
     else
         return Value(API.LLVMConstGEP(val, Indices, length(Indices)))
@@ -476,7 +476,7 @@ function const_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
 end
 
 function const_inbounds_gep(val::Constant, Indices::Vector{<:Constant})
-    if has_opaque_ptr()
+    if !supports_typed_pointers(context(val))
         throw(error("Typed Pointers not supported on this version"))
     else
         return Value(API.LLVMConstInboundsGEP(val, Indices, length(Indices)))
