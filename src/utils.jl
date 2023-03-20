@@ -55,7 +55,7 @@ function clone(f::Function; value_map::Dict{Value,Value}=Dict{Value,Value}())
     end
 
     # Create a new function type...
-    oldfty = FunctionType(f)
+    oldfty = function_type(f)
     vararg = isvararg(oldfty)
     fty = FunctionType(return_type(oldfty), argtypes; vararg)
 

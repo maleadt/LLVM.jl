@@ -94,7 +94,7 @@ function codegen(cg::CodeGen, expr::CallExprAST)
     for v in expr.args
         push!(args, codegen(cg, v))
     end
-    ft = LLVM.FunctionType(func)
+    ft = LLVM.function_type(func)
     return LLVM.call!(cg.builder, ft, func, args, "calltmp")
 end
 

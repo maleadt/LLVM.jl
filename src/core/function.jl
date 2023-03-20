@@ -2,7 +2,7 @@ export unsafe_delete!,
        personality, personality!,
        callconv, callconv!,
        gc, gc!,
-       entry
+       entry, function_type
 
 # forward declaration of Function in src/core/basicblock.jl
 register(Function, API.LLVMFunctionValueKind)
@@ -10,7 +10,7 @@ register(Function, API.LLVMFunctionValueKind)
 Function(mod::Module, name::String, ft::FunctionType) =
     Function(API.LLVMAddFunction(mod, name, ft))
 
-FunctionType(Fn::Function) = FunctionType(API.LLVMGetFunctionType(Fn))
+function_type(Fn::Function) = FunctionType(API.LLVMGetFunctionType(Fn))
 
 Base.empty!(f::Function) = API.LLVMFunctionDeleteBody(f)
 
