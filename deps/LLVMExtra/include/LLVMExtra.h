@@ -85,8 +85,6 @@ void LLVMExtraAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef V
 
 LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn);
 
-LLVMTypeRef LLVMGetType(LLVMValueRef V);
-
 #if LLVM_VERSION_MAJOR >= 12
 void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM,
                                    int BonusInstThreshold,

@@ -138,7 +138,7 @@
     array_allocainst = array_alloca!(builder, LLVM.Int32Type(ctx), int1)
     @check_ir array_allocainst "alloca i32, i32 %0"
 
-    if LLVM.supports_typed_pointers(ctx)
+    if supports_typed_ptrs
         mallocinst = malloc!(builder, LLVM.Int32Type(ctx))
         @check_ir mallocinst r"bitcast i8\* %.+ to i32\*"
         @check_ir operands(mallocinst)[1] r"call i8\* @malloc\(.+\)"
@@ -256,14 +256,14 @@
     @check_ir fpextinst "fpext float %2 to double"
 
     ptrtointinst = ptrtoint!(builder, parameters(fn)[5], LLVM.Int32Type(ctx))
-    if LLVM.supports_typed_pointers(ctx)
+    if supports_typed_ptrs
         @check_ir ptrtointinst "ptrtoint i32* %4 to i32"
     else
         @check_ir ptrtointinst "ptrtoint ptr %4 to i32"
     end
 
     inttoptrinst = inttoptr!(builder, int1, LLVM.PointerType(LLVM.Int32Type(ctx)))
-    if LLVM.supports_typed_pointers(ctx)
+    if supports_typed_ptrs
         @check_ir inttoptrinst "inttoptr i32 %0 to i32*"
     else
         @check_ir inttoptrinst "inttoptr i32 %0 to ptr"
@@ -271,7 +271,7 @@
 
     bitcastinst = bitcast!(builder, int1, LLVM.FloatType(ctx))
     @check_ir bitcastinst "bitcast i32 %0 to float"
-    if LLVM.supports_typed_pointers(ctx)
+    if supports_typed_ptrs
         i32ptr1 = parameters(fn)[5]
         i32ptr1typ = llvmtype(i32ptr1)
         i32ptr1typ2 = LLVM.PointerType(eltype(i32ptr1typ), 2)
@@ -296,7 +296,7 @@
     castinst = cast!(builder, LLVM.API.LLVMBitCast, int1, LLVM.FloatType(ctx))
     @check_ir castinst "bitcast i32 %0 to float"
 
-    if LLVM.supports_typed_pointers(ctx)
+    if supports_typed_ptrs
         floatptrtyp = LLVM.PointerType(LLVM.FloatType(ctx))
 
         pointercastinst = pointercast!(builder, i32ptr1, floatptrtyp)
@@ -323,7 +323,7 @@
 
     trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
 
-    if LLVM.supports_typed_pointers(ctx)
+    if supports_typed_ptrs
         callinst = call!(builder, trap)
     else
         callinst = call!(builder, LLVM.FunctionType(LLVM.VoidType(ctx)), trap)
@@ -351,7 +351,7 @@
     @check_ir strinst "private unnamed_addr constant [7 x i8] c\"foobar\\00\""
 
     strptrinst = globalstring_ptr!(builder, "foobar")
-    if LLVM.supports_typed_pointers(ctx)
+    if supports_typed_ptrs
         @check_ir strptrinst "i8* getelementptr inbounds ([7 x i8], [7 x i8]* @1, i32 0, i32 0)"
     else
         @check_ir strptrinst "private unnamed_addr constant [7 x i8] c\"foobar\\00\""
@@ -364,7 +364,7 @@
     @check_ir isnotnullinst "icmp ne i32 %0, 0"
 
 
-    if LLVM.supports_typed_pointers(ctx)
+    if supports_typed_ptrs
         i32ptr1 = parameters(fn)[5]
         i32ptr2 = parameters(fn)[6]
         ptrdiffinst = ptrdiff!(builder, i32ptr1, i32ptr2)
