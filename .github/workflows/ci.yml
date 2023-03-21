@@ -34,8 +34,23 @@ jobs:
             ${{ runner.os }}-test-
             ${{ runner.os }}-
       - uses: julia-actions/julia-buildpkg@v1
+
       - name: Build libLLVMExtra
         run: julia --project=deps deps/build_ci.jl
+        if: runner.os != 'Windows'
+
+      # we really don't want to use MSVC
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          path-type: inherit
+          install: mingw-w64-x86_64-gcc
+        if: runner.os == 'Windows'
+      - name: Build libLLVMExtra (in msys2)
+        shell: msys2 {0}
+        run: julia --project=deps deps/build_ci.jl
+        if: runner.os == 'Windows'
+
       - name: Run tests
         run: julia --project -e 'using Pkg; Pkg.test(; coverage=true, julia_args=`-g2`)'
       - uses: julia-actions/julia-processcoverage@v1
