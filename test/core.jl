@@ -1015,10 +1015,6 @@ end
 
     @test mod_flags["foobar"] == md
     @test_throws KeyError mod_flags["foobaz"]
-
-    @test sdk_version(mod) === nothing
-    sdk_version!(mod, v"1.2.3")
-    @test sdk_version(mod) == v"1.2.3"
 end
 
 # metadata iteration
