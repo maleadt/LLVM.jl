@@ -1,6 +1,6 @@
 name = "LLVM"
 uuid = "929cbde3-209d-540e-8aea-75f648917ca0"
-version = "4.17.1"
+version = "5.0.0"
 
 [deps]
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
@@ -11,5 +11,5 @@ Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [compat]
 CEnum = "0.2, 0.3, 0.4"
-LLVMExtra_jll = "=0.0.18"
+LLVMExtra_jll = "=0.0.19"
 julia = "1.6"

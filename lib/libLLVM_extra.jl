@@ -416,3 +416,7 @@ function LLVMContextSupportsTypedPointers(Ctx)
     ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
 end
 end
+
+function LLVMConstDataArray(ElementTy, Data, NumElements)
+    ccall((:LLVMConstDataArray, libLLVMExtra), LLVMValueRef, (LLVMTypeRef, Ptr{Cvoid}, Cuint), ElementTy, Data, NumElements)
+end

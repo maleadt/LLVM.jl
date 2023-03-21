@@ -112,16 +112,66 @@ Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
     convert(T, API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}()))
 
 
-# sequential
+# sequential data
 
 export ConstantDataSequential, ConstantDataArray, ConstantDataVector
 
 abstract type ConstantDataSequential <: Constant end
 
+# ConstantData can only contain primitive types (1/2/4/8 byte integers, float/half),
+# as opposed to ConstantAggregate which can contain arbitrary LLVM values.
+#
+# however, LLVM seems to use both array types interchangeably, e.g., constructing
+# a ConstArray through LLVMConstArray may return a ConstantDataArray (presumably as an
+# optimization, when the data can be represented as densely packed primitive values).
+# because of that, ConstantDataArray and ConstantArray need to behave the same way,
+# concretely, indexing a ConstantDataArray has to return LLVM constant values...
+#
+# XXX: maybe we should just not expose ConstantDataArray then?
+#      one advantage of keeping them separate is that creating a ConstantDataArray
+#      is much cheaper (we should also be able to iterate much more efficiently,
+#      but cannot support that as explained above).
+
+# array interface
+Base.eltype(cda::ConstantDataSequential) = llvmeltype(cda)
+Base.length(cda::ConstantDataSequential) = length(llvmtype(cda))
+Base.size(cda::ConstantDataSequential) = (length(cda),)
+function Base.getindex(cda::ConstantDataSequential, idx::Integer)
+    @boundscheck 1 <= idx <= length(cda) || throw(BoundsError(cda, idx))
+    Value(API.LLVMGetElementAsConstant(cda, idx-1))
+end
+function Base.collect(cda::ConstantDataSequential)
+    constants = Array{Value}(undef, length(cda))
+    for i in 1:length(cda)
+        @inbounds constants[i] = cda[i]
+    end
+    return constants
+end
+
 @checked struct ConstantDataArray <: ConstantDataSequential
     ref::API.LLVMValueRef
 end
 register(ConstantDataArray, API.LLVMConstantDataArrayValueKind)
+
+function ConstantDataArray(typ::LLVMType, data::Array{T}) where {T <: Union{Integer, AbstractFloat}}
+    # TODO: can we look up the primitive size of the LLVM type?
+    #       use that to assert it matches the Julia element type.
+    return ConstantDataArray(API.LLVMConstDataArray(typ, data, length(data)))
+end
+
+# shorthands with arrays of plain Julia data
+# FIXME: duplicates the ConstantInt/ConstantFP conversion rules
+# XXX: X[X(...)] instead of X.(...) because of empty-container inference
+ConstantDataArray(data::AbstractVector{T}; ctx::Context) where {T<:Integer} =
+    ConstantDataArray(IntType(sizeof(T)*8; ctx), data)
+ConstantDataArray(data::AbstractVector{Core.Bool}; ctx::Context) =
+    ConstantDataArray(Int1Type(ctx), data)
+ConstantDataArray(data::AbstractVector{Float16}; ctx::Context) =
+    ConstantDataArray(HalfType(ctx), data)
+ConstantDataArray(data::AbstractVector{Float32}; ctx::Context) =
+    ConstantDataArray(FloatType(ctx), data)
+ConstantDataArray(data::AbstractVector{Float64}; ctx::Context) =
+    ConstantDataArray(DoubleType(ctx), data)
 
 @checked struct ConstantDataVector <: ConstantDataSequential
     ref::API.LLVMValueRef
@@ -162,16 +212,14 @@ export ConstantArray
     ref::API.LLVMValueRef
 end
 register(ConstantArray, API.LLVMConstantArrayValueKind)
-register(ConstantArray, API.LLVMConstantDataArrayValueKind)
-
-ConstantArrayOrAggregateZero(value) = Value(value)::Union{ConstantArray,ConstantAggregateZero}
 
 # generic constructor taking an array of constants
 function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}=T[]) where {T<:Constant,N}
     @assert all(x->x==typ, llvmtype.(data))
 
     if N == 1
-        return ConstantArrayOrAggregateZero(API.LLVMConstArray(typ, Array(data), length(data)))
+        # XXX: this can return a ConstDataArray (presumably as an optimization?)
+        return Value(API.LLVMConstArray(typ, Array(data), length(data)))
     end
 
     ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
@@ -183,15 +231,15 @@ end
 # shorthands with arrays of plain Julia data
 # FIXME: duplicates the ConstantInt/ConstantFP conversion rules
 # XXX: X[X(...)] instead of X.(...) because of empty-container inference
-ConstantArray(data::AbstractArray{T,N}; ctx::Context) where {T<:Integer,N} =
+ConstantArray(data::AbstractArray{T}; ctx::Context) where {T<:Integer} =
     ConstantArray(IntType(sizeof(T)*8; ctx), ConstantInt[ConstantInt(x; ctx) for x in data])
-ConstantArray(data::AbstractArray{Core.Bool,N}; ctx::Context) where {N} =
+ConstantArray(data::AbstractArray{Core.Bool}; ctx::Context) =
     ConstantArray(Int1Type(ctx), ConstantInt[ConstantInt(x; ctx) for x in data])
-ConstantArray(data::AbstractArray{Float16,N}; ctx::Context) where {N} =
+ConstantArray(data::AbstractArray{Float16}; ctx::Context) =
     ConstantArray(HalfType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
-ConstantArray(data::AbstractArray{Float32,N}; ctx::Context) where {N} =
+ConstantArray(data::AbstractArray{Float32}; ctx::Context) =
     ConstantArray(FloatType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
-ConstantArray(data::AbstractArray{Float64,N}; ctx::Context) where {N} =
+ConstantArray(data::AbstractArray{Float64}; ctx::Context) =
     ConstantArray(DoubleType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
 
 # convert back to known array types
@@ -226,7 +274,9 @@ function Base.getindex(ca::ConstantArray, idx::Integer...)
     I = CartesianIndices(size(ca))[idx...]
     for i in Tuple(I)
         if isempty(operands(ca))
-            ca = LLVM.Value(API.LLVMGetElementAsConstant(ca, i-1))
+            # XXX: is this valid? LLVMGetElementAsConstant is meant to be used with
+            #      Constant*Data*Arrays, not ConstantArrays
+            ca = Value(API.LLVMGetElementAsConstant(ca, i-1))
         else
             ca = (Base.@_propagate_inbounds_meta; operands(ca)[i])
         end

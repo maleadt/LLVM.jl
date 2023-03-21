@@ -162,5 +162,8 @@ void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRe
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
 #endif
 
+// constant data
+LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data, unsigned NumElements);
+
 LLVM_C_EXTERN_C_END
 #endif
