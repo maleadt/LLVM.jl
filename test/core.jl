@@ -26,13 +26,11 @@ Context() do ctx end
 @dispose ctx=Context() begin end
 
 @dispose ctx=Context() begin
-    @test LLVM.supports_typed_pointers(ctx) isa Bool
-    if LLVM.version() > v"15.0.0"
-        @test LLVM.supports_typed_pointers(ctx) == false
-    elseif LLVM.version() > v"14.0.0"
-        @test LLVM.supports_typed_pointers(ctx) isa Bool
+    @test supports_typed_pointers(ctx) isa Bool
+    if LLVM.version() > v"15"
+        @test supports_typed_pointers(ctx) == false
     else
-        @test LLVM.supports_typed_pointers(ctx) == true
+        @test supports_typed_pointers(ctx) == true
     end
 end
 
@@ -92,7 +90,10 @@ end
     eltyp = LLVM.Int32Type(ctx)
 
     ptrtyp = LLVM.PointerType(eltyp)
-    @test eltype(ptrtyp) == eltyp
+    if supports_typed_ptrs
+        @test eltype(ptrtyp) == eltyp
+    end
+
     @test context(ptrtyp) == context(eltyp)
 
     @test addrspace(ptrtyp) == 0
@@ -520,10 +521,18 @@ end
     @testset "constant expressions" begin
 
     # inline assembly
-    let
-        ft = LLVM.FunctionType(LLVM.VoidType(ctx))
-        asm = InlineAsm(ft, "nop", "", false)
-        @check_ir asm "void ()* asm \"nop\", \"\""
+    if supports_typed_ptrs
+        let
+            ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+            asm = InlineAsm(ft, "nop", "", false)
+            @check_ir asm "void ()* asm \"nop\", \"\""
+        end
+    else
+        let
+            ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+            asm = InlineAsm(ft, "nop", "", false)
+            @check_ir asm "ptr asm \"nop\", \"\""
+        end
     end
 
     # integer
@@ -554,18 +563,19 @@ end
             ce = f(val, other_val)::LLVM.Constant
             @check_ir ce "i32 84"
         end
+        if supports_typed_ptrs
+            for f in [const_udiv, const_sdiv]
+                ce = f(val, other_val)::LLVM.Constant
+                @check_ir ce "i32 21"
 
-        for f in [const_udiv, const_sdiv]
-            ce = f(val, other_val)::LLVM.Constant
-            @check_ir ce "i32 21"
+                ce = f(val, other_val; exact=true) # TODO: test that differs::LLVM.Constant
+                @check_ir ce "i32 21"
+            end
 
-            ce = f(val, other_val; exact=true) # TODO: test that differs::LLVM.Constant
-            @check_ir ce "i32 21"
-        end
-
-        for f in [const_urem, const_srem]
-            ce = f(val, other_val)::LLVM.Constant
-            @check_ir ce "i32 0"
+            for f in [const_urem, const_srem]
+                ce = f(val, other_val)::LLVM.Constant
+                @check_ir ce "i32 0"
+            end
         end
 
         ce = const_and(val, other_val)::LLVM.Constant
@@ -621,22 +631,22 @@ end
         @check_ir ce "float -4.200000e+01"
 
         other_val = LLVM.ConstantFP(Float32(2.); ctx)
+        if supports_typed_ptrs
+            ce = const_fadd(val, other_val)::LLVM.Constant
+            @check_ir ce "float 4.400000e+01"
 
-        ce = const_fadd(val, other_val)::LLVM.Constant
-        @check_ir ce "float 4.400000e+01"
+            ce = const_fsub(val, other_val)::LLVM.Constant
+            @check_ir ce "float 4.000000e+01"
 
-        ce = const_fsub(val, other_val)::LLVM.Constant
-        @check_ir ce "float 4.000000e+01"
+            ce = const_fmul(val, other_val)::LLVM.Constant
+            @check_ir ce "float 8.400000e+01"
 
-        ce = const_fmul(val, other_val)::LLVM.Constant
-        @check_ir ce "float 8.400000e+01"
+            ce = const_fdiv(val, other_val)::LLVM.Constant
+            @check_ir ce "float 2.100000e+01"
 
-        ce = const_fdiv(val, other_val)::LLVM.Constant
-        @check_ir ce "float 2.100000e+01"
-
-        ce = const_frem(val, other_val)::LLVM.Constant
-        @check_ir ce "float 0.000000e+00"
-
+            ce = const_frem(val, other_val)::LLVM.Constant
+            @check_ir ce "float 0.000000e+00"
+        end
         ce = const_fcmp(LLVM.API.LLVMRealUGT, val, other_val)::LLVM.Constant
         @check_ir ce "i1 true"
 
@@ -664,13 +674,19 @@ end
         @check_ir ce "i32 0"
 
         ce = const_inttoptr(ce, llvmtype(ptr))::LLVM.Constant
-        @check_ir ce "i32* null"
-
+        if supports_typed_ptrs
+            @check_ir ce "i32* null"
+        else
+            @check_ir ce "ptr null"
+        end
         @test isempty(uses(ptr))
         for f in [const_addrspacecast, const_pointercast]
             ce = f(ptr, LLVM.PointerType(LLVM.Int32Type(ctx), 1))::LLVM.Constant
-            @check_ir ce "i32 addrspace(1)* addrspacecast (i32* null to i32 addrspace(1)*)"
-
+            if supports_typed_ptrs
+                @check_ir ce "i32 addrspace(1)* addrspacecast (i32* null to i32 addrspace(1)*)"
+            else
+                @check_ir ce "ptr addrspace(1) addrspacecast (ptr null to ptr addrspace(1))"
+            end
             # deletion of a constant
             @test !isempty(uses(ptr))
             LLVM.unsafe_destroy!(ce)
@@ -1119,7 +1135,10 @@ end
 
     fn = LLVM.Function(mod, intr)
     @test fn isa LLVM.Function
-    @test llvmeltype(fn) == ft
+
+    if supports_typed_ptrs
+        @test llvmeltype(fn) == ft
+    end
     @test isintrinsic(fn)
 
     @test intr == Intrinsic("llvm.trap")
@@ -1144,7 +1163,9 @@ end
 
     fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
     @test fn isa LLVM.Function
-    @test llvmeltype(fn) == ft
+    if supports_typed_ptrs
+        @test llvmeltype(fn) == ft
+    end
     @test isintrinsic(fn)
 
     @test intr == Intrinsic("llvm.sin")

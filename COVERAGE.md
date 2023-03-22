@@ -5,7 +5,7 @@ LLVM API coverage
 
 Find functions in `lib` not mentioned in this document:
 ```
-for f in $(grep -ohR "function \w*" lib | cut -d ' ' -f 2) 
+for f in $(grep -ohR "function \w*" lib | cut -d ' ' -f 2)
 do
     grep -q $f COVERAGE.md || echo $f
 done
@@ -585,7 +585,7 @@ Function parameters:
 - [ ] LLVMRemoveAttribute
 - [ ] LLVMGetAttribute
 - [ ] LLVMSetParamAlignment
-    
+
 
 ### Metadata
 

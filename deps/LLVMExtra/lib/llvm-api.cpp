@@ -203,6 +203,11 @@ LLVMContextRef LLVMGetValueContext(LLVMValueRef V)
     return wrap(&unwrap(V)->getContext());
 }
 
+LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef B)
+{
+    return wrap(&unwrap(B)->getContext());
+}
+
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM)
 {
     unwrap(PM)->add(new TargetLibraryInfoWrapperPass(Triple(T)));
@@ -551,8 +556,14 @@ void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRe
     unwrap<MDNode>(MD)->replaceOperandWith(I, unwrap(New));
 }
 
-#if LLVM_VERSION_MAJOR > 12
+#if LLVM_VERSION_MAJOR >= 13
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
   return unwrap(C)->supportsTypedPointers();
 }
 #endif
+
+LLVMTypeRef  LLVMGetFunctionType(LLVMValueRef Fn) {
+    auto Ftype = unwrap<Function>(Fn)->getFunctionType();
+    return wrap(Ftype);
+}
+

@@ -4746,8 +4746,8 @@ function LLVMBuildCall(arg1, Fn, Args, NumArgs, Name)
     ccall((:LLVMBuildCall, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Cstring), arg1, Fn, Args, NumArgs, Name)
 end
 
-function LLVMBuildCall2(arg1, arg2, Fn, Args, NumArgs, Name)
-    ccall((:LLVMBuildCall2, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Cstring), arg1, arg2, Fn, Args, NumArgs, Name)
+function LLVMBuildCall2(arg1, Ty, Fn, Args, NumArgs, Name)
+    ccall((:LLVMBuildCall2, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Cstring), arg1, Ty, Fn, Args, NumArgs, Name)
 end
 
 function LLVMBuildSelect(arg1, If, Then, Else, Name)

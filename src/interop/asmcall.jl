@@ -16,7 +16,7 @@ export @asmcall
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
-            val = call!(builder, inline_asm, collect(parameters(llvm_f)))
+            val = call!(builder, llvm_ft, inline_asm, collect(parameters(llvm_f)))
             if rettyp == Nothing
                 ret!(builder)
             else

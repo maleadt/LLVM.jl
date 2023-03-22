@@ -15,6 +15,8 @@ Builder(ctx::Context) = Builder(API.LLVMCreateBuilderInContext(ctx))
 
 dispose(builder::Builder) = API.LLVMDisposeBuilder(builder)
 
+context(builder::Builder) = Context(API.LLVMGetBuilderContext(builder))
+
 function Builder(f::Core.Function, args...; kwargs...)
     builder = Builder(args...; kwargs...)
     try
@@ -105,8 +107,16 @@ switch!(builder::Builder, V::Value, Else::BasicBlock, NumCases::Integer=10) =
 indirectbr!(builder::Builder, Addr::Value, NumDests::Integer=10) =
     Instruction(API.LLVMBuildIndirectBr(builder, Addr, NumDests))
 
-invoke!(builder::Builder, Fn::Value, Args::Vector{<:Value}, Then::BasicBlock, Catch::BasicBlock, Name::String="") =
+function invoke!(builder::Builder, Fn::Value, Args::Vector{<:Value}, Then::BasicBlock,
+                 Catch::BasicBlock, Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
     Instruction(API.LLVMBuildInvoke(builder, Fn, Args, length(Args), Then, Catch, Name))
+end
+
+function invoke!(builder::Builder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value},
+                 Then::BasicBlock, Catch::BasicBlock, Name::String="")
+    Instruction(API.LLVMBuildInvoke2(builder, Ty, Fn, Args, length(Args), Then, Catch, Name))
+end
 
 resume!(builder::Builder, Exn::Value) =
     Instruction(API.LLVMBuildResume(builder, Exn))
@@ -240,36 +250,69 @@ memset!(builder::Builder, Ptr::Value, Val::Value, Len::Value, Align::Integer) =
 memcpy!(builder::Builder, Dst::Value, DstAlign::Integer, Src::Value, SrcAlign::Integer, Size::Value) =
     Instruction(API.LLVMBuildMemCpy(builder, Dst, DstAlign, Src, SrcAlign, Size))
 
-memmove!(builder::Builder, Dst::Value, DstAlign::Integer, Src::Value, SrcAlign::Integer, Size::Value) =
+memmove!(builder::Builder, Dst::Value, DstAlign::Integer, Src::Value, SrcAlign::Integer,
+         Size::Value) =
     Instruction(API.LLVMBuildMemMove(builder, Dst, DstAlign, Src, SrcAlign, Size))
 
 free!(builder::Builder, PointerVal::Value) =
     Instruction(API.LLVMBuildFree(builder, PointerVal))
 
-load!(builder::Builder, PointerVal::Value, Name::String="") =
+function load!(builder::Builder, PointerVal::Value, Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
     Instruction(API.LLVMBuildLoad(builder, PointerVal, Name))
+end
+
+function load!(builder::Builder, Ty::LLVMType, PointerVal::Value, Name::String="")
+    Instruction(API.LLVMBuildLoad2(builder, Ty, PointerVal, Name))
+end
 
 store!(builder::Builder, Val::Value, Ptr::Value) =
     Instruction(API.LLVMBuildStore(builder, Val, Ptr))
 
-fence!(builder::Builder, ordering::API.LLVMAtomicOrdering, singleThread::Core.Bool=false, Name::String="") =
+fence!(builder::Builder, ordering::API.LLVMAtomicOrdering, singleThread::Core.Bool=false,
+       Name::String="") =
     Instruction(API.LLVMBuildFence(builder, ordering, convert(Bool, singleThread), Name))
-Ptr
-atomic_rmw!(builder::Builder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Value, ordering::API.LLVMAtomicOrdering, singleThread::Core.Bool) =
-    Instruction(API.LLVMBuildAtomicRMW(builder, op, Ptr, Val, ordering, convert(Bool, singleThread)))
 
-atomic_cmpxchg!(builder::Builder, Ptr::Value, Cmp::Value, New::Value, SuccessOrdering::API.LLVMAtomicOrdering, FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Core.Bool) =
-    Instruction(API.LLVMBuildAtomicCmpXchg(builder, Ptr, Cmp, New, SuccessOrdering,FailureOrdering, convert(Bool, SingleThread)))
+atomic_rmw!(builder::Builder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Value,
+            ordering::API.LLVMAtomicOrdering, singleThread::Core.Bool) =
+    Instruction(API.LLVMBuildAtomicRMW(builder, op, Ptr, Val, ordering,
+                                       convert(Bool, singleThread)))
 
-gep!(builder::Builder, Pointer::Value, Indices::Vector{<:Value}, Name::String="") =
+atomic_cmpxchg!(builder::Builder, Ptr::Value, Cmp::Value, New::Value,
+                SuccessOrdering::API.LLVMAtomicOrdering,
+                FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Core.Bool) =
+    Instruction(API.LLVMBuildAtomicCmpXchg(builder, Ptr, Cmp, New, SuccessOrdering,
+                                           FailureOrdering, convert(Bool, SingleThread)))
+
+function gep!(builder::Builder, Pointer::Value, Indices::Vector{<:Value}, Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
     Value(API.LLVMBuildGEP(builder, Pointer, Indices, length(Indices), Name))
+end
 
-inbounds_gep!(builder::Builder, Pointer::Value, Indices::Vector{<:Value}, Name::String="") =
+function gep!(builder::Builder, Ty::LLVMType, Pointer::Value, Indices::Vector{<:Value},
+              Name::String="")
+    return Value(API.LLVMBuildGEP2(builder, Ty, Pointer, Indices, length(Indices), Name))
+end
+
+function inbounds_gep!(builder::Builder, Pointer::Value, Indices::Vector{<:Value},
+                       Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
     Value(API.LLVMBuildInBoundsGEP(builder, Pointer, Indices, length(Indices), Name))
+end
 
-struct_gep!(builder::Builder, Pointer::Value, Idx, Name::String="") =
+function inbounds_gep!(builder::Builder, Ty::LLVMType, Pointer::Value,
+                       Indices::Vector{<:Value}, Name::String="")
+    Value(API.LLVMBuildInBoundsGEP2(builder, Ty, Pointer, Indices, length(Indices), Name))
+end
+
+function struct_gep!(builder::Builder, Pointer::Value, Idx, Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
     Value(API.LLVMBuildStructGEP(builder, Pointer, Idx, Name))
+end
 
+function struct_gep!(builder::Builder, Ty::LLVMType, Pointer::Value, Idx, Name::String="")
+    Value(API.LLVMBuildStructGEP2(builder, Ty, Pointer, Idx, Name))
+end
 
 # conversion operations
 
@@ -324,6 +367,7 @@ truncorbitcast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="")
 cast!(builder::Builder, Op::API.LLVMOpcode, Val::Value, DestTy::LLVMType, Name::String="") =
     Value(API.LLVMBuildCast(builder, Op, Val, DestTy, Name))
 
+# XXX: make this error with opaque pointers?
 pointercast!(builder::Builder, Val::Value, DestTy::LLVMType, Name::String="") =
     Value(API.LLVMBuildPointerCast(builder, Val, DestTy, Name))
 
@@ -348,8 +392,15 @@ phi!(builder::Builder, Ty::LLVMType, Name::String="") =
 select!(builder::Builder, If::Value, Then::Value, Else::Value, Name::String="") =
     Value(API.LLVMBuildSelect(builder, If, Then, Else, Name))
 
-call!(builder::Builder, Fn::Value, Args::Vector{<:Value}=Value[], Name::String="") =
+function call!(builder::Builder, Fn::Value, Args::Vector{<:Value}=Value[], Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
     Instruction(API.LLVMBuildCall(builder, Fn, Args, length(Args), Name))
+end
+
+function call!(builder::Builder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value}=Value[],
+               Name::String="")
+    Instruction(API.LLVMBuildCall2(builder, Ty, Fn, Args, length(Args), Name))
+end
 
 call!(builder::Builder, Fn::Value, Args::Vector{<:Value},
       Bundles::Vector{OperandBundleDef}, Name::String="") =
@@ -366,7 +417,8 @@ call!(builder::Builder, Fn::Value, Args::Vector{<:Value},
 va_arg!(builder::Builder, List::Value, Ty::LLVMType, Name::String="") =
     Instruction(API.LLVMBuildVAArg(builder, List, Ty, Name))
 
-landingpad!(builder::Builder, Ty::LLVMType, PersFn::Value, NumClauses::Integer, Name::String="") =
+landingpad!(builder::Builder, Ty::LLVMType, PersFn::Value, NumClauses::Integer,
+            Name::String="") =
     Instruction(API.LLVMBuildLandingPad(builder, Ty, PersFn, NumClauses, Name))
 
 neg!(builder::Builder, V::Value, Name::String="") =
@@ -399,5 +451,11 @@ isnull!(builder::Builder, Val::Value, Name::String="") =
 isnotnull!(builder::Builder, Val::Value, Name::String="") =
     Value(API.LLVMBuildIsNotNull(builder, Val, Name))
 
-ptrdiff!(builder::Builder, LHS::Value, RHS::Value, Name::String="") =
+function ptrdiff!(builder::Builder, LHS::Value, RHS::Value, Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
     Value(API.LLVMBuildPtrDiff(builder, LHS, RHS, Name))
+end
+
+function ptrdiff!(builder::Builder, Ty::LLVMType, LHS::Value, RHS::Value, Name::String="")
+    Value(API.LLVMBuildPtrDiff2(builder, Ty, LHS, RHS, Name))
+end

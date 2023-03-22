@@ -416,3 +416,11 @@ function LLVMContextSupportsTypedPointers(Ctx)
     ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
 end
 end
+
+function LLVMGetFunctionType(Fn)
+    ccall((:LLVMGetFunctionType,libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), Fn)
+end
+
+function LLVMGetBuilderContext(B)
+    ccall((:LLVMGetBuilderContext, libLLVMExtra), LLVMContextRef, (LLVMBuilderRef,), B)
+end

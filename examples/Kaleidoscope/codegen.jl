@@ -43,7 +43,7 @@ end
 function codegen(cg::CodeGen, expr::VariableExprAST)
     V = get(current_scope(cg), expr.name, nothing)
     V == nothing && error("did not find variable $(expr.name)")
-    return LLVM.load!(cg.builder, V, expr.name)
+    return LLVM.load!(cg.builder, LLVM.DoubleType(cg.ctx), V, expr.name)
 end
 
 function codegen(cg::CodeGen, expr::BinaryExprAST)
@@ -94,8 +94,8 @@ function codegen(cg::CodeGen, expr::CallExprAST)
     for v in expr.args
         push!(args, codegen(cg, v))
     end
-
-    return LLVM.call!(cg.builder, func, args, "calltmp")
+    ft = LLVM.function_type(func)
+    return LLVM.call!(cg.builder, ft, func, args, "calltmp")
 end
 
 function codegen(cg::CodeGen, expr::PrototypeAST)
@@ -190,7 +190,7 @@ function codegen(cg::CodeGen, expr::ForExprAST)
         step = codegen(cg, expr.step)
         endd = codegen(cg, expr.endd)
 
-        curvar = LLVM.load!(cg.builder, alloc, expr.varname)
+        curvar = LLVM.load!(cg.builder, LLVM.DoubleType(cg.ctx), alloc, expr.varname)
         nextvar = LLVM.fadd!(cg.builder, curvar, step, "nextvar")
         LLVM.store!(cg.builder, nextvar, alloc)
 

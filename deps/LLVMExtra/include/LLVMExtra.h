@@ -51,6 +51,7 @@ LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback, void *Data)
 // Various missing functions
 unsigned int LLVMGetDebugMDVersion(void);
 
+LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef B);
 LLVMContextRef LLVMGetValueContext(LLVMValueRef V);
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
 void LLVMAddInternalizePassWithExportList(
@@ -81,6 +82,8 @@ unsigned LLVMExtraGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD);
 void LLVMExtraGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest);
 
 void LLVMExtraAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
+
+LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn);
 
 #if LLVM_VERSION_MAJOR >= 12
 void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM,
@@ -158,7 +161,7 @@ LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata);
 void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New);
 void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
 
-#if LLVM_VERSION_MAJOR >= 12
+#if LLVM_VERSION_MAJOR >= 13
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
 #endif
 
