@@ -18,7 +18,7 @@
                 ConstantInt(0xdeadbeef%UInt; ctx),
                 LLVM.PointerType(LLVM.Int32Type(ctx)))
             tmp = add!(builder, parameters(f)[1], parameters(f)[2], "tmp")
-            tmp2 = load!(builder, ptr)
+            tmp2 = load!(builder, LLVM.Int32Type(ctx), ptr)
             tmp3 = add!(builder, tmp, tmp2)
             ret!(builder, tmp3)
 

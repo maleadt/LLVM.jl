@@ -98,15 +98,17 @@ define_transforms([
     :AggressiveDCE, :BitTrackingDCE, :AlignmentFromAssumptions,
     :DeadStoreElimination, :Scalarizer, :MergedLoadStoreMotion, :GVN, :IndVarSimplify,
     :InstructionCombining, :JumpThreading, :LICM, :LoopDeletion, :LoopIdiom, :LoopRotate,
-    :LoopReroll, :LoopUnroll, :LoopUnswitch, :MemCpyOpt, :PartiallyInlineLibCalls,
+    :LoopReroll, :LoopUnroll, :MemCpyOpt, :PartiallyInlineLibCalls,
     :LowerSwitch, :PromoteMemoryToRegister, :Reassociate, :SCCP, :ScalarReplAggregates,
     :SimplifyLibCalls, :TailCallElimination, :ConstantPropagation, :DemoteMemoryToRegister,
     :Verifier, :CorrelatedValuePropagation, :EarlyCSE, :EarlyCSEMemSSA,
     :LowerExpectIntrinsic, :TypeBasedAliasAnalysis, :ScopedNoAliasAA, :BasicAliasAnalysis,
     :MergeFunctions, :SpeculativeExecutionIfHasBranchDivergence, :SimpleLoopUnroll,
-    :InductiveRangeCheckElimination
+    :InductiveRangeCheckElimination, :SimpleLoopUnswitchLegacy,
 ])
-
+if version() < v"15"
+    define_transforms([:LoopUnswitch])
+end
 export scalar_repl_aggregates!, scalar_repl_aggregates_ssa!, cfgsimplification!
 
 scalar_repl_aggregates!(pm::PassManager, threshold::Integer) =
@@ -151,10 +153,14 @@ define_transforms([:LoadStoreVectorizer])
 ## interprocedural transformations
 
 define_transforms([
-    :ArgumentPromotion, :ConstantMerge, :DeadArgElimination, :FunctionAttrs,
+    :ConstantMerge, :DeadArgElimination, :FunctionAttrs,
     :FunctionInlining, :AlwaysInliner, :GlobalDCE, :GlobalOptimizer, :IPConstantPropagation,
     :PruneEH, :IPSCCP, :StripDeadPrototypes, :StripSymbols
 ])
+
+if version() < v"15"
+    define_transforms([:ArgumentPromotion]) #only avaliable on new PM
+end
 
 export internalize!
 

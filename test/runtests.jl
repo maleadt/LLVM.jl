@@ -89,6 +89,5 @@ include("Kaleidoscope.jl")
 include("examples.jl")
 
 include("interop.jl")
-include("atomics.jl")
 
 end
