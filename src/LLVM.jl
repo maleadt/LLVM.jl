@@ -16,30 +16,36 @@ const libllvm_version = Base.libllvm_version
 
 module API
 using CEnum
+
+# LLVM C API
 using ..LLVM
 using ..LLVM: libllvm
+let
+    ver = if version() < v"12"
+        "11"
+    elseif version().major == 12
+        "12"
+    elseif version() < v"15"
+        "13"
+    else
+        "15"
+    end
+    dir = joinpath(@__DIR__, "..", "lib", ver)
+    if !isdir(dir)
+        error("""The LLVM API bindings for v$libllvm_version do not exist.
+                  You might need a newer version of LLVM.jl for this version of Julia.""")
+    end
 
-const llvm_version = if version() < v"12"
-    "11"
-elseif version().major == 12
-    "12"
-elseif version() < v"15"
-    "13"
-else
-    "15"
+    include(joinpath(dir, "libLLVM_h.jl"))
 end
-const libdir = joinpath(@__DIR__, "..", "lib")
 
-if !isdir(libdir)
-    error("""
-    The LLVM API bindings for v$llvm_version do not exist.
-    You might need a newer version of LLVM.jl for this version of Julia.""")
-end
+# LLVMExtra
 import LLVMExtra_jll: libLLVMExtra
+include(joinpath(@__DIR__, "..", "lib", "libLLVM_extra.jl"))
 
-include(joinpath(libdir, llvm_version, "libLLVM_h.jl"))
-include(joinpath(libdir, "libLLVM_extra.jl"))
-include(joinpath(libdir, "libLLVM_julia.jl"))
+# Julia LLVM functionality
+include(joinpath(@__DIR__, "..", "lib", "libLLVM_julia.jl"))
+
 end # module API
 
 # LLVM API wrappers
