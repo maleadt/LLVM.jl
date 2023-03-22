@@ -27,11 +27,18 @@ end
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())
 
-if version() > v"13.0.0"
+if version() >= v"13"
     supports_typed_pointers(ctx::Context) = API.LLVMContextSupportsTypedPointers(ctx) == 1
 else
     supports_typed_pointers(ctx::Context) = true
 end
+
+@noinline throw_typedpointererror() =
+    error("""Typed pointers are not supported.
+
+             You are invoking an API without specifying the pointer type, but this LLVM context
+             uses opaque pointers. You should either pass the element type of the pointer as an
+             argument, or use an environment that sypports typed pointers.""")
 
 ## wrapper exception type
 

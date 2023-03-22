@@ -464,27 +464,21 @@ const_ashr(lhs::Constant, rhs::Constant) =
     Value(API.LLVMConstAShr(lhs, rhs))
 
 function const_gep(val::Constant, Indices::Vector{<:Constant})
-    if !supports_typed_pointers(context(val))
-        throw(error("Typed Pointers not supported on this version"))
-    else
-        return Value(API.LLVMConstGEP(val, Indices, length(Indices)))
-    end
+    supports_typed_pointers(context(val)) || throw_typedpointererror()
+    Value(API.LLVMConstGEP(val, Indices, length(Indices)))
 end
 
 function const_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
-    return Value(API.LLVMConstGEP2(val, Ty, Indices, length(Indices)))
+    Value(API.LLVMConstGEP2(val, Ty, Indices, length(Indices)))
 end
 
 function const_inbounds_gep(val::Constant, Indices::Vector{<:Constant})
-    if !supports_typed_pointers(context(val))
-        throw(error("Typed Pointers not supported on this version"))
-    else
-        return Value(API.LLVMConstInboundsGEP(val, Indices, length(Indices)))
-    end
+    supports_typed_pointers(context(val)) || throw_typedpointererror()
+    Value(API.LLVMConstInboundsGEP(val, Indices, length(Indices)))
 end
 
 function const_inbounds_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
-    return Value(API.LLVMConstInBoundsGEP2(val, Ty, Indices, length(Indices)))
+    Value(API.LLVMConstInBoundsGEP2(val, Ty, Indices, length(Indices)))
 end
 
 const_trunc(val::Constant, ToType::LLVMType) =

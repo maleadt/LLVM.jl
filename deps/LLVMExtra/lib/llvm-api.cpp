@@ -556,7 +556,7 @@ void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRe
     unwrap<MDNode>(MD)->replaceOperandWith(I, unwrap(New));
 }
 
-#if LLVM_VERSION_MAJOR > 12
+#if LLVM_VERSION_MAJOR >= 13
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
   return unwrap(C)->supportsTypedPointers();
 }
