@@ -26,11 +26,11 @@ Context() do ctx end
 @dispose ctx=Context() begin end
 
 @dispose ctx=Context() begin
-    @test LLVM.supports_typed_pointers(ctx) isa Bool
+    @test supports_typed_pointers(ctx) isa Bool
     if LLVM.version() > v"15"
-        @test LLVM.supports_typed_pointers(ctx) == false
+        @test supports_typed_pointers(ctx) == false
     else
-        @test LLVM.supports_typed_pointers(ctx) == true
+        @test supports_typed_pointers(ctx) == true
     end
 end
 

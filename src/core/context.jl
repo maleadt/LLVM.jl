@@ -1,6 +1,6 @@
 # Contexts are execution states for the core LLVM IR system.
 
-export Context, dispose, GlobalContext
+export Context, dispose, GlobalContext, supports_typed_pointers
 
 @checked struct Context
     ref::API.LLVMContextRef
@@ -39,6 +39,7 @@ end
              You are invoking an API without specifying the pointer type, but this LLVM context
              uses opaque pointers. You should either pass the element type of the pointer as an
              argument, or use an environment that sypports typed pointers.""")
+
 
 ## wrapper exception type
 
