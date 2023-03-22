@@ -89,7 +89,11 @@ end
             ts_mod = ThreadSafeModule(mod; ctx=ts_ctx)
 
             add!(lljit, jd, ts_mod)
-            @test_throws LLVMException lookup(lljit, fname)
+            @test_throws LLVMException redirect_stderr(devnull) do
+                # XXX: this reports an unhandled JIT session error;
+                #      can we handle it instead?
+                lookup(lljit, fname)
+            end
         end
     end
 end
