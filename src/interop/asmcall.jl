@@ -43,21 +43,21 @@ macro asmcall(asm::String, constraints::String, side_effects::Bool,
               argtyp::Union{Expr,Type}=:(Tuple{}), args...)
     asm_val = Val{Symbol(asm)}()
     constraints_val = Val{Symbol(constraints)}()
-    return esc(:(LLVM.Interop._asmcall($asm_val, $constraints_val,
-                                       Val{$side_effects}(), Val{$rettyp}(), Val{$argtyp}(),
-                                       $(args...))))
+    return esc(:($Interop._asmcall($asm_val, $constraints_val,
+                                   Val{$side_effects}(), Val{$rettyp}(), Val{$argtyp}(),
+                                   $(args...))))
 end
 
 # shorthand: no side_effects
 macro asmcall(asm::String, constraints::String,
               rettyp::Union{Expr,Symbol,Type}=:(Nothing),
               argtyp::Union{Expr,Type}=:(Tuple{}), args...)
-    esc(:(LLVM.Interop.@asmcall $asm $constraints false $rettyp $argtyp $(args...)))
+    esc(:($Interop.@asmcall $asm $constraints false $rettyp $argtyp $(args...)))
 end
 
 # shorthand: no side_effects or constraints
 macro asmcall(asm::String,
               rettyp::Union{Expr,Symbol,Type}=:(Nothing),
               argtyp::Union{Expr,Type}=:(Tuple{}), args...)
-    esc(:(LLVM.Interop.@asmcall $asm "" $rettyp $argtyp $(args...)))
+    esc(:($Interop.@asmcall $asm "" $rettyp $argtyp $(args...)))
 end

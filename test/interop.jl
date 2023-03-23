@@ -51,35 +51,35 @@ end
 # only asm
 
 a1() = @asmcall("nop")
-@test a1() == nothing
+@test a1() === nothing
 
 a2() = @asmcall("nop", Nothing)
-@test a2() == nothing
+@test a2() === nothing
 
 a3() = @asmcall("nop", Nothing, Tuple{})
-@test a3() == nothing
+@test a3() === nothing
 
 # asm + constraints
 
 b1() = @asmcall("nop", "")
-@test b1() == nothing
+@test b1() === nothing
 
 b2() = @asmcall("nop", "", Nothing)
-@test b2() == nothing
+@test b2() === nothing
 
 b3() = @asmcall("nop", "", Nothing, Tuple{})
-@test b3() == nothing
+@test b3() === nothing
 
 # asm + constraints + side-effects
 
 c1() = @asmcall("nop", "", false)
-@test c1() == nothing
+@test c1() === nothing
 
 c2() = @asmcall("nop", "", false, Nothing)
-@test c2() == nothing
+@test c2() === nothing
 
 c3() = @asmcall("nop", "", false, Nothing, Tuple{})
-@test c3() == nothing
+@test c3() === nothing
 
 if Sys.ARCH == :x86 || Sys.ARCH == :x86_64
 
@@ -95,6 +95,18 @@ e1() = @asmcall("mov \$\$1, \$0; mov \$\$2, \$1;", "=r,=r", Tuple{Int16,Int32})
 
 # TODO: alternative test snippets for other platforms
 
+end
+
+@testset "macro hygiene" begin
+    mod = @eval module $(gensym())
+        module Inner
+            using LLVM, LLVM.Interop
+        end
+
+        foo() = Inner.@asmcall("nop")
+    end
+
+    @test mod.foo() === nothing
 end
 
 end
