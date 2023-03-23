@@ -567,8 +567,12 @@ LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data, unsigne
     return wrap(ConstantDataArray::getRaw(S, NumElements, unwrap(ElementTy)));
 }
 
-LLVMTypeRef  LLVMGetFunctionType(LLVMValueRef Fn) {
+LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn) {
     auto Ftype = unwrap<Function>(Fn)->getFunctionType();
     return wrap(Ftype);
 }
 
+LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef GV) {
+    auto Ftype = unwrap<GlobalValue>(GV)->getValueType();
+    return wrap(Ftype);
+}
