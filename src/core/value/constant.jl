@@ -118,6 +118,36 @@ export ConstantDataSequential, ConstantDataArray, ConstantDataVector
 
 abstract type ConstantDataSequential <: Constant end
 
+# ConstantData can only contain primitive types (1/2/4/8 byte integers, float/half),
+# as opposed to ConstantAggregate which can contain arbitrary LLVM values.
+#
+# however, LLVM seems to use both array types interchangeably, e.g., constructing
+# a ConstArray through LLVMConstArray may return a ConstantDataArray (presumably as an
+# optimization, when the data can be represented as densely packed primitive values).
+# because of that, ConstantDataArray and ConstantArray need to behave the same way,
+# concretely, indexing a ConstantDataArray has to return LLVM constant values...
+#
+# XXX: maybe we should just not expose ConstantDataArray then?
+#      one advantage of keeping them separate is that creating a ConstantDataArray
+#      is much cheaper (we should also be able to iterate much more efficiently,
+#      but cannot support that as explained above).
+
+# array interface
+Base.eltype(cda::ConstantDataSequential) = eltype(value_type(cda))
+Base.length(cda::ConstantDataSequential) = length(value_type(cda))
+Base.size(cda::ConstantDataSequential) = (length(cda),)
+function Base.getindex(cda::ConstantDataSequential, idx::Integer)
+    @boundscheck 1 <= idx <= length(cda) || throw(BoundsError(cda, idx))
+    Value(API.LLVMGetElementAsConstant(cda, idx-1))
+end
+function Base.collect(cda::ConstantDataSequential)
+    constants = Array{Value}(undef, length(cda))
+    for i in 1:length(cda)
+        @inbounds constants[i] = cda[i]
+    end
+    return constants
+end
+
 @checked struct ConstantDataArray <: ConstantDataSequential
     ref::API.LLVMValueRef
 end
@@ -141,7 +171,7 @@ register(ConstantAggregateZero, API.LLVMConstantAggregateZeroValueKind)
 # array interface
 # FIXME: can we reuse the ::ConstantArray functionality with ConstantAggregateZero values?
 #        probably works fine if we just get rid of the refcheck
-Base.eltype(caz::ConstantAggregateZero) = llvmeltype(caz)
+Base.eltype(caz::ConstantAggregateZero) = eltype(value_type(caz))
 Base.size(caz::ConstantAggregateZero) = (0,)
 Base.length(caz::ConstantAggregateZero) = 0
 Base.axes(caz::ConstantAggregateZero) = (Base.OneTo(0),)
@@ -168,14 +198,14 @@ ConstantArrayOrAggregateZero(value) = Value(value)::Union{ConstantArray,Constant
 
 # generic constructor taking an array of constants
 function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}=T[]) where {T<:Constant,N}
-    @assert all(x->x==typ, llvmtype.(data))
+    @assert all(x->x==typ, value_type.(data))
 
     if N == 1
         return ConstantArrayOrAggregateZero(API.LLVMConstArray(typ, Array(data), length(data)))
     end
 
     ca_vec = map(x->ConstantArray(typ, x), eachslice(data, dims=1))
-    ca_typ = llvmtype(first(ca_vec))
+    ca_typ = value_type(first(ca_vec))
 
     return ConstantArray(API.LLVMConstArray(ca_typ, ca_vec, length(ca_vec)))
 end
@@ -204,10 +234,10 @@ function Base.collect(ca::ConstantArray)
 end
 
 # array interface
-Base.eltype(ca::ConstantArray) = llvmeltype(ca)
+Base.eltype(ca::ConstantArray) = eltype(value_type(ca))
 function Base.size(ca::ConstantArray)
     dims = Int[]
-    typ = llvmtype(ca)
+    typ = value_type(ca)
     while typ isa ArrayType
         push!(dims, length(typ))
         typ = eltype(typ)
@@ -276,13 +306,13 @@ function ConstantStruct(value::T, name=String(nameof(T)); ctx::Context,
         ConstantStruct(constants; ctx, packed)
     elseif haskey(types(ctx), name)
         typ = types(ctx)[name]
-        if collect(elements(typ)) != llvmtype.(constants)
-            throw(ArgumentError("Cannot create struct $name {$(join(llvmtype.(constants), ", "))} as it is already defined in this context as {$(join(elements(typ), ", "))}."))
+        if collect(elements(typ)) != value_type.(constants)
+            throw(ArgumentError("Cannot create struct $name {$(join(value_type.(constants), ", "))} as it is already defined in this context as {$(join(elements(typ), ", "))}."))
         end
         ConstantStruct(typ, constants)
     else
         typ = StructType(name; ctx)
-        elements!(typ, llvmtype.(constants))
+        elements!(typ, value_type.(constants))
         ConstantStruct(typ, constants)
     end
 end

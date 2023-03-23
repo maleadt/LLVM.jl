@@ -28,7 +28,7 @@
         # basic clone
         let new_f = clone(f)
             @test new_f != f
-            @test llvmtype(new_f) == llvmtype(f)
+            @test value_type(new_f) == value_type(f)
             for (bb1, bb2) in zip(blocks(f), blocks(new_f))
                 for (inst1, inst2) in zip(instructions(bb2), instructions(bb2))
                     @test inst1 == inst2
@@ -85,9 +85,9 @@
 
             # the add should now be a 64-bit addition
             add = first(instructions(first(blocks(new_f))))
-            @test llvmtype(operands(add)[1]) == LLVM.Int64Type(ctx)
-            @test llvmtype(operands(add)[2]) == LLVM.Int64Type(ctx)
-            @test llvmtype(add) == LLVM.Int64Type(ctx)
+            @test value_type(operands(add)[1]) == LLVM.Int64Type(ctx)
+            @test value_type(operands(add)[2]) == LLVM.Int64Type(ctx)
+            @test value_type(add) == LLVM.Int64Type(ctx)
         end
     end
 end

@@ -273,7 +273,7 @@
     @check_ir bitcastinst "bitcast i32 %0 to float"
     if supports_typed_ptrs
         i32ptr1 = parameters(fn)[5]
-        i32ptr1typ = llvmtype(i32ptr1)
+        i32ptr1typ = value_type(i32ptr1)
         i32ptr1typ2 = LLVM.PointerType(eltype(i32ptr1typ), 2)
         addrspacecastinst = addrspacecast!(builder, i32ptr1, i32ptr1typ2)
         @check_ir addrspacecastinst "addrspacecast i32* %4 to i32 addrspace(2)*"
