@@ -428,3 +428,12 @@ end
 function LLVMGetBuilderContext(B)
     ccall((:LLVMGetBuilderContext, libLLVMExtra), LLVMContextRef, (LLVMBuilderRef,), B)
 end
+
+if v"13" <= version() < v"15"
+function LLVMPointerTypeIsOpaque(Ty)
+    ccall((:LLVMPointerTypeIsOpaque, libLLVMExtra), LLVMBool, (LLVMTypeRef,), Ty)
+end
+function LLVMPointerTypeInContext(C, AddressSpace)
+    ccall((:LLVMPointerTypeInContext, libLLVMExtra), LLVMTypeRef, (LLVMContextRef, Cuint), C, AddressSpace)
+end
+end

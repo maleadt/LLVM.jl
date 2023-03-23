@@ -134,7 +134,7 @@ abstract type CompositeType <: LLVMType end
 
 ## sequential types
 
-export addrspace
+export addrspace, is_opaque
 
 abstract type SequentialType <: CompositeType end
 
@@ -150,12 +150,20 @@ function PointerType(eltyp::LLVMType, addrspace=0)
     return PointerType(API.LLVMPointerType(eltyp, addrspace))
 end
 
-if version() >= v"15"
-    function PointerType(ctx::Context, addrspace=0)
-        return PointerType(API.LLVMPointerTypeInContext(ctx, addrspace))
-    end
+function PointerType(addrspace=0; ctx::Context)
+    return PointerType(API.LLVMPointerTypeInContext(ctx, addrspace))
+end
 
-    Base.eltype(typ::PointerType) = throw(error("Taking the type of an opaque pointer is illegal"))
+if version() >= v"13"
+    is_opaque(ptrtyp::PointerType) =
+        convert(Core.Bool, API.LLVMPointerTypeIsOpaque(ptrtyp))
+
+    function Base.eltype(typ::PointerType)
+        is_opaque(typ) && throw(error("Taking the type of an opaque pointer is illegal"))
+        invoke(eltype, Tuple{SequentialType}, typ)
+    end
+else
+    is_opaque(ptrtyp::PointerType) = false
 end
 
 addrspace(ptrtyp::PointerType) =

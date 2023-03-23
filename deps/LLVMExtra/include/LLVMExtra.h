@@ -166,5 +166,11 @@ void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRe
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
 #endif
 
+// missing opaque pointer APIs
+#if LLVM_VERSION_MAJOR >= 13 && LLVM_VERSION_MAJOR < 15
+LLVMBool LLVMPointerTypeIsOpaque(LLVMTypeRef Ty);
+LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace);
+#endif
+
 LLVM_C_EXTERN_C_END
 #endif

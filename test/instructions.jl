@@ -138,93 +138,90 @@
     array_allocainst = array_alloca!(builder, LLVM.Int32Type(ctx), int1)
     @check_ir array_allocainst "alloca i32, i32 %0"
 
-    if supports_typed_ptrs
-        mallocinst = malloc!(builder, LLVM.Int32Type(ctx))
+    mallocinst = malloc!(builder, LLVM.Int32Type(ctx))
+    if supports_typed_pointers(ctx)
         @check_ir mallocinst r"bitcast i8\* %.+ to i32\*"
         @check_ir operands(mallocinst)[1] r"call i8\* @malloc\(.+\)"
-
-        i8ptr = parameters(fn)[6]
-
-        array_mallocinst = array_malloc!(builder, LLVM.Int8Type(ctx), ConstantInt(Int32(42); ctx))
-        @check_ir array_mallocinst r"call i8\* @malloc\(.+, i32 42\)"
-
-        memsetisnt = memset!(builder, i8ptr, ConstantInt(Int8(1); ctx), ConstantInt(Int32(2); ctx), 4)
-        @check_ir memsetisnt r"call void @llvm.memset.p0i8.i32\(i8\* align 4 %.+, i8 1, i32 2, i1 false\)"
-
-        memcpyinst = memcpy!(builder, allocainst, 4, i8ptr, 8, ConstantInt(Int32(32); ctx))
-        @check_ir memcpyinst r"call void @llvm.memcpy.p0i8.p0i8.i32\(i8\* align 4 %.+, i8\* align 8 %.+, i32 32, i1 false\)"
-
-        memmoveinst = memmove!(builder, allocainst, 4, i8ptr, 8, ConstantInt(Int32(32); ctx))
-        @check_ir memmoveinst r"call void @llvm.memmove.p0i8.p0i8.i32\(i8\* align 4 %.+, i8\* align 8 %.+, i32 32, i1 false\)"
-
-        i32ptr1 = parameters(fn)[5]
-
-        freeinst = free!(builder, i32ptr1)
-        @check_ir freeinst "tail call void @free"
-
-        loadinst = load!(builder, i32ptr1)
-        @check_ir loadinst "load i32, i32* %4"
-        alignment!(loadinst, 4)
-        @test alignment(loadinst) == 4
-
-        ordering!(loadinst, LLVM.API.LLVMAtomicOrderingSequentiallyConsistent)
-        @check_ir loadinst "load atomic i32, i32* %4 seq_cst"
-        @test ordering(loadinst) == LLVM.API.LLVMAtomicOrderingSequentiallyConsistent
-
-        storeinst = store!(builder, int1, i32ptr1)
-        @check_ir storeinst "store i32 %0, i32* %4"
-
-        fenceinst = fence!(builder, LLVM.API.LLVMAtomicOrderingNotAtomic)
-        @check_ir fenceinst "fence"
-
-        gepinst = gep!(builder, i32ptr1, [int1])
-        @check_ir gepinst "getelementptr i32, i32* %4, i32 %0"
-
-        gepinst1 = inbounds_gep!(builder, i32ptr1, [int1])
-        @check_ir gepinst1 "getelementptr inbounds i32, i32* %4, i32 %0"
-
     else
-        mallocinst = malloc!(builder, LLVM.Int32Type(ctx))
         @check_ir mallocinst r"call ptr @malloc\(.+\)"
+    end
 
-        ptr = parameters(fn)[6]
+    ptr = parameters(fn)[6]
 
-        array_mallocinst = array_malloc!(builder, LLVM.Int8Type(ctx), ConstantInt(Int32(42); ctx))
+    array_mallocinst = array_malloc!(builder, LLVM.Int8Type(ctx), ConstantInt(Int32(42); ctx))
+    if supports_typed_pointers(ctx)
+        @check_ir array_mallocinst r"call i8\* @malloc\(.+, i32 42\)"
+    else
         @check_ir array_mallocinst r"call ptr @malloc\(.+, i32 42\)"
+    end
 
-        memsetisnt = memset!(builder, ptr, ConstantInt(Int8(1); ctx), ConstantInt(Int32(2); ctx), 4)
+    memsetisnt = memset!(builder, ptr, ConstantInt(Int8(1); ctx), ConstantInt(Int32(2); ctx), 4)
+    if supports_typed_pointers(ctx)
+        @check_ir memsetisnt r"call void @llvm.memset.p0i8.i32\(i8\* align 4 %.+, i8 1, i32 2, i1 false\)"
+    else
         @check_ir memsetisnt r"call void @llvm.memset.p0.i32\(ptr align 4 %.+, i8 1, i32 2, i1 false\)"
+    end
 
-        memcpyinst = memcpy!(builder, allocainst, 4, ptr, 8, ConstantInt(Int32(32); ctx))
+    memcpyinst = memcpy!(builder, allocainst, 4, ptr, 8, ConstantInt(Int32(32); ctx))
+    if supports_typed_pointers(ctx)
+        @check_ir memcpyinst r"call void @llvm.memcpy.p0i8.p0i8.i32\(i8\* align 4 %.+, i8\* align 8 %.+, i32 32, i1 false\)"
+    else
         @check_ir memcpyinst r"call void @llvm.memcpy.p0.p0.i32\(ptr align 4 %.+, ptr align 8 %.+, i32 32, i1 false\)"
+    end
 
-        memmoveinst = memmove!(builder, allocainst, 4, ptr, 8, ConstantInt(Int32(32); ctx))
+    memmoveinst = memmove!(builder, allocainst, 4, ptr, 8, ConstantInt(Int32(32); ctx))
+    if supports_typed_pointers(ctx)
+        @check_ir memmoveinst r"call void @llvm.memmove.p0i8.p0i8.i32\(i8\* align 4 %.+, i8\* align 8 %.+, i32 32, i1 false\)"
+    else
         @check_ir memmoveinst r"call void @llvm.memmove.p0.p0.i32\(ptr align 4 %.+, ptr align 8 %.+, i32 32, i1 false\)"
+    end
 
-        ptr2 = parameters(fn)[5]
+    ptr1 = parameters(fn)[5]
 
-        freeinst = free!(builder, ptr2)
-        @check_ir freeinst "tail call void @free"
-        ptr_type = LLVM.Int32Type(ctx)
-        loadinst = load!(builder, ptr_type, ptr2)
+    freeinst = free!(builder, ptr1)
+    @check_ir freeinst "tail call void @free"
+
+    if supports_typed_pointers(ctx)
+        loadinst = load!(builder, ptr1)
+        @check_ir loadinst "load i32, i32* %4"
+    else
+        loadinst = load!(builder, LLVM.Int32Type(ctx), ptr1)
         @check_ir loadinst "load i32, ptr %4"
-        alignment!(loadinst, 4)
-        @test alignment(loadinst) == 4
+    end
+    alignment!(loadinst, 4)
+    @test alignment(loadinst) == 4
 
-        ordering!(loadinst, LLVM.API.LLVMAtomicOrderingSequentiallyConsistent)
+    ordering!(loadinst, LLVM.API.LLVMAtomicOrderingSequentiallyConsistent)
+    if supports_typed_pointers(ctx)
+        @check_ir loadinst "load atomic i32, i32* %4 seq_cst"
+    else
         @check_ir loadinst "load atomic i32, ptr %4 seq_cst"
-        @test ordering(loadinst) == LLVM.API.LLVMAtomicOrderingSequentiallyConsistent
+    end
+    @test ordering(loadinst) == LLVM.API.LLVMAtomicOrderingSequentiallyConsistent
 
-        storeinst = store!(builder, int1, ptr2)
+    storeinst = store!(builder, int1, ptr1)
+    if supports_typed_pointers(ctx)
+        @check_ir storeinst "store i32 %0, i32* %4"
+    else
         @check_ir storeinst "store i32 %0, ptr %4"
+    end
 
-        fenceinst = fence!(builder, LLVM.API.LLVMAtomicOrderingNotAtomic)
-        @check_ir fenceinst "fence"
+    fenceinst = fence!(builder, LLVM.API.LLVMAtomicOrderingNotAtomic)
+    @check_ir fenceinst "fence"
 
-        gepinst = gep!(builder, ptr_type, ptr2, [int1])
+    if supports_typed_pointers(ctx)
+        gepinst = gep!(builder, ptr1, [int1])
+        @check_ir gepinst "getelementptr i32, i32* %4, i32 %0"
+    else
+        gepinst = gep!(builder, LLVM.Int32Type(ctx), ptr1, [int1])
         @check_ir gepinst "getelementptr i32, ptr %4, i32 %0"
+    end
 
-        gepinst1 = inbounds_gep!(builder, ptr_type, ptr2, [int1])
+    if supports_typed_pointers(ctx)
+        gepinst1 = inbounds_gep!(builder, ptr1, [int1])
+        @check_ir gepinst1 "getelementptr inbounds i32, i32* %4, i32 %0"
+    else
+        gepinst1 = inbounds_gep!(builder, LLVM.Int32Type(ctx), ptr1, [int1])
         @check_ir gepinst1 "getelementptr inbounds i32, ptr %4, i32 %0"
     end
 
@@ -256,14 +253,14 @@
     @check_ir fpextinst "fpext float %2 to double"
 
     ptrtointinst = ptrtoint!(builder, parameters(fn)[5], LLVM.Int32Type(ctx))
-    if supports_typed_ptrs
+    if supports_typed_pointers(ctx)
         @check_ir ptrtointinst "ptrtoint i32* %4 to i32"
     else
         @check_ir ptrtointinst "ptrtoint ptr %4 to i32"
     end
 
     inttoptrinst = inttoptr!(builder, int1, LLVM.PointerType(LLVM.Int32Type(ctx)))
-    if supports_typed_ptrs
+    if supports_typed_pointers(ctx)
         @check_ir inttoptrinst "inttoptr i32 %0 to i32*"
     else
         @check_ir inttoptrinst "inttoptr i32 %0 to ptr"
@@ -271,15 +268,15 @@
 
     bitcastinst = bitcast!(builder, int1, LLVM.FloatType(ctx))
     @check_ir bitcastinst "bitcast i32 %0 to float"
-    if supports_typed_ptrs
-        i32ptr1 = parameters(fn)[5]
-        i32ptr1typ = value_type(i32ptr1)
-        i32ptr1typ2 = LLVM.PointerType(eltype(i32ptr1typ), 2)
-        addrspacecastinst = addrspacecast!(builder, i32ptr1, i32ptr1typ2)
+    ptr1 = parameters(fn)[5]
+    if supports_typed_pointers(ctx)
+        typ1 = value_type(ptr1)
+        ptr2 = LLVM.PointerType(eltype(typ1), 2)
+        addrspacecastinst = addrspacecast!(builder, ptr1, ptr2)
         @check_ir addrspacecastinst "addrspacecast i32* %4 to i32 addrspace(2)*"
     else
-        ptr1 = parameters(fn)[5]
-        ptr2 = LLVM.PointerType(ctx,2)
+        ptr2 = LLVM.PointerType(2; ctx)
+        @test_throws ErrorException eltype(ptr2)
         addrspacecastinst = addrspacecast!(builder, ptr1, ptr2)
         @check_ir addrspacecastinst "addrspacecast ptr %4 to ptr addrspace(2)"
     end
@@ -296,10 +293,10 @@
     castinst = cast!(builder, LLVM.API.LLVMBitCast, int1, LLVM.FloatType(ctx))
     @check_ir castinst "bitcast i32 %0 to float"
 
-    if supports_typed_ptrs
+    if supports_typed_pointers(ctx)
         floatptrtyp = LLVM.PointerType(LLVM.FloatType(ctx))
 
-        pointercastinst = pointercast!(builder, i32ptr1, floatptrtyp)
+        pointercastinst = pointercast!(builder, ptr1, floatptrtyp)
         @check_ir pointercastinst "bitcast i32* %4 to float*"
     end
 
@@ -323,7 +320,7 @@
 
     trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
 
-    if supports_typed_ptrs
+    if supports_typed_pointers(ctx)
         callinst = call!(builder, trap)
     else
         callinst = call!(builder, LLVM.FunctionType(LLVM.VoidType(ctx)), trap)
@@ -351,9 +348,14 @@
     @check_ir strinst "private unnamed_addr constant [7 x i8] c\"foobar\\00\""
 
     strptrinst = globalstring_ptr!(builder, "foobar")
-    if supports_typed_ptrs
+    if supports_typed_pointers(ctx)
         @check_ir strptrinst "i8* getelementptr inbounds ([7 x i8], [7 x i8]* @1, i32 0, i32 0)"
+    elseif LLVM.version() < v"15"
+        # globalstring_ptr! returns a i8* ptr instead of a ptr to an i8 array.
+        # that difference is moot when we have opaque pointers...
+        @check_ir strptrinst "ptr getelementptr inbounds ([7 x i8], ptr @1, i32 0, i32 0)"
     else
+        # ... so it is folded away now.
         @check_ir strptrinst "private unnamed_addr constant [7 x i8] c\"foobar\\00\""
     end
 
@@ -363,19 +365,15 @@
     isnotnullinst = isnotnull!(builder, int1)
     @check_ir isnotnullinst "icmp ne i32 %0, 0"
 
-
-    if supports_typed_ptrs
-        i32ptr1 = parameters(fn)[5]
-        i32ptr2 = parameters(fn)[6]
-        ptrdiffinst = ptrdiff!(builder, i32ptr1, i32ptr2)
+    ptr1 = parameters(fn)[5]
+    ptr2 = parameters(fn)[6]
+    if supports_typed_pointers(ctx)
+        ptrdiffinst = ptrdiff!(builder, ptr1, ptr2)
         @check_ir ptrdiffinst r"sdiv exact i64 %.+, ptrtoint \(i32\* getelementptr \(i32, i32\* null, i32 1\) to i64\)"
-    else
-        ptr1 = parameters(fn)[5]
-        ptr2 = parameters(fn)[6]
+    elseif LLVM.version() >= v"14"   # XXX: backport, if we care
         ptrdiffinst = ptrdiff!(builder, LLVM.Int32Type(ctx), ptr1, ptr2)
         @check_ir ptrdiffinst r"sdiv exact i64 %.+, ptrtoint \(ptr getelementptr \(i32, ptr null, i32 1\) to i64\)"
     end
-
 
     position!(builder)
 end
@@ -384,7 +382,7 @@ end
 
 
 @testset "operand bundles" begin
-    ir = """
+    typed_ir = """
         declare void @x()
         declare void @y()
         declare void @z()
@@ -398,10 +396,24 @@ end
 
         define void @g() {
             ret void
+        }"""
+    opaque_ir = """
+        declare void @x()
+        declare void @y()
+        declare void @z()
+
+        define void @f() {
+            call void @x()
+            call void @y() [ "deopt"(i32 1, i64 2) ]
+            call void @z() [ "deopt"(), "unknown"(ptr null) ]
+            ret void
         }
-        """
+
+        define void @g() {
+            ret void
+        }"""
     @dispose ctx=Context() begin
-        mod = parse(LLVM.Module, ir; ctx)
+        mod = parse(LLVM.Module, supports_typed_pointers(ctx) ? typed_ir : opaque_ir; ctx)
 
         @testset "iteration" begin
             f = functions(mod)["f"]
@@ -444,7 +456,11 @@ end
                 let bundle = bundles[2]
                     inputs = LLVM.inputs(bundle)
                     @test length(inputs) == 1
-                    @test sprint(io->print(io, bundle)) == "\"unknown\"(i8* null)"
+                    if supports_typed_pointers(ctx)
+                        @test sprint(io->print(io, bundle)) == "\"unknown\"(i8* null)"
+                    else
+                        @test sprint(io->print(io, bundle)) == "\"unknown\"(ptr null)"
+                    end
                 end
             end
         end
