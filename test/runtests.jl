@@ -15,6 +15,9 @@ if Base.JLOptions().debug_level < 2
     @warn "It is recommended to run the LLVM.jl test suite with -g2"
 end
 
+using InteractiveUtils
+@info "System information:\n" * sprint(io->versioninfo(io))
+
 @testset "LLVM" begin
 
 # HACK: if a test throws within a Context() do block, displaying the LLVM value may crash

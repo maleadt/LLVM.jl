@@ -169,5 +169,11 @@ LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
 // constant data
 LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data, unsigned NumElements);
 
+// missing opaque pointer APIs
+#if LLVM_VERSION_MAJOR >= 13 && LLVM_VERSION_MAJOR < 15
+LLVMBool LLVMPointerTypeIsOpaque(LLVMTypeRef Ty);
+LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace);
+#endif
+
 LLVM_C_EXTERN_C_END
 #endif
