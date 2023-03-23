@@ -38,7 +38,7 @@ end
 
     mktemp() do path, io
         mark(io)
-        write(io, source_mod)
+        @test write(io, source_mod) > 0
         flush(io)
         reset(io)
 
