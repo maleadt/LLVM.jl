@@ -109,7 +109,7 @@ function Base.convert(::Type{LLVMType}, typ::Type; ctx::Context,
         llvmtyp = let
             mod = parse(LLVM.Module, buf; ctx)
             gv = first(globals(mod))
-            llvmeltype(gv)
+            eltype(value_type(gv))
         end
     end
 

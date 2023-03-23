@@ -39,13 +39,12 @@ end
 
 ## general APIs
 
-export llvmtype, llvmeltype, name, name!, replace_uses!, replace_metadata_uses!, isconstant, isundef, ispoison, context
+export value_type, name, name!, replace_uses!, replace_metadata_uses!, isconstant, isundef, ispoison, context
 
-llvmtype(val::Value) = LLVMType(API.LLVMTypeOf(val))
-llvmeltype(val::Value) = eltype(llvmtype(val))
+value_type(val::Value) = LLVMType(API.LLVMTypeOf(val))
 
 # defer size queries to the LLVM type (where we'll error)
-Base.sizeof(val::Value) = sizeof(llvmtype(val))
+Base.sizeof(val::Value) = sizeof(value_type(val))
 
 name(val::Value) = unsafe_string(API.LLVMGetValueName(val))
 name!(val::Value, name::String) = API.LLVMSetValueName(val, name)
@@ -58,13 +57,13 @@ end
 replace_uses!(old::Value, new::Value) = API.LLVMReplaceAllUsesWith(old, new)
 
 function replace_metadata_uses!(old::Value, new::Value)
-    if llvmtype(old) == llvmtype(new)
+    if value_type(old) == value_type(new)
         API.LLVMReplaceAllMetadataUsesWith(old, new)
     else
         # NOTE: LLVM does not support replacing values of different types, either using
         #       regular RAUW or only on metadata. The latter should probably be supported.
         #       Instead, we replace by a bitcast to the old type.
-        compat_new = const_bitcast(new, llvmtype(old))
+        compat_new = const_bitcast(new, value_type(old))
         replace_metadata_uses!(old, compat_new)
 
         # the above is often invalid, e.g. for module-level metadata identifying functions.
