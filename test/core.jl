@@ -791,7 +791,10 @@ end
 @dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
     gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal", 1)
 
+    @test value_type(gv) isa LLVM.PointerType
     @test addrspace(value_type(gv)) == 1
+
+    @test global_value_type(gv) == LLVM.Int32Type(ctx)
 end
 
 end

@@ -559,7 +559,7 @@ InlineAsm(typ::FunctionType, asm::String, constraints::String,
 
 abstract type GlobalValue <: Constant end
 
-export GlobalValue,
+export GlobalValue, global_value_type,
        isdeclaration,
        linkage, linkage!,
        section, section!,
@@ -569,6 +569,8 @@ export GlobalValue,
        alignment, alignment!
 
 parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(val))
+
+global_value_type(val::GlobalValue) = LLVMType(API.LLVMGetGlobalValueType(val))
 
 isdeclaration(val::GlobalValue) = convert(Core.Bool, API.LLVMIsDeclaration(val))
 
