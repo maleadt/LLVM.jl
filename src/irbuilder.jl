@@ -55,7 +55,7 @@ debuglocation!(builder::Builder, inst::Instruction) =
 ## build methods
 
 # TODO/IDEAS:
-# - dynamic dispatch based on `llvmtype` (eg. disambiguating `add!` and `fadd!`)
+# - dynamic dispatch based on `value_type` (eg. disambiguating `add!` and `fadd!`)
 
 # NOTE: the return values for these operations are, according to the C API, always a Value.
 #       however, the C++ API learns us that we can be more strict.

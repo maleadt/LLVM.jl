@@ -50,7 +50,7 @@ function clone(f::Function; value_map::Dict{Value,Value}=Dict{Value,Value}())
     # the VMap. If so, we need to not add the arguments to the arg ty vector
     for arg in parameters(f)
         if !in(arg, keys(value_map))    # Haven't mapped the argument to anything yet?
-            push!(argtypes, llvmtype(arg))
+            push!(argtypes, value_type(arg))
         end
     end
 

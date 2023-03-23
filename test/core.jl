@@ -228,7 +228,7 @@ end
 
     show(devnull, val)
 
-    @test llvmtype(val) == LLVM.PointerType(typ)
+    @test value_type(val) == LLVM.PointerType(typ)
     @test_throws ErrorException sizeof(val)
     @test name(val) == "foo"
     @test !isconstant(val)
@@ -367,7 +367,7 @@ end
     end
     let
         constval = ConstantInt(false; ctx)
-        @test llvmtype(constval) == LLVM.Int1Type(ctx)
+        @test value_type(constval) == LLVM.Int1Type(ctx)
         @test !convert(Bool, constval)
 
         constval = ConstantInt(true; ctx)
@@ -459,7 +459,7 @@ end
     let
         test_struct = TestStruct(true, -99, 1.5)
         constant_struct = ConstantStruct(test_struct; ctx, anonymous=true)
-        constant_struct_type = llvmtype(constant_struct)
+        constant_struct_type = value_type(constant_struct)
 
         @test constant_struct_type isa LLVM.StructType
         @test context(constant_struct) == ctx
@@ -479,7 +479,7 @@ end
     let
         test_struct = TestStruct(false, 52, -2.5)
         constant_struct = ConstantStruct(test_struct; ctx)
-        constant_struct_type = llvmtype(constant_struct)
+        constant_struct_type = value_type(constant_struct)
 
         @test constant_struct_type isa LLVM.StructType
 
@@ -499,7 +499,7 @@ end
     let
         test_struct = TestSingleton()
         constant_struct = ConstantStruct(test_struct; ctx)
-        constant_struct_type = llvmtype(constant_struct)
+        constant_struct_type = value_type(constant_struct)
 
         @test isempty(operands(constant_struct))
     end
@@ -517,7 +517,7 @@ end
         eltyp = LLVM.Int32Type(ctx)
         cda = ConstantDataArray(eltyp, vec)
         @test cda isa ConstantDataArray
-        @test llvmtype(cda) == LLVM.ArrayType(eltyp, 4)
+        @test value_type(cda) == LLVM.ArrayType(eltyp, 4)
         @test collect(cda) == ConstantInt.(vec; ctx)
     end
 
@@ -697,7 +697,7 @@ end
         ce = const_ptrtoint(ptr, LLVM.Int32Type(ctx))::LLVM.Constant
         @check_ir ce "i32 0"
 
-        ce = const_inttoptr(ce, llvmtype(ptr))::LLVM.Constant
+        ce = const_inttoptr(ce, value_type(ptr))::LLVM.Constant
         if supports_typed_ptrs
             @check_ir ce "i32* null"
         else
@@ -815,7 +815,10 @@ end
 @dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
     gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal", 1)
 
-    @test addrspace(llvmtype(gv)) == 1
+    @test value_type(gv) isa LLVM.PointerType
+    @test addrspace(value_type(gv)) == 1
+
+    @test global_value_type(gv) == LLVM.Int32Type(ctx)
 end
 
 end
@@ -1165,7 +1168,7 @@ end
     @test fn isa LLVM.Function
 
     if supports_typed_ptrs
-        @test llvmeltype(fn) == ft
+        @test eltype(value_type(fn)) == ft
     end
     @test isintrinsic(fn)
 
@@ -1192,7 +1195,7 @@ end
     fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
     @test fn isa LLVM.Function
     if supports_typed_ptrs
-        @test llvmeltype(fn) == ft
+        @test eltype(value_type(fn)) == ft
     end
     @test isintrinsic(fn)
 
