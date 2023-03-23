@@ -518,17 +518,6 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        LLVMValueRef *Args, unsigned NumArgs,
                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
                                        const char *Name) {
-
-    // TODO make opaque pointer compatibly
-    Value *V = unwrap(Fn);
-    #if LLVM_VERSION_MAJOR <= 14
-        FunctionType *FnT =
-            cast<FunctionType>(cast<PointerType>(V->getType())->getElementType());
-    #else
-        FunctionType *FnT =
-            cast<FunctionType>(cast<PointerType>(V->getType())->getPointerElementType()); // deprecated
-    #endif
-
     SmallVector<OperandBundleDef, 1> BundleArray;
     for (auto *Bundle : makeArrayRef(Bundles, NumBundles))
         BundleArray.push_back(*unwrap<OperandBundleDef>(Bundle));
@@ -536,6 +525,7 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
     llvm::IRBuilder<> *Builder = unwrap(B);
     llvm::ArrayRef<llvm::Value*> args = makeArrayRef(unwrap(Args), NumArgs);
 
+    FunctionType *FnT = unwrap<Function>(Fn)->getFunctionType();
     llvm::CallInst *CI = Builder->CreateCall(FnT, unwrap(Fn), args ,BundleArray, Name);
     return wrap(CI);
 }
@@ -576,3 +566,12 @@ LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef GV) {
     auto Ftype = unwrap<GlobalValue>(GV)->getValueType();
     return wrap(Ftype);
 }
+
+#if LLVM_VERSION_MAJOR >= 13 && LLVM_VERSION_MAJOR < 15
+LLVMBool LLVMPointerTypeIsOpaque(LLVMTypeRef Ty) {
+  return unwrap(Ty)->isOpaquePointerTy();
+}
+LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace) {
+  return wrap(PointerType::get(*unwrap(C), AddressSpace));
+}
+#endif
