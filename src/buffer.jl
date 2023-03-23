@@ -57,4 +57,4 @@ Base.length(membuf::MemoryBuffer) = API.LLVMGetBufferSize(membuf)
 Base.pointer(membuf::MemoryBuffer) = convert(Ptr{UInt8}, API.LLVMGetBufferStart(membuf))
 
 Base.convert(::Type{Vector{UInt8}}, membuf::MemoryBuffer) =
-    unsafe_wrap(Array, pointer(membuf), length(membuf))
+    copy(unsafe_wrap(Array, pointer(membuf), length(membuf)))
