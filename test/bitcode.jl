@@ -5,7 +5,7 @@
     @test_throws LLVMException parse(LLVM.Module, unsafe_wrap(Vector{UInt8}, invalid_bitcode); ctx)
 end
 
-@dispose ctx=Context() builder=Builder(ctx) source_mod=LLVM.Module("SomeModule"; ctx) begin
+@dispose ctx=Context() builder=IRBuilder(ctx) source_mod=LLVM.Module("SomeModule"; ctx) begin
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(source_mod, "SomeFunction", ft)
 

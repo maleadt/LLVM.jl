@@ -6,16 +6,16 @@
 end
 
 @dispose ctx=Context() begin
-    let builder = Builder(ctx)
+    let builder = IRBuilder(ctx)
         dispose(builder)
     end
 
-    Builder(ctx) do builder
+    IRBuilder(ctx) do builder
     end
 end
 
 
-@dispose ctx=Context() builder=Builder(ctx) source_mod=LLVM.Module("SomeModule"; ctx) begin
+@dispose ctx=Context() builder=IRBuilder(ctx) source_mod=LLVM.Module("SomeModule"; ctx) begin
     ft = LLVM.FunctionType(LLVM.VoidType(ctx))
     fn = LLVM.Function(source_mod, "SomeFunction", ft)
 

@@ -21,7 +21,7 @@ end
     sum = LLVM.Function(mod, "sum", fun_type)
 
     # generate IR
-    @dispose builder=Builder(ctx) begin
+    @dispose builder=IRBuilder(ctx) begin
         entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 

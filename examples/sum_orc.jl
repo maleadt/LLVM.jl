@@ -22,7 +22,7 @@ function codegen!(mod::LLVM.Module, name, tm)
     sum = LLVM.Function(mod, name, ft)
 
     # generate IR
-    @dispose builder=Builder(ctx) begin
+    @dispose builder=IRBuilder(ctx) begin
         entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 

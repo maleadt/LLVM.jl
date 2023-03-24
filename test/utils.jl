@@ -11,7 +11,7 @@
         f = LLVM.Function(mod, "f", fun_type)
 
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(f, "entry"; ctx)
             position!(builder, entry)
             ptr = const_inttoptr(

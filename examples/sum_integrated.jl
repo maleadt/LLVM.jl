@@ -18,7 +18,7 @@ end
     sum, _ = create_function(ret_type, param_types)
 
     # generate IR
-    @dispose builder=Builder(ctx) begin
+    @dispose builder=IRBuilder(ctx) begin
         entry = BasicBlock(sum, "entry"; ctx)
         position!(builder, entry)
 

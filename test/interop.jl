@@ -11,7 +11,7 @@ using InteractiveUtils
 
         f, ft = create_function(T_int, [T_int])
 
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(f, "entry"; ctx)
             position!(builder, entry)
 

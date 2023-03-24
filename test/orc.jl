@@ -21,7 +21,7 @@ end
         fname = mangle(orc, "wrapper")
         wrapper = LLVM.Function(mod, fname, ft)
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(wrapper, "entry"; ctx)
             position!(builder, entry)
 
@@ -73,7 +73,7 @@ end
         fname = mangle(orc, "wrapper")
         wrapper = LLVM.Function(mod, fname, ft)
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(wrapper, "entry"; ctx)
             position!(builder, entry)
 
@@ -128,7 +128,7 @@ end
         fname = mangle(orc, "wrapper")
         wrapper = LLVM.Function(mod, fname, ft)
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(wrapper, "entry"; ctx)
             position!(builder, entry)
 
@@ -171,7 +171,7 @@ end
         fname = mangle(orc, "wrapper")
         wrapper = LLVM.Function(mod, fname, ft)
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(wrapper, "entry"; ctx)
             position!(builder, entry)
 
@@ -214,7 +214,7 @@ end
         ft = LLVM.FunctionType(LLVM.VoidType(ctx))
         fn = LLVM.Function(mod, sym, ft)
 
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(fn, "entry"; ctx)
             position!(builder, entry)
             ret!(builder)
@@ -285,7 +285,7 @@ end
                 ft = LLVM.FunctionType(LLVM.VoidType(ctx))
                 fn = LLVM.Function(mod, sym, ft)
 
-                @dispose builder=Builder(ctx) begin
+                @dispose builder=IRBuilder(ctx) begin
                     entry = BasicBlock(fn, "entry"; ctx)
                     position!(builder, entry)
                     ret!(builder)
