@@ -68,7 +68,7 @@ end
             fname = "wrapper"
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
-            @dispose builder=Builder(ctx) begin
+            @dispose builder=IRBuilder(ctx) begin
                 entry = BasicBlock(wrapper, "entry"; ctx)
                 position!(builder, entry)
 
@@ -110,7 +110,7 @@ end
             ft = LLVM.FunctionType(LLVM.VoidType(ctx))
             fn = LLVM.Function(mod, sym, ft)
 
-            @dispose builder=Builder(ctx) begin
+            @dispose builder=IRBuilder(ctx) begin
                 entry = BasicBlock(fn, "entry"; ctx)
                 position!(builder, entry)
                 ret!(builder)
@@ -144,7 +144,7 @@ end
             gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(ctx), "gv")
             LLVM.extinit!(gv, true)
 
-            @dispose builder=Builder(ctx) begin
+            @dispose builder=IRBuilder(ctx) begin
                 entry = BasicBlock(fn, "entry"; ctx)
                 position!(builder, entry)
                 val = load!(builder, gv)
@@ -208,7 +208,7 @@ end
                 ft = LLVM.FunctionType(LLVM.VoidType(ctx))
                 fn = LLVM.Function(mod, sym, ft)
 
-                @dispose builder=Builder(ctx) begin
+                @dispose builder=IRBuilder(ctx) begin
                     entry = BasicBlock(fn, "entry"; ctx)
                     position!(builder, entry)
                     ret!(builder)
@@ -273,7 +273,7 @@ end
                     fn = LLVM.Function(mod, "foo", ft)
 
                     # generate IR
-                    @dispose builder=Builder(ctx) begin
+                    @dispose builder=IRBuilder(ctx) begin
                         entry = BasicBlock(fn, "entry"; ctx)
                         position!(builder, entry)
 

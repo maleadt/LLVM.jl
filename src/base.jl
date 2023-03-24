@@ -15,10 +15,6 @@ end
 # calling `refcheck` on the ref field argument
 macro checked(typedef)
     # decode structure definition
-    if Meta.isexpr(typedef, :macrocall)
-        # handle `@compat` prefixing 0.6-style type declarations
-        typedef = macroexpand(typedef)
-    end
     if Meta.isexpr(typedef, :struct)
         structure = typedef.args[2]
         body = typedef.args[3]

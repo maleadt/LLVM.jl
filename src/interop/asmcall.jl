@@ -12,7 +12,7 @@ export @asmcall
         inline_asm = InlineAsm(llvm_ft, String(asm), String(constraints), side_effects)
 
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 

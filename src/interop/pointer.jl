@@ -21,17 +21,16 @@ using Core: LLVMPtr
         llvm_f, _ = create_function(eltyp, param_types)
 
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
-            if supports_typed_pointers(ctx)
+            ptr = if supports_typed_pointers(ctx)
                 typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
-                typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[2]])
-                ld = load!(builder, typed_ptr)
+                inbounds_gep!(builder, eltyp, typed_ptr, [parameters(llvm_f)[2]])
             else
-                ptr = inbounds_gep!(builder, eltyp, parameters(llvm_f)[1],[parameters(llvm_f)[2]])
-                ld = load!(builder, eltyp, ptr)
+                inbounds_gep!(builder, eltyp, parameters(llvm_f)[1], [parameters(llvm_f)[2]])
             end
+            ld = load!(builder, eltyp, ptr)
             if A != 0
                 metadata(ld)[LLVM.MD_tbaa] = tbaa_addrspace(A; ctx)
             end
@@ -59,19 +58,17 @@ end
         llvm_f, _ = create_function(LLVM.VoidType(ctx), param_types)
 
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
-            if supports_typed_pointers(ctx)
+            ptr = if supports_typed_pointers(ctx)
                 typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
-                typed_ptr = inbounds_gep!(builder, typed_ptr, [parameters(llvm_f)[3]])
-                val = parameters(llvm_f)[2]
-                st = store!(builder, val, typed_ptr)
+                inbounds_gep!(builder, eltyp, typed_ptr, [parameters(llvm_f)[3]])
             else
-                ptr = inbounds_gep!(builder, eltyp, parameters(llvm_f)[1], [parameters(llvm_f)[3]])
-                val = parameters(llvm_f)[2]
-                st = store!(builder, val, ptr)
+                inbounds_gep!(builder, eltyp, parameters(llvm_f)[1], [parameters(llvm_f)[3]])
             end
+            val = parameters(llvm_f)[2]
+            st = store!(builder, val, ptr)
             if A != 0
                 metadata(st)[LLVM.MD_tbaa] = tbaa_addrspace(A; ctx)
             end
@@ -129,7 +126,7 @@ Base.signed(x::LLVMPtr) = Int(x)
         llvm_f, _ = create_function(T_dest, [T_src])
         mod = LLVM.parent(llvm_f)
 
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
@@ -164,7 +161,7 @@ end
         llvm_f, _ = create_function(T_ret, T_args)
         mod = LLVM.parent(llvm_f)
 
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 

@@ -1,6 +1,6 @@
 @testset "irbuilder" begin
 
-@dispose ctx=Context() builder=Builder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
+@dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx),
                                                 LLVM.FloatType(ctx), LLVM.FloatType(ctx),
                                                 LLVM.PointerType(LLVM.Int32Type(ctx)),
@@ -181,11 +181,10 @@
     freeinst = free!(builder, ptr1)
     @check_ir freeinst "tail call void @free"
 
+    loadinst = load!(builder, LLVM.Int32Type(ctx), ptr1)
     if supports_typed_pointers(ctx)
-        loadinst = load!(builder, ptr1)
         @check_ir loadinst "load i32, i32* %4"
     else
-        loadinst = load!(builder, LLVM.Int32Type(ctx), ptr1)
         @check_ir loadinst "load i32, ptr %4"
     end
     alignment!(loadinst, 4)
@@ -209,19 +208,17 @@
     fenceinst = fence!(builder, LLVM.API.LLVMAtomicOrderingNotAtomic)
     @check_ir fenceinst "fence"
 
+    gepinst = gep!(builder, LLVM.Int32Type(ctx), ptr1, [int1])
     if supports_typed_pointers(ctx)
-        gepinst = gep!(builder, ptr1, [int1])
         @check_ir gepinst "getelementptr i32, i32* %4, i32 %0"
     else
-        gepinst = gep!(builder, LLVM.Int32Type(ctx), ptr1, [int1])
         @check_ir gepinst "getelementptr i32, ptr %4, i32 %0"
     end
 
+    gepinst1 = inbounds_gep!(builder, LLVM.Int32Type(ctx), ptr1, [int1])
     if supports_typed_pointers(ctx)
-        gepinst1 = inbounds_gep!(builder, ptr1, [int1])
         @check_ir gepinst1 "getelementptr inbounds i32, i32* %4, i32 %0"
     else
-        gepinst1 = inbounds_gep!(builder, LLVM.Int32Type(ctx), ptr1, [int1])
         @check_ir gepinst1 "getelementptr inbounds i32, ptr %4, i32 %0"
     end
 
@@ -320,11 +317,7 @@
 
     trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
 
-    if supports_typed_pointers(ctx)
-        callinst = call!(builder, trap)
-    else
-        callinst = call!(builder, LLVM.FunctionType(LLVM.VoidType(ctx)), trap)
-    end
+    callinst = call!(builder, LLVM.FunctionType(LLVM.VoidType(ctx)), trap)
 
     @check_ir callinst "call void @llvm.trap()"
     @test called_value(callinst) == trap
@@ -367,11 +360,10 @@
 
     ptr1 = parameters(fn)[5]
     ptr2 = parameters(fn)[6]
+    ptrdiffinst = ptrdiff!(builder, LLVM.Int32Type(ctx), ptr1, ptr2)
     if supports_typed_pointers(ctx)
-        ptrdiffinst = ptrdiff!(builder, ptr1, ptr2)
         @check_ir ptrdiffinst r"sdiv exact i64 %.+, ptrtoint \(i32\* getelementptr \(i32, i32\* null, i32 1\) to i64\)"
-    elseif LLVM.version() >= v"14"   # XXX: backport, if we care
-        ptrdiffinst = ptrdiff!(builder, LLVM.Int32Type(ctx), ptr1, ptr2)
+    else
         @check_ir ptrdiffinst r"sdiv exact i64 %.+, ptrtoint \(ptr getelementptr \(i32, ptr null, i32 1\) to i64\)"
     end
 
@@ -479,9 +471,11 @@ end
             @test sprint(io->print(io, bundle1)) == "\"unknown\"(i32 1, i64 2)"
 
             # use in a call
-            @dispose builder=Builder(ctx) begin
+            f = functions(mod)["x"]
+            ft = function_type(f)
+            @dispose builder=IRBuilder(ctx) begin
                 position!(builder, inst)
-                inst = call!(builder, functions(mod)["x"], Value[], [bundle1])
+                inst = call!(builder, ft, f, Value[], [bundle1])
 
                 bundles = operand_bundles(inst)
                 @test length(bundles) == 1
@@ -500,8 +494,8 @@ end
                 @test sprint(io->print(io, bundle3)) == "\"unknown\"(i32 1, i64 2)"
 
                 # creating a call should perform the necessary conversion automatically
-                call!(builder, functions(mod)["x"], Value[], operand_bundles(inst))
-                call!(builder, functions(mod)["x"], Value[], [bundle2])
+                call!(builder, ft, f, Value[], operand_bundles(inst))
+                call!(builder, ft, f, Value[], [bundle2])
             end
         end
     end
