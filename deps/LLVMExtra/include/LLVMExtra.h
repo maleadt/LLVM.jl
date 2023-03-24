@@ -158,6 +158,10 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        LLVMValueRef *Args, unsigned NumArgs,
                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
                                        const char *Name);
+LLVMValueRef LLVMBuildCallWithOpBundle2(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
+                                        LLVMValueRef *Args, unsigned NumArgs,
+                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
+                                        const char *Name);
 LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata);
 void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New);
 void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);

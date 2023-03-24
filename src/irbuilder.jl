@@ -110,6 +110,7 @@ indirectbr!(builder::IRBuilder, Addr::Value, NumDests::Integer=10) =
 function invoke!(builder::IRBuilder, Fn::Value, Args::Vector{<:Value}, Then::BasicBlock,
                  Catch::BasicBlock, Name::String="")
     supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("invoke! without specifying the function type is deprecated", :invoke)
     Instruction(API.LLVMBuildInvoke(builder, Fn, Args, length(Args), Then, Catch, Name))
 end
 
@@ -259,11 +260,16 @@ free!(builder::IRBuilder, PointerVal::Value) =
 
 function load!(builder::IRBuilder, PointerVal::Value, Name::String="")
     supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("load! without specifying the destination type is deprecated", :load)
     Instruction(API.LLVMBuildLoad(builder, PointerVal, Name))
 end
 
 function load!(builder::IRBuilder, Ty::LLVMType, PointerVal::Value, Name::String="")
-    Instruction(API.LLVMBuildLoad2(builder, Ty, PointerVal, Name))
+    @static if version() >= v"11"
+        Instruction(API.LLVMBuildLoad2(builder, Ty, PointerVal, Name))
+    else
+        Instruction(API.LLVMBuildLoad(builder, PointerVal, Name))
+    end
 end
 
 store!(builder::IRBuilder, Val::Value, Ptr::Value) =
@@ -286,32 +292,47 @@ atomic_cmpxchg!(builder::IRBuilder, Ptr::Value, Cmp::Value, New::Value,
 
 function gep!(builder::IRBuilder, Pointer::Value, Indices::Vector{<:Value}, Name::String="")
     supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("gep! without specifying the destination type is deprecated", :gep)
     Value(API.LLVMBuildGEP(builder, Pointer, Indices, length(Indices), Name))
 end
 
 function gep!(builder::IRBuilder, Ty::LLVMType, Pointer::Value, Indices::Vector{<:Value},
               Name::String="")
-    return Value(API.LLVMBuildGEP2(builder, Ty, Pointer, Indices, length(Indices), Name))
+    @static if version() >= v"11"
+        Value(API.LLVMBuildGEP2(builder, Ty, Pointer, Indices, length(Indices), Name))
+    else
+        Value(API.LLVMBuildGEP(builder, Pointer, Indices, length(Indices), Name))
+    end
 end
 
 function inbounds_gep!(builder::IRBuilder, Pointer::Value, Indices::Vector{<:Value},
                        Name::String="")
     supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("inbounds_gep! without specifying the destination type is deprecated", :inbounds_gep)
     Value(API.LLVMBuildInBoundsGEP(builder, Pointer, Indices, length(Indices), Name))
 end
 
 function inbounds_gep!(builder::IRBuilder, Ty::LLVMType, Pointer::Value,
                        Indices::Vector{<:Value}, Name::String="")
-    Value(API.LLVMBuildInBoundsGEP2(builder, Ty, Pointer, Indices, length(Indices), Name))
+    @static if version() >= v"11"
+        Value(API.LLVMBuildInBoundsGEP2(builder, Ty, Pointer, Indices, length(Indices), Name))
+    else
+        Value(API.LLVMBuildInBoundsGEP(builder, Pointer, Indices, length(Indices), Name))
+    end
 end
 
 function struct_gep!(builder::IRBuilder, Pointer::Value, Idx, Name::String="")
     supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("struct_gep! without specifying the destination type is deprecated", :struct_gep)
     Value(API.LLVMBuildStructGEP(builder, Pointer, Idx, Name))
 end
 
 function struct_gep!(builder::IRBuilder, Ty::LLVMType, Pointer::Value, Idx, Name::String="")
-    Value(API.LLVMBuildStructGEP2(builder, Ty, Pointer, Idx, Name))
+    @static if version() >= v"11"
+        Value(API.LLVMBuildStructGEP2(builder, Ty, Pointer, Idx, Name))
+    else
+        Value(API.LLVMBuildStructGEP(builder, Pointer, Idx, Name))
+    end
 end
 
 # conversion operations
@@ -394,25 +415,47 @@ select!(builder::IRBuilder, If::Value, Then::Value, Else::Value, Name::String=""
 
 function call!(builder::IRBuilder, Fn::Value, Args::Vector{<:Value}=Value[], Name::String="")
     supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("call! without specifying the function type is deprecated", :call)
     Instruction(API.LLVMBuildCall(builder, Fn, Args, length(Args), Name))
 end
 
 function call!(builder::IRBuilder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value}=Value[],
                Name::String="")
-    Instruction(API.LLVMBuildCall2(builder, Ty, Fn, Args, length(Args), Name))
+    @static if version() >= v"11"
+        Instruction(API.LLVMBuildCall2(builder, Ty, Fn, Args, length(Args), Name))
+    else
+        Instruction(API.LLVMBuildCall(builder, Fn, Args, length(Args), Name))
+    end
 end
 
-call!(builder::IRBuilder, Fn::Value, Args::Vector{<:Value},
-      Bundles::Vector{OperandBundleDef}, Name::String="") =
+function call!(builder::IRBuilder, Fn::Value, Args::Vector{<:Value},
+               Bundles::Vector{OperandBundleDef}, Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("call! without specifying the function type is deprecated", :call)
     Instruction(API.LLVMBuildCallWithOpBundle(builder, Fn, Args, length(Args), Bundles,
                                               length(Bundles), Name))
+end
+function call!(builder::IRBuilder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value},
+               Bundles::Vector{OperandBundleDef}, Name::String="")
+    Instruction(API.LLVMBuildCallWithOpBundle2(builder, Ty, Fn, Args, length(Args), Bundles,
+                                               length(Bundles), Name))
+end
 
 # convenience function that performs the OperandBundle(Iterator|Use)->Def conversion
-call!(builder::IRBuilder, Fn::Value, Args::Vector{<:Value},
-      Bundles, Name::String="") =
+function call!(builder::IRBuilder, Fn::Value, Args::Vector{<:Value},
+               Bundles, Name::String="")
+    supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("call! without specifying the function type is deprecated", :call)
     Instruction(API.LLVMBuildCallWithOpBundle(builder, Fn, Args, length(Args),
                                               OperandBundleDef.(Bundles),
                                               length(Bundles), Name))
+end
+function call!(builder::IRBuilder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value},
+               Bundles, Name::String="")
+    Instruction(API.LLVMBuildCallWithOpBundle2(builder, Ty, Fn, Args, length(Args),
+                                               OperandBundleDef.(Bundles),
+                                               length(Bundles), Name))
+end
 
 va_arg!(builder::IRBuilder, List::Value, Ty::LLVMType, Name::String="") =
     Instruction(API.LLVMBuildVAArg(builder, List, Ty, Name))
@@ -453,9 +496,15 @@ isnotnull!(builder::IRBuilder, Val::Value, Name::String="") =
 
 function ptrdiff!(builder::IRBuilder, LHS::Value, RHS::Value, Name::String="")
     supports_typed_pointers(context(builder)) || throw_typedpointererror()
+    Base.depwarn("ptrdiff! without specifying a pointer type is deprecated", :ptrdiff)
     Value(API.LLVMBuildPtrDiff(builder, LHS, RHS, Name))
 end
 
 function ptrdiff!(builder::IRBuilder, Ty::LLVMType, LHS::Value, RHS::Value, Name::String="")
-    Value(API.LLVMBuildPtrDiff2(builder, Ty, LHS, RHS, Name))
+    @static if version() >= v"15"
+        # XXX: backport this to LLVM 11, if we care
+        Value(API.LLVMBuildPtrDiff2(builder, Ty, LHS, RHS, Name))
+    else
+        Value(API.LLVMBuildPtrDiff(builder, LHS, RHS, Name))
+    end
 end

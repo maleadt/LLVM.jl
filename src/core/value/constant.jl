@@ -465,6 +465,7 @@ const_ashr(lhs::Constant, rhs::Constant) =
 
 function const_gep(val::Constant, Indices::Vector{<:Constant})
     supports_typed_pointers(context(val)) || throw_typedpointererror()
+    Base.depwarn("const_gep without specifying the destination type is deprecated", :const_gep)
     Value(API.LLVMConstGEP(val, Indices, length(Indices)))
 end
 
@@ -474,6 +475,7 @@ end
 
 function const_inbounds_gep(val::Constant, Indices::Vector{<:Constant})
     supports_typed_pointers(context(val)) || throw_typedpointererror()
+    Base.depwarn("const_inbounds_gep without specifying the destination type is deprecated", :const_inbounds_gep)
     Value(API.LLVMConstInboundsGEP(val, Indices, length(Indices)))
 end
 

@@ -525,8 +525,25 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
     llvm::IRBuilder<> *Builder = unwrap(B);
     llvm::ArrayRef<llvm::Value*> args = makeArrayRef(unwrap(Args), NumArgs);
 
-    FunctionType *FnT = unwrap<Function>(Fn)->getFunctionType();
+    Value *V = unwrap(Fn);
+    FunctionType *FnT = cast<FunctionType>(V->getType()->getPointerElementType());
     llvm::CallInst *CI = Builder->CreateCall(FnT, unwrap(Fn), args ,BundleArray, Name);
+    return wrap(CI);
+}
+
+LLVMValueRef LLVMBuildCallWithOpBundle2(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
+                                        LLVMValueRef *Args, unsigned NumArgs,
+                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
+                                        const char *Name) {
+    SmallVector<OperandBundleDef, 1> BundleArray;
+    for (auto *Bundle : makeArrayRef(Bundles, NumBundles))
+        BundleArray.push_back(*unwrap<OperandBundleDef>(Bundle));
+
+    llvm::IRBuilder<> *Builder = unwrap(B);
+    llvm::ArrayRef<llvm::Value*> args = makeArrayRef(unwrap(Args), NumArgs);
+
+    FunctionType *FTy = unwrap<FunctionType>(Ty);
+    llvm::CallInst *CI = Builder->CreateCall(FTy, unwrap(Fn), args ,BundleArray, Name);
     return wrap(CI);
 }
 
