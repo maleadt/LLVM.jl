@@ -57,7 +57,7 @@ function emit_sum(ctx::Context)
 
     entry = BasicBlock(sum, "entry"; ctx)
 
-    @dispose builder=Builder(ctx) begin
+    @dispose builder=IRBuilder(ctx) begin
         position!(builder, entry)
 
         tmp = add!(builder, parameters(sum)[1], parameters(sum)[2])
@@ -78,7 +78,7 @@ function emit_retint(ctx::Context, val)
 
     entry = BasicBlock(fn, "entry"; ctx)
 
-    @dispose builder=Builder(ctx) begin
+    @dispose builder=IRBuilder(ctx) begin
         position!(builder, entry)
 
         ret!(builder, ConstantInt(LLVM.Int32Type(ctx), val))
@@ -103,7 +103,7 @@ function emit_phi(ctx::Context)
     elsee = BasicBlock(fn, "else"; ctx)
     merge = BasicBlock(fn, "ifcont"; ctx)
 
-    @dispose builder=Builder(ctx) begin
+    @dispose builder=IRBuilder(ctx) begin
         position!(builder, entry)
 
         cond = LLVM.icmp!(builder, LLVM.API.LLVMIntSGT, parameters(fn)[1], parameters(fn)[2], "ifcond")

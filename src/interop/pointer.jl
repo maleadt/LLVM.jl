@@ -21,7 +21,7 @@ using Core: LLVMPtr
         llvm_f, _ = create_function(eltyp, param_types)
 
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
             if supports_typed_pointers(ctx)
@@ -59,7 +59,7 @@ end
         llvm_f, _ = create_function(LLVM.VoidType(ctx), param_types)
 
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
             if supports_typed_pointers(ctx)
@@ -129,7 +129,7 @@ Base.signed(x::LLVMPtr) = Int(x)
         llvm_f, _ = create_function(T_dest, [T_src])
         mod = LLVM.parent(llvm_f)
 
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 
@@ -164,7 +164,7 @@ end
         llvm_f, _ = create_function(T_ret, T_args)
         mod = LLVM.parent(llvm_f)
 
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvm_f, "entry"; ctx)
             position!(builder, entry)
 

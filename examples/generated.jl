@@ -21,7 +21,7 @@ end
         llvmf, _ = create_function(eltyp, paramtyps)
 
         # generate IR
-        @dispose builder=Builder(ctx) begin
+        @dispose builder=IRBuilder(ctx) begin
             entry = BasicBlock(llvmf, "entry"; ctx)
             position!(builder, entry)
 

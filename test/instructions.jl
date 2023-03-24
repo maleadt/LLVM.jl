@@ -1,6 +1,6 @@
 @testset "irbuilder" begin
 
-@dispose ctx=Context() builder=Builder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
+@dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
     ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx),
                                                 LLVM.FloatType(ctx), LLVM.FloatType(ctx),
                                                 LLVM.PointerType(LLVM.Int32Type(ctx)),
@@ -479,7 +479,7 @@ end
             @test sprint(io->print(io, bundle1)) == "\"unknown\"(i32 1, i64 2)"
 
             # use in a call
-            @dispose builder=Builder(ctx) begin
+            @dispose builder=IRBuilder(ctx) begin
                 position!(builder, inst)
                 inst = call!(builder, functions(mod)["x"], Value[], [bundle1])
 

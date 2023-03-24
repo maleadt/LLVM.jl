@@ -1,6 +1,6 @@
 @testset "linker" begin
 
-@dispose ctx=Context() builder=Builder(ctx) begin
+@dispose ctx=Context() builder=IRBuilder(ctx) begin
     mod1 = let
         mod = LLVM.Module("SomeModule"; ctx)
         ft = LLVM.FunctionType(LLVM.VoidType(ctx))
