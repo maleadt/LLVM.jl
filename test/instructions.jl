@@ -321,6 +321,7 @@
 
     @check_ir callinst "call void @llvm.trap()"
     @test called_value(callinst) == trap
+    @test called_type(callinst) == LLVM.FunctionType(LLVM.VoidType(ctx))
 
     neginst = neg!(builder, int1)
     @check_ir neginst "sub i32 0, %0"

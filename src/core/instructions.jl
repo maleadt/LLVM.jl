@@ -148,7 +148,7 @@ const CallBase = Union{CallBrInst, CallInst, InvokeInst}
 
 export callconv, callconv!,
        istailcall, tailcall!,
-       called_value, arguments,
+       called_value, arguments, called_type,
        OperandBundleUse, OperandBundleDef, operand_bundles
 
 callconv(inst::CallBase) = API.LLVMGetInstructionCallConv(inst)
@@ -159,6 +159,14 @@ istailcall(inst::CallBase) = convert(Core.Bool, API.LLVMIsTailCall(inst))
 tailcall!(inst::CallBase, bool) = API.LLVMSetTailCall(inst, convert(Bool, bool))
 
 called_value(inst::CallBase) = Value(API.LLVMGetCalledValue(inst))
+
+function called_type(inst::CallBase)
+    @static if version() >= v"11"
+        LLVMType(API.LLVMGetCalledFunctionType(inst))
+    else
+        value_type(called_value(inst))
+    end
+end
 
 function arguments(inst::CallBase)
     nargs = API.LLVMGetNumArgOperands(inst)
