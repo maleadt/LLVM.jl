@@ -6,18 +6,18 @@ export @typed_ccall
 
 using Core: LLVMPtr
 
-@generated function pointerref(ptr::LLVMPtr{T,A}, i::Integer, ::Val{align}) where {T,A,align}
+@generated function pointerref(ptr::LLVMPtr{T,A}, i::I, ::Val{align}) where {T,A,I,align}
     sizeof(T) == 0 && return T.instance
     @dispose ctx=Context() begin
         eltyp = convert(LLVMType, T; ctx)
 
-        T_int = convert(LLVMType, Int; ctx)
+        T_idx = convert(LLVMType, I; ctx)
         T_ptr = convert(LLVMType, ptr; ctx)
 
         T_typed_ptr = LLVM.PointerType(eltyp, A)
 
         # create a function
-        param_types = [T_ptr, T_int]
+        param_types = [T_ptr, T_idx]
         llvm_f, _ = create_function(eltyp, param_types)
 
         # generate IR
@@ -39,22 +39,22 @@ using Core: LLVMPtr
             ret!(builder, ld)
         end
 
-        call_function(llvm_f, T, Tuple{LLVMPtr{T,A}, Int}, :ptr, :(Int(i-one(i))))
+        call_function(llvm_f, T, Tuple{LLVMPtr{T,A}, I}, :ptr, :(i-one(I)))
     end
 end
 
-@generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::Integer, ::Val{align}) where {T,A,align}
+@generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::I, ::Val{align}) where {T,A,I,align}
     sizeof(T) == 0 && return
     @dispose ctx=Context() begin
         eltyp = convert(LLVMType, T; ctx)
 
-        T_int = convert(LLVMType, Int; ctx)
+        T_idx = convert(LLVMType, I; ctx)
         T_ptr = convert(LLVMType, ptr; ctx)
 
         T_typed_ptr = LLVM.PointerType(eltyp, A)
 
         # create a function
-        param_types = [T_ptr, eltyp, T_int]
+        param_types = [T_ptr, eltyp, T_idx]
         llvm_f, _ = create_function(LLVM.VoidType(ctx), param_types)
 
         # generate IR
@@ -77,8 +77,8 @@ end
             ret!(builder)
         end
 
-        call_function(llvm_f, Cvoid, Tuple{LLVMPtr{T,A}, T, Int},
-                      :ptr, :(convert(T,x)), :(Int(i-one(i))))
+        call_function(llvm_f, Cvoid, Tuple{LLVMPtr{T,A}, T, I},
+                      :ptr, :(convert(T,x)), :(i-one(I)))
     end
 end
 
