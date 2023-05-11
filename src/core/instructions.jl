@@ -1,5 +1,5 @@
 export Instruction, unsafe_delete!,
-       metadata, metadata!,
+       metadata,
        opcode,
        predicate_int, predicate_real
 

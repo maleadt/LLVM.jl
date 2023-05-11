@@ -160,7 +160,7 @@ end
 
 # intrinsics
 
-export isintrinsic, Intrinsic, isoverloaded, declaration
+export isintrinsic, Intrinsic, isoverloaded
 
 isintrinsic(f::Function) = API.LLVMGetIntrinsicID(f) != 0
 

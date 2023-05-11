@@ -1,6 +1,6 @@
 ## subsystem initialization
 
-export Shutdown, ismultithreaded
+export ismultithreaded
 
 ismultithreaded() = convert(Core.Bool, API.LLVMIsMultithreaded())
 
