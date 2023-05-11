@@ -587,20 +587,6 @@ end
             ce = f(val, other_val)::LLVM.Constant
             @check_ir ce "i32 84"
         end
-        if supports_typed_pointers(ctx)
-            for f in [const_udiv, const_sdiv]
-                ce = f(val, other_val)::LLVM.Constant
-                @check_ir ce "i32 21"
-
-                ce = f(val, other_val; exact=true) # TODO: test that differs::LLVM.Constant
-                @check_ir ce "i32 21"
-            end
-
-            for f in [const_urem, const_srem]
-                ce = f(val, other_val)::LLVM.Constant
-                @check_ir ce "i32 0"
-            end
-        end
 
         ce = const_and(val, other_val)::LLVM.Constant
         @check_ir ce "i32 2"
@@ -645,6 +631,21 @@ end
 
         ce = const_intcast(val, LLVM.Int16Type(ctx), true)::LLVM.Constant
         @check_ir ce "i16 42"
+
+        if LLVM.version() < v"15"
+            for f in [const_udiv, const_sdiv]
+                ce = f(val, other_val)::LLVM.Constant
+                @check_ir ce "i32 21"
+
+                ce = f(val, other_val; exact=true) # TODO: test that differs::LLVM.Constant
+                @check_ir ce "i32 21"
+            end
+
+            for f in [const_urem, const_srem]
+                ce = f(val, other_val)::LLVM.Constant
+                @check_ir ce "i32 0"
+            end
+        end
     end
 
     # floating-point
@@ -655,22 +656,6 @@ end
         @check_ir ce "float -4.200000e+01"
 
         other_val = LLVM.ConstantFP(Float32(2.); ctx)
-        if supports_typed_pointers(ctx)
-            ce = const_fadd(val, other_val)::LLVM.Constant
-            @check_ir ce "float 4.400000e+01"
-
-            ce = const_fsub(val, other_val)::LLVM.Constant
-            @check_ir ce "float 4.000000e+01"
-
-            ce = const_fmul(val, other_val)::LLVM.Constant
-            @check_ir ce "float 8.400000e+01"
-
-            ce = const_fdiv(val, other_val)::LLVM.Constant
-            @check_ir ce "float 2.100000e+01"
-
-            ce = const_frem(val, other_val)::LLVM.Constant
-            @check_ir ce "float 0.000000e+00"
-        end
         ce = const_fcmp(LLVM.API.LLVMRealUGT, val, other_val)::LLVM.Constant
         @check_ir ce "i1 true"
 
@@ -687,6 +672,25 @@ end
         for f in [const_fptoui, const_fptosi]
             ce = const_fptoui(val, LLVM.Int32Type(ctx))::LLVM.Constant
             @check_ir ce "i32 42"
+        end
+
+        if LLVM.version() < v"15"
+            other_val = LLVM.ConstantFP(Float32(2.); ctx)
+
+            ce = const_fdiv(val, other_val)::LLVM.Constant
+            @check_ir ce "float 2.100000e+01"
+
+            ce = const_fadd(val, other_val)::LLVM.Constant
+            @check_ir ce "float 4.400000e+01"
+
+            ce = const_fsub(val, other_val)::LLVM.Constant
+            @check_ir ce "float 4.000000e+01"
+
+            ce = const_fmul(val, other_val)::LLVM.Constant
+            @check_ir ce "float 8.400000e+01"
+
+            ce = const_frem(val, other_val)::LLVM.Constant
+            @check_ir ce "float 0.000000e+00"
         end
     end
 

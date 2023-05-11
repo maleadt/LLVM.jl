@@ -67,7 +67,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ['release-1.7', 'release-1.8', 'release-1.9', 'master', 'vc/upgrade_llvm15']
+        branch: ['release-1.7', 'release-1.8', 'release-1.9', 'master']
         os: [ubuntu-latest, macOS-latest]
         arch: [x64]
     steps:
