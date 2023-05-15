@@ -302,4 +302,21 @@ end
     end
 end
 
+import NUMA_jll
+
+@testset "CustomDefinitionGenerator" begin
+    @dispose lljit=LLJIT() begin
+        if NUMA_jll.is_available()
+            @test_throws lookup(lljit, "numa_available")
+
+            dg = LLVM.DynamicLibDefinitionGenerator(NUMA_jll.libnuma)
+            jd = JITDylib(lljit)
+            LLVM.add!(jd, dg)
+
+            addr = lookup(lljit, "numa_available")
+            @test addr !== C_NULL
+        end
+    end
+end
+
 end
