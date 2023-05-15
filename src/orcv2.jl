@@ -194,9 +194,15 @@ end
 
 # We can do this async by copying content of `LookupState` and setting it to
 # C_NULL and returning ErrorSuccess. We then would need to call `LookupContinue`
-# but that function seems to be missing from teh CAPI.
+# but that function was only added in LLVM 15 to the API.
+#
 # Note LookupSet get's destroyed when we return here
-function DefinitionGeneratorTryToGenerateFunction(GeneratorObj::API.LLVMOrcDefinitionGeneratorRef, ctx::Ptr{Cvoid}, LookupState::Ptr{API.LLVMOrcLookupStateRef}, Kind::API.LLVMOrcLookupKind, JD::API.LLVMOrcJITDylibRef, JDLookupFlags::API.LLVMOrcJITDylibLookupFlags, LookupSet::API.LLVMOrcCLookupSet, LookupSetSize::Csize_t)::API.LLVMErrorRef
+function DefinitionGeneratorTryToGenerateFunction(
+    GeneratorObj::API.LLVMOrcDefinitionGeneratorRef, ctx::Ptr{Cvoid},
+    LookupState::Ptr{API.LLVMOrcLookupStateRef}, Kind::API.LLVMOrcLookupKind,
+    JD::API.LLVMOrcJITDylibRef, JDLookupFlags::API.LLVMOrcJITDylibLookupFlags,
+    LookupSet::API.LLVMOrcCLookupSet, LookupSetSize::Csize_t)::API.LLVMErrorRef
+
     dg = Base.unsafe_pointer_to_objref(ctx)::CustomDefinitionGenerator
     @assert dg.dg.ref === GeneratorObj
     lookupSet = Base.unsafe_wrap(Array, LookupSet, LookupSetSize, own=false)
@@ -208,10 +214,15 @@ mutable struct CustomDefinitionGenerator <: AbstractDefinitionGenerator
     dg::DefinitionGenerator
     function CustomDefinitionGenerator(callback)
         this = new(callback)
-        push!(CUSTOM_DG_ROOTS, this)
+        push!(CUSTOM_DG_ROOTS, this) # Globally root DefinitionGenerator
 
         ref = API.LLVMOrcCreateCustomCAPIDefinitionGenerator(
-            @cfunction(DefinitionGeneratorTryToGenerateFunction, API.LLVMErrorRef, (API.LLVMOrcDefinitionGeneratorRef, Ptr{Cvoid}, Ptr{API.LLVMOrcLookupStateRef}, API.LLVMOrcLookupKind, API.LLVMOrcJITDylibRef, API.LLVMOrcJITDylibLookupFlags, API.LLVMOrcCLookupSet, Csize_t)),
+            @cfunction(DefinitionGeneratorTryToGenerateFunction,
+                API.LLVMErrorRef,
+                (API.LLVMOrcDefinitionGeneratorRef, Ptr{Cvoid},
+                 Ptr{API.LLVMOrcLookupStateRef}, API.LLVMOrcLookupKind,
+                 API.LLVMOrcJITDylibRef, API.LLVMOrcJITDylibLookupFlags,
+                 API.LLVMOrcCLookupSet, Csize_t)),
             Base.pointer_from_objref(this)
         )
 
