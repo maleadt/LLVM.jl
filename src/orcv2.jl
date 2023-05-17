@@ -87,7 +87,7 @@ end
 
 include("executionengine/ts_module.jl")
 
-@checked struct LLVMSymbol <: AbstractString
+@checked struct LLVMSymbol
     ref::API.LLVMOrcSymbolStringPoolEntryRef
 end
 Base.unsafe_convert(::Type{API.LLVMOrcSymbolStringPoolEntryRef}, sym::LLVMSymbol) = sym.ref
