@@ -31,6 +31,10 @@ jobs:
             arch: 'x64'
             llvm_args: '--opaque-pointers'
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
+
       # install Julia
       - uses: julia-actions/setup-julia@v1
         with:
@@ -38,9 +42,6 @@ jobs:
           arch: ${{ matrix.arch }}
 
       # set-up packages
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
@@ -78,16 +79,14 @@ jobs:
           file: lcov.info
 
   # development versions, built from source (with assertions enabled)
-  # XXX: skip 1.6 as that requires gfortran, which isn't available on macOS runners
-  # XXX: build Windows using mingw or msys2
   source_test:
     name: Julia ${{ matrix.branch }} ${{ matrix.llvm_args }} - ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        branch: ['release-1.7', 'release-1.8', 'release-1.9', 'master']
-        os: ['ubuntu-latest', 'macOS-latest']
+        branch: ['release-1.6', 'release-1.7', 'release-1.8', 'release-1.9', 'master']
+        os: ['ubuntu-latest', 'macOS-latest', 'windows-latest']
         arch: ['x64']
         llvm_args: ['']
         include:
@@ -100,24 +99,37 @@ jobs:
             os: 'macOS-latest'
             arch: 'x64'
             llvm_args: '--opaque-pointers'
+          # - branch: 'master'
+          #   os: 'windows-latest'
+          #   arch: 'x64'
+          #   llvm_args: '--opaque-pointers'
+        exclude:
+          # JuliaLang/julia#48081
           - branch: 'master'
             os: 'windows-latest'
             arch: 'x64'
-            llvm_args: '--opaque-pointers'
+          # 1.6 requires gfortran, which isn't available on macOS runners
+          - branch: 'release-1.6'
+            os: 'macOS-latest'
+            arch: 'x64'
     steps:
-      - name: Install MSYS2
-        uses: msys2/setup-msys2@v2
+      - uses: actions/checkout@v3
         with:
-          path-type: inherit
-          install: mingw-w64-x86_64-gcc
-        if: runner.os == 'Windows'
-
-      # install Julia
+          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
       - uses: actions/checkout@v3
         with:
           repository: 'JuliaLang/julia'
           ref: ${{ matrix.branch }}
           path: 'julia'
+
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          path-type: inherit
+          install: mingw-w64-x86_64-gcc cmake diffutils git m4 make patch tar p7zip curl python
+        if: runner.os == 'Windows'
+
+      # compile Julia
       - name: Compile Julia
         run: |
           sed -i.bak 's/exit 2/exit 0/g' julia/deps/tools/jlchecksum
@@ -127,15 +139,16 @@ jobs:
       - name: Compile Julia (in msys2)
         shell: msys2 {0}
         run: |
+          echo $PWD
           sed -i.bak 's/exit 2/exit 0/g' julia/deps/tools/jlchecksum
+          # XXX: workaround for JuliaLang/julia#48081
+          make -C julia/deps install-csl && \
+          cp ${MINGW_PREFIX}/lib/libmsvcrt.a ./julia/usr/lib/libmsvcrt.a && \
           make -C julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
           echo $PWD/julia/usr/bin >> $GITHUB_PATH
         if: runner.os == 'Windows'
 
       # set-up packages
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
