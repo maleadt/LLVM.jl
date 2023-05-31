@@ -31,13 +31,16 @@ jobs:
             arch: 'x64'
             llvm_args: '--opaque-pointers'
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
+      # install Julia
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+
+      # set-up packages
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
@@ -50,17 +53,16 @@ jobs:
             ${{ runner.os }}-
       - uses: julia-actions/julia-buildpkg@v1
 
-      - name: Build libLLVMExtra
-        run: julia --project=deps deps/build_ci.jl
-        if: runner.os != 'Windows'
-
-      # we really don't want to use MSVC
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
         with:
           path-type: inherit
           install: mingw-w64-x86_64-gcc
         if: runner.os == 'Windows'
+
+      - name: Build libLLVMExtra
+        run: julia --project=deps deps/build_ci.jl
+        if: runner.os != 'Windows'
       - name: Build libLLVMExtra (in msys2)
         shell: msys2 {0}
         run: julia --project=deps deps/build_ci.jl
@@ -103,9 +105,14 @@ jobs:
             arch: 'x64'
             llvm_args: '--opaque-pointers'
     steps:
-      - uses: actions/checkout@v3
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
         with:
-          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
+          path-type: inherit
+          install: mingw-w64-x86_64-gcc
+        if: runner.os == 'Windows'
+
+      # install Julia
       - uses: actions/checkout@v3
         with:
           repository: 'JuliaLang/julia'
@@ -116,6 +123,19 @@ jobs:
           sed -i.bak 's/exit 2/exit 0/g' julia/deps/tools/jlchecksum
           make -C julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
           echo $PWD/julia/usr/bin >> $GITHUB_PATH
+        if: runner.os != 'Windows'
+      - name: Compile Julia (in msys2)
+        shell: msys2 {0}
+        run: |
+          sed -i.bak 's/exit 2/exit 0/g' julia/deps/tools/jlchecksum
+          make -C julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
+          echo $PWD/julia/usr/bin >> $GITHUB_PATH
+        if: runner.os == 'Windows'
+
+      # set-up packages
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
@@ -131,6 +151,10 @@ jobs:
       - name: Build libLLVMExtra
         run: julia --project=deps deps/build_ci.jl
         if: runner.os != 'Windows'
+      - name: Build libLLVMExtra (in msys2)
+        shell: msys2 {0}
+        run: julia --project=deps deps/build_ci.jl
+        if: runner.os == 'Windows'
 
       - name: Run tests
         run: julia --project -e 'using Pkg; Pkg.test(; coverage=true, julia_args=`-g2`)'
