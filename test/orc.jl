@@ -25,7 +25,7 @@ end
             entry = BasicBlock(wrapper, "entry"; ctx)
             position!(builder, entry)
 
-            tmp = call!(builder, fn, [parameters(wrapper)...])
+            tmp = call!(builder, ft, fn, [parameters(wrapper)...])
             ret!(builder, tmp)
         end
 
@@ -77,7 +77,7 @@ end
             entry = BasicBlock(wrapper, "entry"; ctx)
             position!(builder, entry)
 
-            tmp = call!(builder, fn, [parameters(wrapper)...])
+            tmp = call!(builder, ft, fn, [parameters(wrapper)...])
             ret!(builder, tmp)
         end
 
@@ -132,7 +132,7 @@ end
             entry = BasicBlock(wrapper, "entry"; ctx)
             position!(builder, entry)
 
-            tmp = call!(builder, fn, [parameters(wrapper)...])
+            tmp = call!(builder, ft, fn, [parameters(wrapper)...])
             ret!(builder, tmp)
         end
 
@@ -175,7 +175,7 @@ end
             entry = BasicBlock(wrapper, "entry"; ctx)
             position!(builder, entry)
 
-            tmp = call!(builder, fn, [parameters(wrapper)...])
+            tmp = call!(builder, ft, fn, [parameters(wrapper)...])
             ret!(builder, tmp)
         end
 
