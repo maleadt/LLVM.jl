@@ -13,7 +13,7 @@
     @assert position(builder) == entrybb
 
     @test debuglocation(builder) === nothing
-    loc = DILocation(ctx, 1, 1)
+    loc = DILocation(1, 1; ctx)
     debuglocation!(builder, loc)
     @test debuglocation(builder) == loc
     debuglocation!(builder)

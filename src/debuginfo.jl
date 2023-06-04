@@ -1,3 +1,18 @@
+## DIBuilder
+
+export DIBuilder
+
+@checked struct DIBuilder
+    ref::API.LLVMDIBuilderRef
+end
+Base.unsafe_convert(::Type{API.LLVMDIBuilderRef}, builder::DIBuilder) = builder.ref
+
+# LLVMCreateDIBuilderDisallowUnresolved
+DIBuilder(mod::Module) = DIBuilder(API.LLVMCreateDIBuilder(mod))
+
+dispose(builder::DIBuilder) = API.LLVMDisposeDIBuilder(builder)
+finalize(builder::DIBuilder) = API.LLVMDIBuilderFinalize(builder)
+
 ## location information
 
 export DILocation
@@ -20,6 +35,11 @@ function inlined_at(location::DILocation)
     ref == C_NULL ? nothing : Metadata(ref)::DILocation
 end
 
+function DILocation(line, col, scope=nothing, inlined_at=nothing; ctx::Context)
+    DILocation(API.LLVMDIBuilderCreateDebugLocation(ctx, line, col,
+                                                    something(scope, C_NULL),
+                                                    something(inlined_at, C_NULL)))
+end
 
 ## nodes
 
@@ -106,6 +126,13 @@ function source(file::DIFile)
     unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
+function file!(builder::DIBuilder, file::String, dir::String)
+    DIFile(API.LLVMDIBuilderCreateFile(
+        builder,
+        file, convert(Csize_t, length(file)),
+        dir, convert(Csize_t, length(dir))
+    ))
+end
 
 ## type
 
@@ -158,6 +185,27 @@ export DICompileUnit
 end
 register(DICompileUnit, API.LLVMDICompileUnitMetadataKind)
 
+function compilationunit!(builder::DIBuilder, lang, file, producer;
+    optimized::Base.Bool=true, flags="", runtime_version=0, split_name=nothing, emission_kind=API.LLVMDWARFEmissionFull,
+    dwo_id=0, split_debug_inlining=true, debug_info_for_profiling=false, sysroot="", sdk="")
+
+    DICompileUnit(API.LLVMDIBuilderCreateCompileUnit(
+        builder,
+        lang,
+        file,
+        producer, length(producer),
+        optimized ? LLVM.True : LLVM.False,
+        flags, length(flags),
+        runtime_version,
+        something(split_name, C_NULL), split_name === nothing ? 0 : length(split_name),
+        emission_kind,
+        dwo_id,
+        split_debug_inlining ? LLVM.True : LLVM.False,
+        debug_info_for_profiling ? LLVM.True : LLVM.False,
+        sysroot, length(sysroot),
+        sdk, length(sdk)
+    ))
+end
 
 ## other
 

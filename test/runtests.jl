@@ -77,6 +77,7 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 include("debuginfo.jl")
+include("dibuilder.jl")
 include("utils.jl")
 
 # XXX: testing ORC on LLVM 12 or before results in a dangling reference abort.
