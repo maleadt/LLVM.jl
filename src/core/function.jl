@@ -128,8 +128,16 @@ blocks(f::Function) = FunctionBlockSet(f)
 
 Base.size(iter::FunctionBlockSet) = (Int(API.LLVMCountBasicBlocks(iter.f)),)
 
-Base.first(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetFirstBasicBlock(iter.f))
-Base.last(iter::FunctionBlockSet) = BasicBlock(API.LLVMGetLastBasicBlock(iter.f))
+function Base.first(iter::FunctionBlockSet)
+    ref = API.LLVMGetFirstBasicBlock(iter.f)
+    ref == C_NULL && throw(BoundsError(iter))
+    BasicBlock(ref)
+end
+function Base.last(iter::FunctionBlockSet)
+    ref = API.LLVMGetLastBasicBlock(iter.f)
+    ref == C_NULL && throw(BoundsError(iter))
+    BasicBlock(ref)
+end
 
 function Base.iterate(iter::FunctionBlockSet, state=API.LLVMGetFirstBasicBlock(iter.f))
     state == C_NULL ? nothing : (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
