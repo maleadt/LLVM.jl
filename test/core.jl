@@ -282,12 +282,14 @@ end
 @dispose ctx=Context() begin
     # operand iteration
     mod = parse(LLVM.Module,  """
-        define void @fun(i32) {
+        define void @fun1(i32) {
         top:
           %1 = add i32 %0, 1
           ret void
-        }"""; ctx)
-    fun = functions(mod)["fun"]
+        }
+
+        declare void @fun2()"""; ctx)
+    fun = functions(mod)["fun1"]
 
     for (i, instr) in enumerate(instructions(first(blocks(fun))))
         ops = operands(instr)
@@ -302,6 +304,12 @@ end
             @test collect(ops) == []
         end
     end
+
+    fun = functions(mod)["fun2"]
+
+    @test_throws BoundsError first(blocks(fun))
+    @test_throws BoundsError last(blocks(fun))
+    @test_throws BoundsError blocks(fun)[1]
 
     dispose(mod)
 end
