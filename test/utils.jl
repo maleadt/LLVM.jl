@@ -1,6 +1,6 @@
 @testset "utils" begin
 
-@testset "cloning" begin
+@testset "function cloning" begin
     @dispose ctx=Context() begin
         # set-up
         mod = LLVM.Module("my_module"; ctx)
@@ -90,6 +90,66 @@
             @test value_type(add) == LLVM.Int64Type(ctx)
         end
     end
+end
+
+@testset "basic block cloning" begin
+    @dispose ctx=Context() begin
+        # set-up
+        ir = """
+            declare void @bar(i8);
+
+            define void @foo(i1 %cond, i8 %arg1, i8 %arg2) {
+            entry:
+                br i1 %cond, label %doit, label %cont
+
+            doit:
+                %val = add i8 %arg1, 1
+                call void @bar(i8 %val)
+                ret void
+
+            cont:
+                ret void
+            }
+
+            declare void @baz(i8 %val)
+            """
+        mod = parse(LLVM.Module, ir; ctx)
+        f = functions(mod)["foo"]
+        bb = blocks(f)[2]
+        add = first(instructions(bb))
+
+        # clone a basic block, providing a suffix
+        let bb_clone = clone(bb; suffix="_clone")
+            @test LLVM.parent(bb_clone) == f
+            @test LLVM.name(bb_clone) == "doit_clone"
+
+            # we should have remapped instructions in the basic block
+            inst_clone = collect(instructions(bb_clone))
+            add_clone = inst_clone[1]
+            call_clone = inst_clone[2]
+            @test first(operands(call_clone)) == add_clone
+        end
+
+        # clone, mapping values
+        arg1 = parameters(f)[2]
+        arg2 = parameters(f)[3]
+        value_map = Dict{Value,Value}(arg1 => arg2)
+        let bb_clone = clone(bb; value_map)
+            # test that we've remapped the argument
+            add_clone = first(instructions(bb_clone))
+            @test operands(add_clone)[1] == arg2
+        end
+
+        # clone into a different function
+        f2 = functions(mod)["baz"]
+        value_map = Dict{Value,Value}(arg1 => only(parameters(f2)))
+        let bb_clone = clone(bb; dest=f2, value_map)
+            # make sure we don't refer anything from the original function
+            verify(f2)
+        end
+
+    end
+
 end
 
 end
