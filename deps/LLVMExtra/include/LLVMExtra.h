@@ -133,6 +133,10 @@ void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
                            LLVMValueRef (*Materializer)(LLVMValueRef, void *),
                            void *MaterializerData);
 
+LLVMBasicBlockRef LLVMCloneBasicBlock(LLVMBasicBlockRef BB, const char *NameSuffix,
+                                      LLVMValueRef *ValueMap, unsigned ValueMapElements,
+                                      LLVMValueRef F);
+
 void LLVMFunctionDeleteBody(LLVMValueRef Func);
 
 void LLVMDestroyConstant(LLVMValueRef Const);

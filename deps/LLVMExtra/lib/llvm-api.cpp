@@ -432,6 +432,19 @@ void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
                     Materializer ? &TheMaterializer : nullptr);
 }
 
+LLVMBasicBlockRef LLVMCloneBasicBlock(LLVMBasicBlockRef BB, const char *NameSuffix,
+                                      LLVMValueRef *ValueMap, unsigned ValueMapElements,
+                                      LLVMValueRef F) {
+  ValueToValueMapTy VMap;
+  BasicBlock *NewBB = CloneBasicBlock(unwrap(BB), VMap, NameSuffix,
+                                      F ? unwrap<Function>(F) : nullptr);
+  for (unsigned i = 0; i < ValueMapElements; ++i)
+    VMap[unwrap(ValueMap[2 * i])] = unwrap(ValueMap[2 * i + 1]);
+  SmallVector<BasicBlock*, 1> Blocks = {NewBB};
+  remapInstructionsInBlocks(Blocks, VMap);
+  return wrap(NewBB);
+}
+
 void LLVMFunctionDeleteBody(LLVMValueRef Func) {
     unwrap<Function>(Func)->deleteBody();
 }

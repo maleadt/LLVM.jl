@@ -77,3 +77,30 @@ function clone(f::Function; value_map::Dict{Value,Value}=Dict{Value,Value}())
 
    return new_f
 end
+
+"""
+    clone(bb::BasicBlock]; dest=parent(bb), suffix="", value_map=Dict{Value,Value})
+
+Clone a basic block `bb` by copying all instructions. The new block is inserted at the end
+of the parent function; this can be altered by setting `dest` to a different function, or to
+`nothing` to create a detached block. The `suffix` is appended to the name of the cloned
+basic block.
+
+!!! warn
+
+    This function only remaps values that are defined in the cloned basic block. Values
+    defined outside the basic block (e.g. function arguments) are not remapped by default.
+    This means that the cloned basic block can generally only be used within the same
+    function that it was cloned from, unless you manually remap other values.
+    This can be done passing a `value_map` dictionary.
+"""
+function clone(bb::BasicBlock; dest::Union{Nothing,Function}=parent(bb), suffix::String="",
+               value_map::Dict{Value,Value}=Dict{Value,Value}())
+    value_map_array = Value[]
+    for (src, dest) in value_map
+        push!(value_map_array, src)
+        push!(value_map_array, dest)
+    end
+    BasicBlock(API.LLVMCloneBasicBlock(bb, suffix, value_map_array, length(value_map),
+                                       something(dest, C_NULL)))
+end
