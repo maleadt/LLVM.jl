@@ -1333,6 +1333,8 @@ end
     bb2 = BasicBlock(fn, "SomeOtherBasicBlock"; ctx)
     @test LLVM.parent(bb2) == fn
     @test isempty(instructions(bb2))
+    @test isempty(predecessors(bb2))
+    @test_throws ArgumentError successors(bb2)
 
     bb1 = BasicBlock(bb2, "SomeBasicBlock"; ctx)
     @test LLVM.parent(bb2) == fn
@@ -1341,9 +1343,16 @@ end
     position!(builder, bb2)
     retinst = ret!(builder)
     @test !isempty(instructions(bb2))
+    @test collect(predecessors(bb2)) == [bb1]
+    @test collect(successors(bb1)) == [bb2]
 
     @test terminator(bb1) == brinst
     @test terminator(bb2) == retinst
+
+    bb3 = BasicBlock("YetAnotherBasicBlock"; ctx)
+    @test LLVM.parent(bb3) == nothing
+    @test terminator(bb3) == nothing
+    # XXX: can we insert this block into the function?
 
     # instruction iteration
     let insts = instructions(bb1)
