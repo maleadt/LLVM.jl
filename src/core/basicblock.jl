@@ -74,3 +74,25 @@ Base.isempty(iter::BasicBlockInstructionSet) =
     API.LLVMGetLastInstruction(iter.bb) == C_NULL
 
 Base.IteratorSize(::BasicBlockInstructionSet) = Base.SizeUnknown()
+
+
+## cfg-like operations
+
+export predecessors, successors
+
+function predecessors(bb::BasicBlock)
+    preds = BasicBlock[]
+    for use in uses(bb)
+        inst = user(use)
+        isterminator(inst) || continue
+        push!(preds, parent(inst))
+    end
+    return preds
+end
+
+function successors(bb::BasicBlock)
+    term = terminator(bb)
+    term === nothing &&
+        throw(ArgumentError("Cannot query successors of unterminated basic block"))
+    successors(term)
+end
