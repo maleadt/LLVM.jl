@@ -31,18 +31,24 @@ unsafe_delete!(::Function, bb::BasicBlock) = API.LLVMDeleteBasicBlock(bb)
 Base.delete!(::Function, bb::BasicBlock) =
     API.LLVMRemoveBasicBlockFromParent(bb)
 
-parent(bb::BasicBlock) = Function(API.LLVMGetBasicBlockParent(bb))
+function parent(bb::BasicBlock)
+    ref = API.LLVMGetBasicBlockParent(bb)
+    ref == C_NULL && return nothing
+    Function(ref)
+end
 
-terminator(bb::BasicBlock) = Instruction(API.LLVMGetBasicBlockTerminator(bb))
+function terminator(bb::BasicBlock)
+    ref = API.LLVMGetBasicBlockTerminator(bb)
+    ref == C_NULL && return nothing
+    Instruction(ref)
+end
 
-name(bb::BasicBlock) =
-    unsafe_string(API.LLVMGetBasicBlockName(bb))
+name(bb::BasicBlock) = unsafe_string(API.LLVMGetBasicBlockName(bb))
 
 move_before(bb::BasicBlock, pos::BasicBlock) =
     API.LLVMMoveBasicBlockBefore(bb, pos)
 move_after(bb::BasicBlock, pos::BasicBlock) =
     API.LLVMMoveBasicBlockAfter(bb, pos)
-
 
 ## instruction iteration
 
