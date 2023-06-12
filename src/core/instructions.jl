@@ -50,6 +50,12 @@ opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(inst)
 predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(inst)
 predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(inst)
 
+# strip unnecessary whitespace
+Base.show(io::IO, ::MIME"text/plain", inst::Instruction) = print(io, lstrip(string(inst)))
+
+# instructions are typically only a single line, so always display them in full
+Base.show(io::IO, inst::Instruction) = print(io, typeof(inst), "(", lstrip(string(inst)), ")")
+
 
 ## metadata iteration
 # TODO: doesn't actually iterate, since we can't list the available keys
@@ -250,13 +256,17 @@ function inputs(bundle::OperandBundleDef)
     return [Value(val) for val in vals]
 end
 
-function Base.show(io::IO, bundle::Union{OperandBundleUse,OperandBundleDef})
+function Base.string(bundle::Union{OperandBundleUse,OperandBundleDef})
     # mimic how bundles are rendered in LLVM IR
-    print(io, "\"", tag_name(bundle), "\"(")
-    join(io, inputs(bundle), ", ")
-    print(io, ")")
+    "\"$(tag_name(bundle))\"(" * join(string.(inputs(bundle)), ", ") * ")"
 end
 
+function Base.show(io::IO, ::MIME"text/plain", bundle::Union{OperandBundleUse,OperandBundleDef})
+    print(io, string(bundle))
+end
+
+Base.show(io::IO, bundle::Union{OperandBundleUse,OperandBundleDef}) =
+    print(io, typeof(bundle), "(", string(bundle), ")")
 
 
 ## terminators

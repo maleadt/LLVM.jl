@@ -49,9 +49,20 @@ Base.sizeof(val::Value) = sizeof(value_type(val))
 name(val::Value) = unsafe_string(API.LLVMGetValueName(val))
 name!(val::Value, name::String) = API.LLVMSetValueName(val, name)
 
+Base.string(val::Value) = unsafe_message(API.LLVMPrintValueToString(val))
+
+# by default, only print the value type and its name or address
 function Base.show(io::IO, val::Value)
-    output = unsafe_message(API.LLVMPrintValueToString(val))
-    print(io, output)
+    if !isempty(name(val))
+        @printf(io, "%s(\"%s\")", typeof(val), name(val))
+    else
+        @printf(io, "%s(%p)", typeof(val), val.ref)
+    end
+end
+
+# when more output is requested, render the value (which may print multiple lines)
+function Base.show(io::IO, ::MIME"text/plain", val::Value)
+    print(io, string(val))
 end
 
 replace_uses!(old::Value, new::Value) = API.LLVMReplaceAllUsesWith(old, new)

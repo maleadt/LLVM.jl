@@ -26,6 +26,8 @@ function IRBuilder(f::Core.Function, args...; kwargs...)
     end
 end
 
+Base.show(io::IO, builder::IRBuilder) = @printf(io, "IRBuilder(%p)", builder.ref)
+
 Base.position(builder::IRBuilder) = BasicBlock(API.LLVMGetInsertBlock(builder))
 position!(builder::IRBuilder, inst::Instruction) =
     API.LLVMPositionBuilderBefore(builder, inst)

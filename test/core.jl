@@ -1026,7 +1026,7 @@ end
     show(devnull, mod)
 
     inline_asm!(mod, "nop")
-    @test occursin("module asm", sprint(io->show(io,mod)))
+    @test occursin("module asm", string(mod))
 
     dummyTriple = "SomeTriple"
     triple!(mod, dummyTriple)
@@ -1041,8 +1041,8 @@ end
     mod_flags = flags(mod)
     mod_flags["foobar", LLVM.API.LLVMModuleFlagBehaviorError] = md
 
-    @test occursin("!llvm.module.flags = !{!0}", sprint(io->show(io,mod)))
-    @test occursin(r"!0 = !\{i\d+ 1, !\"foobar\", i\d+ 42\}", sprint(io->show(io,mod)))
+    @test occursin("!llvm.module.flags = !{!0}", string(mod))
+    @test occursin(r"!0 = !\{i\d+ 1, !\"foobar\", i\d+ 42\}", string(mod))
 
     @test mod_flags["foobar"] == md
     @test_throws KeyError mod_flags["foobaz"]

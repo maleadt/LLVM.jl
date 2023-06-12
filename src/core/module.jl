@@ -40,6 +40,10 @@ function Module(f::Core.Function, args...; kwargs...)
 end
 
 function Base.show(io::IO, mod::Module)
+    print(io, "LLVM.Module(\"", name(mod), "\")")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", mod::Module)
     output = string(mod)
     print(io, output)
 end

@@ -33,6 +33,18 @@ else
     supports_typed_pointers(ctx::Context) = true
 end
 
+function Base.show(io::IO, ctx::Context)
+    @printf(io, "LLVM.Context(%p", ctx.ref)
+    if ctx == GlobalContext()
+        print(io, ", global instance")
+    end
+    if v"14" <= version() < v"17"
+        # migration to opaque pointers
+        print(io, ", ", supports_typed_pointers(ctx) ? "typed ptrs" : "opaque ptrs")
+    end
+    print(io, ")")
+end
+
 @noinline throw_typedpointererror() =
     error("""Typed pointers are not supported.
 
