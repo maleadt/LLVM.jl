@@ -431,7 +431,7 @@ end
                 @test length(bundles) == 1
                 bundle = first(bundles)
                 @test LLVM.tag_name(bundle) == "deopt"
-                @test sprint(io->print(io, bundle)) == "\"deopt\"(i32 1, i64 2)"
+                @test string(bundle) == "\"deopt\"(i32 1, i64 2)"
 
                 inputs = LLVM.inputs(bundle)
                 @test length(inputs) == 2
@@ -444,15 +444,15 @@ end
                 let bundle = bundles[1]
                     inputs = LLVM.inputs(bundle)
                     @test length(inputs) == 0
-                    @test sprint(io->print(io, bundle)) == "\"deopt\"()"
+                    @test string(bundle) == "\"deopt\"()"
                 end
                 let bundle = bundles[2]
                     inputs = LLVM.inputs(bundle)
                     @test length(inputs) == 1
                     if supports_typed_pointers(ctx)
-                        @test sprint(io->print(io, bundle)) == "\"unknown\"(i8* null)"
+                        @test string(bundle) == "\"unknown\"(i8* null)"
                     else
-                        @test sprint(io->print(io, bundle)) == "\"unknown\"(ptr null)"
+                        @test string(bundle) == "\"unknown\"(ptr null)"
                     end
                 end
             end
@@ -469,7 +469,7 @@ end
             @test bundle1 isa OperandBundleDef
             @test LLVM.tag_name(bundle1) == "unknown"
             @test LLVM.inputs(bundle1) == inputs
-            @test sprint(io->print(io, bundle1)) == "\"unknown\"(i32 1, i64 2)"
+            @test string(bundle1) == "\"unknown\"(i32 1, i64 2)"
 
             # use in a call
             f = functions(mod)["x"]
@@ -485,14 +485,14 @@ end
                 @test bundle2 isa OperandBundleUse
                 @test LLVM.tag_name(bundle2) == "unknown"
                 @test LLVM.inputs(bundle2) == inputs
-                @test sprint(io->print(io, bundle2)) == "\"unknown\"(i32 1, i64 2)"
+                @test string(bundle2) == "\"unknown\"(i32 1, i64 2)"
 
                 # creating from a use
                 bundle3 = OperandBundleDef(bundle2)
                 @test bundle3 isa OperandBundleDef
                 @test LLVM.tag_name(bundle3) == "unknown"
                 @test LLVM.inputs(bundle3) == inputs
-                @test sprint(io->print(io, bundle3)) == "\"unknown\"(i32 1, i64 2)"
+                @test string(bundle3) == "\"unknown\"(i32 1, i64 2)"
 
                 # creating a call should perform the necessary conversion automatically
                 call!(builder, ft, f, Value[], operand_bundles(inst))

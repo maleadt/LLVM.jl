@@ -42,9 +42,14 @@ issized(typ::LLVMType) =
     convert(Core.Bool, API.LLVMTypeIsSized(typ))
 context(typ::LLVMType) = Context(API.LLVMGetTypeContext(typ))
 
+Base.string(typ::LLVMType) = unsafe_message(API.LLVMPrintTypeToString(typ))
+
+function Base.show(io::IO, ::MIME"text/plain", typ::LLVMType)
+    print(io, string(typ))
+end
+
 function Base.show(io::IO, typ::LLVMType)
-    output = unsafe_message(API.LLVMPrintTypeToString(typ))
-    print(io, output)
+    print(io, typeof(typ), "(", string(typ), ")")
 end
 
 Base.isempty(@nospecialize(T::LLVMType)) = false
