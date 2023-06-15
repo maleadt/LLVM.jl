@@ -21,7 +21,10 @@ export backends
 
 const libllvm_backends = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai,
                           :MSP430, :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ,
-                          :VE, :WebAssembly, :X86, :XCore]
+                          :VE, :WebAssembly, :X86, :XCore,
+                          # Unofficial backends
+                          :Colossus,
+]
 const libllvm_components = [:Target, :TargetInfo, :TargetMC, :AsmPrinter, :AsmParser, :Disassembler]
 
 # discover supported back-ends and their components by looking at available symbols.
