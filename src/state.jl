@@ -2,12 +2,13 @@
 
 # LLVM contexts are maintained as a stack in task local store
 
-export context, activate, deactivate, context!
+export hascontext, context, activate, deactivate, context!
+
+hascontext() = haskey(task_local_storage(), :LLVMContext) &&
+               !isempty(task_local_storage(:LLVMContext))
 
 function context()
-    if !haskey(task_local_storage(), :LLVMContext)
-        error("No LLVM context is active")
-    end
+    hascontext() || error("No LLVM context is active")
     last(task_local_storage(:LLVMContext))
 end
 
@@ -20,8 +21,7 @@ function activate(ctx::Context)
 end
 
 function deactivate(ctx::Context)
-    haskey(task_local_storage(), :LLVMContext) || error("No LLVM context is active")
-    ctx == last(task_local_storage(:LLVMContext)) || error("Deactivating wrong context")
+    context() == ctx || error("Deactivating wrong context")
     pop!(task_local_storage(:LLVMContext))
 end
 

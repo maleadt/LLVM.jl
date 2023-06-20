@@ -53,6 +53,15 @@ end
 Return if a type would be boxed when instantiated in the code generator.
 """
 function isboxed(typ::Type)
+    if hascontext()
+        _isboxed(typ)
+    else
+        LLVM.Context() do _
+            _isboxed(typ)
+        end
+    end
+end
+function _isboxed(typ::Type)
     isboxed_ref = Ref{Bool}()
     if VERSION >= v"1.9.0-DEV.115"
         ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
@@ -122,6 +131,13 @@ This only works for types created by the Julia compiler (living in its LLVM cont
 """
 isghosttype(@nospecialize(T::LLVMType)) = T == LLVM.VoidType() || isempty(T)
 function isghosttype(@nospecialize(t::Type))
-    T = convert(LLVMType, t; allow_boxed=true)
-    isghosttype(T)
+    if hascontext()
+        T = convert(LLVMType, t; allow_boxed=true)
+        isghosttype(T)
+    else
+        LLVM.Context() do _
+            T = convert(LLVMType, t; allow_boxed=true)
+            isghosttype(T)
+        end
+    end
 end
