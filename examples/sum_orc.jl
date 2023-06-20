@@ -12,33 +12,34 @@ else
 end
 
 function codegen!(mod::LLVM.Module, name, tm)
-    ctx = context(mod)
-    param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
-    ret_type = LLVM.Int32Type(ctx)
+    context!(context(mod)) do
+        param_types = [LLVM.Int32Type(), LLVM.Int32Type()]
+        ret_type = LLVM.Int32Type()
 
-    triple!(mod, triple(tm))
+        triple!(mod, triple(tm))
 
-    ft = LLVM.FunctionType(ret_type, param_types)
-    sum = LLVM.Function(mod, name, ft)
+        ft = LLVM.FunctionType(ret_type, param_types)
+        sum = LLVM.Function(mod, name, ft)
 
-    # generate IR
-    @dispose builder=IRBuilder(ctx) begin
-        entry = BasicBlock(sum, "entry"; ctx)
-        position!(builder, entry)
+        # generate IR
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(sum, "entry")
+            position!(builder, entry)
 
-        tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
-        ret!(builder, tmp)
+            tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
+            ret!(builder, tmp)
+        end
+
+        verify(mod)
+
+        @dispose pm=ModulePassManager() begin
+            add_library_info!(pm, triple(mod))
+            add_transform_info!(pm, tm)
+            run!(pm, mod)
+        end
+
+        verify(mod)
     end
-
-    verify(mod)
-
-    @dispose pm=ModulePassManager() begin
-        add_library_info!(pm, triple(mod))
-        add_transform_info!(pm, tm)
-        run!(pm, mod)
-    end
-
-    verify(mod)
 end
 
 JIT = nothing
@@ -68,7 +69,7 @@ else
         orc = OrcJIT(tm)
         register!(orc, GDBRegistrationListener())
 
-        mod = LLVM.Module("jit"; ctx)
+        mod = LLVM.Module("jit")
         name = mangle(orc, "sum_orc.jl")
         codegen!(mod, name, tm)
 

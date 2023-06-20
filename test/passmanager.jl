@@ -5,12 +5,12 @@ let
     dispose(mpm)
 end
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) mpm=ModulePassManager() begin
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") mpm=ModulePassManager() begin
     @test !run!(mpm, mod)
 end
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) fpm=FunctionPassManager(mod) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") fpm=FunctionPassManager(mod) begin
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     @test !initialize!(fpm)

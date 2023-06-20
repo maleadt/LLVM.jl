@@ -16,15 +16,13 @@ Base.unsafe_convert(::Type{API.LLVMBasicBlockRef}, bb::BasicBlock) = API.LLVMVal
 end
 
 # create empty
-BasicBlock(name::String; ctx::Context) =
-    BasicBlock(API.LLVMCreateBasicBlockInContext(ctx, name))
+BasicBlock(name::String) =
+    BasicBlock(API.LLVMCreateBasicBlockInContext(context(), name))
 # append in function
-# TODO: deprecate ctx keyword (why does the C API even have it?)
-BasicBlock(f::Function, name::String; ctx) =
+BasicBlock(f::Function, name::String;) =
     BasicBlock(API.LLVMAppendBasicBlockInContext(context(f), f, name))
 # insert before another
-# TODO: deprecate ctx keyword (why does the C API even have it?)
-BasicBlock(bb::BasicBlock, name::String; ctx) =
+BasicBlock(bb::BasicBlock, name::String) =
     BasicBlock(API.LLVMInsertBasicBlockInContext(context(bb), bb, name))
 
 unsafe_delete!(::Function, bb::BasicBlock) = API.LLVMDeleteBasicBlock(bb)

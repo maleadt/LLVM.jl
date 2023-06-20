@@ -1,5 +1,5 @@
-function generate_IR(str; ctx::LLVM.Context)
-    cg = CodeGen(ctx)
+function generate_IR(str)
+    cg = CodeGen()
     ps = Parser(str)
     while true
         tok = current_token(ps)
@@ -35,7 +35,7 @@ function run(mod::LLVM.Module, entry::String)
         end
         f = LLVM.functions(engine)[entry]
         res = LLVM.run(engine, f)
-        res_jl = convert(Float64, res, LLVM.DoubleType(LLVM.context(mod)))
+        res_jl = convert(Float64, res, LLVM.DoubleType())
         LLVM.dispose(res)
     end
     return res_jl

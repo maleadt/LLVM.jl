@@ -5,15 +5,15 @@ export @asmcall
                             {asm, constraints, side_effects, rettyp, argtyp}
     @dispose ctx=Context() begin
         # create a function
-        llvm_rettyp = convert(LLVMType, rettyp; ctx)
-        llvm_argtyp = LLVMType[convert.(LLVMType, [argtyp.parameters...]; ctx)...]
+        llvm_rettyp = convert(LLVMType, rettyp)
+        llvm_argtyp = LLVMType[convert.(LLVMType, [argtyp.parameters...])...]
         llvm_f, llvm_ft = create_function(llvm_rettyp, llvm_argtyp)
 
         inline_asm = InlineAsm(llvm_ft, String(asm), String(constraints), side_effects)
 
         # generate IR
-        @dispose builder=IRBuilder(ctx) begin
-            entry = BasicBlock(llvm_f, "entry"; ctx)
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(llvm_f, "entry")
             position!(builder, entry)
 
             val = call!(builder, llvm_ft, inline_asm, collect(parameters(llvm_f)))

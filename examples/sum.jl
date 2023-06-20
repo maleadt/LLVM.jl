@@ -13,16 +13,16 @@ end
 
 @dispose ctx=Context() begin
     # set-up
-    mod = LLVM.Module("my_module"; ctx)
+    mod = LLVM.Module("my_module")
 
-    param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
-    ret_type = LLVM.Int32Type(ctx)
+    param_types = [LLVM.Int32Type(), LLVM.Int32Type()]
+    ret_type = LLVM.Int32Type()
     fun_type = LLVM.FunctionType(ret_type, param_types)
     sum = LLVM.Function(mod, "sum", fun_type)
 
     # generate IR
-    @dispose builder=IRBuilder(ctx) begin
-        entry = BasicBlock(sum, "entry"; ctx)
+    @dispose builder=IRBuilder() begin
+        entry = BasicBlock(sum, "entry")
         position!(builder, entry)
 
         tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
@@ -34,8 +34,8 @@ end
 
     # analysis and execution
     @dispose engine=Interpreter(mod) begin
-        args = [GenericValue(LLVM.Int32Type(ctx), x),
-                GenericValue(LLVM.Int32Type(ctx), y)]
+        args = [GenericValue(LLVM.Int32Type(), x),
+                GenericValue(LLVM.Int32Type(), y)]
 
         res = LLVM.run(engine, sum, args)
         @test convert(Int, res) == x + y

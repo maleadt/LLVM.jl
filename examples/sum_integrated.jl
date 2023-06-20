@@ -13,13 +13,13 @@ else
 end
 
 @dispose ctx=Context() begin
-    param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
-    ret_type = LLVM.Int32Type(ctx)
+    param_types = [LLVM.Int32Type(), LLVM.Int32Type()]
+    ret_type = LLVM.Int32Type()
     sum, _ = create_function(ret_type, param_types)
 
     # generate IR
-    @dispose builder=IRBuilder(ctx) begin
-        entry = BasicBlock(sum, "entry"; ctx)
+    @dispose builder=IRBuilder() begin
+        entry = BasicBlock(sum, "entry")
         position!(builder, entry)
 
         tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
@@ -27,7 +27,7 @@ end
     end
 
     # make Julia compile and execute the function
-    push!(function_attributes(sum), EnumAttribute("alwaysinline"; ctx))
+    push!(function_attributes(sum), EnumAttribute("alwaysinline"))
     @eval call_sum(x, y) = $(call_function(sum, Int32, Tuple{Int32, Int32}, :x, :y))
 end
 

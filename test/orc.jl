@@ -12,8 +12,8 @@ end
 @testset "Undefined Symbol" begin
     tm  = JITTargetMachine()
     @dispose orc=OrcJIT(tm) ctx=Context() begin
-        mod = LLVM.Module("jit"; ctx)
-        T_Int32 = LLVM.Int32Type(ctx)
+        mod = LLVM.Module("jit")
+        T_Int32 = LLVM.Int32Type()
         ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
         fn = LLVM.Function(mod, "mysum", ft)
         linkage!(fn, LLVM.API.LLVMExternalLinkage)
@@ -21,8 +21,8 @@ end
         fname = mangle(orc, "wrapper")
         wrapper = LLVM.Function(mod, fname, ft)
         # generate IR
-        @dispose builder=IRBuilder(ctx) begin
-            entry = BasicBlock(wrapper, "entry"; ctx)
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(wrapper, "entry")
             position!(builder, entry)
 
             tmp = call!(builder, ft, fn, [parameters(wrapper)...])
@@ -64,8 +64,8 @@ end
             end
         end
 
-        mod = LLVM.Module("jit"; ctx)
-        T_Int32 = LLVM.Int32Type(ctx)
+        mod = LLVM.Module("jit")
+        T_Int32 = LLVM.Int32Type()
         ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
         fn = LLVM.Function(mod, "mysum", ft)
         linkage!(fn, LLVM.API.LLVMExternalLinkage)
@@ -73,8 +73,8 @@ end
         fname = mangle(orc, "wrapper")
         wrapper = LLVM.Function(mod, fname, ft)
         # generate IR
-        @dispose builder=IRBuilder(ctx) begin
-            entry = BasicBlock(wrapper, "entry"; ctx)
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(wrapper, "entry")
             position!(builder, entry)
 
             tmp = call!(builder, ft, fn, [parameters(wrapper)...])
@@ -119,8 +119,8 @@ end
 @testset "Default Resolver + Stub" begin
     tm  = JITTargetMachine()
     @dispose orc=OrcJIT(tm) ctx=Context() begin
-        mod = LLVM.Module("jit"; ctx)
-        T_Int32 = LLVM.Int32Type(ctx)
+        mod = LLVM.Module("jit")
+        T_Int32 = LLVM.Int32Type()
         ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
         fn = LLVM.Function(mod, "mysum", ft)
         linkage!(fn, LLVM.API.LLVMExternalLinkage)
@@ -128,8 +128,8 @@ end
         fname = mangle(orc, "wrapper")
         wrapper = LLVM.Function(mod, fname, ft)
         # generate IR
-        @dispose builder=IRBuilder(ctx) begin
-            entry = BasicBlock(wrapper, "entry"; ctx)
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(wrapper, "entry")
             position!(builder, entry)
 
             tmp = call!(builder, ft, fn, [parameters(wrapper)...])
@@ -161,8 +161,8 @@ end
 @testset "Default Resolver + Global Symbol" begin
     tm  = JITTargetMachine()
     @dispose orc=OrcJIT(tm) ctx=Context() begin
-        mod = LLVM.Module("jit"; ctx)
-        T_Int32 = LLVM.Int32Type(ctx)
+        mod = LLVM.Module("jit")
+        T_Int32 = LLVM.Int32Type()
         ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
         mysum = mangle(orc, "mysum")
         fn = LLVM.Function(mod, mysum, ft)
@@ -171,8 +171,8 @@ end
         fname = mangle(orc, "wrapper")
         wrapper = LLVM.Function(mod, fname, ft)
         # generate IR
-        @dispose builder=IRBuilder(ctx) begin
-            entry = BasicBlock(wrapper, "entry"; ctx)
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(wrapper, "entry")
             position!(builder, entry)
 
             tmp = call!(builder, ft, fn, [parameters(wrapper)...])
@@ -210,12 +210,12 @@ end
     @dispose orc=OrcJIT(tm) ctx=Context() begin
         sym = mangle(orc, "SomeFunction")
 
-        mod = LLVM.Module("jit"; ctx)
-        ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+        mod = LLVM.Module("jit")
+        ft = LLVM.FunctionType(LLVM.VoidType())
         fn = LLVM.Function(mod, sym, ft)
 
-        @dispose builder=IRBuilder(ctx) begin
-            entry = BasicBlock(fn, "entry"; ctx)
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(fn, "entry")
             position!(builder, entry)
             ret!(builder)
         end
@@ -281,12 +281,12 @@ end
 
             # 1. IRGen & Optimize the module
             orc_mod = @dispose ctx=Context() begin
-                mod = LLVM.Module("jit"; ctx)
-                ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+                mod = LLVM.Module("jit")
+                ft = LLVM.FunctionType(LLVM.VoidType())
                 fn = LLVM.Function(mod, sym, ft)
 
-                @dispose builder=IRBuilder(ctx) begin
-                    entry = BasicBlock(fn, "entry"; ctx)
+                @dispose builder=IRBuilder() begin
+                    entry = BasicBlock(fn, "entry")
                     position!(builder, entry)
                     ret!(builder)
                 end

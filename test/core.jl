@@ -40,7 +40,7 @@ end
 @testset "type" begin
 
 @dispose ctx=Context() begin
-    typ = LLVM.Int1Type(ctx)
+    typ = LLVM.Int1Type()
     @test typeof(typ.ref) == LLVM.API.LLVMTypeRef                 # untyped
 
     @test typeof(LLVM.IntegerType(typ.ref)) == LLVM.IntegerType   # type reconstructed
@@ -53,16 +53,16 @@ end
     @test typeof(LLVMType(typ.ref)) == LLVM.IntegerType           # type reconstructed
     @test_throws UndefRefError LLVMType(LLVM.API.LLVMTypeRef(C_NULL))
 
-    @test width(LLVM.IntType(8; ctx)) == 8
+    @test width(LLVM.IntType(8)) == 8
 
-    @test issized(LLVM.Int1Type(ctx))
-    @test !issized(LLVM.VoidType(ctx))
+    @test issized(LLVM.Int1Type())
+    @test !issized(LLVM.VoidType())
     @test_throws ErrorException sizeof(typ)
 end
 
 # integer
 @dispose ctx=Context() begin
-    typ = LLVM.Int1Type(ctx)
+    typ = LLVM.Int1Type()
     @test context(typ) == ctx
 
     show(devnull, typ)
@@ -74,8 +74,8 @@ end
 
 # function
 @dispose ctx=Context() begin
-    x = LLVM.Int1Type(ctx)
-    y = [LLVM.Int8Type(ctx), LLVM.Int16Type(ctx)]
+    x = LLVM.Int1Type()
+    y = [LLVM.Int8Type(), LLVM.Int16Type()]
     ft = LLVM.FunctionType(x, y)
     @test context(ft) == ctx
 
@@ -87,7 +87,7 @@ end
 
 # sequential
 @dispose ctx=Context() begin
-    eltyp = LLVM.Int32Type(ctx)
+    eltyp = LLVM.Int32Type()
 
     ptrtyp = LLVM.PointerType(eltyp)
     if supports_typed_pointers(ctx)
@@ -102,7 +102,7 @@ end
     @test addrspace(ptrtyp) == 1
 end
 @dispose ctx=Context() begin
-    eltyp = LLVM.Int32Type(ctx)
+    eltyp = LLVM.Int32Type()
 
     arrtyp = LLVM.ArrayType(eltyp, 2)
     @test eltype(arrtyp) == eltyp
@@ -112,13 +112,13 @@ end
     @test length(arrtyp) == 2
 end
 @dispose ctx=Context() begin
-    eltyp = LLVM.Int32Type(ctx)
+    eltyp = LLVM.Int32Type()
 
     arrtyp = LLVM.ArrayType(eltyp, 0)
     @test isempty(arrtyp)
 end
 @dispose ctx=Context() begin
-    eltyp = LLVM.Int32Type(ctx)
+    eltyp = LLVM.Int32Type()
 
     vectyp = LLVM.VectorType(eltyp, 2)
     @test eltype(vectyp) == eltyp
@@ -129,9 +129,9 @@ end
 
 # structure
 @dispose ctx=Context() begin
-    elem = [LLVM.Int32Type(ctx), LLVM.FloatType(ctx)]
+    elem = [LLVM.Int32Type(), LLVM.FloatType()]
 
-    let st = LLVM.StructType(elem; ctx)
+    let st = LLVM.StructType(elem)
         @test context(st) == ctx
         @test !ispacked(st)
         @test !isopaque(st)
@@ -156,7 +156,7 @@ end
         end
     end
 
-    let st = LLVM.StructType("foo"; ctx)
+    let st = LLVM.StructType("foo")
         @test name(st) == "foo"
         @test isopaque(st)
         elements!(st, elem)
@@ -167,25 +167,25 @@ end
 
 # other
 @dispose ctx=Context() begin
-    typ = LLVM.VoidType(ctx)
+    typ = LLVM.VoidType()
     @test context(typ) == ctx
 end
 @dispose ctx=Context() begin
-    typ = LLVM.LabelType(ctx)
+    typ = LLVM.LabelType()
     @test context(typ) == ctx
 end
 @dispose ctx=Context() begin
-    typ = LLVM.MetadataType(ctx)
+    typ = LLVM.MetadataType()
     @test context(typ) == ctx
 end
 @dispose ctx=Context() begin
-    typ = LLVM.TokenType(ctx)
+    typ = LLVM.TokenType()
     @test context(typ) == ctx
 end
 
 # type iteration
 @dispose ctx=Context() begin
-    st = LLVM.StructType("SomeType"; ctx)
+    st = LLVM.StructType("SomeType")
 
     let ts = types(ctx)
         @test keytype(ts) == String
@@ -204,15 +204,15 @@ end
 
 @testset "value" begin
 
-@dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+@dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    entry = BasicBlock(fn, "entry"; ctx)
+    entry = BasicBlock(fn, "entry")
     position!(builder, entry)
     @test name(entry) == "entry"
 
-    typ = LLVM.Int32Type(ctx)
+    typ = LLVM.Int32Type()
     val = alloca!(builder, typ, "foo")
     @test context(val) == ctx
     @test typeof(val.ref) == LLVM.API.LLVMValueRef                # untyped
@@ -240,19 +240,19 @@ end
 
 # usage
 
-@dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+@dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    entry = BasicBlock(fn, "entry"; ctx)
+    entry = BasicBlock(fn, "entry")
     position!(builder, entry)
 
     valueinst1 = add!(builder, parameters(fn)[1],
-                      ConstantInt(Int32(1); ctx))
+                      ConstantInt(Int32(1)))
     @test !isterminator(valueinst1)
 
     userinst = add!(builder, valueinst1,
-                    ConstantInt(Int32(1); ctx))
+                    ConstantInt(Int32(1)))
 
     # use iteration
     let usepairs = uses(valueinst1)
@@ -271,7 +271,7 @@ end
     end
 
     valueinst2 = add!(builder, parameters(fn)[1],
-                    ConstantInt(Int32(2); ctx))
+                    ConstantInt(Int32(2)))
 
     replace_uses!(valueinst1, valueinst2)
     @test user.(collect(uses(valueinst2))) == [userinst]
@@ -288,7 +288,7 @@ end
           ret void
         }
 
-        declare void @fun2()"""; ctx)
+        declare void @fun2()""")
     fun = functions(mod)["fun1"]
 
     for (i, instr) in enumerate(instructions(first(blocks(fun))))
@@ -297,7 +297,7 @@ end
         if i == 1
             @test length(ops) == 2
             @test ops[1] == first(parameters(fun))
-            @test ops[2] == ConstantInt(LLVM.Int32Type(ctx), 1)
+            @test ops[2] == ConstantInt(LLVM.Int32Type(), 1)
             @test_throws BoundsError ops[3]
         elseif i == 2
             @test length(ops) == 0
@@ -319,7 +319,7 @@ end
 @dispose ctx=Context() begin
     @testset "constants" begin
 
-    typ = LLVM.Int32Type(ctx)
+    typ = LLVM.Int32Type()
     ptrtyp = LLVM.PointerType(typ)
 
     let val = null(typ)
@@ -355,7 +355,7 @@ end
 
     # manual construction of small values
     let
-        typ = LLVM.Int32Type(ctx)
+        typ = LLVM.Int32Type()
         constval = ConstantInt(typ, -1)
         @test convert(Int, constval) == -1
         @test convert(UInt32, constval) == typemax(UInt32)
@@ -363,28 +363,28 @@ end
 
     # manual construction of large values
     let
-        typ = LLVM.Int64Type(ctx)
+        typ = LLVM.Int64Type()
         constval = ConstantInt(typ, BigInt(2)^100-1)
         @test convert(Int, constval) == -1
     end
 
     # automatic construction
     let
-        constval = ConstantInt(UInt32(1); ctx)
+        constval = ConstantInt(UInt32(1))
         @test convert(UInt, constval) == 1
     end
     let
-        constval = ConstantInt(false; ctx)
-        @test value_type(constval) == LLVM.Int1Type(ctx)
+        constval = ConstantInt(false)
+        @test value_type(constval) == LLVM.Int1Type()
         @test !convert(Bool, constval)
 
-        constval = ConstantInt(true; ctx)
+        constval = ConstantInt(true)
         @test convert(Bool, constval)
     end
 
     # issue #81
     for T in [Int32, UInt32, Int64, UInt64]
-        constval = ConstantInt(typemax(T); ctx)
+        constval = ConstantInt(typemax(T))
         @test convert(T, constval) == typemax(T)
     end
 
@@ -394,34 +394,34 @@ end
     @testset "floating point constants" begin
 
     let
-        typ = LLVM.HalfType(ctx)
+        typ = LLVM.HalfType()
         c = ConstantFP(typ, Float16(1.1f0))
         @test convert(Float16, c) == Float16(1.1f0)
     end
     let
-        typ = LLVM.FloatType(ctx)
+        typ = LLVM.FloatType()
         c = ConstantFP(typ, 1.1f0)
         @test convert(Float32, c) == 1.1f0
     end
     let
-        typ = LLVM.DoubleType(ctx)
+        typ = LLVM.DoubleType()
         c = ConstantFP(typ, 1.1)
         @test convert(Float64, c) == 1.1
     end
     let
-        typ = LLVM.X86FP80Type(ctx)
+        typ = LLVM.X86FP80Type()
         # TODO: how to construct full-width constants?
         c = ConstantFP(typ, 1.1)
         @test convert(Float64, c) == 1.1
     end
     for T in [LLVM.FP128Type, LLVM.PPCFP128Type]
-        typ = T(ctx)
+        typ = T()
         # TODO: how to construct full-width constants?
         c = ConstantFP(typ, 1.1)
         @test convert(Float64, c) == 1.1
     end
     for T in [Float16, Float32, Float64]
-        c = ConstantFP(typemax(T); ctx)
+        c = ConstantFP(typemax(T))
         @test convert(T, c) == typemax(T)
     end
 
@@ -433,17 +433,17 @@ end
     # from Julia values
     let
         vec = Int128[1,2,3,4]
-        ca = ConstantArray(vec; ctx)
+        ca = ConstantArray(vec)
         @test ca isa ConstantArray
         @test size(vec) == size(ca)
         @test length(vec) == length(ca)
-        @test ca[1] == ConstantInt(vec[1]; ctx)
-        @test collect(ca) == ConstantInt.(vec; ctx)
+        @test ca[1] == ConstantInt(vec[1])
+        @test collect(ca) == ConstantInt.(vec)
     end
     let
         # tests for ConstantAggregateZero, constructed indirectly.
         # should behave similarly to ConstantArray since it can get returned there.
-        ca = ConstantArray(Int[]; ctx)
+        ca = ConstantArray(Int[])
         @test ca isa ConstantAggregateZero
         @test size(ca) == (0,)
         @test length(ca) == 0
@@ -453,10 +453,10 @@ end
     # multidimensional
     let
         vec = rand(Int, 2,3,4)
-        ca = ConstantArray(vec; ctx)
+        ca = ConstantArray(vec)
         @test size(vec) == size(ca)
         @test length(vec) == length(ca)
-        @test collect(ca) == ConstantInt.(vec; ctx)
+        @test collect(ca) == ConstantInt.(vec)
     end
 
     end
@@ -466,7 +466,7 @@ end
     # from Julia values
     let
         test_struct = TestStruct(true, -99, 1.5)
-        constant_struct = ConstantStruct(test_struct; ctx, anonymous=true)
+        constant_struct = ConstantStruct(test_struct, anonymous=true)
         constant_struct_type = value_type(constant_struct)
 
         @test constant_struct_type isa LLVM.StructType
@@ -475,44 +475,44 @@ end
         @test !isopaque(constant_struct_type)
 
         @test collect(elements(constant_struct_type)) ==
-            [LLVM.Int1Type(ctx), LLVM.Int64Type(ctx), LLVM.HalfType(ctx)]
+            [LLVM.Int1Type(), LLVM.Int64Type(), LLVM.HalfType()]
 
         expected_operands = [
-            ConstantInt(LLVM.Int1Type(ctx), Int(true)),
-            ConstantInt(LLVM.Int64Type(ctx), -99),
-            ConstantFP(LLVM.HalfType(ctx), 1.5)
+            ConstantInt(LLVM.Int1Type(), Int(true)),
+            ConstantInt(LLVM.Int64Type(), -99),
+            ConstantFP(LLVM.HalfType(), 1.5)
         ]
         @test collect(operands(constant_struct)) == expected_operands
     end
     let
         test_struct = TestStruct(false, 52, -2.5)
-        constant_struct = ConstantStruct(test_struct; ctx)
+        constant_struct = ConstantStruct(test_struct)
         constant_struct_type = value_type(constant_struct)
 
         @test constant_struct_type isa LLVM.StructType
 
         expected_operands = [
-            ConstantInt(LLVM.Int1Type(ctx), Int(false)),
-            ConstantInt(LLVM.Int64Type(ctx), 52),
-            ConstantFP(LLVM.HalfType(ctx), -2.5)
+            ConstantInt(LLVM.Int1Type(), Int(false)),
+            ConstantInt(LLVM.Int64Type(), 52),
+            ConstantFP(LLVM.HalfType(), -2.5)
         ]
         @test collect(operands(constant_struct)) == expected_operands
 
         # re-creating the same type shouldn't fail
-        ConstantStruct(TestStruct(true, 42, 0); ctx)
+        ConstantStruct(TestStruct(true, 42, 0))
         # unless it's a conflicting type
-        @test_throws ArgumentError ConstantStruct(AnotherTestStruct(1), "TestStruct"; ctx)
+        @test_throws ArgumentError ConstantStruct(AnotherTestStruct(1), "TestStruct")
 
     end
     let
         test_struct = TestSingleton()
-        constant_struct = ConstantStruct(test_struct; ctx)
+        constant_struct = ConstantStruct(test_struct)
         constant_struct_type = value_type(constant_struct)
 
         @test isempty(operands(constant_struct))
     end
     let
-        @test_throws ArgumentError ConstantStruct(1; ctx)
+        @test_throws ArgumentError ConstantStruct(1)
     end
 
     end
@@ -522,27 +522,27 @@ end
 
     let
         vec = Int32[1,2,3,4]
-        eltyp = LLVM.Int32Type(ctx)
+        eltyp = LLVM.Int32Type()
         cda = ConstantDataArray(eltyp, vec)
         @test cda isa ConstantDataArray
         @test value_type(cda) == LLVM.ArrayType(eltyp, 4)
-        @test collect(cda) == ConstantInt.(vec; ctx)
+        @test collect(cda) == ConstantInt.(vec)
     end
 
     # from Julia values
     for T in [Int8, Int16, Int32, Int64]
         vec = T[1,2,3,4]
-        cda = ConstantDataArray(vec; ctx)
+        cda = ConstantDataArray(vec)
         @test cda isa ConstantDataArray
         @test size(vec) == size(cda)
-        @test collect(cda) == ConstantInt.(vec; ctx)
+        @test collect(cda) == ConstantInt.(vec)
     end
     for T in [Float32, Float64]
         vec = T[1,2,3,4]
-        cda = ConstantDataArray(vec; ctx)
+        cda = ConstantDataArray(vec)
         @test cda isa ConstantDataArray
         @test size(vec) == size(cda)
-        @test collect(cda) == ConstantFP.(vec; ctx)
+        @test collect(cda) == ConstantFP.(vec)
     end
 
     end
@@ -555,13 +555,13 @@ end
     # inline assembly
     if supports_typed_pointers(ctx)
         let
-            ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+            ft = LLVM.FunctionType(LLVM.VoidType())
             asm = InlineAsm(ft, "nop", "", false)
             @check_ir asm "void ()* asm \"nop\", \"\""
         end
     else
         let
-            ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+            ft = LLVM.FunctionType(LLVM.VoidType())
             asm = InlineAsm(ft, "nop", "", false)
             @check_ir asm "ptr asm \"nop\", \"\""
         end
@@ -569,7 +569,7 @@ end
 
     # integer
     let
-        val = LLVM.ConstantInt(Int32(42); ctx)
+        val = LLVM.ConstantInt(Int32(42))
 
         for f = [const_neg, const_nswneg, const_nuwneg]
             ce = f(val)::LLVM.Constant
@@ -579,7 +579,7 @@ end
         ce = const_not(val)::LLVM.Constant
         @check_ir ce "i32 -43"
 
-        other_val = LLVM.ConstantInt(Int32(2); ctx)
+        other_val = LLVM.ConstantInt(Int32(2))
 
         for f in [const_add, const_nswadd, const_nuwadd]
             ce = f(val, other_val)::LLVM.Constant
@@ -617,27 +617,27 @@ end
         end
 
         for f in [const_trunc, const_truncorbitcast]
-            ce = const_trunc(val, LLVM.Int16Type(ctx))::LLVM.Constant
+            ce = const_trunc(val, LLVM.Int16Type())::LLVM.Constant
             @check_ir ce "i16 42"
         end
 
         for f in [const_sext, const_zext, const_sextorbitcast, const_zextorbitcast]
-            ce = f(val, LLVM.Int64Type(ctx))::LLVM.Constant
+            ce = f(val, LLVM.Int64Type())::LLVM.Constant
             @check_ir ce "i64 42"
         end
 
         for f in [const_uitofp, const_sitofp]
-            ce = f(val, LLVM.FloatType(ctx))::LLVM.Constant
+            ce = f(val, LLVM.FloatType())::LLVM.Constant
             @check_ir ce "float 4.200000e+01"
         end
 
-        ce = const_bitcast(val, LLVM.FloatType(ctx))::LLVM.Constant
+        ce = const_bitcast(val, LLVM.FloatType())::LLVM.Constant
         @check_ir ce "float 0x36F5000000000000"
 
-        ce = const_intcast(val, LLVM.Int64Type(ctx), true)::LLVM.Constant
+        ce = const_intcast(val, LLVM.Int64Type(), true)::LLVM.Constant
         @check_ir ce "i64 42"
 
-        ce = const_intcast(val, LLVM.Int16Type(ctx), true)::LLVM.Constant
+        ce = const_intcast(val, LLVM.Int16Type(), true)::LLVM.Constant
         @check_ir ce "i16 42"
 
         if LLVM.version() < v"15"
@@ -658,32 +658,32 @@ end
 
     # floating-point
     let
-        val = LLVM.ConstantFP(Float32(42.); ctx)
+        val = LLVM.ConstantFP(Float32(42.); )
 
         ce = const_fneg(val)::LLVM.Constant
         @check_ir ce "float -4.200000e+01"
 
-        other_val = LLVM.ConstantFP(Float32(2.); ctx)
+        other_val = LLVM.ConstantFP(Float32(2.))
         ce = const_fcmp(LLVM.API.LLVMRealUGT, val, other_val)::LLVM.Constant
         @check_ir ce "i1 true"
 
         for f in [const_fptrunc, const_fpcast]
-            ce = f(val, LLVM.HalfType(ctx))::LLVM.Constant
+            ce = f(val, LLVM.HalfType())::LLVM.Constant
             @check_ir ce "half 0xH5140"
         end
 
         for f in [const_fpext, const_fpcast]
-            ce = f(val, LLVM.DoubleType(ctx))::LLVM.Constant
+            ce = f(val, LLVM.DoubleType())::LLVM.Constant
             @check_ir ce "double 4.200000e+01"
         end
 
         for f in [const_fptoui, const_fptosi]
-            ce = const_fptoui(val, LLVM.Int32Type(ctx))::LLVM.Constant
+            ce = const_fptoui(val, LLVM.Int32Type())::LLVM.Constant
             @check_ir ce "i32 42"
         end
 
         if LLVM.version() < v"15"
-            other_val = LLVM.ConstantFP(Float32(2.); ctx)
+            other_val = LLVM.ConstantFP(Float32(2.))
 
             ce = const_fdiv(val, other_val)::LLVM.Constant
             @check_ir ce "float 2.100000e+01"
@@ -704,9 +704,9 @@ end
 
     # pointer
     let
-        ptr = LLVM.PointerNull(LLVM.PointerType(LLVM.Int32Type(ctx)))
+        ptr = LLVM.PointerNull(LLVM.PointerType(LLVM.Int32Type()))
 
-        ce = const_ptrtoint(ptr, LLVM.Int32Type(ctx))::LLVM.Constant
+        ce = const_ptrtoint(ptr, LLVM.Int32Type())::LLVM.Constant
         @check_ir ce "i32 0"
 
         ce = const_inttoptr(ce, value_type(ptr))::LLVM.Constant
@@ -717,7 +717,7 @@ end
         end
         @test isempty(uses(ptr))
         for f in [const_addrspacecast, const_pointercast]
-            ce = f(ptr, LLVM.PointerType(LLVM.Int32Type(ctx), 1))::LLVM.Constant
+            ce = f(ptr, LLVM.PointerType(LLVM.Int32Type(), 1))::LLVM.Constant
             if supports_typed_pointers(ctx)
                 @check_ir ce "i32 addrspace(1)* addrspacecast (i32* null to i32 addrspace(1)*)"
             else
@@ -736,8 +736,8 @@ end
 end
 
 # global values
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    st = LLVM.StructType("SomeType"; ctx)
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    st = LLVM.StructType("SomeType")
     ft = LLVM.FunctionType(st, [st])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
@@ -768,15 +768,15 @@ end
 end
 
 # global variables
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
     @test isempty(globals(mod))
-    gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
+    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
     @test !isempty(globals(mod))
 
     show(devnull, gv)
 
     @test initializer(gv) === nothing
-    init = ConstantInt(Int32(0); ctx)
+    init = ConstantInt(Int32(0))
     initializer!(gv, init)
     @test initializer(gv) == init
     initializer!(gv, nothing)
@@ -815,8 +815,8 @@ end
     end
 end
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    st = LLVM.StructType("SomeType"; ctx)
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    st = LLVM.StructType("SomeType")
     gv = GlobalVariable(mod, st, "SomeGlobal")
 
     init = null(st)
@@ -824,13 +824,13 @@ end
     @test initializer(gv) == init
 end
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    gv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal", 1)
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    gv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal", 1)
 
     @test value_type(gv) isa LLVM.PointerType
     @test addrspace(value_type(gv)) == 1
 
-    @test global_value_type(gv) == LLVM.Int32Type(ctx)
+    @test global_value_type(gv) == LLVM.Int32Type()
 end
 
 end
@@ -839,11 +839,11 @@ end
 @testset "metadata" begin
 
 @dispose ctx=Context() begin
-    str = MDString("foo"; ctx)
+    str = MDString("foo")
     @test string(str) == "foo"
 
     # wrap as Value
-    val = Value(str; ctx)
+    val = Value(str)
     @test val isa LLVM.MetadataAsValue
 
     # back to Metadata
@@ -855,7 +855,7 @@ end
 end
 
 @dispose ctx=Context() begin
-    int = ConstantInt(42; ctx)
+    int = ConstantInt(42)
     @test convert(Int, int) == 42
 
     # wrap as Metadata
@@ -863,7 +863,7 @@ end
     @test md isa LLVM.ValueAsMetadata
 
     # back to Value
-    val = Value(md; ctx)
+    val = Value(md)
     @test val == int
 
     # more specific conversion
@@ -871,36 +871,36 @@ end
 end
 
 @dispose ctx=Context() begin
-    mod = LLVM.Module("SomeModule"; ctx)
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+    mod = LLVM.Module("SomeModule")
+    ft = LLVM.FunctionType(LLVM.VoidType())
     f1 = LLVM.Function(mod, "f1", ft)
 
-    push!(metadata(mod)["function"], MDNode([f1]; ctx))
-    @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f1
+    push!(metadata(mod)["function"], MDNode([f1]))
+    @test Value(operands(operands(metadata(mod)["function"])[1])[1]) == f1
 
     f2 = LLVM.Function(mod, "f2", ft)
     replace_metadata_uses!(f1, f2)
-    @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f2
+    @test Value(operands(operands(metadata(mod)["function"])[1])[1]) == f2
 end
 
 # different type; requires a hack
 @dispose ctx=Context() begin
-    mod = LLVM.Module("SomeModule"; ctx)
-    ft1 = LLVM.FunctionType(LLVM.VoidType(ctx))
+    mod = LLVM.Module("SomeModule")
+    ft1 = LLVM.FunctionType(LLVM.VoidType())
     f1 = LLVM.Function(mod, "f1", ft1)
 
-    push!(metadata(mod)["function"], MDNode([f1]; ctx))
-    @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f1
+    push!(metadata(mod)["function"], MDNode([f1]))
+    @test Value(operands(operands(metadata(mod)["function"])[1])[1]) == f1
 
-    ft2 = LLVM.FunctionType(LLVM.Int32Type(ctx))
+    ft2 = LLVM.FunctionType(LLVM.Int32Type())
     f2 = LLVM.Function(mod, "f2", ft2)
     replace_metadata_uses!(f1, f2)
-    @test Value(operands(operands(metadata(mod)["function"])[1])[1]; ctx) == f2
+    @test Value(operands(operands(metadata(mod)["function"])[1])[1]) == f2
 end
 
 @dispose ctx=Context() begin
-    str = MDString("foo"; ctx)
-    node = MDNode([str]; ctx)
+    str = MDString("foo")
+    node = MDNode([str])
     ops = operands(node)
     @test length(ops) == 1
     @test ops[1] == str
@@ -912,14 +912,14 @@ end
             !0 = !{i32 42, null, !"string"}
             !foo = !{!0}
         """
-    mod = parse(LLVM.Module, ir; ctx)
+    mod = parse(LLVM.Module, ir)
 
     foo_md = operands(metadata(mod)["foo"])[1]
     @test operands(foo_md)[1] !== nothing
     @test operands(foo_md)[2] === nothing
     @test operands(foo_md)[3] !== nothing
 
-    bar_md = MDNode([ConstantInt(Int32(42); ctx), nothing, MDString("string"; ctx)]; ctx)
+    bar_md = MDNode([ConstantInt(Int32(42)), nothing, MDString("string")])
     @test foo_md == bar_md
 end
 
@@ -956,7 +956,7 @@ mod = parse(LLVM.Module, raw"""
        !16 = distinct !DISubprogram(name: "promote;", linkageName: "promote", scope: !3, file: !3, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
        !17 = !DILocation(line: 321, scope: !5)
        !18 = !DILocation(line: 326, scope: !19, inlinedAt: !17)
-       !19 = distinct !DISubprogram(name: "+;", linkageName: "+", scope: !9, file: !9, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)"""; ctx)
+       !19 = distinct !DISubprogram(name: "+;", linkageName: "+", scope: !9, file: !9, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)""")
 
     fun = functions(mod)["test"]
     bb = first(collect(blocks(fun)))
@@ -1005,7 +1005,7 @@ end
 @testset "module" begin
 
 @dispose ctx=Context() begin
-    let mod = LLVM.Module("SomeModule"; ctx)
+    let mod = LLVM.Module("SomeModule")
         @test context(mod) == ctx
 
         @test name(mod) == "SomeModule"
@@ -1013,11 +1013,11 @@ end
         @test name(mod) == "SomeOtherName"
     end
 
-    LLVM.Module("SomeModule"; ctx) do mod
+    LLVM.Module("SomeModule") do mod
     end
 end
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
     clone = copy(mod)
     @test mod != clone
     @test context(clone) == ctx
@@ -1036,7 +1036,7 @@ end
     datalayout!(mod, dummyLayout)
     @test string(datalayout(mod)) == dummyLayout
 
-    md = Metadata(ConstantInt(42; ctx))
+    md = Metadata(ConstantInt(42))
 
     mod_flags = flags(mod)
     mod_flags["foobar", LLVM.API.LLVMModuleFlagBehaviorError] = md
@@ -1053,8 +1053,8 @@ end
 end
 
 # metadata iteration
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    node = MDNode([MDString("SomeMDString"; ctx)]; ctx)
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    node = MDNode([MDString("SomeMDString")])
 
     let mds = metadata(mod)
         @test keytype(mds) == String
@@ -1070,8 +1070,8 @@ end
 end
 
 # global variable iteration
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    dummygv = GlobalVariable(mod, LLVM.Int32Type(ctx), "SomeGlobal")
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    dummygv = GlobalVariable(mod, LLVM.Int32Type(), "SomeGlobal")
 
     let gvs = globals(mod)
         @test eltype(gvs) == typeof(dummygv)
@@ -1094,8 +1094,8 @@ end
 end
 
 # function iteration
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    st = LLVM.StructType("SomeType"; ctx)
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    st = LLVM.StructType("SomeType")
     ft = LLVM.FunctionType(st, [st])
     @test isempty(functions(mod))
 
@@ -1127,14 +1127,14 @@ end
 
 @testset "function" begin
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     show(devnull, fn)
 
     @test personality(fn) === nothing
-    pers_ft = LLVM.FunctionType(LLVM.Int32Type(ctx); vararg=true)
+    pers_ft = LLVM.FunctionType(LLVM.Int32Type(); vararg=true)
     pers_fn = LLVM.Function(mod, "PersonalityFunction", ft)
     personality!(fn, pers_fn)
     @test personality(fn) == pers_fn
@@ -1160,8 +1160,8 @@ end
 end
 
 # non-overloaded intrinsic
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    intr_ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    intr_ft = LLVM.FunctionType(LLVM.VoidType())
     intr_fn = LLVM.Function(mod, "llvm.trap", intr_ft)
     @test isintrinsic(intr_fn)
 
@@ -1172,9 +1172,9 @@ end
 
     @test name(intr) == "llvm.trap"
 
-    ft = LLVM.FunctionType(intr; ctx=ctx)
+    ft = LLVM.FunctionType(intr)
     @test ft isa LLVM.FunctionType
-    @test return_type(ft) == LLVM.VoidType(ctx)
+    @test return_type(ft) == LLVM.VoidType()
 
     fn = LLVM.Function(mod, intr)
     @test fn isa LLVM.Function
@@ -1188,8 +1188,8 @@ end
 end
 
 # overloaded intrinsic
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    intr_ft = LLVM.FunctionType(LLVM.DoubleType(ctx), [LLVM.DoubleType(ctx)])
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    intr_ft = LLVM.FunctionType(LLVM.DoubleType(), [LLVM.DoubleType()])
     intr_fn = LLVM.Function(mod, "llvm.sin.f64", intr_ft)
     @test isintrinsic(intr_fn)
 
@@ -1198,13 +1198,13 @@ end
 
     @test isoverloaded(intr)
 
-    @test name(intr, [LLVM.DoubleType(ctx)]) == "llvm.sin.f64"
+    @test name(intr, [LLVM.DoubleType()]) == "llvm.sin.f64"
 
-    ft = LLVM.FunctionType(intr, [LLVM.DoubleType(ctx)])
+    ft = LLVM.FunctionType(intr, [LLVM.DoubleType()])
     @test ft isa LLVM.FunctionType
-    @test return_type(ft) == LLVM.DoubleType(ctx)
+    @test return_type(ft) == LLVM.DoubleType()
 
-    fn = LLVM.Function(mod, intr, [LLVM.DoubleType(ctx)])
+    fn = LLVM.Function(mod, intr, [LLVM.DoubleType()])
     @test fn isa LLVM.Function
     if supports_typed_pointers(ctx)
         @test eltype(value_type(fn)) == ft
@@ -1215,8 +1215,8 @@ end
 end
 
 # attributes
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     let attrs = function_attributes(fn)
@@ -1224,7 +1224,7 @@ end
 
         @test length(attrs) == 0
 
-        let attr = EnumAttribute("sspreq", 0; ctx)
+        let attr = EnumAttribute("sspreq", 0)
             @test kind(attr) != 0
             @test value(attr) == 0
             push!(attrs, attr)
@@ -1234,7 +1234,7 @@ end
             @test length(attrs) == 0
         end
 
-        let attr = StringAttribute("nounwind", ""; ctx)
+        let attr = StringAttribute("nounwind", "")
             @test kind(attr) == "nounwind"
             @test value(attr) == ""
             push!(attrs, attr)
@@ -1245,9 +1245,9 @@ end
         end
 
         if LLVM.version() >= v"12"
-            let attr = TypeAttribute("sret", LLVM.Int32Type(ctx); ctx)
+            let attr = TypeAttribute("sret", LLVM.Int32Type())
                 @test kind(attr) != 0
-                @test value(attr) ==  LLVM.Int32Type(ctx)
+                @test value(attr) ==  LLVM.Int32Type()
 
                 push!(attrs, attr)
                 @test collect(attrs) == [attr]
@@ -1272,8 +1272,8 @@ end
 end
 
 # parameter iteration
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx)])
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     let params = parameters(fn)
@@ -1294,12 +1294,12 @@ end
 end
 
 # basic block iteration
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType())
     fn = LLVM.Function(mod, "SomeFunction", ft)
     @test isempty(blocks(fn))
 
-    entrybb = BasicBlock(fn, "SomeBasicBlock"; ctx)
+    entrybb = BasicBlock(fn, "SomeBasicBlock")
     @test entry(fn) == entrybb
     let bbs = blocks(fn)
         @test eltype(bbs) == BasicBlock
@@ -1326,17 +1326,17 @@ end
 
 @testset "basic blocks" begin
 
-@dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+@dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType())
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    bb2 = BasicBlock(fn, "SomeOtherBasicBlock"; ctx)
+    bb2 = BasicBlock(fn, "SomeOtherBasicBlock")
     @test LLVM.parent(bb2) == fn
     @test isempty(instructions(bb2))
     @test isempty(predecessors(bb2))
     @test_throws ArgumentError successors(bb2)
 
-    bb1 = BasicBlock(bb2, "SomeBasicBlock"; ctx)
+    bb1 = BasicBlock(bb2, "SomeBasicBlock")
     @test LLVM.parent(bb2) == fn
     position!(builder, bb1)
     brinst = br!(builder, bb2)
@@ -1349,7 +1349,7 @@ end
     @test terminator(bb1) == brinst
     @test terminator(bb2) == retinst
 
-    bb3 = BasicBlock("YetAnotherBasicBlock"; ctx)
+    bb3 = BasicBlock("YetAnotherBasicBlock")
     @test LLVM.parent(bb3) == nothing
     @test terminator(bb3) == nothing
     # XXX: can we insert this block into the function?
@@ -1393,18 +1393,18 @@ end
 
 @testset "instructions" begin
 
-@dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+@dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType())
     fn = LLVM.Function(mod, "SomeFunction", ft)
     @test isempty(parameters(fn))
 
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int1Type(ctx), LLVM.Int1Type(ctx)])
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int1Type(), LLVM.Int1Type()])
     fn = LLVM.Function(mod, "SomeOtherFunction", ft)
     @test !isempty(parameters(fn))
 
-    bb1 = BasicBlock(fn, "entry"; ctx)
-    bb2 = BasicBlock(fn, "then"; ctx)
-    bb3 = BasicBlock(fn, "else"; ctx)
+    bb1 = BasicBlock(fn, "entry")
+    bb2 = BasicBlock(fn, "then")
+    bb3 = BasicBlock(fn, "else")
 
     position!(builder, bb1)
     brinst = br!(builder, parameters(fn)[1], bb2, bb3)
@@ -1457,7 +1457,7 @@ end
     @test LLVM.parent(brinst) == bb1
 
     # metadata
-    mdval = MDNode([MDString("whatever"; ctx)]; ctx)
+    mdval = MDNode([MDString("whatever")])
     let md = metadata(brinst)
         @test keytype(md) == LLVM.MD
         @test valtype(md) == LLVM.MetadataAsValue
@@ -1497,7 +1497,7 @@ end
         top:
             %1 = freeze i64 undef
             ret i64 %1
-        }"""; ctx)
+        }""")
     f = first(functions(mod))
     bb = first(blocks(f))
     inst = first(instructions(bb))

@@ -75,13 +75,13 @@ end
 
 # NOTE: fixed set where sizeof(T) does match the numerical width
 const SizeableInteger = Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
-function ConstantInt(val::T; ctx::Context) where T<:SizeableInteger
-    typ = IntType(sizeof(T)*8; ctx)
+function ConstantInt(val::T) where T<:SizeableInteger
+    typ = IntType(sizeof(T)*8)
     return ConstantInt(typ, val, T<:Signed)
 end
 
 # Booleans are encoded with a single bit, so we can't use sizeof
-ConstantInt(val::Core.Bool; ctx::Context) = ConstantInt(Int1Type(ctx), val ? 1 : 0)
+ConstantInt(val::Core.Bool) = ConstantInt(Int1Type(), val ? 1 : 0)
 
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Unsigned} =
     convert(T, API.LLVMConstIntGetZExtValue(val))
@@ -101,12 +101,12 @@ register(ConstantFP, API.LLVMConstantFPValueKind)
 ConstantFP(typ::FloatingPointType, val::Real) =
     ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
 
-ConstantFP(val::Float16; ctx::Context) =
-    ConstantFP(HalfType(ctx), val)
-ConstantFP(val::Float32; ctx::Context) =
-    ConstantFP(FloatType(ctx), val)
-ConstantFP(val::Float64; ctx::Context) =
-    ConstantFP(DoubleType(ctx), val)
+ConstantFP(val::Float16) =
+    ConstantFP(HalfType(), val)
+ConstantFP(val::Float32) =
+    ConstantFP(FloatType(), val)
+ConstantFP(val::Float64) =
+    ConstantFP(DoubleType(), val)
 
 Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
     convert(T, API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}()))
@@ -162,16 +162,16 @@ end
 # shorthands with arrays of plain Julia data
 # FIXME: duplicates the ConstantInt/ConstantFP conversion rules
 # XXX: X[X(...)] instead of X.(...) because of empty-container inference
-ConstantDataArray(data::AbstractVector{T}; ctx::Context) where {T<:Integer} =
-    ConstantDataArray(IntType(sizeof(T)*8; ctx), data)
-ConstantDataArray(data::AbstractVector{Core.Bool}; ctx::Context) =
-    ConstantDataArray(Int1Type(ctx), data)
-ConstantDataArray(data::AbstractVector{Float16}; ctx::Context) =
-    ConstantDataArray(HalfType(ctx), data)
-ConstantDataArray(data::AbstractVector{Float32}; ctx::Context) =
-    ConstantDataArray(FloatType(ctx), data)
-ConstantDataArray(data::AbstractVector{Float64}; ctx::Context) =
-    ConstantDataArray(DoubleType(ctx), data)
+ConstantDataArray(data::AbstractVector{T}) where {T<:Integer} =
+    ConstantDataArray(IntType(sizeof(T)*8), data)
+ConstantDataArray(data::AbstractVector{Core.Bool}) =
+    ConstantDataArray(Int1Type(), data)
+ConstantDataArray(data::AbstractVector{Float16}) =
+    ConstantDataArray(HalfType(), data)
+ConstantDataArray(data::AbstractVector{Float32}) =
+    ConstantDataArray(FloatType(), data)
+ConstantDataArray(data::AbstractVector{Float64}) =
+    ConstantDataArray(DoubleType(), data)
 
 @checked struct ConstantDataVector <: ConstantDataSequential
     ref::API.LLVMValueRef
@@ -231,16 +231,16 @@ end
 # shorthands with arrays of plain Julia data
 # FIXME: duplicates the ConstantInt/ConstantFP conversion rules
 # XXX: X[X(...)] instead of X.(...) because of empty-container inference
-ConstantArray(data::AbstractArray{T}; ctx::Context) where {T<:Integer} =
-    ConstantArray(IntType(sizeof(T)*8; ctx), ConstantInt[ConstantInt(x; ctx) for x in data])
-ConstantArray(data::AbstractArray{Core.Bool}; ctx::Context) =
-    ConstantArray(Int1Type(ctx), ConstantInt[ConstantInt(x; ctx) for x in data])
-ConstantArray(data::AbstractArray{Float16}; ctx::Context) =
-    ConstantArray(HalfType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
-ConstantArray(data::AbstractArray{Float32}; ctx::Context) =
-    ConstantArray(FloatType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
-ConstantArray(data::AbstractArray{Float64}; ctx::Context) =
-    ConstantArray(DoubleType(ctx), ConstantFP[ConstantFP(x; ctx) for x in data])
+ConstantArray(data::AbstractArray{T}) where {T<:Integer} =
+    ConstantArray(IntType(sizeof(T)*8), ConstantInt[ConstantInt(x) for x in data])
+ConstantArray(data::AbstractArray{Core.Bool}) =
+    ConstantArray(Int1Type(), ConstantInt[ConstantInt(x) for x in data])
+ConstantArray(data::AbstractArray{Float16}) =
+    ConstantArray(HalfType(), ConstantFP[ConstantFP(x) for x in data])
+ConstantArray(data::AbstractArray{Float32}) =
+    ConstantArray(FloatType(), ConstantFP[ConstantFP(x) for x in data])
+ConstantArray(data::AbstractArray{Float64}) =
+    ConstantArray(DoubleType(), ConstantFP[ConstantFP(x) for x in data])
 
 # convert back to known array types
 function Base.collect(ca::ConstantArray)
@@ -296,15 +296,15 @@ register(ConstantStruct, API.LLVMConstantStructValueKind)
 ConstantStructOrAggregateZero(value) = Value(value)::Union{ConstantStruct,ConstantAggregateZero}
 
 # anonymous
-ConstantStruct(values::Vector{<:Constant}; ctx::Context, packed::Core.Bool=false) =
-    ConstantStructOrAggregateZero(API.LLVMConstStructInContext(ctx, values, length(values), convert(Bool, packed)))
+ConstantStruct(values::Vector{<:Constant}; packed::Core.Bool=false) =
+    ConstantStructOrAggregateZero(API.LLVMConstStructInContext(context(), values, length(values), convert(Bool, packed)))
 
 # named
 ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
     ConstantStructOrAggregateZero(API.LLVMConstNamedStruct(typ, values, length(values)))
 
 # create a ConstantStruct from a Julia object
-function ConstantStruct(value::T, name=String(nameof(T)); ctx::Context,
+function ConstantStruct(value::T, name=String(nameof(T));
                         anonymous::Core.Bool=false, packed::Core.Bool=false) where {T}
     isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
     isprimitivetype(T) && throw(ArgumentError("Cannot create a ConstantStruct from a primitive value"))
@@ -314,24 +314,24 @@ function ConstantStruct(value::T, name=String(nameof(T)); ctx::Context,
         field = getfield(value, fieldname)
 
         if isa(field, Integer)
-            push!(constants, ConstantInt(field; ctx))
+            push!(constants, ConstantInt(field))
         elseif isa(field, AbstractFloat)
-            push!(constants, ConstantFP(field; ctx))
+            push!(constants, ConstantFP(field))
         else # TODO: nested structs?
             throw(ArgumentError("only structs with boolean, integer and floating point fields are allowed"))
         end
     end
 
     if anonymous
-        ConstantStruct(constants; ctx, packed)
-    elseif haskey(types(ctx), name)
-        typ = types(ctx)[name]
+        ConstantStruct(constants; packed)
+    elseif haskey(types(context()), name)
+        typ = types(context())[name]
         if collect(elements(typ)) != value_type.(constants)
             throw(ArgumentError("Cannot create struct $name {$(join(value_type.(constants), ", "))} as it is already defined in this context as {$(join(elements(typ), ", "))}."))
         end
         ConstantStruct(typ, constants)
     else
-        typ = StructType(name; ctx)
+        typ = StructType(name)
         elements!(typ, value_type.(constants))
         ConstantStruct(typ, constants)
     end
@@ -596,8 +596,8 @@ function section(val::GlobalValue)
   #=
   The following started to fail on LLVM 4.0:
     @dispose ctx=Context() begin
-      @dispose mod=LLVM.Module("SomeModule"; ctx) begin
-        st = LLVM.StructType("SomeType"; ctx)
+      @dispose mod=LLVM.Module("SomeModule") begin
+        st = LLVM.StructType("SomeType")
         ft = LLVM.FunctionType(st, [st])
         fn = LLVM.Function(mod, "SomeFunction", ft)
         section(fn) == ""

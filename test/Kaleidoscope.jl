@@ -17,7 +17,7 @@ include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
     """
 
     @dispose ctx=Context() begin
-        m = Kaleidoscope.generate_IR(program; ctx)
+        m = Kaleidoscope.generate_IR(program)
         Kaleidoscope.optimize!(m)
         v = Kaleidoscope.run(m, "entry")
         @test v == 55.0
@@ -42,7 +42,7 @@ end
     """
 
     @dispose ctx=Context() begin
-        m = Kaleidoscope.generate_IR(program; ctx)
+        m = Kaleidoscope.generate_IR(program)
         Kaleidoscope.optimize!(m)
         mktemp() do path, io
             Kaleidoscope.write_objectfile(m, path)
@@ -62,7 +62,7 @@ end
     """
 
     @dispose ctx=Context() begin
-        m = Kaleidoscope.generate_IR(program; ctx)
+        m = Kaleidoscope.generate_IR(program)
         Kaleidoscope.optimize!(m)
         v = Kaleidoscope.run(m, "entry")
         @test v == 13

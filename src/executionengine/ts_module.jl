@@ -43,7 +43,9 @@ Construct a ThreadSafeModule from a fresh LLVM.Module and a private context.
 """
 function ThreadSafeModule(name::String)
     ctx = @dispose ctx=ThreadSafeContext() begin
-        mod = LLVM.Module(name; ctx=context(ctx))
+        mod = context!(context(ctx)) do
+            LLVM.Module(name)
+        end
         ThreadSafeModule(mod; ctx)
     end
 end

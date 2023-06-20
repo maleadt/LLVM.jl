@@ -11,7 +11,7 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMBuilderRef}, builder::IRBuilder) = builder.ref
 
-IRBuilder(ctx::Context) = IRBuilder(API.LLVMCreateBuilderInContext(ctx))
+IRBuilder() = IRBuilder(API.LLVMCreateBuilderInContext(context()))
 
 dispose(builder::IRBuilder) = API.LLVMDisposeBuilder(builder)
 

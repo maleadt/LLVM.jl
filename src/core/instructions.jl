@@ -105,7 +105,7 @@ function Base.getindex(md::InstructionMetadataDict, kind::MD)
   end
 
 Base.setindex!(md::InstructionMetadataDict, node::Metadata, kind::MD) =
-    API.LLVMSetMetadata(md.inst, kind, Value(node; ctx=context(md.inst)))
+    API.LLVMSetMetadata(md.inst, kind, Value(node))
 
 Base.delete!(md::InstructionMetadataDict, kind::MD) =
     API.LLVMSetMetadata(md.inst, kind, C_NULL)

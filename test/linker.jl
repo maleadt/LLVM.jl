@@ -1,12 +1,12 @@
 @testset "linker" begin
 
-@dispose ctx=Context() builder=IRBuilder(ctx) begin
+@dispose ctx=Context() builder=IRBuilder() begin
     mod1 = let
-        mod = LLVM.Module("SomeModule"; ctx)
-        ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+        mod = LLVM.Module("SomeModule")
+        ft = LLVM.FunctionType(LLVM.VoidType())
         fn = LLVM.Function(mod, "SomeFunction", ft)
 
-        entry = BasicBlock(fn, "entry"; ctx)
+        entry = BasicBlock(fn, "entry")
         position!(builder, entry)
 
         ret!(builder)
@@ -15,11 +15,11 @@
     end
 
     mod2 = let
-        mod = LLVM.Module("SomeOtherModule"; ctx)
-        ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+        mod = LLVM.Module("SomeOtherModule")
+        ft = LLVM.FunctionType(LLVM.VoidType())
         fn = LLVM.Function(mod, "SomeOtherFunction", ft)
 
-        entry = BasicBlock(fn, "entry"; ctx)
+        entry = BasicBlock(fn, "entry")
         position!(builder, entry)
 
         ret!(builder)

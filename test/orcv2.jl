@@ -57,42 +57,43 @@ end
         jd = JITDylib(lljit)
 
         @dispose ts_ctx=ThreadSafeContext() begin
-            ctx = context(ts_ctx)
-            mod = LLVM.Module("jit"; ctx)
+            context!(context(ts_ctx)) do
+                mod = LLVM.Module("jit")
 
-            T_Int32 = LLVM.Int32Type(ctx)
-            ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
-            fn = LLVM.Function(mod, "mysum", ft)
-            linkage!(fn, LLVM.API.LLVMExternalLinkage)
+                T_Int32 = LLVM.Int32Type()
+                ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
+                fn = LLVM.Function(mod, "mysum", ft)
+                linkage!(fn, LLVM.API.LLVMExternalLinkage)
 
-            fname = "wrapper"
-            wrapper = LLVM.Function(mod, fname, ft)
-            # generate IR
-            @dispose builder=IRBuilder(ctx) begin
-                entry = BasicBlock(wrapper, "entry"; ctx)
-                position!(builder, entry)
+                fname = "wrapper"
+                wrapper = LLVM.Function(mod, fname, ft)
+                # generate IR
+                @dispose builder=IRBuilder() begin
+                    entry = BasicBlock(wrapper, "entry")
+                    position!(builder, entry)
 
-                tmp = call!(builder, ft, fn, [parameters(wrapper)...])
-                ret!(builder, tmp)
-            end
+                    tmp = call!(builder, ft, fn, [parameters(wrapper)...])
+                    ret!(builder, tmp)
+                end
 
-            # TODO: Get TM from lljit?
-            tm = JITTargetMachine()
-            triple!(mod, triple(lljit))
-            @dispose pm=ModulePassManager() begin
-                add_library_info!(pm, triple(mod))
-                add_transform_info!(pm, tm)
-                run!(pm, mod)
-            end
-            verify(mod)
+                # TODO: Get TM from lljit?
+                tm = JITTargetMachine()
+                triple!(mod, triple(lljit))
+                @dispose pm=ModulePassManager() begin
+                    add_library_info!(pm, triple(mod))
+                    add_transform_info!(pm, tm)
+                    run!(pm, mod)
+                end
+                verify(mod)
 
-            ts_mod = ThreadSafeModule(mod; ctx=ts_ctx)
+                ts_mod = ThreadSafeModule(mod; ctx=ts_ctx)
 
-            add!(lljit, jd, ts_mod)
-            @test_throws LLVMException redirect_stderr(devnull) do
-                # XXX: this reports an unhandled JIT session error;
-                #      can we handle it instead?
-                lookup(lljit, fname)
+                add!(lljit, jd, ts_mod)
+                @test_throws LLVMException redirect_stderr(devnull) do
+                    # XXX: this reports an unhandled JIT session error;
+                    #      can we handle it instead?
+                    lookup(lljit, fname)
+                end
             end
         end
     end
@@ -104,21 +105,21 @@ end
 
         sym = "SomeFunction"
         obj = @dispose ts_ctx=ThreadSafeContext() begin
-            ctx = context(ts_ctx)
+            context!(context(ts_ctx)) do
+                mod = LLVM.Module("jit")
+                ft = LLVM.FunctionType(LLVM.VoidType())
+                fn = LLVM.Function(mod, sym, ft)
 
-            mod = LLVM.Module("jit"; ctx)
-            ft = LLVM.FunctionType(LLVM.VoidType(ctx))
-            fn = LLVM.Function(mod, sym, ft)
+                @dispose builder=IRBuilder() begin
+                    entry = BasicBlock(fn, "entry")
+                    position!(builder, entry)
+                    ret!(builder)
+                end
+                verify(mod)
 
-            @dispose builder=IRBuilder(ctx) begin
-                entry = BasicBlock(fn, "entry"; ctx)
-                position!(builder, entry)
-                ret!(builder)
+                tm  = JITTargetMachine()
+                return emit(tm, mod, LLVM.API.LLVMObjectFile)
             end
-            verify(mod)
-
-            tm  = JITTargetMachine()
-            return emit(tm, mod, LLVM.API.LLVMObjectFile)
         end
         add!(lljit, jd, MemoryBuffer(obj))
 
@@ -135,25 +136,25 @@ end
 
         sym = "SomeFunction"
         obj = @dispose ts_ctx=ThreadSafeContext() begin
-            ctx = context(ts_ctx)
+            context!(context(ts_ctx)) do
+                mod = LLVM.Module("jit")
+                ft = LLVM.FunctionType(LLVM.Int32Type())
+                fn = LLVM.Function(mod, sym, ft)
 
-            mod = LLVM.Module("jit"; ctx)
-            ft = LLVM.FunctionType(LLVM.Int32Type(ctx))
-            fn = LLVM.Function(mod, sym, ft)
+                gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(), "gv")
+                LLVM.extinit!(gv, true)
 
-            gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(ctx), "gv")
-            LLVM.extinit!(gv, true)
+                @dispose builder=IRBuilder() begin
+                    entry = BasicBlock(fn, "entry")
+                    position!(builder, entry)
+                    val = load!(builder, LLVM.Int32Type(), gv)
+                    ret!(builder, val)
+                end
+                verify(mod)
 
-            @dispose builder=IRBuilder(ctx) begin
-                entry = BasicBlock(fn, "entry"; ctx)
-                position!(builder, entry)
-                val = load!(builder, gv)
-                ret!(builder, val)
+                tm  = JITTargetMachine()
+                return emit(tm, mod, LLVM.API.LLVMObjectFile)
             end
-            verify(mod)
-
-            tm  = JITTargetMachine()
-            return emit(tm, mod, LLVM.API.LLVMObjectFile)
         end
 
         data = Ref{Int32}(42)
@@ -201,26 +202,27 @@ end
             jd = JITDylib(lljit)
 
             @dispose ts_ctx=ThreadSafeContext() begin
-                ctx = context(ts_ctx)
-                sym = "SomeFunctionOLL"
+                context!(context(ts_ctx)) do
+                    sym = "SomeFunctionOLL"
 
-                mod = LLVM.Module("jit"; ctx)
-                ft = LLVM.FunctionType(LLVM.VoidType(ctx))
-                fn = LLVM.Function(mod, sym, ft)
+                    mod = LLVM.Module("jit")
+                    ft = LLVM.FunctionType(LLVM.VoidType())
+                    fn = LLVM.Function(mod, sym, ft)
 
-                @dispose builder=IRBuilder(ctx) begin
-                    entry = BasicBlock(fn, "entry"; ctx)
-                    position!(builder, entry)
-                    ret!(builder)
+                    @dispose builder=IRBuilder() begin
+                        entry = BasicBlock(fn, "entry")
+                        position!(builder, entry)
+                        ret!(builder)
+                    end
+                    verify(mod)
+
+                    ts_mod = ThreadSafeModule(mod; ctx=ts_ctx)
+                    add!(lljit, jd, ts_mod)
+
+                    addr = lookup(lljit, sym)
+
+                    @test pointer(addr) != C_NULL
                 end
-                verify(mod)
-
-                ts_mod = ThreadSafeModule(mod; ctx=ts_ctx)
-                add!(lljit, jd, ts_mod)
-
-                addr = lookup(lljit, sym)
-
-                @test pointer(addr) != C_NULL
             end
         end
     end
@@ -266,19 +268,20 @@ end
                 TSM() do mod
                     LLVM.apply_datalayout!(lljit, mod)
 
-                    ctx = context(mod)
-                    T_Int32 = LLVM.Int32Type(ctx)
-                    ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
+                    context!(context(mod)) do
+                        T_Int32 = LLVM.Int32Type()
+                        ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
 
-                    fn = LLVM.Function(mod, "foo", ft)
+                        fn = LLVM.Function(mod, "foo", ft)
 
-                    # generate IR
-                    @dispose builder=IRBuilder(ctx) begin
-                        entry = BasicBlock(fn, "entry"; ctx)
-                        position!(builder, entry)
+                        # generate IR
+                        @dispose builder=IRBuilder() begin
+                            entry = BasicBlock(fn, "entry")
+                            position!(builder, entry)
 
-                        tmp = add!(builder, parameters(fn)...)
-                        ret!(builder, tmp)
+                            tmp = add!(builder, parameters(fn)...)
+                            ret!(builder, tmp)
+                        end
                     end
                 end
 

@@ -208,9 +208,8 @@ function Function(mod::Module, intr::Intrinsic, params::Vector{<:LLVMType}=LLVMT
     Value(API.LLVMGetIntrinsicDeclaration(mod, intr, params, length(params)))
 end
 
-function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[];
-                      ctx::Context=only(unique(map(context, params))))
-    LLVMType(API.LLVMIntrinsicGetType(ctx, intr, params, length(params)))
+function FunctionType(intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[])
+    LLVMType(API.LLVMIntrinsicGetType(context(), intr, params, length(params)))
 end
 
 function Base.show(io::IO, intr::Intrinsic)

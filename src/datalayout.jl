@@ -38,10 +38,10 @@ pointersize(data::DataLayout) = API.LLVMPointerSize(data)
 pointersize(data::DataLayout, addrspace::Integer) =
     API.LLVMPointerSizeForAS(data, addrspace)
 
-intptr(data::DataLayout; ctx::Context) =
-    IntegerType(API.LLVMIntPtrTypeInContext(ctx, data))
-intptr(data::DataLayout, addrspace::Integer; ctx::Context) =
-    IntegerType(API.LLVMIntPtrTypeForASInContext(ctx, data, addrspace))
+intptr(data::DataLayout) =
+    IntegerType(API.LLVMIntPtrTypeInContext(context(), data))
+intptr(data::DataLayout, addrspace::Integer) =
+    IntegerType(API.LLVMIntPtrTypeForASInContext(context(), data, addrspace))
 
 Base.sizeof(data::DataLayout, typ::LLVMType) =
     Int(API.LLVMSizeOfTypeInBits(data, typ) / 8)

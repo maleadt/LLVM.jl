@@ -13,12 +13,12 @@ end
 
 @generated function add_one(i)
     @dispose ctx=Context() begin
-        T_int = convert(LLVMType, Int; ctx)
+        T_int = convert(LLVMType, Int)
 
         f, ft = create_function(T_int, [T_int])
 
-        @dispose builder=IRBuilder(ctx) begin
-            entry = BasicBlock(f, "entry"; ctx)
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(f, "entry")
             position!(builder, entry)
 
             val = add!(builder, parameters(f)[1], ConstantInt(T_int, 1))
@@ -44,10 +44,10 @@ end
 @test !isghosttype(NonGhostType2)
 
 @dispose ctx=Context() begin
-    @test isboxed(NonGhostType2; ctx)
-    @test isghosttype(GhostType; ctx)
-    @test !isghosttype(NonGhostType1; ctx)
-    @test !isghosttype(NonGhostType2; ctx)
+    @test isboxed(NonGhostType2)
+    @test isghosttype(GhostType)
+    @test !isghosttype(NonGhostType1)
+    @test !isghosttype(NonGhostType2)
 end
 
 end
@@ -121,7 +121,7 @@ end
 @testset "passes" begin
 
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) pm=ModulePassManager() begin
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") pm=ModulePassManager() begin
 
 demote_float16!(pm)
 julia_licm!(pm)

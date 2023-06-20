@@ -84,10 +84,9 @@ function replace_metadata_uses!(old::Value, new::Value)
         while !isa(mod, LLVM.Module)
             mod = LLVM.parent(new)
         end
-        ctx = context(mod)
         function recurse(md)
             for (i, op) in enumerate(operands(md))
-                if op isa ValueAsMetadata && Value(op; ctx) == compat_new
+                if op isa ValueAsMetadata && Value(op) == compat_new
                     LLVM.replace_operand(md, i, Metadata(new))
                 elseif isa(op, MDTuple)
                     recurse(op)

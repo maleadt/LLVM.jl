@@ -19,11 +19,11 @@ end
     asm_verbosity!(tm, true)
 
     # emission
-    @dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
-        ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+    @dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
+        ft = LLVM.FunctionType(LLVM.VoidType())
         fn = LLVM.Function(mod, "SomeFunction", ft)
 
-        entry = BasicBlock(fn, "entry"; ctx)
+        entry = BasicBlock(fn, "entry")
         position!(builder, entry)
 
         ret!(builder)
@@ -38,7 +38,7 @@ end
         @test_throws LLVMException emit(tm, mod, LLVM.API.LLVMAssemblyFile, "/")
     end
 
-    @dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
+    @dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
         @dispose fpm=FunctionPassManager(mod) begin
             add_transform_info!(fpm)
             add_transform_info!(fpm, tm)

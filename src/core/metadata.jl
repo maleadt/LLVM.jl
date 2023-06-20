@@ -50,7 +50,7 @@ register(MetadataAsValue, API.LLVMMetadataAsValueValueKind)
 
 # NOTE: this can be used to both pack e.g. metadata as a value, and to extract the
 #       value from an ValueAsMetadata, so we don't type-assert narrowly here
-Value(md::Metadata; ctx::Context) = Value(API.LLVMMetadataAsValue2(ctx, md))
+Value(md::Metadata) = Value(API.LLVMMetadataAsValue2(context(), md))
 
 Base.convert(T::Type{<:Value}, val::Metadata) = Value(val)::T
 
@@ -88,8 +88,8 @@ export MDString
 end
 register(MDString, API.LLVMMDStringMetadataKind)
 
-MDString(val::String; ctx::Context) =
-    MDString(API.LLVMMDStringInContext2(ctx, val, length(val)))
+MDString(val::String) =
+    MDString(API.LLVMMDStringInContext2(context(), val, length(val)))
 
 function Base.string(md::MDString)
     len = Ref{Cuint}()
@@ -127,10 +127,10 @@ end
 register(MDTuple, API.LLVMMDTupleMetadataKind)
 
 # MDTuples are commonly referred to as MDNodes, so keep that name
-MDNode(mds::Vector{<:Metadata}; ctx::Context) =
-    MDTuple(API.LLVMMDNodeInContext2(ctx, mds, length(mds)))
-MDNode(vals::Vector; ctx::Context) =
-    MDNode(convert(Vector{Metadata}, vals); ctx)
+MDNode(mds::Vector{<:Metadata}) =
+    MDTuple(API.LLVMMDNodeInContext2(context(), mds, length(mds)))
+MDNode(vals::Vector) =
+    MDNode(convert(Vector{Metadata}, vals))
 
 # we support passing `nothing`, but convert it to a non-exported `MDNull` instance
 # so that we can keep everything as a subtype of `Metadata`
