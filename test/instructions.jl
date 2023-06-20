@@ -320,7 +320,7 @@
     callinst = call!(builder, LLVM.FunctionType(LLVM.VoidType(ctx)), trap)
 
     @check_ir callinst "call void @llvm.trap()"
-    @test called_value(callinst) == trap
+    @test called_operand(callinst) == trap
     @test called_type(callinst) == LLVM.FunctionType(LLVM.VoidType(ctx))
 
     neginst = neg!(builder, int1)
