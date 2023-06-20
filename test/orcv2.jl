@@ -164,7 +164,7 @@ end
                 LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
             symbol = LLVM.API.LLVMJITEvaluatedSymbol(
                 address, flags)
-            gv = LLVM.API.LLVMJITCSymbolMapPair(
+            gv = LLVM.API.LLVMOrcCSymbolMapPair(
                     mangle(lljit, "gv"), symbol)
 
             mu = LLVM.absolute_symbols(Ref(gv))
