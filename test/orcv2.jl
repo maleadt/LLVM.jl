@@ -158,8 +158,11 @@ end
                 LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
             symbol = LLVM.API.LLVMJITEvaluatedSymbol(
                 address, flags)
-            gv = LLVM.API.LLVMOrcCSymbolMapPair(
-                    mangle(lljit, "gv"), symbol)
+            gv = if LLVM.version() >= v"15"
+                LLVM.API.LLVMOrcCSymbolMapPair(mangle(lljit, "gv"), symbol)
+            else
+                LLVM.API.LLVMJITCSymbolMapPair(mangle(lljit, "gv"), symbol)
+            end
 
             mu = LLVM.absolute_symbols(Ref(gv))
             LLVM.define(jd, mu)
