@@ -42,10 +42,11 @@ end
 Construct a ThreadSafeModule from a fresh LLVM.Module and a private context.
 """
 function ThreadSafeModule(name::String)
-    ctx = @dispose ctx=ThreadSafeContext() begin
+    @dispose ctx=ThreadSafeContext() begin
         mod = context!(context(ctx)) do
-            LLVM.Module(name)
+            Module(name)
         end
+        # NOTE: this creates a new context, so we can dispose the old one
         ThreadSafeModule(mod; ctx)
     end
 end
@@ -58,13 +59,18 @@ mutable struct ThreadSafeModuleCallback
     callback
 end
 
-function tsm_callback(ctx::Ptr{Cvoid}, ref::API.LLVMModuleRef)
+function tsm_callback(data::Ptr{Cvoid}, ref::API.LLVMModuleRef)
+    cb = Base.unsafe_pointer_to_objref(data)::ThreadSafeModuleCallback
+    mod = Module(ref)
+    ctx = context(mod)
+    activate(ctx)
     try
-        cb = Base.unsafe_pointer_to_objref(ctx)::ThreadSafeModuleCallback
-        cb.callback(LLVM.Module(ref))
+        cb.callback(Module(ref))
     catch err
         msg = sprint(Base.display_error, err, Base.catch_backtrace())
         return API.LLVMCreateStringError(msg)
+    finally
+        deactivate(ctx)
     end
     return convert(API.LLVMErrorRef, C_NULL)
 end
@@ -72,7 +78,8 @@ end
 """
     (mod::ThreadSafeModule)(f)
 
-Apply `f` to the LLVM.Module contained within `mod`, after locking the module.
+Apply `f` to the LLVM module contained within `mod`, after locking the module and activating
+its context.
 """
 function (mod::ThreadSafeModule)(f)
     cb = ThreadSafeModuleCallback(f)
