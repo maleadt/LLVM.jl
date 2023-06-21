@@ -156,12 +156,12 @@ end
                 reinterpret(UInt, Base.unsafe_convert(Ptr{Int32}, data)))
             flags = LLVM.API.LLVMJITSymbolFlags(
                 LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
-            symbol = LLVM.API.LLVMJITEvaluatedSymbol(
-                address, flags)
+            name = mangle(lljit, "gv")
+            symbol = LLVM.API.LLVMJITEvaluatedSymbol(address, flags)
             gv = if LLVM.version() >= v"15"
-                LLVM.API.LLVMOrcCSymbolMapPair(mangle(lljit, "gv"), symbol)
+                LLVM.API.LLVMOrcCSymbolMapPair(name, symbol)
             else
-                LLVM.API.LLVMJITCSymbolMapPair(mangle(lljit, "gv"), symbol)
+                LLVM.API.LLVMJITCSymbolMapPair(name, symbol)
             end
 
             mu = LLVM.absolute_symbols(Ref(gv))
@@ -175,6 +175,10 @@ end
             @test ccall(pointer(addr), Int32, ()) == 42
             data[] = -1
             @test ccall(pointer(addr), Int32, ()) == -1
+
+            if LLVM.version() < v"13"
+                LLVM.release(name)
+            end
         end
         empty!(jd)
         @test_throws LLVMException lookup(lljit, sym)
