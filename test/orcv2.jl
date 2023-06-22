@@ -15,19 +15,21 @@ ThreadSafeContext() do ctx
 end
 
 @testset "ThreadSafeModule" begin
-    ts_mod = ThreadSafeModule("jit")
-    @test_throws LLVMException ts_mod() do mod
-        error("Error")
+    @dispose ts_ctx=ThreadSafeContext() begin
+        ts_mod = ThreadSafeModule("jit")
+        @test_throws LLVMException ts_mod() do mod
+            error("Error")
+        end
+        run = Ref{Bool}(false)
+        ts_mod() do mod
+            run[] = true
+        end
+        @test run[]
     end
-    run = Ref{Bool}(false)
-    ts_mod() do mod
-        run[] = true
-    end
-    @test run[]
 end
 
 @testset "JITDylib" begin
-    @dispose lljit=LLJIT() begin
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT() begin
         es = ExecutionSession(lljit)
 
         @test LLVM.lookup_dylib(es, "my.so") === nothing
@@ -53,7 +55,7 @@ end
         @test_throws LLVMException lookup(lljit, string(gensym()))
     end
 
-    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT(;tm=JITTargetMachine()) begin
         jd = JITDylib(lljit)
 
         ts_mod = ThreadSafeModule("jit")
@@ -198,7 +200,7 @@ end
     GC.@preserve ollc begin
         builder = LLJITBuilder()
         linkinglayercreator!(builder, ollc)
-        @dispose lljit=LLJIT(builder) begin
+        @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT(builder) begin
             jd = JITDylib(lljit)
 
             ts_mod = ThreadSafeModule("jit")
@@ -226,7 +228,7 @@ end
 end
 
 @testset "Lazy" begin
-    @dispose lljit=LLJIT() begin
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT() begin
         jd = JITDylib(lljit)
         es = ExecutionSession(lljit)
 

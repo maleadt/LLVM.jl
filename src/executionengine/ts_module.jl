@@ -4,8 +4,9 @@ end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeContextRef}, ctx::ThreadSafeContext) = ctx.ref
 
 function ThreadSafeContext()
-    ref = API.LLVMOrcCreateNewThreadSafeContext()
-    ThreadSafeContext(ref)
+    ts_ctx = ThreadSafeContext(API.LLVMOrcCreateNewThreadSafeContext())
+    activate(ts_ctx)
+    ts_ctx
 end
 
 function ThreadSafeContext(f::Core.Function)
@@ -23,6 +24,7 @@ function context(ctx::ThreadSafeContext)
 end
 
 function dispose(ctx::ThreadSafeContext)
+    deactivate(ctx)
     API.LLVMOrcDisposeThreadSafeContext(ctx)
 end
 
@@ -31,24 +33,19 @@ end
 end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeModuleRef}, mod::ThreadSafeModule) = mod.ref
 
-function ThreadSafeModule(mod::Module; ctx::ThreadSafeContext)
-    ref = API.LLVMOrcCreateNewThreadSafeModule(mod, ctx)
+function ThreadSafeModule(mod::Module)
+    ref = API.LLVMOrcCreateNewThreadSafeModule(mod, ts_context())
     ThreadSafeModule(ref)
 end
 
-"""
-    ThreadSafeModule(name::String)
-
-Construct a ThreadSafeModule from a fresh LLVM.Module and a private context.
-"""
 function ThreadSafeModule(name::String)
-    @dispose ctx=ThreadSafeContext() begin
-        mod = context!(context(ctx)) do
-            Module(name)
-        end
-        # NOTE: this creates a new context, so we can dispose the old one
-        ThreadSafeModule(mod; ctx)
+    ts_ctx = ts_context()
+    # XXX: we should lock the context here
+    ctx = context(ts_ctx)
+    mod = context!(ctx) do
+        Module(name)
     end
+    ThreadSafeModule(mod)
 end
 
 function dispose(mod::ThreadSafeModule)

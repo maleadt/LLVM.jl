@@ -83,6 +83,8 @@ if has_orc_v2()
     include("orcv2.jl")
 end
 
+# high-level functionality
+include("state.jl")
 include("interop.jl")
 
 include("deprecated.jl")
