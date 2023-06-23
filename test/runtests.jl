@@ -21,8 +21,9 @@ using InteractiveUtils
 @testset "LLVM" begin
 
 # HACK: if a test throws within a Context() do block, displaying the LLVM value may crash
-#       because the context has been disposed already. avoid that by disabling `dispose`
-LLVM.dispose(::Context) = return
+#       because the context has been disposed already. avoid that by disabling `dispose`,
+#       and only have it pop the context off the stack (but not destroy it).
+LLVM.dispose(ctx::Context) = LLVM.deactivate(ctx)
 
 include("helpers.jl")
 

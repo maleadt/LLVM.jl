@@ -15,10 +15,14 @@ end
 
 @testset "context" begin
 
+@test context(; throw_error=false) === nothing
+
 let
     ctx = Context()
     @assert ctx != GlobalContext()
+    @test context() == ctx
     dispose(ctx)
+    @test context(; throw_error=false) === nothing
 end
 
 Context() do ctx end
@@ -33,6 +37,8 @@ Context() do ctx end
         @test supports_typed_pointers(ctx) == true
     end
 end
+
+@test context(; throw_error=false) === nothing
 
 end
 
