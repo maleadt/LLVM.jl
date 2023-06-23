@@ -97,27 +97,9 @@ function Base.cconvert(::Type{Cstring}, sym::LLVMSymbol)
     return API.LLVMOrcSymbolStringPoolEntryStr(sym)
 end
 
-"""
-    string(sym::LLVMSymbol)
-
-Converts a `LLVMSymbol` to a Julia string without releasing the corresponding reference.
-It is safe to continue using the symbol.
-"""
 function Base.string(sym::LLVMSymbol)
     cstr = API.LLVMOrcSymbolStringPoolEntryStr(sym)
     Base.unsafe_string(cstr)
-end
-
-"""
-   String(sym::LLVMSymbol)
-
-Converts a `LLVMSymbol` to a Julia string and releases the corresponding reference.
-Likely you do not want to re-use the passed symbol.
-"""
-function Base.String(sym::LLVMSymbol)
-    str = string(sym)
-    release(sym)
-    return str
 end
 
 function intern(es::ExecutionSession, string)

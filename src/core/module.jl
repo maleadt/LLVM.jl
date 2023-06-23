@@ -22,8 +22,8 @@ Base.:(==)(x::Module, y::Module) = (x.ref === y.ref)
     ref::API.LLVMTargetDataRef
 end
 
-Module(name::String; ctx::Context) =
-    Module(API.LLVMModuleCreateWithNameInContext(name, ctx))
+Module(name::String) =
+    Module(API.LLVMModuleCreateWithNameInContext(name, context()))
 
 Module(mod::Module) = Module(API.LLVMCloneModule(mod))
 Base.copy(mod::Module) = Module(mod)
@@ -286,7 +286,9 @@ function sdk_version!(mod::Module, version::VersionNumber)
         end
         # cannot represent prerelease or build metadata
     end
-    md = Metadata(ConstantDataArray(entries; ctx=context(mod)))
+    md = context!(context(mod)) do
+        Metadata(ConstantDataArray(entries))
+    end
 
     flags(mod)["SDK Version", LLVM.API.LLVMModuleFlagBehaviorWarning] = md
 end
@@ -294,7 +296,9 @@ end
 function sdk_version(mod::Module)
     haskey(flags(mod), "SDK Version") || return nothing
     md = flags(mod)["SDK Version"]
-    c = Value(md; ctx=context(mod))
+    c = context!(context(mod)) do
+        Value(md)
+    end
     entries = collect(c)
     VersionNumber(map(val->convert(Int, val), entries)...)
 end

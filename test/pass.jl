@@ -1,10 +1,10 @@
 @testset "pass" begin
 
-@dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+@dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType())
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    bb = BasicBlock(fn, "SomeBasicBlock"; ctx)
+    bb = BasicBlock(fn, "SomeBasicBlock")
     position!(builder, bb)
 
     ret!(builder)

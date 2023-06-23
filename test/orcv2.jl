@@ -15,19 +15,21 @@ ThreadSafeContext() do ctx
 end
 
 @testset "ThreadSafeModule" begin
-    ts_mod = ThreadSafeModule("jit")
-    @test_throws LLVMException ts_mod() do mod
-        error("Error")
+    @dispose ts_ctx=ThreadSafeContext() begin
+        ts_mod = ThreadSafeModule("jit")
+        @test_throws LLVMException ts_mod() do mod
+            error("Error")
+        end
+        run = Ref{Bool}(false)
+        ts_mod() do mod
+            run[] = true
+        end
+        @test run[]
     end
-    run = Ref{Bool}(false)
-    ts_mod() do mod
-        run[] = true
-    end
-    @test run[]
 end
 
 @testset "JITDylib" begin
-    @dispose lljit=LLJIT() begin
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT() begin
         es = ExecutionSession(lljit)
 
         @test LLVM.lookup_dylib(es, "my.so") === nothing
@@ -53,23 +55,23 @@ end
         @test_throws LLVMException lookup(lljit, string(gensym()))
     end
 
-    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT(;tm=JITTargetMachine()) begin
         jd = JITDylib(lljit)
 
-        @dispose ts_ctx=ThreadSafeContext() begin
-            ctx = context(ts_ctx)
-            mod = LLVM.Module("jit"; ctx)
+        ts_mod = ThreadSafeModule("jit")
 
-            T_Int32 = LLVM.Int32Type(ctx)
+        # build the module
+        fname = "wrapper"
+        ts_mod() do mod
+            T_Int32 = LLVM.Int32Type()
             ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
             fn = LLVM.Function(mod, "mysum", ft)
             linkage!(fn, LLVM.API.LLVMExternalLinkage)
 
-            fname = "wrapper"
             wrapper = LLVM.Function(mod, fname, ft)
             # generate IR
-            @dispose builder=IRBuilder(ctx) begin
-                entry = BasicBlock(wrapper, "entry"; ctx)
+            @dispose builder=IRBuilder() begin
+                entry = BasicBlock(wrapper, "entry")
                 position!(builder, entry)
 
                 tmp = call!(builder, ft, fn, [parameters(wrapper)...])
@@ -85,15 +87,13 @@ end
                 run!(pm, mod)
             end
             verify(mod)
+        end
 
-            ts_mod = ThreadSafeModule(mod; ctx=ts_ctx)
-
-            add!(lljit, jd, ts_mod)
-            @test_throws LLVMException redirect_stderr(devnull) do
-                # XXX: this reports an unhandled JIT session error;
-                #      can we handle it instead?
-                lookup(lljit, fname)
-            end
+        add!(lljit, jd, ts_mod)
+        @test_throws LLVMException redirect_stderr(devnull) do
+            # XXX: this reports an unhandled JIT session error;
+            #      can we handle it instead?
+            lookup(lljit, fname)
         end
     end
 end
@@ -103,22 +103,20 @@ end
         jd = JITDylib(lljit)
 
         sym = "SomeFunction"
-        obj = @dispose ts_ctx=ThreadSafeContext() begin
-            ctx = context(ts_ctx)
-
-            mod = LLVM.Module("jit"; ctx)
-            ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+        obj = @dispose ctx=Context() begin
+            mod = LLVM.Module("jit")
+            ft = LLVM.FunctionType(LLVM.VoidType())
             fn = LLVM.Function(mod, sym, ft)
 
-            @dispose builder=IRBuilder(ctx) begin
-                entry = BasicBlock(fn, "entry"; ctx)
+            @dispose builder=IRBuilder() begin
+                entry = BasicBlock(fn, "entry")
                 position!(builder, entry)
                 ret!(builder)
             end
             verify(mod)
 
             tm  = JITTargetMachine()
-            return emit(tm, mod, LLVM.API.LLVMObjectFile)
+            emit(tm, mod, LLVM.API.LLVMObjectFile)
         end
         add!(lljit, jd, MemoryBuffer(obj))
 
@@ -134,26 +132,24 @@ end
         jd = JITDylib(lljit)
 
         sym = "SomeFunction"
-        obj = @dispose ts_ctx=ThreadSafeContext() begin
-            ctx = context(ts_ctx)
-
-            mod = LLVM.Module("jit"; ctx)
-            ft = LLVM.FunctionType(LLVM.Int32Type(ctx))
+        obj = @dispose ctx=Context() begin
+            mod = LLVM.Module("jit")
+            ft = LLVM.FunctionType(LLVM.Int32Type())
             fn = LLVM.Function(mod, sym, ft)
 
-            gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(ctx), "gv")
+            gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(), "gv")
             LLVM.extinit!(gv, true)
 
-            @dispose builder=IRBuilder(ctx) begin
-                entry = BasicBlock(fn, "entry"; ctx)
+            @dispose builder=IRBuilder() begin
+                entry = BasicBlock(fn, "entry")
                 position!(builder, entry)
-                val = load!(builder, gv)
+                val = load!(builder, LLVM.Int32Type(), gv)
                 ret!(builder, val)
             end
             verify(mod)
 
             tm  = JITTargetMachine()
-            return emit(tm, mod, LLVM.API.LLVMObjectFile)
+            emit(tm, mod, LLVM.API.LLVMObjectFile)
         end
 
         data = Ref{Int32}(42)
@@ -162,10 +158,13 @@ end
                 reinterpret(UInt, Base.unsafe_convert(Ptr{Int32}, data)))
             flags = LLVM.API.LLVMJITSymbolFlags(
                 LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
-            symbol = LLVM.API.LLVMJITEvaluatedSymbol(
-                address, flags)
-            gv = LLVM.API.LLVMOrcCSymbolMapPair(
-                    mangle(lljit, "gv"), symbol)
+            name = mangle(lljit, "gv")
+            symbol = LLVM.API.LLVMJITEvaluatedSymbol(address, flags)
+            gv = if LLVM.version() >= v"15"
+                LLVM.API.LLVMOrcCSymbolMapPair(name, symbol)
+            else
+                LLVM.API.LLVMJITCSymbolMapPair(name, symbol)
+            end
 
             mu = LLVM.absolute_symbols(Ref(gv))
             LLVM.define(jd, mu)
@@ -178,6 +177,10 @@ end
             @test ccall(pointer(addr), Int32, ()) == 42
             data[] = -1
             @test ccall(pointer(addr), Int32, ()) == -1
+
+            if LLVM.version() < v"13"
+                LLVM.release(name)
+            end
         end
         empty!(jd)
         @test_throws LLVMException lookup(lljit, sym)
@@ -197,38 +200,35 @@ end
     GC.@preserve ollc begin
         builder = LLJITBuilder()
         linkinglayercreator!(builder, ollc)
-        @dispose lljit=LLJIT(builder) begin
+        @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT(builder) begin
             jd = JITDylib(lljit)
 
-            @dispose ts_ctx=ThreadSafeContext() begin
-                ctx = context(ts_ctx)
-                sym = "SomeFunctionOLL"
+            ts_mod = ThreadSafeModule("jit")
+            sym = "SomeFunctionOLL"
 
-                mod = LLVM.Module("jit"; ctx)
-                ft = LLVM.FunctionType(LLVM.VoidType(ctx))
+            # build the module
+            ts_mod() do mod
+                ft = LLVM.FunctionType(LLVM.VoidType())
                 fn = LLVM.Function(mod, sym, ft)
 
-                @dispose builder=IRBuilder(ctx) begin
-                    entry = BasicBlock(fn, "entry"; ctx)
+                @dispose builder=IRBuilder() begin
+                    entry = BasicBlock(fn, "entry")
                     position!(builder, entry)
                     ret!(builder)
                 end
                 verify(mod)
-
-                ts_mod = ThreadSafeModule(mod; ctx=ts_ctx)
-                add!(lljit, jd, ts_mod)
-
-                addr = lookup(lljit, sym)
-
-                @test pointer(addr) != C_NULL
             end
+
+            add!(lljit, jd, ts_mod)
+            addr = lookup(lljit, sym)
+            @test pointer(addr) != C_NULL
         end
     end
     @test called_oll[] >= 1
 end
 
 @testset "Lazy" begin
-    @dispose lljit=LLJIT() begin
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT() begin
         jd = JITDylib(lljit)
         es = ExecutionSession(lljit)
 
@@ -262,19 +262,18 @@ end
                 # syms contains mangled symbols
                 # we need to emit an unmangled one
 
-                TSM = ThreadSafeModule("jit")
-                TSM() do mod
+                ts_mod = ThreadSafeModule("jit")
+                ts_mod() do mod
                     LLVM.apply_datalayout!(lljit, mod)
 
-                    ctx = context(mod)
-                    T_Int32 = LLVM.Int32Type(ctx)
+                    T_Int32 = LLVM.Int32Type()
                     ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
 
                     fn = LLVM.Function(mod, "foo", ft)
 
                     # generate IR
-                    @dispose builder=IRBuilder(ctx) begin
-                        entry = BasicBlock(fn, "entry"; ctx)
+                    @dispose builder=IRBuilder() begin
+                        entry = BasicBlock(fn, "entry")
                         position!(builder, entry)
 
                         tmp = add!(builder, parameters(fn)...)
@@ -283,7 +282,7 @@ end
                 end
 
                 il = LLVM.IRTransformLayer(lljit)
-                LLVM.emit(il, mr, TSM)
+                LLVM.emit(il, mr, ts_mod)
 
                 return nothing
             end

@@ -79,17 +79,13 @@ include("datalayout.jl")
 include("debuginfo.jl")
 include("utils.jl")
 
-# XXX: testing ORC on LLVM 12 or before results in a dangling reference abort.
-#      see also: https://github.com/maleadt/LLVM.jl/pull/296#issuecomment-1057796751
-if !(LLVM.is_asserts() && LLVM.version() <= v"12+")
-    if LLVM.has_orc_v1()
-        include("orc.jl")
-    end
-    if LLVM.has_orc_v2()
-        include("orcv2.jl")
-    end
+if LLVM.has_orc_v1() && !LLVM.is_asserts()
+    # XXX: dangling references abort
+    include("orc.jl")
 end
-
+if LLVM.has_orc_v2()
+    include("orcv2.jl")
+end
 
 include("Kaleidoscope.jl")
 

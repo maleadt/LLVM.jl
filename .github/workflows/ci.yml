@@ -95,18 +95,24 @@ jobs:
             os: 'ubuntu-latest'
             arch: 'x64'
             llvm_args: '--opaque-pointers'
-          - branch: 'master'
-            os: 'macOS-latest'
-            arch: 'x64'
-            llvm_args: '--opaque-pointers'
-          # - branch: 'master'
-          #   os: 'windows-latest'
-          #   arch: 'x64'
-          #   llvm_args: '--opaque-pointers'
+          # JuliaLang/julia#48081
+          #- branch: 'master'
+          #  os: 'windows-latest'
+          #  arch: 'x64'
+          #  llvm_args: '--opaque-pointers'
+          # hangs
+          #- branch: 'master'
+          #  os: 'macOS-latest'
+          #  arch: 'x64'
+          #  llvm_args: '--opaque-pointers'
         exclude:
           # JuliaLang/julia#48081
           - branch: 'master'
             os: 'windows-latest'
+            arch: 'x64'
+          # hangs
+          - branch: 'master'
+            os: 'macOS-latest'
             arch: 'x64'
           # 1.6 requires gfortran, which isn't available on macOS runners
           - branch: 'release-1.6'

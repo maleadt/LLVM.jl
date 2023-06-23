@@ -45,7 +45,7 @@ DEBUG_METADATA_VERSION()
           !19 = !DILocalVariable(name: "foobar", scope: !15, file: !16, line: 2, type: !20)
           !20 = !DIBasicType(name: "int", size: 32, encoding: DW_ATE_signed)
           !21 = !DILocation(line: 2, column: 9, scope: !15)
-          !22 = !DILocation(line: 3, column: 5, scope: !15)"""; ctx)
+          !22 = !DILocation(line: 3, column: 5, scope: !15)""")
 
     foo = functions(mod)["foo"]
 

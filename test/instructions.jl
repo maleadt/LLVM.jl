@@ -1,19 +1,19 @@
 @testset "irbuilder" begin
 
-@dispose ctx=Context() builder=IRBuilder(ctx) mod=LLVM.Module("SomeModule"; ctx) begin
-    ft = LLVM.FunctionType(LLVM.VoidType(ctx), [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx),
-                                                LLVM.FloatType(ctx), LLVM.FloatType(ctx),
-                                                LLVM.PointerType(LLVM.Int32Type(ctx)),
-                                                LLVM.PointerType(LLVM.Int32Type(ctx)),
-                                                LLVM.PointerType(LLVM.Int8Type(ctx))])
+@dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
+    ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type(), LLVM.Int32Type(),
+                                             LLVM.FloatType(), LLVM.FloatType(),
+                                             LLVM.PointerType(LLVM.Int32Type()),
+                                             LLVM.PointerType(LLVM.Int32Type()),
+                                             LLVM.PointerType(LLVM.Int8Type())])
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
-    entrybb = BasicBlock(fn, "entry"; ctx)
+    entrybb = BasicBlock(fn, "entry")
     position!(builder, entrybb)
     @assert position(builder) == entrybb
 
     @test debuglocation(builder) === nothing
-    loc = DILocation(ctx, 1, 1)
+    loc = DILocation(1, 1)
     debuglocation!(builder, loc)
     @test debuglocation(builder) == loc
     debuglocation!(builder)
@@ -23,7 +23,7 @@
     @check_ir retinst1 "ret void"
     debuglocation!(builder, retinst1)
 
-    retinst2 = ret!(builder, ConstantInt(LLVM.Int32Type(ctx), 0))
+    retinst2 = ret!(builder, ConstantInt(LLVM.Int32Type(), 0))
     @check_ir retinst2 "ret i32 0"
 
     retinst3 = ret!(builder, Value[])
@@ -32,8 +32,8 @@
     else
         @check_ir retinst3 "ret void poison"
     end
-    thenbb = BasicBlock(fn, "then"; ctx)
-    elsebb = BasicBlock(fn, "else"; ctx)
+    thenbb = BasicBlock(fn, "then")
+    elsebb = BasicBlock(fn, "else")
 
     brinst1 = br!(builder, thenbb)
     @check_ir brinst1 "br label %then"
@@ -42,7 +42,7 @@
     brinst2 = br!(builder, cond1, thenbb, elsebb)
     @check_ir brinst2 "br i1 %cond, label %then, label %else"
 
-    resumeinst = resume!(builder, UndefValue(LLVM.Int32Type(ctx)))
+    resumeinst = resume!(builder, UndefValue(LLVM.Int32Type()))
     @check_ir resumeinst "resume i32 undef"
 
     unreachableinst = unreachable!(builder)
@@ -132,13 +132,13 @@
     xorinst = xor!(builder, int1, int2)
     @check_ir xorinst "xor i32 %0, %1"
 
-    allocainst = alloca!(builder, LLVM.Int32Type(ctx))
+    allocainst = alloca!(builder, LLVM.Int32Type())
     @check_ir allocainst "alloca i32"
 
-    array_allocainst = array_alloca!(builder, LLVM.Int32Type(ctx), int1)
+    array_allocainst = array_alloca!(builder, LLVM.Int32Type(), int1)
     @check_ir array_allocainst "alloca i32, i32 %0"
 
-    mallocinst = malloc!(builder, LLVM.Int32Type(ctx))
+    mallocinst = malloc!(builder, LLVM.Int32Type())
     if supports_typed_pointers(ctx)
         @check_ir mallocinst r"bitcast i8\* %.+ to i32\*"
         @check_ir operands(mallocinst)[1] r"call i8\* @malloc\(.+\)"
@@ -148,28 +148,28 @@
 
     ptr = parameters(fn)[6]
 
-    array_mallocinst = array_malloc!(builder, LLVM.Int8Type(ctx), ConstantInt(Int32(42); ctx))
+    array_mallocinst = array_malloc!(builder, LLVM.Int8Type(), ConstantInt(Int32(42)))
     if supports_typed_pointers(ctx)
         @check_ir array_mallocinst r"call i8\* @malloc\(.+, i32 42\)"
     else
         @check_ir array_mallocinst r"call ptr @malloc\(.+, i32 42\)"
     end
 
-    memsetisnt = memset!(builder, ptr, ConstantInt(Int8(1); ctx), ConstantInt(Int32(2); ctx), 4)
+    memsetisnt = memset!(builder, ptr, ConstantInt(Int8(1)), ConstantInt(Int32(2)), 4)
     if supports_typed_pointers(ctx)
         @check_ir memsetisnt r"call void @llvm.memset.p0i8.i32\(i8\* align 4 %.+, i8 1, i32 2, i1 false\)"
     else
         @check_ir memsetisnt r"call void @llvm.memset.p0.i32\(ptr align 4 %.+, i8 1, i32 2, i1 false\)"
     end
 
-    memcpyinst = memcpy!(builder, allocainst, 4, ptr, 8, ConstantInt(Int32(32); ctx))
+    memcpyinst = memcpy!(builder, allocainst, 4, ptr, 8, ConstantInt(Int32(32)))
     if supports_typed_pointers(ctx)
         @check_ir memcpyinst r"call void @llvm.memcpy.p0i8.p0i8.i32\(i8\* align 4 %.+, i8\* align 8 %.+, i32 32, i1 false\)"
     else
         @check_ir memcpyinst r"call void @llvm.memcpy.p0.p0.i32\(ptr align 4 %.+, ptr align 8 %.+, i32 32, i1 false\)"
     end
 
-    memmoveinst = memmove!(builder, allocainst, 4, ptr, 8, ConstantInt(Int32(32); ctx))
+    memmoveinst = memmove!(builder, allocainst, 4, ptr, 8, ConstantInt(Int32(32)))
     if supports_typed_pointers(ctx)
         @check_ir memmoveinst r"call void @llvm.memmove.p0i8.p0i8.i32\(i8\* align 4 %.+, i8\* align 8 %.+, i32 32, i1 false\)"
     else
@@ -181,7 +181,7 @@
     freeinst = free!(builder, ptr1)
     @check_ir freeinst "tail call void @free"
 
-    loadinst = load!(builder, LLVM.Int32Type(ctx), ptr1)
+    loadinst = load!(builder, LLVM.Int32Type(), ptr1)
     if supports_typed_pointers(ctx)
         @check_ir loadinst "load i32, i32* %4"
     else
@@ -208,62 +208,62 @@
     fenceinst = fence!(builder, LLVM.API.LLVMAtomicOrderingNotAtomic)
     @check_ir fenceinst "fence"
 
-    gepinst = gep!(builder, LLVM.Int32Type(ctx), ptr1, [int1])
+    gepinst = gep!(builder, LLVM.Int32Type(), ptr1, [int1])
     if supports_typed_pointers(ctx)
         @check_ir gepinst "getelementptr i32, i32* %4, i32 %0"
     else
         @check_ir gepinst "getelementptr i32, ptr %4, i32 %0"
     end
 
-    gepinst1 = inbounds_gep!(builder, LLVM.Int32Type(ctx), ptr1, [int1])
+    gepinst1 = inbounds_gep!(builder, LLVM.Int32Type(), ptr1, [int1])
     if supports_typed_pointers(ctx)
         @check_ir gepinst1 "getelementptr inbounds i32, i32* %4, i32 %0"
     else
         @check_ir gepinst1 "getelementptr inbounds i32, ptr %4, i32 %0"
     end
 
-    truncinst = trunc!(builder, int1, LLVM.Int16Type(ctx))
+    truncinst = trunc!(builder, int1, LLVM.Int16Type())
     @check_ir truncinst "trunc i32 %0 to i16"
 
-    zextinst = zext!(builder, int1, LLVM.Int64Type(ctx))
+    zextinst = zext!(builder, int1, LLVM.Int64Type())
     @check_ir zextinst "zext i32 %0 to i64"
 
-    sextinst = sext!(builder, int1, LLVM.Int64Type(ctx))
+    sextinst = sext!(builder, int1, LLVM.Int64Type())
     @check_ir sextinst "sext i32 %0 to i64"
 
-    fptouiinst = fptoui!(builder, float1, LLVM.Int32Type(ctx))
+    fptouiinst = fptoui!(builder, float1, LLVM.Int32Type())
     @check_ir fptouiinst "fptoui float %2 to i32"
 
-    fptosiinst = fptosi!(builder, float1, LLVM.Int32Type(ctx))
+    fptosiinst = fptosi!(builder, float1, LLVM.Int32Type())
     @check_ir fptosiinst "fptosi float %2 to i32"
 
-    uitofpinst = uitofp!(builder, int1, LLVM.FloatType(ctx))
+    uitofpinst = uitofp!(builder, int1, LLVM.FloatType())
     @check_ir uitofpinst "uitofp i32 %0 to float"
 
-    sitofpinst = sitofp!(builder, int1, LLVM.FloatType(ctx))
+    sitofpinst = sitofp!(builder, int1, LLVM.FloatType())
     @check_ir sitofpinst "sitofp i32 %0 to float"
 
-    fptruncinst = fptrunc!(builder, float1, LLVM.HalfType(ctx))
+    fptruncinst = fptrunc!(builder, float1, LLVM.HalfType())
     @check_ir fptruncinst "fptrunc float %2 to half"
 
-    fpextinst = fpext!(builder, float1, LLVM.DoubleType(ctx))
+    fpextinst = fpext!(builder, float1, LLVM.DoubleType())
     @check_ir fpextinst "fpext float %2 to double"
 
-    ptrtointinst = ptrtoint!(builder, parameters(fn)[5], LLVM.Int32Type(ctx))
+    ptrtointinst = ptrtoint!(builder, parameters(fn)[5], LLVM.Int32Type())
     if supports_typed_pointers(ctx)
         @check_ir ptrtointinst "ptrtoint i32* %4 to i32"
     else
         @check_ir ptrtointinst "ptrtoint ptr %4 to i32"
     end
 
-    inttoptrinst = inttoptr!(builder, int1, LLVM.PointerType(LLVM.Int32Type(ctx)))
+    inttoptrinst = inttoptr!(builder, int1, LLVM.PointerType(LLVM.Int32Type()))
     if supports_typed_pointers(ctx)
         @check_ir inttoptrinst "inttoptr i32 %0 to i32*"
     else
         @check_ir inttoptrinst "inttoptr i32 %0 to ptr"
     end
 
-    bitcastinst = bitcast!(builder, int1, LLVM.FloatType(ctx))
+    bitcastinst = bitcast!(builder, int1, LLVM.FloatType())
     @check_ir bitcastinst "bitcast i32 %0 to float"
     ptr1 = parameters(fn)[5]
     if supports_typed_pointers(ctx)
@@ -272,35 +272,35 @@
         addrspacecastinst = addrspacecast!(builder, ptr1, ptr2)
         @check_ir addrspacecastinst "addrspacecast i32* %4 to i32 addrspace(2)*"
     else
-        ptr2 = LLVM.PointerType(2; ctx)
+        ptr2 = LLVM.PointerType(2)
         @test_throws ErrorException eltype(ptr2)
         addrspacecastinst = addrspacecast!(builder, ptr1, ptr2)
         @check_ir addrspacecastinst "addrspacecast ptr %4 to ptr addrspace(2)"
     end
 
-    zextorbitcastinst = zextorbitcast!(builder, int1, LLVM.FloatType(ctx))
+    zextorbitcastinst = zextorbitcast!(builder, int1, LLVM.FloatType())
     @check_ir zextorbitcastinst "bitcast i32 %0 to float"
 
-    sextorbitcastinst = sextorbitcast!(builder, int1, LLVM.FloatType(ctx))
+    sextorbitcastinst = sextorbitcast!(builder, int1, LLVM.FloatType())
     @check_ir sextorbitcastinst "bitcast i32 %0 to float"
 
-    truncorbitcastinst = truncorbitcast!(builder, int1, LLVM.FloatType(ctx))
+    truncorbitcastinst = truncorbitcast!(builder, int1, LLVM.FloatType())
     @check_ir truncorbitcastinst "bitcast i32 %0 to float"
 
-    castinst = cast!(builder, LLVM.API.LLVMBitCast, int1, LLVM.FloatType(ctx))
+    castinst = cast!(builder, LLVM.API.LLVMBitCast, int1, LLVM.FloatType())
     @check_ir castinst "bitcast i32 %0 to float"
 
     if supports_typed_pointers(ctx)
-        floatptrtyp = LLVM.PointerType(LLVM.FloatType(ctx))
+        floatptrtyp = LLVM.PointerType(LLVM.FloatType())
 
         pointercastinst = pointercast!(builder, ptr1, floatptrtyp)
         @check_ir pointercastinst "bitcast i32* %4 to float*"
     end
 
-    intcastinst = intcast!(builder, int1, LLVM.Int64Type(ctx))
+    intcastinst = intcast!(builder, int1, LLVM.Int64Type())
     @check_ir intcastinst "sext i32 %0 to i64"
 
-    fpcastinst = fpcast!(builder, float1, LLVM.DoubleType(ctx))
+    fpcastinst = fpcast!(builder, float1, LLVM.DoubleType())
     @check_ir fpcastinst "fpext float %2 to double"
 
     icmpinst = icmp!(builder, LLVM.API.LLVMIntEQ, int1, int2)
@@ -309,19 +309,19 @@
     fcmpinst = fcmp!(builder, LLVM.API.LLVMRealOEQ, float1, float2)
     @check_ir fcmpinst "fcmp oeq float %2, %3"
 
-    phiinst = phi!(builder, LLVM.Int32Type(ctx))
+    phiinst = phi!(builder, LLVM.Int32Type())
     @check_ir phiinst "phi i32 "
 
     selectinst = LLVM.select!(builder, cond1, int1, int2)
     @check_ir selectinst "select i1 %cond, i32 %0, i32 %1"
 
-    trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType(ctx)))
+    trap = LLVM.Function(mod, "llvm.trap", LLVM.FunctionType(LLVM.VoidType()))
 
-    callinst = call!(builder, LLVM.FunctionType(LLVM.VoidType(ctx)), trap)
+    callinst = call!(builder, LLVM.FunctionType(LLVM.VoidType()), trap)
 
     @check_ir callinst "call void @llvm.trap()"
     @test called_operand(callinst) == trap
-    @test called_type(callinst) == LLVM.FunctionType(LLVM.VoidType(ctx))
+    @test called_type(callinst) == LLVM.FunctionType(LLVM.VoidType())
 
     neginst = neg!(builder, int1)
     @check_ir neginst "sub i32 0, %0"
@@ -361,7 +361,7 @@
 
     ptr1 = parameters(fn)[5]
     ptr2 = parameters(fn)[6]
-    ptrdiffinst = ptrdiff!(builder, LLVM.Int32Type(ctx), ptr1, ptr2)
+    ptrdiffinst = ptrdiff!(builder, LLVM.Int32Type(), ptr1, ptr2)
     if supports_typed_pointers(ctx)
         @check_ir ptrdiffinst r"sdiv exact i64 %.+, ptrtoint \(i32\* getelementptr \(i32, i32\* null, i32 1\) to i64\)"
     else
@@ -406,7 +406,7 @@ end
             ret void
         }"""
     @dispose ctx=Context() begin
-        mod = parse(LLVM.Module, supports_typed_pointers(ctx) ? typed_ir : opaque_ir; ctx)
+        mod = parse(LLVM.Module, supports_typed_pointers(ctx) ? typed_ir : opaque_ir)
 
         @testset "iteration" begin
             f = functions(mod)["f"]
@@ -435,8 +435,8 @@ end
 
                 inputs = LLVM.inputs(bundle)
                 @test length(inputs) == 2
-                @test inputs[1] == LLVM.ConstantInt(Int32(1); ctx)
-                @test inputs[2] == LLVM.ConstantInt(Int64(2); ctx)
+                @test inputs[1] == LLVM.ConstantInt(Int32(1))
+                @test inputs[2] == LLVM.ConstantInt(Int64(2))
             end
 
             let bundles = operand_bundles(cz)
@@ -464,7 +464,7 @@ end
             inst = first(instructions(bb))
 
             # direct creation
-            inputs = [LLVM.ConstantInt(Int32(1); ctx), LLVM.ConstantInt(Int64(2); ctx)]
+            inputs = [LLVM.ConstantInt(Int32(1)), LLVM.ConstantInt(Int64(2))]
             bundle1 = OperandBundleDef("unknown", inputs)
             @test bundle1 isa OperandBundleDef
             @test LLVM.tag_name(bundle1) == "unknown"
@@ -474,7 +474,7 @@ end
             # use in a call
             f = functions(mod)["x"]
             ft = function_type(f)
-            @dispose builder=IRBuilder(ctx) begin
+            @dispose builder=IRBuilder() begin
                 position!(builder, inst)
                 inst = call!(builder, ft, f, Value[], [bundle1])
 

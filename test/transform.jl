@@ -17,7 +17,7 @@ end
     simplify_libcalls!(pmb, false)
     inliner!(pmb, 0)
 
-    @dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) begin
+    @dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
         @dispose fpm=FunctionPassManager(mod) begin
             populate!(fpm, pmb)
         end
@@ -27,7 +27,7 @@ end
     end
 end
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule"; ctx) pm=ModulePassManager() begin
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") pm=ModulePassManager() begin
     aggressive_dce!(pm)
     dce!(pm)
     bit_tracking_dce!(pm)

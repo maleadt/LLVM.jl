@@ -12,9 +12,8 @@ else
 end
 
 function codegen!(mod::LLVM.Module, name, tm)
-    ctx = context(mod)
-    param_types = [LLVM.Int32Type(ctx), LLVM.Int32Type(ctx)]
-    ret_type = LLVM.Int32Type(ctx)
+    param_types = [LLVM.Int32Type(), LLVM.Int32Type()]
+    ret_type = LLVM.Int32Type()
 
     triple!(mod, triple(tm))
 
@@ -22,8 +21,8 @@ function codegen!(mod::LLVM.Module, name, tm)
     sum = LLVM.Function(mod, name, ft)
 
     # generate IR
-    @dispose builder=IRBuilder(ctx) begin
-        entry = BasicBlock(sum, "entry"; ctx)
+    @dispose builder=IRBuilder() begin
+        entry = BasicBlock(sum, "entry")
         position!(builder, entry)
 
         tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
@@ -41,60 +40,54 @@ function codegen!(mod::LLVM.Module, name, tm)
     verify(mod)
 end
 
-JIT = nothing
-
+tm = JITTargetMachine()
 if LLVM.has_orc_v2()
-    lljit = LLJIT(;tm=JITTargetMachine())
+    # XXX: LLJIT calls TargetMachineBuilder which disposes the TargetMachine
+    jit = LLJIT(; tm=JITTargetMachine())
 
-    ts_mod = ThreadSafeModule("jit")
-    name = "sum_orc.jl"
-    tm = JITTargetMachine()
-    ts_mod(m->codegen!(m, name, tm))
-    dispose(tm)
+    @dispose ts_ctx=ThreadSafeContext() begin
+        ts_mod = ThreadSafeModule("jit")
+        name = "sum_orc.jl"
+        ts_mod() do mod
+            codegen!(mod, name, tm)
+        end
 
-    jd = JITDylib(lljit)
-    add!(lljit, jd, ts_mod)
-    addr = lookup(lljit, name)
+        jd = JITDylib(jit)
+        add!(jit, jd, ts_mod)
+        addr = lookup(jit, name)
 
-    @eval call_sum(x, y) = ccall($(pointer(addr)), Int32, (Int32, Int32), x, y)
-
-    finalizer(LLVM.dispose, lljit)
-    JIT = lljit
+        @eval call_sum(x, y) = ccall($(pointer(addr)), Int32, (Int32, Int32), x, y)
+    end
 else
+    jit = OrcJIT(tm)
+    register!(jit, GDBRegistrationListener())
+
     @dispose ctx=Context() begin
-        # Setup jit
-        tm = JITTargetMachine()
-
-        orc = OrcJIT(tm)
-        register!(orc, GDBRegistrationListener())
-
-        mod = LLVM.Module("jit"; ctx)
-        name = mangle(orc, "sum_orc.jl")
+        mod = LLVM.Module("jit")
+        name = mangle(jit, "sum_orc.jl")
         codegen!(mod, name, tm)
 
         # For debugging:
         #   asm = String(convert(Vector{UInt8}, emit(tm, mod, LLVM.API.LLVMAssemblyFile)))
         #   write(stdout, asm)
 
-        jitted_mod = compile!(orc, mod)
+        jitted_mod = compile!(jit, mod)
 
-        addr = address(orc, name)
-        addr2 = addressin(orc, jitted_mod, name)
+        addr = address(jit, name)
+        addr2 = addressin(jit, jitted_mod, name)
         @test addr == addr2
         @test addr.ptr != 0
-
-        unregister!(orc, GDBRegistrationListener())
 
         # For debugging:
         #   ccall(:jl_breakpoint, Cvoid, (Any,), pointer(addr))
         # Then in GDB
         #   b *(*(uint64_t*)v)
         @eval call_sum(x, y) = ccall($(pointer(addr)), Int32, (Int32, Int32), x, y)
-
-        JIT = orc
     end
+
+    unregister!(jit, GDBRegistrationListener())
 end
 
-GC.@preserve JIT begin
-    @test call_sum(x, y) == x + y
-end
+@test call_sum(x, y) == x + y
+LLVM.dispose(jit)
+LLVM.dispose(tm)

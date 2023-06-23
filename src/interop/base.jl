@@ -10,13 +10,12 @@ Returns both the newly created function, and its type.
 function create_function(rettyp::LLVMType=LLVM.VoidType(Context()),
                          argtyp::Vector{<:LLVMType}=LLVMType[],
                          name::String="entry")
-    ctx = context(rettyp)
-    mod = LLVM.Module("llvmcall"; ctx)
+    mod = LLVM.Module("llvmcall")
     isempty(name) && throw(ArgumentError("Function name cannot be empty"))
 
     ft = LLVM.FunctionType(rettyp, argtyp)
     f = LLVM.Function(mod, name, ft)
-    push!(function_attributes(f), EnumAttribute("alwaysinline", 0; ctx))
+    push!(function_attributes(f), EnumAttribute("alwaysinline", 0))
 
     return f, ft
 end
@@ -49,22 +48,24 @@ end
 
 
 """
-    isboxed(typ::Type; [ctx::Context])
+    isboxed(typ::Type)
 
 Return if a type would be boxed when instantiated in the code generator.
 """
-function isboxed(typ::Type; ctx::Union{Nothing,Context}=nothing)
+function isboxed(typ::Type)
+    if context(; throw_error=false) === nothing
+        _isboxed(typ)
+    else
+        LLVM.Context() do _
+            _isboxed(typ)
+        end
+    end
+end
+function _isboxed(typ::Type)
     isboxed_ref = Ref{Bool}()
     if VERSION >= v"1.9.0-DEV.115"
-        if ctx === nothing
-            @dispose ctx=Context() begin
-                ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-                      (Any, LLVM.API.LLVMContextRef, Ptr{Bool}), typ, ctx, isboxed_ref)
-            end
-        else
-            ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-                  (Any, LLVM.API.LLVMContextRef, Ptr{Bool}), typ, ctx, isboxed_ref)
-        end
+        ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
+              (Any, LLVM.API.LLVMContextRef, Ptr{Bool}), typ, context(), isboxed_ref)
     else
         ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
               (Any, Ptr{Bool}), typ, isboxed_ref)
@@ -73,17 +74,16 @@ function isboxed(typ::Type; ctx::Union{Nothing,Context}=nothing)
 end
 
 """
-    convert(LLVMType, typ::Type, ctx::Context; allow_boxed=true)
+    convert(LLVMType, typ::Type; allow_boxed=true)
 
-Convert a Julia type `typ` to its LLVM representation in context `ctx`.
+Convert a Julia type `typ` to its LLVM representation in the current context.
 The `allow_boxed` argument determines whether boxed types are allowed.
 """
-function Base.convert(::Type{LLVMType}, typ::Type; ctx::Context,
-                      allow_boxed::Bool=false)
+function Base.convert(::Type{LLVMType}, typ::Type; allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
     llvmtyp = if VERSION >= v"1.9.0-DEV.115"
         LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-                        (Any, Context, Ptr{Bool}), typ, ctx, isboxed_ref))
+                        (Any, Context, Ptr{Bool}), typ, context(), isboxed_ref))
     else
         LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
                         (Any, Ptr{Bool}), typ, isboxed_ref))
@@ -93,21 +93,27 @@ function Base.convert(::Type{LLVMType}, typ::Type; ctx::Context,
     end
 
     # HACK: older versions of Julia don't offer an API to fetch types in a specific context
-    if VERSION < v"1.9.0-DEV.115" && ctx != context(llvmtyp)
-        if llvmtyp == LLVM.VoidType(context(llvmtyp))
-            return LLVM.VoidType(ctx)
+    if VERSION < v"1.9.0-DEV.115" && context() != context(llvmtyp)
+        src_ctx = context(llvmtyp)
+
+        # fast path for void
+        is_void = context!(src_ctx) do
+            llvmtyp == LLVM.VoidType()
+        end
+        if is_void
+            return LLVM.VoidType()
         end
 
-        # serialize
-        buf = let
-            mod = LLVM.Module(""; ctx=context(llvmtyp))
+        # serialize in the source context
+        buf = context!(src_ctx) do
+            mod = LLVM.Module("")
             gv = LLVM.GlobalVariable(mod, llvmtyp, "")
             convert(MemoryBuffer, mod)
         end
 
-        # deserialize in different context
+        # deserialize in our destination context
         llvmtyp = let
-            mod = parse(LLVM.Module, buf; ctx)
+            mod = parse(LLVM.Module, buf)
             gv = first(globals(mod))
             global_value_type(gv)
         end
@@ -117,21 +123,21 @@ function Base.convert(::Type{LLVMType}, typ::Type; ctx::Context,
 end
 
 """
-    isghosttype(t::Type; [ctx::Context])
+    isghosttype(t::Type)
     isghosttype(T::LLVMType)
 
 Check if a type is a ghost type, implying it would not be emitted by the Julia compiler.
 This only works for types created by the Julia compiler (living in its LLVM context).
 """
-isghosttype(@nospecialize(T::LLVMType)) = T == LLVM.VoidType(context(T)) || isempty(T)
-function isghosttype(@nospecialize(t::Type); ctx::Union{Nothing,Context}=nothing)
-    if ctx === nothing
-        @dispose ctx′=Context() begin
-            T = convert(LLVMType, t; ctx=ctx′, allow_boxed=true)
+isghosttype(@nospecialize(T::LLVMType)) = T == LLVM.VoidType() || isempty(T)
+function isghosttype(@nospecialize(t::Type))
+    if context(; throw_error=false) === nothing
+        T = convert(LLVMType, t; allow_boxed=true)
+        isghosttype(T)
+    else
+        LLVM.Context() do _
+            T = convert(LLVMType, t; allow_boxed=true)
             isghosttype(T)
         end
-    else
-        T = convert(LLVMType, t; ctx, allow_boxed=true)
-        isghosttype(T)
     end
 end

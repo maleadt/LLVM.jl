@@ -4,8 +4,9 @@ end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeContextRef}, ctx::ThreadSafeContext) = ctx.ref
 
 function ThreadSafeContext()
-    ref = API.LLVMOrcCreateNewThreadSafeContext()
-    ThreadSafeContext(ref)
+    ts_ctx = ThreadSafeContext(API.LLVMOrcCreateNewThreadSafeContext())
+    activate(ts_ctx)
+    ts_ctx
 end
 
 function ThreadSafeContext(f::Core.Function)
@@ -23,6 +24,7 @@ function context(ctx::ThreadSafeContext)
 end
 
 function dispose(ctx::ThreadSafeContext)
+    deactivate(ctx)
     API.LLVMOrcDisposeThreadSafeContext(ctx)
 end
 
@@ -31,21 +33,19 @@ end
 end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeModuleRef}, mod::ThreadSafeModule) = mod.ref
 
-function ThreadSafeModule(mod::Module; ctx::ThreadSafeContext)
-    ref = API.LLVMOrcCreateNewThreadSafeModule(mod, ctx)
+function ThreadSafeModule(mod::Module)
+    ref = API.LLVMOrcCreateNewThreadSafeModule(mod, ts_context())
     ThreadSafeModule(ref)
 end
 
-"""
-    ThreadSafeModule(name::String)
-
-Construct a ThreadSafeModule from a fresh LLVM.Module and a private context.
-"""
 function ThreadSafeModule(name::String)
-    ctx = @dispose ctx=ThreadSafeContext() begin
-        mod = LLVM.Module(name; ctx=context(ctx))
-        ThreadSafeModule(mod; ctx)
+    ts_ctx = ts_context()
+    # XXX: we should lock the context here
+    ctx = context(ts_ctx)
+    mod = context!(ctx) do
+        Module(name)
     end
+    ThreadSafeModule(mod)
 end
 
 function dispose(mod::ThreadSafeModule)
@@ -56,13 +56,18 @@ mutable struct ThreadSafeModuleCallback
     callback
 end
 
-function tsm_callback(ctx::Ptr{Cvoid}, ref::API.LLVMModuleRef)
+function tsm_callback(data::Ptr{Cvoid}, ref::API.LLVMModuleRef)
+    cb = Base.unsafe_pointer_to_objref(data)::ThreadSafeModuleCallback
+    mod = Module(ref)
+    ctx = context(mod)
+    activate(ctx)
     try
-        cb = Base.unsafe_pointer_to_objref(ctx)::ThreadSafeModuleCallback
-        cb.callback(LLVM.Module(ref))
+        cb.callback(Module(ref))
     catch err
         msg = sprint(Base.display_error, err, Base.catch_backtrace())
         return API.LLVMCreateStringError(msg)
+    finally
+        deactivate(ctx)
     end
     return convert(API.LLVMErrorRef, C_NULL)
 end
@@ -70,7 +75,8 @@ end
 """
     (mod::ThreadSafeModule)(f)
 
-Apply `f` to the LLVM.Module contained within `mod`, after locking the module.
+Apply `f` to the LLVM module contained within `mod`, after locking the module and activating
+its context.
 """
 function (mod::ThreadSafeModule)(f)
     cb = ThreadSafeModuleCallback(f)

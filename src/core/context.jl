@@ -11,10 +11,14 @@ Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 function Context()
     ctx = Context(API.LLVMContextCreate())
     _install_handlers(ctx)
+    activate(ctx)
     ctx
 end
 
-dispose(ctx::Context) = API.LLVMContextDispose(ctx)
+function dispose(ctx::Context)
+    deactivate(ctx)
+    API.LLVMContextDispose(ctx)
+end
 
 function Context(f::Core.Function)
     ctx = Context()
@@ -134,3 +138,4 @@ function _install_handlers()
     handler = @cfunction(handle_error, Cvoid, (Cstring,))
     API.LLVMInstallFatalErrorHandler(handler)
 end
+
