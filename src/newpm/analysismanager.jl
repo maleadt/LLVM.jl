@@ -1,10 +1,43 @@
 abstract type AnalysisManager end
 
-struct ModuleAnalysisManager <: AnalysisManager end
-struct CGSCCAnalysisManager <: AnalysisManager end
-struct FunctionAnalysisManager <: AnalysisManager end
-struct LoopAnalysisManager <: AnalysisManager end
-struct AAManager end
+@checked struct ModuleAnalysisManager <: AnalysisManager
+    ref::API.LLVMModuleAnalysisManagerRef
+    roots::Vector{Any}
+end
+@checked struct CGSCCAnalysisManager <: AnalysisManager
+    ref::API.LLVMCGSCCAnalysisManagerRef
+    roots::Vector{Any}
+end
+@checked struct FunctionAnalysisManager <: AnalysisManager
+    ref::API.LLVMFunctionAnalysisManagerRef
+    roots::Vector{Any}
+end
+@checked struct LoopAnalysisManager <: AnalysisManager
+    ref::API.LLVMLoopAnalysisManagerRef
+    roots::Vector{Any}
+end
+@checked struct AAManager
+    ref::API.LLVMAAManagerRef
+    roots::Vector{Any}
+end
+
+Base.unsafe_convert(::Type{API.LLVMModuleAnalysisManagerRef}, am::ModuleAnalysisManager) = am.ref
+Base.unsafe_convert(::Type{API.LLVMCGSCCAnalysisManagerRef}, am::CGSCCAnalysisManager) = am.ref
+Base.unsafe_convert(::Type{API.LLVMFunctionAnalysisManagerRef}, am::FunctionAnalysisManager) = am.ref
+Base.unsafe_convert(::Type{API.LLVMLoopAnalysisManagerRef}, am::LoopAnalysisManager) = am.ref
+Base.unsafe_convert(::Type{API.LLVMAAManagerRef}, am::AAManager) = am.ref
+
+ModuleAnalysisManager() = ModuleAnalysisManager(API.LLVMCreateModuleAnalysisManager(), [])
+CGSCCAnalysisManager() = CGSCCAnalysisManager(API.LLVMCreateCGSCCAnalysisManager(), [])
+FunctionAnalysisManager() = FunctionAnalysisManager(API.LLVMCreateFunctionAnalysisManager(), [])
+LoopAnalysisManager() = LoopAnalysisManager(API.LLVMCreateLoopAnalysisManager(), [])
+AAManager() = AAManager(API.LLVMCreateAAManager(), [])
+
+dispose(mam::ModuleAnalysisManager) = API.LLVMDisposeModuleAnalysisManager(mam.ref)
+dispose(cgmam::CGSCCAnalysisManager) = API.LLVMDisposeCGSCCAnalysisManager(cgmam.ref)
+dispose(fam::FunctionAnalysisManager) = API.LLVMDisposeFunctionAnalysisManager(fam.ref)
+dispose(lam::LoopAnalysisManager) = API.LLVMDisposeLoopAnalysisManager(lam.ref)
+dispose(aam::AAManager) = API.LLVMDisposeAAManager(aam.ref)
 
 function ModuleAnalysisManager(f::Core.Function, args...; kwargs...)
     am = ModuleAnalysisManager(args...; kwargs...)
