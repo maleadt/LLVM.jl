@@ -1319,28 +1319,28 @@ pass_string(pass::LNICMPass) = ifelse(pass.options.allowspeculation, "lnicm<allo
 
 # Add methods
 
-function add!(pm::ModulePassManager, pb::PassBuilder, pass::LLVMPass)
+function add!(pm::NewPMModulePassManager, pb::PassBuilder, pass::LLVMPass)
     if !is_module_pass(typeof(pass))
         error("Pass $pass is not a module pass")
     end
     parse!(pm, pb, pass_string(pass))
 end
 
-function add!(pm::CGSCCPassManager, pb::PassBuilder, pass::LLVMPass)
+function add!(pm::NewPMCGSCCPassManager, pb::PassBuilder, pass::LLVMPass)
     if !is_cgscc_pass(typeof(pass))
         error("Pass $pass is not a cgscc pass")
     end
     parse!(pm, pb, pass_string(pass))
 end
 
-function add!(pm::FunctionPassManager, pb::PassBuilder, pass::LLVMPass)
+function add!(pm::NewPMFunctionPassManager, pb::PassBuilder, pass::LLVMPass)
     if !is_function_pass(typeof(pass))
         error("Pass $pass is not a function pass")
     end
     parse!(pm, pb, pass_string(pass))
 end
 
-function add!(pm::LoopPassManager, pb::PassBuilder, pass::LLVMPass)
+function add!(pm::NewPMLoopPassManager, pb::PassBuilder, pass::LLVMPass)
     if !is_loop_pass(typeof(pass))
         error("Pass $pass is not a loop pass")
     end

@@ -1,57 +1,57 @@
-export PassManager, ModulePassManager, CGSCCPassManager, FunctionPassManager, LoopPassManager
+export NewPMPassManager, NewPMModulePassManager, NewPMCGSCCPassManager, NewPMFunctionPassManager, NewPMLoopPassManager
 
 export dispose, add!
 
-abstract type PassManager end
+abstract type NewPMPassManager end
 
-@checked struct ModulePassManager <: PassManager
+@checked struct NewPMModulePassManager <: NewPMPassManager
     ref::API.LLVMModulePassManagerRef
     roots::Vector{Any}
 end
-@checked struct CGSCCPassManager <: PassManager
+@checked struct NewPMCGSCCPassManager <: NewPMPassManager
     ref::API.LLVMCGSCCPassManagerRef
     roots::Vector{Any}
 end
-@checked struct FunctionPassManager <: PassManager
+@checked struct NewPMFunctionPassManager <: NewPMPassManager
     ref::API.LLVMFunctionPassManagerRef
     roots::Vector{Any}
 end
-@checked struct LoopPassManager <: PassManager
+@checked struct NewPMLoopPassManager <: NewPMPassManager
     ref::API.LLVMLoopPassManagerRef
     roots::Vector{Any}
 end
 
-Base.unsafe_convert(::Type{API.LLVMModulePassManagerRef}, pm::ModulePassManager) = pm.ref
-Base.unsafe_convert(::Type{API.LLVMCGSCCPassManagerRef}, pm::CGSCCPassManager) = pm.ref
-Base.unsafe_convert(::Type{API.LLVMFunctionPassManagerRef}, pm::FunctionPassManager) = pm.ref
-Base.unsafe_convert(::Type{API.LLVMLoopPassManagerRef}, pm::LoopPassManager) = pm.ref
+Base.unsafe_convert(::Type{API.LLVMModulePassManagerRef}, pm::NewPMModulePassManager) = pm.ref
+Base.unsafe_convert(::Type{API.LLVMCGSCCPassManagerRef}, pm::NewPMCGSCCPassManager) = pm.ref
+Base.unsafe_convert(::Type{API.LLVMFunctionPassManagerRef}, pm::NewPMFunctionPassManager) = pm.ref
+Base.unsafe_convert(::Type{API.LLVMLoopPassManagerRef}, pm::NewPMLoopPassManager) = pm.ref
 
-function ModulePassManager(f::Core.Function, args...; kwargs...)
-    am = ModulePassManager(args...; kwargs...)
+function NewPMModulePassManager(f::Core.Function, args...; kwargs...)
+    am = NewPMModulePassManager(args...; kwargs...)
     try
         f(am)
     finally
         dispose(am)
     end
 end
-function CGSCCPassManager(f::Core.Function, args...; kwargs...)
-    am = CGSCCPassManager(args...; kwargs...)
+function NewPMCGSCCPassManager(f::Core.Function, args...; kwargs...)
+    am = NewPMCGSCCPassManager(args...; kwargs...)
     try
         f(am)
     finally
         dispose(am)
     end
 end
-function FunctionPassManager(f::Core.Function, args...; kwargs...)
-    am = FunctionPassManager(args...; kwargs...)
+function NewPMFunctionPassManager(f::Core.Function, args...; kwargs...)
+    am = NewPMFunctionPassManager(args...; kwargs...)
     try
         f(am)
     finally
         dispose(am)
     end
 end
-function LoopPassManager(f::Core.Function, args...; kwargs...)
-    am = LoopPassManager(args...; kwargs...)
+function NewPMLoopPassManager(f::Core.Function, args...; kwargs...)
+    am = NewPMLoopPassManager(args...; kwargs...)
     try
         f(am)
     finally
@@ -59,15 +59,15 @@ function LoopPassManager(f::Core.Function, args...; kwargs...)
     end
 end
 
-add!(pm::ModulePassManager, pm2::ModulePassManager) = API.LLVMMPMAddMPM(pm, pm2)
-add!(pm::CGSCCPassManager, pm2::CGSCCPassManager) = API.LLVMCGPMAddCGPM(pm, pm2)
-add!(pm::FunctionPassManager, pm2::FunctionPassManager) = API.LLVMFPMAddFPM(pm, pm2)
-add!(pm::LoopPassManager, pm2::LoopPassManager) = API.LLVMLPMAddLPM(pm, pm2)
+add!(pm::NewPMModulePassManager, pm2::NewPMModulePassManager) = API.LLVMMPMAddMPM(pm, pm2)
+add!(pm::NewPMCGSCCPassManager, pm2::NewPMCGSCCPassManager) = API.LLVMCGPMAddCGPM(pm, pm2)
+add!(pm::NewPMFunctionPassManager, pm2::NewPMFunctionPassManager) = API.LLVMFPMAddFPM(pm, pm2)
+add!(pm::NewPMLoopPassManager, pm2::NewPMLoopPassManager) = API.LLVMLPMAddLPM(pm, pm2)
 
-add!(pm::ModulePassManager, pm2::CGSCCPassManager) = API.LLVMMPMAddCGPM(pm, pm2)
-add!(pm::ModulePassManager, pm2::FunctionPassManager) = API.LLVMMPMAddFPM(pm, pm2)
-add!(pm::CGSCCPassManager, pm2::FunctionPassManager) = API.LLVMCGPMAddFPM(pm, pm2)
-add!(pm::FunctionPassManager, pm2::LoopPassManager) = API.LLVMFPMAddLPM(pm, pm2)
+add!(pm::NewPMModulePassManager, pm2::NewPMCGSCCPassManager) = API.LLVMMPMAddCGPM(pm, pm2)
+add!(pm::NewPMModulePassManager, pm2::NewPMFunctionPassManager) = API.LLVMMPMAddFPM(pm, pm2)
+add!(pm::NewPMCGSCCPassManager, pm2::NewPMFunctionPassManager) = API.LLVMCGPMAddFPM(pm, pm2)
+add!(pm::NewPMFunctionPassManager, pm2::NewPMLoopPassManager) = API.LLVMFPMAddLPM(pm, pm2)
 
 function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMModulePassManager})
     pm2 = NewPMModulePassManager()
