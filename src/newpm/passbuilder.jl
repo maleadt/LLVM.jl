@@ -34,7 +34,7 @@ function register!(pb::PassBuilder, lam::LoopAnalysisManager, fam::FunctionAnaly
     cross_register_proxies!(pb, lam, fam, cgam, mam)
 end
 
-parse!(pb::PassBuilder, pm::ModulePassManager, s::String) = API.LLVMPassBuilderParseModulePassPipeline(pb, pm, s, length(s))
-parse!(pb::PassBuilder, pm::CGSCCPassManager, s::String) = API.LLVMPassBuilderParseCGSCCPassPipeline(pb, pm, s, length(s))
-parse!(pb::PassBuilder, pm::FunctionPassManager, s::String) = API.LLVMPassBuilderParseFunctionPassPipeline(pb, pm, s, length(s))
-parse!(pb::PassBuilder, pm::LoopPassManager, s::String) = API.LLVMPassBuilderParseLoopPassPipeline(pb, pm, s, length(s))
+parse!(pb::PassBuilder, pm::ModulePassManager, s::String) = LLVMError(API.LLVMPassBuilderParseModulePassPipeline(pb, pm, s, length(s)))
+parse!(pb::PassBuilder, pm::CGSCCPassManager, s::String) = LLVMError(API.LLVMPassBuilderParseCGSCCPassPipeline(pb, pm, s, length(s)))
+parse!(pb::PassBuilder, pm::FunctionPassManager, s::String) = LLVMError(API.LLVMPassBuilderParseFunctionPassPipeline(pb, pm, s, length(s)))
+parse!(pb::PassBuilder, pm::LoopPassManager, s::String) = LLVMError(API.LLVMPassBuilderParseLoopPassPipeline(pb, pm, s, length(s)))
