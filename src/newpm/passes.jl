@@ -343,15 +343,9 @@ pass_string(::InferFunctionAttrsPass) = "inferattrs"
 struct ModuleInlinerWrapperPass <: LLVMPass end
 is_module_pass(::Type{ModuleInlinerWrapperPass}) = true
 pass_string(::ModuleInlinerWrapperPass) = "inliner-wrapper"
-struct ModuleInlinerWrapperPass <: LLVMPass end
-is_module_pass(::Type{ModuleInlinerWrapperPass}) = true
-pass_string(::ModuleInlinerWrapperPass) = "inliner-ml-advisor-release"
 struct InlineAdvisorAnalysisPrinterPass <: LLVMPass end
 is_module_pass(::Type{InlineAdvisorAnalysisPrinterPass}) = true
 pass_string(::InlineAdvisorAnalysisPrinterPass) = "print<inline-advisor>"
-struct ModuleInlinerWrapperPass <: LLVMPass end
-is_module_pass(::Type{ModuleInlinerWrapperPass}) = true
-pass_string(::ModuleInlinerWrapperPass) = "inliner-wrapper-no-mandatory-first"
 struct GCOVProfilerPass <: LLVMPass end
 is_module_pass(::Type{GCOVProfilerPass}) = true
 pass_string(::GCOVProfilerPass) = "insert-gcov-profiling"
@@ -365,8 +359,8 @@ struct InvalidateAllAnalysesPass <: LLVMPass end
 is_module_pass(::Type{InvalidateAllAnalysesPass}) = true
 pass_string(::InvalidateAllAnalysesPass) = "invalidate<all>"
 struct IPSCCPPass <: LLVMPass end
-is_module_pass(::Type{})
-pass_string(::IPSCCPPass) = "ipscc::p" = true
+is_module_pass(::Type{IPSCCPPass}) = true
+pass_string(::IPSCCPPass) = "ipscc"
 struct IROutlinerPass <: LLVMPass end
 is_module_pass(::Type{IROutlinerPass}) = true
 pass_string(::IROutlinerPass) = "iroutliner"
@@ -547,9 +541,9 @@ pass_string(pass::ModuleAddressSanitizerPass) = ifelse(pass.options.kernel, "asa
 struct ArgumentPromotionPass <: LLVMPass end
 is_cgscc_pass(::Type{ArgumentPromotionPass}) = true
 pass_string(::ArgumentPromotionPass) = "argpromotion"
-struct InvalidateAllAnalysesPass <: LLVMPass end
+# struct InvalidateAllAnalysesPass <: LLVMPass end
 is_cgscc_pass(::Type{InvalidateAllAnalysesPass}) = true
-pass_string(::InvalidateAllAnalysesPass) = "invalidate<all>"
+# pass_string(::InvalidateAllAnalysesPass) = "invalidate<all>"
 struct PostOrderFunctionAttrsPass <: LLVMPass end
 is_cgscc_pass(::Type{PostOrderFunctionAttrsPass}) = true
 pass_string(::PostOrderFunctionAttrsPass) = "function-attrs"
@@ -711,9 +705,9 @@ pass_string(::InstCountPass) = "instcount"
 struct InstSimplifyPass <: LLVMPass end
 is_function_pass(::Type{InstSimplifyPass}) = true
 pass_string(::InstSimplifyPass) = "instsimplify"
-struct InvalidateAllAnalysesPass <: LLVMPass end
+# struct InvalidateAllAnalysesPass <: LLVMPass end
 is_function_pass(::Type{InvalidateAllAnalysesPass}) = true
-pass_string(::InvalidateAllAnalysesPass) = "invalidate<all>"
+# pass_string(::InvalidateAllAnalysesPass) = "invalidate<all>"
 struct IRCEPass <: LLVMPass end
 is_function_pass(::Type{IRCEPass}) = true
 pass_string(::IRCEPass) = "irce"
@@ -951,9 +945,9 @@ pass_string(::UnifyLoopExitsPass) = "unify-loop-exits"
 struct VectorCombinePass <: LLVMPass end
 is_function_pass(::Type{VectorCombinePass}) = true
 pass_string(::VectorCombinePass) = "vector-combine"
-struct VerifierPass <: LLVMPass end
+# struct VerifierPass <: LLVMPass end
 is_function_pass(::Type{VerifierPass}) = true
-pass_string(::VerifierPass) = "verify"
+# pass_string(::VerifierPass) = "verify"
 struct DominatorTreeVerifierPass <: LLVMPass end
 is_function_pass(::Type{DominatorTreeVerifierPass}) = true
 pass_string(::DominatorTreeVerifierPass) = "verify<domtree>"
@@ -1218,9 +1212,9 @@ pass_string(::CanonicalizeFreezeInLoopsPass) = "canon-freeze"
 struct DDGDotPrinterPass <: LLVMPass end
 is_loop_pass(::Type{DDGDotPrinterPass}) = true
 pass_string(::DDGDotPrinterPass) = "dot-ddg"
-struct InvalidateAllAnalysesPass <: LLVMPass end
+# struct InvalidateAllAnalysesPass <: LLVMPass end
 is_loop_pass(::Type{InvalidateAllAnalysesPass}) = true
-pass_string(::InvalidateAllAnalysesPass) = "invalidate<all>"
+# pass_string(::InvalidateAllAnalysesPass) = "invalidate<all>"
 struct LoopIdiomRecognizePass <: LLVMPass end
 is_loop_pass(::Type{LoopIdiomRecognizePass}) = true
 pass_string(::LoopIdiomRecognizePass) = "loop-idiom"
@@ -1269,9 +1263,9 @@ pass_string(::LoopCachePrinterPass) = "print<loop-cache-cost>"
 struct LoopPredicationPass <: LLVMPass end
 is_loop_pass(::Type{LoopPredicationPass}) = true
 pass_string(::LoopPredicationPass) = "loop-predication"
-struct GuardWideningPass <: LLVMPass end
+# struct GuardWideningPass <: LLVMPass end
 is_loop_pass(::Type{GuardWideningPass}) = true
-pass_string(::GuardWideningPass) = "guard-widening"
+# pass_string(::GuardWideningPass) = "guard-widening"
 struct LoopBoundSplitPass <: LLVMPass end
 is_loop_pass(::Type{LoopBoundSplitPass}) = true
 pass_string(::LoopBoundSplitPass) = "loop-bound-split"
