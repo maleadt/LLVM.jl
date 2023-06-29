@@ -33,11 +33,11 @@ FunctionAnalysisManager() = FunctionAnalysisManager(API.LLVMCreateFunctionAnalys
 LoopAnalysisManager() = LoopAnalysisManager(API.LLVMCreateLoopAnalysisManager(), [])
 AAManager() = AAManager(API.LLVMCreateAAManager(), [])
 
-dispose(mam::ModuleAnalysisManager) = API.LLVMDisposeModuleAnalysisManager(mam.ref)
-dispose(cgmam::CGSCCAnalysisManager) = API.LLVMDisposeCGSCCAnalysisManager(cgmam.ref)
-dispose(fam::FunctionAnalysisManager) = API.LLVMDisposeFunctionAnalysisManager(fam.ref)
-dispose(lam::LoopAnalysisManager) = API.LLVMDisposeLoopAnalysisManager(lam.ref)
-dispose(aam::AAManager) = API.LLVMDisposeAAManager(aam.ref)
+dispose(mam::ModuleAnalysisManager) = API.LLVMDisposeModuleAnalysisManager(mam)
+dispose(cgmam::CGSCCAnalysisManager) = API.LLVMDisposeCGSCCAnalysisManager(cgmam)
+dispose(fam::FunctionAnalysisManager) = API.LLVMDisposeFunctionAnalysisManager(fam)
+dispose(lam::LoopAnalysisManager) = API.LLVMDisposeLoopAnalysisManager(lam)
+dispose(aam::AAManager) = API.LLVMDisposeAAManager(aam)
 
 function ModuleAnalysisManager(f::Core.Function, args...; kwargs...)
     am = ModuleAnalysisManager(args...; kwargs...)

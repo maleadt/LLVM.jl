@@ -18,7 +18,7 @@ function PassInstrumentationCallbacks(f::Core.Function, args...; kwargs...)
 end
 
 function dispose(pic::PassInstrumentationCallbacks)
-    API.LLVMDisposePassInstrumentationCallbacks(pic.ref)
+    API.LLVMDisposePassInstrumentationCallbacks(pic)
     if pic.si != C_NULL
         API.LLVMDisposeStandardInstrumentations(pic.si)
     end
