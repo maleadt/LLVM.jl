@@ -1,4 +1,4 @@
-abstract type JuliaPass end
+export add!
 
 function module_pass_callback_impl(mod, mam, thunk)
     m = Module(mod)

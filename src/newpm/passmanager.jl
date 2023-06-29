@@ -1,3 +1,7 @@
+export PassManager, ModulePassManager, CGSCCPassManager, FunctionPassManager, LoopPassManager
+
+export dispose, add!
+
 abstract type PassManager end
 
 @checked struct ModulePassManager <: PassManager

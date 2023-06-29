@@ -1,3 +1,7 @@
+export PassInstrumentationCallbacks
+
+export dispose, standard_instrumentations!
+
 @checked struct PassInstrumentationCallbacks
     ref::API.LLVMPassInstrumentationCallbacksRef
     si::API.LLVMStandardInstrumentationsRef

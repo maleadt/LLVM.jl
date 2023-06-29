@@ -1,3 +1,7 @@
+export PreservedAnalyses
+
+export no_analyses_preserved, all_analyses_preserved, cfg_analyses_preserved
+
 @checked struct PreservedAnalyses
     ref::API.LLVMPreservedAnalysesRef
 end

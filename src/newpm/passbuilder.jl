@@ -1,3 +1,7 @@
+export PassBuilder
+
+export dispose, register!, cross_register_proxies!, parse!
+
 @checked struct PassBuilder
     ref::API.LLVMPassBuilderRef
     roots::Vector{Any}

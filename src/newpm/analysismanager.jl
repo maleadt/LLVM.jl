@@ -1,3 +1,7 @@
+export AnalysisManager, ModuleAnalysisManager, CGSCCAnalysisManager, FunctionAnalysisManager, LoopAnalysisManager, AAManager
+
+export dispose
+
 abstract type AnalysisManager end
 
 @checked struct ModuleAnalysisManager <: AnalysisManager
