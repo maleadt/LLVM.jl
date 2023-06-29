@@ -78,6 +78,7 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 include("debuginfo.jl")
+include("newpm.jl")
 include("utils.jl")
 
 if LLVM.has_orc_v1() && !LLVM.is_asserts()

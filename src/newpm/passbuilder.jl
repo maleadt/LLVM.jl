@@ -11,6 +11,7 @@ Base.unsafe_convert(::Type{API.LLVMPassBuilderRef}, pb::PassBuilder) = pb.ref
 
 PassBuilder(tm::TargetMachine) = PassBuilder(API.LLVMCreatePassBuilder(tm, C_NULL), [])
 PassBuilder(tm::TargetMachine, pic::PassInstrumentationCallbacks) = PassBuilder(API.LLVMCreatePassBuilder(tm, pic), [])
+PassBuilder() = PassBuilder(API.LLVMCreatePassBuilder(C_NULL, C_NULL), [])
 
 dispose(pb::PassBuilder) = API.LLVMDisposePassBuilder(pb)
 
@@ -38,7 +39,7 @@ function register!(pb::PassBuilder, lam::LoopAnalysisManager, fam::FunctionAnaly
     cross_register_proxies!(pb, lam, fam, cgam, mam)
 end
 
-parse!(pb::PassBuilder, pm::NewPMModulePassManager, s::String) = LLVMError(API.LLVMPassBuilderParseModulePassPipeline(pb, pm, s, length(s)))
-parse!(pb::PassBuilder, pm::NewPMCGSCCPassManager, s::String) = LLVMError(API.LLVMPassBuilderParseCGSCCPassPipeline(pb, pm, s, length(s)))
-parse!(pb::PassBuilder, pm::NewPMFunctionPassManager, s::String) = LLVMError(API.LLVMPassBuilderParseFunctionPassPipeline(pb, pm, s, length(s)))
-parse!(pb::PassBuilder, pm::NewPMLoopPassManager, s::String) = LLVMError(API.LLVMPassBuilderParseLoopPassPipeline(pb, pm, s, length(s)))
+parse!(pb::PassBuilder, pm::NewPMModulePassManager, s::String) = @check API.LLVMPassBuilderParseModulePassPipeline(pb, pm, s, length(s))
+parse!(pb::PassBuilder, pm::NewPMCGSCCPassManager, s::String) = @check API.LLVMPassBuilderParseCGSCCPassPipeline(pb, pm, s, length(s))
+parse!(pb::PassBuilder, pm::NewPMFunctionPassManager, s::String) = @check API.LLVMPassBuilderParseFunctionPassPipeline(pb, pm, s, length(s))
+parse!(pb::PassBuilder, pm::NewPMLoopPassManager, s::String) = @check API.LLVMPassBuilderParseLoopPassPipeline(pb, pm, s, length(s))

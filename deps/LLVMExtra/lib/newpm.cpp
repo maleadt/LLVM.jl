@@ -120,11 +120,21 @@ void LLVMDisposePassBuilder(LLVMPassBuilderRef PB) {
     delete unwrap(PB);
 }
 
-LLVMErrorRef LLVMPassBuilderParseModulePassPipeline(LLVMPassBuilderRef PB, LLVMModulePassManagerRef PM, const char *PipelineText, size_t PipelineTextLength);
-LLVMErrorRef LLVMPassBuilderParseCGSCCPassPipeline(LLVMPassBuilderRef PB, LLVMCGSCCPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength);
-LLVMErrorRef LLVMPassBuilderParseFunctionPassPipeline(LLVMPassBuilderRef PB, LLVMFunctionPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength);
-LLVMErrorRef LLVMPassBuilderParseLoopPassPipeline(LLVMPassBuilderRef PB, LLVMLoopPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength);
-LLVMErrorRef LLVMPassBuilderParseAAPipeline(LLVMPassBuilderRef PB, LLVMAAManagerRef AM, const char *PipelineText, size_t PipelineTextLength);
+LLVMErrorRef LLVMPassBuilderParseModulePassPipeline(LLVMPassBuilderRef PB, LLVMModulePassManagerRef PM, const char *PipelineText, size_t PipelineTextLength) {
+    return wrap(unwrap(PB)->parsePassPipeline(*unwrap(PM), llvm::StringRef(PipelineText, PipelineTextLength)));
+}
+LLVMErrorRef LLVMPassBuilderParseCGSCCPassPipeline(LLVMPassBuilderRef PB, LLVMCGSCCPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength) {
+    return wrap(unwrap(PB)->parsePassPipeline(*unwrap(PM), llvm::StringRef(PipelineText, PipelineTextLength)));
+}
+LLVMErrorRef LLVMPassBuilderParseFunctionPassPipeline(LLVMPassBuilderRef PB, LLVMFunctionPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength) {
+    return wrap(unwrap(PB)->parsePassPipeline(*unwrap(PM), llvm::StringRef(PipelineText, PipelineTextLength)));
+}
+LLVMErrorRef LLVMPassBuilderParseLoopPassPipeline(LLVMPassBuilderRef PB, LLVMLoopPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength) {
+    return wrap(unwrap(PB)->parsePassPipeline(*unwrap(PM), llvm::StringRef(PipelineText, PipelineTextLength)));
+}
+LLVMErrorRef LLVMPassBuilderParseAAPipeline(LLVMPassBuilderRef PB, LLVMAAManagerRef AM, const char *PipelineText, size_t PipelineTextLength) {
+    return wrap(unwrap(PB)->parseAAPipeline(*unwrap(AM), llvm::StringRef(PipelineText, PipelineTextLength)));
+}
 
 void LLVMPassBuilderRegisterModuleAnalyses(LLVMPassBuilderRef PB, LLVMModuleAnalysisManagerRef AM) {
     unwrap(PB)->registerModuleAnalyses(*unwrap(AM));

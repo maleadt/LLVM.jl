@@ -71,7 +71,6 @@ include("transform.jl")
 include("debuginfo.jl")
 include("dibuilder.jl")
 include("jitevents.jl")
-include("newpm.jl")
 include("utils.jl")
 
 has_orc_v1() = v"8" <= LLVM.version() < v"12"
@@ -83,6 +82,8 @@ has_orc_v2() = v"12" <= LLVM.version()
 if has_orc_v2()
     include("orcv2.jl")
 end
+
+include("newpm.jl")
 
 # high-level functionality
 include("state.jl")

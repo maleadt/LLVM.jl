@@ -7,24 +7,43 @@ abstract type NewPMPassManager end
 @checked struct NewPMModulePassManager <: NewPMPassManager
     ref::API.LLVMModulePassManagerRef
     roots::Vector{Any}
+    pb::Any # Union{PassBuilder, Nothing}
 end
 @checked struct NewPMCGSCCPassManager <: NewPMPassManager
     ref::API.LLVMCGSCCPassManagerRef
     roots::Vector{Any}
+    pb::Any # Union{PassBuilder, Nothing}
 end
 @checked struct NewPMFunctionPassManager <: NewPMPassManager
     ref::API.LLVMFunctionPassManagerRef
     roots::Vector{Any}
+    pb::Any # Union{PassBuilder, Nothing}
 end
 @checked struct NewPMLoopPassManager <: NewPMPassManager
     ref::API.LLVMLoopPassManagerRef
     roots::Vector{Any}
+    pb::Any # Union{PassBuilder, Nothing}
 end
 
 Base.unsafe_convert(::Type{API.LLVMModulePassManagerRef}, pm::NewPMModulePassManager) = pm.ref
 Base.unsafe_convert(::Type{API.LLVMCGSCCPassManagerRef}, pm::NewPMCGSCCPassManager) = pm.ref
 Base.unsafe_convert(::Type{API.LLVMFunctionPassManagerRef}, pm::NewPMFunctionPassManager) = pm.ref
 Base.unsafe_convert(::Type{API.LLVMLoopPassManagerRef}, pm::NewPMLoopPassManager) = pm.ref
+
+NewPMModulePassManager(pb) = NewPMModulePassManager(API.LLVMCreateNewPMModulePassManager(), [], pb)
+NewPMCGSCCPassManager(pb) = NewPMCGSCCPassManager(API.LLVMCreateNewPMCGSCCPassManager(), [], pb)
+NewPMFunctionPassManager(pb) = NewPMFunctionPassManager(API.LLVMCreateNewPMFunctionPassManager(), [], pb)
+NewPMLoopPassManager(pb) = NewPMLoopPassManager(API.LLVMCreateNewPMLoopPassManager(), [], pb)
+
+dispose(pm::NewPMModulePassManager) = API.LLVMDisposeNewPMModulePassManager(pm)
+dispose(pm::NewPMCGSCCPassManager) = API.LLVMDisposeNewPMCGSCCPassManager(pm)
+dispose(pm::NewPMFunctionPassManager) = API.LLVMDisposeNewPMFunctionPassManager(pm)
+dispose(pm::NewPMLoopPassManager) = API.LLVMDisposeNewPMLoopPassManager(pm)
+
+NewPMModulePassManager() = NewPMModulePassManager(nothing)
+NewPMCGSCCPassManager() = NewPMCGSCCPassManager(nothing)
+NewPMFunctionPassManager() = NewPMFunctionPassManager(nothing)
+NewPMLoopPassManager() = NewPMLoopPassManager(nothing)
 
 function NewPMModulePassManager(f::Core.Function, args...; kwargs...)
     am = NewPMModulePassManager(args...; kwargs...)
@@ -70,7 +89,7 @@ add!(pm::NewPMCGSCCPassManager, pm2::NewPMFunctionPassManager) = API.LLVMCGPMAdd
 add!(pm::NewPMFunctionPassManager, pm2::NewPMLoopPassManager) = API.LLVMFPMAddLPM(pm, pm2)
 
 function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMModulePassManager})
-    pm2 = NewPMModulePassManager()
+    pm2 = NewPMModulePassManager(pm.pb)
     try
         f(pm2)
         add!(pm, pm2)
@@ -80,7 +99,7 @@ function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMModulePa
 end
 
 function add!(f::Core.Function, pm::NewPMCGSCCPassManager, ::Type{NewPMCGSCCPassManager})
-    pm2 = NewPMCGSCCPassManager()
+    pm2 = NewPMCGSCCPassManager(om.pb)
     try
         f(pm2)
         add!(pm, pm2)
@@ -90,7 +109,7 @@ function add!(f::Core.Function, pm::NewPMCGSCCPassManager, ::Type{NewPMCGSCCPass
 end
 
 function add!(f::Core.Function, pm::NewPMFunctionPassManager, ::Type{NewPMFunctionPassManager})
-    pm2 = NewPMFunctionPassManager()
+    pm2 = NewPMFunctionPassManager(pm.pb)
     try
         f(pm2)
         add!(pm, pm2)
@@ -100,7 +119,7 @@ function add!(f::Core.Function, pm::NewPMFunctionPassManager, ::Type{NewPMFuncti
 end
 
 function add!(f::Core.Function, pm::NewPMLoopPassManager, ::Type{NewPMLoopPassManager})
-    pm2 = NewPMLoopPassManager()
+    pm2 = NewPMLoopPassManager(pm.pb)
     try
         f(pm2)
         add!(pm, pm2)
@@ -110,7 +129,7 @@ function add!(f::Core.Function, pm::NewPMLoopPassManager, ::Type{NewPMLoopPassMa
 end
 
 function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMCGSCCPassManager})
-    pm2 = NewPMCGSCCPassManager()
+    pm2 = NewPMCGSCCPassManager(pm.pb)
     try
         f(pm2)
         add!(pm, pm2)
@@ -120,7 +139,7 @@ function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMCGSCCPas
 end
 
 function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMFunctionPassManager})
-    pm2 = NewPMFunctionPassManager()
+    pm2 = NewPMFunctionPassManager(pm.pb)
     try
         f(pm2)
         add!(pm, pm2)
@@ -130,7 +149,7 @@ function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMFunction
 end
 
 function add!(f::Core.Function, pm::NewPMCGSCCPassManager, ::Type{NewPMFunctionPassManager})
-    pm2 = NewPMFunctionPassManager()
+    pm2 = NewPMFunctionPassManager(pm.pb)
     try
         f(pm2)
         add!(pm, pm2)
@@ -140,7 +159,7 @@ function add!(f::Core.Function, pm::NewPMCGSCCPassManager, ::Type{NewPMFunctionP
 end
 
 function add!(f::Core.Function, pm::NewPMFunctionPassManager, ::Type{NewPMLoopPassManager})
-    pm2 = NewPMLoopPassManager()
+    pm2 = NewPMLoopPassManager(pm.pb)
     try
         f(pm2)
         add!(pm, pm2)
