@@ -1,9 +1,26 @@
 abstract type PassManager end
 
-struct ModulePassManager <: PassManager end
-struct CGSCCPassManager <: PassManager end
-struct FunctionPassManager <: PassManager end
-struct LoopPassManager <: PassManager end
+@checked struct ModulePassManager <: PassManager
+    ref::API.LLVMModulePassManagerRef
+    roots::Vector{Any}
+end
+@checked struct CGSCCPassManager <: PassManager
+    ref::API.LLVMCGSCCPassManagerRef
+    roots::Vector{Any}
+end
+@checked struct FunctionPassManager <: PassManager
+    ref::API.LLVMFunctionPassManagerRef
+    roots::Vector{Any}
+end
+@checked struct LoopPassManager <: PassManager
+    ref::API.LLVMLoopPassManagerRef
+    roots::Vector{Any}
+end
+
+Base.unsafe_convert(::Type{API.LLVMModulePassManagerRef}, pm::ModulePassManager) = pm.ref
+Base.unsafe_convert(::Type{API.LLVMCGSCCPassManagerRef}, pm::CGSCCPassManager) = pm.ref
+Base.unsafe_convert(::Type{API.LLVMFunctionPassManagerRef}, pm::FunctionPassManager) = pm.ref
+Base.unsafe_convert(::Type{API.LLVMLoopPassManagerRef}, pm::LoopPassManager) = pm.ref
 
 function ModulePassManager(f::Core.Function, args...; kwargs...)
     am = ModulePassManager(args...; kwargs...)
@@ -37,6 +54,16 @@ function LoopPassManager(f::Core.Function, args...; kwargs...)
         dispose(am)
     end
 end
+
+add!(pm::ModulePassManager, pm2::ModulePassManager) = API.LLVMMPMAddMPM(pm, pm2)
+add!(pm::CGSCCPassManager, pm2::CGSCCPassManager) = API.LLVMCGPMAddCGPM(pm, pm2)
+add!(pm::FunctionPassManager, pm2::FunctionPassManager) = API.LLVMFPMAddFPM(pm, pm2)
+add!(pm::LoopPassManager, pm2::LoopPassManager) = API.LLVMLPMAddLPM(pm, pm2)
+
+add!(pm::ModulePassManager, pm2::CGSCCPassManager) = API.LLVMMPMAddCGPM(pm, pm2)
+add!(pm::ModulePassManager, pm2::FunctionPassManager) = API.LLVMMPMAddFPM(pm, pm2)
+add!(pm::CGSCCPassManager, pm2::FunctionPassManager) = API.LLVMCGPMAddFPM(pm, pm2)
+add!(pm::FunctionPassManager, pm2::LoopPassManager) = API.LLVMFPMAddLPM(pm, pm2)
 
 function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMModulePassManager})
     pm2 = NewPMModulePassManager()
