@@ -2,7 +2,7 @@ export add!
 
 function module_pass_callback_impl(mod, mam, thunk)
     m = Module(mod)
-    am = NewPMModuleAnalysisManager(mam, Any[])
+    am = ModuleAnalysisManager(mam, Any[])
     pass = Base.unsafe_pointer_to_objref(thunk)::Ref{Core.Function}
     preserved = unsafe_run() do
         pa = pass[](m, am)::PreservedAnalyses
@@ -13,7 +13,7 @@ end
 
 function function_pass_callback_impl(fun, fam, thunk)
     f = Function(fun)
-    am = NewPMFunctionAnalysisManager(fam, Any[])
+    am = FunctionAnalysisManager(fam, Any[])
     pass = Base.unsafe_pointer_to_objref(thunk)::Ref{Core.Function}
     preserved = unsafe_run() do
         pa = pass[](f, am)::PreservedAnalyses
