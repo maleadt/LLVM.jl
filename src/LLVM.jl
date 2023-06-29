@@ -71,6 +71,7 @@ include("transform.jl")
 include("debuginfo.jl")
 include("dibuilder.jl")
 include("jitevents.jl")
+include("newpm.jl")
 include("utils.jl")
 
 has_orc_v1() = v"8" <= LLVM.version() < v"12"
