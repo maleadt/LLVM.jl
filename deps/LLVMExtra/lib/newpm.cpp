@@ -3,8 +3,13 @@
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/StandardInstrumentations.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Function.h>
 
 #include "llvm/Support/CBindingWrapping.h"
+
+using llvm::wrap;
+using llvm::unwrap;
 
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::TargetMachine, LLVMTargetMachineRef)
 
@@ -18,6 +23,18 @@ LLVMPreservedAnalysesRef LLVMCreatePreservedAnalysesAll(void) {
 }
 LLVMPreservedAnalysesRef LLVMCreatePreservedAnalysesCFG(void) {
     return wrap(new llvm::PreservedAnalyses(llvm::PreservedAnalyses::allInSet<llvm::CFGAnalyses>()));
+}
+
+void LLVMDisposePreservedAnalyses(LLVMPreservedAnalysesRef PA) {
+    delete unwrap(PA);
+}
+
+LLVMBool LLVMAreAllAnalysesPreserved(LLVMPreservedAnalysesRef PA) {
+    return unwrap(PA)->areAllPreserved();
+}
+
+LLVMBool LLVMAreCFGAnalysesPreserved(LLVMPreservedAnalysesRef PA) {
+    return unwrap(PA)->allAnalysesInSetPreserved<llvm::CFGAnalyses>();
 }
 
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::ModuleAnalysisManager, LLVMModuleAnalysisManagerRef)
@@ -87,6 +104,13 @@ void LLVMDisposeNewPMFunctionPassManager(LLVMFunctionPassManagerRef PM) {
 }
 void LLVMDisposeNewPMLoopPassManager(LLVMLoopPassManagerRef PM) {
     delete unwrap(PM);
+}
+
+LLVMPreservedAnalysesRef LLVMRunNewPMModulePassManager(LLVMModulePassManagerRef PM, LLVMModuleRef M, LLVMModuleAnalysisManagerRef AM) {
+    return wrap(new llvm::PreservedAnalyses(unwrap(PM)->run(*unwrap(M), *unwrap(AM))));
+}
+LLVMPreservedAnalysesRef LLVMRunNewPMFunctionPassManager(LLVMFunctionPassManagerRef PM, LLVMValueRef F, LLVMFunctionAnalysisManagerRef AM) {
+    return wrap(new llvm::PreservedAnalyses(unwrap(PM)->run(*llvm::cast<llvm::Function>(unwrap(F)), *unwrap(AM))));
 }
 
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::StandardInstrumentations, LLVMStandardInstrumentationsRef)

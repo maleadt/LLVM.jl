@@ -105,7 +105,7 @@ LoopAnalysisManager() do lam end
 
 end # testset "newpm analysis managers"
 
-@testset "newpm pipeline setup" begin
+@testset "newpm analysis registration" begin
 
 host_triple = triple()
 host_t = Target(triple=host_triple)
@@ -116,7 +116,9 @@ host_t = Target(triple=host_triple)
     end
 end
 
-end # testset "newpm pipeline setup"
+@test "Successfully registered all analysis managers!" != ""
+
+end # testset "newpm analysis registration"
 
 @testset "newpm passes" begin
 
@@ -169,3 +171,55 @@ host_t = Target(triple=host_triple)
 end
 
 end # testset "newpm passes"
+
+@testset "newpm custom passes" begin
+
+host_triple = triple()
+host_t = Target(triple=host_triple)
+
+@dispose tm=TargetMachine(host_t, host_triple) pic=StandardInstrumentationCallbacks() pb=PassBuilder(tm, pic) begin
+    analysis_managers() do lam, fam, cam, mam
+        register!(pb, lam, fam, cam, mam)
+
+        observed_modules = 0
+        observed_functions = 0
+
+        NewPMModulePassManager(pb) do mpm
+            add!(mpm) do mod, mam
+                observed_modules += 1
+                all_analyses_preserved()
+            end
+            add!(mpm, NewPMFunctionPassManager) do fpm
+                add!(fpm) do fun, fam
+                    observed_functions += 1
+                    all_analyses_preserved()
+                end
+            end
+
+            @test "Successfully added custom module and function passes!" != ""
+    
+            @dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("test") begin
+                pa = run!(mpm, mod, mam)
+                @test observed_modules == 1
+                @test observed_functions == 0
+                @test are_all_preserved(pa)
+    
+                
+                ft = LLVM.FunctionType(LLVM.VoidType())
+                fn = LLVM.Function(mod, "SomeFunction", ft)
+    
+                entry = BasicBlock(fn, "entry")
+                position!(builder, entry)
+    
+                ret!(builder)
+    
+                pa = run!(mpm, mod, mam)
+                @test observed_modules == 2
+                @test observed_functions == 1
+                @test are_all_preserved(pa)
+            end
+        end
+    end
+end
+
+end # testset "newpm custom passes"

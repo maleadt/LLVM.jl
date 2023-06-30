@@ -1,6 +1,6 @@
 export PreservedAnalyses
 
-export no_analyses_preserved, all_analyses_preserved, cfg_analyses_preserved
+export no_analyses_preserved, all_analyses_preserved, cfg_analyses_preserved, are_all_preserved, are_cfg_preserved, dispose
 
 @checked struct PreservedAnalyses
     ref::API.LLVMPreservedAnalysesRef
@@ -13,6 +13,15 @@ no_analyses_preserved() = PreservedAnalyses(API.LLVMCreatePreservedAnalysesNone(
 all_analyses_preserved() = PreservedAnalyses(API.LLVMCreatePreservedAnalysesAll())
 
 cfg_analyses_preserved() = PreservedAnalyses(API.LLVMCreatePreservedAnalysesCFG())
+
+dispose(pa::PreservedAnalyses) = API.LLVMDisposePreservedAnalyses(pa)
+
+are_all_preserved(pa::PreservedAnalyses) = API.LLVMAreAllAnalysesPreserved(pa)
+
+are_cfg_preserved(pa::PreservedAnalyses) = API.LLVMAreCFGAnalysesPreserved(pa)
+
+# No do-block syntax is provided for preserved analyses because
+# it is not meant to be used with limited scope.
 
 function unsafe_run(f::Core.Function)
     try

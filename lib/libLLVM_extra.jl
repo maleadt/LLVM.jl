@@ -467,6 +467,18 @@ function LLVMCreatePreservedAnalysesCFG()
     ccall((:LLVMCreatePreservedAnalysesCFG, libLLVMExtra), LLVMPreservedAnalysesRef, ())
 end
 
+function LLVMDisposePreservedAnalyses(PA)
+    ccall((:LLVMDisposePreservedAnalyses, libLLVMExtra), Cvoid, (LLVMPreservedAnalysesRef,), PA)
+end
+
+function LLVMAreAllAnalysesPreserved(PA)
+    convert(Core.Bool, ccall((:LLVMAreAllAnalysesPreserved, libLLVMExtra), LLVMBool, (LLVMPreservedAnalysesRef,), PA))
+end
+
+function LLVMAreCFGAnalysesPreserved(PA)
+    convert(Core.Bool, ccall((:LLVMAreCFGAnalysesPreserved, libLLVMExtra), LLVMBool, (LLVMPreservedAnalysesRef,), PA))
+end
+
 mutable struct LLVMOpaqueModuleAnalysisManager end
 
 const LLVMModuleAnalysisManagerRef = Ptr{LLVMOpaqueModuleAnalysisManager}
@@ -573,6 +585,14 @@ end
 
 function LLVMDisposeNewPMLoopPassManager(PM)
     ccall((:LLVMDisposeNewPMLoopPassManager, libLLVMExtra), Cvoid, (LLVMLoopPassManagerRef,), PM)
+end
+
+function LLVMRunNewPMModulePassManager(PM, M, AM)
+    ccall((:LLVMRunNewPMModulePassManager, libLLVMExtra), LLVMPreservedAnalysesRef, (LLVMModulePassManagerRef, LLVMModuleRef, LLVMModuleAnalysisManagerRef), PM, M, AM)
+end
+
+function LLVMRunNewPMFunctionPassManager(PM, F, AM)
+    ccall((:LLVMRunNewPMFunctionPassManager, libLLVMExtra), LLVMPreservedAnalysesRef, (LLVMFunctionPassManagerRef, LLVMValueRef, LLVMFunctionAnalysisManagerRef), PM, F, AM)
 end
 
 mutable struct LLVMOpaqueStandardInstrumentations end

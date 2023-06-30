@@ -78,15 +78,39 @@ function NewPMLoopPassManager(f::Core.Function, args...; kwargs...)
     end
 end
 
-add!(pm::NewPMModulePassManager, pm2::NewPMModulePassManager) = API.LLVMMPMAddMPM(pm, pm2)
-add!(pm::NewPMCGSCCPassManager, pm2::NewPMCGSCCPassManager) = API.LLVMCGPMAddCGPM(pm, pm2)
-add!(pm::NewPMFunctionPassManager, pm2::NewPMFunctionPassManager) = API.LLVMFPMAddFPM(pm, pm2)
-add!(pm::NewPMLoopPassManager, pm2::NewPMLoopPassManager) = API.LLVMLPMAddLPM(pm, pm2)
+function add!(pm::NewPMModulePassManager, pm2::NewPMModulePassManager)
+    API.LLVMMPMAddMPM(pm, pm2)
+    append!(pm.roots, pm2.roots)
+end
+function add!(pm::NewPMCGSCCPassManager, pm2::NewPMCGSCCPassManager)
+    API.LLVMCGPMAddCGPM(pm, pm2)
+    append!(pm.roots, pm2.roots)
+end
+function add!(pm::NewPMFunctionPassManager, pm2::NewPMFunctionPassManager)
+    API.LLVMFPMAddFPM(pm, pm2)
+    append!(pm.roots, pm2.roots)
+end
+function add!(pm::NewPMLoopPassManager, pm2::NewPMLoopPassManager)
+    API.LLVMLPMAddLPM(pm, pm2)
+    append!(pm.roots, pm2.roots)
+end
 
-add!(pm::NewPMModulePassManager, pm2::NewPMCGSCCPassManager) = API.LLVMMPMAddCGPM(pm, pm2)
-add!(pm::NewPMModulePassManager, pm2::NewPMFunctionPassManager) = API.LLVMMPMAddFPM(pm, pm2)
-add!(pm::NewPMCGSCCPassManager, pm2::NewPMFunctionPassManager) = API.LLVMCGPMAddFPM(pm, pm2)
-add!(pm::NewPMFunctionPassManager, pm2::NewPMLoopPassManager) = API.LLVMFPMAddLPM(pm, pm2)
+function add!(pm::NewPMModulePassManager, pm2::NewPMCGSCCPassManager)
+    API.LLVMMPMAddCGPM(pm, pm2)
+    append!(pm.roots, pm2.roots)
+end
+function add!(pm::NewPMModulePassManager, pm2::NewPMFunctionPassManager)
+    API.LLVMMPMAddFPM(pm, pm2)
+    append!(pm.roots, pm2.roots)
+end
+function add!(pm::NewPMCGSCCPassManager, pm2::NewPMFunctionPassManager)
+    API.LLVMCGPMAddFPM(pm, pm2)
+    append!(pm.roots, pm2.roots)
+end
+function add!(pm::NewPMFunctionPassManager, pm2::NewPMLoopPassManager)
+    API.LLVMFPMAddLPM(pm, pm2)
+    append!(pm.roots, pm2.roots)
+end
 
 function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMModulePassManager})
     pm2 = NewPMModulePassManager(pm.pb)
@@ -167,3 +191,7 @@ function add!(f::Core.Function, pm::NewPMFunctionPassManager, ::Type{NewPMLoopPa
         dispose(pm2)
     end
 end
+
+run!(pm::NewPMModulePassManager, m::Module, am::ModuleAnalysisManager) = PreservedAnalyses(API.LLVMRunNewPMModulePassManager(pm, m, am))
+
+run!(pm::NewPMFunctionPassManager, f::Function, am::FunctionAnalysisManager) = PreservedAnalyses(API.LLVMRunNewPMFunctionPassManager(pm, f, am))

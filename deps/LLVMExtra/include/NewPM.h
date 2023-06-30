@@ -15,6 +15,11 @@ LLVMPreservedAnalysesRef LLVMCreatePreservedAnalysesNone(void);
 LLVMPreservedAnalysesRef LLVMCreatePreservedAnalysesAll(void);
 LLVMPreservedAnalysesRef LLVMCreatePreservedAnalysesCFG(void);
 
+void LLVMDisposePreservedAnalyses(LLVMPreservedAnalysesRef PA);
+
+LLVMBool LLVMAreAllAnalysesPreserved(LLVMPreservedAnalysesRef PA);
+LLVMBool LLVMAreCFGAnalysesPreserved(LLVMPreservedAnalysesRef PA);
+
 typedef struct LLVMOpaqueModuleAnalysisManager *LLVMModuleAnalysisManagerRef;
 typedef struct LLVMOpaqueCGSCCAnalysisManager *LLVMCGSCCAnalysisManagerRef;
 typedef struct LLVMOpaqueFunctionAnalysisManager *LLVMFunctionAnalysisManagerRef;
@@ -47,6 +52,9 @@ void LLVMDisposeNewPMModulePassManager(LLVMModulePassManagerRef PM);
 void LLVMDisposeNewPMCGSCCPassManager(LLVMCGSCCPassManagerRef PM);
 void LLVMDisposeNewPMFunctionPassManager(LLVMFunctionPassManagerRef PM);
 void LLVMDisposeNewPMLoopPassManager(LLVMLoopPassManagerRef PM);
+
+LLVMPreservedAnalysesRef LLVMRunNewPMModulePassManager(LLVMModulePassManagerRef PM, LLVMModuleRef M, LLVMModuleAnalysisManagerRef AM);
+LLVMPreservedAnalysesRef LLVMRunNewPMFunctionPassManager(LLVMFunctionPassManagerRef PM, LLVMValueRef F, LLVMFunctionAnalysisManagerRef AM);
 
 typedef struct LLVMOpaqueStandardInstrumentations *LLVMStandardInstrumentationsRef;
 typedef struct LLVMOpaquePassInstrumentationCallbacks *LLVMPassInstrumentationCallbacksRef;
