@@ -1,5 +1,7 @@
 #include "NewPM.h"
 
+#if LLVM_VERSION_MAJOR >= 15
+
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/StandardInstrumentations.h>
@@ -236,3 +238,5 @@ void LLVMMPMAddJuliaPass(LLVMModulePassManagerRef PM, LLVMJuliaModulePassCallbac
 void LLVMFPMAddJuliaPass(LLVMFunctionPassManagerRef PM, LLVMJuliaFunctionPassCallback Callback, void *Thunk) {
     unwrap(PM)->addPass(JuliaCustomFunctionPass(Callback, Thunk));
 }
+
+#endif

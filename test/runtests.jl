@@ -78,7 +78,6 @@ include("target.jl")
 include("targetmachine.jl")
 include("datalayout.jl")
 include("debuginfo.jl")
-include("newpm.jl")
 include("utils.jl")
 
 if LLVM.has_orc_v1() && !LLVM.is_asserts()
@@ -87,6 +86,9 @@ if LLVM.has_orc_v1() && !LLVM.is_asserts()
 end
 if LLVM.has_orc_v2()
     include("orcv2.jl")
+end
+if LLVM.has_newpm()
+    include("newpm.jl")
 end
 
 include("Kaleidoscope.jl")

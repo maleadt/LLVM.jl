@@ -451,6 +451,7 @@ function LLVMPointerTypeInContext(C, AddressSpace)
 end
 end
 
+if v"15" <= version()
 mutable struct LLVMOpaquePreservedAnalyses end
 
 const LLVMPreservedAnalysesRef = Ptr{LLVMOpaquePreservedAnalyses}
@@ -720,4 +721,5 @@ end
 function LLVMFPMAddJuliaPass(PM, Callback, Thunk)
     ccall((:LLVMFPMAddJuliaPass, libLLVMExtra), Cvoid, (LLVMFunctionPassManagerRef, LLVMJuliaFunctionPassCallback, Ptr{Cvoid}), PM, Callback, Thunk)
 end
+end # v"15" <= version()
 

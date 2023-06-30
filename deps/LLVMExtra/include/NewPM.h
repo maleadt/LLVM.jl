@@ -7,6 +7,8 @@
 #include <llvm-c/TargetMachine.h>
 #include <llvm-c/Error.h>
 
+#if LLVM_VERSION_MAJOR >= 15
+
 LLVM_C_EXTERN_C_BEGIN
 
 typedef struct LLVMOpaquePreservedAnalyses *LLVMPreservedAnalysesRef;
@@ -103,5 +105,7 @@ void LLVMMPMAddJuliaPass(LLVMModulePassManagerRef PM, LLVMJuliaModulePassCallbac
 void LLVMFPMAddJuliaPass(LLVMFunctionPassManagerRef PM, LLVMJuliaFunctionPassCallback Callback, void *Thunk);
 
 LLVM_C_EXTERN_C_END
+
+#endif
 
 #endif
