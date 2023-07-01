@@ -83,6 +83,11 @@ if has_orc_v2()
     include("orcv2.jl")
 end
 
+has_newpm() = v"15" <= LLVM.version()
+if has_newpm()
+    include("newpm.jl")
+end
+
 # high-level functionality
 include("state.jl")
 include("interop.jl")

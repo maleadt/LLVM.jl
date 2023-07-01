@@ -87,6 +87,9 @@ end
 if LLVM.has_orc_v2()
     include("orcv2.jl")
 end
+if LLVM.has_newpm()
+    include("newpm.jl")
+end
 
 include("Kaleidoscope.jl")
 

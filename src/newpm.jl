@@ -1,0 +1,7 @@
+include("newpm/utilities.jl")
+include("newpm/analysismanager.jl")
+include("newpm/passmanager.jl")
+include("newpm/instrumentation.jl")
+include("newpm/passbuilder.jl")
+include("newpm/passes.jl")
+include("newpm/custompass.jl")
