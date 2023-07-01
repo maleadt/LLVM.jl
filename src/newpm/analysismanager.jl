@@ -1,6 +1,6 @@
 export AnalysisManager, ModuleAnalysisManager, CGSCCAnalysisManager, FunctionAnalysisManager, LoopAnalysisManager, AAManager
 
-export dispose, analysis_managers
+export dispose, add!
 
 abstract type AnalysisManager end
 
@@ -12,16 +12,17 @@ end
     ref::API.LLVMCGSCCAnalysisManagerRef
     roots::Vector{Any}
 end
-@checked struct FunctionAnalysisManager <: AnalysisManager
+mutable struct AAManager
+    aas::Vector{String}
+    tm::Union{Nothing,TargetMachine}
+end
+@checked mutable struct FunctionAnalysisManager <: AnalysisManager
     ref::API.LLVMFunctionAnalysisManagerRef
+    aa::Union{Nothing,AAManager}
     roots::Vector{Any}
 end
 @checked struct LoopAnalysisManager <: AnalysisManager
     ref::API.LLVMLoopAnalysisManagerRef
-    roots::Vector{Any}
-end
-@checked struct AAManager
-    ref::API.LLVMAAManagerRef
     roots::Vector{Any}
 end
 
@@ -29,19 +30,17 @@ Base.unsafe_convert(::Type{API.LLVMModuleAnalysisManagerRef}, am::ModuleAnalysis
 Base.unsafe_convert(::Type{API.LLVMCGSCCAnalysisManagerRef}, am::CGSCCAnalysisManager) = am.ref
 Base.unsafe_convert(::Type{API.LLVMFunctionAnalysisManagerRef}, am::FunctionAnalysisManager) = am.ref
 Base.unsafe_convert(::Type{API.LLVMLoopAnalysisManagerRef}, am::LoopAnalysisManager) = am.ref
-Base.unsafe_convert(::Type{API.LLVMAAManagerRef}, am::AAManager) = am.ref
 
 ModuleAnalysisManager() = ModuleAnalysisManager(API.LLVMCreateNewPMModuleAnalysisManager(), [])
 CGSCCAnalysisManager() = CGSCCAnalysisManager(API.LLVMCreateNewPMCGSCCAnalysisManager(), [])
-FunctionAnalysisManager() = FunctionAnalysisManager(API.LLVMCreateNewPMFunctionAnalysisManager(), [])
+FunctionAnalysisManager() = FunctionAnalysisManager(API.LLVMCreateNewPMFunctionAnalysisManager(), nothing, [])
 LoopAnalysisManager() = LoopAnalysisManager(API.LLVMCreateNewPMLoopAnalysisManager(), [])
-AAManager() = AAManager(API.LLVMCreateNewPMAAManager(), [])
+AAManager() = AAManager([], nothing)
 
 dispose(mam::ModuleAnalysisManager) = API.LLVMDisposeNewPMModuleAnalysisManager(mam)
 dispose(cgmam::CGSCCAnalysisManager) = API.LLVMDisposeNewPMCGSCCAnalysisManager(cgmam)
 dispose(fam::FunctionAnalysisManager) = API.LLVMDisposeNewPMFunctionAnalysisManager(fam)
 dispose(lam::LoopAnalysisManager) = API.LLVMDisposeNewPMLoopAnalysisManager(lam)
-dispose(aam::AAManager) = API.LLVMDisposeNewPMAAManager(aam)
 
 function ModuleAnalysisManager(f::Core.Function, args...; kwargs...)
     am = ModuleAnalysisManager(args...; kwargs...)
@@ -75,17 +74,22 @@ function LoopAnalysisManager(f::Core.Function, args...; kwargs...)
         dispose(am)
     end
 end
-function AAManager(f::Core.Function, args...; kwargs...)
-    am = AAManager(args...; kwargs...)
-    try
-        f(am)
-    finally
-        dispose(am)
+
+function add!(fam::FunctionAnalysisManager, aa::AAManager)
+    if isnothing(fam.aa)
+        fam.aa = aa
+        return true
+    else
+        return false
     end
 end
 
-function analysis_managers(f::Core.Function)
-    @dispose lam=LoopAnalysisManager() fam=FunctionAnalysisManager() cgam=CGSCCAnalysisManager() mam=ModuleAnalysisManager() begin
-        f(lam, fam, cgam, mam)
+function add!(f::Core.Function, fam::FunctionAnalysisManager, ::Type{AAManager})
+    if !isnothing(fam.aa)
+        return false
     end
+    aa = AAManager()
+    f(aa)
+    add!(fam, aa)
+    return true
 end

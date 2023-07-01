@@ -510,10 +510,6 @@ mutable struct LLVMOpaqueLoopAnalysisManager end
 
 const LLVMLoopAnalysisManagerRef = Ptr{LLVMOpaqueLoopAnalysisManager}
 
-mutable struct LLVMOpaqueAAManager end
-
-const LLVMAAManagerRef = Ptr{LLVMOpaqueAAManager}
-
 function LLVMCreateNewPMModuleAnalysisManager()
     ccall((:LLVMCreateNewPMModuleAnalysisManager, libLLVMExtra), LLVMModuleAnalysisManagerRef, ())
 end
@@ -530,10 +526,6 @@ function LLVMCreateNewPMLoopAnalysisManager()
     ccall((:LLVMCreateNewPMLoopAnalysisManager, libLLVMExtra), LLVMLoopAnalysisManagerRef, ())
 end
 
-function LLVMCreateNewPMAAManager()
-    ccall((:LLVMCreateNewPMAAManager, libLLVMExtra), LLVMAAManagerRef, ())
-end
-
 function LLVMDisposeNewPMModuleAnalysisManager(AM)
     ccall((:LLVMDisposeNewPMModuleAnalysisManager, libLLVMExtra), Cvoid, (LLVMModuleAnalysisManagerRef,), AM)
 end
@@ -548,10 +540,6 @@ end
 
 function LLVMDisposeNewPMLoopAnalysisManager(AM)
     ccall((:LLVMDisposeNewPMLoopAnalysisManager, libLLVMExtra), Cvoid, (LLVMLoopAnalysisManagerRef,), AM)
-end
-
-function LLVMDisposeNewPMAAManager(AM)
-    ccall((:LLVMDisposeNewPMAAManager, libLLVMExtra), Cvoid, (LLVMAAManagerRef,), AM)
 end
 
 mutable struct LLVMOpaqueModulePassManager end
@@ -666,10 +654,6 @@ function LLVMPassBuilderParseLoopPassPipeline(PB, PM, PipelineText, PipelineText
     ccall((:LLVMPassBuilderParseLoopPassPipeline, libLLVMExtra), LLVMErrorRef, (LLVMPassBuilderRef, LLVMLoopPassManagerRef, Cstring, Csize_t), PB, PM, PipelineText, PipelineTextLength)
 end
 
-function LLVMPassBuilderParseAAPipeline(PB, AM, PipelineText, PipelineTextLength)
-    ccall((:LLVMPassBuilderParseAAPipeline, libLLVMExtra), LLVMErrorRef, (LLVMPassBuilderRef, LLVMAAManagerRef, Cstring, Csize_t), PB, AM, PipelineText, PipelineTextLength)
-end
-
 function LLVMPassBuilderRegisterModuleAnalyses(PB, AM)
     ccall((:LLVMPassBuilderRegisterModuleAnalyses, libLLVMExtra), Cvoid, (LLVMPassBuilderRef, LLVMModuleAnalysisManagerRef), PB, AM)
 end
@@ -714,8 +698,8 @@ function LLVMCGPMAddFPM(PM, NestedPM)
     ccall((:LLVMCGPMAddFPM, libLLVMExtra), Cvoid, (LLVMCGSCCPassManagerRef, LLVMFunctionPassManagerRef), PM, NestedPM)
 end
 
-function LLVMFPMAddLPM(PM, NestedPM)
-    ccall((:LLVMFPMAddLPM, libLLVMExtra), Cvoid, (LLVMFunctionPassManagerRef, LLVMLoopPassManagerRef), PM, NestedPM)
+function LLVMFPMAddLPM(PM, NestedPM, UseMemorySSA)
+    ccall((:LLVMFPMAddLPM, libLLVMExtra), Cvoid, (LLVMFunctionPassManagerRef, LLVMLoopPassManagerRef, LLVMBool), PM, NestedPM, UseMemorySSA)
 end
 
 function LLVMMPMAddFPM(PM, NestedPM)
@@ -735,5 +719,16 @@ end
 function LLVMFPMAddJuliaPass(PM, Callback, Thunk)
     ccall((:LLVMFPMAddJuliaPass, libLLVMExtra), Cvoid, (LLVMFunctionPassManagerRef, LLVMJuliaFunctionPassCallback, Ptr{Cvoid}), PM, Callback, Thunk)
 end
-end # v"15" <= version()
 
+function LLVMRegisterTargetIRAnalysis(FAM, TM)
+    ccall((:LLVMRegisterTargetIRAnalysis, libLLVMExtra), LLVMBool, (LLVMFunctionAnalysisManagerRef, LLVMTargetMachineRef), FAM, TM)
+end
+
+function LLVMRegisterTargetLibraryAnalysis(FAM, Triple, TripleLength)
+    ccall((:LLVMRegisterTargetLibraryAnalysis, libLLVMExtra), LLVMBool, (LLVMFunctionAnalysisManagerRef, Cstring, Csize_t), FAM, Triple, TripleLength)
+end
+
+function LLVMRegisterAliasAnalyses(FAM, PB, TM, Analyses, AnalysesLength)
+    ccall((:LLVMRegisterAliasAnalyses, libLLVMExtra), LLVMErrorRef, (LLVMFunctionAnalysisManagerRef, LLVMPassBuilderRef, LLVMTargetMachineRef, Cstring, Csize_t), FAM, PB, TM, Analyses, AnalysesLength)
+end
+end # v"15" <= version()
