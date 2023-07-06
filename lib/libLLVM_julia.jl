@@ -59,3 +59,55 @@ end
 function LLVMAddCPUFeaturesPass(PM)
     ccall(:LLVMExtraAddCPUFeaturesPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
+
+if VERSION >= v"1.10.0-DEV.1395"
+
+mutable struct JLOpaqueJuliaOJIT end
+
+const JuliaOJITRef = Ptr{JLOpaqueJuliaOJIT}
+
+function JLJITGetJuliaOJIT()
+    ccall(:JLJITGetJuliaOJIT, JuliaOJITRef, ())
+end
+
+function JLJITGetLLVMOrcExecutionSession(JIT)
+    ccall(:JLJITGetLLVMOrcExecutionSession, LLVMOrcExecutionSessionRef, (JuliaOJITRef,), JIT)
+end
+
+function JLJITGetExternalJITDylib(JIT)
+    ccall(:JLJITGetExternalJITDylib, LLVMOrcJITDylibRef, (JuliaOJITRef,), JIT)
+end
+
+function JLJITAddObjectFile(JIT, JD, ObjBuffer)
+    ccall(:JLJITAddObjectFile, LLVMErrorRef, (JuliaOJITRef, LLVMOrcJITDylibRef, LLVMMemoryBufferRef), JIT, JD, ObjBuffer)
+end
+
+function JLJITAddLLVMIRModule(JIT, JD, TSM)
+    ccall(:JLJITAddLLVMIRModule, LLVMErrorRef, (JuliaOJITRef, LLVMOrcJITDylibRef,  LLVMOrcThreadSafeModuleRef), JIT, JD, TSM)
+end
+
+function JLJITLookup(JIT, Result, Name, ExternalJDOnly)
+    ccall(:JLJITLookup, LLVMErrorRef, (JuliaOJITRef, Ptr{LLVMOrcExecutorAddress}, Cstring, Cint), JIT, Result, Name, ExternalJDOnly)
+end
+
+function JLJITMangleAndIntern(JIT, UnmangledName)
+    ccall(:JLJITMangleAndIntern, LLVMOrcSymbolStringPoolEntryRef, (JuliaOJITRef, Cstring), JIT, UnmangledName)
+end
+
+function JLJITGetTripleString(JIT)
+    ccall(:JLJITGetTripleString, Cstring, (JuliaOJITRef,), JIT)
+end
+
+function JLJITGetGlobalPrefix(JIT)
+    ccall(:JLJITGetGlobalPrefix, Cchar, (JuliaOJITRef,), JIT)
+end
+
+function JLJITGetDataLayoutString(JIT)
+    ccall(:JLJITGetDataLayoutString, Cstring, (JuliaOJITRef,), JIT)
+end
+
+function JLJITGetIRCompileLayer(JIT)
+    ccall(:JLJITGetIRCompileLayer, LLVMOrcIRCompileLayerRef, (JuliaOJITRef,), JIT)
+end
+
+end # VERSION >= v"1.10.0-DEV.1395"

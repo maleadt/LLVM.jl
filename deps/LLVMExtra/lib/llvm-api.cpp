@@ -3,6 +3,7 @@
 #include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/TargetLibraryInfo.h>
 #include <llvm/Analysis/TargetTransformInfo.h>
+#include <llvm/ExecutionEngine/Orc/IRCompileLayer.h>
 #include <llvm/IR/Attributes.h>
 #include <llvm/IR/DebugInfo.h>
 #include <llvm/IR/Function.h>
@@ -30,22 +31,22 @@ using namespace llvm::legacy;
 //
 // The LLVMInitialize* functions and friends are defined `static inline`
 
-LLVMBool LLVMInitializeNativeTarget()
+LLVMBool LLVMExtraInitializeNativeTarget()
 {
     return InitializeNativeTarget();
 }
 
-LLVMBool LLVMInitializeNativeAsmParser()
+LLVMBool LLVMExtraInitializeNativeAsmParser()
 {
     return InitializeNativeTargetAsmParser();
 }
 
-LLVMBool LLVMInitializeNativeAsmPrinter()
+LLVMBool LLVMExtraInitializeNativeAsmPrinter()
 {
     return InitializeNativeTargetAsmPrinter();
 }
 
-LLVMBool LLVMInitializeNativeDisassembler()
+LLVMBool LLVMExtraInitializeNativeDisassembler()
 {
     return InitializeNativeTargetDisassembler();
 }
@@ -345,6 +346,37 @@ void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn) {
     unwrap<Function>(Fn)->setPersonalityFn(PersonalityFn ? unwrap<Constant>(PersonalityFn)
                                                          : nullptr);
 }
+
+#if LLVM_VERSION_MAJOR > 12
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(orc::MaterializationResponsibility,
+                                   LLVMOrcMaterializationResponsibilityRef)
+
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(orc::ThreadSafeModule, LLVMOrcThreadSafeModuleRef)
+
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(orc::IRCompileLayer, LLVMOrcIRCompileLayerRef)
+
+void LLVMExtraOrcIRCompileLayerEmit(LLVMOrcIRCompileLayerRef IRLayer,
+                                 LLVMOrcMaterializationResponsibilityRef MR,
+                                 LLVMOrcThreadSafeModuleRef TSM)
+{
+  std::unique_ptr<orc::ThreadSafeModule> TmpTSM(unwrap(TSM));
+  unwrap(IRLayer)->emit(
+      std::unique_ptr<orc::MaterializationResponsibility>(unwrap(MR)),
+      std::move(*TmpTSM));
+}
+
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(orc::JITDylib, LLVMOrcJITDylibRef)
+
+char* LLVMExtraDumpJitDylibToString(LLVMOrcJITDylibRef JD) {
+    std::string str;
+    llvm::raw_string_ostream rso(str);
+    auto jd = unwrap(JD);
+    jd->dump(rso);
+    rso.flush();
+    return strdup(str.c_str());
+}
+
+#endif
 
 #if LLVM_VERSION_MAJOR == 12
 LLVMAttributeRef LLVMCreateTypeAttribute(LLVMContextRef C, unsigned KindID,

@@ -3,14 +3,17 @@
 
 #include "llvm/Config/llvm-config.h"
 #include <llvm-c/Core.h>
+#include <llvm-c/Orc.h>
+#include <llvm-c/Target.h>
 #include <llvm-c/Types.h>
+#include <llvm/Support/CBindingWrapping.h>
 
 LLVM_C_EXTERN_C_BEGIN
 
-LLVMBool LLVMInitializeNativeTarget(void);
-LLVMBool LLVMInitializeNativeAsmParser(void);
-LLVMBool LLVMInitializeNativeAsmPrinter(void);
-LLVMBool LLVMInitializeNativeDisassembler(void);
+LLVMBool LLVMExtraInitializeNativeTarget(void);
+LLVMBool LLVMExtraInitializeNativeAsmParser(void);
+LLVMBool LLVMExtraInitializeNativeAsmPrinter(void);
+LLVMBool LLVMExtraInitializeNativeDisassembler(void);
 
 typedef enum {
   LLVMDebugEmissionKindNoDebug = 0,
@@ -82,6 +85,16 @@ unsigned LLVMExtraGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD);
 void LLVMExtraGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest);
 
 void LLVMExtraAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
+
+#if LLVM_VERSION_MAJOR > 12
+typedef struct LLVMOrcOpaqueIRCompileLayer *LLVMOrcIRCompileLayerRef;
+
+void LLVMExtraOrcIRCompileLayerEmit(LLVMOrcIRCompileLayerRef IRLayer,
+                                 LLVMOrcMaterializationResponsibilityRef MR,
+                                 LLVMOrcThreadSafeModuleRef TSM);
+
+char* LLVMExtraDumpJitDylibToString(LLVMOrcJITDylibRef JD);
+#endif
 
 LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn);
 LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef Fn);

@@ -89,3 +89,48 @@ end
 function get_prefix(lljit::LLJIT)
     return API.LLVMOrcLLJITGetGlobalPrefix(lljit)
 end
+
+if VERSION >= v"1.10.0-DEV.1395"
+# JuliaOJIT interface
+
+@checked mutable struct JuliaOJIT
+    ref::API.JuliaOJITRef
+end
+
+Base.unsafe_convert(::Type{API.JuliaOJITRef}, jljit::JuliaOJIT) = jljit.ref
+
+function JuliaOJIT()
+    JuliaOJIT(API.JLJITGetJuliaOJIT())
+end
+
+function triple(jljit::JuliaOJIT)
+    cstr = API.JLJITGetTripleString(jljit)
+    Base.unsafe_string(cstr)
+end
+
+function datalayout(jljit::JuliaOJIT)
+    Base.unsafe_string(API.JLJITGetDataLayoutString(jljit))
+end
+
+function apply_datalayout!(jljit::JuliaOJIT, mod::LLVM.Module)
+    datalayout!(mod, datalayout(jljit))
+end
+
+function get_prefix(jljit::JuliaOJIT)
+    return API.JLJITGetGlobalPrefix(jljit)
+end
+
+function dispose(jljit::JuliaOJIT)
+    return nothing #Don't dispose of the julia JIT
+end
+
+function JuliaOJIT(f::Core.Function)
+    jljit = JuliaOJIT()
+    try
+        f(jljit)
+    finally
+        dispose(jljit)
+    end
+end
+
+end

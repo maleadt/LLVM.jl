@@ -79,6 +79,7 @@ if has_orc_v1()
 end
 
 has_orc_v2() = v"12" <= LLVM.version()
+has_julia_ojit() = VERSION >= v"1.10.0-DEV.1395"
 if has_orc_v2()
     include("orcv2.jl")
 end
