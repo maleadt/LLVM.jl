@@ -1,19 +1,19 @@
 using CEnum
 
 function LLVMInitializeNativeTarget()
-    ccall((:LLVMInitializeNativeTarget, libLLVMExtra), LLVMBool, ())
+    ccall((:LLVMExtraInitializeNativeTarget, libLLVMExtra), LLVMBool, ())
 end
 
 function LLVMInitializeNativeAsmParser()
-    ccall((:LLVMInitializeNativeAsmParser, libLLVMExtra), LLVMBool, ())
+    ccall((:LLVMExtraInitializeNativeAsmParser, libLLVMExtra), LLVMBool, ())
 end
 
 function LLVMInitializeNativeAsmPrinter()
-    ccall((:LLVMInitializeNativeAsmPrinter, libLLVMExtra), LLVMBool, ())
+    ccall((:LLVMExtraInitializeNativeAsmPrinter, libLLVMExtra), LLVMBool, ())
 end
 
 function LLVMInitializeNativeDisassembler()
-    ccall((:LLVMInitializeNativeDisassembler, libLLVMExtra), LLVMBool, ())
+    ccall((:LLVMExtraInitializeNativeDisassembler, libLLVMExtra), LLVMBool, ())
 end
 
 @cenum(LLVMDebugEmissionKind,
@@ -450,6 +450,20 @@ function LLVMPointerTypeInContext(C, AddressSpace)
     ccall((:LLVMPointerTypeInContext, libLLVMExtra), LLVMTypeRef, (LLVMContextRef, Cuint), C, AddressSpace)
 end
 end
+
+if version() >= v"13"
+function LLVMExtraDumpJitDylibToString(JD)
+    ccall((:LLVMExtraDumpJitDylibToString, libLLVMExtra),  Cstring, (LLVMOrcJITDylibRef,), JD)
+end
+
+mutable struct LLVMOrcOpaqueIRCompileLayer end
+
+const LLVMOrcIRCompileLayerRef = Ptr{LLVMOrcOpaqueIRCompileLayer}
+
+function LLVMExtraOrcIRCompileLayerEmit(IRCompileLayer, MR, TSM)
+    ccall((:LLVMExtraOrcIRCompileLayerEmit, libLLVMExtra), Cvoid, (LLVMOrcIRCompileLayerRef, LLVMOrcMaterializationResponsibilityRef, LLVMOrcThreadSafeModuleRef), IRCompileLayer, MR, TSM)
+end
+end # version() >= v"13"
 
 if v"15" <= version()
 mutable struct LLVMOpaquePreservedAnalyses end

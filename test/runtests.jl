@@ -91,6 +91,9 @@ if LLVM.has_newpm()
     include("newpm.jl")
 end
 
+if LLVM.has_julia_ojit()
+    include("jljit.jl")
+end
 include("Kaleidoscope.jl")
 
 include("examples.jl")

@@ -141,6 +141,7 @@ function JITDylib(lljit::LLJIT)
     JITDylib(ref)
 end
 
+
 """
     JITDylib(es::ExecutionSession, name; bare=false)
 
@@ -157,7 +158,14 @@ function JITDylib(es::ExecutionSession, name; bare=false)
     end
     JITDylib(ref)
 end
+if version() >= v"13"
+Base.string(jd::JITDylib) = unsafe_message(API.LLVMExtraDumpJitDylibToString(jd))
 
+function Base.show(io::IO, jd::JITDylib)
+    output = string(jd)
+    print(io, output)
+end
+end
 @checked struct DefinitionGenerator
     ref::API.LLVMOrcDefinitionGeneratorRef
 end
@@ -235,6 +243,7 @@ function set_transform!(il::IRTransformLayer)
     API.LLVMOrcIRTransformLayerSetTransform(il)
 end
 
+
 @checked struct MaterializationResponsibility
     ref::API.LLVMOrcMaterializationResponsibilityRef
 end
@@ -243,6 +252,7 @@ Base.unsafe_convert(::Type{API.LLVMOrcMaterializationResponsibilityRef}, mr::Mat
 function emit(il::IRTransformLayer, mr::MaterializationResponsibility, tsm::ThreadSafeModule)
     API.LLVMOrcIRTransformLayerEmit(il, mr, tsm)
 end
+
 
 function get_requested_symbols(mr::MaterializationResponsibility)
     N = Ref{Csize_t}()
@@ -360,4 +370,62 @@ end
 function reexports(lctm::LazyCallThroughManager, ism::IndirectStubsManager, jd::JITDylib, symbols)
     ref = API.LLVMOrcLazyReexports(lctm, ism, jd, symbols, length(symbols))
     MaterializationUnit(ref)
+end
+
+#JuliaOJIT
+if has_julia_ojit()
+
+function ExecutionSession(jljit::JuliaOJIT)
+    es = API.JLJITGetLLVMOrcExecutionSession(jljit)
+    ExecutionSession(es)
+end
+
+function mangle(jljit::JuliaOJIT, name)
+    entry = API.JLJITMangleAndIntern(jljit, name)
+    return LLVMSymbol(entry)
+end
+
+"""
+    JITDylib(jljit::JuliaOJIT)
+
+Get the external JITDylib from the Julia JIT
+"""
+function JITDylib(jljit::JuliaOJIT)
+    ref = API.JLJITGetExternalJITDylib(jljit)
+    JITDylib(ref)
+end
+
+function add!(jljit::JuliaOJIT, jd::JITDylib, obj::MemoryBuffer)
+    @check API.JLJITAddObjectFile(jljit, jd, obj)
+    return nothing
+end
+
+function add!(jljit::JuliaOJIT, jd::JITDylib, mod::ThreadSafeModule)
+    @check API.JLJITAddLLVMIRModule(jljit, jd, mod)
+    return nothing
+end
+
+function lookup(jljit::JuliaOJIT, name, external_jd=true)
+    result = Ref{API.LLVMOrcJITTargetAddress}()
+    @check API.JLJITLookup(jljit, result, name, external_jd)
+    OrcTargetAddress(result[])
+end
+
+@checked struct IRCompileLayer
+    ref::API.LLVMOrcIRCompileLayerRef
+end
+
+Base.unsafe_convert(::Type{API.LLVMOrcIRCompileLayerRef}, il::IRCompileLayer) = il.ref
+
+function emit(il::IRCompileLayer, mr::MaterializationResponsibility, tsm::ThreadSafeModule)
+    API.LLVMExtraOrcIRCompileLayerEmit(il, mr, tsm)
+end
+
+function IRCompileLayer(jljit::JuliaOJIT)
+    ref = API.JLJITGetIRCompileLayer(jljit)
+    IRCompileLayer(ref)
+end
+
+export JuliaOJIT
+
 end
