@@ -1,4 +1,4 @@
-@testset "support" begin
+@testitem "support" begin
 
 @testset "command-line options" begin
 

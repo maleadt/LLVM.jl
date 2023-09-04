@@ -1,3 +1,5 @@
+@testitem "core" setup=[TestHelpers] begin
+
 struct TestStruct
     x::Bool
     y::Int64
@@ -10,8 +12,6 @@ end
 
 struct TestSingleton
 end
-
-@testset "core" begin
 
 @testset "context" begin
 

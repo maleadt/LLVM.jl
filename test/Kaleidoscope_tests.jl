@@ -1,4 +1,4 @@
-@testset "Kaleidoscope" begin
+@testitem "Kaleidoscope" begin
 
 include(joinpath(@__DIR__, "..", "examples", "Kaleidoscope", "Kaleidoscope.jl"))
 

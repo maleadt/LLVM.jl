@@ -1,6 +1,4 @@
-using LLVM,Test
-
-@testset "debuginfo" begin
+@testitem "debuginfo" begin
 
 DEBUG_METADATA_VERSION()
 

@@ -1,3 +1,8 @@
+@static if LLVM.has_newpm()
+@testitem "newpm" begin
+
+using InteractiveUtils  # for subtypes
+
 @testset "newpm pass managers" begin
 
 let mpm = NewPMModulePassManager()
@@ -197,22 +202,22 @@ host_t = Target(triple=host_triple)
             end
 
             @test "Successfully added custom module and function passes!" != ""
-    
+
             @dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("test") begin
                 pa = run!(mpm, mod, mam)
                 @test observed_modules == 1
                 @test observed_functions == 0
                 @test are_all_preserved(pa)
-    
-                
+
+
                 ft = LLVM.FunctionType(LLVM.VoidType())
                 fn = LLVM.Function(mod, "SomeFunction", ft)
-    
+
                 entry = BasicBlock(fn, "entry")
                 position!(builder, entry)
-    
+
                 ret!(builder)
-    
+
                 pa = run!(mpm, mod, mam)
                 @test observed_modules == 2
                 @test observed_functions == 1
@@ -222,4 +227,7 @@ host_t = Target(triple=host_triple)
     end
 end
 
-end # testset "newpm custom passes"
+end # testset "newpm passes"
+
+end
+end

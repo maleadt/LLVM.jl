@@ -1,10 +1,11 @@
-@testset "orcv2" begin
+@static if LLVM.has_julia_ojit()
+@testitem "jljit" begin
 
-let lljit=LLJIT()
-    dispose(lljit)
+let jljit=JuliaOJIT()
+    dispose(jljit)
 end
 
-LLJIT() do lljit
+JuliaOJIT() do jljit
 end
 
 let ctx = ThreadSafeContext()
@@ -29,8 +30,8 @@ end
 end
 
 @testset "JITDylib" begin
-    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT() begin
-        es = ExecutionSession(lljit)
+    @dispose ts_ctx=ThreadSafeContext() jljit=JuliaOJIT() begin
+        es = ExecutionSession(jljit)
 
         @test LLVM.lookup_dylib(es, "my.so") === nothing
 
@@ -39,24 +40,24 @@ end
 
         @test LLVM.lookup_dylib(es, "my.so") === jd
 
-        jd_main = JITDylib(lljit)
+        jd_main = JITDylib(jljit)
 
-        prefix = LLVM.get_prefix(lljit)
+        prefix = LLVM.get_prefix(jljit)
         dg = LLVM.CreateDynamicLibrarySearchGeneratorForProcess(prefix)
         add!(jd_main, dg)
 
-        addr = lookup(lljit, "jl_apply_generic")
+        addr = lookup(jljit, "jl_apply_generic")
         @test pointer(addr) != C_NULL
     end
 end
 
 @testset "Undefined Symbol" begin
-    @dispose lljit=LLJIT() begin
-        @test_throws LLVMException lookup(lljit, string(gensym()))
+    @dispose jljit=JuliaOJIT() begin
+        @test_throws LLVMException lookup(jljit, string(gensym()))
     end
 
-    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT(;tm=JITTargetMachine()) begin
-        jd = JITDylib(lljit)
+    @dispose ts_ctx=ThreadSafeContext() jljit=JuliaOJIT() begin
+        jd = JITDylib(jljit)
 
         ts_mod = ThreadSafeModule("jit")
 
@@ -78,9 +79,9 @@ end
                 ret!(builder, tmp)
             end
 
-            # TODO: Get TM from lljit?
+            # TODO: Get TM from jljit?
             tm = JITTargetMachine()
-            triple!(mod, triple(lljit))
+            triple!(mod, triple(jljit))
             @dispose pm=ModulePassManager() begin
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
@@ -89,18 +90,20 @@ end
             verify(mod)
         end
 
-        add!(lljit, jd, ts_mod)
-        @test_throws LLVMException redirect_stderr(devnull) do
-            # XXX: this reports an unhandled JIT session error;
-            #      can we handle it instead?
-            lookup(lljit, fname)
-        end
+        add!(jljit, jd, ts_mod)
+        # @test_throws LLVMException redirect_stderr(devnull) do
+        #     # XXX: this reports an unhandled JIT session error;
+        #     #      can we handle it instead?
+        #     lookup(jljit, fname)
+        # end
+        # This test triggers an assertion in the juliaJIT memory manager
+        # because it allocates a code section but doesn't finalize it
     end
 end
 
 @testset "Loading ObjectFile" begin
-    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
-        jd = JITDylib(lljit)
+    @dispose jljit=JuliaOJIT() begin
+        jd = JITDylib(jljit)
 
         sym = "SomeFunction"
         obj = @dispose ctx=Context() begin
@@ -118,18 +121,18 @@ end
             tm  = JITTargetMachine()
             emit(tm, mod, LLVM.API.LLVMObjectFile)
         end
-        add!(lljit, jd, MemoryBuffer(obj))
+        add!(jljit, jd, MemoryBuffer(obj))
 
-        addr = lookup(lljit, sym)
+        addr = lookup(jljit, sym)
 
         @test pointer(addr) != C_NULL
 
         empty!(jd)
-        @test_throws LLVMException lookup(lljit, sym)
+        @test_throws LLVMException lookup(jljit, sym)
     end
 
-    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
-        jd = JITDylib(lljit)
+    @dispose jljit=JuliaOJIT() begin
+        jd = JITDylib(jljit)
 
         sym = "SomeFunction"
         obj = @dispose ctx=Context() begin
@@ -158,7 +161,7 @@ end
                 reinterpret(UInt, Base.unsafe_convert(Ptr{Int32}, data)))
             flags = LLVM.API.LLVMJITSymbolFlags(
                 LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
-            name = mangle(lljit, "gv")
+            name = mangle(jljit, "gv")
             symbol = LLVM.API.LLVMJITEvaluatedSymbol(address, flags)
             gv = if LLVM.version() >= v"15"
                 LLVM.API.LLVMOrcCSymbolMapPair(name, symbol)
@@ -169,9 +172,9 @@ end
             mu = LLVM.absolute_symbols(Ref(gv))
             LLVM.define(jd, mu)
 
-            add!(lljit, jd, MemoryBuffer(obj))
+            add!(jljit, jd, MemoryBuffer(obj))
 
-            addr = lookup(lljit, sym)
+            addr = lookup(jljit, sym)
             @test pointer(addr) != C_NULL
 
             @test ccall(pointer(addr), Int32, ()) == 42
@@ -183,57 +186,18 @@ end
             end
         end
         empty!(jd)
-        @test_throws LLVMException lookup(lljit, sym)
+        @test_throws LLVMException lookup(jljit, sym)
     end
 end
 
-@testset "ObjectLinkingLayer" begin
-    called_oll = Ref{Int}(0)
-
-    ollc = LLVM.ObjectLinkingLayerCreator() do es, triple
-        oll = ObjectLinkingLayer(es)
-        register!(oll, GDBRegistrationListener())
-        called_oll[] += 1
-        return oll
-    end
-
-    GC.@preserve ollc begin
-        builder = LLJITBuilder()
-        linkinglayercreator!(builder, ollc)
-        @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT(builder) begin
-            jd = JITDylib(lljit)
-
-            ts_mod = ThreadSafeModule("jit")
-            sym = "SomeFunctionOLL"
-
-            # build the module
-            ts_mod() do mod
-                ft = LLVM.FunctionType(LLVM.VoidType())
-                fn = LLVM.Function(mod, sym, ft)
-
-                @dispose builder=IRBuilder() begin
-                    entry = BasicBlock(fn, "entry")
-                    position!(builder, entry)
-                    ret!(builder)
-                end
-                verify(mod)
-            end
-
-            add!(lljit, jd, ts_mod)
-            addr = lookup(lljit, sym)
-            @test pointer(addr) != C_NULL
-        end
-    end
-    @test called_oll[] >= 1
-end
 
 @testset "Lazy" begin
-    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT() begin
-        jd = JITDylib(lljit)
-        es = ExecutionSession(lljit)
+    @dispose ts_ctx=ThreadSafeContext() jljit=JuliaOJIT() begin
+        jd = JITDylib(jljit)
+        es = ExecutionSession(jljit)
 
-        lctm = LLVM.LocalLazyCallThroughManager(triple(lljit), es)
-        ism = LLVM.LocalIndirectStubsManager(triple(lljit))
+        lctm = LLVM.LocalLazyCallThroughManager(triple(jljit), es)
+        ism = LLVM.LocalIndirectStubsManager(triple(jljit))
         try
             # 1. define entry symbol
             entry_sym = "foo_entry"
@@ -241,19 +205,19 @@ end
                 LLVM.API.LLVMJITSymbolGenericFlagsCallable |
                 LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
             entry = LLVM.API.LLVMOrcCSymbolAliasMapPair(
-                mangle(lljit, entry_sym),
+                mangle(jljit, entry_sym),
                 LLVM.API.LLVMOrcCSymbolAliasMapEntry(
-                    mangle(lljit, "foo"), flags))
+                    mangle(jljit, "foo"), flags))
 
             mu = LLVM.reexports(lctm, ism, jd, Ref(entry))
             LLVM.define(jd, mu)
 
             # 2. Lookup address of entry symbol
-            addr = lookup(lljit, entry_sym)
+            addr = lookup(jljit, entry_sym)
             @test pointer(addr) != C_NULL
 
             # 3. add MU that will call back into the compiler
-            sym = LLVM.API.LLVMOrcCSymbolFlagsMapPair(mangle(lljit, "foo"), flags)
+            sym = LLVM.API.LLVMOrcCSymbolFlagsMapPair(mangle(jljit, "foo"), flags)
 
             function materialize(mr)
                 syms = LLVM.get_requested_symbols(mr)
@@ -264,7 +228,7 @@ end
 
                 ts_mod = ThreadSafeModule("jit")
                 ts_mod() do mod
-                    LLVM.apply_datalayout!(lljit, mod)
+                    LLVM.apply_datalayout!(jljit, mod)
 
                     T_Int32 = LLVM.Int32Type()
                     ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
@@ -281,7 +245,7 @@ end
                     end
                 end
 
-                il = LLVM.IRTransformLayer(lljit)
+                il = LLVM.IRCompileLayer(jljit)
                 LLVM.emit(il, mr, ts_mod)
 
                 return nothing
@@ -301,4 +265,5 @@ end
     end
 end
 
+end
 end

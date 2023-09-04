@@ -1,4 +1,5 @@
-@testset "orc" begin
+@static if LLVM.has_orc_v1() && !LLVM.is_asserts()  # XXX: dangling references abort
+@testitem "orc" begin
 
 let tm  = JITTargetMachine()
     let orc = OrcJIT(tm)
@@ -327,4 +328,5 @@ end
     end
 end
 
+end
 end

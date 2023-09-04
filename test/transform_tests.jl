@@ -1,4 +1,4 @@
-@testset "transform" begin
+@testitem "transform" begin
 
 let
     pmb = PassManagerBuilder()
@@ -108,5 +108,7 @@ end
     internalize!(pm, false)
     internalize!(pm, ["SomeFunction", "SomeOtherFunction"])
 end
+
+@test "we didn't crash!" != ""
 
 end

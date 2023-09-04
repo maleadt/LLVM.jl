@@ -1,4 +1,4 @@
-@testset "passmanager" begin
+@testitem "passmanager" begin
 
 let
     mpm = ModulePassManager()

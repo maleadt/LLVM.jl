@@ -1,7 +1,7 @@
+@testitem "interop" begin
+
 using LLVM.Interop
 using InteractiveUtils
-
-@testset "interop" begin
 
 # many of these tests don't use explicit contexts, as they rely on high-level functionality.
 # that functionality should be using default context options, so query those here.
@@ -120,7 +120,6 @@ end
 
 @testset "passes" begin
 
-
 @dispose ctx=Context() mod=LLVM.Module("SomeModule") pm=ModulePassManager() begin
 
 demote_float16!(pm)
@@ -142,6 +141,8 @@ final_lower_gc!(pm)
 cpu_features!(pm)
 
 end
+
+@test "we didn't crash!" != ""
 
 end
 
