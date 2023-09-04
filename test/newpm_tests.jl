@@ -1,4 +1,3 @@
-@static if LLVM.has_newpm()
 @testitem "newpm" begin
 
 using InteractiveUtils  # for subtypes
@@ -229,5 +228,4 @@ end
 
 end # testset "newpm passes"
 
-end
 end

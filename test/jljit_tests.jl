@@ -1,4 +1,3 @@
-@static if LLVM.has_julia_ojit()
 @testitem "jljit" begin
 
 let jljit=JuliaOJIT()
@@ -261,5 +260,4 @@ end
     end
 end
 
-end
 end
