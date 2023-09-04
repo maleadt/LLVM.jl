@@ -220,15 +220,15 @@ end
         end
     end
     if supports_typed_ptrs
-        @test contains(ir, r"load i64, i64\* %\d+, align 1")
+        @test contains(ir, r"load i64, i64\* %.+?, align 1")
     else
-        @test contains(ir, r"load i64, ptr %\d+, align 1")
+        @test contains(ir, r"load i64, ptr %.+?, align 1")
     end
     ir = sprint(io->code_llvm(io, unsafe_load, Tuple{typeof(ptr), Int, Val{4}}))
     if supports_typed_ptrs
-        @test contains(ir, r"load i64, i64\* %\d+, align 4")
+        @test contains(ir, r"load i64, i64\* %.+?, align 4")
     else
-        @test contains(ir, r"load i64, ptr %\d+, align 4")
+        @test contains(ir, r"load i64, ptr %.+?, align 4")
     end
 end
 
@@ -239,15 +239,15 @@ end
         ir = sprint(io->code_llvm(io, LLVM.Interop.addrspacecast, Tuple{Type{T_dest}, typeof(ptr)}))
         if supports_typed_ptrs
             if AS_dest == 3
-                @test contains(ir, r"addrspacecast i8 addrspace\(4\)\* %\d+ to i8 addrspace\(3\)\*")
+                @test contains(ir, r"addrspacecast i8 addrspace\(4\)\* %.+? to i8 addrspace\(3\)\*")
             else
-                @test !contains(ir, r"addrspacecast i8 addrspace\(4\)\* %\d+ to i8 addrspace\(3\)\*")
+                @test !contains(ir, r"addrspacecast i8 addrspace\(4\)\* %.+? to i8 addrspace\(3\)\*")
             end
         else
             if AS_dest == 3
-                @test contains(ir, r"addrspacecast ptr addrspace\(4\) %\d+ to ptr addrspace\(3\)")
+                @test contains(ir, r"addrspacecast ptr addrspace\(4\) %.+? to ptr addrspace\(3\)")
             else
-                @test !contains(ir, r"addrspacecast ptr addrspace\(4\) %\d+ to ptr addrspace\(3\)")
+                @test !contains(ir, r"addrspacecast ptr addrspace\(4\) %.+? to ptr addrspace\(3\)")
             end
         end
     end
