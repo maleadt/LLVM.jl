@@ -18,20 +18,17 @@ function create_passbuilder_internal(tm, pic)
     pb
 end
 
-function PassBuilder(tm::Union{Nothing,TargetMachine} = nothing, pic::Union{Nothing,PassInstrumentationCallbacks} = nothing; si::Core.Bool=false)
-    if !isnothing(pic) && si
-        throw(ArgumentError("Cannot provide explicit PassInstrumentationCallbacks and request StandardInstrumentations!"))
-    end
-    tm_internal = ifelse(isnothing(tm), C_NULL, tm)
-    if !isnothing(pic)
-        pic_internal = pic
-    elseif si
-        pic_internal = StandardInstrumentationCallbacks()
+struct RequestStandardInstrumentationCallbacks; end
+function PassBuilder(tm=nothing, pic=RequestStandardInstrumentationCallbacks())
+    # if no callbacks are requested, we default to LLVM's standard instrumentation,
+    # unless the user explicitly requests no instrumentation by passing pic=nothing.
+    if pic == RequestStandardInstrumentationCallbacks()
+        owned_pic = pic = StandardInstrumentationCallbacks()
     else
-        pic_internal = C_NULL
+        owned_pic = nothing
     end
-    pb = create_passbuilder_internal(tm_internal, pic_internal)
-    PassBuilder(pb, ifelse(si, pic_internal, nothing), [])
+    pb = create_passbuilder_internal(something(tm, C_NULL), something(pic, C_NULL))
+    PassBuilder(pb, owned_pic, [])
 end
 
 function dispose(pb::PassBuilder)
@@ -50,22 +47,29 @@ function PassBuilder(f::Core.Function, args...; kwargs...)
     end
 end
 
-register!(pb::PassBuilder, am::ModuleAnalysisManager) = API.LLVMPassBuilderRegisterModuleAnalyses(pb, am)
-register!(pb::PassBuilder, am::CGSCCAnalysisManager) = API.LLVMPassBuilderRegisterCGSCCAnalyses(pb, am)
-register!(pb::PassBuilder, am::LoopAnalysisManager) = API.LLVMPassBuilderRegisterLoopAnalyses(pb, am)
+register!(pb::PassBuilder, am::ModuleAnalysisManager) =
+    API.LLVMPassBuilderRegisterModuleAnalyses(pb, am)
+register!(pb::PassBuilder, am::CGSCCAnalysisManager) =
+    API.LLVMPassBuilderRegisterCGSCCAnalyses(pb, am)
+register!(pb::PassBuilder, am::LoopAnalysisManager) =
+    API.LLVMPassBuilderRegisterLoopAnalyses(pb, am)
 # FunctionAnalysisManager is special because we can build alias analysis pipelines on top of it
 function register!(pb::PassBuilder, am::FunctionAnalysisManager)
     if !isnothing(am.aa)
         pipeline = analysis_string(am.aa)
-        tm = ifelse(isnothing(am.aa.tm), C_NULL, am.aa.tm)
+        tm = something(am.aa.tm, C_NULL)
         @check API.LLVMRegisterAliasAnalyses(am, pb, tm, pipeline, length(pipeline))
     end
     API.LLVMPassBuilderRegisterFunctionAnalyses(pb, am)
 end
 
-cross_register_proxies!(pb::PassBuilder, lam::LoopAnalysisManager, fam::FunctionAnalysisManager, cgam::CGSCCAnalysisManager, mam::ModuleAnalysisManager) = API.LLVMPassBuilderCrossRegisterProxies(pb, lam, fam, cgam, mam)
+cross_register_proxies!(pb::PassBuilder, lam::LoopAnalysisManager,
+                        fam::FunctionAnalysisManager, cgam::CGSCCAnalysisManager,
+                        mam::ModuleAnalysisManager) =
+    API.LLVMPassBuilderCrossRegisterProxies(pb, lam, fam, cgam, mam)
 
-function register!(pb::PassBuilder, lam::LoopAnalysisManager, fam::FunctionAnalysisManager, cgam::CGSCCAnalysisManager, mam::ModuleAnalysisManager)
+function register!(pb::PassBuilder, lam::LoopAnalysisManager, fam::FunctionAnalysisManager,
+                   cgam::CGSCCAnalysisManager, mam::ModuleAnalysisManager)
     register!(pb, lam)
     register!(pb, fam)
     register!(pb, cgam)
@@ -73,10 +77,14 @@ function register!(pb::PassBuilder, lam::LoopAnalysisManager, fam::FunctionAnaly
     cross_register_proxies!(pb, lam, fam, cgam, mam)
 end
 
-parse!(pb::PassBuilder, pm::NewPMModulePassManager, s::String) = @check API.LLVMPassBuilderParseModulePassPipeline(pb, pm, s, length(s))
-parse!(pb::PassBuilder, pm::NewPMCGSCCPassManager, s::String) = @check API.LLVMPassBuilderParseCGSCCPassPipeline(pb, pm, s, length(s))
-parse!(pb::PassBuilder, pm::NewPMFunctionPassManager, s::String) = @check API.LLVMPassBuilderParseFunctionPassPipeline(pb, pm, s, length(s))
-parse!(pb::PassBuilder, pm::NewPMLoopPassManager, s::String) = @check API.LLVMPassBuilderParseLoopPassPipeline(pb, pm, s, length(s))
+parse!(pb::PassBuilder, pm::NewPMModulePassManager, s::String) =
+    @check API.LLVMPassBuilderParseModulePassPipeline(pb, pm, s, length(s))
+parse!(pb::PassBuilder, pm::NewPMCGSCCPassManager, s::String) =
+    @check API.LLVMPassBuilderParseCGSCCPassPipeline(pb, pm, s, length(s))
+parse!(pb::PassBuilder, pm::NewPMFunctionPassManager, s::String) =
+    @check API.LLVMPassBuilderParseFunctionPassPipeline(pb, pm, s, length(s))
+parse!(pb::PassBuilder, pm::NewPMLoopPassManager, s::String) =
+    @check API.LLVMPassBuilderParseLoopPassPipeline(pb, pm, s, length(s))
 
 function passbuilder(pm::NewPMPassManager)::PassBuilder
     if isnothing(pm.pb)

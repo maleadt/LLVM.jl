@@ -1,7 +1,8 @@
 export NewPMPass, NewPMLLVMPass
 export is_module_pass, is_cgscc_pass, is_function_pass, is_loop_pass, pass_string
 
-# Export all the passes
+
+# helper functionality
 
 macro module_pass(pass_name, class_name)
     quote
@@ -101,7 +102,8 @@ is_loop_pass(::Type{<:NewPMLLVMPass}) = false
 
 Base.show(io::IO, pass::NewPMLLVMPass) = print(io, pass_string(pass))
 
-# Module passes
+
+# module passes
 
 @module_pass "always-inline" AlwaysInlinerPass
 @module_pass "attributor" AttributorPass
@@ -186,13 +188,11 @@ Base.show(io::IO, pass::NewPMLLVMPass) = print(io, pass_string(pass))
 @module_pass "poison-checking" PoisonCheckingPass
 @module_pass "pseudo-probe-update" PseudoProbeUpdatePass
 
-# Module Passes With Params
-
 struct LoopExtractorPassOptions
     single::Core.Bool
 end
 LoopExtractorPassOptions(; single::Core.Bool = false) = LoopExtractorPassOptions(single)
-options_string(options::LoopExtractorPassOptions) = ifelse(options.single, "<single>", "")
+options_string(options::LoopExtractorPassOptions) = options.single ? "<single>" : ""
 @module_pass "loop-extract" LoopExtractorPass LoopExtractorPassOptions
 
 struct HWAddressSanitizerPassOptions
@@ -219,11 +219,14 @@ end
 struct ModuleAddressSanitizerPassOptions
     kernel::Core.Bool
 end
-ModuleAddressSanitizerPassOptions(; kernel::Core.Bool = false) = ModuleAddressSanitizerPassOptions(kernel)
-options_string(options::ModuleAddressSanitizerPassOptions) = ifelse(options.kernel, "<kernel>", "")
+ModuleAddressSanitizerPassOptions(; kernel::Core.Bool = false) =
+    ModuleAddressSanitizerPassOptions(kernel)
+options_string(options::ModuleAddressSanitizerPassOptions) =
+    options.kernel ? "<kernel>" : ""
 @module_pass "asan-module" ModuleAddressSanitizerPass ModuleAddressSanitizerPassOptions
 
-# CGSCC Passes
+
+# CGSCC passes
 
 @cgscc_pass "argpromotion" ArgumentPromotionPass
 # @cgscc_pass "invalidate<all>" InvalidateAllAnalysesPass
@@ -233,23 +236,24 @@ is_cgscc_pass(::Type{InvalidateAllAnalysesPass}) = true
 @cgscc_pass "openmp-opt-cgscc" OpenMPOptCGSCCPass
 @cgscc_pass "no-op-cgscc" NoOpCGSCCPass
 
-# CGSCC Passes With Params
-
 struct InlinerPassOptions
     onlymandatory::Core.Bool
 end
 InlinerPassOptions(; onlymandatory::Core.Bool = false) = InlinerPassOptions(onlymandatory)
-options_string(options::InlinerPassOptions) = ifelse(options.onlymandatory, "<only-mandatory>", "")
+options_string(options::InlinerPassOptions) =
+    options.onlymandatory ? "<only-mandatory>" : ""
 @cgscc_pass "inline" InlinerPass InlinerPassOptions
 
 struct CoroSplitPassOptions
     reusestorage::Core.Bool
 end
 CoroSplitPassOptions(; reusestorage::Core.Bool = false) = CoroSplitPassOptions(reusestorage)
-options_string(options::CoroSplitPassOptions) = ifelse(options.reusestorage, "<reuse-storage>", "")
+options_string(options::CoroSplitPassOptions) =
+    options.reusestorage ? "<reuse-storage>" : ""
 @cgscc_pass "coro-split" CoroSplitPass CoroSplitPassOptions
 
-# Function Passes
+
+# function passes
 
 @function_pass "aa-eval" AAEvaluator
 @function_pass "adce" ADCEPass
@@ -388,69 +392,73 @@ is_function_pass(::Type{VerifierPass}) = true
 @function_pass "tsan" ThreadSanitizerPass
 @function_pass "memprof" MemProfilerPass
 
-# Function Passes With Params
-
 struct EarlyCSEPassOptions
     memssa::Core.Bool
 end
 EarlyCSEPassOptions(; memssa::Core.Bool = false) = EarlyCSEPassOptions(memssa)
-options_string(options::EarlyCSEPassOptions) = ifelse(options.memssa, "<memssa>", "")
+options_string(options::EarlyCSEPassOptions) = options.memssa ? "<memssa>" : ""
 @function_pass "early-cse" EarlyCSEPass EarlyCSEPassOptions
 
 struct EntryExitInstrumenterPassOptions
     postinline::Core.Bool
 end
-EntryExitInstrumenterPassOptions(; postinline::Core.Bool = false) = EntryExitInstrumenterPassOptions(postinline)
-options_string(options::EntryExitInstrumenterPassOptions) = ifelse(options.postinline, "<post-inline>", "")
+EntryExitInstrumenterPassOptions(; postinline::Core.Bool = false) =
+    EntryExitInstrumenterPassOptions(postinline)
+options_string(options::EntryExitInstrumenterPassOptions) =
+    options.postinline ? "<post-inline>" : ""
 @function_pass "ee-instrument" EntryExitInstrumenterPass EntryExitInstrumenterPassOptions
 
 struct LowerMatrixIntrinsicsPassOptions
     minimal::Core.Bool
 end
-LowerMatrixIntrinsicsPassOptions(; minimal::Core.Bool = false) = LowerMatrixIntrinsicsPassOptions(minimal)
-options_string(options::LowerMatrixIntrinsicsPassOptions) = ifelse(options.minimal, "<minimal>", "")
+LowerMatrixIntrinsicsPassOptions(; minimal::Core.Bool = false) =
+    LowerMatrixIntrinsicsPassOptions(minimal)
+options_string(options::LowerMatrixIntrinsicsPassOptions) =
+    options.minimal ? "<minimal>" : ""
 @function_pass "lower-matrix-intrinsics" LowerMatrixIntrinsicsPass LowerMatrixIntrinsicsPassOptions
 
-struct LoopUnrollPassOptions
-    speedup::Int
-    fullunrollmax::Union{Nothing, Int}
-    partial::Union{Nothing, Core.Bool}
-    peeling::Union{Nothing, Core.Bool}
-    profilepeeling::Union{Nothing, Core.Bool}
-    runtime::Union{Nothing, Core.Bool}
-    upperbound::Union{Nothing, Core.Bool}
+struct LoopUnrollOptions
+    opt_level::Int
+    full_unroll_max_count::Union{Nothing, Int}
+    allow_partial::Union{Nothing, Core.Bool}
+    allow_peeling::Union{Nothing, Core.Bool}
+    allow_profile_based_peeling::Union{Nothing, Core.Bool}
+    allow_runtime::Union{Nothing, Core.Bool}
+    allow_upper_bound::Union{Nothing, Core.Bool}
 end
-LoopUnrollPassOptions(; speedup::Int = 2,
-                       fullunrollmax::Union{Nothing, Int} = nothing,
-                       partial::Union{Nothing, Bool} = nothing,
-                       peeling::Union{Nothing, Bool} = nothing,
-                       profilepeeling::Union{Nothing, Bool} = nothing,
-                       runtime::Union{Nothing, Bool} = nothing,
-                       upperbound::Union{Nothing, Bool} = nothing) = LoopUnrollPassOptions(speedup, fullunrollmax, partial, peeling, profilepeeling, runtime, upperbound)
-function options_string(options::LoopUnrollPassOptions)
+LoopUnrollOptions(; opt_level::Int = 2,
+                    full_unroll_max_count::Union{Nothing, Int} = nothing,
+                    allow_partial::Union{Nothing, Bool} = nothing,
+                    allow_peeling::Union{Nothing, Bool} = nothing,
+                    allow_profile_based_peeling::Union{Nothing, Bool} = nothing,
+                    allow_runtime::Union{Nothing, Bool} = nothing,
+                    allow_upper_bound::Union{Nothing, Bool} = nothing) =
+    LoopUnrollOptions(opt_level, full_unroll_max_count, allow_partial, allow_peeling,
+                      allow_profile_based_peeling, allow_runtime, allow_upper_bound)
+function options_string(options::LoopUnrollOptions)
     final_options = String[]
-    push!(final_options, "O$(options.speedup)")
-    if options.fullunrollmax !== nothing
-        push!(final_options, "full-unroll-max=$(options.fullunrollmax)")
+    push!(final_options, "O$(options.opt_level)")
+    if options.full_unroll_max_count !== nothing
+        push!(final_options, "full-unroll-max=$(options.full_unroll_max_count)")
     end
-    if options.partial !== nothing
-        push!(final_options, ifelse(options.partial, "partial", "no-partial"))
+    if options.allow_partial !== nothing
+        push!(final_options, options.allow_partial ? "partial" : "no-partial")
     end
-    if options.peeling !== nothing
-        push!(final_options, ifelse(options.peeling, "peeling", "no-peeling"))
+    if options.allow_peeling !== nothing
+        push!(final_options, options.allow_peeling ? "peeling" : "no-peeling")
     end
-    if options.profilepeeling !== nothing
-        push!(final_options, ifelse(options.profilepeeling, "profile-peeling", "no-profile-peeling"))
+    if options.allow_profile_based_peeling !== nothing
+        push!(final_options, options.allow_profile_based_peeling ? "profile-peeling" : "no-profile-peeling")
     end
-    if options.runtime !== nothing
-        push!(final_options, ifelse(options.runtime, "runtime", "no-runtime"))
+    if options.allow_runtime !== nothing
+        push!(final_options, options.allow_runtime ? "runtime" : "no-runtime")
     end
-    if options.upperbound !== nothing
-        push!(final_options, ifelse(options.upperbound, "upperbound", "no-upperbound"))
+    if options.allow_upper_bound !== nothing
+        push!(final_options, options.allow_upper_bound ? "upperbound" : "no-upperbound")
     end
     "<" * join(final_options, ";") * ">"
 end
-@function_pass "loop-unroll" LoopUnrollPass LoopUnrollPassOptions
+@function_pass "loop-unroll" LoopUnrollPass LoopUnrollOptions
 
 struct MemorySanitizerPassOptions
     recover::Core.Bool
@@ -459,9 +467,10 @@ struct MemorySanitizerPassOptions
     trackorigins::Int
 end
 MemorySanitizerPassOptions(; recover::Core.Bool = false,
-                            kernel::Core.Bool = false,
-                            eagerchecks::Core.Bool = false,
-                            trackorigins::Int = 0) = MemorySanitizerPassOptions(recover, kernel, eagerchecks, trackorigins)
+                             kernel::Core.Bool = false,
+                             eagerchecks::Core.Bool = false,
+                             trackorigins::Int = 0) =
+    MemorySanitizerPassOptions(recover, kernel, eagerchecks, trackorigins)
 function options_string(options::MemorySanitizerPassOptions)
     final_options = String[]
     if options.recover
@@ -479,30 +488,33 @@ end
 @function_pass "msan" MemorySanitizerPass MemorySanitizerPassOptions
 
 struct SimplifyCFGPassOptions
-    forwardswitchcond::Core.Bool
-    switchrangetoicmp::Core.Bool
-    switchtolookup::Core.Bool
-    keeploops::Core.Bool
-    hoistcommoninsts::Core.Bool
-    sinkcommoninsts::Core.Bool
-    bonusinstthreshold::Int
+    forward_switch_cond_to_phi::Core.Bool
+    convert_switch_range_to_icmp::Core.Bool
+    convert_switch_to_lookup_table::Core.Bool
+    keep_loops::Core.Bool
+    hoist_common_insts::Core.Bool
+    sink_common_inst::Core.Bool
+    bonus_inst_threshold::Int
 end
-SimplifyCFGPassOptions(; forwardswitchcond::Core.Bool = false,
-                        switchrangetoicmp::Core.Bool = false,
-                        switchtolookup::Core.Bool = false,
-                        keeploops::Core.Bool = true,
-                        hoistcommoninsts::Core.Bool = false,
-                        sinkcommoninsts::Core.Bool = false,
-                        bonusinstthreshold::Int = 1) = SimplifyCFGPassOptions(forwardswitchcond, switchrangetoicmp, switchtolookup, keeploops, hoistcommoninsts, sinkcommoninsts, bonusinstthreshold)
+SimplifyCFGPassOptions(; forward_switch_cond_to_phi::Core.Bool = false,
+                         convert_switch_range_to_icmp::Core.Bool = false,
+                         convert_switch_to_lookup_table::Core.Bool = false,
+                         keep_loops::Core.Bool = true,
+                         hoist_common_insts::Core.Bool = false,
+                         sink_common_inst::Core.Bool = false,
+                         bonus_inst_threshold::Int = 1) =
+    SimplifyCFGPassOptions(forward_switch_cond_to_phi, convert_switch_range_to_icmp,
+                           convert_switch_to_lookup_table, keep_loops,
+                           hoist_common_insts, sink_common_inst, bonus_inst_threshold)
 function options_string(options::SimplifyCFGPassOptions)
-    forward = ifelse(options.forwardswitchcond, "forward-switch-cond", "no-forward-switch-cond")
-    s2i = ifelse(options.switchrangetoicmp, "switch-range-to-icmp", "no-switch-range-to-icmp")
-    s2l = ifelse(options.switchtolookup, "switch-to-lookup", "no-switch-to-lookup")
-    keeploops = ifelse(options.keeploops, "keep-loops", "no-keep-loops")
-    hoist = ifelse(options.hoistcommoninsts, "hoist-common-insts", "no-hoist-common-insts")
-    sink = ifelse(options.sinkcommoninsts, "sink-common-insts", "no-sink-common-insts")
-    bonus = "bonus-inst-threshold=$(options.bonusinstthreshold)"
-    "<" * join([forward, s2i, s2l, keeploops, hoist, sink, bonus], ";") * ">"
+    forward = options.forward_switch_cond_to_phi ? "forward-switch-cond" : "no-forward-switch-cond"
+    s2i = options.convert_switch_range_to_icmp ? "switch-range-to-icmp" : "no-switch-range-to-icmp"
+    s2l = options.convert_switch_to_lookup_table ? "switch-to-lookup" : "no-switch-to-lookup"
+    keep_loops = options.keep_loops ? "keep-loops" : "no-keep-loops"
+    hoist = options.hoist_common_insts ? "hoist-common-insts" : "no-hoist-common-insts"
+    sink = options.sink_common_inst ? "sink-common-insts" : "no-sink-common-insts"
+    bonus = "bonus-inst-threshold=$(options.bonus_inst_threshold)"
+    "<" * join([forward, s2i, s2l, keep_loops, hoist, sink, bonus], ";") * ">"
 end
 @function_pass "simplifycfg" SimplifyCFGPass SimplifyCFGPassOptions
 
@@ -511,10 +523,13 @@ struct LoopVectorizePassOptions
     vectorizeforcedonly::Core.Bool
 end
 LoopVectorizePassOptions(; interleaveforcedonly::Core.Bool = false,
-                          vectorizeforcedonly::Core.Bool = false) = LoopVectorizePassOptions(interleaveforcedonly, vectorizeforcedonly)
+                          vectorizeforcedonly::Core.Bool = false) =
+    LoopVectorizePassOptions(interleaveforcedonly, vectorizeforcedonly)
 function options_string(options::LoopVectorizePassOptions)
-    interleave = ifelse(options.interleaveforcedonly, "interleave-forced-only", "no-interleave-forced-only")
-    vectorize = ifelse(options.vectorizeforcedonly, "vectorize-forced-only", "no-vectorize-forced-only")
+    interleave = options.interleaveforcedonly ? "interleave-forced-only" :
+                                                "no-interleave-forced-only"
+    vectorize = options.vectorizeforcedonly ? "vectorize-forced-only" :
+                                              "no-vectorize-forced-only"
     "<" * join([interleave, vectorize], ";") * ">"
 end
 @function_pass "loop-vectorize" LoopVectorizePass LoopVectorizePassOptions
@@ -522,8 +537,10 @@ end
 struct MergedLoadStoreMotionPassOptions
     splitfooterbb::Core.Bool
 end
-MergedLoadStoreMotionPassOptions(; splitfooterbb::Core.Bool = false) = MergedLoadStoreMotionPassOptions(splitfooterbb)
-options_string(options::MergedLoadStoreMotionPassOptions) = ifelse(options.splitfooterbb, "<split-footer-bb>", "<no-split-footer-bb>")
+MergedLoadStoreMotionPassOptions(; splitfooterbb::Core.Bool = false) =
+    MergedLoadStoreMotionPassOptions(splitfooterbb)
+options_string(options::MergedLoadStoreMotionPassOptions) =
+    options.splitfooterbb ? "<split-footer-bb>" : "<no-split-footer-bb>"
 @function_pass "mldst-motion" MergedLoadStoreMotionPass MergedLoadStoreMotionPassOptions
 
 struct GVNPassOptions
@@ -535,7 +552,8 @@ end
 GVNPassOptions(; allowpre::Union{Nothing, Core.Bool} = nothing,
                 allowloadpre::Union{Nothing, Core.Bool} = nothing,
                 allowloadpresplitbackedge::Union{Nothing, Core.Bool} = nothing,
-                allowmemdep::Union{Nothing, Core.Bool} = nothing) = GVNPassOptions(allowpre, allowloadpre, allowloadpresplitbackedge, allowmemdep)
+                allowmemdep::Union{Nothing, Core.Bool} = nothing) =
+    GVNPassOptions(allowpre, allowloadpre, allowloadpresplitbackedge, allowmemdep)
 function options_string(options::GVNPassOptions)
     final_options = String[]
     if options.allowpre !== nothing
@@ -573,20 +591,22 @@ end
 struct StackLifetimePrinterPassOptions
     must::Core.Bool
 end
-StackLifetimePrinterPassOptions(; must::Core.Bool = false) = StackLifetimePrinterPassOptions(must)
-function options_string(options::StackLifetimePrinterPassOptions)
-    ifelse(options.must, "<must>", "<may>")
-end
+StackLifetimePrinterPassOptions(; must::Core.Bool = false) =
+    StackLifetimePrinterPassOptions(must)
+options_string(options::StackLifetimePrinterPassOptions) =
+    options.must ? "<must>" : "<may>"
 @function_pass "print<stack-lifetime>" StackLifetimePrinterPass StackLifetimePrinterPassOptions
 
-# Loop Nest Passes
+
+# loop nest passes
 
 @loop_pass "loop-flatten" LoopFlattenPass
 @loop_pass "loop-interchange" LoopInterchangePass
 @loop_pass "loop-unroll-and-jam" LoopUnrollAndJamPass
 @loop_pass "no-op-loopnest" NoOpLoopNestPass
 
-# Loop Passes
+
+# loop passes
 
 @loop_pass "canon-freeze" CanonicalizeFreezeInLoopsPass
 @loop_pass "dot-ddg" DDGDotPrinterPass
@@ -614,16 +634,15 @@ is_loop_pass(::Type{GuardWideningPass}) = true
 @loop_pass "loop-reroll" LoopRerollPass
 @loop_pass "loop-versioning-licm" LoopVersioningLICMPass
 
-# Loop Passes With Params
-
 struct SimpleLoopUnswitchPassOptions
     nontrivial::Core.Bool
     trivial::Core.Bool
 end
-SimpleLoopUnswitchPassOptions(; nontrivial::Core.Bool = false, trivial::Core.Bool = true) = SimpleLoopUnswitchPassOptions(nontrivial, trivial)
+SimpleLoopUnswitchPassOptions(; nontrivial::Core.Bool = false, trivial::Core.Bool = true) =
+    SimpleLoopUnswitchPassOptions(nontrivial, trivial)
 function options_string(options::SimpleLoopUnswitchPassOptions)
-    nontrivial = ifelse(options.nontrivial, "nontrivial", "no-nontrivial")
-    trivial = ifelse(options.trivial, "trivial", "no-trivial")
+    nontrivial = options.nontrivial ? "nontrivial" : "no-nontrivial"
+    trivial = options.trivial ? "trivial" : "no-trivial"
     "<$nontrivial;$trivial>"
 end
 @loop_pass "simple-loop-unswitch" SimpleLoopUnswitchPass SimpleLoopUnswitchPassOptions
@@ -632,13 +651,15 @@ struct LICMPassOptions
     allowspeculation::Core.Bool
 end
 LICMPassOptions(; allowspeculation::Core.Bool = true) = LICMPassOptions(allowspeculation)
-options_string(options::LICMPassOptions) = ifelse(options.allowspeculation, "<allowspeculation>", "<no-allowspeculation>")
+options_string(options::LICMPassOptions) =
+    options.allowspeculation ? "<allowspeculation>" : "<no-allowspeculation>"
 @loop_pass "licm" LICMPass LICMPassOptions
 
 const LNICMPassOptions = LICMPassOptions
 @loop_pass "lnicm" LNICMPass LNICMPassOptions
 
-# Add methods
+
+# add methods
 
 function add!(pm::NewPMModulePassManager, pb::PassBuilder, pass::NewPMLLVMPass)
     if !is_module_pass(typeof(pass))
@@ -672,21 +693,26 @@ function add!(pm::NewPMPassManager, pass::NewPMLLVMPass)
     add!(pm, passbuilder(pm), pass)
 end
 
-function run!(pm::NewPMModulePassManager, m::Module, tm::Union{Nothing,TargetMachine}=nothing, aa_stack::AbstractVector{<:NewPMAliasAnalysis}=NewPMAliasAnalysis[])
+function run!(pm::NewPMModulePassManager, m::Module,
+              tm::Union{Nothing,TargetMachine} = nothing,
+              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = NewPMAliasAnalysis[])
     pb = passbuilder(pm)
     analysis_managers(pb, tm, aa_stack) do lam, fam, cam, mam
         dispose(run!(pm, m, mam))
     end
 end
 
-function run!(pm::NewPMFunctionPassManager, f::Function, tm::Union{Nothing,TargetMachine}=nothing, aa_stack::AbstractVector{<:NewPMAliasAnalysis}=NewPMAliasAnalysis[])
+function run!(pm::NewPMFunctionPassManager, f::Function,
+              tm::Union{Nothing,TargetMachine} = nothing,
+              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = NewPMAliasAnalysis[])
     pb = passbuilder(pm)
     analysis_managers(pb, tm, aa_stack) do lam, fam, cam, mam
         dispose(run!(pm, f, fam))
     end
 end
 
-function run!(pass::NewPMLLVMPass, m::Module, tm::Union{Nothing,TargetMachine}=nothing, aa_stack::AbstractVector{<:NewPMAliasAnalysis}=NewPMAliasAnalysis[])
+function run!(pass::NewPMLLVMPass, m::Module, tm::Union{Nothing,TargetMachine} = nothing,
+              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = NewPMAliasAnalysis[])
     needs_globals_aa_recompute = any(aa_stack) do aa
         isa(aa, GlobalsAA)
     end
@@ -717,14 +743,15 @@ function run!(pass::NewPMLLVMPass, m::Module, tm::Union{Nothing,TargetMachine}=n
     end
 end
 
-function run!(pass::NewPMLLVMPass, f::Function, tm::Union{Nothing,TargetMachine}=nothing, aa_stack::AbstractVector{<:NewPMAliasAnalysis}=NewPMAliasAnalysis[])
+function run!(pass::NewPMLLVMPass, f::Function, tm::Union{Nothing,TargetMachine} = nothing,
+              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = NewPMAliasAnalysis[])
     needs_globals_aa_recompute = any(aa_stack) do aa
         isa(aa, GlobalsAA)
     end
     if needs_globals_aa_recompute
         throw(ArgumentError("GlobalsAA needs to be computed on a module, not a function!"))
     end
-    @dispose pic=StandardInstrumentationCallbacks() pb=PassBuilder(tm, pic) fpm=NewPMFunctionPassManager(pb) begin
+    @dispose pb=PassBuilder(tm) fpm=NewPMFunctionPassManager(pb) begin
         if is_function_pass(typeof(pass))
             add!(fpm, pb, pass)
         elseif is_loop_pass(typeof(pass))

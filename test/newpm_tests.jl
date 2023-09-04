@@ -1,3 +1,4 @@
+
 @testitem "newpm" begin
 
 using InteractiveUtils  # for subtypes
@@ -129,7 +130,7 @@ end # testset "newpm analysis registration"
 host_triple = triple()
 host_t = Target(triple=host_triple)
 
-@dispose tm=TargetMachine(host_t, host_triple) pic=StandardInstrumentationCallbacks() pb=PassBuilder(tm, pic) begin
+@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
     analysis_managers() do lam, fam, cam, mam
         register!(pb, lam, fam, cam, mam)
 
@@ -235,7 +236,7 @@ end # testset "newpm passes"
 host_triple = triple()
 host_t = Target(triple=host_triple)
 
-@dispose tm=TargetMachine(host_t, host_triple) pic=StandardInstrumentationCallbacks() pb=PassBuilder(tm, pic) begin
+@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
     analysis_managers() do lam, fam, cam, mam
         register!(pb, lam, fam, cam, mam)
 
@@ -288,7 +289,7 @@ function fake_custom_legacy_pass(counter::Ref{Int})
     end
 end
 
-@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm; si=true) begin
+@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
 
     observed_modules = Ref{Int}(0)
     observed_functions = Ref{Int}(0)
@@ -326,7 +327,7 @@ end # testset "newpm custom passes"
 host_triple = triple()
 host_t = Target(triple=host_triple)
 
-@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm; si=true) begin
+@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
     analysis_managers() do lam, fam, cam, mam
         @test add!(fam, AAManager) do aam
             # Do nothing
@@ -436,10 +437,6 @@ end
     @test_throws ArgumentError add!(lpm, LICMPass())
 end
 
-@dispose pic=PassInstrumentationCallbacks() begin
-    @test_throws ArgumentError PassBuilder(nothing, pic; si=true)
-end
-
 @dispose pb=PassBuilder() begin
     @dispose mpm=NewPMModulePassManager(pb) begin
         @test_throws ArgumentError add!(mpm, SimplifyCFGPass())
@@ -486,9 +483,16 @@ using LLVM.Interop
 @testset "newpm julia pipeline" begin
 host_triple = triple()
 host_t = Target(triple=host_triple)
-@dispose tm=TargetMachine(host_t, host_triple) pic=StandardInstrumentationCallbacks() pb=PassBuilder(tm,pic) begin
-    basicSimplifyCFGOptions = SimplifyCFGPassOptions(; forwardswitchcond=true, switchrangetoicmp=true, switchtolookup=true)
-    aggressiveSimplifyCFGOptions = SimplifyCFGPassOptions(; forwardswitchcond=true, switchrangetoicmp=true, switchtolookup=true, hoistcommoninsts=true)
+@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
+    basicSimplifyCFGOptions =
+        SimplifyCFGPassOptions(; forward_switch_cond_to_phi=true,
+                                 convert_switch_range_to_icmp=true,
+                                 convert_switch_to_lookup_table=true)
+    aggressiveSimplifyCFGOptions =
+        SimplifyCFGPassOptions(; forward_switch_cond_to_phi=true,
+                                 convert_switch_range_to_icmp=true,
+                                 convert_switch_to_lookup_table=true,
+                                 hoist_common_insts=true)
     NewPMModulePassManager(pb) do mpm
         add!(mpm, NewPMFunctionPassManager) do fpm
             add!(fpm, GCInvariantVerifierPass())
@@ -621,7 +625,8 @@ end
 
 @test "Successfully ran julia pipeline!" != ""
 
-@test string(JuliaPipelinePass(; speedup=2)) == "julia<O2;lower_intrinsics;no_dump_native;no_external_use;no_llvm_only>"
+@test string(JuliaPipelinePass(; opt_level=2)) ==
+      "julia<O2;lower_intrinsics;no_dump_native;no_external_use;no_llvm_only>"
 
 end # testset "newpm julia pipeline"
 
