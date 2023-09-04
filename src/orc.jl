@@ -1,160 +1,431 @@
-export OrcJIT, OrcModule, OrcTargetAddress
-export dispose, errormsg, compile!, remove!, add!,
-       mangle, address, addressin, create_stub!, set_stub!,
-       register!, unregister!, callback!
+export LLJITBuilder, LLJIT, ExecutionSession, JITDylib,
+       ThreadSafeModule, ThreadSafeContext, OrcTargetAddress
+export TargetMachineBuilder, targetmachinebuilder!, linkinglayercreator!
+export mangle, lookup, intern
+export ObjectLinkingLayer, register!
 
-@checked struct OrcJIT
-    ref::API.LLVMOrcJITStackRef
+include("executionengine/utils.jl")
+
+@checked struct TargetMachineBuilder
+    ref::API.LLVMOrcJITTargetMachineBuilderRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcJITTargetMachineBuilderRef},
+                    tmb::TargetMachineBuilder) = tmb.ref
+
+
+function TargetMachineBuilder()
+    ref = Ref{API.LLVMOrcJITTargetMachineBuilderRef}()
+    @check API.LLVMOrcJITTargetMachineBuilderDetectHost(ref)
+    TargetMachineBuilder(ref[])
 end
 
-Base.unsafe_convert(::Type{API.LLVMOrcJITStackRef}, orc::OrcJIT) = orc.ref
-Base.unsafe_convert(::Type{Ptr{Cvoid}}, orc::OrcJIT) = Base.unsafe_convert(Ptr{Cvoid}, orc.ref)
+function TargetMachineBuilder(tm::TargetMachine)
+    tmb = API.LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(tm)
+    TargetMachineBuilder(tmb)
+end
 
-OrcJIT(ref::Ptr{Cvoid}) = OrcJIT(Base.unsafe_convert(API.LLVMOrcJITStackRef, ref))
+function dispose(tmb::TargetMachineBuilder)
+    API.LLVMOrcDisposeJITTargetMachineBuilder(tmb)
+end
+
+include("executionengine/lljit.jl")
+
+@checked struct ExecutionSession
+    ref::API.LLVMOrcExecutionSessionRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcExecutionSessionRef}, es::ExecutionSession) = es.ref
+
+function ExecutionSession(lljit::LLJIT)
+    es = API.LLVMOrcLLJITGetExecutionSession(lljit)
+    ExecutionSession(es)
+end
+
+@checked struct ObjectLinkingLayer
+    ref::API.LLVMOrcObjectLayerRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcObjectLayerRef}, oll::ObjectLinkingLayer) = oll.ref
+
+function ObjectLinkingLayer(es::ExecutionSession)
+    ref = API.LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager(es)
+    ObjectLinkingLayer(ref)
+end
+
+function dispose(oll::ObjectLinkingLayer)
+    API.LLVMOrcDisposeObjectLayer(oll)
+end
+
+function register!(oll::ObjectLinkingLayer, listener::JITEventListener)
+    API.LLVMOrcRTDyldObjectLinkingLayerRegisterJITEventListener(oll, listener)
+end
+
+mutable struct ObjectLinkingLayerCreator
+    cb
+end
+
+function ollc_callback(ctx::Ptr{Cvoid}, es::API.LLVMOrcExecutionSessionRef, triple::Ptr{Cchar})
+    es = ExecutionSession(es)
+    triple = Base.unsafe_string(triple)
+
+    ollc = Base.unsafe_pointer_to_objref(ctx)::ObjectLinkingLayerCreator
+    oll = ollc.cb(es, triple)::ObjectLinkingLayer
+    return oll.ref
+end
 
 """
-    OrcJIT(::TargetMachine)
-
-Creates a OrcJIT stack based on the provided target machine.
+    linkinglayercreator!(builder::LLJITBuilder, creator::ObjectLinkingLayerCreator)
 
 !!! warning
-    Takes ownership of the provided target machine.
+    The creator object needs to be rooted by the caller for the lifetime of the
+    builder argument.
 """
-function OrcJIT(tm::TargetMachine)
-    OrcJIT(API.LLVMOrcCreateInstance(tm))
+function linkinglayercreator!(builder::LLJITBuilder, creator::ObjectLinkingLayerCreator)
+    cb = @cfunction(ollc_callback,
+                    API.LLVMOrcObjectLayerRef,
+                    (Ptr{Cvoid}, API.LLVMOrcExecutionSessionRef, Ptr{Cchar}))
+    linkinglayercreator!(builder, cb, Base.pointer_from_objref(creator))
 end
 
-function dispose(orc::OrcJIT)
-    API.LLVMOrcDisposeInstance(orc)
+include("executionengine/ts_module.jl")
+
+@checked struct LLVMSymbol
+    ref::API.LLVMOrcSymbolStringPoolEntryRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcSymbolStringPoolEntryRef}, sym::LLVMSymbol) = sym.ref
+Base.convert(::Type{API.LLVMOrcSymbolStringPoolEntryRef}, sym::LLVMSymbol) = sym.ref
+
+function Base.cconvert(::Type{Cstring}, sym::LLVMSymbol)
+    return API.LLVMOrcSymbolStringPoolEntryStr(sym)
 end
 
-function OrcJIT(f::Core.Function, tm::TargetMachine)
-    orc = OrcJIT(tm)
-    try
-        f(orc)
-    finally
-        dispose(orc)
-    end
+function Base.string(sym::LLVMSymbol)
+    cstr = API.LLVMOrcSymbolStringPoolEntryStr(sym)
+    Base.unsafe_string(cstr)
 end
 
-function errormsg(orc::OrcJIT)
-    # The error message is owned by `orc`, and will
-    # be disposed along-side the OrcJIT.
-    unsafe_string(API.LLVMOrcGetErrorMsg(orc))
+function intern(es::ExecutionSession, string)
+    entry = API.LLVMOrcExecutionSessionIntern(es, string)
+    LLVMSymbol(entry)
 end
 
-struct OrcModule
-    handle::API.LLVMOrcModuleHandle
+function release(sym::LLVMSymbol)
+    API.LLVMOrcReleaseSymbolStringPoolEntry(sym)
 end
-Base.convert(::Type{API.LLVMOrcModuleHandle}, mod::OrcModule) = mod.handle
+
+function retain(sym::LLVMSymbol)
+    API.LLVMOrcRetainSymbolStringPoolEntry(sym)
+end
+
+# ORC always uses linker-mangled symbols internally (including for lookups, responsibility object maps, etc).
+# IR uses non-linker-mangled names.
+# If you're synthesizing IR from a requested-symbols map you'll need to demangle the name.
+# Unfortunately we don't have a generic utility for that yet, but on MacOS it just means
+# dropping the leading '_' if there is one, or prepending a \01 prefix (see https://llvm.org/docs/LangRef.html#identifiers)
+
+function mangle(lljit::LLJIT, name)
+    entry = API.LLVMOrcLLJITMangleAndIntern(lljit, name)
+    return LLVMSymbol(entry)
+end
+
+@checked struct JITDylib
+    ref::API.LLVMOrcJITDylibRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcJITDylibRef}, jd::JITDylib) = jd.ref
 
 """
-   resolver(name, ctx)
+    JITDylib(lljit::LLJIT)
 
-Lookup the symbol `name`. Iff `ctx` is passed to this function it should be a
-pointer to the OrcJIT we are compiling for.
+Get the main JITDylib
 """
-function resolver(name, ctx)
-    name = unsafe_string(name)
-    ## Step 0: Should have already resolved it iff it was in the
-    ##         same module
-    ## Step 1: See if it's something known to the execution engine
-    ptr = C_NULL
-    if ctx != C_NULL
-        orc = OrcJIT(ctx)
-        ptr = pointer(address(orc, name))
-    end
-
-    ## Step 2: Search the program symbols
-    if ptr == C_NULL
-        #
-        # SearchForAddressOfSymbol expects an unmangled 'C' symbol name.
-        # Iff we are on Darwin, strip the leading '_' off.
-        @static if Sys.isapple()
-            if name[1] == '_'
-                name = name[2:end]
-            end
-        end
-        ptr = LLVM.find_symbol(name)
-    end
-
-    ## Step 4: Lookup in libatomic
-    # TODO: Do we need to do this?
-
-    if ptr == C_NULL
-        error("OrcJIT: Symbol `$name` lookup failed. Aborting!")
-    end
-
-    return UInt64(reinterpret(UInt, ptr))
+function JITDylib(lljit::LLJIT)
+    ref = API.LLVMOrcLLJITGetMainJITDylib(lljit)
+    JITDylib(ref)
 end
 
-function compile!(orc::OrcJIT, mod::Module, resolver = @cfunction(resolver, UInt64, (Cstring, Ptr{Cvoid})), resolver_ctx = orc; lazy=false)
-    r_mod = Ref{API.LLVMOrcModuleHandle}()
-    if lazy
-        API.LLVMOrcAddLazilyCompiledIR(orc, r_mod, mod, resolver, resolver_ctx)
+
+"""
+    JITDylib(es::ExecutionSession, name; bare=false)
+
+Adds a new JITDylib to the ExecutionSession. The name must be unique and
+the `bare=true` no standard platform symbols are made available.
+"""
+function JITDylib(es::ExecutionSession, name; bare=false)
+    if bare
+        ref = API.LLVMOrcExecutionSessionCreateBareJITDylib(es, name)
     else
-        API.LLVMOrcAddEagerlyCompiledIR(orc, r_mod, mod, resolver, resolver_ctx)
+        ref = Ref{API.LLVMOrcJITDylibRef}()
+        @check API.LLVMOrcExecutionSessionCreateJITDylib(es, ref, name)
+        ref = ref[]
     end
-    OrcModule(r_mod[])
+    JITDylib(ref)
+end
+if version() >= v"13"
+Base.string(jd::JITDylib) = unsafe_message(API.LLVMExtraDumpJitDylibToString(jd))
+
+function Base.show(io::IO, jd::JITDylib)
+    output = string(jd)
+    print(io, output)
+end
+end
+@checked struct DefinitionGenerator
+    ref::API.LLVMOrcDefinitionGeneratorRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcDefinitionGeneratorRef}, dg::DefinitionGenerator) = dg.ref
+
+function add!(jd::JITDylib, dg::DefinitionGenerator)
+    API.LLVMOrcJITDylibAddGenerator(jd, dg)
 end
 
-function Base.delete!(orc::OrcJIT, mod::OrcModule)
-    API.LLVMOrcRemoveModule(orc, mod)
+function CreateDynamicLibrarySearchGeneratorForProcess(prefix)
+    ref = Ref{API.LLVMOrcDefinitionGeneratorRef}()
+    @check API.LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess(ref, prefix, C_NULL, C_NULL)
+    DefinitionGenerator(ref[])
 end
 
-function add!(orc::OrcJIT, obj::MemoryBuffer, resolver = @cfunction(resolver, UInt64, (Cstring, Ptr{Cvoid})), resolver_ctx = orc)
-    r_mod = Ref{API.LLVMOrcModuleHandle}()
-    API.LLVMOrcAddObjectFile(orc, r_mod, obj, resolver, resolver_ctx)
-    return OrcModule(r_mod[])
+# LLVMOrcCreateCustomCAPIDefinitionGenerator(F, Ctx)
+
+function lookup_dylib(es::ExecutionSession, name)
+    ref = API.LLVMOrcExecutionSessionGetJITDylibByName(es, name)
+    if ref == C_NULL
+        return nothing
+    end
+    JITDylib(ref)
 end
 
-function mangle(orc::OrcJIT, name)
-    r_symbol = Ref{Cstring}()
-    API.LLVMOrcGetMangledSymbol(orc, r_symbol, name)
-    symbol = unsafe_string(r_symbol[])
-    API.LLVMOrcDisposeMangledSymbol(r_symbol[])
-    return symbol
+function add!(lljit::LLJIT, jd::JITDylib, obj::MemoryBuffer)
+    @check API.LLVMOrcLLJITAddObjectFile(lljit, jd, obj)
+    return nothing
+end
+
+# LLVMOrcLLJITAddObjectFileWithRT(J, RT, ObjBuffer)
+
+function add!(lljit::LLJIT, jd::JITDylib, mod::ThreadSafeModule)
+    @check API.LLVMOrcLLJITAddLLVMIRModule(lljit, jd, mod)
+    return nothing
+end
+
+# LLVMOrcLLJITAddLLVMIRModuleWithRT(J, JD, TSM)
+
+function Base.empty!(jd::JITDylib)
+    API.LLVMOrcJITDylibClear(jd)
 end
 
 struct OrcTargetAddress
-    ptr::API.LLVMOrcTargetAddress
+    ptr::API.LLVMOrcJITTargetAddress
 end
-Base.convert(::Type{API.LLVMOrcTargetAddress}, addr::OrcTargetAddress) = addr.ptr
+Base.convert(::Type{API.LLVMOrcJITTargetAddress}, addr::OrcTargetAddress) = addr.ptr
 
 Base.pointer(addr::OrcTargetAddress) = reinterpret(Ptr{Cvoid}, addr.ptr % UInt) # LLVMOrcTargetAddress is UInt64 even on 32-bit
 
 OrcTargetAddress(ptr::Ptr{Cvoid}) = OrcTargetAddress(reinterpret(UInt, ptr))
 
-function create_stub!(orc::OrcJIT, name, initial)
-    API.LLVMOrcCreateIndirectStub(orc, name, initial)
+"""
+    lookup(lljit::LLJIT, name)
+
+Takes an unmangled symbol names and searches for it in the LLJIT.
+"""
+function lookup(lljit::LLJIT, name)
+    result = Ref{API.LLVMOrcJITTargetAddress}()
+    @check API.LLVMOrcLLJITLookup(lljit, result, name)
+    OrcTargetAddress(result[])
 end
 
-function set_stub!(orc::OrcJIT, name, new)
-    API.LLVMOrcSetIndirectStubPointer(orc, name, new)
+@checked struct IRTransformLayer
+    ref::API.LLVMOrcIRTransformLayerRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcIRTransformLayerRef}, il::IRTransformLayer) = il.ref
+
+function IRTransformLayer(lljit::LLJIT)
+    ref = API.LLVMOrcLLJITGetIRTransformLayer(lljit)
+    IRTransformLayer(ref)
 end
 
-function address(orc::OrcJIT, name)
-    r_address = Ref{API.LLVMOrcTargetAddress}()
-    API.LLVMOrcGetSymbolAddress(orc, r_address, name)
-    OrcTargetAddress(r_address[])
+function set_transform!(il::IRTransformLayer)
+    API.LLVMOrcIRTransformLayerSetTransform(il)
 end
 
-function addressin(orc::OrcJIT, mod::OrcModule, name)
-    r_address = Ref{API.LLVMOrcTargetAddress}()
-    API.LLVMOrcGetSymbolAddressIn(orc, r_address, mod, name)
-    OrcTargetAddress(r_address[])
+
+@checked struct MaterializationResponsibility
+    ref::API.LLVMOrcMaterializationResponsibilityRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcMaterializationResponsibilityRef}, mr::MaterializationResponsibility) = mr.ref
+
+function emit(il::IRTransformLayer, mr::MaterializationResponsibility, tsm::ThreadSafeModule)
+    API.LLVMOrcIRTransformLayerEmit(il, mr, tsm)
 end
 
-function callback!(orc::OrcJIT, callback, ctx)
-    r_address = Ref{API.LLVMOrcTargetAddress}()
-    API.LLVMOrcCreateLazyCompileCallback(orc, r_address, callback, ctx)
-    return OrcTargetAddress(r_address[])
+
+function get_requested_symbols(mr::MaterializationResponsibility)
+    N = Ref{Csize_t}()
+    ptr = API.LLVMOrcMaterializationResponsibilityGetRequestedSymbols(mr, N)
+    syms = map(LLVMSymbol, Base.unsafe_wrap(Array, ptr, N[], own=false))
+    API.LLVMOrcDisposeSymbols(ptr)
+    return syms
 end
 
-function register!(orc::OrcJIT, listener::JITEventListener)
-    API.LLVMOrcRegisterJITEventListener(orc, listener)
+abstract type AbstractMaterializationUnit end
+
+function define(jd::JITDylib, mu::AbstractMaterializationUnit)
+    API.LLVMOrcJITDylibDefine(jd, mu)
 end
 
-function unregister!(orc::OrcJIT, listener::JITEventListener)
-    API.LLVMOrcUnregisterJITEventListener(orc, listener)
+@checked struct MaterializationUnit <: AbstractMaterializationUnit
+    ref::API.LLVMOrcMaterializationUnitRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcMaterializationUnitRef}, mu::MaterializationUnit) = mu.ref
+
+
+mutable struct CustomMaterializationUnit <: AbstractMaterializationUnit
+    materialize
+    discard
+    mu::MaterializationUnit
+    function CustomMaterializationUnit(materialize, discard)
+        new(materialize, discard)
+    end
+end
+Base.cconvert(::Type{API.LLVMOrcMaterializationUnitRef}, mu::CustomMaterializationUnit) = mu.mu
+
+const CUSTOM_MU_ROOTS = Base.IdSet{CustomMaterializationUnit}()
+
+function __materialize(ctx::Ptr{Cvoid}, mr::API.LLVMOrcMaterializationResponsibilityRef)
+    mu = Base.unsafe_pointer_to_objref(ctx)::CustomMaterializationUnit
+    try
+        mu.materialize(MaterializationResponsibility(mr))
+    catch err
+        bt = catch_backtrace()
+        showerror(stderr, err, bt)
+        API.LLVMOrcMaterializationResponsibilityFailMaterialization(mr)
+    end
+    nothing
+end
+
+function __discard(ctx::Ptr{Cvoid}, jd::API.LLVMOrcJITDylibRef, symbol::API.LLVMOrcSymbolStringPoolEntryRef)
+    mu = Base.unsafe_pointer_to_objref(ctx)::CustomMaterializationUnit
+    try
+        mu.discard(JITDylib(jd), LLVMSymbol(symbol))
+    catch err
+        bt = catch_backtrace()
+        showerror(stderr, err, bt)
+    end
+    nothing
+end
+
+function __destroy(ctx::Ptr{Cvoid})
+    mu = Base.unsafe_pointer_to_objref(ctx)::CustomMaterializationUnit
+    delete!(CUSTOM_MU_ROOTS, mu)
+    nothing
+end
+
+function CustomMaterializationUnit(name, symbols, materialize, discard, init=C_NULL)
+    this = CustomMaterializationUnit(materialize, discard)
+    push!(CUSTOM_MU_ROOTS, this)
+
+    ref = API.LLVMOrcCreateCustomMaterializationUnit(
+        name,
+        Base.pointer_from_objref(this), # escaping this, rooted in CUSTOM_MU_ROOTS
+        symbols,
+        length(symbols),
+        init,
+        @cfunction(__materialize, Cvoid, (Ptr{Cvoid}, API.LLVMOrcMaterializationResponsibilityRef)),
+        @cfunction(__discard, Cvoid, (Ptr{Cvoid}, API.LLVMOrcJITDylibRef, API.LLVMOrcSymbolStringPoolEntryRef) ),
+        @cfunction(__destroy, Cvoid, (Ptr{Cvoid},))
+    )
+    this.mu = MaterializationUnit(ref)
+    return this
+end
+
+function absolute_symbols(symbols)
+    ref = API.LLVMOrcAbsoluteSymbols(symbols, length(symbols))
+    MaterializationUnit(ref)
+end
+
+@checked struct IndirectStubsManager
+    ref::API.LLVMOrcIndirectStubsManagerRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcIndirectStubsManagerRef}, ism::IndirectStubsManager) = ism.ref
+
+function LocalIndirectStubsManager(triple)
+    ref = API.LLVMOrcCreateLocalIndirectStubsManager(triple)
+    IndirectStubsManager(ref)
+end
+
+function dispose(ism::IndirectStubsManager)
+    API.LLVMOrcDisposeIndirectStubsManager(ism)
+end
+
+@checked mutable struct LazyCallThroughManager
+    ref::API.LLVMOrcLazyCallThroughManagerRef
+end
+Base.unsafe_convert(::Type{API.LLVMOrcLazyCallThroughManagerRef}, lcm::LazyCallThroughManager) = lcm.ref
+
+function LocalLazyCallThroughManager(triple, es)
+    ref = Ref{API.LLVMOrcLazyCallThroughManagerRef}()
+    @check API.LLVMOrcCreateLocalLazyCallThroughManager(triple, es, C_NULL, ref)
+    LazyCallThroughManager(ref[])
+end
+
+function dispose(lcm::LazyCallThroughManager)
+    API.LLVMOrcDisposeLazyCallThroughManager(lcm)
+end
+
+function reexports(lctm::LazyCallThroughManager, ism::IndirectStubsManager, jd::JITDylib, symbols)
+    ref = API.LLVMOrcLazyReexports(lctm, ism, jd, symbols, length(symbols))
+    MaterializationUnit(ref)
+end
+
+#JuliaOJIT
+if has_julia_ojit()
+
+function ExecutionSession(jljit::JuliaOJIT)
+    es = API.JLJITGetLLVMOrcExecutionSession(jljit)
+    ExecutionSession(es)
+end
+
+function mangle(jljit::JuliaOJIT, name)
+    entry = API.JLJITMangleAndIntern(jljit, name)
+    return LLVMSymbol(entry)
+end
+
+"""
+    JITDylib(jljit::JuliaOJIT)
+
+Get the external JITDylib from the Julia JIT
+"""
+function JITDylib(jljit::JuliaOJIT)
+    ref = API.JLJITGetExternalJITDylib(jljit)
+    JITDylib(ref)
+end
+
+function add!(jljit::JuliaOJIT, jd::JITDylib, obj::MemoryBuffer)
+    @check API.JLJITAddObjectFile(jljit, jd, obj)
+    return nothing
+end
+
+function add!(jljit::JuliaOJIT, jd::JITDylib, mod::ThreadSafeModule)
+    @check API.JLJITAddLLVMIRModule(jljit, jd, mod)
+    return nothing
+end
+
+function lookup(jljit::JuliaOJIT, name, external_jd=true)
+    result = Ref{API.LLVMOrcJITTargetAddress}()
+    @check API.JLJITLookup(jljit, result, name, external_jd)
+    OrcTargetAddress(result[])
+end
+
+@checked struct IRCompileLayer
+    ref::API.LLVMOrcIRCompileLayerRef
+end
+
+Base.unsafe_convert(::Type{API.LLVMOrcIRCompileLayerRef}, il::IRCompileLayer) = il.ref
+
+function emit(il::IRCompileLayer, mr::MaterializationResponsibility, tsm::ThreadSafeModule)
+    API.LLVMExtraOrcIRCompileLayerEmit(il, mr, tsm)
+end
+
+function IRCompileLayer(jljit::JuliaOJIT)
+    ref = API.JLJITGetIRCompileLayer(jljit)
+    IRCompileLayer(ref)
+end
+
+export JuliaOJIT
+
 end

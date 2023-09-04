@@ -1,4 +1,4 @@
-@testset "bitcode" begin
+@testitem "bitcode" begin
 
 @dispose ctx=Context() begin
     invalid_bitcode = "invalid"

@@ -1,4 +1,4 @@
-@testset "ir" begin
+@testitem "ir" begin
 
 @dispose ctx=Context() begin
     invalid_ir = "invalid"

@@ -1,4 +1,4 @@
-@testset "analysis" begin
+@testitem "analysis" begin
 
 @dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
     ft = LLVM.FunctionType(LLVM.Int32Type())

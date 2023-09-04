@@ -1,4 +1,4 @@
-@testset "execution" begin
+@testitem "execution" begin
 
 @testset "generic values" begin
 

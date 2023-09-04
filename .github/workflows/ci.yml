@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.6', '1.7', '1.8', '1.9', 'nightly']
+        version: ['1.8', '1.9', 'nightly']
         os: ['ubuntu-latest', 'macOS-latest', 'windows-latest']
         arch: [x64]
         llvm_args: ['']
@@ -85,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ['release-1.6', 'release-1.7', 'release-1.8', 'release-1.9', 'master']
+        branch: ['release-1.8', 'release-1.9', 'master']
         os: ['ubuntu-latest', 'macOS-latest', 'windows-latest']
         arch: ['x64']
         llvm_args: ['']
@@ -114,9 +114,9 @@ jobs:
           - branch: 'master'
             os: 'macOS-latest'
             arch: 'x64'
-          # 1.6 requires gfortran, which isn't available on macOS runners
-          - branch: 'release-1.6'
-            os: 'macOS-latest'
+          # compilation failure
+          - branch: 'release-1.8'
+            os: 'windows-latest'
             arch: 'x64'
     steps:
       - uses: actions/checkout@v3
@@ -138,20 +138,21 @@ jobs:
       # compile Julia
       - name: Compile Julia
         run: |
-          sed -i.bak 's/exit 2/exit 0/g' julia/deps/tools/jlchecksum
-          make -C julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
-          echo $PWD/julia/usr/bin >> $GITHUB_PATH
+          mv julia ../  # move julia checkout out of the way, for ReTestItems.jl
+          sed -i.bak 's/exit 2/exit 0/g' ../julia/deps/tools/jlchecksum
+          make -C ../julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
+          echo $PWD/../julia/usr/bin >> $GITHUB_PATH
         if: runner.os != 'Windows'
       - name: Compile Julia (in msys2)
         shell: msys2 {0}
         run: |
-          echo $PWD
-          sed -i.bak 's/exit 2/exit 0/g' julia/deps/tools/jlchecksum
+          mv julia ../  # move julia checkout out of the way, for ReTestItems.jl
+          sed -i.bak 's/exit 2/exit 0/g' ../julia/deps/tools/jlchecksum
           # XXX: workaround for JuliaLang/julia#48081
-          make -C julia/deps install-csl && \
-          cp ${MINGW_PREFIX}/lib/libmsvcrt.a ./julia/usr/lib/libmsvcrt.a && \
-          make -C julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
-          echo $PWD/julia/usr/bin >> $GITHUB_PATH
+          make -C ../julia/deps install-csl && \
+          cp ${MINGW_PREFIX}/lib/libmsvcrt.a ../julia/usr/lib/libmsvcrt.a && \
+          make -C ../julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
+          echo $PWD/../julia/usr/bin >> $GITHUB_PATH
         if: runner.os == 'Windows'
 
       # set-up packages
@@ -191,7 +192,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@latest
         with:
-          version: '1.6'
+          version: '1.8'
       - name: Install dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy

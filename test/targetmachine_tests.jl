@@ -1,4 +1,4 @@
-@testset "targetmachine" begin
+@testitem "targetmachine" begin
 
 host_triple = triple()
 host_t = Target(triple=host_triple)

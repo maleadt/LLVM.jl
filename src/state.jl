@@ -44,8 +44,6 @@ end
 
 ## thread-safe contexts
 
-if LLVM.has_orc_v2()
-
 export ts_context, activate, deactivate, ts_context!
 
 _has_ts_context() = haskey(task_local_storage(), :LLVMTSContext) &&
@@ -79,6 +77,4 @@ function ts_context!(f, ts_ctx::ThreadSafeContext)
     finally
         deactivate(ts_ctx)
     end
-end
-
 end

@@ -1,4 +1,4 @@
-@testset "jljit" begin
+@testitem "jljit" begin
 
 let jljit=JuliaOJIT()
     dispose(jljit)
@@ -179,10 +179,6 @@ end
             @test ccall(pointer(addr), Int32, ()) == 42
             data[] = -1
             @test ccall(pointer(addr), Int32, ()) == -1
-
-            if LLVM.version() < v"13"
-                LLVM.release(name)
-            end
         end
         empty!(jd)
         @test_throws LLVMException lookup(jljit, sym)

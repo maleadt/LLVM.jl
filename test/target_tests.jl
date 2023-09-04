@@ -1,4 +1,4 @@
-@testset "target" begin
+@testitem "target" begin
     @test_throws ArgumentError Target(triple="invalid")
     @test_throws ArgumentError Target(name="invalid")
 

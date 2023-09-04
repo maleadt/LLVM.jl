@@ -1,3 +1,5 @@
+@testitem "instructions" setup=[TestHelpers] begin
+
 @testset "irbuilder" begin
 
 @dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("SomeModule") begin
@@ -500,4 +502,6 @@ end
             end
         end
     end
+end
+
 end

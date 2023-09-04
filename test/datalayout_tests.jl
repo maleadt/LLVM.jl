@@ -1,4 +1,4 @@
-@testset "datalayout" begin
+@testitem "datalayout" begin
 
 dlstr = "E-p:32:32-f128:128:128"
 

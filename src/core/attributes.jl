@@ -30,12 +30,9 @@ function Attribute(ref::API.LLVMAttributeRef)
         return EnumAttribute(ref)
     elseif convert(Core.Bool, API.LLVMIsStringAttribute(ref))
         return StringAttribute(ref)
+    elseif convert(Core.Bool, API.LLVMIsTypeAttribute(ref))
+        return TypeAttribute(ref)
     else
-        @static if LLVM.version() >= v"12"
-            if convert(Core.Bool, API.LLVMIsTypeAttribute(ref))
-                return TypeAttribute(ref)
-            end
-        end
         error("unknown attribute kind")
     end
 end

@@ -1,4 +1,4 @@
-@testset "utils" begin
+@testitem "utils" begin
 
 @testset "function cloning" begin
     @dispose ctx=Context() begin

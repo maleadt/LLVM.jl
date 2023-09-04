@@ -1,3 +1,5 @@
+@testitem "core" setup=[TestHelpers] begin
+
 struct TestStruct
     x::Bool
     y::Int64
@@ -10,8 +12,6 @@ end
 
 struct TestSingleton
 end
-
-@testset "core" begin
 
 @testset "context" begin
 
@@ -33,8 +33,6 @@ Context() do ctx end
     @test supports_typed_pointers(ctx) isa Bool
     if LLVM.version() > v"17"
         @test supports_typed_pointers(ctx) == false
-    elseif LLVM.version() < v"13"
-        @test supports_typed_pointers(ctx) == true
     end
 end
 
@@ -345,11 +343,9 @@ end
         @test val isa LLVM.Constant
     end
 
-    if LLVM.version() >= v"12"
-        let val = PoisonValue(typ)
-            @test ispoison(val)
-            @test val isa LLVM.Constant
-        end
+    let val = PoisonValue(typ)
+        @test ispoison(val)
+        @test val isa LLVM.Constant
     end
 
     end
@@ -1250,17 +1246,15 @@ end
             @test length(attrs) == 0
         end
 
-        if LLVM.version() >= v"12"
-            let attr = TypeAttribute("sret", LLVM.Int32Type())
-                @test kind(attr) != 0
-                @test value(attr) ==  LLVM.Int32Type()
+        let attr = TypeAttribute("sret", LLVM.Int32Type())
+            @test kind(attr) != 0
+            @test value(attr) ==  LLVM.Int32Type()
 
-                push!(attrs, attr)
-                @test collect(attrs) == [attr]
+            push!(attrs, attr)
+            @test collect(attrs) == [attr]
 
-                delete!(attrs, attr)
-                @test length(attrs) == 0
-            end
+            delete!(attrs, attr)
+            @test length(attrs) == 0
         end
     end
 
