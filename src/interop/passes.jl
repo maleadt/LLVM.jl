@@ -35,8 +35,4 @@ remove_ni!(pm::PassManager) = API.LLVMAddRemoveNIPass(pm)
 
 julia_licm!(pm::PassManager) = API.LLVMAddJuliaLICMPass(pm)
 
-if VERSION >= v"1.8.0-DEV.1120"
-    cpu_features!(pm::PassManager) = API.LLVMAddCPUFeaturesPass(pm)
-else
-    cpu_features!(pm::PassManager) = nothing
-end
+cpu_features!(pm::PassManager) = API.LLVMAddCPUFeaturesPass(pm)

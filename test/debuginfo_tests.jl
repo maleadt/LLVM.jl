@@ -47,16 +47,15 @@ DEBUG_METADATA_VERSION()
 
     foo = functions(mod)["foo"]
 
-    if LLVM.version() >= v"8.0"
-        sp = LLVM.get_subprogram(foo)
-        @test sp !== nothing
-        @test LLVM.line(sp) == 1
+    let sp = LLVM.get_subprogram(foo)
+      @test sp !== nothing
+      @test LLVM.line(sp) == 1
 
-        bar = functions(mod)["bar"]
-        @test LLVM.get_subprogram(bar) === nothing
-        LLVM.set_subprogram!(bar, sp)
-        @test LLVM.get_subprogram(bar) == sp
-      end
+      bar = functions(mod)["bar"]
+      @test LLVM.get_subprogram(bar) === nothing
+      LLVM.set_subprogram!(bar, sp)
+      @test LLVM.get_subprogram(bar) == sp
+    end
 
     bb = entry(foo)
 

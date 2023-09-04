@@ -1,288 +1,209 @@
-@static if LLVM.has_orc_v1() && !LLVM.is_asserts()  # XXX: dangling references abort
 @testitem "orc" begin
 
-let tm  = JITTargetMachine()
-    let orc = OrcJIT(tm)
-        dispose(orc)
-    end
+let lljit=LLJIT()
+    dispose(lljit)
+end
 
-    OrcJIT(tm) do orc
+LLJIT() do lljit
+end
+
+let ctx = ThreadSafeContext()
+    dispose(ctx)
+end
+
+ThreadSafeContext() do ctx
+end
+
+@testset "ThreadSafeModule" begin
+    @dispose ts_ctx=ThreadSafeContext() begin
+        ts_mod = ThreadSafeModule("jit")
+        @test_throws LLVMException ts_mod() do mod
+            error("Error")
+        end
+        run = Ref{Bool}(false)
+        ts_mod() do mod
+            run[] = true
+        end
+        @test run[]
+    end
+end
+
+@testset "JITDylib" begin
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT() begin
+        es = ExecutionSession(lljit)
+
+        @test LLVM.lookup_dylib(es, "my.so") === nothing
+
+        jd = JITDylib(es, "my.so")
+        jd_bare = JITDylib(es, "mybare.so", bare=true)
+
+        @test LLVM.lookup_dylib(es, "my.so") === jd
+
+        jd_main = JITDylib(lljit)
+
+        prefix = LLVM.get_prefix(lljit)
+        dg = LLVM.CreateDynamicLibrarySearchGeneratorForProcess(prefix)
+        add!(jd_main, dg)
+
+        addr = lookup(lljit, "jl_apply_generic")
+        @test pointer(addr) != C_NULL
     end
 end
 
 @testset "Undefined Symbol" begin
-    tm  = JITTargetMachine()
-    @dispose orc=OrcJIT(tm) ctx=Context() begin
-        mod = LLVM.Module("jit")
-        T_Int32 = LLVM.Int32Type()
-        ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
-        fn = LLVM.Function(mod, "mysum", ft)
-        linkage!(fn, LLVM.API.LLVMExternalLinkage)
-
-        fname = mangle(orc, "wrapper")
-        wrapper = LLVM.Function(mod, fname, ft)
-        # generate IR
-        @dispose builder=IRBuilder() begin
-            entry = BasicBlock(wrapper, "entry")
-            position!(builder, entry)
-
-            tmp = call!(builder, ft, fn, [parameters(wrapper)...])
-            ret!(builder, tmp)
-        end
-
-        triple!(mod, triple(tm))
-        @dispose pm=ModulePassManager() begin
-            add_library_info!(pm, triple(mod))
-            add_transform_info!(pm, tm)
-            run!(pm, mod)
-        end
-        verify(mod)
-
-        orc_mod = compile!(orc, mod)
-        @test_throws ErrorException address(orc, fname) == C_NULL
-
-        delete!(orc, orc_mod)
+    @dispose lljit=LLJIT() begin
+        @test_throws LLVMException lookup(lljit, string(gensym()))
     end
-end
 
-@testset "Custom Resolver" begin
-    tm  = JITTargetMachine()
-    @dispose orc=OrcJIT(tm) ctx=Context() begin
-        known_functions = Dict{String, OrcTargetAddress}()
-        fnames = Dict{String, Int}()
-        function lookup(name, ctx)
-            name = unsafe_string(name)
-            try
-                if !haskey(fnames, name)
-                    fnames[name] = 0
-                end
-                fnames[name] += 1
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT(;tm=JITTargetMachine()) begin
+        jd = JITDylib(lljit)
 
-                return known_functions[name].ptr
-            catch ex
-                @error "Exception during lookup" name exception=(ex, catch_backtrace())
-                error("OrcJIT: Could not find symbol")
+        ts_mod = ThreadSafeModule("jit")
+
+        # build the module
+        fname = "wrapper"
+        ts_mod() do mod
+            T_Int32 = LLVM.Int32Type()
+            ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
+            fn = LLVM.Function(mod, "mysum", ft)
+            linkage!(fn, LLVM.API.LLVMExternalLinkage)
+
+            wrapper = LLVM.Function(mod, fname, ft)
+            # generate IR
+            @dispose builder=IRBuilder() begin
+                entry = BasicBlock(wrapper, "entry")
+                position!(builder, entry)
+
+                tmp = call!(builder, ft, fn, [parameters(wrapper)...])
+                ret!(builder, tmp)
             end
+
+            # TODO: Get TM from lljit?
+            tm = JITTargetMachine()
+            triple!(mod, triple(lljit))
+            @dispose pm=ModulePassManager() begin
+                add_library_info!(pm, triple(mod))
+                add_transform_info!(pm, tm)
+                run!(pm, mod)
+            end
+            verify(mod)
         end
 
-        mod = LLVM.Module("jit")
-        T_Int32 = LLVM.Int32Type()
-        ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
-        fn = LLVM.Function(mod, "mysum", ft)
-        linkage!(fn, LLVM.API.LLVMExternalLinkage)
-
-        fname = mangle(orc, "wrapper")
-        wrapper = LLVM.Function(mod, fname, ft)
-        # generate IR
-        @dispose builder=IRBuilder() begin
-            entry = BasicBlock(wrapper, "entry")
-            position!(builder, entry)
-
-            tmp = call!(builder, ft, fn, [parameters(wrapper)...])
-            ret!(builder, tmp)
+        add!(lljit, jd, ts_mod)
+        @test_throws LLVMException redirect_stderr(devnull) do
+            # XXX: this reports an unhandled JIT session error;
+            #      can we handle it instead?
+            lookup(lljit, fname)
         end
-
-        triple!(mod, triple(tm))
-        @dispose pm=ModulePassManager() begin
-            add_library_info!(pm, triple(mod))
-            add_transform_info!(pm, tm)
-            run!(pm, mod)
-        end
-        verify(mod)
-
-        mysum_name = mangle(orc, "mysum")
-        known_functions[mysum_name] = OrcTargetAddress(@cfunction(+, Int32, (Int32, Int32)))
-
-        f_lookup = @cfunction($lookup, UInt64, (Cstring, Ptr{Cvoid}))
-        GC.@preserve f_lookup begin
-            orc_mod = compile!(orc, mod, f_lookup, C_NULL, lazy=true) # will capture f_lookup
-
-            addr = address(orc, fname)
-            @test errormsg(orc) == ""
-            addr2 = addressin(orc, orc_mod, fname)
-
-            @test addr == addr2
-            @test addr.ptr != 0
-            @test !haskey(fnames, mysum_name)
-
-            r = ccall(pointer(addr), Int32, (Int32, Int32), 1, 2) # uses f_lookup
-            @test r == 3
-        end
-
-        @test haskey(fnames, mysum_name)
-        @test fnames[mysum_name] == 1
-
-        empty!(fnames)
-        delete!(orc, orc_mod)
-    end
-end
-
-@testset "Default Resolver + Stub" begin
-    tm  = JITTargetMachine()
-    @dispose orc=OrcJIT(tm) ctx=Context() begin
-        mod = LLVM.Module("jit")
-        T_Int32 = LLVM.Int32Type()
-        ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
-        fn = LLVM.Function(mod, "mysum", ft)
-        linkage!(fn, LLVM.API.LLVMExternalLinkage)
-
-        fname = mangle(orc, "wrapper")
-        wrapper = LLVM.Function(mod, fname, ft)
-        # generate IR
-        @dispose builder=IRBuilder() begin
-            entry = BasicBlock(wrapper, "entry")
-            position!(builder, entry)
-
-            tmp = call!(builder, ft, fn, [parameters(wrapper)...])
-            ret!(builder, tmp)
-        end
-
-        triple!(mod, triple(tm))
-        @dispose pm=ModulePassManager() begin
-            add_library_info!(pm, triple(mod))
-            add_transform_info!(pm, tm)
-            run!(pm, mod)
-        end
-        verify(mod)
-
-        create_stub!(orc, mangle(orc, "mysum"), OrcTargetAddress(@cfunction(+, Int32, (Int32, Int32))))
-
-        orc_mod = compile!(orc, mod)
-
-        addr = address(orc, fname)
-        @test errormsg(orc) == ""
-
-        r = ccall(pointer(addr), Int32, (Int32, Int32), 1, 2)
-        @test r == 3
-
-        delete!(orc, orc_mod)
-    end
-end
-
-@testset "Default Resolver + Global Symbol" begin
-    tm  = JITTargetMachine()
-    @dispose orc=OrcJIT(tm) ctx=Context() begin
-        mod = LLVM.Module("jit")
-        T_Int32 = LLVM.Int32Type()
-        ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
-        mysum = mangle(orc, "mysum")
-        fn = LLVM.Function(mod, mysum, ft)
-        linkage!(fn, LLVM.API.LLVMExternalLinkage)
-
-        fname = mangle(orc, "wrapper")
-        wrapper = LLVM.Function(mod, fname, ft)
-        # generate IR
-        @dispose builder=IRBuilder() begin
-            entry = BasicBlock(wrapper, "entry")
-            position!(builder, entry)
-
-            tmp = call!(builder, ft, fn, [parameters(wrapper)...])
-            ret!(builder, tmp)
-        end
-
-        triple!(mod, triple(tm))
-        @dispose pm=ModulePassManager() begin
-            add_library_info!(pm, triple(mod))
-            add_transform_info!(pm, tm)
-            run!(pm, mod)
-        end
-        verify(mod)
-
-        # Should do pretty much the same as `@ccallable`
-        LLVM.add_symbol(mysum, @cfunction(+, Int32, (Int32, Int32)))
-        ptr = LLVM.find_symbol(mysum)
-        @test ptr !== C_NULL
-        @test ccall(ptr, Int32, (Int32, Int32), 1, 2) == 3
-
-        orc_mod = compile!(orc, mod, lazy=true)
-
-        addr = address(orc, fname)
-        @test errormsg(orc) == ""
-
-        r = ccall(pointer(addr), Int32, (Int32, Int32), 1, 2)
-        @test r == 3
-
-        delete!(orc, orc_mod)
     end
 end
 
 @testset "Loading ObjectFile" begin
-    tm  = JITTargetMachine()
-    @dispose orc=OrcJIT(tm) ctx=Context() begin
-        sym = mangle(orc, "SomeFunction")
+    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
+        jd = JITDylib(lljit)
 
-        mod = LLVM.Module("jit")
-        ft = LLVM.FunctionType(LLVM.VoidType())
-        fn = LLVM.Function(mod, sym, ft)
+        sym = "SomeFunction"
+        obj = @dispose ctx=Context() begin
+            mod = LLVM.Module("jit")
+            ft = LLVM.FunctionType(LLVM.VoidType())
+            fn = LLVM.Function(mod, sym, ft)
 
-        @dispose builder=IRBuilder() begin
-            entry = BasicBlock(fn, "entry")
-            position!(builder, entry)
-            ret!(builder)
+            @dispose builder=IRBuilder() begin
+                entry = BasicBlock(fn, "entry")
+                position!(builder, entry)
+                ret!(builder)
+            end
+            verify(mod)
+
+            tm  = JITTargetMachine()
+            emit(tm, mod, LLVM.API.LLVMObjectFile)
         end
-        verify(mod)
+        add!(lljit, jd, MemoryBuffer(obj))
 
-        obj = emit(tm, mod, LLVM.API.LLVMObjectFile)
+        addr = lookup(lljit, sym)
 
-        orc_m = add!(orc, MemoryBuffer(obj))
-        addr = address(orc, sym)
+        @test pointer(addr) != C_NULL
 
-        @test addr.ptr != 0
-        delete!(orc, orc_m)
+        empty!(jd)
+        @test_throws LLVMException lookup(lljit, sym)
+    end
+
+    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
+        jd = JITDylib(lljit)
+
+        sym = "SomeFunction"
+        obj = @dispose ctx=Context() begin
+            mod = LLVM.Module("jit")
+            ft = LLVM.FunctionType(LLVM.Int32Type())
+            fn = LLVM.Function(mod, sym, ft)
+
+            gv = LLVM.GlobalVariable(mod, LLVM.Int32Type(), "gv")
+            LLVM.extinit!(gv, true)
+
+            @dispose builder=IRBuilder() begin
+                entry = BasicBlock(fn, "entry")
+                position!(builder, entry)
+                val = load!(builder, LLVM.Int32Type(), gv)
+                ret!(builder, val)
+            end
+            verify(mod)
+
+            tm  = JITTargetMachine()
+            emit(tm, mod, LLVM.API.LLVMObjectFile)
+        end
+
+        data = Ref{Int32}(42)
+        GC.@preserve data begin
+            address = LLVM.API.LLVMOrcJITTargetAddress(
+                reinterpret(UInt, Base.unsafe_convert(Ptr{Int32}, data)))
+            flags = LLVM.API.LLVMJITSymbolFlags(
+                LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
+            name = mangle(lljit, "gv")
+            symbol = LLVM.API.LLVMJITEvaluatedSymbol(address, flags)
+            gv = if LLVM.version() >= v"15"
+                LLVM.API.LLVMOrcCSymbolMapPair(name, symbol)
+            else
+                LLVM.API.LLVMJITCSymbolMapPair(name, symbol)
+            end
+
+            mu = LLVM.absolute_symbols(Ref(gv))
+            LLVM.define(jd, mu)
+
+            add!(lljit, jd, MemoryBuffer(obj))
+
+            addr = lookup(lljit, sym)
+            @test pointer(addr) != C_NULL
+
+            @test ccall(pointer(addr), Int32, ()) == 42
+            data[] = -1
+            @test ccall(pointer(addr), Int32, ()) == -1
+        end
+        empty!(jd)
+        @test_throws LLVMException lookup(lljit, sym)
     end
 end
 
-@testset "Stubs" begin
-    tm  = JITTargetMachine()
-    @dispose orc=OrcJIT(tm) ctx=Context() begin
-        toggle = Ref{Bool}(false)
-        on()  = (toggle[] = true; nothing)
-        off() = (toggle[] = false; nothing)
+@testset "ObjectLinkingLayer" begin
+    called_oll = Ref{Int}(0)
 
-        # Note that `CFunction` objects can be GC'd (???)
-        # and we capture them below.
-        func_on = @cfunction($on, Cvoid, ())
-        GC.@preserve func_on begin
-            ptr = Base.unsafe_convert(Ptr{Cvoid}, func_on)
-
-            create_stub!(orc, "mystub", OrcTargetAddress(ptr))
-            addr = address(orc, "mystub")
-
-            @test addr.ptr != 0
-            @test toggle[] == false
-
-            ccall(pointer(addr), Cvoid, ())
-            @test toggle[] == true
-        end
-
-        func_off = @cfunction($off, Cvoid, ())
-        GC.@preserve func_off begin
-            ptr = Base.unsafe_convert(Ptr{Cvoid}, func_off)
-
-            set_stub!(orc, "mystub", OrcTargetAddress(ptr))
-
-            @test addr == address(orc, "mystub")
-            @test toggle[] == true
-
-            ccall(pointer(addr), Cvoid, ())
-            @test toggle[] == false
-        end
+    ollc = LLVM.ObjectLinkingLayerCreator() do es, triple
+        oll = ObjectLinkingLayer(es)
+        register!(oll, GDBRegistrationListener())
+        called_oll[] += 1
+        return oll
     end
-end
 
-@testset "callback!" begin
-    tm  = JITTargetMachine()
-    @dispose orc=OrcJIT(tm) begin
-        triggered = Ref{Bool}(false)
+    GC.@preserve ollc begin
+        builder = LLJITBuilder()
+        linkinglayercreator!(builder, ollc)
+        @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT(builder) begin
+            jd = JITDylib(lljit)
 
-        # Setup the lazy callback for creating a module
-        function callback(orc_ref::LLVM.API.LLVMOrcJITStackRef, callback_ctx::Ptr{Cvoid})
-            orc = OrcJIT(orc_ref)
-            sym = mangle(orc, "SomeFunction")
+            ts_mod = ThreadSafeModule("jit")
+            sym = "SomeFunctionOLL"
 
-            # 1. IRGen & Optimize the module
-            orc_mod = @dispose ctx=Context() begin
-                mod = LLVM.Module("jit")
+            # build the module
+            ts_mod() do mod
                 ft = LLVM.FunctionType(LLVM.VoidType())
                 fn = LLVM.Function(mod, sym, ft)
 
@@ -292,41 +213,88 @@ end
                     ret!(builder)
                 end
                 verify(mod)
-
-                triple!(mod, triple(tm))
-                @dispose pm=ModulePassManager() begin
-                    add_library_info!(pm, triple(mod))
-                    add_transform_info!(pm, tm)
-                    run!(pm, mod)
-                end
-                verify(mod)
-
-                # 2. Add the IR module to the JIT
-                compile!(orc, mod)
             end
 
-            # 3. Obtain address of compiled module
-            addr = addressin(orc, orc_mod, sym)
-
-            # 4. Update the stub pointer to point to the recently compiled module
-            set_stub!(orc, "lazystub", addr)
-
-            # 5. Return the address of tie implementation, since we are going to call it now
-            triggered[] = true
-            return addr.ptr
+            add!(lljit, jd, ts_mod)
+            addr = lookup(lljit, sym)
+            @test pointer(addr) != C_NULL
         end
-        c_callback = @cfunction($callback, UInt64, (LLVM.API.LLVMOrcJITStackRef, Ptr{Cvoid}))
+    end
+    @test called_oll[] >= 1
+end
 
-        GC.@preserve c_callback begin
-            initial_addr = callback!(orc, c_callback, C_NULL)
-            create_stub!(orc, "lazystub", initial_addr)
-            addr = address(orc, "lazystub")
+@testset "Lazy" begin
+    @dispose ts_ctx=ThreadSafeContext() lljit=LLJIT() begin
+        jd = JITDylib(lljit)
+        es = ExecutionSession(lljit)
 
-            ccall(pointer(addr), Cvoid, ()) # Triggers compilation
+        lctm = LLVM.LocalLazyCallThroughManager(triple(lljit), es)
+        ism = LLVM.LocalIndirectStubsManager(triple(lljit))
+        try
+            # 1. define entry symbol
+            entry_sym = "foo_entry"
+            flags = LLVM.API.LLVMJITSymbolFlags(
+                LLVM.API.LLVMJITSymbolGenericFlagsCallable |
+                LLVM.API.LLVMJITSymbolGenericFlagsExported, 0)
+            entry = LLVM.API.LLVMOrcCSymbolAliasMapPair(
+                mangle(lljit, entry_sym),
+                LLVM.API.LLVMOrcCSymbolAliasMapEntry(
+                    mangle(lljit, "foo"), flags))
+
+            mu = LLVM.reexports(lctm, ism, jd, Ref(entry))
+            LLVM.define(jd, mu)
+
+            # 2. Lookup address of entry symbol
+            addr = lookup(lljit, entry_sym)
+            @test pointer(addr) != C_NULL
+
+            # 3. add MU that will call back into the compiler
+            sym = LLVM.API.LLVMOrcCSymbolFlagsMapPair(mangle(lljit, "foo"), flags)
+
+            function materialize(mr)
+                syms = LLVM.get_requested_symbols(mr)
+                @assert length(syms) == 1
+
+                # syms contains mangled symbols
+                # we need to emit an unmangled one
+
+                ts_mod = ThreadSafeModule("jit")
+                ts_mod() do mod
+                    LLVM.apply_datalayout!(lljit, mod)
+
+                    T_Int32 = LLVM.Int32Type()
+                    ft = LLVM.FunctionType(T_Int32, [T_Int32, T_Int32])
+
+                    fn = LLVM.Function(mod, "foo", ft)
+
+                    # generate IR
+                    @dispose builder=IRBuilder() begin
+                        entry = BasicBlock(fn, "entry")
+                        position!(builder, entry)
+
+                        tmp = add!(builder, parameters(fn)...)
+                        ret!(builder, tmp)
+                    end
+                end
+
+                il = LLVM.IRTransformLayer(lljit)
+                LLVM.emit(il, mr, ts_mod)
+
+                return nothing
+            end
+
+            function discard(jd, sym)
+            end
+
+            mu = LLVM.CustomMaterializationUnit("fooMU", Ref(sym), materialize, discard)
+            LLVM.define(jd, mu)
+
+            @test ccall(pointer(addr), Int32, (Int32, Int32), 1, 2) == 3
+        finally
+            dispose(lctm)
+            dispose(ism)
         end
-        @test triggered[]
     end
 end
 
-end
 end

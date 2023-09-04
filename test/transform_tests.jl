@@ -33,9 +33,7 @@ end
     bit_tracking_dce!(pm)
     alignment_from_assumptions!(pm)
     cfgsimplification!(pm)
-    if LLVM.version() >= v"12"
-        cfgsimplification!(pm; hoist_common_insts=true)
-    end
+    cfgsimplification!(pm; hoist_common_insts=true)
     dead_store_elimination!(pm)
     scalarizer!(pm)
     merged_load_store_motion!(pm)
@@ -68,9 +66,6 @@ end
     scalar_repl_aggregates_ssa!(pm)
     simplify_lib_calls!(pm)
     tail_call_elimination!(pm)
-    if LLVM.version() < v"12"
-        constant_propagation!(pm)
-    end
     demote_memory_to_register!(pm)
     verifier!(pm)
     correlated_value_propagation!(pm)
@@ -96,9 +91,6 @@ end
     always_inliner!(pm)
     global_dce!(pm)
     global_optimizer!(pm)
-    if LLVM.version() < v"12"
-        ipconstant_propagation!(pm)
-    end
     prune_eh!(pm)
     ipsccp!(pm)
     strip_dead_prototypes!(pm)

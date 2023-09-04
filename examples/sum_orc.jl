@@ -41,51 +41,21 @@ function codegen!(mod::LLVM.Module, name, tm)
 end
 
 tm = JITTargetMachine()
-if LLVM.has_orc_v2()
-    # XXX: LLJIT calls TargetMachineBuilder which disposes the TargetMachine
-    jit = LLJIT(; tm=JITTargetMachine())
+# XXX: LLJIT calls TargetMachineBuilder which disposes the TargetMachine
+jit = LLJIT(; tm=JITTargetMachine())
 
-    @dispose ts_ctx=ThreadSafeContext() begin
-        ts_mod = ThreadSafeModule("jit")
-        name = "sum_orc.jl"
-        ts_mod() do mod
-            codegen!(mod, name, tm)
-        end
-
-        jd = JITDylib(jit)
-        add!(jit, jd, ts_mod)
-        addr = lookup(jit, name)
-
-        @eval call_sum(x, y) = ccall($(pointer(addr)), Int32, (Int32, Int32), x, y)
-    end
-else
-    jit = OrcJIT(tm)
-    register!(jit, GDBRegistrationListener())
-
-    @dispose ctx=Context() begin
-        mod = LLVM.Module("jit")
-        name = mangle(jit, "sum_orc.jl")
+@dispose ts_ctx=ThreadSafeContext() begin
+    ts_mod = ThreadSafeModule("jit")
+    name = "sum_orc.jl"
+    ts_mod() do mod
         codegen!(mod, name, tm)
-
-        # For debugging:
-        #   asm = String(convert(Vector{UInt8}, emit(tm, mod, LLVM.API.LLVMAssemblyFile)))
-        #   write(stdout, asm)
-
-        jitted_mod = compile!(jit, mod)
-
-        addr = address(jit, name)
-        addr2 = addressin(jit, jitted_mod, name)
-        @test addr == addr2
-        @test addr.ptr != 0
-
-        # For debugging:
-        #   ccall(:jl_breakpoint, Cvoid, (Any,), pointer(addr))
-        # Then in GDB
-        #   b *(*(uint64_t*)v)
-        @eval call_sum(x, y) = ccall($(pointer(addr)), Int32, (Int32, Int32), x, y)
     end
 
-    unregister!(jit, GDBRegistrationListener())
+    jd = JITDylib(jit)
+    add!(jit, jd, ts_mod)
+    addr = lookup(jit, name)
+
+    @eval call_sum(x, y) = ccall($(pointer(addr)), Int32, (Int32, Int32), x, y)
 end
 
 @test call_sum(x, y) == x + y
