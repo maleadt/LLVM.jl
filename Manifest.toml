@@ -2,7 +2,7 @@
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "0957f48034426a45b1179c095e1ee827baff5f96"
+project_hash = "5a0bbfc39c803f75daafe91617edc0c2dfa7877b"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -43,9 +43,9 @@ version = "1.5.0"
 
 [[deps.LLVMExtra_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl", "TOML"]
-git-tree-sha1 = "efb1613d58c348cebd73722ec940951953a7ae5b"
+git-tree-sha1 = "7ca6850ae880cc99b59b88517545f91a52020afa"
 uuid = "dad2f222-ce93-54a1-a47d-0025e8a3acab"
-version = "0.0.24+0"
+version = "0.0.25+0"
 
 [[deps.LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
