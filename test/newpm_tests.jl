@@ -588,8 +588,13 @@ host_t = Target(triple=host_triple)
         add!(mpm, RemoveNIPass())
         add!(mpm, NewPMFunctionPassManager) do fpm
             add!(fpm, LateLowerGCPass())
+            if VERSION >= v"1.11.0-DEV.208"
+                add!(fpm, FinalLowerGCPass())
+            end
         end
-        add!(mpm, FinalLowerGCPass())
+        if VERSION < v"1.11.0-DEV.208"
+            add!(mpm, FinalLowerGCPass())
+        end
         add!(mpm, NewPMFunctionPassManager) do fpm
             add!(fpm, GVNPass())
             add!(fpm, SCCPPass())

@@ -5,9 +5,11 @@ import ..LLVM: pass_string, options_string, add!
 @module_pass "CPUFeatures" CPUFeaturesPass
 @module_pass "RemoveNI" RemoveNIPass
 @module_pass "LowerSIMDLoop" LowerSIMDLoopPass
-@module_pass "FinalLowerGC" FinalLowerGCPass
 @module_pass "RemoveJuliaAddrspaces" RemoveJuliaAddrspacesPass
 @module_pass "RemoveAddrspaces" RemoveAddrspacesPass
+@static if VERSION < v"1.11.0-DEV.208"
+    @module_pass "FinalLowerGC" FinalLowerGCPass
+end
 
 struct MultiVersioningPassOptions
     external::Core.Bool
@@ -29,6 +31,9 @@ options_string(options::LowerPTLSPassOptions) = options.imaging ? "<imaging>" : 
 @function_pass "AllocOpt" AllocOptPass
 @function_pass "PropagateJuliaAddrspaces" PropagateJuliaAddrspacesPass
 @function_pass "LowerExcHandlers" LowerExcHandlersPass
+@static if VERSION >= v"1.11.0-DEV.208"
+    @function_pass "FinalLowerGC" FinalLowerGCPass
+end
 
 struct GCInvariantVerifierPassOptions
     strong::Core.Bool
