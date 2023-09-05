@@ -31,7 +31,8 @@ Base.show(io::IO, aa::AAManager) = print(io, analysis_string(aa))
 @alias_analysis "tbaa" TypeBasedAA
 
 add!(am::AAManager, aa::NewPMAliasAnalysis) = push!(am.aas, analysis_string(aa))
-add!(am::AAManager, aas::AbstractVector{<:NewPMAliasAnalysis}) = append!(am.aas, analysis_string.(aas))
+add!(am::AAManager, aas::AbstractVector{<:NewPMAliasAnalysis}) =
+    append!(am.aas, analysis_string.(aas))
 add!(am::AAManager, tm::TargetMachine) = am.tm = tm
 
 export TargetIRAnalysis, TargetLibraryAnalysis
@@ -46,10 +47,15 @@ struct TargetLibraryAnalysis
 end
 analysis_string(::TargetLibraryAnalysis) = "target-library-analysis"
 
-add!(fam::FunctionAnalysisManager, analysis::TargetIRAnalysis) = convert(Core.Bool, API.LLVMRegisterTargetIRAnalysis(fam, analysis.tm))
-add!(fam::FunctionAnalysisManager, analysis::TargetLibraryAnalysis) = convert(Core.Bool, API.LLVMRegisterTargetLibraryAnalysis(fam, analysis.triple, length(analysis.triple)))
+add!(fam::FunctionAnalysisManager, analysis::TargetIRAnalysis) =
+    convert(Core.Bool, API.LLVMRegisterTargetIRAnalysis(fam, analysis.tm))
+add!(fam::FunctionAnalysisManager, analysis::TargetLibraryAnalysis) =
+    convert(Core.Bool, API.LLVMRegisterTargetLibraryAnalysis(fam, analysis.triple,
+                                                             length(analysis.triple)))
 
-function analysis_managers(f::Core.Function, pb::Union{Nothing,PassBuilder}=nothing, tm::Union{Nothing,TargetMachine}=nothing, aa_stack::AbstractVector{<:NewPMAliasAnalysis}=NewPMAliasAnalysis[])
+function analysis_managers(f::Core.Function, pb::Union{Nothing,PassBuilder}=nothing,
+                           tm::Union{Nothing,TargetMachine}=nothing,
+                           aa_stack::AbstractVector{<:NewPMAliasAnalysis}=NewPMAliasAnalysis[])
     @dispose lam=LoopAnalysisManager() fam=FunctionAnalysisManager() cam=CGSCCAnalysisManager() mam=ModuleAnalysisManager() begin
         if !isempty(aa_stack)
             add!(fam, AAManager) do aam

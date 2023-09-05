@@ -339,6 +339,7 @@ host_t = Target(triple=host_triple)
         register!(pb, lam, fam, cam, mam)
     end
     @test "Registered an empty AA manager!" != ""
+
     analysis_managers() do lam, fam, cam, mam
         add!(fam, AAManager) do aam
             add!(aam, BasicAA())
@@ -346,6 +347,7 @@ host_t = Target(triple=host_triple)
         register!(pb, lam, fam, cam, mam)
     end
     @test "Registered a single alias analysis pass!" != ""
+
     analysis_managers() do lam, fam, cam, mam
         add!(fam, AAManager) do aam
             add!(aam, BasicAA())
@@ -359,13 +361,16 @@ host_t = Target(triple=host_triple)
         register!(pb, lam, fam, cam, mam)
     end
     @test "Registered all alias analysis passes!" != ""
+
     analysis_managers() do lam, fam, cam, mam
         add!(fam, TargetIRAnalysis(tm))
         add!(fam, TargetLibraryAnalysis(host_triple))
         register!(pb, lam, fam, cam, mam)
     end
     @test "Registered target analyses!" != ""
-    analysis_managers(nothing, tm, [BasicAA(), ScopedNoAliasAA(), TypeBasedAA()]) do lam, fam, cam, mam
+
+    aa_stack = [BasicAA(), ScopedNoAliasAA(), TypeBasedAA()]
+    analysis_managers(nothing, tm, aa_stack) do lam, fam, cam, mam
         register!(pb, lam, fam, cam, mam)
     end
     @test "Implicitly registered alias analyses and target analyses!" != ""
@@ -412,7 +417,7 @@ end # testset "newpm analyses"
     host_t = Target(triple=host_triple)
 
     @dispose tm=TargetMachine(host_t, host_triple) begin
-        @test isnothing(run!(SimplifyCFGPass(), fn, tm, [BasicAA(), ScopedNoAliasAA(), TypeBasedAA()]))
+        @test isnothing(run!(SimplifyCFGPass(), fn, tm))
     end
 
     @test "Successfully forwarded target machine and alias analyses!" != ""
@@ -468,8 +473,8 @@ end
     host_t = Target(triple=host_triple)
 
     @dispose tm=TargetMachine(host_t, host_triple) begin
-        @test isnothing(run!(SimplifyCFGPass(), mod, tm, [BasicAA(), ScopedNoAliasAA(), TypeBasedAA(), GlobalsAA()]))
-        @test_throws ArgumentError run!(SimplifyCFGPass(), fn, tm, [BasicAA(), ScopedNoAliasAA(), TypeBasedAA(), GlobalsAA()])
+        @test isnothing(run!(SimplifyCFGPass(), mod, tm, [GlobalsAA()]))
+        @test_throws ArgumentError run!(SimplifyCFGPass(), fn, tm, [GlobalsAA()])
     end
 end
 
@@ -618,7 +623,7 @@ host_t = Target(triple=host_triple)
 
             ret!(builder)
 
-            run!(mpm, mod, tm, [BasicAA(), ScopedNoAliasAA(), TypeBasedAA()])
+            run!(mpm, mod, tm)
         end
     end
 end

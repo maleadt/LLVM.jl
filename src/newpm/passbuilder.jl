@@ -92,3 +92,17 @@ function passbuilder(pm::NewPMPassManager)::PassBuilder
     end
     pm.pb
 end
+
+
+## pipelines
+
+# we generally don't need to define pipelines here, as we can reuse LLVM's,
+# but the AA stack needs to be passed explicitly, so define a default one here.
+
+function default_aa_pipeline(; global_analyses::Core.Bool=false)
+    aa_stack = NewPMAliasAnalysis[BasicAA(), ScopedNoAliasAA(), TypeBasedAA()]
+    if global_analyses
+        push!(aa_stack, GlobalsAA())
+    end
+    return aa_stack
+end

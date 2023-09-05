@@ -695,7 +695,7 @@ end
 
 function run!(pm::NewPMModulePassManager, m::Module,
               tm::Union{Nothing,TargetMachine} = nothing,
-              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = NewPMAliasAnalysis[])
+              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = default_aa_pipeline(global_analyses=true))
     pb = passbuilder(pm)
     analysis_managers(pb, tm, aa_stack) do lam, fam, cam, mam
         dispose(run!(pm, m, mam))
@@ -704,7 +704,7 @@ end
 
 function run!(pm::NewPMFunctionPassManager, f::Function,
               tm::Union{Nothing,TargetMachine} = nothing,
-              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = NewPMAliasAnalysis[])
+              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = default_aa_pipeline())
     pb = passbuilder(pm)
     analysis_managers(pb, tm, aa_stack) do lam, fam, cam, mam
         dispose(run!(pm, f, fam))
@@ -712,7 +712,7 @@ function run!(pm::NewPMFunctionPassManager, f::Function,
 end
 
 function run!(pass::NewPMLLVMPass, m::Module, tm::Union{Nothing,TargetMachine} = nothing,
-              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = NewPMAliasAnalysis[])
+              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = default_aa_pipeline(global_analyses=true))
     needs_globals_aa_recompute = any(aa_stack) do aa
         isa(aa, GlobalsAA)
     end
@@ -744,11 +744,8 @@ function run!(pass::NewPMLLVMPass, m::Module, tm::Union{Nothing,TargetMachine} =
 end
 
 function run!(pass::NewPMLLVMPass, f::Function, tm::Union{Nothing,TargetMachine} = nothing,
-              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = NewPMAliasAnalysis[])
-    needs_globals_aa_recompute = any(aa_stack) do aa
-        isa(aa, GlobalsAA)
-    end
-    if needs_globals_aa_recompute
+              aa_stack::AbstractVector{<:NewPMAliasAnalysis} = default_aa_pipeline())
+    if any(aa->isa(aa, GlobalsAA), aa_stack)
         throw(ArgumentError("GlobalsAA needs to be computed on a module, not a function!"))
     end
     @dispose pb=PassBuilder(tm) fpm=NewPMFunctionPassManager(pb) begin
