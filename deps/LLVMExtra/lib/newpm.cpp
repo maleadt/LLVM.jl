@@ -3,12 +3,14 @@
 #if LLVM_VERSION_MAJOR >= 15
 
 #include <llvm/Analysis/AliasAnalysis.h>
+#include <llvm/Analysis/TargetTransformInfo.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/StandardInstrumentations.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Function.h>
+#include <llvm/Target/TargetMachine.h>
 
-#include "llvm/Support/CBindingWrapping.h"
+#include <llvm/Support/CBindingWrapping.h>
 
 using llvm::wrap;
 using llvm::unwrap;
@@ -43,7 +45,6 @@ DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::ModuleAnalysisManager, LLVMModuleAnalys
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::CGSCCAnalysisManager, LLVMCGSCCAnalysisManagerRef)
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::FunctionAnalysisManager, LLVMFunctionAnalysisManagerRef)
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::LoopAnalysisManager, LLVMLoopAnalysisManagerRef)
-DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::AAManager, LLVMAAManagerRef)
 
 LLVMModuleAnalysisManagerRef LLVMCreateNewPMModuleAnalysisManager(void) {
     return wrap(new llvm::ModuleAnalysisManager());
@@ -57,9 +58,6 @@ LLVMFunctionAnalysisManagerRef LLVMCreateNewPMFunctionAnalysisManager(void) {
 LLVMLoopAnalysisManagerRef LLVMCreateNewPMLoopAnalysisManager(void) {
     return wrap(new llvm::LoopAnalysisManager());
 }
-LLVMAAManagerRef LLVMCreateNewPMAAManager(void) {
-    return wrap(new llvm::AAManager());
-}
 
 void LLVMDisposeNewPMModuleAnalysisManager(LLVMModuleAnalysisManagerRef AM) {
     delete unwrap(AM);
@@ -71,9 +69,6 @@ void LLVMDisposeNewPMFunctionAnalysisManager(LLVMFunctionAnalysisManagerRef AM) 
     delete unwrap(AM);
 }
 void LLVMDisposeNewPMLoopAnalysisManager(LLVMLoopAnalysisManagerRef AM) {
-    delete unwrap(AM);
-}
-void LLVMDisposeNewPMAAManager(LLVMAAManagerRef AM) {
     delete unwrap(AM);
 }
 
@@ -158,9 +153,6 @@ LLVMErrorRef LLVMPassBuilderParseFunctionPassPipeline(LLVMPassBuilderRef PB, LLV
 LLVMErrorRef LLVMPassBuilderParseLoopPassPipeline(LLVMPassBuilderRef PB, LLVMLoopPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength) {
     return wrap(unwrap(PB)->parsePassPipeline(*unwrap(PM), llvm::StringRef(PipelineText, PipelineTextLength)));
 }
-LLVMErrorRef LLVMPassBuilderParseAAPipeline(LLVMPassBuilderRef PB, LLVMAAManagerRef AM, const char *PipelineText, size_t PipelineTextLength) {
-    return wrap(unwrap(PB)->parseAAPipeline(*unwrap(AM), llvm::StringRef(PipelineText, PipelineTextLength)));
-}
 
 void LLVMPassBuilderRegisterModuleAnalyses(LLVMPassBuilderRef PB, LLVMModuleAnalysisManagerRef AM) {
     unwrap(PB)->registerModuleAnalyses(*unwrap(AM));
@@ -198,8 +190,8 @@ void LLVMMPMAddCGPM(LLVMModulePassManagerRef PM, LLVMCGSCCPassManagerRef NestedP
 void LLVMCGPMAddFPM(LLVMCGSCCPassManagerRef PM, LLVMFunctionPassManagerRef NestedPM) {
     unwrap(PM)->addPass(llvm::createCGSCCToFunctionPassAdaptor(std::move(*unwrap(NestedPM))));
 }
-void LLVMFPMAddLPM(LLVMFunctionPassManagerRef PM, LLVMLoopPassManagerRef NestedPM) {
-    unwrap(PM)->addPass(llvm::createFunctionToLoopPassAdaptor(std::move(*unwrap(NestedPM))));
+void LLVMFPMAddLPM(LLVMFunctionPassManagerRef PM, LLVMLoopPassManagerRef NestedPM, LLVMBool UseMemorySSA) {
+    unwrap(PM)->addPass(llvm::createFunctionToLoopPassAdaptor(std::move(*unwrap(NestedPM)), UseMemorySSA));
 }
 void LLVMMPMAddFPM(LLVMModulePassManagerRef PM, LLVMFunctionPassManagerRef NestedPM) {
     unwrap(PM)->addPass(llvm::createModuleToFunctionPassAdaptor(std::move(*unwrap(NestedPM))));
@@ -237,6 +229,27 @@ void LLVMMPMAddJuliaPass(LLVMModulePassManagerRef PM, LLVMJuliaModulePassCallbac
 }
 void LLVMFPMAddJuliaPass(LLVMFunctionPassManagerRef PM, LLVMJuliaFunctionPassCallback Callback, void *Thunk) {
     unwrap(PM)->addPass(JuliaCustomFunctionPass(Callback, Thunk));
+}
+
+// Target Analyses
+
+LLVMBool LLVMRegisterTargetIRAnalysis(LLVMFunctionAnalysisManagerRef FAM, LLVMTargetMachineRef TM) {
+    return unwrap(FAM)->registerPass([&] { return llvm::TargetIRAnalysis(unwrap(TM)->getTargetIRAnalysis()); });
+}
+LLVMBool LLVMRegisterTargetLibraryAnalysis(LLVMFunctionAnalysisManagerRef FAM, const char *Triple, size_t TripleLength) {
+    return unwrap(FAM)->registerPass([&] { return llvm::TargetLibraryAnalysis(llvm::TargetLibraryInfoImpl(llvm::Triple(llvm::StringRef(Triple, TripleLength)))); });
+}
+
+// Alias Analyses
+LLVMErrorRef LLVMRegisterAliasAnalyses(LLVMFunctionAnalysisManagerRef FAM, LLVMPassBuilderRef PB, LLVMTargetMachineRef TM, const char *Analyses, size_t AnalysesLength) {
+    llvm::AAManager AA;
+    auto err = unwrap(PB)->parseAAPipeline(AA, llvm::StringRef(Analyses, AnalysesLength));
+    if (err)
+        return wrap(std::move(err));
+    if (TM)
+        unwrap(TM)->registerDefaultAliasAnalyses(AA);
+    unwrap(FAM)->registerPass([&] { return std::move(AA); });
+    return LLVMErrorSuccess;
 }
 
 #endif

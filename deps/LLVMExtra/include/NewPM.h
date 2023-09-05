@@ -26,19 +26,16 @@ typedef struct LLVMOpaqueModuleAnalysisManager *LLVMModuleAnalysisManagerRef;
 typedef struct LLVMOpaqueCGSCCAnalysisManager *LLVMCGSCCAnalysisManagerRef;
 typedef struct LLVMOpaqueFunctionAnalysisManager *LLVMFunctionAnalysisManagerRef;
 typedef struct LLVMOpaqueLoopAnalysisManager *LLVMLoopAnalysisManagerRef;
-typedef struct LLVMOpaqueAAManager *LLVMAAManagerRef;
 
 LLVMModuleAnalysisManagerRef LLVMCreateNewPMModuleAnalysisManager(void);
 LLVMCGSCCAnalysisManagerRef LLVMCreateNewPMCGSCCAnalysisManager(void);
 LLVMFunctionAnalysisManagerRef LLVMCreateNewPMFunctionAnalysisManager(void);
 LLVMLoopAnalysisManagerRef LLVMCreateNewPMLoopAnalysisManager(void);
-LLVMAAManagerRef LLVMCreateNewPMAAManager(void);
 
 void LLVMDisposeNewPMModuleAnalysisManager(LLVMModuleAnalysisManagerRef AM);
 void LLVMDisposeNewPMCGSCCAnalysisManager(LLVMCGSCCAnalysisManagerRef AM);
 void LLVMDisposeNewPMFunctionAnalysisManager(LLVMFunctionAnalysisManagerRef AM);
 void LLVMDisposeNewPMLoopAnalysisManager(LLVMLoopAnalysisManagerRef AM);
-void LLVMDisposeNewPMAAManager(LLVMAAManagerRef AM);
 
 typedef struct LLVMOpaqueModulePassManager *LLVMModulePassManagerRef;
 typedef struct LLVMOpaqueCGSCCPassManager *LLVMCGSCCPassManagerRef;
@@ -79,7 +76,6 @@ LLVMErrorRef LLVMPassBuilderParseModulePassPipeline(LLVMPassBuilderRef PB, LLVMM
 LLVMErrorRef LLVMPassBuilderParseCGSCCPassPipeline(LLVMPassBuilderRef PB, LLVMCGSCCPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength);
 LLVMErrorRef LLVMPassBuilderParseFunctionPassPipeline(LLVMPassBuilderRef PB, LLVMFunctionPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength);
 LLVMErrorRef LLVMPassBuilderParseLoopPassPipeline(LLVMPassBuilderRef PB, LLVMLoopPassManagerRef PM, const char *PipelineText, size_t PipelineTextLength);
-LLVMErrorRef LLVMPassBuilderParseAAPipeline(LLVMPassBuilderRef PB, LLVMAAManagerRef AM, const char *PipelineText, size_t PipelineTextLength);
 
 void LLVMPassBuilderRegisterModuleAnalyses(LLVMPassBuilderRef PB, LLVMModuleAnalysisManagerRef AM);
 void LLVMPassBuilderRegisterCGSCCAnalyses(LLVMPassBuilderRef PB, LLVMCGSCCAnalysisManagerRef AM);
@@ -95,7 +91,7 @@ void LLVMLPMAddLPM(LLVMLoopPassManagerRef PM, LLVMLoopPassManagerRef NestedPM);
 
 void LLVMMPMAddCGPM(LLVMModulePassManagerRef PM, LLVMCGSCCPassManagerRef NestedPM);
 void LLVMCGPMAddFPM(LLVMCGSCCPassManagerRef PM, LLVMFunctionPassManagerRef NestedPM);
-void LLVMFPMAddLPM(LLVMFunctionPassManagerRef PM, LLVMLoopPassManagerRef NestedPM);
+void LLVMFPMAddLPM(LLVMFunctionPassManagerRef PM, LLVMLoopPassManagerRef NestedPM, LLVMBool UseMemorySSA);
 void LLVMMPMAddFPM(LLVMModulePassManagerRef PM, LLVMFunctionPassManagerRef NestedPM);
 
 typedef LLVMPreservedAnalysesRef (*LLVMJuliaModulePassCallback)(LLVMModuleRef M, LLVMModuleAnalysisManagerRef AM, void *Thunk);
@@ -103,6 +99,13 @@ typedef LLVMPreservedAnalysesRef (*LLVMJuliaFunctionPassCallback)(LLVMValueRef F
 
 void LLVMMPMAddJuliaPass(LLVMModulePassManagerRef PM, LLVMJuliaModulePassCallback Callback, void *Thunk);
 void LLVMFPMAddJuliaPass(LLVMFunctionPassManagerRef PM, LLVMJuliaFunctionPassCallback Callback, void *Thunk);
+
+// Target Analyses
+LLVMBool LLVMRegisterTargetIRAnalysis(LLVMFunctionAnalysisManagerRef FAM, LLVMTargetMachineRef TM);
+LLVMBool LLVMRegisterTargetLibraryAnalysis(LLVMFunctionAnalysisManagerRef FAM, const char *Triple, size_t TripleLength);
+
+// Analyses
+LLVMErrorRef LLVMRegisterAliasAnalyses(LLVMFunctionAnalysisManagerRef FAM, LLVMPassBuilderRef PB, LLVMTargetMachineRef TM, const char *Analyses, size_t AnalysesLength);
 
 LLVM_C_EXTERN_C_END
 

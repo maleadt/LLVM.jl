@@ -60,6 +60,19 @@ function LLVMAddCPUFeaturesPass(PM)
     ccall(:LLVMExtraAddCPUFeaturesPass,Cvoid,(LLVMPassManagerRef,), PM)
 end
 
+if VERSION >= v"1.10.0-DEV.1622"
+
+function LLVMRegisterJuliaPassBuilderCallbacks(PB)
+    ccall(:jl_register_passbuilder_callbacks,Cvoid,(LLVMPassBuilderRef,), PB)
+end
+
+function LLVMAddJuliaPipelinePass(PM, PB, Speedup, Size, lower_intrinsics, dump_native, external_use, llvm_only)
+    ccall(:jl_build_newpm_pipeline,Cvoid,(LLVMModulePassManagerRef,LLVMPassBuilderRef,Cint,Cint,Cint,Cint,Cint,Cint), PM, PB, Speedup, Size, lower_intrinsics, dump_native, external_use, llvm_only)
+end
+
+end
+
+
 if VERSION >= v"1.10.0-DEV.1395"
 
 mutable struct JLOpaqueJuliaOJIT end
@@ -110,4 +123,4 @@ function JLJITGetIRCompileLayer(JIT)
     ccall(:JLJITGetIRCompileLayer, LLVMOrcIRCompileLayerRef, (JuliaOJITRef,), JIT)
 end
 
-end # VERSION >= v"1.10.0-DEV.1395"
+end

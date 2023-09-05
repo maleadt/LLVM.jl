@@ -1,4 +1,5 @@
-export NewPMPassManager, NewPMModulePassManager, NewPMCGSCCPassManager, NewPMFunctionPassManager, NewPMLoopPassManager
+export NewPMPassManager, NewPMModulePassManager, NewPMCGSCCPassManager,
+       NewPMFunctionPassManager, NewPMLoopPassManager
 
 export dispose, add!
 
@@ -30,10 +31,14 @@ Base.unsafe_convert(::Type{API.LLVMCGSCCPassManagerRef}, pm::NewPMCGSCCPassManag
 Base.unsafe_convert(::Type{API.LLVMFunctionPassManagerRef}, pm::NewPMFunctionPassManager) = pm.ref
 Base.unsafe_convert(::Type{API.LLVMLoopPassManagerRef}, pm::NewPMLoopPassManager) = pm.ref
 
-NewPMModulePassManager(pb) = NewPMModulePassManager(API.LLVMCreateNewPMModulePassManager(), [], pb)
-NewPMCGSCCPassManager(pb) = NewPMCGSCCPassManager(API.LLVMCreateNewPMCGSCCPassManager(), [], pb)
-NewPMFunctionPassManager(pb) = NewPMFunctionPassManager(API.LLVMCreateNewPMFunctionPassManager(), [], pb)
-NewPMLoopPassManager(pb) = NewPMLoopPassManager(API.LLVMCreateNewPMLoopPassManager(), [], pb)
+NewPMModulePassManager(pb) =
+    NewPMModulePassManager(API.LLVMCreateNewPMModulePassManager(), [], pb)
+NewPMCGSCCPassManager(pb) =
+    NewPMCGSCCPassManager(API.LLVMCreateNewPMCGSCCPassManager(), [], pb)
+NewPMFunctionPassManager(pb) =
+    NewPMFunctionPassManager(API.LLVMCreateNewPMFunctionPassManager(), [], pb)
+NewPMLoopPassManager(pb) =
+    NewPMLoopPassManager(API.LLVMCreateNewPMLoopPassManager(), [], pb)
 
 dispose(pm::NewPMModulePassManager) = API.LLVMDisposeNewPMModulePassManager(pm)
 dispose(pm::NewPMCGSCCPassManager) = API.LLVMDisposeNewPMCGSCCPassManager(pm)
@@ -107,8 +112,9 @@ function add!(pm::NewPMCGSCCPassManager, pm2::NewPMFunctionPassManager)
     API.LLVMCGPMAddFPM(pm, pm2)
     append!(pm.roots, pm2.roots)
 end
-function add!(pm::NewPMFunctionPassManager, pm2::NewPMLoopPassManager)
-    API.LLVMFPMAddLPM(pm, pm2)
+function add!(pm::NewPMFunctionPassManager, pm2::NewPMLoopPassManager,
+              UseMemorySSA::Core.Bool=false)
+    API.LLVMFPMAddLPM(pm, pm2, UseMemorySSA)
     append!(pm.roots, pm2.roots)
 end
 
@@ -123,7 +129,7 @@ function add!(f::Core.Function, pm::NewPMModulePassManager, ::Type{NewPMModulePa
 end
 
 function add!(f::Core.Function, pm::NewPMCGSCCPassManager, ::Type{NewPMCGSCCPassManager})
-    pm2 = NewPMCGSCCPassManager(om.pb)
+    pm2 = NewPMCGSCCPassManager(pm.pb)
     try
         f(pm2)
         add!(pm, pm2)
@@ -182,16 +188,18 @@ function add!(f::Core.Function, pm::NewPMCGSCCPassManager, ::Type{NewPMFunctionP
     end
 end
 
-function add!(f::Core.Function, pm::NewPMFunctionPassManager, ::Type{NewPMLoopPassManager})
+function add!(f::Core.Function, pm::NewPMFunctionPassManager, ::Type{NewPMLoopPassManager}, UseMemorySSA::Core.Bool=false)
     pm2 = NewPMLoopPassManager(pm.pb)
     try
         f(pm2)
-        add!(pm, pm2)
+        add!(pm, pm2, UseMemorySSA)
     finally
         dispose(pm2)
     end
 end
 
-run!(pm::NewPMModulePassManager, m::Module, am::ModuleAnalysisManager) = PreservedAnalyses(API.LLVMRunNewPMModulePassManager(pm, m, am))
+run!(pm::NewPMModulePassManager, m::Module, am::ModuleAnalysisManager) =
+    PreservedAnalyses(API.LLVMRunNewPMModulePassManager(pm, m, am))
 
-run!(pm::NewPMFunctionPassManager, f::Function, am::FunctionAnalysisManager) = PreservedAnalyses(API.LLVMRunNewPMFunctionPassManager(pm, f, am))
+run!(pm::NewPMFunctionPassManager, f::Function, am::FunctionAnalysisManager) =
+    PreservedAnalyses(API.LLVMRunNewPMFunctionPassManager(pm, f, am))

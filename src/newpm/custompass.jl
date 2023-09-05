@@ -1,4 +1,4 @@
-export add!
+export add!, legacy2newpm
 
 function module_pass_callback_impl(mod, mam, thunk)
     m = Module(mod)
@@ -13,7 +13,7 @@ end
 
 function function_pass_callback_impl(fun, fam, thunk)
     f = Function(fun)
-    am = FunctionAnalysisManager(fam, Any[])
+    am = FunctionAnalysisManager(fam, nothing, Any[])
     pass = Base.unsafe_pointer_to_objref(thunk)::Ref{Core.Function}
     preserved = unsafe_run() do
         pa = pass[](f, am)::PreservedAnalyses
@@ -34,4 +34,12 @@ function add!(f::Core.Function, fpm::NewPMFunctionPassManager)
     julia_function_pass_callback = @cfunction(function_pass_callback_impl, API.LLVMPreservedAnalysesRef, (API.LLVMValueRef, API.LLVMFunctionAnalysisManagerRef, Ptr{Cvoid}))
     push!(fpm.roots, cb)
     GC.@preserve cb API.LLVMFPMAddJuliaPass(fpm, julia_function_pass_callback, Base.pointer_from_objref(cb))
+end
+
+legacy2newpm(f::Core.Function) = (ir, am) -> begin
+    if f(ir)
+        return no_analyses_preserved()
+    else
+        return all_analyses_preserved()
+    end
 end
