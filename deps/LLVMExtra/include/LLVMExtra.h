@@ -196,5 +196,16 @@ LLVMBool LLVMPointerTypeIsOpaque(LLVMTypeRef Ty);
 LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace);
 #endif
 
+// (Post)DominatorTree
+typedef struct LLVMOpaqueDominatorTree *LLVMDominatorTreeRef;
+LLVMDominatorTreeRef LLVMCreateDominatorTree(LLVMValueRef Fn);
+void LLVMDisposeDominatorTree(LLVMDominatorTreeRef Tree);
+LLVMBool LLVMDominatorTreeInstructionDominates(LLVMDominatorTreeRef Tree, LLVMValueRef InstA, LLVMValueRef InstB);
+
+typedef struct LLVMOpaquePostDominatorTree *LLVMPostDominatorTreeRef;
+LLVMPostDominatorTreeRef LLVMCreatePostDominatorTree(LLVMValueRef Fn);
+void LLVMDisposePostDominatorTree(LLVMPostDominatorTreeRef Tree);
+LLVMBool LLVMPostDominatorTreeInstructionDominates(LLVMPostDominatorTreeRef Tree, LLVMValueRef InstA, LLVMValueRef InstB);
+
 LLVM_C_EXTERN_C_END
 #endif

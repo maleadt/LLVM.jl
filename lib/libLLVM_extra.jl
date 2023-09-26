@@ -420,6 +420,38 @@ function LLVMReplaceMDNodeOperandWith(MD, I, New)
     ccall((:LLVMReplaceMDNodeOperandWith, libLLVMExtra), Cvoid, (LLVMMetadataRef, Cuint, LLVMMetadataRef), MD, I, New)
 end
 
+mutable struct LLVMOpaqueDominatorTree end
+
+const LLVMDominatorTreeRef = Ptr{LLVMOpaqueDominatorTree}
+
+function LLVMCreateDominatorTree(Fn)
+    ccall((:LLVMCreateDominatorTree, libLLVMExtra), LLVMDominatorTreeRef, (LLVMValueRef, ), Fn)
+end
+
+function LLVMDisposeDominatorTree(Tree)
+    ccall((:LLVMDisposeDominatorTree, libLLVMExtra), Cvoid, (LLVMDominatorTreeRef, ), Tree)
+end
+
+function LLVMDominatorTreeInstructionDominates(Tree, InstA, InstB)
+    ccall((:LLVMDominatorTreeInstructionDominates, libLLVMExtra), LLVMBool, (LLVMDominatorTreeRef, LLVMValueRef, LLVMValueRef), Tree, InstA, InstB)
+end
+
+mutable struct LLVMOpaquePostDominatorTree end
+
+const LLVMPostDominatorTreeRef = Ptr{LLVMOpaquePostDominatorTree}
+
+function LLVMCreatePostDominatorTree(Fn)
+    ccall((:LLVMCreatePostDominatorTree, libLLVMExtra), LLVMPostDominatorTreeRef, (LLVMValueRef, ), Fn)
+end
+
+function LLVMDisposePostDominatorTree(Tree)
+    ccall((:LLVMDisposePostDominatorTree, libLLVMExtra), Cvoid, (LLVMPostDominatorTreeRef, ), Tree)
+end
+
+function LLVMPostDominatorTreeInstructionDominates(Tree, InstA, InstB)
+    ccall((:LLVMPostDominatorTreeInstructionDominates, libLLVMExtra), LLVMBool, (LLVMPostDominatorTreeRef, LLVMValueRef, LLVMValueRef), Tree, InstA, InstB)
+end
+
 if version() > v"12"
 function LLVMContextSupportsTypedPointers(Ctx)
     ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
