@@ -118,7 +118,7 @@ end
 end
 
 
-@testset "passes" begin
+VERSION < v"1.11.0-DEV.428" && @testset "passes" begin
 
 @dispose ctx=Context() mod=LLVM.Module("SomeModule") pm=ModulePassManager() begin
 

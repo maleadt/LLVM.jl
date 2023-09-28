@@ -8,7 +8,7 @@ if haskey(ENV, "GITHUB_ACTIONS")
     println("::warning ::Using a locally-built LLVMExtra; A bump of LLVMExtra_jll will be required before releasing LLVM.jl.")
 end
 
-using Pkg, Scratch, Preferences, Libdl, CMake_jll, Ninja_jll
+using Pkg, Scratch, Preferences, Libdl, CMake_jll
 
 LLVM = Base.UUID("929cbde3-209d-540e-8aea-75f648917ca0")
 
@@ -48,10 +48,8 @@ LLVM_DIR = joinpath(LLVM.artifact_dir, "lib", "cmake", "llvm")
 # build and install
 @info "Building" source_dir scratch_dir build_dir LLVM_DIR
 cmake() do cmake_path
-ninja() do ninja_path
-    run(`$cmake_path -GNinja -DLLVM_DIR=$(LLVM_DIR) -DCMAKE_INSTALL_PREFIX=$(scratch_dir) -B$(build_dir) -S$(source_dir)`)
-    run(`$ninja_path -C $(build_dir) install`)
-end
+    run(`$cmake_path -DLLVM_DIR=$(LLVM_DIR) -DCMAKE_INSTALL_PREFIX=$(scratch_dir) -B$(build_dir) -S$(source_dir)`)
+    run(`$cmake_path --build $(build_dir) --target install`)
 end
 
 # discover built libraries
