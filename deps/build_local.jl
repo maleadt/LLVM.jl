@@ -48,7 +48,12 @@ LLVM_DIR = joinpath(LLVM.artifact_dir, "lib", "cmake", "llvm")
 # build and install
 @info "Building" source_dir scratch_dir build_dir LLVM_DIR
 cmake() do cmake_path
-    run(`$cmake_path -DLLVM_DIR=$(LLVM_DIR) -DCMAKE_INSTALL_PREFIX=$(scratch_dir) -B$(build_dir) -S$(source_dir)`)
+    config_opts = `-DLLVM_DIR=$(LLVM_DIR) -DCMAKE_INSTALL_PREFIX=$(scratch_dir)`
+    if Sys.iswindows()
+        # prevent picking up MSVC
+        config_opts = `$config_opts -G "MSYS Makefiles"`
+    end
+    run(`$cmake_path $config_opts -B$(build_dir) -S$(source_dir)`)
     run(`$cmake_path --build $(build_dir) --target install`)
 end
 
