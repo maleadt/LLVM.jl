@@ -1,6 +1,7 @@
 #include <LLVMExtra.h>
 
 #include <llvm/ADT/Triple.h>
+#include <llvm/Analysis/PostDominators.h>
 #include <llvm/Analysis/TargetLibraryInfo.h>
 #include <llvm/Analysis/TargetTransformInfo.h>
 #include <llvm/ExecutionEngine/Orc/IRCompileLayer.h>
@@ -13,6 +14,7 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
+#include <llvm/IR/Dominators.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Transforms/Scalar.h>
@@ -637,3 +639,35 @@ LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace) {
   return wrap(PointerType::get(*unwrap(C), AddressSpace));
 }
 #endif
+
+DEFINE_STDCXX_CONVERSION_FUNCTIONS(DominatorTree, LLVMDominatorTreeRef)
+
+LLVMDominatorTreeRef LLVMCreateDominatorTree(LLVMValueRef Fn) {
+  return wrap(new DominatorTree(*unwrap<Function>(Fn)));
+}
+
+void LLVMDisposeDominatorTree(LLVMDominatorTreeRef Tree) {
+  delete unwrap(Tree);
+}
+
+LLVMBool LLVMDominatorTreeInstructionDominates(
+  LLVMDominatorTreeRef Tree, LLVMValueRef InstA, LLVMValueRef InstB
+) {
+  return unwrap(Tree)->dominates(unwrap<Instruction>(InstA), unwrap<Instruction>(InstB));
+}
+
+DEFINE_STDCXX_CONVERSION_FUNCTIONS(PostDominatorTree, LLVMPostDominatorTreeRef)
+
+LLVMPostDominatorTreeRef LLVMCreatePostDominatorTree(LLVMValueRef Fn) {
+  return wrap(new PostDominatorTree(*unwrap<Function>(Fn)));
+}
+
+void LLVMDisposePostDominatorTree(LLVMPostDominatorTreeRef Tree) {
+  delete unwrap(Tree);
+}
+
+LLVMBool LLVMPostDominatorTreeInstructionDominates(
+  LLVMPostDominatorTreeRef Tree, LLVMValueRef InstA, LLVMValueRef InstB
+) {
+  return unwrap(Tree)->dominates(unwrap<Instruction>(InstA), unwrap<Instruction>(InstB));
+}
