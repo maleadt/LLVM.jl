@@ -101,12 +101,9 @@ register(ConstantFP, API.LLVMConstantFPValueKind)
 ConstantFP(typ::FloatingPointType, val::Real) =
     ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
 
-ConstantFP(val::Float16) =
-    ConstantFP(HalfType(), val)
-ConstantFP(val::Float32) =
-    ConstantFP(FloatType(), val)
-ConstantFP(val::Float64) =
-    ConstantFP(DoubleType(), val)
+ConstantFP(val::Float64) = ConstantFP(DoubleType(), val)
+ConstantFP(val::Float32) = ConstantFP(FloatType(), val)
+ConstantFP(val::Float16) = ConstantFP(HalfType(), val)
 
 Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
     convert(T, API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}()))
@@ -166,12 +163,12 @@ ConstantDataArray(data::AbstractVector{T}) where {T<:Integer} =
     ConstantDataArray(IntType(sizeof(T)*8), data)
 ConstantDataArray(data::AbstractVector{Core.Bool}) =
     ConstantDataArray(Int1Type(), data)
-ConstantDataArray(data::AbstractVector{Float16}) =
-    ConstantDataArray(HalfType(), data)
-ConstantDataArray(data::AbstractVector{Float32}) =
-    ConstantDataArray(FloatType(), data)
 ConstantDataArray(data::AbstractVector{Float64}) =
     ConstantDataArray(DoubleType(), data)
+ConstantDataArray(data::AbstractVector{Float32}) =
+    ConstantDataArray(FloatType(), data)
+ConstantDataArray(data::AbstractVector{Float16}) =
+    ConstantDataArray(HalfType(), data)
 
 @checked struct ConstantDataVector <: ConstantDataSequential
     ref::API.LLVMValueRef

@@ -1,5 +1,7 @@
 @testitem "core" setup=[TestHelpers] begin
 
+using BFloat16s
+
 struct TestStruct
     x::Bool
     y::Int64
@@ -409,6 +411,11 @@ end
         typ = LLVM.DoubleType()
         c = ConstantFP(typ, 1.1)
         @test convert(Float64, c) == 1.1
+    end
+    let
+        typ = LLVM.BFloatType()
+        c = ConstantFP(typ, BFloat16(1.1))
+        @test convert(BFloat16, c) == BFloat16(1.1)
     end
     let
         typ = LLVM.X86FP80Type()
