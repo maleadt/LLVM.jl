@@ -7,9 +7,19 @@ CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 LLVMExtra_jll = "dad2f222-ce93-54a1-a47d-0025e8a3acab"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[weakdeps]
+BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
+
+[extensions]
+BFloat16sExt = "BFloat16s"
 
 [compat]
 CEnum = "0.2, 0.3, 0.4"
 LLVMExtra_jll = "=0.0.26"
 julia = "1.8"
+
+[extras]
+BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
