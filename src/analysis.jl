@@ -1,4 +1,6 @@
-export verify, dominates
+## module and function verification
+
+export verify
 
 function verify(mod::Module)
     out_error = Ref{Cstring}()
@@ -19,6 +21,11 @@ function verify(f::Function)
     end
 end
 
+
+## dominator tree
+
+export DomTree, dominates
+
 @checked struct DomTree
     ref::API.LLVMDominatorTreeRef
 end
@@ -32,11 +39,17 @@ function dominates(domtree::DomTree, A::Instruction, B::Instruction)
     convert(Core.Bool, API.LLVMDominatorTreeInstructionDominates(domtree, A, B))
 end
 
+
+## post-dominator tree
+
+export PostDomTree, dominates
+
 @checked struct PostDomTree
     ref::API.LLVMPostDominatorTreeRef
 end
 
-Base.unsafe_convert(::Type{API.LLVMPostDominatorTreeRef}, postdomtree::PostDomTree) = postdomtree.ref
+Base.unsafe_convert(::Type{API.LLVMPostDominatorTreeRef}, postdomtree::PostDomTree) =
+    postdomtree.ref
 
 PostDomTree(f::Function) = PostDomTree(API.LLVMCreatePostDominatorTree(f))
 dispose(postdomtree::PostDomTree) = API.LLVMDisposePostDominatorTree(postdomtree)
