@@ -573,7 +573,11 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
     llvm::ArrayRef<llvm::Value*> args = ArrayRef(unwrap(Args), NumArgs);
 
     Value *V = unwrap(Fn);
+#if LLVM_VERSION_MAJOR >= 15
+    FunctionType *FnT = cast<Function>(V)->getFunctionType();
+#else
     FunctionType *FnT = cast<FunctionType>(V->getType()->getPointerElementType());
+#endif
     llvm::CallInst *CI = Builder->CreateCall(FnT, unwrap(Fn), args ,BundleArray, Name);
     return wrap(CI);
 }
