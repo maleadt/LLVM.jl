@@ -1,6 +1,6 @@
 # Contexts are execution states for the core LLVM IR system.
 
-export Context, dispose, GlobalContext, supports_typed_pointers
+export Context, dispose, GlobalContext, typed_pointers, opaque_pointers!
 
 @checked struct Context
     ref::API.LLVMContextRef
@@ -32,9 +32,16 @@ end
 GlobalContext() = Context(API.LLVMGetGlobalContext())
 
 if version() >= v"13"
-    supports_typed_pointers(ctx::Context) = API.LLVMContextSupportsTypedPointers(ctx) == 1
+    typed_pointers(ctx::Context) =
+        convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
+
+    opaque_pointers!(ctx::Context, enable::Core.Bool) =
+        API.LLVMContextSetOpaquePointers(ctx, enable)
 else
-    supports_typed_pointers(ctx::Context) = true
+    typed_pointers(ctx::Context) = true
+
+    opaque_pointers!(ctx::Context, enable::Bool) =
+        error("Opaque pointers not supported")
 end
 
 function Base.show(io::IO, ctx::Context)
@@ -44,7 +51,7 @@ function Base.show(io::IO, ctx::Context)
     end
     if v"14" <= version() < v"17"
         # migration to opaque pointers
-        print(io, ", ", supports_typed_pointers(ctx) ? "typed ptrs" : "opaque ptrs")
+        print(io, ", ", typed_pointers(ctx) ? "typed ptrs" : "opaque ptrs")
     end
     print(io, ")")
 end
