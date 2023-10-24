@@ -20,6 +20,7 @@ const libllvm_version = Base.libllvm_version
 
 module API
 using CEnum
+using Preferences
 
 # LLVM C API
 using ..LLVM
@@ -44,7 +45,14 @@ let
 end
 
 # LLVMExtra
-import LLVMExtra_jll: libLLVMExtra
+using LLVMExtra_jll
+if has_preference(LLVM, "libLLVMExtra")
+    const libLLVMExtra = load_preference(LLVM, "libLLVMExtra")
+else
+    if isdefined(LLVMExtra_jll, :libLLVMExtra)
+        import LLVMExtra_jll: libLLVMExtra
+    end
+end
 include(joinpath(@__DIR__, "..", "lib", "libLLVM_extra.jl"))
 
 # Julia LLVM functionality
@@ -97,6 +105,14 @@ function __init__()
     @debug "Using LLVM $libllvm_version at $(Base.libllvm_path())"
 
     # sanity checks
+    if !isdefined(API, :libLLVMExtra)
+        @error """LLVM extensions library unavailable for your platform:
+                    $(Base.BinaryPlatforms.triplet(API.LLVMExtra_jll.host_platform))
+                  LLVM.jl will not be functional.
+
+                  If you are using a custom version of LLVM, try building a
+                  custom version of LLVMExtra_jll using `deps/build_local.jl`"""
+    end
     if libllvm_version != Base.libllvm_version
         # this checks that the precompilation image isn't being used
         # after having upgraded Julia and the contained LLVM library.

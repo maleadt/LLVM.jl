@@ -64,10 +64,10 @@ end
 lib_path = joinpath(scratch_dir, "lib", only(built_libs))
 isfile(lib_path) || error("Could not find library $lib_path in build directory")
 
-# tell LLVMExtra_jll to load our library instead of the default artifact one
+# tell LLVM.jl to load our library instead of the default artifact one
 set_preferences!(
     joinpath(dirname(@__DIR__), "LocalPreferences.toml"),
-    "LLVMExtra_jll",
-    "libLLVMExtra_path" => lib_path;
+    "LLVM",
+    "libLLVMExtra" => lib_path;
     force=true,
 )
