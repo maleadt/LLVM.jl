@@ -114,7 +114,7 @@ DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::StandardInstrumentations, LLVMStandardI
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::PassInstrumentationCallbacks, LLVMPassInstrumentationCallbacksRef)
 
 LLVMStandardInstrumentationsRef LLVMCreateStandardInstrumentations(LLVMContextRef C, LLVMBool DebugLogging, LLVMBool VerifyEach) {
-#if LLVM_VERSION_MAJOR >= 15
+#if LLVM_VERSION_MAJOR >= 16
     return wrap(new llvm::StandardInstrumentations(*unwrap(C), DebugLogging, VerifyEach));
 #else
     return wrap(new llvm::StandardInstrumentations(DebugLogging, VerifyEach));
