@@ -13,7 +13,8 @@ Base.unsafe_convert(::Type{API.LLVMPassInstrumentationCallbacksRef}, pic::PassIn
 PassInstrumentationCallbacks(si) = PassInstrumentationCallbacks(API.LLVMCreatePassInstrumentationCallbacks(), si, [])
 PassInstrumentationCallbacks() = PassInstrumentationCallbacks(API.LLVMStandardInstrumentationsRef(C_NULL))
 
-StandardInstrumentationCallbacks() = PassInstrumentationCallbacks(API.LLVMCreateStandardInstrumentations())
+StandardInstrumentationCallbacks(; debug_logging::Bool=false, verify_each::Bool=false) =
+    PassInstrumentationCallbacks(API.LLVMCreateStandardInstrumentations(context(), debug_logging, verify_each))
 
 function PassInstrumentationCallbacks(f::Core.Function, args...; kwargs...)
     pic = PassInstrumentationCallbacks(args...; kwargs...)

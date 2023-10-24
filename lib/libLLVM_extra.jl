@@ -638,8 +638,8 @@ mutable struct LLVMOpaquePassInstrumentationCallbacks end
 
 const LLVMPassInstrumentationCallbacksRef = Ptr{LLVMOpaquePassInstrumentationCallbacks}
 
-function LLVMCreateStandardInstrumentations()
-    ccall((:LLVMCreateStandardInstrumentations, libLLVMExtra), LLVMStandardInstrumentationsRef, ())
+function LLVMCreateStandardInstrumentations(C, DebugLogging, VerifyEach)
+    ccall((:LLVMCreateStandardInstrumentations, libLLVMExtra), LLVMStandardInstrumentationsRef, (LLVMContextRef, LLVMBool, LLVMBool), C, DebugLogging, VerifyEach)
 end
 
 function LLVMCreatePassInstrumentationCallbacks()

@@ -113,8 +113,12 @@ LLVMPreservedAnalysesRef LLVMRunNewPMFunctionPassManager(LLVMFunctionPassManager
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::StandardInstrumentations, LLVMStandardInstrumentationsRef)
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::PassInstrumentationCallbacks, LLVMPassInstrumentationCallbacksRef)
 
-LLVMStandardInstrumentationsRef LLVMCreateStandardInstrumentations(void) {
-    return wrap(new llvm::StandardInstrumentations(false));
+LLVMStandardInstrumentationsRef LLVMCreateStandardInstrumentations(LLVMContextRef C, LLVMBool DebugLogging, LLVMBool VerifyEach) {
+#if LLVM_VERSION_MAJOR >= 15
+    return wrap(new llvm::StandardInstrumentations(*unwrap(C), DebugLogging, VerifyEach));
+#else
+    return wrap(new llvm::StandardInstrumentations(DebugLogging, VerifyEach));
+#endif
 }
 LLVMPassInstrumentationCallbacksRef LLVMCreatePassInstrumentationCallbacks(void) {
     return wrap(new llvm::PassInstrumentationCallbacks());
@@ -134,7 +138,11 @@ void LLVMAddStandardInstrumentations(LLVMPassInstrumentationCallbacksRef PIC, LL
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(llvm::PassBuilder, LLVMPassBuilderRef)
 
 LLVMPassBuilderRef LLVMCreatePassBuilder(LLVMTargetMachineRef TM, LLVMPassInstrumentationCallbacksRef PIC) {
+#if LLVM_VERSION_MAJOR >= 16
+    return wrap(new llvm::PassBuilder(unwrap(TM), llvm::PipelineTuningOptions(), std::nullopt, unwrap(PIC)));
+#else
     return wrap(new llvm::PassBuilder(unwrap(TM), llvm::PipelineTuningOptions(), llvm::None, unwrap(PIC)));
+#endif
 }
 
 void LLVMDisposePassBuilder(LLVMPassBuilderRef PB) {
