@@ -4,8 +4,12 @@ export ismultithreaded
 
 ismultithreaded() = convert(Core.Bool, API.LLVMIsMultithreaded())
 
-for subsystem in [:Core, :TransformUtils, :ScalarOpts, :ObjCARCOpts, :Vectorization,
-                  :InstCombine, :IPO, :Instrumentation, :Analysis, :IPA, :CodeGen, :Target]
+const subsystems = [:Core, :TransformUtils, :ScalarOpts, :Vectorization, :InstCombine,
+                    :IPO, :Analysis, :IPA, :CodeGen, :Target]
+if LLVM.version() < v"16"
+    append!(subsystems, [:ObjCARCOpts, :Instrumentation])
+end
+for subsystem in subsystems
     jl_fname = Symbol(:Initialize, subsystem)
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin

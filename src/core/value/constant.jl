@@ -348,7 +348,7 @@ register(ConstantVector, API.LLVMConstantVectorValueKind)
 
 export ConstantExpr,
 
-       const_neg, const_nswneg, const_nuwneg, const_fneg, const_not, const_add,
+       const_neg, const_nswneg, const_nuwneg, const_not, const_add,
        const_nswadd, const_nuwadd, const_sub, const_nswsub, const_nuwsub, const_mul,
        const_nswmul, const_nuwmul, const_and, const_or, const_xor, const_icmp, const_fcmp,
        const_shl, const_lshr, const_ashr, const_gep, const_inbounds_gep, const_trunc,
@@ -372,9 +372,6 @@ const_nswneg(val::Constant) =
 
 const_nuwneg(val::Constant) =
     Value(API.LLVMConstNUWNeg(val))
-
-const_fneg(val::Constant) =
-    Value(API.LLVMConstFNeg(val))
 
 const_not(val::Constant) =
     Value(API.LLVMConstNot(val))

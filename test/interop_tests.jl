@@ -351,12 +351,20 @@ else
         annotated(ptr::Ptr{T}) where {T} = @typed_ccall("llvm.ptr.annotation.p0", llvmcall, Ptr{T}, (Ptr{T}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
 
         ir = sprint(io->code_llvm(io, annotated, Tuple{Ptr{Float64}}))
-        @test occursin("ptr @llvm.ptr.annotation.p0(ptr", ir)
+        if LLVM.version() >= v"16"
+            @test occursin("ptr @llvm.ptr.annotation.p0.p0(ptr", ir)
+        else
+            @test occursin("ptr @llvm.ptr.annotation.p0(ptr", ir)
+        end
 
         annotated(ptr::LLVMPtr{T}) where {T} = @typed_ccall("llvm.ptr.annotation.p0", llvmcall, LLVMPtr{T,1}, (LLVMPtr{T,1}, Ptr{Int8}, Ptr{Int8}, Int32), ptr, C_NULL, C_NULL, 0)
 
         ir = sprint(io->code_llvm(io, annotated, Tuple{LLVMPtr{Float64,1}}))
-        @test occursin("ptr addrspace(1) @llvm.ptr.annotation.p1(ptr addrspace(1)", ir)
+        if LLVM.version() >= v"16"
+            @test occursin("ptr addrspace(1) @llvm.ptr.annotation.p1.p0(ptr addrspace(1)", ir)
+        else
+            @test occursin("ptr addrspace(1) @llvm.ptr.annotation.p1(ptr addrspace(1)", ir)
+        end
 
         # test return nothing
         LLVM.Interop.@typed_ccall("llvm.donothing", llvmcall, Cvoid, ())

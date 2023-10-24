@@ -236,7 +236,7 @@ void LLVMExtraAppendToUsed(LLVMModuleRef Mod,
                            size_t Count)
 {
     SmallVector<GlobalValue *, 1> GlobalValues;
-    for (auto *Value : makeArrayRef(Values, Count))
+    for (auto *Value : ArrayRef(Values, Count))
         GlobalValues.push_back(cast<GlobalValue>(unwrap(Value)));
     appendToUsed(*unwrap(Mod), GlobalValues);
 }
@@ -246,7 +246,7 @@ void LLVMExtraAppendToCompilerUsed(LLVMModuleRef Mod,
                                    size_t Count)
 {
     SmallVector<GlobalValue *, 1> GlobalValues;
-    for (auto *Value : makeArrayRef(Values, Count))
+    for (auto *Value : ArrayRef(Values, Count))
         GlobalValues.push_back(cast<GlobalValue>(unwrap(Value)));
     appendToCompilerUsed(*unwrap(Mod), GlobalValues);
 }
@@ -531,7 +531,7 @@ DEFINE_STDCXX_CONVERSION_FUNCTIONS(OperandBundleDef, LLVMOperandBundleDefRef)
 LLVMOperandBundleDefRef LLVMCreateOperandBundleDef(const char *Tag, LLVMValueRef *Inputs,
                                                    unsigned NumInputs) {
     SmallVector<Value*, 1> InputArray;
-    for (auto *Input : makeArrayRef(Inputs, NumInputs))
+    for (auto *Input : ArrayRef(Inputs, NumInputs))
         InputArray.push_back(unwrap(Input));
   return wrap(new OperandBundleDef(std::string(Tag), InputArray));
 }
@@ -566,14 +566,18 @@ LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
                                        const char *Name) {
     SmallVector<OperandBundleDef, 1> BundleArray;
-    for (auto *Bundle : makeArrayRef(Bundles, NumBundles))
+    for (auto *Bundle : ArrayRef(Bundles, NumBundles))
         BundleArray.push_back(*unwrap<OperandBundleDef>(Bundle));
 
     llvm::IRBuilder<> *Builder = unwrap(B);
-    llvm::ArrayRef<llvm::Value*> args = makeArrayRef(unwrap(Args), NumArgs);
+    llvm::ArrayRef<llvm::Value*> args = ArrayRef(unwrap(Args), NumArgs);
 
     Value *V = unwrap(Fn);
+#if LLVM_VERSION_MAJOR >= 15
+    FunctionType *FnT = cast<Function>(V)->getFunctionType();
+#else
     FunctionType *FnT = cast<FunctionType>(V->getType()->getPointerElementType());
+#endif
     llvm::CallInst *CI = Builder->CreateCall(FnT, unwrap(Fn), args ,BundleArray, Name);
     return wrap(CI);
 }
@@ -583,11 +587,11 @@ LLVMValueRef LLVMBuildCallWithOpBundle2(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMVa
                                         LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
                                         const char *Name) {
     SmallVector<OperandBundleDef, 1> BundleArray;
-    for (auto *Bundle : makeArrayRef(Bundles, NumBundles))
+    for (auto *Bundle : ArrayRef(Bundles, NumBundles))
         BundleArray.push_back(*unwrap<OperandBundleDef>(Bundle));
 
     llvm::IRBuilder<> *Builder = unwrap(B);
-    llvm::ArrayRef<llvm::Value*> args = makeArrayRef(unwrap(Args), NumArgs);
+    llvm::ArrayRef<llvm::Value*> args = ArrayRef(unwrap(Args), NumArgs);
 
     FunctionType *FTy = unwrap<FunctionType>(Ty);
     llvm::CallInst *CI = Builder->CreateCall(FTy, unwrap(Fn), args ,BundleArray, Name);

@@ -2,6 +2,8 @@
 cmake_minimum_required(VERSION 3.3)
 
 SET(CMAKE_CXX_FLAGS "-Wall -fPIC -fno-rtti")
+cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0077 NEW)
 
 project(LLVMExtra
 VERSION
@@ -11,10 +13,11 @@ LANGUAGES
    C
 )
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(LLVM REQUIRED)
+
+find_package(LLVM REQUIRED CONFIG)
 set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
   ${LLVM_CMAKE_DIR}

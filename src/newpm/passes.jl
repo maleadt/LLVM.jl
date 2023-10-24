@@ -124,7 +124,11 @@ Base.show(io::IO, pass::NewPMLLVMPass) = print(io, pass_string(pass))
 @module_pass "extract-blocks" BlockExtractorPass
 @module_pass "forceattrs" ForceFunctionAttrsPass
 @module_pass "function-import" FunctionImportPass
-@module_pass "function-specialization" FunctionSpecializationPass
+if LLVM.version() < v"16"
+    @module_pass "function-specialization" FunctionSpecializationPass
+else
+    @module_pass "ipsccp<func-spec>" FunctionSpecializationPass
+end
 @module_pass "globaldce" GlobalDCEPass
 @module_pass "globalopt" GlobalOptPass
 @module_pass "globalsplit" GlobalSplitPass
@@ -180,10 +184,9 @@ Base.show(io::IO, pass::NewPMLLVMPass) = print(io, pass_string(pass))
 @module_pass "view-callgraph" CallGraphViewerPass
 @module_pass "wholeprogramdevirt" WholeProgramDevirtPass
 @module_pass "dfsan" DataFlowSanitizerPass
-@module_pass "msan-module" ModuleMemorySanitizerPass
 @module_pass "module-inline" ModuleInlinerPass
 @module_pass "tsan-module" ModuleThreadSanitizerPass
-@module_pass "sancov-module" ModuleSanitizerCoveragePass
+@module_pass "sancov-module" SanitizerCoveragePass
 @module_pass "memprof-module" ModuleMemProfilerPass
 @module_pass "poison-checking" PoisonCheckingPass
 @module_pass "pseudo-probe-update" PseudoProbeUpdatePass
@@ -216,14 +219,49 @@ function options_string(options::HWAddressSanitizerPassOptions)
 end
 @module_pass "hwasan" HWAddressSanitizerPass HWAddressSanitizerPassOptions
 
-struct ModuleAddressSanitizerPassOptions
+struct AddressSanitizerPassOptions
     kernel::Core.Bool
 end
-ModuleAddressSanitizerPassOptions(; kernel::Core.Bool = false) =
-    ModuleAddressSanitizerPassOptions(kernel)
-options_string(options::ModuleAddressSanitizerPassOptions) =
+AddressSanitizerPassOptions(; kernel::Core.Bool = false) =
+    AddressSanitizerPassOptions(kernel)
+options_string(options::AddressSanitizerPassOptions) =
     options.kernel ? "<kernel>" : ""
-@module_pass "asan-module" ModuleAddressSanitizerPass ModuleAddressSanitizerPassOptions
+if LLVM.version() < v"16"
+    @module_pass "asan-module" AddressSanitizerPass AddressSanitizerPassOptions
+else
+    @module_pass "asan" AddressSanitizerPass AddressSanitizerPassOptions
+end
+
+struct MemorySanitizerPassOptions
+    recover::Core.Bool
+    kernel::Core.Bool
+    eagerchecks::Core.Bool
+    trackorigins::Int
+end
+MemorySanitizerPassOptions(; recover::Core.Bool = false,
+                             kernel::Core.Bool = false,
+                             eagerchecks::Core.Bool = false,
+                             trackorigins::Int = 0) =
+    MemorySanitizerPassOptions(recover, kernel, eagerchecks, trackorigins)
+function options_string(options::MemorySanitizerPassOptions)
+    final_options = String[]
+    if options.recover
+        push!(final_options, "recover")
+    end
+    if options.kernel
+        push!(final_options, "kernel")
+    end
+    if options.eagerchecks
+        push!(final_options, "eager-checks")
+    end
+    push!(final_options, "track-origins=$(options.trackorigins)")
+    "<" * join(final_options, ";") * ">"
+end
+if LLVM.version() < v"16"
+    @function_pass "msan" MemorySanitizerPass MemorySanitizerPassOptions
+else
+    @module_pass "msan" MemorySanitizerPass MemorySanitizerPassOptions
+end
 
 
 # CGSCC passes
@@ -360,6 +398,11 @@ is_function_pass(::Type{InvalidateAllAnalysesPass}) = true
 @function_pass "print-predicateinfo" PredicateInfoPrinterPass
 @function_pass "print-mustexecute" MustExecutePrinterPass
 @function_pass "print-memderefs" MemDerefPrinterPass
+if LLVM.version() < v"16"
+    @loop_pass "print-access-info" LoopAccessInfoPrinterPass
+else
+    @function_pass "print<access-info>" LoopAccessInfoPrinterPass
+end
 @function_pass "reassociate" ReassociatePass
 @function_pass "redundant-dbg-inst-elim" RedundantDbgInstEliminationPass
 @function_pass "reg2mem" RegToMemPass
@@ -459,33 +502,6 @@ function options_string(options::LoopUnrollOptions)
     "<" * join(final_options, ";") * ">"
 end
 @function_pass "loop-unroll" LoopUnrollPass LoopUnrollOptions
-
-struct MemorySanitizerPassOptions
-    recover::Core.Bool
-    kernel::Core.Bool
-    eagerchecks::Core.Bool
-    trackorigins::Int
-end
-MemorySanitizerPassOptions(; recover::Core.Bool = false,
-                             kernel::Core.Bool = false,
-                             eagerchecks::Core.Bool = false,
-                             trackorigins::Int = 0) =
-    MemorySanitizerPassOptions(recover, kernel, eagerchecks, trackorigins)
-function options_string(options::MemorySanitizerPassOptions)
-    final_options = String[]
-    if options.recover
-        push!(final_options, "recover")
-    end
-    if options.kernel
-        push!(final_options, "kernel")
-    end
-    if options.eagerchecks
-        push!(final_options, "eager-checks")
-    end
-    push!(final_options, "track-origins=$(options.trackorigins)")
-    "<" * join(final_options, ";") * ">"
-end
-@function_pass "msan" MemorySanitizerPass MemorySanitizerPassOptions
 
 struct SimplifyCFGPassOptions
     forward_switch_cond_to_phi::Core.Bool
@@ -622,7 +638,6 @@ is_loop_pass(::Type{InvalidateAllAnalysesPass}) = true
 @loop_pass "loop-reduce" LoopStrengthReducePass
 @loop_pass "indvars" IndVarSimplifyPass
 @loop_pass "loop-unroll-full" LoopFullUnrollPass
-@loop_pass "print-access-info" LoopAccessInfoPrinterPass
 @loop_pass "print<ddg>" DDGAnalysisPrinterPass
 @loop_pass "print<iv-users>" IVUsersPrinterPass
 @loop_pass "print<loopnest>" LoopNestPrinterPass
