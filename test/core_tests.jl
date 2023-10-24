@@ -669,9 +669,6 @@ end
     let
         val = LLVM.ConstantFP(Float32(42.); )
 
-        ce = const_fneg(val)::LLVM.Constant
-        @check_ir ce "float -4.200000e+01"
-
         other_val = LLVM.ConstantFP(Float32(2.))
         ce = const_fcmp(LLVM.API.LLVMRealUGT, val, other_val)::LLVM.Constant
         @check_ir ce "i1 true"
