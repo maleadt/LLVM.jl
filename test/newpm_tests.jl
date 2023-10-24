@@ -40,6 +40,7 @@ NewPMLoopPassManager() do lpm end
 end # testset "newpm pass managers"
 
 @testset "newpm pass builder" begin
+@dispose ctx=Context() begin
 
 let pic = PassInstrumentationCallbacks()
     dispose(pic)
@@ -72,6 +73,7 @@ end
 
 @test "PassBuilder didn't crash!" != ""
 
+end
 end # testset "newpm pass builder"
 
 @testset "newpm analysis managers" begin
@@ -130,7 +132,7 @@ end # testset "newpm analysis registration"
 host_triple = triple()
 host_t = Target(triple=host_triple)
 
-@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
+@dispose ctx=Context() tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
     analysis_managers() do lam, fam, cam, mam
         register!(pb, lam, fam, cam, mam)
 
@@ -236,7 +238,7 @@ end # testset "newpm passes"
 host_triple = triple()
 host_t = Target(triple=host_triple)
 
-@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
+@dispose ctx=Context() tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
     analysis_managers() do lam, fam, cam, mam
         register!(pb, lam, fam, cam, mam)
 
@@ -257,7 +259,7 @@ host_t = Target(triple=host_triple)
 
             @test "Successfully added custom module and function passes!" != ""
 
-            @dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("test") begin
+            @dispose builder=IRBuilder() mod=LLVM.Module("test") begin
                 @dispose pa=run!(mpm, mod, mam) begin
                     @test observed_modules == 1
                     @test observed_functions == 0
@@ -289,8 +291,7 @@ function fake_custom_legacy_pass(counter::Ref{Int})
     end
 end
 
-@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
-
+@dispose ctx=Context() tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
     observed_modules = Ref{Int}(0)
     observed_functions = Ref{Int}(0)
     @dispose mpm=NewPMModulePassManager(pb) begin
@@ -299,7 +300,7 @@ end
             add!(legacy2newpm(fake_custom_legacy_pass(observed_functions)), fpm)
         end
 
-        @dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("test") begin
+        @dispose builder=IRBuilder() mod=LLVM.Module("test") begin
             run!(mpm, mod)
 
             @test observed_modules[] == 1
@@ -327,7 +328,7 @@ end # testset "newpm custom passes"
 host_triple = triple()
 host_t = Target(triple=host_triple)
 
-@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
+@dispose ctx=Context() tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
     analysis_managers() do lam, fam, cam, mam
         @test add!(fam, AAManager) do aam
             # Do nothing
@@ -442,7 +443,7 @@ end
     @test_throws ArgumentError add!(lpm, LICMPass())
 end
 
-@dispose pb=PassBuilder() begin
+@dispose ctx=Context() pb=PassBuilder() begin
     @dispose mpm=NewPMModulePassManager(pb) begin
         @test_throws ArgumentError add!(mpm, SimplifyCFGPass())
     end
@@ -488,7 +489,7 @@ using LLVM.Interop
 @testset "newpm julia pipeline" begin
 host_triple = triple()
 host_t = Target(triple=host_triple)
-@dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
+@dispose ctx=Context() tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
     basicSimplifyCFGOptions =
         SimplifyCFGPassOptions(; forward_switch_cond_to_phi=true,
                                  convert_switch_range_to_icmp=true,
@@ -619,7 +620,7 @@ host_t = Target(triple=host_triple)
 
         @test "Successfully created julia pipeline!" != ""
 
-        @dispose ctx=Context() builder=IRBuilder() mod=LLVM.Module("test") begin
+        @dispose builder=IRBuilder() mod=LLVM.Module("test") begin
             ft = LLVM.FunctionType(LLVM.VoidType())
             fn = LLVM.Function(mod, "SomeFunction", ft)
 
