@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.3)
 
 SET(CMAKE_CXX_FLAGS "-Wall -fPIC -fno-rtti")
 cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0077 NEW)
 
 project(LLVMExtra
 VERSION
