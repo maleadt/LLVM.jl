@@ -23,12 +23,14 @@ Base.show(io::IO, aa::AAManager) = print(io, analysis_string(aa))
 
 # Function Alias Analysis
 @alias_analysis "basic-aa" BasicAA
-@alias_analysis "cfl-anders-aa" CFLAndersAA
-@alias_analysis "cfl-steens-aa" CFLSteensAA
 @alias_analysis "objc-arc-aa" ObjCARCAA
 @alias_analysis "scev-aa" SCEVAA
 @alias_analysis "scoped-noalias-aa" ScopedNoAliasAA
 @alias_analysis "tbaa" TypeBasedAA
+if LLVM.version() < v"16"
+    @alias_analysis "cfl-anders-aa" CFLAndersAA
+    @alias_analysis "cfl-steens-aa" CFLSteensAA
+end
 
 add!(am::AAManager, aa::NewPMAliasAnalysis) = push!(am.aas, analysis_string(aa))
 add!(am::AAManager, aas::AbstractVector{<:NewPMAliasAnalysis}) =

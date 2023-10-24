@@ -221,13 +221,6 @@ host_t = Target(triple=host_triple)
         end
 
         @test "Successfully added nested pass managers!" != ""
-
-        # As of LLVM 15 this count is 279, may change with each version based on LLVM's whims
-        if VERSION >= v"1.10.0-DEV.1622"
-            @test length(subtypes(NewPMLLVMPass)) == 279
-        else
-            @test length(subtypes(NewPMLLVMPass)) == 262
-        end
     end
 end
 
@@ -352,12 +345,14 @@ host_t = Target(triple=host_triple)
     analysis_managers() do lam, fam, cam, mam
         add!(fam, AAManager) do aam
             add!(aam, BasicAA())
-            add!(aam, CFLAndersAA())
-            add!(aam, CFLSteensAA())
             add!(aam, ObjCARCAA())
             add!(aam, ScopedNoAliasAA())
             add!(aam, TypeBasedAA())
             add!(aam, GlobalsAA())
+            if LLVM.version() < v"16"
+                add!(aam, CFLAndersAA())
+                add!(aam, CFLSteensAA())
+            end
         end
         register!(pb, lam, fam, cam, mam)
     end
