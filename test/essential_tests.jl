@@ -19,11 +19,13 @@ end
     InitializeCore(passreg)
     InitializeTransformUtils(passreg)
     InitializeScalarOpts(passreg)
-    InitializeObjCARCOpts(passreg)
+    if LLVM.version() < v"16"
+        InitializeObjCARCOpts(passreg)
+        InitializeInstrumentation(passreg)
+    end
     InitializeVectorization(passreg)
     InitializeInstCombine(passreg)
     InitializeIPO(passreg)
-    InitializeInstrumentation(passreg)
     InitializeAnalysis(passreg)
     InitializeIPA(passreg)
     InitializeCodeGen(passreg)

@@ -155,11 +155,15 @@ define_transforms([:LoadStoreVectorizer])
 define_transforms([
     :ConstantMerge, :DeadArgElimination, :FunctionAttrs,
     :FunctionInlining, :AlwaysInliner, :GlobalDCE, :GlobalOptimizer, :IPConstantPropagation,
-    :PruneEH, :IPSCCP, :StripDeadPrototypes, :StripSymbols
+    :IPSCCP, :StripDeadPrototypes, :StripSymbols
 ])
 
 if version() < v"15"
-    define_transforms([:ArgumentPromotion]) # only avaliable on new PM
+    define_transforms([:ArgumentPromotion])
+end
+
+if version() < v"16"
+    define_transforms([:PruneEH])
 end
 
 export internalize!

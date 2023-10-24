@@ -91,7 +91,9 @@ end
     always_inliner!(pm)
     global_dce!(pm)
     global_optimizer!(pm)
-    prune_eh!(pm)
+    if LLVM.version() < v"16"
+        prune_eh!(pm)
+    end
     ipsccp!(pm)
     strip_dead_prototypes!(pm)
     strip_symbols!(pm)
