@@ -32,9 +32,9 @@ Context() do ctx end
 @dispose ctx=Context() begin end
 
 @dispose ctx=Context() begin
-    @test supports_typed_pointers(ctx) isa Bool
+    @test typed_pointers(ctx) isa Bool
     if LLVM.version() > v"17"
-        @test supports_typed_pointers(ctx) == false
+        @test typed_pointers(ctx) == false
     end
 end
 
@@ -96,7 +96,7 @@ end
     eltyp = LLVM.Int32Type()
 
     ptrtyp = LLVM.PointerType(eltyp)
-    if supports_typed_pointers(ctx)
+    if typed_pointers(ctx)
         @test eltype(ptrtyp) == eltyp
     end
 
@@ -562,7 +562,7 @@ end
     @testset "constant expressions" begin
 
     # inline assembly
-    if supports_typed_pointers(ctx)
+    if typed_pointers(ctx)
         let
             ft = LLVM.FunctionType(LLVM.VoidType())
             asm = InlineAsm(ft, "nop", "", false)
@@ -716,7 +716,7 @@ end
         @check_ir ce "i32 0"
 
         ce = const_inttoptr(ce, value_type(ptr))::LLVM.Constant
-        if supports_typed_pointers(ctx)
+        if typed_pointers(ctx)
             @check_ir ce "i32* null"
         else
             @check_ir ce "ptr null"
@@ -724,7 +724,7 @@ end
         @test isempty(uses(ptr))
         for f in [const_addrspacecast, const_pointercast]
             ce = f(ptr, LLVM.PointerType(LLVM.Int32Type(), 1))::LLVM.Constant
-            if supports_typed_pointers(ctx)
+            if typed_pointers(ctx)
                 @check_ir ce "i32 addrspace(1)* addrspacecast (i32* null to i32 addrspace(1)*)"
             else
                 @check_ir ce "ptr addrspace(1) addrspacecast (ptr null to ptr addrspace(1))"
@@ -1185,7 +1185,7 @@ end
     fn = LLVM.Function(mod, intr)
     @test fn isa LLVM.Function
 
-    if supports_typed_pointers(ctx)
+    if typed_pointers(ctx)
         @test eltype(value_type(fn)) == ft
     end
     @test isintrinsic(fn)
@@ -1212,7 +1212,7 @@ end
 
     fn = LLVM.Function(mod, intr, [LLVM.DoubleType()])
     @test fn isa LLVM.Function
-    if supports_typed_pointers(ctx)
+    if typed_pointers(ctx)
         @test eltype(value_type(fn)) == ft
     end
     @test isintrinsic(fn)

@@ -24,7 +24,7 @@ using Core: LLVMPtr
         @dispose builder=IRBuilder() begin
             entry = BasicBlock(llvm_f, "entry")
             position!(builder, entry)
-            ptr = if supports_typed_pointers(ctx)
+            ptr = if typed_pointers(ctx)
                 typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
                 inbounds_gep!(builder, eltyp, typed_ptr, [parameters(llvm_f)[2]])
             else
@@ -61,7 +61,7 @@ end
         @dispose builder=IRBuilder() begin
             entry = BasicBlock(llvm_f, "entry")
             position!(builder, entry)
-            ptr = if supports_typed_pointers(ctx)
+            ptr = if typed_pointers(ctx)
                 typed_ptr = bitcast!(builder, parameters(llvm_f)[1], T_typed_ptr)
                 inbounds_gep!(builder, eltyp, typed_ptr, [parameters(llvm_f)[3]])
             else
