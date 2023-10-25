@@ -185,6 +185,8 @@ void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRe
 
 #if LLVM_VERSION_MAJOR >= 13
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
+#endif
+#if LLVM_VERSION_MAJOR >= 15
 LLVMBool LLVMContextHasSetOpaquePointersValue(LLVMContextRef C);
 #endif
 

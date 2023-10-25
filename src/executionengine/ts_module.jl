@@ -5,12 +5,7 @@ Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeContextRef}, ctx::ThreadSafeCont
 
 function ThreadSafeContext(; opaque_pointers=false)
     ts_ctx = ThreadSafeContext(API.LLVMOrcCreateNewThreadSafeContext())
-    @static if v"13" <= version() < v"17"
-        ctx = context(ts_ctx)
-        if opaque_pointers !== nothing && !has_set_opaque_pointers_value(ctx)
-            opaque_pointers!(ctx, opaque_pointers)
-        end
-    end
+    opaque_pointers!(context(ts_ctx), opaque_pointers)
     activate(ts_ctx)
     ts_ctx
 end

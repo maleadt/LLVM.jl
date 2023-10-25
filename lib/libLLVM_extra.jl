@@ -452,10 +452,12 @@ function LLVMPostDominatorTreeInstructionDominates(Tree, InstA, InstB)
     ccall((:LLVMPostDominatorTreeInstructionDominates, libLLVMExtra), LLVMBool, (LLVMPostDominatorTreeRef, LLVMValueRef, LLVMValueRef), Tree, InstA, InstB)
 end
 
-if version() > v"12"
+if version() >= v"13"
 function LLVMContextSupportsTypedPointers(Ctx)
     ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
 end
+end
+if version() >= v"15"
 function LLVMContextHasSetOpaquePointersValue(Ctx)
     ccall((:LLVMContextHasSetOpaquePointersValue, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
 end

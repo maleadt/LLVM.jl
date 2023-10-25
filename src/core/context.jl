@@ -1,6 +1,6 @@
 # Contexts are execution states for the core LLVM IR system.
 
-export Context, dispose, GlobalContext, typed_pointers
+export Context, dispose, GlobalContext
 
 @checked struct Context
     ref::API.LLVMContextRef
@@ -9,18 +9,15 @@ end
 Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 
 function Context(; opaque_pointers=false)
+    # during the transition to opaque pointers, contexts can be configured to use
+    # typed or opaque pointers. this can lead to incompatibilities: opaque IR cannot
+    # be used in a typed context. the reverse is not true though, so we make sure to
+    # configure LLVM.jl contexts to use typed pointers by default, resulting in simple
+    # `Context()` constructors (e.g. as used in LLVM.jl-based generators) generating IR
+    # that's compatible regardless of the compiler's choice of pointers.
+
     ctx = Context(API.LLVMContextCreate())
-    @static if v"13" <= version() < v"17"
-        # during the transition to opaque pointers, contexts can be configured to use
-        # typed or opaque pointers. this can lead to incompatibilities: opaque IR cannot
-        # be used in a typed context. the reverse is not true though, so we make sure to
-        # configure LLVM.jl contexts to use typed pointers by default, resulting in simple
-        # `Context()` constructors (e.g. as used in LLVM.jl-based generators) generating IR
-        # that's compatible regardless of the compiler's choice of pointers.
-        if opaque_pointers !== nothing && !has_set_opaque_pointers_value(ctx)
-            opaque_pointers!(ctx, opaque_pointers)
-        end
-    end
+    opaque_pointers!(ctx, opaque_pointers)
     _install_handlers(ctx)
     activate(ctx)
     ctx
@@ -42,26 +39,6 @@ end
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())
 
-if version() >= v"13"
-    typed_pointers(ctx::Context) =
-        convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
-
-    has_set_opaque_pointers_value(ctx::Context) =
-        convert(Core.Bool, API.LLVMContextHasSetOpaquePointersValue(ctx))
-
-    function opaque_pointers!(ctx::Context, enable::Core.Bool)
-        if has_set_opaque_pointers_value(ctx)
-            error("Opaque pointers value has already been set!")
-        end
-        API.LLVMContextSetOpaquePointers(ctx, enable)
-    end
-else
-    typed_pointers(ctx::Context) = true
-
-    opaque_pointers!(ctx::Context, enable::Bool) =
-        error("Opaque pointers not supported")
-end
-
 function Base.show(io::IO, ctx::Context)
     @printf(io, "LLVM.Context(%p", ctx.ref)
     if ctx == GlobalContext()
@@ -80,6 +57,68 @@ end
              You are invoking an API without specifying the pointer type, but this LLVM context
              uses opaque pointers. You should either pass the element type of the pointer as an
              argument, or use an environment that sypports typed pointers.""")
+
+
+## opaque pointer handling
+
+export typed_pointers
+
+if version() >= v"13"
+    typed_pointers(ctx::Context) =
+        convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
+
+    if version() >= v"15"
+        has_set_opaque_pointers_value(ctx::Context) =
+            convert(Core.Bool, API.LLVMContextHasSetOpaquePointersValue(ctx))
+    end
+
+    function unsafe_opaque_pointers!(ctx::Context, enable::Core.Bool)
+        @static if version() >= v"15"
+            if has_set_opaque_pointers_value(ctx)
+                error("Opaque pointers value has already been set!")
+            end
+        end
+        API.LLVMContextSetOpaquePointers(ctx, enable)
+    end
+else
+    typed_pointers(ctx::Context) = true
+end
+
+function opaque_pointers!(ctx::Context, opaque_pointers)
+    if opaque_pointers === nothing
+        # the user explicitly opted out of configuring the context
+        return
+    end
+
+    @static if version() < v"13"
+        if opaque_pointers
+            error("LLVM <13 does not support opaque pointers")
+        end
+    end
+
+    @static if version() >= v"17"
+        if !opaque_pointers
+            error("LLVM >=17 does not support typed pointers")
+        end
+    end
+
+    @static if v"13" <= version() < v"17"
+        # the opaque pointer setting can only be set once
+        @static if version() >= v"15"
+            # on LLVM 15, we can check whether the context has been configured already
+            if has_set_opaque_pointers_value(ctx)
+                return
+            end
+        else
+            # we also know that Julia used to set this value to `false` by default
+            if VERSION < v"1.11-"
+                return
+            end
+        end
+
+        unsafe_opaque_pointers!(ctx, opaque_pointers)
+    end
+end
 
 
 ## wrapper exception type
