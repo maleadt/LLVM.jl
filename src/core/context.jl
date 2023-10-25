@@ -74,8 +74,8 @@ if version() >= v"13"
 
     function unsafe_opaque_pointers!(ctx::Context, enable::Core.Bool)
         @static if version() >= v"15"
-            if has_set_opaque_pointers_value(ctx)
-                error("Opaque pointers value has already been set!")
+            if has_set_opaque_pointers_value(ctx) && typed_pointers(ctx) != !enable
+                error("Cannot $(enable ? "enable" : "disable") opaque pointers, as the context has already been configured to use $(typed_pointers(ctx) ? "typed" : "opaque") pointers")
             end
         end
         API.LLVMContextSetOpaquePointers(ctx, enable)
@@ -103,19 +103,6 @@ function opaque_pointers!(ctx::Context, opaque_pointers)
     end
 
     @static if v"13" <= version() < v"17"
-        # the opaque pointer setting can only be set once
-        @static if version() >= v"15"
-            # on LLVM 15, we can check whether the context has been configured already
-            if has_set_opaque_pointers_value(ctx)
-                return
-            end
-        else
-            # we also know that Julia used to set this value to `false` by default
-            if VERSION < v"1.11-"
-                return
-            end
-        end
-
         unsafe_opaque_pointers!(ctx, opaque_pointers)
     end
 end
