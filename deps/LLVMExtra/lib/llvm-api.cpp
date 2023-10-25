@@ -619,11 +619,6 @@ LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
   return unwrap(C)->supportsTypedPointers();
 }
 #endif
-#if LLVM_VERSION_MAJOR >= 15
-LLVMBool LLVMContextHasSetOpaquePointersValue(LLVMContextRef C) {
-  return unwrap(C)->hasSetOpaquePointersValue();
-}
-#endif
 
 LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data, unsigned NumElements) {
     StringRef S((const char *)Data, NumElements * unwrap(ElementTy)->getPrimitiveSizeInBits() / 8);
