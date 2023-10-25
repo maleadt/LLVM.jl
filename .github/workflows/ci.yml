@@ -1,10 +1,16 @@
 name: CI
+
 on:
   push:
     branches:
     - master
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   binary_test:
     name: Julia ${{ matrix.version }} ${{ matrix.llvm_args }} - ${{ matrix.os }} - ${{ matrix.arch }}
@@ -12,12 +18,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.8', '1.9', 'nightly']
+        version: ['1.8', '1.9', '1.10.0-beta3', 'nightly']
         os: ['ubuntu-latest', 'macOS-latest', 'windows-latest']
         arch: [x64]
         llvm_args: ['']
         include:
-          # on Julia 1.10, we can enable opaque pointers
+          # starting with Julia 1.10, we can enable opaque pointers
+          - version: '1.10.0-beta3'
+            os: 'ubuntu-latest'
+            arch: 'x64'
+            llvm_args: '--opaque-pointers'
+          - version: '1.10.0-beta3'
+            os: 'macOS-latest'
+            arch: 'x64'
+            llvm_args: '--opaque-pointers'
+          - version: '1.10.0-beta3'
+            os: 'windows-latest'
+            arch: 'x64'
+            llvm_args: '--opaque-pointers'
           - version: 'nightly'
             os: 'ubuntu-latest'
             arch: 'x64'
@@ -78,82 +96,31 @@ jobs:
         with:
           file: lcov.info
 
-  # development versions, built from source (with assertions enabled)
-  source_test:
-    name: Julia ${{ matrix.branch }} ${{ matrix.llvm_args }} - ${{ matrix.os }} - ${{ matrix.arch }}
+  # fetching builds from Buildkite with assertions enabled
+  assert_test:
+    name: Julia ${{ matrix.build }} ${{ matrix.llvm_args }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        branch: ['release-1.8', 'release-1.9', 'master']
-        os: ['ubuntu-latest', 'macOS-latest', 'windows-latest']
+        build: ['x86_64-linux-gnuassert']
+        os: ['ubuntu-latest']
         arch: ['x64']
-        llvm_args: ['']
-        include:
-          # on Julia 1.10, we can enable opaque pointers
-          - branch: 'master'
-            os: 'ubuntu-latest'
-            arch: 'x64'
-            llvm_args: '--opaque-pointers'
-          # JuliaLang/julia#48081
-          #- branch: 'master'
-          #  os: 'windows-latest'
-          #  arch: 'x64'
-          #  llvm_args: '--opaque-pointers'
-          # hangs
-          #- branch: 'master'
-          #  os: 'macOS-latest'
-          #  arch: 'x64'
-          #  llvm_args: '--opaque-pointers'
-        exclude:
-          # JuliaLang/julia#48081
-          - branch: 'master'
-            os: 'windows-latest'
-            arch: 'x64'
-          # hangs
-          - branch: 'master'
-            os: 'macOS-latest'
-            arch: 'x64'
-          # compilation failure
-          - branch: 'release-1.8'
-            os: 'windows-latest'
-            arch: 'x64'
+        llvm_args: ['', '--opaque-pointers']
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
-      - uses: actions/checkout@v3
-        with:
-          repository: 'JuliaLang/julia'
-          ref: ${{ matrix.branch }}
-          path: 'julia'
-
-      - name: Install MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          path-type: inherit
-          install: mingw-w64-x86_64-gcc cmake diffutils git m4 make patch tar p7zip curl python
-        if: runner.os == 'Windows'
 
       # compile Julia
-      - name: Compile Julia
+      - name: Download Julia
+        env:
+          BUILDKITE_TOKEN: ${{ secrets.BUILDKITE_TOKEN }}
         run: |
-          mv julia ../  # move julia checkout out of the way, for ReTestItems.jl
-          sed -i.bak 's/exit 2/exit 0/g' ../julia/deps/tools/jlchecksum
-          make -C ../julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
-          echo $PWD/../julia/usr/bin >> $GITHUB_PATH
-        if: runner.os != 'Windows'
-      - name: Compile Julia (in msys2)
-        shell: msys2 {0}
-        run: |
-          mv julia ../  # move julia checkout out of the way, for ReTestItems.jl
-          sed -i.bak 's/exit 2/exit 0/g' ../julia/deps/tools/jlchecksum
-          # XXX: workaround for JuliaLang/julia#48081
-          make -C ../julia/deps install-csl && \
-          cp ${MINGW_PREFIX}/lib/libmsvcrt.a ../julia/usr/lib/libmsvcrt.a && \
-          make -C ../julia -j $(nproc) FORCE_ASSERTIONS=1 LLVM_ASSERTIONS=1 JULIA_PRECOMPILE=0
-          echo $PWD/../julia/usr/bin >> $GITHUB_PATH
-        if: runner.os == 'Windows'
+          ./.github/download_build.sh build_${{ matrix.build }} julia.tar.gz
+          tar -xf julia.tar.gz -C ../
+          rm julia.tar.gz
+          echo $PWD/../julia-*/bin >> $GITHUB_PATH
 
       # set-up packages
       - uses: actions/cache@v1
@@ -170,11 +137,6 @@ jobs:
 
       - name: Build libLLVMExtra
         run: julia --project=deps deps/build_ci.jl
-        if: runner.os != 'Windows'
-      - name: Build libLLVMExtra (in msys2)
-        shell: msys2 {0}
-        run: julia --project=deps deps/build_ci.jl
-        if: runner.os == 'Windows'
 
       - name: Run tests
         run: julia --project -e 'using Pkg; Pkg.test(; coverage=true, julia_args=`-g2`)'
