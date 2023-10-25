@@ -58,6 +58,8 @@ end
 
 export typed_pointers
 
+typed_pointers() = typed_pointers(context())
+
 if version() >= v"17"
     typed_pointers(ctx::Context) = false
 elseif version() >= v"13"
