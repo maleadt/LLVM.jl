@@ -1,10 +1,16 @@
 name: CI
+
 on:
   push:
     branches:
     - master
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   binary_test:
     name: Julia ${{ matrix.version }} ${{ matrix.llvm_args }} - ${{ matrix.os }} - ${{ matrix.arch }}
