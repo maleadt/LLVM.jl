@@ -8,16 +8,11 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 
-function Context(; opaque_pointers=false)
-    # during the transition to opaque pointers, contexts can be configured to use
-    # typed or opaque pointers. this can lead to incompatibilities: opaque IR cannot
-    # be used in a typed context. the reverse is not true though, so we make sure to
-    # configure LLVM.jl contexts to use typed pointers by default, resulting in simple
-    # `Context()` constructors (e.g. as used in LLVM.jl-based generators) generating IR
-    # that's compatible regardless of the compiler's choice of pointers.
-
+function Context(; opaque_pointers=nothing)
     ctx = Context(API.LLVMContextCreate())
-    opaque_pointers!(ctx, opaque_pointers)
+    if opaque_pointers !== nothing
+        opaque_pointers!(ctx, opaque_pointers)
+    end
     _install_handlers(ctx)
     activate(ctx)
     ctx
@@ -84,12 +79,7 @@ else
     typed_pointers(ctx::Context) = true
 end
 
-function opaque_pointers!(ctx::Context, opaque_pointers)
-    if opaque_pointers === nothing
-        # the user explicitly opted out of configuring the context
-        return
-    end
-
+function opaque_pointers!(ctx::Context, opaque_pointers::Core.Bool)
     @static if version() < v"13"
         if opaque_pointers
             error("LLVM <13 does not support opaque pointers")

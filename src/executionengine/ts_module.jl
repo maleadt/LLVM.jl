@@ -3,9 +3,11 @@
 end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeContextRef}, ctx::ThreadSafeContext) = ctx.ref
 
-function ThreadSafeContext(; opaque_pointers=false)
+function ThreadSafeContext(; opaque_pointers=nothing)
     ts_ctx = ThreadSafeContext(API.LLVMOrcCreateNewThreadSafeContext())
-    opaque_pointers!(context(ts_ctx), opaque_pointers)
+    if opaque_pointers !== nothing
+        opaque_pointers!(context(ts_ctx), opaque_pointers)
+    end
     activate(ts_ctx)
     ts_ctx
 end
