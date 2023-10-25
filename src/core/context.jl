@@ -1,6 +1,6 @@
 # Contexts are execution states for the core LLVM IR system.
 
-export Context, dispose, GlobalContext, typed_pointers, opaque_pointers!
+export Context, dispose, GlobalContext
 
 @checked struct Context
     ref::API.LLVMContextRef
@@ -8,8 +8,11 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 
-function Context()
+function Context(; opaque_pointers=nothing)
     ctx = Context(API.LLVMContextCreate())
+    if opaque_pointers !== nothing
+        opaque_pointers!(ctx, opaque_pointers)
+    end
     _install_handlers(ctx)
     activate(ctx)
     ctx
@@ -20,8 +23,8 @@ function dispose(ctx::Context)
     API.LLVMContextDispose(ctx)
 end
 
-function Context(f::Core.Function)
-    ctx = Context()
+function Context(f::Core.Function; kwargs...)
+    ctx = Context(; kwargs...)
     try
         f(ctx)
     finally
@@ -30,19 +33,6 @@ function Context(f::Core.Function)
 end
 
 GlobalContext() = Context(API.LLVMGetGlobalContext())
-
-if version() >= v"13"
-    typed_pointers(ctx::Context) =
-        convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
-
-    opaque_pointers!(ctx::Context, enable::Core.Bool) =
-        API.LLVMContextSetOpaquePointers(ctx, enable)
-else
-    typed_pointers(ctx::Context) = true
-
-    opaque_pointers!(ctx::Context, enable::Bool) =
-        error("Opaque pointers not supported")
-end
 
 function Base.show(io::IO, ctx::Context)
     @printf(io, "LLVM.Context(%p", ctx.ref)
@@ -62,6 +52,50 @@ end
              You are invoking an API without specifying the pointer type, but this LLVM context
              uses opaque pointers. You should either pass the element type of the pointer as an
              argument, or use an environment that sypports typed pointers.""")
+
+
+## opaque pointer handling
+
+export typed_pointers
+
+if version() >= v"13"
+    typed_pointers(ctx::Context) =
+        convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
+
+    if version() >= v"15"
+        has_set_opaque_pointers_value(ctx::Context) =
+            convert(Core.Bool, API.LLVMContextHasSetOpaquePointersValue(ctx))
+    end
+
+    function unsafe_opaque_pointers!(ctx::Context, enable::Core.Bool)
+        @static if version() >= v"15"
+            if has_set_opaque_pointers_value(ctx) && typed_pointers(ctx) != !enable
+                error("Cannot $(enable ? "enable" : "disable") opaque pointers, as the context has already been configured to use $(typed_pointers(ctx) ? "typed" : "opaque") pointers")
+            end
+        end
+        API.LLVMContextSetOpaquePointers(ctx, enable)
+    end
+else
+    typed_pointers(ctx::Context) = true
+end
+
+function opaque_pointers!(ctx::Context, opaque_pointers::Core.Bool)
+    @static if version() < v"13"
+        if opaque_pointers
+            error("LLVM <13 does not support opaque pointers")
+        end
+    end
+
+    @static if version() >= v"17"
+        if !opaque_pointers
+            error("LLVM >=17 does not support typed pointers")
+        end
+    end
+
+    @static if v"13" <= version() < v"17"
+        unsafe_opaque_pointers!(ctx, opaque_pointers)
+    end
+end
 
 
 ## wrapper exception type
