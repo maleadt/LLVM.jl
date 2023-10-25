@@ -6,7 +6,7 @@ using InteractiveUtils
 # many of these tests don't use explicit contexts, as they rely on high-level functionality.
 # that functionality should be using default context options, so query those here.
 supports_typed_ptrs = @dispose ctx=Context() begin
-    typed_pointers(ctx)
+    supports_typed_pointers(ctx)
 end
 
 @testset "base" begin

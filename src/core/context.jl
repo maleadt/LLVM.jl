@@ -41,7 +41,7 @@ function Base.show(io::IO, ctx::Context)
     end
     if v"14" <= version() < v"17"
         # migration to opaque pointers
-        print(io, ", ", typed_pointers(ctx) ? "typed ptrs" : "opaque ptrs")
+        print(io, ", ", supports_typed_pointers(ctx) ? "typed ptrs" : "opaque ptrs")
     end
     print(io, ")")
 end
@@ -56,20 +56,20 @@ end
 
 ## opaque pointer handling
 
-export typed_pointers
+export supports_typed_pointers
 
-typed_pointers() = typed_pointers(context())
+supports_typed_pointers() = supports_typed_pointers(context())
 
 if version() >= v"17"
-    typed_pointers(ctx::Context) = false
+    supports_typed_pointers(ctx::Context) = false
 elseif version() >= v"13"
-    typed_pointers(ctx::Context) =
+    supports_typed_pointers(ctx::Context) =
         convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
 
     unsafe_opaque_pointers!(ctx::Context, enable::Core.Bool) =
         API.LLVMContextSetOpaquePointers(ctx, enable)
 else
-    typed_pointers(ctx::Context) = true
+    supports_typed_pointers(ctx::Context) = true
 end
 
 function opaque_pointers!(ctx::Context, opaque_pointers::Core.Bool)
