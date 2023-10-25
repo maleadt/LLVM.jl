@@ -11,7 +11,43 @@ end
 
 @testset "base" begin
 
-@generated function add_one(i)
+@generated function foo()
+    @dispose ctx=Context() begin
+        f, ft = create_function()
+
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(f, "entry")
+            position!(builder, entry)
+
+            ret!(builder)
+        end
+
+        call_function(f, Nothing, Tuple{})
+    end
+end
+@test foo() === nothing
+
+@generated function bar()
+    @dispose ctx=Context() begin
+        T_int = convert(LLVMType, Int)
+
+        f, ft = create_function(T_int)
+
+        @dispose builder=IRBuilder() begin
+            entry = BasicBlock(f, "entry")
+            position!(builder, entry)
+
+            val = ConstantInt(T_int, 42)
+
+            ret!(builder, val)
+        end
+
+        call_function(f, Int, Tuple{})
+    end
+end
+@test bar() == 42
+
+@generated function baz(i)
     @dispose ctx=Context() begin
         T_int = convert(LLVMType, Int)
 
@@ -21,7 +57,7 @@ end
             entry = BasicBlock(f, "entry")
             position!(builder, entry)
 
-            val = add!(builder, parameters(f)[1], ConstantInt(T_int, 1))
+            val = add!(builder, parameters(f)[1], ConstantInt(T_int, 42))
 
             ret!(builder, val)
         end
@@ -29,8 +65,7 @@ end
         call_function(f, Int, Tuple{Int}, :i)
     end
 end
-
-@test add_one(1) == 2
+@test baz(1) == 43
 
 @eval struct GhostType end
 @eval struct NonGhostType1

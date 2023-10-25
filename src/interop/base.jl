@@ -7,7 +7,7 @@ Create an LLVM function, given its return type `rettyp` and a vector of argument
 `argtyp`. The function is marked for inlining, to be embedded in the caller's body.
 Returns both the newly created function, and its type.
 """
-function create_function(rettyp::LLVMType=LLVM.VoidType(Context()),
+function create_function(rettyp::LLVMType=LLVM.VoidType(),
                          argtyp::Vector{<:LLVMType}=LLVMType[],
                          name::String="entry")
     mod = LLVM.Module("llvmcall")
