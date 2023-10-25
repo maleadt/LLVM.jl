@@ -3,14 +3,20 @@
 end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeContextRef}, ctx::ThreadSafeContext) = ctx.ref
 
-function ThreadSafeContext()
+function ThreadSafeContext(; opaque_pointers=false)
     ts_ctx = ThreadSafeContext(API.LLVMOrcCreateNewThreadSafeContext())
+    @static if v"13" <= version() < v"17"
+        ctx = context(ts_ctx)
+        if opaque_pointers !== nothing && !has_set_opaque_pointers_value(ctx)
+            opaque_pointers!(ctx, opaque_pointers)
+        end
+    end
     activate(ts_ctx)
     ts_ctx
 end
 
-function ThreadSafeContext(f::Core.Function)
-    ctx = ThreadSafeContext()
+function ThreadSafeContext(f::Core.Function; kwargs...)
+    ctx = ThreadSafeContext(; kwargs...)
     try
         f(ctx)
     finally

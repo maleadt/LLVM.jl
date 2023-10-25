@@ -456,6 +456,9 @@ if version() > v"12"
 function LLVMContextSupportsTypedPointers(Ctx)
     ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
 end
+function LLVMContextHasSetOpaquePointersValue(Ctx)
+    ccall((:LLVMContextHasSetOpaquePointersValue, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
+end
 end
 
 function LLVMConstDataArray(ElementTy, Data, NumElements)

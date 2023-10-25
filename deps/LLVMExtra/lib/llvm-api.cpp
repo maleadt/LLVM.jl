@@ -618,6 +618,9 @@ void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRe
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
   return unwrap(C)->supportsTypedPointers();
 }
+LLVMBool LLVMContextHasSetOpaquePointersValue(LLVMContextRef C) {
+  return unwrap(C)->hasSetOpaquePointersValue();
+}
 #endif
 
 LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data, unsigned NumElements) {

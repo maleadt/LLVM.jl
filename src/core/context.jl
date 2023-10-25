@@ -1,6 +1,6 @@
 # Contexts are execution states for the core LLVM IR system.
 
-export Context, dispose, GlobalContext, typed_pointers, opaque_pointers!
+export Context, dispose, GlobalContext, typed_pointers
 
 @checked struct Context
     ref::API.LLVMContextRef
@@ -8,8 +8,19 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 
-function Context()
+function Context(; opaque_pointers=false)
     ctx = Context(API.LLVMContextCreate())
+    @static if v"13" <= version() < v"17"
+        # during the transition to opaque pointers, contexts can be configured to use
+        # typed or opaque pointers. this can lead to incompatibilities: opaque IR cannot
+        # be used in a typed context. the reverse is not true though, so we make sure to
+        # configure LLVM.jl contexts to use typed pointers by default, resulting in simple
+        # `Context()` constructors (e.g. as used in LLVM.jl-based generators) generating IR
+        # that's compatible regardless of the compiler's choice of pointers.
+        if opaque_pointers !== nothing && !has_set_opaque_pointers_value(ctx)
+            opaque_pointers!(ctx, opaque_pointers)
+        end
+    end
     _install_handlers(ctx)
     activate(ctx)
     ctx
@@ -20,8 +31,8 @@ function dispose(ctx::Context)
     API.LLVMContextDispose(ctx)
 end
 
-function Context(f::Core.Function)
-    ctx = Context()
+function Context(f::Core.Function; kwargs...)
+    ctx = Context(; kwargs...)
     try
         f(ctx)
     finally
@@ -35,8 +46,15 @@ if version() >= v"13"
     typed_pointers(ctx::Context) =
         convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
 
-    opaque_pointers!(ctx::Context, enable::Core.Bool) =
+    has_set_opaque_pointers_value(ctx::Context) =
+        convert(Core.Bool, API.LLVMContextHasSetOpaquePointersValue(ctx))
+
+    function opaque_pointers!(ctx::Context, enable::Core.Bool)
+        if has_set_opaque_pointers_value(ctx)
+            error("Opaque pointers value has already been set!")
+        end
         API.LLVMContextSetOpaquePointers(ctx, enable)
+    end
 else
     typed_pointers(ctx::Context) = true
 
