@@ -58,23 +58,16 @@ end
 
 export typed_pointers
 
-if version() >= v"13"
+typed_pointers() = typed_pointers(context())
+
+if version() >= v"17"
+    typed_pointers(ctx::Context) = false
+elseif version() >= v"13"
     typed_pointers(ctx::Context) =
         convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
 
-    if version() >= v"15"
-        has_set_opaque_pointers_value(ctx::Context) =
-            convert(Core.Bool, API.LLVMContextHasSetOpaquePointersValue(ctx))
-    end
-
-    function unsafe_opaque_pointers!(ctx::Context, enable::Core.Bool)
-        @static if version() >= v"15"
-            if has_set_opaque_pointers_value(ctx) && typed_pointers(ctx) != !enable
-                error("Cannot $(enable ? "enable" : "disable") opaque pointers, as the context has already been configured to use $(typed_pointers(ctx) ? "typed" : "opaque") pointers")
-            end
-        end
+    unsafe_opaque_pointers!(ctx::Context, enable::Core.Bool) =
         API.LLVMContextSetOpaquePointers(ctx, enable)
-    end
 else
     typed_pointers(ctx::Context) = true
 end
