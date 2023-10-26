@@ -17,7 +17,7 @@ Base.empty!(f::Function) = API.LLVMFunctionDeleteBody(f)
 unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(f)
 
 function personality(f::Function)
-    has_personality = convert(Bool, API.LLVMHasPersonalityFn(f))
+    has_personality = API.LLVMHasPersonalityFn(f) |> Bool
     return has_personality ? Function(API.LLVMGetPersonalityFn(f)) : nothing
 end
 personality!(f::Function, persfn::Union{Nothing,Function}) =
@@ -201,7 +201,7 @@ function name(intr::Intrinsic, params::Vector{<:LLVMType})
 end
 
 function isoverloaded(intr::Intrinsic)
-    convert(Bool, API.LLVMIntrinsicIsOverloaded(intr))
+    API.LLVMIntrinsicIsOverloaded(intr) |> Bool
 end
 
 function Function(mod::Module, intr::Intrinsic, params::Vector{<:LLVMType}=LLVMType[])

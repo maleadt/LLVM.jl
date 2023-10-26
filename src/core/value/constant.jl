@@ -4,7 +4,7 @@ null(typ::LLVMType) = Value(API.LLVMConstNull(typ))
 
 all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(typ))
 
-isnull(val::Value) = convert(Bool, API.LLVMIsNull(val))
+isnull(val::Value) = API.LLVMIsNull(val) |> Bool
 
 
 abstract type Constant <: User end
@@ -578,7 +578,7 @@ parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(val))
 
 global_value_type(val::GlobalValue) = LLVMType(API.LLVMGetGlobalValueType(val))
 
-isdeclaration(val::GlobalValue) = convert(Bool, API.LLVMIsDeclaration(val))
+isdeclaration(val::GlobalValue) = API.LLVMIsDeclaration(val) |> Bool
 
 linkage(val::GlobalValue) = API.LLVMGetLinkage(val)
 linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
@@ -609,7 +609,7 @@ dllstorage(val::GlobalValue) = API.LLVMGetDLLStorageClass(val)
 dllstorage!(val::GlobalValue, storage::API.LLVMDLLStorageClass) =
     API.LLVMSetDLLStorageClass(val, storage)
 
-unnamed_addr(val::GlobalValue) = convert(Bool, API.LLVMHasUnnamedAddr(val))
+unnamed_addr(val::GlobalValue) = API.LLVMHasUnnamedAddr(val) |> Bool
 unnamed_addr!(val::GlobalValue, flag::Bool) = API.LLVMSetUnnamedAddr(val, flag)
 
 const AlignedValue = Union{GlobalValue,Instruction}   # load, store, alloca
@@ -651,15 +651,15 @@ initializer!(gv::GlobalVariable, val::Constant) =
 initializer!(gv::GlobalVariable, ::Nothing) =
   API.LLVMExtraSetInitializer(gv, C_NULL)
 
-isthreadlocal(gv::GlobalVariable) = convert(Bool, API.LLVMIsThreadLocal(gv))
+isthreadlocal(gv::GlobalVariable) = API.LLVMIsThreadLocal(gv) |> Bool
 threadlocal!(gv::GlobalVariable, bool) =
   API.LLVMSetThreadLocal(gv, bool)
 
-isconstant(gv::GlobalVariable) = convert(Bool, API.LLVMIsGlobalConstant(gv))
+isconstant(gv::GlobalVariable) = API.LLVMIsGlobalConstant(gv) |> Bool
 constant!(gv::GlobalVariable, bool) = API.LLVMSetGlobalConstant(gv, bool)
 
 threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(gv)
 threadlocalmode!(gv::GlobalVariable, mode) = API.LLVMSetThreadLocalMode(gv, mode)
 
-isextinit(gv::GlobalVariable) = convert(Bool, API.LLVMIsExternallyInitialized(gv))
+isextinit(gv::GlobalVariable) = API.LLVMIsExternallyInitialized(gv) |> Bool
 extinit!(gv::GlobalVariable, bool) = API.LLVMSetExternallyInitialized(gv, bool)

@@ -3,7 +3,7 @@
 function Base.parse(::Type{Module}, membuf::MemoryBuffer)
     out_ref = Ref{API.LLVMModuleRef}()
 
-    status = convert(Bool, API.LLVMParseBitcodeInContext2(context(), membuf, out_ref))
+    status = API.LLVMParseBitcodeInContext2(context(), membuf, out_ref) |> Bool
     @assert !status # caught by diagnostics handler
 
     Module(out_ref[])

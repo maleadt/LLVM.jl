@@ -42,9 +42,8 @@ asm_verbosity!(tm::TargetMachine, verbose::Bool) =
 function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType)
     out_error = Ref{Cstring}()
     out_membuf = Ref{API.LLVMMemoryBufferRef}()
-    status = convert(Bool,
-        API.LLVMTargetMachineEmitToMemoryBuffer(tm, mod, filetype,
-                                                out_error, out_membuf))
+    status = API.LLVMTargetMachineEmitToMemoryBuffer(tm, mod, filetype,
+                                                     out_error, out_membuf) |> Bool
 
     if status
         error = unsafe_message(out_error[])
@@ -56,8 +55,7 @@ end
 
 function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType, path::String)
     out_error = Ref{Cstring}()
-    status = convert(Bool,
-        API.LLVMTargetMachineEmitToFile(tm, mod, path, filetype, out_error))
+    status = API.LLVMTargetMachineEmitToFile(tm, mod, path, filetype, out_error) |> Bool
 
     if status
         error = unsafe_message(out_error[])

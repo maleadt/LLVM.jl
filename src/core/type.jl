@@ -38,8 +38,7 @@ function LLVMType(ref::API.LLVMTypeRef)
     return T(ref)::LLVMType
 end
 
-issized(typ::LLVMType) =
-    convert(Bool, API.LLVMTypeIsSized(typ))
+issized(typ::LLVMType) = API.LLVMTypeIsSized(typ) |> Bool
 context(typ::LLVMType) = Context(API.LLVMGetTypeContext(typ))
 
 Base.string(typ::LLVMType) = unsafe_message(API.LLVMPrintTypeToString(typ))
@@ -117,8 +116,7 @@ FunctionType(rettyp::LLVMType, params::Vector{<:LLVMType}=LLVMType[];
     FunctionType(API.LLVMFunctionType(rettyp, params,
                                       length(params), vararg))
 
-isvararg(ft::FunctionType) =
-    convert(Bool, API.LLVMIsFunctionVarArg(ft))
+isvararg(ft::FunctionType) = API.LLVMIsFunctionVarArg(ft) |> Bool
 
 return_type(ft::FunctionType) =
     LLVMType(API.LLVMGetReturnType(ft))
@@ -160,8 +158,7 @@ function PointerType(addrspace=0)
 end
 
 if version() >= v"13"
-    is_opaque(ptrtyp::PointerType) =
-        convert(Bool, API.LLVMPointerTypeIsOpaque(ptrtyp))
+    is_opaque(ptrtyp::PointerType) = API.LLVMPointerTypeIsOpaque(ptrtyp) |> Bool
 
     function Base.eltype(typ::PointerType)
         is_opaque(typ) && throw(error("Taking the type of an opaque pointer is illegal"))
@@ -220,10 +217,8 @@ function name(structtyp::StructType)
     cstr = API.LLVMGetStructName(structtyp)
     cstr == C_NULL ? nothing : unsafe_string(cstr)
 end
-ispacked(structtyp::StructType) =
-    convert(Bool, API.LLVMIsPackedStruct(structtyp))
-isopaque(structtyp::StructType) =
-    convert(Bool, API.LLVMIsOpaqueStruct(structtyp))
+ispacked(structtyp::StructType) = API.LLVMIsPackedStruct(structtyp) |> Bool
+isopaque(structtyp::StructType) = API.LLVMIsOpaqueStruct(structtyp) |> Bool
 
 elements!(structtyp::StructType, elems::Vector{<:LLVMType}, packed::Bool=false) =
     API.LLVMStructSetBody(structtyp, elems, length(elems), packed)

@@ -29,8 +29,7 @@ function MemoryBufferFile(path::String)
     out_ref = Ref{API.LLVMMemoryBufferRef}()
 
     out_error = Ref{Cstring}()
-    status =
-        convert(Bool, API.LLVMCreateMemoryBufferWithContentsOfFile(path, out_ref, out_error))
+    status = API.LLVMCreateMemoryBufferWithContentsOfFile(path, out_ref, out_error) |> Bool
 
     if status
         error = unsafe_message(out_error[])

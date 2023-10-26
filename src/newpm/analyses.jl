@@ -50,10 +50,10 @@ end
 analysis_string(::TargetLibraryAnalysis) = "target-library-analysis"
 
 add!(fam::FunctionAnalysisManager, analysis::TargetIRAnalysis) =
-    convert(Bool, API.LLVMRegisterTargetIRAnalysis(fam, analysis.tm))
+    API.LLVMRegisterTargetIRAnalysis(fam, analysis.tm) |> Bool
 add!(fam::FunctionAnalysisManager, analysis::TargetLibraryAnalysis) =
-    convert(Bool, API.LLVMRegisterTargetLibraryAnalysis(fam, analysis.triple,
-                                                             length(analysis.triple)))
+    API.LLVMRegisterTargetLibraryAnalysis(fam, analysis.triple,
+                                          length(analysis.triple)) |> Bool
 
 function analysis_managers(f::Core.Function, pb::Union{Nothing,PassBuilder}=nothing,
                            tm::Union{Nothing,TargetMachine}=nothing,

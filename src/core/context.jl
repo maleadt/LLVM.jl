@@ -64,7 +64,7 @@ if version() >= v"17"
     supports_typed_pointers(ctx::Context) = false
 elseif version() >= v"13"
     supports_typed_pointers(ctx::Context) =
-        convert(Bool, API.LLVMContextSupportsTypedPointers(ctx))
+        API.LLVMContextSupportsTypedPointers(ctx) |> Bool
 
     unsafe_opaque_pointers!(ctx::Context, enable::Bool) =
         API.LLVMContextSetOpaquePointers(ctx, enable)

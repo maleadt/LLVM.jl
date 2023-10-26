@@ -64,8 +64,7 @@ Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine)
 function ExecutionEngine(mod::Module)
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Bool, API.LLVMCreateExecutionEngineForModule(out_ref, mod,
-                                                                       out_error))
+    status = API.LLVMCreateExecutionEngineForModule(out_ref, mod, out_error) |> Bool
 
     if status
         error = unsafe_message(out_error[])
@@ -79,8 +78,7 @@ function Interpreter(mod::Module)
 
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Bool, API.LLVMCreateInterpreterForModule(out_ref, mod,
-                                                                   out_error))
+    status = API.LLVMCreateInterpreterForModule(out_ref, mod, out_error) |> Bool
 
     if status
         error = unsafe_message(out_error[])
@@ -94,8 +92,7 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
 
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Bool, API.LLVMCreateJITCompilerForModule(out_ref, mod,
-                                                                   optlevel, out_error))
+    status = API.LLVMCreateJITCompilerForModule(out_ref, mod, optlevel, out_error) |> Bool
 
     if status
         error = unsafe_message(out_error[])
@@ -156,7 +153,7 @@ Base.iterate(::ExecutionEngineFunctionSet) =
 function Base.get(functionset::ExecutionEngineFunctionSet, name::String, default)
     out_ref = Ref{API.LLVMValueRef}()
     API.LLVMFindFunction(functionset.engine.ref, name, out_ref)
-    status = convert(Bool, API.LLVMFindFunction(functionset.engine.ref, name, out_ref))
+    status = API.LLVMFindFunction(functionset.engine.ref, name, out_ref) |> Bool
     return status == 0 ? Function(out_ref[]) : default
 end
 
