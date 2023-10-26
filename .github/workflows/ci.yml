@@ -98,7 +98,7 @@ jobs:
 
   # fetching builds from Buildkite with assertions enabled
   assert_test:
-    name: Julia ${{ matrix.build }} ${{ matrix.llvm_args }}
+    name: Julia-master ${{ matrix.build }} ${{ matrix.llvm_args }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -112,7 +112,6 @@ jobs:
         with:
           fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
 
-      # compile Julia
       - name: Download Julia
         env:
           BUILDKITE_TOKEN: ${{ secrets.BUILDKITE_TOKEN }}

@@ -161,7 +161,7 @@ end
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionBlockSet)
-    elems = Vector{API.LLVMValueRef}(undef, length(iter))
+    elems = Vector{API.LLVMBasicBlockRef}(undef, length(iter))
     API.LLVMGetBasicBlocks(iter.f, elems)
     return BasicBlock[BasicBlock(elem) for elem in elems]
 end
