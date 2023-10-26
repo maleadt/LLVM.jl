@@ -6,14 +6,13 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMMemoryBufferRef}, membuf::MemoryBuffer) = membuf.ref
 
-function MemoryBuffer(data::Vector{T}, name::String="", copy::Core.Bool=true) where T<:Union{UInt8,Int8}
+function MemoryBuffer(data::Vector{T}, name::String="", copy::Bool=true) where T<:Union{UInt8,Int8}
     ptr = pointer(data)
     len = Csize_t(length(data))
     if copy
         return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRangeCopy(ptr, len, name))
     else
-        return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRange(ptr, len, name,
-                                                                      convert(Bool, false)))
+        return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRange(ptr, len, name, false))
     end
 end
 
@@ -31,7 +30,7 @@ function MemoryBufferFile(path::String)
 
     out_error = Ref{Cstring}()
     status =
-        convert(Core.Bool, API.LLVMCreateMemoryBufferWithContentsOfFile(path, out_ref, out_error))
+        convert(Bool, API.LLVMCreateMemoryBufferWithContentsOfFile(path, out_ref, out_error))
 
     if status
         error = unsafe_message(out_error[])

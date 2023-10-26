@@ -15,20 +15,20 @@ Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = val.re
 GenericValue(typ::IntegerType, N::Signed) =
     GenericValue(
         API.LLVMCreateGenericValueOfInt(typ,
-                                        reinterpret(Culonglong, convert(Int64, N)), True))
+                                        reinterpret(Culonglong, convert(Int64, N)), true))
 
 GenericValue(typ::IntegerType, N::Unsigned) =
     GenericValue(
         API.LLVMCreateGenericValueOfInt(typ,
-                                        reinterpret(Culonglong, convert(UInt64, N)), False))
+                                        reinterpret(Culonglong, convert(UInt64, N)), false))
 
 intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(val)
 
 Base.convert(::Type{T}, val::GenericValue) where {T<:Signed} =
-    convert(T, reinterpret(Clonglong, API.LLVMGenericValueToInt(val, True)))
+    convert(T, reinterpret(Clonglong, API.LLVMGenericValueToInt(val, true)))
 
 Base.convert(::Type{T}, val::GenericValue) where {T<:Unsigned} =
-    convert(T, API.LLVMGenericValueToInt(val, False))
+    convert(T, API.LLVMGenericValueToInt(val, false))
 
 GenericValue(typ::FloatingPointType, N::AbstractFloat) =
     GenericValue(API.LLVMCreateGenericValueOfFloat(typ, convert(Cdouble, N)))
@@ -64,7 +64,7 @@ Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine)
 function ExecutionEngine(mod::Module)
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Core.Bool, API.LLVMCreateExecutionEngineForModule(out_ref, mod,
+    status = convert(Bool, API.LLVMCreateExecutionEngineForModule(out_ref, mod,
                                                                        out_error))
 
     if status
@@ -79,7 +79,7 @@ function Interpreter(mod::Module)
 
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Core.Bool, API.LLVMCreateInterpreterForModule(out_ref, mod,
+    status = convert(Bool, API.LLVMCreateInterpreterForModule(out_ref, mod,
                                                                    out_error))
 
     if status
@@ -94,7 +94,7 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
 
     out_ref = Ref{API.LLVMExecutionEngineRef}()
     out_error = Ref{Cstring}()
-    status = convert(Core.Bool, API.LLVMCreateJITCompilerForModule(out_ref, mod,
+    status = convert(Bool, API.LLVMCreateJITCompilerForModule(out_ref, mod,
                                                                    optlevel, out_error))
 
     if status
@@ -156,7 +156,7 @@ Base.iterate(::ExecutionEngineFunctionSet) =
 function Base.get(functionset::ExecutionEngineFunctionSet, name::String, default)
     out_ref = Ref{API.LLVMValueRef}()
     API.LLVMFindFunction(functionset.engine.ref, name, out_ref)
-    status = convert(Core.Bool, API.LLVMFindFunction(functionset.engine.ref, name, out_ref))
+    status = convert(Bool, API.LLVMFindFunction(functionset.engine.ref, name, out_ref))
     return status == 0 ? Function(out_ref[]) : default
 end
 

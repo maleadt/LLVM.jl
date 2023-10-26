@@ -99,11 +99,11 @@ function replace_metadata_uses!(old::Value, new::Value)
     end
 end
 
-isconstant(val::Value) = convert(Core.Bool, API.LLVMIsConstant(val))
+isconstant(val::Value) = convert(Bool, API.LLVMIsConstant(val))
 
-isundef(val::Value) = convert(Core.Bool, API.LLVMIsUndef(val))
+isundef(val::Value) = convert(Bool, API.LLVMIsUndef(val))
 
-ispoison(val::Value) = convert(Core.Bool, API.LLVMIsPoison(val))
+ispoison(val::Value) = convert(Bool, API.LLVMIsPoison(val))
 
 context(val::Value) = Context(API.LLVMGetValueContext(val))
 

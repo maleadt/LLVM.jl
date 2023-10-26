@@ -37,7 +37,7 @@ function ModulePassManager(f::Core.Function, args...; kwargs...)
 end
 
 run!(mpm::ModulePassManager, mod::Module) =
-    convert(Core.Bool, API.LLVMRunPassManager(mpm, mod))
+    convert(Bool, API.LLVMRunPassManager(mpm, mod))
 
 
 
@@ -66,9 +66,9 @@ function FunctionPassManager(f::Core.Function, args...; kwargs...)
 end
 
 initialize!(fpm::FunctionPassManager) =
-    convert(Core.Bool, API.LLVMInitializeFunctionPassManager(fpm))
+    convert(Bool, API.LLVMInitializeFunctionPassManager(fpm))
 finalize!(fpm::FunctionPassManager) =
-    convert(Core.Bool, API.LLVMFinalizeFunctionPassManager(fpm))
+    convert(Bool, API.LLVMFinalizeFunctionPassManager(fpm))
 
 run!(fpm::FunctionPassManager, f::Function) =
-    convert(Core.Bool, API.LLVMRunFunctionPassManager(fpm, f))
+    convert(Bool, API.LLVMRunFunctionPassManager(fpm, f))

@@ -3,7 +3,7 @@
 function Base.parse(::Type{Module}, membuf::MemoryBuffer)
     out_ref = Ref{API.LLVMModuleRef}()
 
-    status = convert(Core.Bool, API.LLVMParseBitcodeInContext2(context(), membuf, out_ref))
+    status = convert(Bool, API.LLVMParseBitcodeInContext2(context(), membuf, out_ref))
     @assert !status # caught by diagnostics handler
 
     Module(out_ref[])
@@ -26,7 +26,7 @@ end
 
 function Base.write(io::IOStream, mod::Module)
     # XXX: can't use the LLVM API because it returns 0, not the number of bytes written
-    #API.LLVMWriteBitcodeToFD(mod, Cint(fd(io)), convert(Bool, false), convert(Bool, true))
+    #API.LLVMWriteBitcodeToFD(mod, Cint(fd(io)), false, true)
     buf = convert(MemoryBuffer, mod)
     vec = unsafe_wrap(Array, pointer(buf), length(buf))
     nb = write(io, vec)

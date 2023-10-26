@@ -5,7 +5,7 @@ export verify
 function verify(mod::Module)
     out_error = Ref{Cstring}()
     status =
-        convert(Core.Bool, API.LLVMVerifyModule(mod, API.LLVMReturnStatusAction, out_error))
+        convert(Bool, API.LLVMVerifyModule(mod, API.LLVMReturnStatusAction, out_error))
 
     if status
         error = unsafe_message(out_error[])
@@ -14,7 +14,7 @@ function verify(mod::Module)
 end
 
 function verify(f::Function)
-    status = convert(Core.Bool, API.LLVMVerifyFunction(f, API.LLVMReturnStatusAction))
+    status = convert(Bool, API.LLVMVerifyFunction(f, API.LLVMReturnStatusAction))
 
     if status
         throw(LLVMException("broken function"))
@@ -36,7 +36,7 @@ DomTree(f::Function) = DomTree(API.LLVMCreateDominatorTree(f))
 dispose(domtree::DomTree) = API.LLVMDisposeDominatorTree(domtree)
 
 function dominates(domtree::DomTree, A::Instruction, B::Instruction)
-    convert(Core.Bool, API.LLVMDominatorTreeInstructionDominates(domtree, A, B))
+    convert(Bool, API.LLVMDominatorTreeInstructionDominates(domtree, A, B))
 end
 
 
@@ -55,5 +55,5 @@ PostDomTree(f::Function) = PostDomTree(API.LLVMCreatePostDominatorTree(f))
 dispose(postdomtree::PostDomTree) = API.LLVMDisposePostDominatorTree(postdomtree)
 
 function dominates(postdomtree::PostDomTree, A::Instruction, B::Instruction)
-    convert(Core.Bool, API.LLVMPostDominatorTreeInstructionDominates(postdomtree, A, B))
+    convert(Bool, API.LLVMPostDominatorTreeInstructionDominates(postdomtree, A, B))
 end

@@ -64,15 +64,15 @@ if version() >= v"17"
     supports_typed_pointers(ctx::Context) = false
 elseif version() >= v"13"
     supports_typed_pointers(ctx::Context) =
-        convert(Core.Bool, API.LLVMContextSupportsTypedPointers(ctx))
+        convert(Bool, API.LLVMContextSupportsTypedPointers(ctx))
 
-    unsafe_opaque_pointers!(ctx::Context, enable::Core.Bool) =
+    unsafe_opaque_pointers!(ctx::Context, enable::Bool) =
         API.LLVMContextSetOpaquePointers(ctx, enable)
 else
     supports_typed_pointers(ctx::Context) = true
 end
 
-function opaque_pointers!(ctx::Context, opaque_pointers::Core.Bool)
+function opaque_pointers!(ctx::Context, opaque_pointers::Bool)
     @static if version() < v"13"
         if opaque_pointers
             error("LLVM <13 does not support opaque pointers")

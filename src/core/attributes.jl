@@ -26,11 +26,11 @@ end
 
 function Attribute(ref::API.LLVMAttributeRef)
     ref == C_NULL && throw(UndefRefError())
-    if convert(Core.Bool, API.LLVMIsEnumAttribute(ref))
+    if convert(Bool, API.LLVMIsEnumAttribute(ref))
         return EnumAttribute(ref)
-    elseif convert(Core.Bool, API.LLVMIsStringAttribute(ref))
+    elseif convert(Bool, API.LLVMIsStringAttribute(ref))
         return StringAttribute(ref)
-    elseif convert(Core.Bool, API.LLVMIsTypeAttribute(ref))
+    elseif convert(Bool, API.LLVMIsTypeAttribute(ref))
         return TypeAttribute(ref)
     else
         error("unknown attribute kind")

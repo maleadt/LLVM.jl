@@ -2,7 +2,7 @@
 
 export ismultithreaded
 
-ismultithreaded() = convert(Core.Bool, API.LLVMIsMultithreaded())
+ismultithreaded() = convert(Bool, API.LLVMIsMultithreaded())
 
 const subsystems = [:Core, :TransformUtils, :ScalarOpts, :Vectorization, :InstCombine,
                     :IPO, :Analysis, :IPA, :CodeGen, :Target]
@@ -89,7 +89,7 @@ for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
     api_fname = Symbol(:LLVM, jl_fname)
     @eval begin
         export $jl_fname
-        $jl_fname() = convert(Core.Bool, API.$api_fname()) &&
+        $jl_fname() = convert(Bool, API.$api_fname()) &&
                       throw(LLVMException($"Could not initialize native $component"))
     end
 end

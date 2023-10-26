@@ -8,7 +8,7 @@ alloc_opt!(pm::PassManager) = API.LLVMAddAllocOptPass(pm)
 barrier_noop!(pm::PassManager) = API.LLVMAddBarrierNoopPass(pm)
 
 gc_invariant_verifier!(pm::PassManager, strong::Bool=false) =
-    API.LLVMAddGCInvariantVerifierPass(pm, convert(Bool, strong))
+    API.LLVMAddGCInvariantVerifierPass(pm, strong)
 
 lower_exc_handlers!(pm::PassManager) = API.LLVMAddLowerExcHandlersPass(pm)
 
@@ -19,7 +19,7 @@ multi_versioning!(pm::PassManager) = API.LLVMAddMultiVersioningPass(pm)
 propagate_julia_addrsp!(pm::PassManager) = API.LLVMAddPropagateJuliaAddrspaces(pm)
 
 lower_ptls!(pm::PassManager, imaging_mode::Bool=false) =
-    API.LLVMAddLowerPTLSPass(pm, convert(Bool, imaging_mode))
+    API.LLVMAddLowerPTLSPass(pm, imaging_mode)
 
 lower_simdloop!(pm::PassManager) = API.LLVMAddLowerSimdLoopPass(pm)
 
