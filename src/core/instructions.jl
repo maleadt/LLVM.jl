@@ -92,8 +92,7 @@ end
 
 metadata(inst::Instruction) = InstructionMetadataDict(inst)
 
-Base.isempty(md::InstructionMetadataDict) =
-  !convert(Core.Bool, API.LLVMHasMetadata(md.inst))
+Base.isempty(md::InstructionMetadataDict) = !Bool(API.LLVMHasMetadata(md.inst))
 
 Base.haskey(md::InstructionMetadataDict, kind::MD) =
   API.LLVMGetMetadata(md.inst, kind) != C_NULL
@@ -161,8 +160,8 @@ callconv(inst::CallBase) = API.LLVMGetInstructionCallConv(inst)
 callconv!(inst::CallBase, cc) =
     API.LLVMSetInstructionCallConv(inst, cc)
 
-istailcall(inst::CallBase) = convert(Core.Bool, API.LLVMIsTailCall(inst))
-tailcall!(inst::CallBase, bool) = API.LLVMSetTailCall(inst, convert(Bool, bool))
+istailcall(inst::CallBase) = API.LLVMIsTailCall(inst) |> Bool
+tailcall!(inst::CallBase, bool) = API.LLVMSetTailCall(inst, bool)
 
 called_operand(inst::CallBase) = Value(API.LLVMGetCalledValue(inst))
 
@@ -275,7 +274,7 @@ export isterminator, isconditional, condition, condition!, default_dest
 
 isterminator(inst::Instruction) = API.LLVMIsATerminatorInst(inst) != C_NULL
 
-isconditional(br::Instruction) = convert(Core.Bool, API.LLVMIsConditional(br))
+isconditional(br::Instruction) = API.LLVMIsConditional(br) |> Bool
 
 condition(br::Instruction) =
     Value(API.LLVMGetCondition(br))

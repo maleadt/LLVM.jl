@@ -11,7 +11,7 @@ export context, activate, deactivate, context!
 _has_context() = haskey(task_local_storage(), :LLVMContext) &&
                  !isempty(task_local_storage(:LLVMContext))
 
-function context(; throw_error::Core.Bool=true)
+function context(; throw_error::Bool=true)
     if !_has_context()
         throw_error && error("No LLVM context is active")
         return nothing
@@ -49,7 +49,7 @@ export ts_context, activate, deactivate, ts_context!
 _has_ts_context() = haskey(task_local_storage(), :LLVMTSContext) &&
                     !isempty(task_local_storage(:LLVMTSContext))
 
-function ts_context(; throw_error::Core.Bool=true)
+function ts_context(; throw_error::Bool=true)
     if !_has_ts_context()
         throw_error && error("No LLVM thread-safe context is active")
         return nothing

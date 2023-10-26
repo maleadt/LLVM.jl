@@ -38,8 +38,7 @@ function LLVMType(ref::API.LLVMTypeRef)
     return T(ref)::LLVMType
 end
 
-issized(typ::LLVMType) =
-    convert(Core.Bool, API.LLVMTypeIsSized(typ))
+issized(typ::LLVMType) = API.LLVMTypeIsSized(typ) |> Bool
 context(typ::LLVMType) = Context(API.LLVMGetTypeContext(typ))
 
 Base.string(typ::LLVMType) = unsafe_message(API.LLVMPrintTypeToString(typ))
@@ -113,12 +112,11 @@ end
 register(FunctionType, API.LLVMFunctionTypeKind)
 
 FunctionType(rettyp::LLVMType, params::Vector{<:LLVMType}=LLVMType[];
-             vararg::Core.Bool=false) =
+             vararg::Bool=false) =
     FunctionType(API.LLVMFunctionType(rettyp, params,
-                                      length(params), convert(Bool, vararg)))
+                                      length(params), vararg))
 
-isvararg(ft::FunctionType) =
-    convert(Core.Bool, API.LLVMIsFunctionVarArg(ft))
+isvararg(ft::FunctionType) = API.LLVMIsFunctionVarArg(ft) |> Bool
 
 return_type(ft::FunctionType) =
     LLVMType(API.LLVMGetReturnType(ft))
@@ -160,8 +158,7 @@ function PointerType(addrspace=0)
 end
 
 if version() >= v"13"
-    is_opaque(ptrtyp::PointerType) =
-        convert(Core.Bool, API.LLVMPointerTypeIsOpaque(ptrtyp))
+    is_opaque(ptrtyp::PointerType) = API.LLVMPointerTypeIsOpaque(ptrtyp) |> Bool
 
     function Base.eltype(typ::PointerType)
         is_opaque(typ) && throw(error("Taking the type of an opaque pointer is illegal"))
@@ -213,21 +210,18 @@ function StructType(name::String)
     return StructType(API.LLVMStructCreateNamed(context(), name))
 end
 
-StructType(elems::Vector{<:LLVMType}; packed::Core.Bool=false) =
-    StructType(API.LLVMStructTypeInContext(context(), elems, length(elems), convert(Bool, packed)))
+StructType(elems::Vector{<:LLVMType}; packed::Bool=false) =
+    StructType(API.LLVMStructTypeInContext(context(), elems, length(elems), packed))
 
 function name(structtyp::StructType)
     cstr = API.LLVMGetStructName(structtyp)
     cstr == C_NULL ? nothing : unsafe_string(cstr)
 end
-ispacked(structtyp::StructType) =
-    convert(Core.Bool, API.LLVMIsPackedStruct(structtyp))
-isopaque(structtyp::StructType) =
-    convert(Core.Bool, API.LLVMIsOpaqueStruct(structtyp))
+ispacked(structtyp::StructType) = API.LLVMIsPackedStruct(structtyp) |> Bool
+isopaque(structtyp::StructType) = API.LLVMIsOpaqueStruct(structtyp) |> Bool
 
-elements!(structtyp::StructType, elems::Vector{<:LLVMType}, packed::Core.Bool=false) =
-    API.LLVMStructSetBody(structtyp, elems,
-                          length(elems), convert(Bool, packed))
+elements!(structtyp::StructType, elems::Vector{<:LLVMType}, packed::Bool=false) =
+    API.LLVMStructSetBody(structtyp, elems, length(elems), packed)
 
 Base.isempty(@nospecialize(T::StructType)) =
     isempty(elements(T)) || all(isempty, elements(T))

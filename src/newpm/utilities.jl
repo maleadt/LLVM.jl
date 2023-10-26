@@ -16,9 +16,9 @@ cfg_analyses_preserved() = PreservedAnalyses(API.LLVMCreatePreservedAnalysesCFG(
 
 dispose(pa::PreservedAnalyses) = API.LLVMDisposePreservedAnalyses(pa)
 
-are_all_preserved(pa::PreservedAnalyses) = API.LLVMAreAllAnalysesPreserved(pa)
+are_all_preserved(pa::PreservedAnalyses) = API.LLVMAreAllAnalysesPreserved(pa) |> Bool
 
-are_cfg_preserved(pa::PreservedAnalyses) = API.LLVMAreCFGAnalysesPreserved(pa)
+are_cfg_preserved(pa::PreservedAnalyses) = API.LLVMAreCFGAnalysesPreserved(pa) |> Bool
 
 # No do-block syntax is provided for preserved analyses because
 # it is not meant to be used with limited scope.

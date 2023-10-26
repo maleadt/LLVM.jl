@@ -36,15 +36,14 @@ normalize(triple) = unsafe_message(API.LLVMNormalizeTargetTriple(triple))
 cpu(tm::TargetMachine) = unsafe_message(API.LLVMGetTargetMachineCPU(tm))
 features(tm::TargetMachine) = unsafe_message(API.LLVMGetTargetMachineFeatureString(tm))
 
-asm_verbosity!(tm::TargetMachine, verbose::Core.Bool) =
-    API.LLVMSetTargetMachineAsmVerbosity(tm, convert(Bool, verbose))
+asm_verbosity!(tm::TargetMachine, verbose::Bool) =
+    API.LLVMSetTargetMachineAsmVerbosity(tm, verbose)
 
 function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType)
     out_error = Ref{Cstring}()
     out_membuf = Ref{API.LLVMMemoryBufferRef}()
-    status = convert(Core.Bool,
-        API.LLVMTargetMachineEmitToMemoryBuffer(tm, mod, filetype,
-                                                out_error, out_membuf))
+    status = API.LLVMTargetMachineEmitToMemoryBuffer(tm, mod, filetype,
+                                                     out_error, out_membuf) |> Bool
 
     if status
         error = unsafe_message(out_error[])
@@ -56,8 +55,7 @@ end
 
 function emit(tm::TargetMachine, mod::Module, filetype::API.LLVMCodeGenFileType, path::String)
     out_error = Ref{Cstring}()
-    status = convert(Core.Bool,
-        API.LLVMTargetMachineEmitToFile(tm, mod, path, filetype, out_error))
+    status = API.LLVMTargetMachineEmitToFile(tm, mod, path, filetype, out_error) |> Bool
 
     if status
         error = unsafe_message(out_error[])

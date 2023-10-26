@@ -519,11 +519,11 @@ function LLVMDisposePreservedAnalyses(PA)
 end
 
 function LLVMAreAllAnalysesPreserved(PA)
-    convert(Core.Bool, ccall((:LLVMAreAllAnalysesPreserved, libLLVMExtra), LLVMBool, (LLVMPreservedAnalysesRef,), PA))
+    ccall((:LLVMAreAllAnalysesPreserved, libLLVMExtra), LLVMBool, (LLVMPreservedAnalysesRef,), PA)
 end
 
 function LLVMAreCFGAnalysesPreserved(PA)
-    convert(Core.Bool, ccall((:LLVMAreCFGAnalysesPreserved, libLLVMExtra), LLVMBool, (LLVMPreservedAnalysesRef,), PA))
+    ccall((:LLVMAreCFGAnalysesPreserved, libLLVMExtra), LLVMBool, (LLVMPreservedAnalysesRef,), PA)
 end
 
 mutable struct LLVMOpaqueModuleAnalysisManager end

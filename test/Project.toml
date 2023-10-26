@@ -1,4 +1,5 @@
 [deps]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 ReTestItems = "817f1d60-ba6b-4fd5-9520-3cf149f6a823"

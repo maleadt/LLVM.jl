@@ -12,16 +12,16 @@ import ..LLVM: pass_string, options_string, add!
 end
 
 struct MultiVersioningPassOptions
-    external::Core.Bool
+    external::Bool
 end
-MultiVersioningPassOptions(; external::Core.Bool=false) = MultiVersioningPassOptions(external)
+MultiVersioningPassOptions(; external::Bool=false) = MultiVersioningPassOptions(external)
 options_string(options::MultiVersioningPassOptions) = options.external ? "<external>" : ""
 @module_pass "JuliaMultiVersioning" MultiVersioningPass MultiVersioningPassOptions
 
 struct LowerPTLSPassOptions
-    imaging::Core.Bool
+    imaging::Bool
 end
-LowerPTLSPassOptions(; imaging::Core.Bool=false) = LowerPTLSPassOptions(imaging)
+LowerPTLSPassOptions(; imaging::Bool=false) = LowerPTLSPassOptions(imaging)
 options_string(options::LowerPTLSPassOptions) = options.imaging ? "<imaging>" : ""
 @module_pass "LowerPTLSPass" LowerPTLSPass LowerPTLSPassOptions
 
@@ -36,9 +36,9 @@ options_string(options::LowerPTLSPassOptions) = options.imaging ? "<imaging>" : 
 end
 
 struct GCInvariantVerifierPassOptions
-    strong::Core.Bool
+    strong::Bool
 end
-GCInvariantVerifierPassOptions(; strong::Core.Bool=false) =
+GCInvariantVerifierPassOptions(; strong::Bool=false) =
     GCInvariantVerifierPassOptions(strong)
 options_string(options::GCInvariantVerifierPassOptions) = options.strong ? "<strong>" : ""
 @function_pass "GCInvariantVerifier" GCInvariantVerifierPass GCInvariantVerifierPassOptions
@@ -48,15 +48,15 @@ options_string(options::GCInvariantVerifierPassOptions) = options.strong ? "<str
 # The entire Julia pipeline
 struct JuliaPipelinePassOptions
     opt_level::Int
-    lower_intrinsics::Core.Bool
-    dump_native::Core.Bool
-    external_use::Core.Bool
-    llvm_only::Core.Bool
+    lower_intrinsics::Bool
+    dump_native::Bool
+    external_use::Bool
+    llvm_only::Bool
 end
 JuliaPipelinePassOptions(; opt_level=Base.JLOptions().opt_level,
-                           lower_intrinsics::Core.Bool=true,
-                           dump_native::Core.Bool=false, external_use::Core.Bool=false,
-                           llvm_only::Core.Bool=false) =
+                           lower_intrinsics::Bool=true,
+                           dump_native::Bool=false, external_use::Bool=false,
+                           llvm_only::Bool=false) =
     JuliaPipelinePassOptions(convert(Int, opt_level), lower_intrinsics, dump_native,
                              external_use, llvm_only)
 function options_string(options::JuliaPipelinePassOptions)

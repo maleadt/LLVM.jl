@@ -4,7 +4,7 @@ null(typ::LLVMType) = Value(API.LLVMConstNull(typ))
 
 all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(typ))
 
-isnull(val::Value) = convert(Core.Bool, API.LLVMIsNull(val))
+isnull(val::Value) = API.LLVMIsNull(val) |> Bool
 
 
 abstract type Constant <: User end
@@ -57,9 +57,8 @@ register(ConstantInt, API.LLVMConstantIntValueKind)
 # NOTE: fixed set for dispatch, also because we can't rely on sizeof(T)==width(T)
 const WideInteger = Union{Int64, UInt64}
 ConstantInt(typ::IntegerType, val::WideInteger, signed=false) =
-    ConstantInt(API.LLVMConstInt(typ, reinterpret(Culonglong, val),
-                convert(Bool, signed)))
-const SmallInteger = Union{Core.Bool, Int8, Int16, Int32, UInt8, UInt16, UInt32}
+    ConstantInt(API.LLVMConstInt(typ, reinterpret(Culonglong, val), signed))
+const SmallInteger = Union{Bool, Int8, Int16, Int32, UInt8, UInt16, UInt32}
 ConstantInt(typ::IntegerType, val::SmallInteger, signed=false) =
     ConstantInt(typ, convert(Int64, val), signed)
 
@@ -81,7 +80,7 @@ function ConstantInt(val::T) where T<:SizeableInteger
 end
 
 # Booleans are encoded with a single bit, so we can't use sizeof
-ConstantInt(val::Core.Bool) = ConstantInt(Int1Type(), val ? 1 : 0)
+ConstantInt(val::Bool) = ConstantInt(Int1Type(), val ? 1 : 0)
 
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Unsigned} =
     convert(T, API.LLVMConstIntGetZExtValue(val))
@@ -90,7 +89,7 @@ Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
     convert(T, API.LLVMConstIntGetSExtValue(val))
 
 # Booleans aren't Signed or Unsigned
-Base.convert(::Type{Core.Bool}, val::ConstantInt) = convert(Int, val) != 0
+Base.convert(::Type{Bool}, val::ConstantInt) = convert(Int, val) != 0
 
 
 @checked struct ConstantFP <: ConstantData
@@ -161,7 +160,7 @@ end
 # XXX: X[X(...)] instead of X.(...) because of empty-container inference
 ConstantDataArray(data::AbstractVector{T}) where {T<:Integer} =
     ConstantDataArray(IntType(sizeof(T)*8), data)
-ConstantDataArray(data::AbstractVector{Core.Bool}) =
+ConstantDataArray(data::AbstractVector{Bool}) =
     ConstantDataArray(Int1Type(), data)
 ConstantDataArray(data::AbstractVector{Float64}) =
     ConstantDataArray(DoubleType(), data)
@@ -230,7 +229,7 @@ end
 # XXX: X[X(...)] instead of X.(...) because of empty-container inference
 ConstantArray(data::AbstractArray{T}) where {T<:Integer} =
     ConstantArray(IntType(sizeof(T)*8), ConstantInt[ConstantInt(x) for x in data])
-ConstantArray(data::AbstractArray{Core.Bool}) =
+ConstantArray(data::AbstractArray{Bool}) =
     ConstantArray(Int1Type(), ConstantInt[ConstantInt(x) for x in data])
 ConstantArray(data::AbstractArray{Float16}) =
     ConstantArray(HalfType(), ConstantFP[ConstantFP(x) for x in data])
@@ -266,7 +265,7 @@ function Base.getindex(ca::ConstantArray, idx::Integer...)
     # multidimensional arrays are represented by arrays of arrays,
     # which we need to 'peel back' by looking at the operand sets.
     # for the final dimension, we use LLVMGetElementAsConstant
-    @boundscheck Base.checkbounds_indices(Base.Bool, axes(ca), idx) ||
+    @boundscheck Base.checkbounds_indices(Bool, axes(ca), idx) ||
         throw(BoundsError(ca, idx))
     I = CartesianIndices(size(ca))[idx...]
     for i in Tuple(I)
@@ -293,8 +292,9 @@ register(ConstantStruct, API.LLVMConstantStructValueKind)
 ConstantStructOrAggregateZero(value) = Value(value)::Union{ConstantStruct,ConstantAggregateZero}
 
 # anonymous
-ConstantStruct(values::Vector{<:Constant}; packed::Core.Bool=false) =
-    ConstantStructOrAggregateZero(API.LLVMConstStructInContext(context(), values, length(values), convert(Bool, packed)))
+ConstantStruct(values::Vector{<:Constant}; packed::Bool=false) =
+    ConstantStructOrAggregateZero(API.LLVMConstStructInContext(context(), values,
+                                                               length(values), packed))
 
 # named
 ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
@@ -302,7 +302,7 @@ ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
 
 # create a ConstantStruct from a Julia object
 function ConstantStruct(value::T, name=String(nameof(T));
-                        anonymous::Core.Bool=false, packed::Core.Bool=false) where {T}
+                        anonymous::Bool=false, packed::Bool=false) where {T}
     isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
     isprimitivetype(T) && throw(ArgumentError("Cannot create a ConstantStruct from a primitive value"))
 
@@ -486,7 +486,7 @@ const_truncorbitcast(val::Constant, ToType::LLVMType) =
 const_pointercast(val::Constant, ToType::LLVMType) =
     Value(API.LLVMConstPointerCast(val, ToType))
 
-const_intcast(val::Constant, ToType::LLVMType, isSigned::Base.Bool) =
+const_intcast(val::Constant, ToType::LLVMType, isSigned::Bool) =
     Value(API.LLVMConstIntCast(val, ToType, isSigned))
 
 const_fpcast(val::Constant, ToType::LLVMType) =
@@ -515,10 +515,10 @@ const_extractvalue(agg::Constant, Idx::Vector{<:Integer}) =
 const_insertvalue(agg::Constant, element::Constant, Idx::Vector{<:Integer}) =
    Value(API.LLVMConstInsertValue(agg, element, Idx, length(Idx)))
 
-const_udiv(lhs::Constant, rhs::Constant; exact::Base.Bool=false) =
+const_udiv(lhs::Constant, rhs::Constant; exact::Bool=false) =
     Value(exact ? API.LLVMConstExactUDiv(lhs, rhs) : API.LLVMConstUDiv(lhs, rhs))
 
-const_sdiv(lhs::Constant, rhs::Constant; exact::Base.Bool=false) =
+const_sdiv(lhs::Constant, rhs::Constant; exact::Bool=false) =
     Value(exact ? API.LLVMConstExactSDiv(lhs, rhs) : API.LLVMConstSDiv(lhs, rhs))
 
 const_fdiv(lhs::Constant, rhs::Constant) =
@@ -557,10 +557,8 @@ end
 register(InlineAsm, API.LLVMInlineAsmValueKind)
 
 InlineAsm(typ::FunctionType, asm::String, constraints::String,
-          side_effects::Core.Bool, align_stack::Core.Bool=false) =
-    InlineAsm(API.LLVMConstInlineAsm(typ, asm, constraints,
-                                     convert(Bool, side_effects),
-                                     convert(Bool, align_stack)))
+          side_effects::Bool, align_stack::Bool=false) =
+    InlineAsm(API.LLVMConstInlineAsm(typ, asm, constraints, side_effects, align_stack))
 
 
 ## global values
@@ -580,7 +578,7 @@ parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(val))
 
 global_value_type(val::GlobalValue) = LLVMType(API.LLVMGetGlobalValueType(val))
 
-isdeclaration(val::GlobalValue) = convert(Core.Bool, API.LLVMIsDeclaration(val))
+isdeclaration(val::GlobalValue) = API.LLVMIsDeclaration(val) |> Bool
 
 linkage(val::GlobalValue) = API.LLVMGetLinkage(val)
 linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
@@ -611,9 +609,8 @@ dllstorage(val::GlobalValue) = API.LLVMGetDLLStorageClass(val)
 dllstorage!(val::GlobalValue, storage::API.LLVMDLLStorageClass) =
     API.LLVMSetDLLStorageClass(val, storage)
 
-unnamed_addr(val::GlobalValue) = convert(Core.Bool, API.LLVMHasUnnamedAddr(val))
-unnamed_addr!(val::GlobalValue, flag::Core.Bool) =
-    API.LLVMSetUnnamedAddr(val, convert(Bool, flag))
+unnamed_addr(val::GlobalValue) = API.LLVMHasUnnamedAddr(val) |> Bool
+unnamed_addr!(val::GlobalValue, flag::Bool) = API.LLVMSetUnnamedAddr(val, flag)
 
 const AlignedValue = Union{GlobalValue,Instruction}   # load, store, alloca
 alignment(val::AlignedValue) = API.LLVMGetAlignment(val)
@@ -654,19 +651,15 @@ initializer!(gv::GlobalVariable, val::Constant) =
 initializer!(gv::GlobalVariable, ::Nothing) =
   API.LLVMExtraSetInitializer(gv, C_NULL)
 
-isthreadlocal(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsThreadLocal(gv))
+isthreadlocal(gv::GlobalVariable) = API.LLVMIsThreadLocal(gv) |> Bool
 threadlocal!(gv::GlobalVariable, bool) =
-  API.LLVMSetThreadLocal(gv, convert(Bool, bool))
+  API.LLVMSetThreadLocal(gv, bool)
 
-isconstant(gv::GlobalVariable) = convert(Core.Bool, API.LLVMIsGlobalConstant(gv))
-constant!(gv::GlobalVariable, bool) =
-  API.LLVMSetGlobalConstant(gv, convert(Bool, bool))
+isconstant(gv::GlobalVariable) = API.LLVMIsGlobalConstant(gv) |> Bool
+constant!(gv::GlobalVariable, bool) = API.LLVMSetGlobalConstant(gv, bool)
 
 threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(gv)
-threadlocalmode!(gv::GlobalVariable, mode) =
-  API.LLVMSetThreadLocalMode(gv, mode)
+threadlocalmode!(gv::GlobalVariable, mode) = API.LLVMSetThreadLocalMode(gv, mode)
 
-isextinit(gv::GlobalVariable) =
-  convert(Core.Bool, API.LLVMIsExternallyInitialized(gv))
-extinit!(gv::GlobalVariable, bool) =
-  API.LLVMSetExternallyInitialized(gv, convert(Bool, bool))
+isextinit(gv::GlobalVariable) = API.LLVMIsExternallyInitialized(gv) |> Bool
+extinit!(gv::GlobalVariable, bool) = API.LLVMSetExternallyInitialized(gv, bool)

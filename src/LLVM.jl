@@ -65,7 +65,6 @@ has_julia_ojit() = VERSION >= v"1.10.0-DEV.1395"
 
 # LLVM API wrappers
 include("support.jl")
-include("types.jl")
 include("passregistry.jl")
 include("init.jl")
 include("core.jl")

@@ -113,7 +113,7 @@ function add!(pm::NewPMCGSCCPassManager, pm2::NewPMFunctionPassManager)
     append!(pm.roots, pm2.roots)
 end
 function add!(pm::NewPMFunctionPassManager, pm2::NewPMLoopPassManager,
-              UseMemorySSA::Core.Bool=false)
+              UseMemorySSA::Bool=false)
     API.LLVMFPMAddLPM(pm, pm2, UseMemorySSA)
     append!(pm.roots, pm2.roots)
 end
@@ -188,7 +188,7 @@ function add!(f::Core.Function, pm::NewPMCGSCCPassManager, ::Type{NewPMFunctionP
     end
 end
 
-function add!(f::Core.Function, pm::NewPMFunctionPassManager, ::Type{NewPMLoopPassManager}, UseMemorySSA::Core.Bool=false)
+function add!(f::Core.Function, pm::NewPMFunctionPassManager, ::Type{NewPMLoopPassManager}, UseMemorySSA::Bool=false)
     pm2 = NewPMLoopPassManager(pm.pb)
     try
         f(pm2)

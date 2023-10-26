@@ -16,8 +16,8 @@ function module_pass_callback(ptr, data)
     mod = Module(convert(API.LLVMModuleRef, ptr))
     runner_box = Base.unsafe_pointer_to_objref(data)
     runner = runner_box[]
-    changed = runner(mod)::Core.Bool
-    convert(Bool, changed)
+    changed = runner(mod)::Bool
+    convert(API.LLVMBool, changed)
 end
 
 @checked struct ModulePass <: Pass
@@ -46,8 +46,8 @@ function function_pass_callback(ptr, data)
     fn = Function(convert(API.LLVMValueRef, ptr))
     runner_box = Base.unsafe_pointer_to_objref(data)
     runner = runner_box[]
-    changed = runner(fn)::Core.Bool
-    convert(Bool, changed)
+    changed = runner(fn)::Bool
+    convert(API.LLVMBool, changed)
 end
 
 @checked struct FunctionPass <: Pass

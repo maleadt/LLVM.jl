@@ -264,20 +264,20 @@ end
 store!(builder::IRBuilder, Val::Value, Ptr::Value) =
     Instruction(API.LLVMBuildStore(builder, Val, Ptr))
 
-fence!(builder::IRBuilder, ordering::API.LLVMAtomicOrdering, singleThread::Core.Bool=false,
+fence!(builder::IRBuilder, ordering::API.LLVMAtomicOrdering, singleThread::Bool=false,
        Name::String="") =
-    Instruction(API.LLVMBuildFence(builder, ordering, convert(Bool, singleThread), Name))
+    Instruction(API.LLVMBuildFence(builder, ordering, singleThread, Name))
 
 atomic_rmw!(builder::IRBuilder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Value,
-            ordering::API.LLVMAtomicOrdering, singleThread::Core.Bool) =
+            ordering::API.LLVMAtomicOrdering, singleThread::Bool) =
     Instruction(API.LLVMBuildAtomicRMW(builder, op, Ptr, Val, ordering,
-                                       convert(Bool, singleThread)))
+                                       singleThread))
 
 atomic_cmpxchg!(builder::IRBuilder, Ptr::Value, Cmp::Value, New::Value,
                 SuccessOrdering::API.LLVMAtomicOrdering,
-                FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Core.Bool) =
+                FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Bool) =
     Instruction(API.LLVMBuildAtomicCmpXchg(builder, Ptr, Cmp, New, SuccessOrdering,
-                                           FailureOrdering, convert(Bool, SingleThread)))
+                                           FailureOrdering, SingleThread))
 
 function gep!(builder::IRBuilder, Ty::LLVMType, Pointer::Value, Indices::Vector{<:Value},
               Name::String="")

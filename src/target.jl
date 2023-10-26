@@ -17,7 +17,7 @@ function Target(; name=nothing, triple=nothing)
     if triple !== nothing
         target_ref = Ref{API.LLVMTargetRef}(0)
         error_ref = Ref{Cstring}(C_NULL)
-        status = convert(Core.Bool, API.LLVMGetTargetFromTriple(triple, target_ref, error_ref))
+        status = API.LLVMGetTargetFromTriple(triple, target_ref, error_ref) |> Bool
         if status && error_ref[] !== C_NULL
             error = unsafe_message(error_ref[])
             throw(ArgumentError(error))
@@ -39,9 +39,9 @@ name(t::Target) = unsafe_string(API.LLVMGetTargetName(t))
 
 description(t::Target) = unsafe_string(API.LLVMGetTargetDescription(t))
 
-hasjit(t::Target) = convert(Core.Bool, API.LLVMTargetHasJIT(t))
-hastargetmachine(t::Target) = convert(Core.Bool, API.LLVMTargetHasTargetMachine(t))
-hasasmparser(t::Target) = convert(Core.Bool, API.LLVMTargetHasAsmBackend(t))
+hasjit(t::Target) = API.LLVMTargetHasJIT(t) |> Bool
+hastargetmachine(t::Target) = API.LLVMTargetHasTargetMachine(t) |> Bool
+hasasmparser(t::Target) = API.LLVMTargetHasAsmBackend(t) |> Bool
 
 function Base.show(io::IO, ::MIME"text/plain", target::Target)
   print(io, "LLVM.Target($(name(target))): $(description(target))")
