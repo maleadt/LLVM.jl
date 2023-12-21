@@ -7,6 +7,21 @@ end
 using InteractiveUtils
 @info "System information:\n" * sprint(io->versioninfo(io))
 
+ctx_typed_pointers = Context() do ctx
+    supports_typed_pointers(ctx)
+end
+julia_typed_pointers = let
+    ir = sprint(io->code_llvm(io, unsafe_load, Tuple{Ptr{Int}}))
+    if occursin(r"load i64, i64\* .+, align 1", ir)
+        true
+    elseif occursin(r"load i64, ptr .+, align 1", ir)
+        false
+    else
+        error("could not determine whether Julia uses typed pointers")
+    end
+end
+@info "Pointer settings: Julia uses $(julia_typed_pointers ? "typed" : "opaque") pointers, default contexts use $(ctx_typed_pointers ? "typed" : "opaque") pointers"
+
 worker_init_expr = quote
     using LLVM
 
