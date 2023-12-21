@@ -3,10 +3,18 @@
 using LLVM.Interop
 using InteractiveUtils
 
-# many of these tests don't use explicit contexts, as they rely on high-level functionality.
-# that functionality should be using default context options, so query those here.
-supports_typed_ptrs = @dispose ctx=Context() begin
-    supports_typed_pointers(ctx)
+# the tests below use Julia's JIT, so check whether it uses opaque pointers or not.
+# note that the default context used in generated functions may behave differently,
+# but that does not matter (as typed IR can be linked with opaque IR).
+supports_typed_ptrs = let
+    ir = sprint(io->code_llvm(io, unsafe_load, Tuple{Ptr{Int}}))
+    if occursin(r"load i64, i64\* .+, align 1", ir)
+        true
+    elseif occursin(r"load i64, ptr .+, align 1", ir)
+        false
+    else
+        error("could not determine whether Julia uses typed pointers")
+    end
 end
 
 @testset "base" begin
