@@ -159,7 +159,7 @@ function JITDylib(es::ExecutionSession, name; bare=false)
     JITDylib(ref)
 end
 if version() >= v"13"
-Base.string(jd::JITDylib) = unsafe_message(API.LLVMExtraDumpJitDylibToString(jd))
+Base.string(jd::JITDylib) = unsafe_message(API.LLVMDumpJitDylibToString(jd))
 
 function Base.show(io::IO, jd::JITDylib)
     output = string(jd)
@@ -418,7 +418,7 @@ end
 Base.unsafe_convert(::Type{API.LLVMOrcIRCompileLayerRef}, il::IRCompileLayer) = il.ref
 
 function emit(il::IRCompileLayer, mr::MaterializationResponsibility, tsm::ThreadSafeModule)
-    API.LLVMExtraOrcIRCompileLayerEmit(il, mr, tsm)
+    API.LLVMOrcIRCompileLayerEmit(il, mr, tsm)
 end
 
 function IRCompileLayer(jljit::JuliaOJIT)

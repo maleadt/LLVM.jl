@@ -68,7 +68,7 @@ file(scope::DIScope) = DIFile(API.LLVMDIScopeGetFile(scope))
 
 function name(scope::DIScope)
     len = Ref{Cuint}()
-    data = API.LLVMExtraDIScopeGetName(scope, len)
+    data = API.LLVMDIScopeGetName(scope, len)
     data == C_NULL && return nothing
     unsafe_string(convert(Ptr{Int8}, data), len[])
 end

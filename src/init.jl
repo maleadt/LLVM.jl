@@ -86,7 +86,7 @@ end
 # same, for the native back-end
 for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
     jl_fname = Symbol(:Initialize, :Native, component)
-    api_fname = Symbol(:LLVM, jl_fname)
+    api_fname = Symbol(:LLVMExtra, jl_fname)
     @eval begin
         export $jl_fname
         $jl_fname() = Bool(API.$api_fname()) &&

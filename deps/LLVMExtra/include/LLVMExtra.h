@@ -10,6 +10,10 @@
 
 LLVM_C_EXTERN_C_BEGIN
 
+// XXX: without this, Clang.jl doesn't emit LLVMExtraInitializeNativeTarget.
+//      maybe LLVM_C_EXTERN_C_BEGIN somehow eats the function definition?
+void dummy();
+
 LLVMBool LLVMExtraInitializeNativeTarget(void);
 LLVMBool LLVMExtraInitializeNativeAsmParser(void);
 LLVMBool LLVMExtraInitializeNativeAsmPrinter(void);
@@ -35,9 +39,6 @@ void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM);
 void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM);
 void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM);
 
-#if LLVM_VERSION_MAJOR < 12
-void LLVMAddInstructionSimplifyPass(LLVMPassManagerRef PM);
-#endif
 
 // Infrastructure for writing LLVM passes in Julia
 typedef struct LLVMOpaquePass *LLVMPassRef;
@@ -45,11 +46,11 @@ typedef struct LLVMOpaquePass *LLVMPassRef;
 void LLVMAddPass(LLVMPassManagerRef PM, LLVMPassRef P);
 typedef LLVMBool (*LLVMPassCallback)(void *Ref, void *Data);
 
-LLVMPassRef
-LLVMCreateModulePass2(const char *Name, LLVMPassCallback Callback, void *Data);
+LLVMPassRef LLVMCreateModulePass2(const char *Name, LLVMPassCallback Callback, void *Data);
 
-LLVMPassRef
-LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback, void *Data);
+LLVMPassRef LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback,
+                                    void *Data);
+
 
 // Various missing functions
 unsigned int LLVMGetDebugMDVersion(void);
@@ -57,78 +58,53 @@ unsigned int LLVMGetDebugMDVersion(void);
 LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef B);
 LLVMContextRef LLVMGetValueContext(LLVMValueRef V);
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
-void LLVMAddInternalizePassWithExportList(
-    LLVMPassManagerRef PM, const char **ExportList, size_t Length);
+void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **ExportList,
+                                          size_t Length);
 
-void LLVMExtraAppendToUsed(LLVMModuleRef Mod,
-                           LLVMValueRef *Values,
-                           size_t Count);
-void LLVMExtraAppendToCompilerUsed(LLVMModuleRef Mod,
-                                   LLVMValueRef *Values,
-                                   size_t Count);
-void LLVMExtraAddGenericAnalysisPasses(LLVMPassManagerRef PM);
+void LLVMAppendToUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count);
+void LLVMAppendToCompilerUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count);
+void LLVMAddGenericAnalysisPasses(LLVMPassManagerRef PM);
 
-void LLVMExtraDumpMetadata(LLVMMetadataRef MD);
+void LLVMDumpMetadata(LLVMMetadataRef MD);
 
-char* LLVMExtraPrintMetadataToString(LLVMMetadataRef MD);
+char *LLVMPrintMetadataToString(LLVMMetadataRef MD);
 
-const char *LLVMExtraDIScopeGetName(LLVMMetadataRef File, unsigned *Len);
+const char *LLVMDIScopeGetName(LLVMMetadataRef File, unsigned *Len);
 
-const char *LLVMExtraGetMDString2(LLVMMetadataRef MD, unsigned *Length);
+const char *LLVMGetMDString2(LLVMMetadataRef MD, unsigned *Length);
 
-unsigned LLVMExtraGetMDNodeNumOperands2(LLVMMetadataRef MD);
+unsigned LLVMGetMDNodeNumOperands2(LLVMMetadataRef MD);
 
-void LLVMExtraGetMDNodeOperands2(LLVMMetadataRef MD, LLVMMetadataRef *Dest);
+void LLVMGetMDNodeOperands2(LLVMMetadataRef MD, LLVMMetadataRef *Dest);
 
-unsigned LLVMExtraGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD);
+unsigned LLVMGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD);
 
-void LLVMExtraGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest);
+void LLVMGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest);
 
-void LLVMExtraAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
+void LLVMAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
 
-#if LLVM_VERSION_MAJOR > 12
 typedef struct LLVMOrcOpaqueIRCompileLayer *LLVMOrcIRCompileLayerRef;
 
-void LLVMExtraOrcIRCompileLayerEmit(LLVMOrcIRCompileLayerRef IRLayer,
-                                 LLVMOrcMaterializationResponsibilityRef MR,
-                                 LLVMOrcThreadSafeModuleRef TSM);
+void LLVMOrcIRCompileLayerEmit(LLVMOrcIRCompileLayerRef IRLayer,
+                               LLVMOrcMaterializationResponsibilityRef MR,
+                               LLVMOrcThreadSafeModuleRef TSM);
 
-char* LLVMExtraDumpJitDylibToString(LLVMOrcJITDylibRef JD);
-#endif
+char *LLVMDumpJitDylibToString(LLVMOrcJITDylibRef JD);
 
 LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn);
 LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef Fn);
 
-#if LLVM_VERSION_MAJOR >= 12
-void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM,
-                                   int BonusInstThreshold,
+void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
                                    LLVMBool ForwardSwitchCondToPhi,
                                    LLVMBool ConvertSwitchToLookupTable,
-                                   LLVMBool NeedCanonicalLoop,
-                                   LLVMBool HoistCommonInsts,
-                                   LLVMBool SinkCommonInsts,
-                                   LLVMBool SimplifyCondBranch,
+                                   LLVMBool NeedCanonicalLoop, LLVMBool HoistCommonInsts,
+                                   LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
                                    LLVMBool FoldTwoEntryPHINode);
-#endif
+
 
 // Bug fixes
-void LLVMExtraSetInitializer(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);
-void LLVMExtraSetPersonalityFn(LLVMValueRef Fn, LLVMValueRef PersonalityFn);
-
-// https://reviews.llvm.org/D97763
-#if LLVM_VERSION_MAJOR == 12
-/**
- * Create a type attribute
- */
-LLVMAttributeRef LLVMCreateTypeAttribute(LLVMContextRef C, unsigned KindID,
-                                         LLVMTypeRef type_ref);
-
-/**
- * Get the type attribute's value.
- */
-LLVMTypeRef LLVMGetTypeAttributeValue(LLVMAttributeRef A);
-LLVMBool LLVMIsTypeAttribute(LLVMAttributeRef A);
-#endif
+void LLVMSetInitializer2(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);
+void LLVMSetPersonalityFn2(LLVMValueRef Fn, LLVMValueRef PersonalityFn);
 
 typedef enum {
   LLVMCloneFunctionChangeTypeLocalChangesOnly = 0,
@@ -139,8 +115,7 @@ typedef enum {
 
 void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
                            LLVMValueRef *ValueMap, unsigned ValueMapElements,
-                           LLVMCloneFunctionChangeType Changes,
-                           const char *NameSuffix,
+                           LLVMCloneFunctionChangeType Changes, const char *NameSuffix,
                            LLVMTypeRef (*TypeMapper)(LLVMTypeRef, void *),
                            void *TypeMapperData,
                            LLVMValueRef (*Materializer)(LLVMValueRef, void *),
@@ -154,13 +129,15 @@ void LLVMFunctionDeleteBody(LLVMValueRef Func);
 
 void LLVMDestroyConstant(LLVMValueRef Const);
 
+
 // operand bundles
 typedef struct LLVMOpaqueOperandBundleUse *LLVMOperandBundleUseRef;
 unsigned LLVMGetNumOperandBundles(LLVMValueRef Instr);
 LLVMOperandBundleUseRef LLVMGetOperandBundle(LLVMValueRef Val, unsigned Index);
 void LLVMDisposeOperandBundleUse(LLVMOperandBundleUseRef Bundle);
 uint32_t LLVMGetOperandBundleUseTagID(LLVMOperandBundleUseRef Bundle);
-const char *LLVMGetOperandBundleUseTagName(LLVMOperandBundleUseRef Bundle, unsigned *Length);
+const char *LLVMGetOperandBundleUseTagName(LLVMOperandBundleUseRef Bundle,
+                                           unsigned *Length);
 unsigned LLVMGetOperandBundleUseNumInputs(LLVMOperandBundleUseRef Bundle);
 void LLVMGetOperandBundleUseInputs(LLVMOperandBundleUseRef Bundle, LLVMValueRef *Dest);
 typedef struct LLVMOpaqueOperandBundleDef *LLVMOperandBundleDefRef;
@@ -173,39 +150,46 @@ unsigned LLVMGetOperandBundleDefNumInputs(LLVMOperandBundleDefRef Bundle);
 void LLVMGetOperandBundleDefInputs(LLVMOperandBundleDefRef Bundle, LLVMValueRef *Dest);
 LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
                                        LLVMValueRef *Args, unsigned NumArgs,
-                                       LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
-                                       const char *Name);
+                                       LLVMOperandBundleDefRef *Bundles,
+                                       unsigned NumBundles, const char *Name);
 LLVMValueRef LLVMBuildCallWithOpBundle2(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
                                         LLVMValueRef *Args, unsigned NumArgs,
-                                        LLVMOperandBundleDefRef *Bundles, unsigned NumBundles,
-                                        const char *Name);
+                                        LLVMOperandBundleDefRef *Bundles,
+                                        unsigned NumBundles, const char *Name);
+
+
+// metadata
 LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata);
 void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New);
 void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
 
-#if LLVM_VERSION_MAJOR >= 13
-LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
-#endif
 
 // constant data
-LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data, unsigned NumElements);
+LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data,
+                                unsigned NumElements);
+
 
 // missing opaque pointer APIs
-#if LLVM_VERSION_MAJOR >= 13 && LLVM_VERSION_MAJOR < 15
+LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
+#if LLVM_VERSION_MAJOR < 15
 LLVMBool LLVMPointerTypeIsOpaque(LLVMTypeRef Ty);
 LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace);
 #endif
+
 
 // (Post)DominatorTree
 typedef struct LLVMOpaqueDominatorTree *LLVMDominatorTreeRef;
 LLVMDominatorTreeRef LLVMCreateDominatorTree(LLVMValueRef Fn);
 void LLVMDisposeDominatorTree(LLVMDominatorTreeRef Tree);
-LLVMBool LLVMDominatorTreeInstructionDominates(LLVMDominatorTreeRef Tree, LLVMValueRef InstA, LLVMValueRef InstB);
+LLVMBool LLVMDominatorTreeInstructionDominates(LLVMDominatorTreeRef Tree,
+                                               LLVMValueRef InstA, LLVMValueRef InstB);
 
 typedef struct LLVMOpaquePostDominatorTree *LLVMPostDominatorTreeRef;
 LLVMPostDominatorTreeRef LLVMCreatePostDominatorTree(LLVMValueRef Fn);
 void LLVMDisposePostDominatorTree(LLVMPostDominatorTreeRef Tree);
-LLVMBool LLVMPostDominatorTreeInstructionDominates(LLVMPostDominatorTreeRef Tree, LLVMValueRef InstA, LLVMValueRef InstB);
+LLVMBool LLVMPostDominatorTreeInstructionDominates(LLVMPostDominatorTreeRef Tree,
+                                                   LLVMValueRef InstA, LLVMValueRef InstB);
+
 
 LLVM_C_EXTERN_C_END
 #endif

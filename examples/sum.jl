@@ -28,7 +28,6 @@ end
         tmp = add!(builder, parameters(sum)[1], parameters(sum)[2], "tmp")
         ret!(builder, tmp)
 
-        println(mod)
         verify(mod)
     end
 

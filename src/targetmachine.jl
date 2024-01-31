@@ -69,7 +69,7 @@ function add_transform_info!(pm::PassManager, tm::Union{Nothing,TargetMachine}=n
     if tm !== nothing
         API.LLVMAddAnalysisPasses(tm, pm)
     else
-        API.LLVMExtraAddGenericAnalysisPasses(pm)
+        API.LLVMAddGenericAnalysisPasses(pm)
     end
 end
 add_library_info!(pm::PassManager, triple::String) =

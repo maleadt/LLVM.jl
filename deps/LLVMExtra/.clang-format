@@ -1,0 +1,3 @@
+BasedOnStyle: LLVM
+ColumnLimit: '92'
+MaxEmptyLinesToKeep: '2'
