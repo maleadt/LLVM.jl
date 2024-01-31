@@ -504,4 +504,70 @@ end
     end
 end
 
+
+@testset "fast math" begin
+@dispose ctx=Context() mod=LLVM.Module("my_module") begin
+    # emit some IR
+    param_types = [LLVM.FloatType()]
+    ret_type = LLVM.FloatType()
+    fun_type = LLVM.FunctionType(ret_type, param_types)
+    fun = LLVM.Function(mod, "add_sub", fun_type)
+    @dispose builder=IRBuilder() begin
+        entry = BasicBlock(fun, "entry")
+        position!(builder, entry)
+        # add and substract 42
+        a = fadd!(builder, parameters(fun)[1], LLVM.ConstantFP(Float32(42.)), "a")
+        # fast_math!(a; all=true)
+        b = fsub!(builder, a, LLVM.ConstantFP(Float32(42.)), "b")
+        # fast_math!(b; all=true)
+        ret!(builder, b)
+    end
+    verify(mod)
+
+    # optimize
+    host_triple = triple()
+    host_t = Target(triple=host_triple)
+    @dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
+        NewPMModulePassManager(pb) do mpm
+            parse!(pb, mpm, "default<O3>")
+            run!(mpm, mod, tm)
+        end
+    end
+    verify(mod)
+
+    # ensure we still have our two operations
+    @test length(blocks(fun)) == 1
+    bb = blocks(fun)[1]
+    instns = collect(instructions(bb))
+    @test length(instns) == 3
+    @test instns[1] isa LLVM.FAddInst
+    @test instns[2] isa LLVM.FAddInst
+    @test instns[3] isa LLVM.RetInst
+
+    # make them fast math
+    @test !fast_math(instns[1]).contract
+    fast_math!(instns[1]; all=true)
+    @test fast_math(instns[1]).contract
+    fast_math!(instns[2]; all=true)
+    @test_throws ArgumentError fast_math(instns[3])
+    @test_throws ArgumentError fast_math!(instns[3]; all=true)
+
+    # optimize again
+    @dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
+        NewPMModulePassManager(pb) do mpm
+            parse!(pb, mpm, "default<O3>")
+            run!(mpm, mod, tm)
+        end
+    end
+    verify(mod)
+
+    # observe there's only a single return now
+    @test length(blocks(fun)) == 1
+    bb = blocks(fun)[1]
+    instns = collect(instructions(bb))
+    @test length(instns) == 1
+    @test instns[1] isa LLVM.RetInst
+end
+end
+
 end

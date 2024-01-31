@@ -337,3 +337,29 @@ function LLVMPostDominatorTreeInstructionDominates(Tree, InstA, InstB)
     ccall((:LLVMPostDominatorTreeInstructionDominates, libLLVMExtra), LLVMBool, (LLVMPostDominatorTreeRef, LLVMValueRef, LLVMValueRef), Tree, InstA, InstB)
 end
 
+@cenum __JL_Ctag_52::UInt32 begin
+    LLVMFastMathAllowReassoc = 1
+    LLVMFastMathNoNaNs = 2
+    LLVMFastMathNoInfs = 4
+    LLVMFastMathNoSignedZeros = 8
+    LLVMFastMathAllowReciprocal = 16
+    LLVMFastMathAllowContract = 32
+    LLVMFastMathApproxFunc = 64
+    LLVMFastMathNone = 0
+    LLVMFastMathAll = 127
+end
+
+const LLVMFastMathFlags = Cuint
+
+function LLVMGetFastMathFlags(FPMathInst)
+    ccall((:LLVMGetFastMathFlags, libLLVMExtra), LLVMFastMathFlags, (LLVMValueRef,), FPMathInst)
+end
+
+function LLVMSetFastMathFlags(FPMathInst, FMF)
+    ccall((:LLVMSetFastMathFlags, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMFastMathFlags), FPMathInst, FMF)
+end
+
+function LLVMCanValueUseFastMathFlags(Inst)
+    ccall((:LLVMCanValueUseFastMathFlags, libLLVMExtra), LLVMBool, (LLVMValueRef,), Inst)
+end
+

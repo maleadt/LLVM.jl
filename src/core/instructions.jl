@@ -335,3 +335,63 @@ function Base.append!(iter::PhiIncomingSet, args::Vector{Tuple{V, BasicBlock}} w
 end
 
 Base.push!(iter::PhiIncomingSet, args::Tuple{<:Value, BasicBlock}) = append!(iter, [args])
+
+
+## floating point operations
+
+export fast_math, fast_math!
+
+"""
+    fast_math(inst::Instruction)
+
+Get the fast math flags on an instruction.
+"""
+function fast_math(inst::Instruction)
+    if !Bool(API.LLVMCanValueUseFastMathFlags(inst))
+        throw(ArgumentError("Instruction cannot use fast math flags"))
+    end
+    flags = API.LLVMGetFastMathFlags(inst)
+    return (;
+        nnan = flags & LLVM.API.LLVMFastMathNoNaNs != 0,
+        ninf = flags & LLVM.API.LLVMFastMathNoInfs != 0,
+        nsz = flags & LLVM.API.LLVMFastMathNoSignedZeros != 0,
+        arcp = flags & LLVM.API.LLVMFastMathAllowReciprocal != 0,
+        contract = flags & LLVM.API.LLVMFastMathAllowContract != 0,
+        afn = flags & LLVM.API.LLVMFastMathApproxFunc != 0,
+        reassoc = flags & LLVM.API.LLVMFastMathAllowReassoc != 0,
+    )
+end
+
+"""
+    fast_math!(inst::Instruction; [flag=...], [all=...])
+
+Set the fast math flags on an instruction. If `all` is `true`, then all flags are set.
+
+The following flags are supported:
+ - `nnan`: assume arguments and results are not NaN
+ - `ninf`: assume arguments and results are not Inf
+ - `nsz`: treat the sign of zero arguments and results as insignificant
+ - `arcp`: allow use of reciprocal rather than perform division
+ - `contract`: allow contraction of operations
+ - `afn`: allow substitution of approximate calculations for functions
+ - `reassoc`: allow reassociation of operations
+"""
+function fast_math!(inst::Instruction; nnan=false, ninf=false, nsz=false, arcp=false,
+                          contract=false, afn=false, reassoc=false, all=false)
+    if !Bool(API.LLVMCanValueUseFastMathFlags(inst))
+        throw(ArgumentError("Instruction cannot use fast math flags"))
+    end
+    if all
+        API.LLVMSetFastMathFlags(inst, LLVM.API.LLVMFastMathAll)
+    else
+        flags = 0
+        nnan && (flags |= LLVM.API.LLVMFastMathNoNaNs)
+        ninf && (flags |= LLVM.API.LLVMFastMathNoInfs)
+        nsz && (flags |= LLVM.API.LLVMFastMathNoSignedZeros)
+        arcp && (flags |= LLVM.API.LLVMFastMathAllowReciprocal)
+        contract && (flags |= LLVM.API.LLVMFastMathAllowContract)
+        afn && (flags |= LLVM.API.LLVMFastMathApproxFunc)
+        reassoc && (flags |= LLVM.API.LLVMFastMathAllowReassoc)
+        API.LLVMSetFastMathFlags(inst, flags)
+    end
+end
