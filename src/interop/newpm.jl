@@ -73,7 +73,11 @@ end
 # Julia won't insert the PassBuilder's callbacks in the right spots.
 # Using the specific method call here allows insertion of those callbacks.
 function add!(pm::NewPMModulePassManager, pb::PassBuilder, pass::JuliaPipelinePass)
-    API.LLVMAddJuliaPipelinePass(pm, pb, pass.options.opt_level, 0,
-                                 pass.options.lower_intrinsics, pass.options.dump_native,
-                                 pass.options.external_use, pass.options.llvm_only)
+    cfg = API.PipelineConfig(; Speedup = pass.options.opt_level, Size = 0,
+        pass.options.lower_intrinsics,
+        pass.options.dump_native,
+        pass.options.external_use,
+        pass.options.llvm_only
+    )
+    API.LLVMAddJuliaPipelinePass(pm, pb, cfg)
 end

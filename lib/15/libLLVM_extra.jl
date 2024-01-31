@@ -1,27 +1,27 @@
 using CEnum
 
-function LLVMInitializeNativeTarget()
+function LLVMExtraInitializeNativeTarget()
     ccall((:LLVMExtraInitializeNativeTarget, libLLVMExtra), LLVMBool, ())
 end
 
-function LLVMInitializeNativeAsmParser()
+function LLVMExtraInitializeNativeAsmParser()
     ccall((:LLVMExtraInitializeNativeAsmParser, libLLVMExtra), LLVMBool, ())
 end
 
-function LLVMInitializeNativeAsmPrinter()
+function LLVMExtraInitializeNativeAsmPrinter()
     ccall((:LLVMExtraInitializeNativeAsmPrinter, libLLVMExtra), LLVMBool, ())
 end
 
-function LLVMInitializeNativeDisassembler()
+function LLVMExtraInitializeNativeDisassembler()
     ccall((:LLVMExtraInitializeNativeDisassembler, libLLVMExtra), LLVMBool, ())
 end
 
-@cenum(LLVMDebugEmissionKind,
-    LLVMDebugEmissionKindNoDebug = 0,
-    LLVMDebugEmissionKindFullDebug = 1,
-    LLVMDebugEmissionKindLineTablesOnly = 2,
-    LLVMDebugEmissionKindDebugDirectivesOnly = 3,
-)
+@cenum LLVMDebugEmissionKind::UInt32 begin
+    LLVMDebugEmissionKindNoDebug = 0
+    LLVMDebugEmissionKindFullDebug = 1
+    LLVMDebugEmissionKindLineTablesOnly = 2
+    LLVMDebugEmissionKindDebugDirectivesOnly = 3
+end
 
 function LLVMAddBarrierNoopPass(PM)
     ccall((:LLVMAddBarrierNoopPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
@@ -67,12 +67,6 @@ function LLVMAddSimpleLoopUnswitchLegacyPass(PM)
     ccall((:LLVMAddSimpleLoopUnswitchLegacyPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-if version() < v"12"
-function LLVMAddInstructionSimplifyPass(PM)
-    ccall((:LLVMAddInstructionSimplifyPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
-end
-end
-
 mutable struct LLVMOpaquePass end
 
 const LLVMPassRef = Ptr{LLVMOpaquePass}
@@ -96,6 +90,10 @@ function LLVMGetDebugMDVersion()
     ccall((:LLVMGetDebugMDVersion, libLLVMExtra), Cuint, ())
 end
 
+function LLVMGetBuilderContext(B)
+    ccall((:LLVMGetBuilderContext, libLLVMExtra), LLVMContextRef, (LLVMBuilderRef,), B)
+end
+
 function LLVMGetValueContext(V)
     ccall((:LLVMGetValueContext, libLLVMExtra), LLVMContextRef, (LLVMValueRef,), V)
 end
@@ -108,213 +106,85 @@ function LLVMAddInternalizePassWithExportList(PM, ExportList, Length)
     ccall((:LLVMAddInternalizePassWithExportList, libLLVMExtra), Cvoid, (LLVMPassManagerRef, Ptr{Cstring}, Csize_t), PM, ExportList, Length)
 end
 
-function LLVMExtraAppendToUsed(Mod, Values, Count)
-    ccall((:LLVMExtraAppendToUsed, libLLVMExtra), Cvoid, (LLVMModuleRef, Ptr{LLVMValueRef}, Csize_t), Mod, Values, Count)
+function LLVMAppendToUsed(Mod, Values, Count)
+    ccall((:LLVMAppendToUsed, libLLVMExtra), Cvoid, (LLVMModuleRef, Ptr{LLVMValueRef}, Csize_t), Mod, Values, Count)
 end
 
-function LLVMExtraAppendToCompilerUsed(Mod, Values, Count)
-    ccall((:LLVMExtraAppendToCompilerUsed, libLLVMExtra), Cvoid, (LLVMModuleRef, Ptr{LLVMValueRef}, Csize_t), Mod, Values, Count)
+function LLVMAppendToCompilerUsed(Mod, Values, Count)
+    ccall((:LLVMAppendToCompilerUsed, libLLVMExtra), Cvoid, (LLVMModuleRef, Ptr{LLVMValueRef}, Csize_t), Mod, Values, Count)
 end
 
-function LLVMExtraAddGenericAnalysisPasses(PM)
-    ccall((:LLVMExtraAddGenericAnalysisPasses, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
+function LLVMAddGenericAnalysisPasses(PM)
+    ccall((:LLVMAddGenericAnalysisPasses, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMExtraSetInitializer(GlobalVar, ConstantVal)
-    ccall((:LLVMExtraSetInitializer, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), GlobalVar, ConstantVal)
+function LLVMDumpMetadata(MD)
+    ccall((:LLVMDumpMetadata, libLLVMExtra), Cvoid, (LLVMMetadataRef,), MD)
 end
 
-function LLVMExtraSetPersonalityFn(Fn, PersonalityFn)
-    ccall((:LLVMExtraSetPersonalityFn, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), Fn, PersonalityFn)
+function LLVMPrintMetadataToString(MD)
+    ccall((:LLVMPrintMetadataToString, libLLVMExtra), Cstring, (LLVMMetadataRef,), MD)
 end
 
-function LLVMExtraDIScopeGetName(Scope, Len)
-    ccall((:LLVMExtraDIScopeGetName, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), Scope, Len)
+function LLVMDIScopeGetName(File, Len)
+    ccall((:LLVMDIScopeGetName, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), File, Len)
 end
 
-function LLVMAddCFGSimplificationPass2(PM, BonusInstThreshold, ForwardSwitchCondToPhi,
-                                       ConvertSwitchToLookupTable, NeedCanonicalLoop,
-                                       HoistCommonInsts, SinkCommonInsts,
-                                       SimplifyCondBranch, FoldTwoEntryPHINode)
-    ccall((:LLVMAddCFGSimplificationPass2, libLLVMExtra), Cvoid,
-          (LLVMPassManagerRef, Cint, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool),
-          PM, BonusInstThreshold, ForwardSwitchCondToPhi, ConvertSwitchToLookupTable, NeedCanonicalLoop,
-          HoistCommonInsts, SinkCommonInsts, SimplifyCondBranch, FoldTwoEntryPHINode)
+function LLVMGetMDString2(MD, Length)
+    ccall((:LLVMGetMDString2, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), MD, Length)
 end
 
-# bug fixes
-
-# TODO: upstream
-
-function LLVMExtraDumpMetadata(MD)
-    ccall((:LLVMExtraDumpMetadata, libLLVMExtra), Cvoid, (LLVMMetadataRef,), MD)
+function LLVMGetMDNodeNumOperands2(MD)
+    ccall((:LLVMGetMDNodeNumOperands2, libLLVMExtra), Cuint, (LLVMMetadataRef,), MD)
 end
 
-function LLVMExtraPrintMetadataToString(MD)
-    ccall((:LLVMExtraPrintMetadataToString, libLLVMExtra), Cstring, (LLVMMetadataRef,), MD)
+function LLVMGetMDNodeOperands2(MD, Dest)
+    ccall((:LLVMGetMDNodeOperands2, libLLVMExtra), Cvoid, (LLVMMetadataRef, Ptr{LLVMMetadataRef}), MD, Dest)
 end
 
-function LLVMExtraGetMDNodeNumOperands2(MD)
-    ccall((:LLVMExtraGetMDNodeNumOperands2, libLLVMExtra), Cuint, (LLVMMetadataRef,), MD)
+function LLVMGetNamedMetadataNumOperands2(NMD)
+    ccall((:LLVMGetNamedMetadataNumOperands2, libLLVMExtra), Cuint, (LLVMNamedMDNodeRef,), NMD)
 end
 
-function LLVMExtraGetMDString2(MD, Len)
-    ccall((:LLVMExtraGetMDString2, libLLVMExtra), Cstring, (LLVMMetadataRef, Ptr{Cuint}), MD, Len)
+function LLVMGetNamedMetadataOperands2(NMD, Dest)
+    ccall((:LLVMGetNamedMetadataOperands2, libLLVMExtra), Cvoid, (LLVMNamedMDNodeRef, Ptr{LLVMMetadataRef}), NMD, Dest)
 end
 
-function LLVMExtraGetMDNodeOperands2(MD, Dest)
-    ccall((:LLVMExtraGetMDNodeOperands2, libLLVMExtra), Cvoid, (LLVMMetadataRef, Ptr{LLVMMetadataRef}), MD, Dest)
+function LLVMAddNamedMetadataOperand2(NMD, Val)
+    ccall((:LLVMAddNamedMetadataOperand2, libLLVMExtra), Cvoid, (LLVMNamedMDNodeRef, LLVMMetadataRef), NMD, Val)
 end
 
-function LLVMExtraGetNamedMetadataNumOperands2(NMD)
-    ccall((:LLVMExtraGetNamedMetadataNumOperands2, libLLVMExtra), Cuint, (LLVMNamedMDNodeRef,), NMD)
+mutable struct LLVMOrcOpaqueIRCompileLayer end
+
+const LLVMOrcIRCompileLayerRef = Ptr{LLVMOrcOpaqueIRCompileLayer}
+
+function LLVMOrcIRCompileLayerEmit(IRLayer, MR, TSM)
+    ccall((:LLVMOrcIRCompileLayerEmit, libLLVMExtra), Cvoid, (LLVMOrcIRCompileLayerRef, LLVMOrcMaterializationResponsibilityRef, LLVMOrcThreadSafeModuleRef), IRLayer, MR, TSM)
 end
 
-function LLVMExtraGetNamedMetadataOperands2(NMD, Dest)
-    ccall((:LLVMExtraGetNamedMetadataOperands2, libLLVMExtra), Cvoid, (LLVMNamedMDNodeRef, Ptr{LLVMMetadataRef}), NMD, Dest)
+function LLVMDumpJitDylibToString(JD)
+    ccall((:LLVMDumpJitDylibToString, libLLVMExtra), Cstring, (LLVMOrcJITDylibRef,), JD)
 end
 
-function LLVMExtraAddNamedMetadataOperand2(NMD, Val)
-    ccall((:LLVMExtraAddNamedMetadataOperand2, libLLVMExtra), Cvoid, (LLVMNamedMDNodeRef, LLVMMetadataRef), NMD, Val)
+function LLVMGetFunctionType(Fn)
+    ccall((:LLVMGetFunctionType, libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), Fn)
 end
 
-if v"12" <= version() < v"13"
-
-function LLVMCreateTypeAttribute(C, KindID, type_ref)
-    ccall((:LLVMCreateTypeAttribute, libLLVMExtra), LLVMAttributeRef, (LLVMContextRef, Cuint, LLVMTypeRef), C, KindID, type_ref)
+function LLVMGetGlobalValueType(Fn)
+    ccall((:LLVMGetGlobalValueType, libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), Fn)
 end
 
-function LLVMGetTypeAttributeValue(A)
-    ccall((:LLVMGetTypeAttributeValue, libLLVMExtra), LLVMTypeRef, (LLVMAttributeRef,), A)
+function LLVMAddCFGSimplificationPass2(PM, BonusInstThreshold, ForwardSwitchCondToPhi, ConvertSwitchToLookupTable, NeedCanonicalLoop, HoistCommonInsts, SinkCommonInsts, SimplifyCondBranch, FoldTwoEntryPHINode)
+    ccall((:LLVMAddCFGSimplificationPass2, libLLVMExtra), Cvoid, (LLVMPassManagerRef, Cint, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool), PM, BonusInstThreshold, ForwardSwitchCondToPhi, ConvertSwitchToLookupTable, NeedCanonicalLoop, HoistCommonInsts, SinkCommonInsts, SimplifyCondBranch, FoldTwoEntryPHINode)
 end
 
-function LLVMIsTypeAttribute(A)
-    ccall((:LLVMIsTypeAttribute, libLLVMExtra), LLVMBool, (LLVMAttributeRef,), A)
+function LLVMSetInitializer2(GlobalVar, ConstantVal)
+    ccall((:LLVMSetInitializer2, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), GlobalVar, ConstantVal)
 end
 
-struct LLVMOrcCSymbolFlagsMapPair
-    Name::LLVMOrcSymbolStringPoolEntryRef
-    Flags::LLVMJITSymbolFlags
+function LLVMSetPersonalityFn2(Fn, PersonalityFn)
+    ccall((:LLVMSetPersonalityFn2, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), Fn, PersonalityFn)
 end
-
-const LLVMOrcCSymbolFlagsMapPairs = Ptr{LLVMOrcCSymbolFlagsMapPair}
-
-struct LLVMOrcCSymbolAliasMapEntry
-    Name::LLVMOrcSymbolStringPoolEntryRef
-    Flags::LLVMJITSymbolFlags
-end
-
-struct LLVMOrcCSymbolAliasMapPair
-    Name::LLVMOrcSymbolStringPoolEntryRef
-    Entry::LLVMOrcCSymbolAliasMapEntry
-end
-
-const LLVMOrcCSymbolAliasMapPairs = Ptr{LLVMOrcCSymbolAliasMapPair}
-
-mutable struct LLVMOrcOpaqueMaterializationResponsibility end
-
-const LLVMOrcMaterializationResponsibilityRef = Ptr{LLVMOrcOpaqueMaterializationResponsibility}
-
-# typedef void ( * LLVMOrcMaterializationUnitMaterializeFunction ) ( void * Ctx , LLVMOrcMaterializationResponsibilityRef MR )
-const LLVMOrcMaterializationUnitMaterializeFunction = Ptr{Cvoid}
-
-# typedef void ( * LLVMOrcMaterializationUnitDiscardFunction ) ( void * Ctx , LLVMOrcJITDylibRef JD , LLVMOrcSymbolStringPoolEntryRef Symbol )
-const LLVMOrcMaterializationUnitDiscardFunction = Ptr{Cvoid}
-
-# typedef void ( * LLVMOrcMaterializationUnitDestroyFunction ) ( void * Ctx )
-const LLVMOrcMaterializationUnitDestroyFunction = Ptr{Cvoid}
-
-# typedef LLVMErrorRef ( * LLVMOrcGenericIRModuleOperationFunction ) ( void * Ctx , LLVMModuleRef M )
-const LLVMOrcGenericIRModuleOperationFunction = Ptr{Cvoid}
-
-mutable struct LLVMOrcOpaqueIRTransformLayer end
-
-const LLVMOrcIRTransformLayerRef = Ptr{LLVMOrcOpaqueIRTransformLayer}
-
-# typedef LLVMErrorRef ( * LLVMOrcIRTransformLayerTransformFunction ) ( void * Ctx , LLVMOrcThreadSafeModuleRef * ModInOut , LLVMOrcMaterializationResponsibilityRef MR )
-const LLVMOrcIRTransformLayerTransformFunction = Ptr{Cvoid}
-
-mutable struct LLVMOrcOpaqueIndirectStubsManager end
-
-const LLVMOrcIndirectStubsManagerRef = Ptr{LLVMOrcOpaqueIndirectStubsManager}
-
-mutable struct LLVMOrcOpaqueLazyCallThroughManager end
-
-const LLVMOrcLazyCallThroughManagerRef = Ptr{LLVMOrcOpaqueLazyCallThroughManager}
-
-function LLVMOrcCreateCustomMaterializationUnit(Name, Ctx, Syms, NumSyms, InitSym, Materialize, Discard, Destroy)
-    ccall((:LLVMOrcCreateCustomMaterializationUnit, libLLVMExtra), LLVMOrcMaterializationUnitRef, (Cstring, Ptr{Cvoid}, LLVMOrcCSymbolFlagsMapPairs, Csize_t, LLVMOrcSymbolStringPoolEntryRef, LLVMOrcMaterializationUnitMaterializeFunction, LLVMOrcMaterializationUnitDiscardFunction, LLVMOrcMaterializationUnitDestroyFunction), Name, Ctx, Syms, NumSyms, InitSym, Materialize, Discard, Destroy)
-end
-
-function LLVMOrcLazyReexports(LCTM, ISM, SourceRef, CallableAliases, NumPairs)
-    ccall((:LLVMOrcLazyReexports, libLLVMExtra), LLVMOrcMaterializationUnitRef, (LLVMOrcLazyCallThroughManagerRef, LLVMOrcIndirectStubsManagerRef, LLVMOrcJITDylibRef, LLVMOrcCSymbolAliasMapPairs, Csize_t), LCTM, ISM, SourceRef, CallableAliases, NumPairs)
-end
-
-function LLVMOrcMaterializationResponsibilityGetTargetDylib(MR)
-    ccall((:LLVMOrcMaterializationResponsibilityGetTargetDylib, libLLVMExtra), LLVMOrcJITDylibRef, (LLVMOrcMaterializationResponsibilityRef,), MR)
-end
-
-function LLVMOrcMaterializationResponsibilityGetExecutionSession(MR)
-    ccall((:LLVMOrcMaterializationResponsibilityGetExecutionSession, libLLVMExtra), LLVMOrcExecutionSessionRef, (LLVMOrcMaterializationResponsibilityRef,), MR)
-end
-
-function LLVMOrcMaterializationResponsibilityGetInitializerSymbol(MR)
-    ccall((:LLVMOrcMaterializationResponsibilityGetInitializerSymbol, libLLVMExtra), LLVMOrcSymbolStringPoolEntryRef, (LLVMOrcMaterializationResponsibilityRef,), MR)
-end
-
-function LLVMOrcMaterializationResponsibilityGetRequestedSymbols(MR, NumSymbols)
-    ccall((:LLVMOrcMaterializationResponsibilityGetRequestedSymbols, libLLVMExtra), Ptr{LLVMOrcSymbolStringPoolEntryRef}, (LLVMOrcMaterializationResponsibilityRef, Ptr{Csize_t}), MR, NumSymbols)
-end
-
-function LLVMOrcDisposeSymbols(Symbols)
-    ccall((:LLVMOrcDisposeSymbols, libLLVMExtra), Cvoid, (Ptr{LLVMOrcSymbolStringPoolEntryRef},), Symbols)
-end
-
-function LLVMOrcMaterializationResponsibilityNotifyResolved(MR, Symbols, NumPairs)
-    ccall((:LLVMOrcMaterializationResponsibilityNotifyResolved, libLLVMExtra), LLVMErrorRef, (LLVMOrcMaterializationResponsibilityRef, LLVMOrcCSymbolMapPairs, Csize_t), MR, Symbols, NumPairs)
-end
-
-function LLVMOrcMaterializationResponsibilityNotifyEmitted(MR)
-    ccall((:LLVMOrcMaterializationResponsibilityNotifyEmitted, libLLVMExtra), LLVMErrorRef, (LLVMOrcMaterializationResponsibilityRef,), MR)
-end
-
-function LLVMOrcMaterializationResponsibilityFailMaterialization(MR)
-    ccall((:LLVMOrcMaterializationResponsibilityFailMaterialization, libLLVMExtra), Cvoid, (LLVMOrcMaterializationResponsibilityRef,), MR)
-end
-
-function LLVMOrcThreadSafeModuleWithModuleDo(TSM, F, Ctx)
-    ccall((:LLVMOrcThreadSafeModuleWithModuleDo, libLLVMExtra), LLVMErrorRef, (LLVMOrcThreadSafeModuleRef, LLVMOrcGenericIRModuleOperationFunction, Ptr{Cvoid}), TSM, F, Ctx)
-end
-
-function LLVMOrcIRTransformLayerEmit(IRTransformLayer, MR, TSM)
-    ccall((:LLVMOrcIRTransformLayerEmit, libLLVMExtra), Cvoid, (LLVMOrcIRTransformLayerRef, LLVMOrcMaterializationResponsibilityRef, LLVMOrcThreadSafeModuleRef), IRTransformLayer, MR, TSM)
-end
-
-function LLVMOrcCreateLocalIndirectStubsManager(TargetTriple)
-    ccall((:LLVMOrcCreateLocalIndirectStubsManager, libLLVMExtra), LLVMOrcIndirectStubsManagerRef, (Cstring,), TargetTriple)
-end
-
-function LLVMOrcDisposeIndirectStubsManager(ISM)
-    ccall((:LLVMOrcDisposeIndirectStubsManager, libLLVMExtra), Cvoid, (LLVMOrcIndirectStubsManagerRef,), ISM)
-end
-
-function LLVMOrcCreateLocalLazyCallThroughManager(TargetTriple, ES, ErrorHandlerAddr, Result)
-    ccall((:LLVMOrcCreateLocalLazyCallThroughManager, libLLVMExtra), LLVMErrorRef, (Cstring, LLVMOrcExecutionSessionRef, LLVMOrcJITTargetAddress, Ptr{LLVMOrcLazyCallThroughManagerRef}), TargetTriple, ES, ErrorHandlerAddr, Result)
-end
-
-function LLVMOrcDisposeLazyCallThroughManager(LCM)
-    ccall((:LLVMOrcDisposeLazyCallThroughManager, libLLVMExtra), Cvoid, (LLVMOrcLazyCallThroughManagerRef,), LCM)
-end
-
-function LLVMOrcLLJITGetIRTransformLayer(J)
-    ccall((:LLVMOrcLLJITGetIRTransformLayer, libLLVMExtra), LLVMOrcIRTransformLayerRef, (LLVMOrcLLJITRef,), J)
-end
-
-function LLVMOrcLLJITApplyDataLayout(J, Mod)
-    ccall((:LLVMOrcLLJITApplyDataLayout, libLLVMExtra), LLVMErrorRef, (LLVMOrcLLJITRef, LLVMModuleRef), J, Mod)
-end
-
-end # version
 
 @cenum LLVMCloneFunctionChangeType::UInt32 begin
     LLVMCloneFunctionChangeTypeLocalChangesOnly = 0
@@ -330,7 +200,6 @@ end
 function LLVMCloneBasicBlock(BB, NameSuffix, ValueMap, ValueMapElements, F)
     ccall((:LLVMCloneBasicBlock, libLLVMExtra), LLVMBasicBlockRef, (LLVMBasicBlockRef, Cstring, Ptr{LLVMValueRef}, Cuint, LLVMValueRef), BB, NameSuffix, ValueMap, ValueMapElements, F)
 end
-
 
 function LLVMFunctionDeleteBody(Func)
     ccall((:LLVMFunctionDeleteBody, libLLVMExtra), Cvoid, (LLVMValueRef,), Func)
@@ -408,16 +277,24 @@ function LLVMBuildCallWithOpBundle2(B, Ty, Fn, Args, NumArgs, Bundles, NumBundle
     ccall((:LLVMBuildCallWithOpBundle2, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Ptr{LLVMOperandBundleDefRef}, Cuint, Cstring), B, Ty, Fn, Args, NumArgs, Bundles, NumBundles, Name)
 end
 
-function LLVMMetadataAsValue2(C, MD)
-    ccall((:LLVMMetadataAsValue2, libLLVMExtra), LLVMValueRef, (LLVMContextRef, LLVMMetadataRef), C, MD)
+function LLVMMetadataAsValue2(C, Metadata)
+    ccall((:LLVMMetadataAsValue2, libLLVMExtra), LLVMValueRef, (LLVMContextRef, LLVMMetadataRef), C, Metadata)
 end
 
-function LLVMReplaceAllMetadataUsesWith(OldVal, NewVal)
-    ccall((:LLVMReplaceAllMetadataUsesWith, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), OldVal, NewVal)
+function LLVMReplaceAllMetadataUsesWith(Old, New)
+    ccall((:LLVMReplaceAllMetadataUsesWith, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), Old, New)
 end
 
 function LLVMReplaceMDNodeOperandWith(MD, I, New)
     ccall((:LLVMReplaceMDNodeOperandWith, libLLVMExtra), Cvoid, (LLVMMetadataRef, Cuint, LLVMMetadataRef), MD, I, New)
+end
+
+function LLVMConstDataArray(ElementTy, Data, NumElements)
+    ccall((:LLVMConstDataArray, libLLVMExtra), LLVMValueRef, (LLVMTypeRef, Ptr{Cvoid}, Cuint), ElementTy, Data, NumElements)
+end
+
+function LLVMContextSupportsTypedPointers(C)
+    ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), C)
 end
 
 mutable struct LLVMOpaqueDominatorTree end
@@ -425,11 +302,11 @@ mutable struct LLVMOpaqueDominatorTree end
 const LLVMDominatorTreeRef = Ptr{LLVMOpaqueDominatorTree}
 
 function LLVMCreateDominatorTree(Fn)
-    ccall((:LLVMCreateDominatorTree, libLLVMExtra), LLVMDominatorTreeRef, (LLVMValueRef, ), Fn)
+    ccall((:LLVMCreateDominatorTree, libLLVMExtra), LLVMDominatorTreeRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMDisposeDominatorTree(Tree)
-    ccall((:LLVMDisposeDominatorTree, libLLVMExtra), Cvoid, (LLVMDominatorTreeRef, ), Tree)
+    ccall((:LLVMDisposeDominatorTree, libLLVMExtra), Cvoid, (LLVMDominatorTreeRef,), Tree)
 end
 
 function LLVMDominatorTreeInstructionDominates(Tree, InstA, InstB)
@@ -441,63 +318,17 @@ mutable struct LLVMOpaquePostDominatorTree end
 const LLVMPostDominatorTreeRef = Ptr{LLVMOpaquePostDominatorTree}
 
 function LLVMCreatePostDominatorTree(Fn)
-    ccall((:LLVMCreatePostDominatorTree, libLLVMExtra), LLVMPostDominatorTreeRef, (LLVMValueRef, ), Fn)
+    ccall((:LLVMCreatePostDominatorTree, libLLVMExtra), LLVMPostDominatorTreeRef, (LLVMValueRef,), Fn)
 end
 
 function LLVMDisposePostDominatorTree(Tree)
-    ccall((:LLVMDisposePostDominatorTree, libLLVMExtra), Cvoid, (LLVMPostDominatorTreeRef, ), Tree)
+    ccall((:LLVMDisposePostDominatorTree, libLLVMExtra), Cvoid, (LLVMPostDominatorTreeRef,), Tree)
 end
 
 function LLVMPostDominatorTreeInstructionDominates(Tree, InstA, InstB)
     ccall((:LLVMPostDominatorTreeInstructionDominates, libLLVMExtra), LLVMBool, (LLVMPostDominatorTreeRef, LLVMValueRef, LLVMValueRef), Tree, InstA, InstB)
 end
 
-if version() >= v"13"
-function LLVMContextSupportsTypedPointers(Ctx)
-    ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), Ctx)
-end
-end
-
-function LLVMConstDataArray(ElementTy, Data, NumElements)
-    ccall((:LLVMConstDataArray, libLLVMExtra), LLVMValueRef, (LLVMTypeRef, Ptr{Cvoid}, Cuint), ElementTy, Data, NumElements)
-end
-
-function LLVMGetFunctionType(Fn)
-    ccall((:LLVMGetFunctionType,libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), Fn)
-end
-
-function LLVMGetGlobalValueType(Fn)
-    ccall((:LLVMGetGlobalValueType,libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), Fn)
-end
-
-function LLVMGetBuilderContext(B)
-    ccall((:LLVMGetBuilderContext, libLLVMExtra), LLVMContextRef, (LLVMBuilderRef,), B)
-end
-
-if v"13" <= version() < v"15"
-function LLVMPointerTypeIsOpaque(Ty)
-    ccall((:LLVMPointerTypeIsOpaque, libLLVMExtra), LLVMBool, (LLVMTypeRef,), Ty)
-end
-function LLVMPointerTypeInContext(C, AddressSpace)
-    ccall((:LLVMPointerTypeInContext, libLLVMExtra), LLVMTypeRef, (LLVMContextRef, Cuint), C, AddressSpace)
-end
-end
-
-if version() >= v"13"
-function LLVMExtraDumpJitDylibToString(JD)
-    ccall((:LLVMExtraDumpJitDylibToString, libLLVMExtra),  Cstring, (LLVMOrcJITDylibRef,), JD)
-end
-
-mutable struct LLVMOrcOpaqueIRCompileLayer end
-
-const LLVMOrcIRCompileLayerRef = Ptr{LLVMOrcOpaqueIRCompileLayer}
-
-function LLVMExtraOrcIRCompileLayerEmit(IRCompileLayer, MR, TSM)
-    ccall((:LLVMExtraOrcIRCompileLayerEmit, libLLVMExtra), Cvoid, (LLVMOrcIRCompileLayerRef, LLVMOrcMaterializationResponsibilityRef, LLVMOrcThreadSafeModuleRef), IRCompileLayer, MR, TSM)
-end
-end # version() >= v"13"
-
-if v"15" <= version()
 mutable struct LLVMOpaquePreservedAnalyses end
 
 const LLVMPreservedAnalysesRef = Ptr{LLVMOpaquePreservedAnalyses}
@@ -763,4 +594,4 @@ end
 function LLVMRegisterAliasAnalyses(FAM, PB, TM, Analyses, AnalysesLength)
     ccall((:LLVMRegisterAliasAnalyses, libLLVMExtra), LLVMErrorRef, (LLVMFunctionAnalysisManagerRef, LLVMPassBuilderRef, LLVMTargetMachineRef, Cstring, Csize_t), FAM, PB, TM, Analyses, AnalysesLength)
 end
-end # v"15" <= version()
+

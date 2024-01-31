@@ -539,11 +539,12 @@ end
     LLVMModuleFlagBehaviorAppendUnique = 5
 end
 
-@cenum LLVMAttributeIndex::Int32 begin
+@cenum __JL_Ctag_85::Int32 begin
     LLVMAttributeReturnIndex = 0
     LLVMAttributeFunctionIndex = -1
 end
 
+const LLVMAttributeIndex = Cuint
 
 function LLVMInitializeCore(R)
     ccall((:LLVMInitializeCore, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
@@ -3466,7 +3467,7 @@ end
     LLVMDWARFEmissionLineTablesOnly = 2
 end
 
-@cenum LLVMMetadataKind::UInt32 begin
+@cenum __JL_Ctag_102::UInt32 begin
     LLVMMDStringMetadataKind = 0
     LLVMConstantAsMetadataMetadataKind = 1
     LLVMLocalAsMetadataMetadataKind = 2
@@ -3503,6 +3504,8 @@ end
     LLVMDIGenericSubrangeMetadataKind = 33
     LLVMDIArgListMetadataKind = 34
 end
+
+const LLVMMetadataKind = Cuint
 
 const LLVMDWARFTypeEncoding = Cuint
 
@@ -4034,12 +4037,12 @@ mutable struct LLVMOpaqueTargetLibraryInfotData end
 
 const LLVMTargetLibraryInfoRef = Ptr{LLVMOpaqueTargetLibraryInfotData}
 
-function LLVMInitializeNVPTXTargetInfo()
-    ccall((:LLVMInitializeNVPTXTargetInfo, libllvm), Cvoid, ())
-end
-
 function LLVMInitializeAMDGPUTargetInfo()
     ccall((:LLVMInitializeAMDGPUTargetInfo, libllvm), Cvoid, ())
+end
+
+function LLVMInitializeNVPTXTargetInfo()
+    ccall((:LLVMInitializeNVPTXTargetInfo, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyTargetInfo()
@@ -4050,12 +4053,16 @@ function LLVMInitializeBPFTargetInfo()
     ccall((:LLVMInitializeBPFTargetInfo, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeNVPTXTarget()
-    ccall((:LLVMInitializeNVPTXTarget, libllvm), Cvoid, ())
+function LLVMInitializeAVRTargetInfo()
+    ccall((:LLVMInitializeAVRTargetInfo, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUTarget()
     ccall((:LLVMInitializeAMDGPUTarget, libllvm), Cvoid, ())
+end
+
+function LLVMInitializeNVPTXTarget()
+    ccall((:LLVMInitializeNVPTXTarget, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyTarget()
@@ -4066,12 +4073,16 @@ function LLVMInitializeBPFTarget()
     ccall((:LLVMInitializeBPFTarget, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeNVPTXTargetMC()
-    ccall((:LLVMInitializeNVPTXTargetMC, libllvm), Cvoid, ())
+function LLVMInitializeAVRTarget()
+    ccall((:LLVMInitializeAVRTarget, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUTargetMC()
     ccall((:LLVMInitializeAMDGPUTargetMC, libllvm), Cvoid, ())
+end
+
+function LLVMInitializeNVPTXTargetMC()
+    ccall((:LLVMInitializeNVPTXTargetMC, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyTargetMC()
@@ -4082,12 +4093,16 @@ function LLVMInitializeBPFTargetMC()
     ccall((:LLVMInitializeBPFTargetMC, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeNVPTXAsmPrinter()
-    ccall((:LLVMInitializeNVPTXAsmPrinter, libllvm), Cvoid, ())
+function LLVMInitializeAVRTargetMC()
+    ccall((:LLVMInitializeAVRTargetMC, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUAsmPrinter()
     ccall((:LLVMInitializeAMDGPUAsmPrinter, libllvm), Cvoid, ())
+end
+
+function LLVMInitializeNVPTXAsmPrinter()
+    ccall((:LLVMInitializeNVPTXAsmPrinter, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeWebAssemblyAsmPrinter()
@@ -4096,6 +4111,10 @@ end
 
 function LLVMInitializeBPFAsmPrinter()
     ccall((:LLVMInitializeBPFAsmPrinter, libllvm), Cvoid, ())
+end
+
+function LLVMInitializeAVRAsmPrinter()
+    ccall((:LLVMInitializeAVRAsmPrinter, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeAMDGPUAsmParser()
@@ -4110,6 +4129,10 @@ function LLVMInitializeBPFAsmParser()
     ccall((:LLVMInitializeBPFAsmParser, libllvm), Cvoid, ())
 end
 
+function LLVMInitializeAVRAsmParser()
+    ccall((:LLVMInitializeAVRAsmParser, libllvm), Cvoid, ())
+end
+
 function LLVMInitializeAMDGPUDisassembler()
     ccall((:LLVMInitializeAMDGPUDisassembler, libllvm), Cvoid, ())
 end
@@ -4120,6 +4143,10 @@ end
 
 function LLVMInitializeBPFDisassembler()
     ccall((:LLVMInitializeBPFDisassembler, libllvm), Cvoid, ())
+end
+
+function LLVMInitializeAVRDisassembler()
+    ccall((:LLVMInitializeAVRDisassembler, libllvm), Cvoid, ())
 end
 
 function LLVMGetModuleDataLayout(M)

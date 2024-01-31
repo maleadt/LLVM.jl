@@ -5,14 +5,15 @@ abstract type Metadata end
 
 Base.unsafe_convert(::Type{API.LLVMMetadataRef}, md::Metadata) = md.ref
 
-const metadata_kinds = Vector{Type}(fill(Nothing, typemax(API.LLVMMetadataKind)+1))
+# XXX: LLVMMetadataKind is simply unsigned, so we don't know the max enum
+const metadata_kinds = Vector{Type}(fill(Nothing, 64))
 function identify(::Type{Metadata}, ref::API.LLVMMetadataRef)
     kind = API.LLVMGetMetadataKind(ref)
     typ = @inbounds metadata_kinds[kind+1]
     typ === Nothing && error("Unknown metadata kind $kind")
     return typ
 end
-function register(T::Type{<:Metadata}, kind::API.LLVMMetadataKind)
+function register(T::Type{<:Metadata}, kind)
     metadata_kinds[kind+1] = T
 end
 
@@ -34,7 +35,7 @@ function Metadata(ref::API.LLVMMetadataRef)
 end
 
 function Base.show(io::IO, md::Metadata)
-    output = unsafe_message(API.LLVMExtraPrintMetadataToString(md))
+    output = unsafe_message(API.LLVMPrintMetadataToString(md))
     print(io, output)
 end
 
@@ -93,7 +94,7 @@ MDString(val::String) =
 
 function Base.string(md::MDString)
     len = Ref{Cuint}()
-    ptr = API.LLVMExtraGetMDString2(md, len)
+    ptr = API.LLVMGetMDString2(md, len)
     return unsafe_string(convert(Ptr{Int8}, ptr), len[])
 end
 
@@ -105,9 +106,9 @@ export MDNode, operands
 abstract type MDNode <: Metadata end
 
 function operands(md::MDNode)
-    nops = API.LLVMExtraGetMDNodeNumOperands2(md)
+    nops = API.LLVMGetMDNodeNumOperands2(md)
     ops = Vector{API.LLVMMetadataRef}(undef, nops)
-    API.LLVMExtraGetMDNodeOperands2(md, ops)
+    API.LLVMGetMDNodeOperands2(md, ops)
     return [op == C_NULL ? nothing : Metadata(op) for op in ops]
 end
 

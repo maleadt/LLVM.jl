@@ -22,29 +22,10 @@ module API
 using CEnum
 using Preferences
 
-# LLVM C API
 using ..LLVM
+
+# library handles
 using ..LLVM: libllvm
-let
-    ver = if version() < v"12"
-        "11"
-    elseif version().major == 12
-        "12"
-    elseif version() < v"15"
-        "13"
-    else
-        "15"
-    end
-    dir = joinpath(@__DIR__, "..", "lib", ver)
-    if !isdir(dir)
-        error("""The LLVM API bindings for v$libllvm_version do not exist.
-                  You might need a newer version of LLVM.jl for this version of Julia.""")
-    end
-
-    include(joinpath(dir, "libLLVM_h.jl"))
-end
-
-# LLVMExtra
 using LLVMExtra_jll
 if has_preference(LLVM, "libLLVMExtra")
     const libLLVMExtra = load_preference(LLVM, "libLLVMExtra")
@@ -53,9 +34,23 @@ else
         import LLVMExtra_jll: libLLVMExtra
     end
 end
-include(joinpath(@__DIR__, "..", "lib", "libLLVM_extra.jl"))
 
-# Julia LLVM functionality
+# auto-generated wrappers
+let
+    if version().major < 13
+        error("LLVM.jl only supports LLVM 13 and later.")
+    end
+    dir = if version().major > 16
+        @warn "LLVM.jl has not been tested with LLVM versions newer than 16."
+        joinpath(@__DIR__, "..", "lib", "16")
+    else
+        joinpath(@__DIR__, "..", "lib", string(version().major))
+    end
+    @assert isdir(dir)
+
+    include(joinpath(dir, "libLLVM.jl"))
+    include(joinpath(dir, "libLLVM_extra.jl"))
+end
 include(joinpath(@__DIR__, "..", "lib", "libLLVM_julia.jl"))
 
 end # module API

@@ -70,10 +70,10 @@ inline_asm!(mod::Module, asm::String) =
 context(mod::Module) = Context(API.LLVMGetModuleContext(mod))
 
 set_used!(mod::Module, values::GlobalVariable...) =
-    API.LLVMExtraAppendToUsed(mod, collect(values), length(values))
+    API.LLVMAppendToUsed(mod, collect(values), length(values))
 
 set_compiler_used!(mod::Module, values::GlobalVariable...) =
-    API.LLVMExtraAppendToCompilerUsed(mod, collect(values), length(values))
+    API.LLVMAppendToCompilerUsed(mod, collect(values), length(values))
 
 
 ## named metadata iteration
@@ -106,16 +106,16 @@ function Base.show(io::IO, mime::MIME"text/plain", node::NamedMDNode)
 end
 
 function operands(node::NamedMDNode)
-    nops = API.LLVMExtraGetNamedMetadataNumOperands2(node)
+    nops = API.LLVMGetNamedMetadataNumOperands2(node)
     ops = Vector{API.LLVMMetadataRef}(undef, nops)
     if nops > 0
-        API.LLVMExtraGetNamedMetadataOperands2(node, ops)
+        API.LLVMGetNamedMetadataOperands2(node, ops)
     end
     return [Metadata(op) for op in ops]
 end
 
 Base.push!(node::NamedMDNode, val::MDNode) =
-    API.LLVMExtraAddNamedMetadataOperand2(node, val)
+    API.LLVMAddNamedMetadataOperand2(node, val)
 
 # module metadata iteration
 
