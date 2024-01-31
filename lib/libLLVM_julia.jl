@@ -66,8 +66,39 @@ function LLVMRegisterJuliaPassBuilderCallbacks(PB)
     ccall(:jl_register_passbuilder_callbacks,Cvoid,(LLVMPassBuilderRef,), PB)
 end
 
-function LLVMAddJuliaPipelinePass(PM, PB, Speedup, Size, lower_intrinsics, dump_native, external_use, llvm_only)
-    ccall(:jl_build_newpm_pipeline,Cvoid,(LLVMModulePassManagerRef,LLVMPassBuilderRef,Cint,Cint,Cint,Cint,Cint,Cint), PM, PB, Speedup, Size, lower_intrinsics, dump_native, external_use, llvm_only)
+Base.@kwdef struct PipelineConfig
+    Speedup::Cint
+    Size::Cint
+    lower_intrinsics::Cint=1
+    dump_native::Cint=0
+    external_use::Cint=0
+    llvm_only::Cint=0
+    always_inline::Cint=1
+    enable_early_simplifications::Cint=1
+    enable_early_optimizations::Cint=1
+    enable_scalar_optimizations::Cint=1
+    enable_loop_optimizations::Cint=1
+    enable_vector_pipeline::Cint=1
+    remove_ni::Cint=1
+    cleanup::Cint=1
+end
+
+if VERSION >= v"1.11.0-DEV.1296"
+
+function LLVMAddJuliaPipelinePass(PM, PB, cfg::PipelineConfig)
+    ccall(:jl_build_newpm_pipeline,Cvoid,
+          (LLVMModulePassManagerRef,LLVMPassBuilderRef,Ref{PipelineConfig}),
+          PM, PB, cfg)
+end
+
+else
+
+function LLVMAddJuliaPipelinePass(PM, PB, cfg::PipelineConfig)
+    ccall(:jl_build_newpm_pipeline,Cvoid,
+          (LLVMModulePassManagerRef,LLVMPassBuilderRef,Cint,Cint,Cint,Cint,Cint,Cint),
+          PM, PB, cfg.Speedup, cfg.Size, cfg.lower_intrinsics, cfg.dump_native, cfg.external_use, cfg.llvm_only)
+end
+
 end
 
 end
