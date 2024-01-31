@@ -525,14 +525,26 @@ end
     verify(mod)
 
     # optimize
-    host_triple = triple()
-    host_t = Target(triple=host_triple)
-    @dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
-        NewPMModulePassManager(pb) do mpm
-            parse!(pb, mpm, "default<O3>")
-            run!(mpm, mod, tm)
+    function optimize(mod)
+        if LLVM.has_newpm()
+            host_triple = triple()
+            host_t = Target(triple=host_triple)
+            @dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
+                NewPMModulePassManager(pb) do mpm
+                    parse!(pb, mpm, "default<O3>")
+                    run!(mpm, mod, tm)
+                end
+            end
+        else
+            pmb = PassManagerBuilder()
+            optlevel!(pmb, 3)
+            @dispose mpm=ModulePassManager() begin
+                populate!(mpm, pmb)
+                run!(mpm, mod)
+            end
         end
     end
+    optimize(mod)
     verify(mod)
 
     # ensure we still have our two operations
@@ -553,12 +565,7 @@ end
     @test_throws ArgumentError fast_math!(instns[3]; all=true)
 
     # optimize again
-    @dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
-        NewPMModulePassManager(pb) do mpm
-            parse!(pb, mpm, "default<O3>")
-            run!(mpm, mod, tm)
-        end
-    end
+    optimize(mod)
     verify(mod)
 
     # observe there's only a single return now
