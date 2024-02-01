@@ -191,5 +191,28 @@ LLVMBool LLVMPostDominatorTreeInstructionDominates(LLVMPostDominatorTreeRef Tree
                                                    LLVMValueRef InstA, LLVMValueRef InstB);
 
 
+// fastmath (backport of llvm/llvm-project#75123)
+#if LLVM_VERSION_MAJOR < 18
+enum {
+  LLVMFastMathAllowReassoc = (1 << 0),
+  LLVMFastMathNoNaNs = (1 << 1),
+  LLVMFastMathNoInfs = (1 << 2),
+  LLVMFastMathNoSignedZeros = (1 << 3),
+  LLVMFastMathAllowReciprocal = (1 << 4),
+  LLVMFastMathAllowContract = (1 << 5),
+  LLVMFastMathApproxFunc = (1 << 6),
+  LLVMFastMathNone = 0,
+  LLVMFastMathAll = LLVMFastMathAllowReassoc | LLVMFastMathNoNaNs | LLVMFastMathNoInfs |
+                    LLVMFastMathNoSignedZeros | LLVMFastMathAllowReciprocal |
+                    LLVMFastMathAllowContract | LLVMFastMathApproxFunc,
+};
+typedef unsigned LLVMFastMathFlags;
+
+LLVMFastMathFlags LLVMGetFastMathFlags(LLVMValueRef FPMathInst);
+void LLVMSetFastMathFlags(LLVMValueRef FPMathInst, LLVMFastMathFlags FMF);
+LLVMBool LLVMCanValueUseFastMathFlags(LLVMValueRef Inst);
+#endif
+
+
 LLVM_C_EXTERN_C_END
 #endif

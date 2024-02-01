@@ -578,3 +578,59 @@ LLVMBool LLVMPostDominatorTreeInstructionDominates(LLVMPostDominatorTreeRef Tree
                                                    LLVMValueRef InstA, LLVMValueRef InstB) {
   return unwrap(Tree)->dominates(unwrap<Instruction>(InstA), unwrap<Instruction>(InstB));
 }
+
+
+// fastmath (backport of llvm/llvm-project#75123)
+
+#if LLVM_VERSION_MAJOR < 18
+
+static FastMathFlags mapFromLLVMFastMathFlags(LLVMFastMathFlags FMF) {
+  FastMathFlags NewFMF;
+  NewFMF.setAllowReassoc((FMF & LLVMFastMathAllowReassoc) != 0);
+  NewFMF.setNoNaNs((FMF & LLVMFastMathNoNaNs) != 0);
+  NewFMF.setNoInfs((FMF & LLVMFastMathNoInfs) != 0);
+  NewFMF.setNoSignedZeros((FMF & LLVMFastMathNoSignedZeros) != 0);
+  NewFMF.setAllowReciprocal((FMF & LLVMFastMathAllowReciprocal) != 0);
+  NewFMF.setAllowContract((FMF & LLVMFastMathAllowContract) != 0);
+  NewFMF.setApproxFunc((FMF & LLVMFastMathApproxFunc) != 0);
+
+  return NewFMF;
+}
+
+static LLVMFastMathFlags mapToLLVMFastMathFlags(FastMathFlags FMF) {
+  LLVMFastMathFlags NewFMF = LLVMFastMathNone;
+  if (FMF.allowReassoc())
+    NewFMF |= LLVMFastMathAllowReassoc;
+  if (FMF.noNaNs())
+    NewFMF |= LLVMFastMathNoNaNs;
+  if (FMF.noInfs())
+    NewFMF |= LLVMFastMathNoInfs;
+  if (FMF.noSignedZeros())
+    NewFMF |= LLVMFastMathNoSignedZeros;
+  if (FMF.allowReciprocal())
+    NewFMF |= LLVMFastMathAllowReciprocal;
+  if (FMF.allowContract())
+    NewFMF |= LLVMFastMathAllowContract;
+  if (FMF.approxFunc())
+    NewFMF |= LLVMFastMathApproxFunc;
+
+  return NewFMF;
+}
+
+LLVMFastMathFlags LLVMGetFastMathFlags(LLVMValueRef FPMathInst) {
+  Value *P = unwrap<Value>(FPMathInst);
+  FastMathFlags FMF = cast<Instruction>(P)->getFastMathFlags();
+  return mapToLLVMFastMathFlags(FMF);
+}
+
+void LLVMSetFastMathFlags(LLVMValueRef FPMathInst, LLVMFastMathFlags FMF) {
+  Value *P = unwrap<Value>(FPMathInst);
+  cast<Instruction>(P)->setFastMathFlags(mapFromLLVMFastMathFlags(FMF));
+}
+
+LLVMBool LLVMCanValueUseFastMathFlags(LLVMValueRef V) {
+  Value *Val = unwrap<Value>(V);
+  return isa<FPMathOperator>(Val);
+}
+
+#endif
