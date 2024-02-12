@@ -154,6 +154,10 @@ function LLVMAddNamedMetadataOperand2(NMD, Val)
     ccall((:LLVMAddNamedMetadataOperand2, libLLVMExtra), Cvoid, (LLVMNamedMDNodeRef, LLVMMetadataRef), NMD, Val)
 end
 
+function LLVMReplaceMDNodeOperandWith2(MD, I, New)
+    ccall((:LLVMReplaceMDNodeOperandWith2, libLLVMExtra), Cvoid, (LLVMMetadataRef, Cuint, LLVMMetadataRef), MD, I, New)
+end
+
 mutable struct LLVMOrcOpaqueIRCompileLayer end
 
 const LLVMOrcIRCompileLayerRef = Ptr{LLVMOrcOpaqueIRCompileLayer}
@@ -285,8 +289,8 @@ function LLVMReplaceAllMetadataUsesWith(Old, New)
     ccall((:LLVMReplaceAllMetadataUsesWith, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), Old, New)
 end
 
-function LLVMReplaceMDNodeOperandWith(MD, I, New)
-    ccall((:LLVMReplaceMDNodeOperandWith, libLLVMExtra), Cvoid, (LLVMMetadataRef, Cuint, LLVMMetadataRef), MD, I, New)
+function LLVMReplaceMDNodeOperandWith(V, Index, Replacement)
+    ccall((:LLVMReplaceMDNodeOperandWith, libLLVMExtra), Cvoid, (LLVMValueRef, Cuint, LLVMMetadataRef), V, Index, Replacement)
 end
 
 function LLVMConstDataArray(ElementTy, Data, NumElements)

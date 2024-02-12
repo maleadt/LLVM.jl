@@ -114,7 +114,7 @@ end
 
 # TODO: setindex?
 function replace_operand(md::MDNode, i, new::Metadata)
-    API.LLVMReplaceMDNodeOperandWith(md, i-1, new)
+    API.LLVMReplaceMDNodeOperandWith2(md, i-1, new)
 end
 
 

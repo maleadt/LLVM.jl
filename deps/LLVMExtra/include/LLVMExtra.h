@@ -28,15 +28,21 @@ typedef enum {
 
 // Various missing passes (being upstreamed)
 void LLVMAddBarrierNoopPass(LLVMPassManagerRef PM);
+#if LLVM_VERSION_MAJOR < 17
 void LLVMAddDivRemPairsPass(LLVMPassManagerRef PM);
 void LLVMAddLoopDistributePass(LLVMPassManagerRef PM);
 void LLVMAddLoopFusePass(LLVMPassManagerRef PM);
 void LLVMAddLoopLoadEliminationPass(LLVMPassManagerRef PM);
+#endif
 void LLVMAddLoadStoreVectorizerPass(LLVMPassManagerRef PM);
+#if LLVM_VERSION_MAJOR < 17
 void LLVMAddVectorCombinePass(LLVMPassManagerRef PM);
+#endif
 void LLVMAddSpeculativeExecutionIfHasBranchDivergencePass(LLVMPassManagerRef PM);
+#if LLVM_VERSION_MAJOR < 17
 void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM);
 void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM);
+#endif
 void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM);
 
 
@@ -58,8 +64,10 @@ unsigned int LLVMGetDebugMDVersion(void);
 LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef B);
 LLVMContextRef LLVMGetValueContext(LLVMValueRef V);
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
+#if LLVM_VERSION_MAJOR < 17
 void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **ExportList,
                                           size_t Length);
+#endif
 
 void LLVMAppendToUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count);
 void LLVMAppendToCompilerUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count);
@@ -71,17 +79,14 @@ char *LLVMPrintMetadataToString(LLVMMetadataRef MD);
 
 const char *LLVMDIScopeGetName(LLVMMetadataRef File, unsigned *Len);
 
+// APIs without MetadataAsValue
 const char *LLVMGetMDString2(LLVMMetadataRef MD, unsigned *Length);
-
 unsigned LLVMGetMDNodeNumOperands2(LLVMMetadataRef MD);
-
 void LLVMGetMDNodeOperands2(LLVMMetadataRef MD, LLVMMetadataRef *Dest);
-
 unsigned LLVMGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD);
-
 void LLVMGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest);
-
 void LLVMAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
+void LLVMReplaceMDNodeOperandWith2(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
 
 typedef struct LLVMOrcOpaqueIRCompileLayer *LLVMOrcIRCompileLayerRef;
 
@@ -94,12 +99,21 @@ char *LLVMDumpJitDylibToString(LLVMOrcJITDylibRef JD);
 LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn);
 LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef Fn);
 
+#if LLVM_VERSION_MAJOR >= 17
+void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
+                                   LLVMBool ForwardSwitchCondToPhi,
+                                   LLVMBool ConvertSwitchToLookupTable,
+                                   LLVMBool NeedCanonicalLoop, LLVMBool HoistCommonInsts,
+                                   LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
+                                   LLVMBool SpeculateBlocks);
+#else
 void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
                                    LLVMBool ForwardSwitchCondToPhi,
                                    LLVMBool ConvertSwitchToLookupTable,
                                    LLVMBool NeedCanonicalLoop, LLVMBool HoistCommonInsts,
                                    LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
                                    LLVMBool FoldTwoEntryPHINode);
+#endif
 
 
 // Bug fixes
@@ -161,8 +175,10 @@ LLVMValueRef LLVMBuildCallWithOpBundle2(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMVa
 // metadata
 LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata);
 void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New);
-void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
-
+#if LLVM_VERSION_MAJOR < 17
+void LLVMReplaceMDNodeOperandWith(LLVMValueRef V, unsigned Index,
+                                  LLVMMetadataRef Replacement);
+#endif
 
 // constant data
 LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data,
@@ -170,7 +186,9 @@ LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data,
 
 
 // missing opaque pointer APIs
+#if LLVM_VERSION_MAJOR < 17
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
+#endif
 #if LLVM_VERSION_MAJOR < 15
 LLVMBool LLVMPointerTypeIsOpaque(LLVMTypeRef Ty);
 LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace);
