@@ -210,7 +210,7 @@ end
 register(ConstantArray, API.LLVMConstantArrayValueKind)
 
 # generic constructor taking an array of constants
-function ConstantArray(typ::LLVMType, data::AbstractArray{T,N}=T[]) where {T<:Constant,N}
+function ConstantArray(typ::LLVMType, data::AbstractArray{<:Constant,N}) where {N}
     @assert all(x->x==typ, value_type.(data))
 
     if N == 1
@@ -301,7 +301,7 @@ ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
     ConstantStructOrAggregateZero(API.LLVMConstNamedStruct(typ, values, length(values)))
 
 # create a ConstantStruct from a Julia object
-function ConstantStruct(value::T, name=String(nameof(T));
+function ConstantStruct(value::T, name::AbstractString=String(nameof(T));
                         anonymous::Bool=false, packed::Bool=false) where {T}
     isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
     isprimitivetype(T) && throw(ArgumentError("Cannot create a ConstantStruct from a primitive value"))

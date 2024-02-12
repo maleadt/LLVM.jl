@@ -121,7 +121,7 @@ struct FunctionBlockSet <: AbstractVector{BasicBlock}
     f::Function
     cache::Vector{API.LLVMValueRef}
 
-    FunctionBlockSet(f::Function) = new(f, BasicBlock[])
+    FunctionBlockSet(f::Function) = new(f, API.LLVMValueRef[])
 end
 
 blocks(f::Function) = FunctionBlockSet(f)

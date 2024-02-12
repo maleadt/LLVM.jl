@@ -207,7 +207,7 @@ function Base.getindex(iter::OperandBundleIterator, i::Int)
     end
 end
 
-tag_id(bundle::OperandBundleUse) = API.LLVMGetOperandBundleTagID(bundle)
+tag_id(bundle::OperandBundleUse) = API.LLVMGetOperandBundleUseTagID(bundle)
 
 function tag_name(bundle::OperandBundleUse)
     len = Ref{Cuint}()

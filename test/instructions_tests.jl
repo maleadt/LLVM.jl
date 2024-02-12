@@ -433,6 +433,7 @@ end
                 @test length(bundles) == 1
                 bundle = first(bundles)
                 @test LLVM.tag_name(bundle) == "deopt"
+                @test LLVM.tag_id(bundle) isa Integer
                 @test string(bundle) == "\"deopt\"(i32 1, i64 2)"
 
                 inputs = LLVM.inputs(bundle)
