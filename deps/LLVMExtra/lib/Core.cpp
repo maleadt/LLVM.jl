@@ -1,6 +1,10 @@
 #include <LLVMExtra.h>
 
+#if LLVM_VERSION_MAJOR >= 17
+#include <llvm/TargetParser/Triple.h>
+#else
 #include <llvm/ADT/Triple.h>
+#endif
 #include <llvm/Analysis/PostDominators.h>
 #include <llvm/Analysis/TargetLibraryInfo.h>
 #include <llvm/Analysis/TargetTransformInfo.h>
@@ -48,6 +52,7 @@ void LLVMAddBarrierNoopPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createBarrierNoopPass());
 }
 
+#if LLVM_VERSION_MAJOR < 17
 void LLVMAddDivRemPairsPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createDivRemPairsPass());
 }
@@ -61,19 +66,23 @@ void LLVMAddLoopFusePass(LLVMPassManagerRef PM) { unwrap(PM)->add(createLoopFuse
 void LLVMAddLoopLoadEliminationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopLoadEliminationPass());
 }
+#endif
 
 void LLVMAddLoadStoreVectorizerPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoadStoreVectorizerPass());
 }
 
+#if LLVM_VERSION_MAJOR < 17
 void LLVMAddVectorCombinePass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createVectorCombinePass());
 }
+#endif
 
 void LLVMAddSpeculativeExecutionIfHasBranchDivergencePass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSpeculativeExecutionIfHasBranchDivergencePass());
 }
 
+#if LLVM_VERSION_MAJOR < 17
 void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSimpleLoopUnrollPass());
 }
@@ -81,6 +90,7 @@ void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM) {
 void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createInductiveRangeCheckEliminationPass());
 }
+#endif
 
 void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSimpleLoopUnswitchLegacyPass());
@@ -164,6 +174,7 @@ void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM) {
   unwrap(PM)->add(new TargetLibraryInfoWrapperPass(Triple(T)));
 }
 
+#if LLVM_VERSION_MAJOR < 17
 void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **ExportList,
                                           size_t Length) {
   auto PreserveFobj = [=](const GlobalValue &GV) {
@@ -175,6 +186,7 @@ void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **Ex
   };
   unwrap(PM)->add(createInternalizePass(PreserveFobj));
 }
+#endif
 
 void LLVMAppendToUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count) {
   SmallVector<GlobalValue *, 1> GlobalValues;
@@ -218,6 +230,25 @@ char *LLVMPrintMetadataToString(LLVMMetadataRef MD) {
   return strdup(buf.c_str());
 }
 
+#if LLVM_VERSION_MAJOR >= 17
+void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
+                                   LLVMBool ForwardSwitchCondToPhi,
+                                   LLVMBool ConvertSwitchToLookupTable,
+                                   LLVMBool NeedCanonicalLoop, LLVMBool HoistCommonInsts,
+                                   LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
+                                   LLVMBool SpeculateBlocks) {
+  auto simplifyCFGOptions = SimplifyCFGOptions()
+                                .bonusInstThreshold(BonusInstThreshold)
+                                .forwardSwitchCondToPhi(ForwardSwitchCondToPhi)
+                                .convertSwitchToLookupTable(ConvertSwitchToLookupTable)
+                                .needCanonicalLoops(NeedCanonicalLoop)
+                                .hoistCommonInsts(HoistCommonInsts)
+                                .sinkCommonInsts(SinkCommonInsts)
+                                .setSimplifyCondBranch(SimplifyCondBranch)
+                                .speculateBlocks(SpeculateBlocks);
+  unwrap(PM)->add(createCFGSimplificationPass(simplifyCFGOptions));
+}
+#else
 void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
                                    LLVMBool ForwardSwitchCondToPhi,
                                    LLVMBool ConvertSwitchToLookupTable,
@@ -235,6 +266,7 @@ void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold
                                 .setFoldTwoEntryPHINode(FoldTwoEntryPHINode);
   unwrap(PM)->add(createCFGSimplificationPass(simplifyCFGOptions));
 }
+#endif
 
 // versions of API without MetadataAsValue
 
@@ -267,6 +299,10 @@ void LLVMGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest
 
 void LLVMAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val) {
   unwrap<NamedMDNode>(NMD)->addOperand(unwrap<MDNode>(Val));
+}
+
+void LLVMReplaceMDNodeOperandWith2(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New) {
+  unwrap<MDNode>(MD)->replaceOperandWith(I, unwrap(New));
 }
 
 // Bug fixes (TODO: upstream these)
@@ -512,9 +548,15 @@ void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New) {
   ValueAsMetadata::handleRAUW(unwrap<Value>(Old), unwrap<Value>(New));
 }
 
-void LLVMReplaceMDNodeOperandWith(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New) {
-  unwrap<MDNode>(MD)->replaceOperandWith(I, unwrap(New));
+// back-port of D136637
+#if LLVM_VERSION_MAJOR < 17
+void LLVMReplaceMDNodeOperandWith(LLVMValueRef V, unsigned Index,
+                                  LLVMMetadataRef Replacement) {
+  auto *MD = cast<MetadataAsValue>(unwrap(V));
+  auto *N = cast<MDNode>(MD->getMetadata());
+  N->replaceOperandWith(Index, unwrap<Metadata>(Replacement));
 }
+#endif
 
 
 // constant data
@@ -529,9 +571,11 @@ LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data,
 
 // missing opaque pointer APIs
 
+#if LLVM_VERSION_MAJOR < 17
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
   return unwrap(C)->supportsTypedPointers();
 }
+#endif
 
 LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn) {
   auto Ftype = unwrap<Function>(Fn)->getFunctionType();
