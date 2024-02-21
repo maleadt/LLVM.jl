@@ -34,7 +34,8 @@ function main()
                     end
                     print(repr(data))
                 """
-                cmd = `$(Base.julia_cmd()) -e $script $version`
+                # XXX: this assumes juliaup...
+                cmd = `julia +nightly -e $script $version`
                 data = read(cmd, String)
                 eval(Meta.parse(data))
             finally

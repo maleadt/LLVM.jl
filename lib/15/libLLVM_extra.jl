@@ -67,6 +67,10 @@ function LLVMAddSimpleLoopUnswitchLegacyPass(PM)
     ccall((:LLVMAddSimpleLoopUnswitchLegacyPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
+function LLVMAddExpandReductionsPass(PM)
+    ccall((:LLVMAddExpandReductionsPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
+end
+
 mutable struct LLVMOpaquePass end
 
 const LLVMPassRef = Ptr{LLVMOpaquePass}

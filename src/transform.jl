@@ -166,6 +166,12 @@ if version() < v"16"
     define_transforms([:PruneEH])
 end
 
+## codegen passes
+
+define_transforms([:ExpandReductions])
+
+## other
+
 export internalize!
 
 internalize!(pm::PassManager, allbutmain::Bool=true) =

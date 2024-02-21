@@ -84,6 +84,7 @@ end
     if LLVM.version() < v"15"
         argument_promotion!(pm)
     end
+
     constant_merge!(pm)
     dead_arg_elimination!(pm)
     function_attrs!(pm)
@@ -97,6 +98,9 @@ end
     ipsccp!(pm)
     strip_dead_prototypes!(pm)
     strip_symbols!(pm)
+
+    expand_reductions!(pm)
+
     internalize!(pm)
     internalize!(pm, true)
     internalize!(pm, false)

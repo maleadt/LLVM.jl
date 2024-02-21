@@ -3970,30 +3970,6 @@ function LLVMInitializeTarget(R)
     ccall((:LLVMInitializeTarget, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMInitializeX86AsmParser()
-    ccall((:LLVMInitializeX86AsmParser, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeX86AsmPrinter()
-    ccall((:LLVMInitializeX86AsmPrinter, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeX86Disassembler()
-    ccall((:LLVMInitializeX86Disassembler, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeX86Target()
-    ccall((:LLVMInitializeX86Target, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeX86TargetInfo()
-    ccall((:LLVMInitializeX86TargetInfo, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeX86TargetMC()
-    ccall((:LLVMInitializeX86TargetMC, libllvm), Cvoid, ())
-end
-
 mutable struct LLVMOpaqueError end
 
 const LLVMErrorRef = Ptr{LLVMOpaqueError}
@@ -4037,112 +4013,24 @@ mutable struct LLVMOpaqueTargetLibraryInfotData end
 
 const LLVMTargetLibraryInfoRef = Ptr{LLVMOpaqueTargetLibraryInfotData}
 
-function LLVMInitializeAMDGPUTargetInfo()
-    ccall((:LLVMInitializeAMDGPUTargetInfo, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeNVPTXTargetInfo()
-    ccall((:LLVMInitializeNVPTXTargetInfo, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyTargetInfo()
-    ccall((:LLVMInitializeWebAssemblyTargetInfo, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeBPFTargetInfo()
-    ccall((:LLVMInitializeBPFTargetInfo, libllvm), Cvoid, ())
-end
-
 function LLVMInitializeAVRTargetInfo()
     ccall((:LLVMInitializeAVRTargetInfo, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUTarget()
-    ccall((:LLVMInitializeAMDGPUTarget, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeNVPTXTarget()
-    ccall((:LLVMInitializeNVPTXTarget, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyTarget()
-    ccall((:LLVMInitializeWebAssemblyTarget, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeBPFTarget()
-    ccall((:LLVMInitializeBPFTarget, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeAVRTarget()
     ccall((:LLVMInitializeAVRTarget, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeAMDGPUTargetMC()
-    ccall((:LLVMInitializeAMDGPUTargetMC, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeNVPTXTargetMC()
-    ccall((:LLVMInitializeNVPTXTargetMC, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyTargetMC()
-    ccall((:LLVMInitializeWebAssemblyTargetMC, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeBPFTargetMC()
-    ccall((:LLVMInitializeBPFTargetMC, libllvm), Cvoid, ())
-end
-
 function LLVMInitializeAVRTargetMC()
     ccall((:LLVMInitializeAVRTargetMC, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUAsmPrinter()
-    ccall((:LLVMInitializeAMDGPUAsmPrinter, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeNVPTXAsmPrinter()
-    ccall((:LLVMInitializeNVPTXAsmPrinter, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyAsmPrinter()
-    ccall((:LLVMInitializeWebAssemblyAsmPrinter, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeBPFAsmPrinter()
-    ccall((:LLVMInitializeBPFAsmPrinter, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeAVRAsmPrinter()
     ccall((:LLVMInitializeAVRAsmPrinter, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeAMDGPUAsmParser()
-    ccall((:LLVMInitializeAMDGPUAsmParser, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyAsmParser()
-    ccall((:LLVMInitializeWebAssemblyAsmParser, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeBPFAsmParser()
-    ccall((:LLVMInitializeBPFAsmParser, libllvm), Cvoid, ())
-end
-
 function LLVMInitializeAVRAsmParser()
     ccall((:LLVMInitializeAVRAsmParser, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeAMDGPUDisassembler()
-    ccall((:LLVMInitializeAMDGPUDisassembler, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeWebAssemblyDisassembler()
-    ccall((:LLVMInitializeWebAssemblyDisassembler, libllvm), Cvoid, ())
-end
-
-function LLVMInitializeBPFDisassembler()
-    ccall((:LLVMInitializeBPFDisassembler, libllvm), Cvoid, ())
 end
 
 function LLVMInitializeAVRDisassembler()
@@ -6320,34 +6208,6 @@ const LLVMDisassembler_Option_SetInstrComments = 8
 const LLVMDisassembler_Option_PrintLatency = 16
 
 const LLVMErrorSuccess = 0
-
-const LLVM_DEFAULT_TARGET_TRIPLE = "x86_64-linux-gnu"
-
-const LLVM_ENABLE_THREADS = 1
-
-const LLVM_HAS_ATOMICS = 1
-
-const LLVM_HOST_TRIPLE = "x86_64-linux-gnu"
-
-const LLVM_NATIVE_ASMPARSER = LLVMInitializeX86AsmParser
-
-const LLVM_NATIVE_ASMPRINTER = LLVMInitializeX86AsmPrinter
-
-const LLVM_NATIVE_DISASSEMBLER = LLVMInitializeX86Disassembler
-
-const LLVM_NATIVE_TARGET = LLVMInitializeX86Target
-
-const LLVM_NATIVE_TARGETINFO = LLVMInitializeX86TargetInfo
-
-const LLVM_NATIVE_TARGETMC = LLVMInitializeX86TargetMC
-
-const LLVM_ON_UNIX = 1
-
-const LLVM_USE_INTEL_JITEVENTS = 1
-
-const LLVM_USE_OPROFILE = 0
-
-const LLVM_USE_PERF = 1
 
 const LLVM_VERSION_MAJOR = 15
 

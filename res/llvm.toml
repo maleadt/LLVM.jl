@@ -1,0 +1,85 @@
+[general]
+library_name = "libllvm"
+prologue_file_path = "./missing_defs.jl"
+epilogue_file_path = ""
+use_julia_native_enum_type = false
+use_deterministic_symbol = true
+printer_blacklist = [
+    "LLVM_C_STRICT_PROTOTYPES_END",
+    "LLVM_NATIVE_ARCH",
+    "LLVMInitializeAllTargetInfos",
+    "LLVMInitializeAllTargets",
+    "LLVMInitializeAllTargetMCs",
+    "LLVMInitializeAllAsmPrinters",
+    "LLVMInitializeAllAsmParsers",
+    "LLVMInitializeAllDisassemblers",
+    "LLVMInitializeNativeTarget",
+    "LLVMInitializeNativeAsmPrinter",
+    "LLVMInitializeNativeAsmParser",
+    "LLVMInitializeNativeDisassembler",
+    "LLVM_C_EXTERN_C_BEGIN",
+    "LLVM_C_EXTERN_C_END",
+    "HUGE_VALF",
+    # configuration
+    "LLVM_DEFAULT_TARGET_TRIPLE",
+    "LLVM_ENABLE_THREADS",
+    "LLVM_HAS_ATOMICS",
+    "LLVM_HOST_TRIPLE",
+    "LLVM_NATIVE_ASMPARSER",
+    "LLVM_NATIVE_ASMPRINTER",
+    "LLVM_NATIVE_DISASSEMBLER",
+    "LLVM_NATIVE_TARGET",
+    "LLVM_NATIVE_TARGETINFO",
+    "LLVM_NATIVE_TARGETMC",
+    "LLVM_ON_UNIX",
+    "LLVM_USE_INTEL_JITEVENTS",
+    "LLVM_USE_OPROFILE",
+    "LLVM_USE_PERF",
+    # initialization routines (we ccall these directly)
+    "LLVMInitializeAArch64AsmParser",
+    "LLVMInitializeAArch64AsmPrinter",
+    "LLVMInitializeAArch64Disassembler",
+    "LLVMInitializeAArch64Target",
+    "LLVMInitializeAArch64TargetInfo",
+    "LLVMInitializeAArch64TargetMC",
+    "LLVMInitializeAMDGPUAsmParser",
+    "LLVMInitializeAMDGPUAsmPrinter",
+    "LLVMInitializeAMDGPUDisassembler",
+    "LLVMInitializeAMDGPUTarget",
+    "LLVMInitializeAMDGPUTargetInfo",
+    "LLVMInitializeAMDGPUTargetMC",
+    "LLVMInitializeBPFAsmParser",
+    "LLVMInitializeBPFAsmPrinter",
+    "LLVMInitializeBPFDisassembler",
+    "LLVMInitializeBPFTarget",
+    "LLVMInitializeBPFTargetInfo",
+    "LLVMInitializeBPFTargetMC",
+    "LLVMInitializeNVPTXAsmPrinter",
+    "LLVMInitializeNVPTXTarget",
+    "LLVMInitializeNVPTXTargetInfo",
+    "LLVMInitializeNVPTXTargetMC",
+    "LLVMInitializeWebAssemblyAsmParser",
+    "LLVMInitializeWebAssemblyAsmPrinter",
+    "LLVMInitializeWebAssemblyDisassembler",
+    "LLVMInitializeWebAssemblyTarget",
+    "LLVMInitializeWebAssemblyTargetInfo",
+    "LLVMInitializeWebAssemblyTargetMC",
+    "LLVMInitializeX86AsmParser",
+    "LLVMInitializeX86AsmPrinter",
+    "LLVMInitializeX86Disassembler",
+    "LLVMInitializeX86Target",
+    "LLVMInitializeX86TargetInfo",
+    "LLVMInitializeX86TargetMC",
+]
+
+[codegen]
+use_julia_bool = true
+always_NUL_terminated_string = true
+is_function_strictly_typed = false
+opaque_func_arg_as_PtrCvoid = false
+opaque_as_mutable_struct = true
+
+[codegen.macro]
+macro_mode = "basic"
+add_comment_for_skipped_macro = false
+
