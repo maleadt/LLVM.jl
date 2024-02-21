@@ -3976,28 +3976,28 @@ function LLVMInitializeTarget(R)
     ccall((:LLVMInitializeTarget, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
 end
 
-function LLVMInitializeX86AsmParser()
-    ccall((:LLVMInitializeX86AsmParser, libllvm), Cvoid, ())
+function LLVMInitializeAArch64AsmParser()
+    ccall((:LLVMInitializeAArch64AsmParser, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeX86AsmPrinter()
-    ccall((:LLVMInitializeX86AsmPrinter, libllvm), Cvoid, ())
+function LLVMInitializeAArch64AsmPrinter()
+    ccall((:LLVMInitializeAArch64AsmPrinter, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeX86Disassembler()
-    ccall((:LLVMInitializeX86Disassembler, libllvm), Cvoid, ())
+function LLVMInitializeAArch64Disassembler()
+    ccall((:LLVMInitializeAArch64Disassembler, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeX86Target()
-    ccall((:LLVMInitializeX86Target, libllvm), Cvoid, ())
+function LLVMInitializeAArch64Target()
+    ccall((:LLVMInitializeAArch64Target, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeX86TargetInfo()
-    ccall((:LLVMInitializeX86TargetInfo, libllvm), Cvoid, ())
+function LLVMInitializeAArch64TargetInfo()
+    ccall((:LLVMInitializeAArch64TargetInfo, libllvm), Cvoid, ())
 end
 
-function LLVMInitializeX86TargetMC()
-    ccall((:LLVMInitializeX86TargetMC, libllvm), Cvoid, ())
+function LLVMInitializeAArch64TargetMC()
+    ccall((:LLVMInitializeAArch64TargetMC, libllvm), Cvoid, ())
 end
 
 mutable struct LLVMOpaqueError end

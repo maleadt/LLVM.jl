@@ -8,6 +8,7 @@
 #include <llvm/Analysis/PostDominators.h>
 #include <llvm/Analysis/TargetLibraryInfo.h>
 #include <llvm/Analysis/TargetTransformInfo.h>
+#include <llvm/CodeGen/Passes.h>
 #include <llvm/ExecutionEngine/Orc/IRCompileLayer.h>
 #include <llvm/IR/Attributes.h>
 #include <llvm/IR/DebugInfo.h>
@@ -94,6 +95,10 @@ void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM) {
 
 void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSimpleLoopUnswitchLegacyPass());
+}
+
+void LLVMAddExpandReductionsPass(LLVMPassManagerRef PM) {
+  unwrap(PM)->add(createExpandReductionsPass());
 }
 
 // Infrastructure for writing LLVM passes in Julia

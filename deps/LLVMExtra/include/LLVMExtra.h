@@ -44,6 +44,7 @@ void LLVMAddSimpleLoopUnrollPass(LLVMPassManagerRef PM);
 void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM);
 #endif
 void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM);
+void LLVMAddExpandReductionsPass(LLVMPassManagerRef PM);
 
 
 // Infrastructure for writing LLVM passes in Julia
