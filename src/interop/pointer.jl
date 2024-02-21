@@ -111,8 +111,41 @@ Base.:(==)(x::LLVMPtr, y::LLVMPtr) = false
 
 Base.:(-)(x::LLVMPtr{<:Any,A},  y::LLVMPtr{<:Any,A}) where {A} = UInt(x) - UInt(y)
 
-Base.:(+)(x::LLVMPtr, y::Integer) = oftype(x, Base.add_ptr(UInt(x), (y % UInt) % UInt))
-Base.:(-)(x::LLVMPtr, y::Integer) = oftype(x, Base.sub_ptr(UInt(x), (y % UInt) % UInt))
+@generated function add_ptr(x::LLVMPtr{T,A}, y::I) where {T,A,I}
+    Context() do ctx
+        T_uint = convert(LLVMType, I)
+        T_ptr = convert(LLVMType, Core.LLVMPtr{T,A})
+        T_byteptr = convert(LLVMType, Core.LLVMPtr{Int8,A})
+
+        # create a function
+        llvm_f, _ = create_function(T_ptr, [T_ptr, T_uint])
+
+        # generate IR
+        IRBuilder() do builder
+            entry = BasicBlock(llvm_f, "entry")
+            position!(builder, entry)
+
+            if T_ptr == T_byteptr
+                # when LLVMPtr is i8* (the default), or when using opaque pointers
+                ptr = gep!(builder, LLVM.Int8Type(), parameters(llvm_f)[1], [parameters(llvm_f)[2]])
+            else
+                # future proofing, for when LLVMPtr isn't always an i8*
+                byteptr = bitcast!(builder, parameters(llvm_f)[1], T_byteptr)
+                byteptr = gep!(builder, LLVM.Int8Type(), byteptr, [parameters(llvm_f)[2]])
+                ptr = bitcast!(builder, byteptr, T_ptr)
+            end
+
+            ret!(builder, ptr)
+        end
+
+        call_function(llvm_f, Core.LLVMPtr{T,A},
+                      Tuple{Core.LLVMPtr{T,A}, I},
+                      :x, :y)
+    end
+end
+
+Base.:(+)(x::LLVMPtr, y::Integer) = add_ptr(x, Int(y))
+Base.:(-)(x::LLVMPtr, y::Integer) = add_ptr(x, -Int(y))
 Base.:(+)(x::Integer, y::LLVMPtr) = y + x
 
 Base.unsigned(x::LLVMPtr) = UInt(x)

@@ -242,6 +242,12 @@ using Core: LLVMPtr
     @test b - 1 == a
     @test d - 1 == c
     @test f - 1 == e
+
+    # ensure pointer arithmetic doesn't perform addrspacecasts
+    ir = sprint(io->code_llvm(io, +, Tuple{typeof(e), Int}; optimize=false, dump_module=true))
+    @test !occursin(r"addrspacecast", ir)
+    ir = sprint(io->code_llvm(io, -, Tuple{typeof(e), Int}; optimize=false, dump_module=true))
+    @test !occursin(r"addrspacecast", ir)
 end
 
 @testset "unsafe_load" begin
