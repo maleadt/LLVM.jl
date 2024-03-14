@@ -1,10 +1,10 @@
 # Modules represent the top-level structure in an LLVM program.
 
-export dispose,
+export dispose, context,
        name, name!,
        triple, triple!,
        datalayout, datalayout!,
-       context, inline_asm!,
+       inline_asm, inline_asm!,
        set_used!, set_compiler_used!
 
 # forward definition of Module in src/core/value/constant.jl
@@ -64,8 +64,19 @@ datalayout!(mod::Module, layout::String) = API.LLVMSetDataLayout(mod, layout)
 datalayout!(mod::Module, layout::DataLayout) =
     API.LLVMSetModuleDataLayout(mod, layout)
 
-inline_asm!(mod::Module, asm::String) =
-    API.LLVMSetModuleInlineAsm(mod, asm)
+function inline_asm!(mod::Module, asm::String; overwrite::Bool=false)
+    if overwrite
+        API.LLVMSetModuleInlineAsm2(mod, asm, length(asm))
+    else
+        API.LLVMAppendModuleInlineAsm(mod, asm, length(asm))
+    end
+end
+
+function inline_asm(mod::Module)
+    out_len = Ref{Csize_t}()
+    ptr = convert(Ptr{UInt8}, API.LLVMGetModuleInlineAsm(mod, out_len))
+    return unsafe_string(ptr, out_len[])
+end
 
 context(mod::Module) = Context(API.LLVMGetModuleContext(mod))
 
