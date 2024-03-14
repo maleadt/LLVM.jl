@@ -437,20 +437,24 @@ end
 
 @checked struct IRCompileLayer
     ref::API.LLVMOrcIRCompileLayerRef
+    jit
 end
 
 Base.unsafe_convert(::Type{API.LLVMOrcIRCompileLayerRef}, il::IRCompileLayer) = il.ref
 
 function emit(il::IRCompileLayer, mr::MaterializationResponsibility, tsm::ThreadSafeModule)
-    tsm() do mod
-        decorate_module(mod)
+    if il.jit isa JuliaOJIT
+        # Julia's debug info expects certain symbols to be present
+        tsm() do mod
+            decorate_module(mod)
+        end
     end
     API.LLVMOrcIRCompileLayerEmit(il, mr, tsm)
 end
 
 function IRCompileLayer(jljit::JuliaOJIT)
     ref = API.JLJITGetIRCompileLayer(jljit)
-    IRCompileLayer(ref)
+    IRCompileLayer(ref, jljit)
 end
 
 export JuliaOJIT
