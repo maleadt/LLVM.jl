@@ -1032,7 +1032,11 @@ end
     show(devnull, mod)
 
     inline_asm!(mod, "nop")
-    @test occursin("module asm", string(mod))
+    @test split(inline_asm(mod)) == ["nop"]
+    inline_asm!(mod, "nop")
+    @test split(inline_asm(mod)) == ["nop", "nop"]
+    inline_asm!(mod, "nop"; overwrite=true)
+    @test split(inline_asm(mod)) == ["nop"]
 
     dummyTriple = "SomeTriple"
     triple!(mod, dummyTriple)
