@@ -400,8 +400,32 @@ function add!(jljit::JuliaOJIT, jd::JITDylib, obj::MemoryBuffer)
     return nothing
 end
 
-function add!(jljit::JuliaOJIT, jd::JITDylib, mod::ThreadSafeModule)
-    @check API.JLJITAddLLVMIRModule(jljit, jd, mod)
+function decorate_module(mod)
+    # TODO: check the triple, not the system
+    if Sys.iswindows() && Sys.ARCH == :x86_64 &&
+       !contains(inline_asm(mod), "__UnwindData")
+        inline_asm!(mod, """
+            .section .text
+            .type   __UnwindData,@object
+            .p2align        2, 0x90
+            __UnwindData:
+                .zero   12
+                .size   __UnwindData, 12
+
+                .type   __catchjmp,@object
+                .p2align        2, 0x90
+            __catchjmp:
+                .zero   12
+                .size   __catchjmp, 12""")
+    end
+end
+
+function add!(jljit::JuliaOJIT, jd::JITDylib, tsm::ThreadSafeModule)
+    # Julia's debug info expects certain symbols to be present
+    tsm() do mod
+        decorate_module(mod)
+    end
+    @check API.JLJITAddLLVMIRModule(jljit, jd, tsm)
     return nothing
 end
 
@@ -418,6 +442,9 @@ end
 Base.unsafe_convert(::Type{API.LLVMOrcIRCompileLayerRef}, il::IRCompileLayer) = il.ref
 
 function emit(il::IRCompileLayer, mr::MaterializationResponsibility, tsm::ThreadSafeModule)
+    tsm() do mod
+        decorate_module(mod)
+    end
     API.LLVMOrcIRCompileLayerEmit(il, mr, tsm)
 end
 
