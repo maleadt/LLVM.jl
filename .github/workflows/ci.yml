@@ -112,7 +112,7 @@ jobs:
 
   # fetching builds from Buildkite
   assert_test:
-    name: Julia-master ${{ matrix.build }} ${{ matrix.llvm_args }}
+    name: Julia ${{ matrix.branch }} ${{ matrix.llvm_args }} - ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -121,14 +121,12 @@ jobs:
         arch: [x64]
         llvm_args: ['', '--opaque-pointers']
         include:
-          - version: '1.11'
+          - branch: 'release-1.11'
             pipeline: 'julia-release-1-dot-11'
             build: 'x86_64-linux-gnuassert'
-            branch: 'release-1.11'
-          #- version: 'master'
+          #- branch: 'master'
           #  pipeline: 'julia-master'
           #  build: 'x86_64-linux-gnuassert'
-          #  branch: 'master'
     steps:
       - uses: actions/checkout@v4
         with:
