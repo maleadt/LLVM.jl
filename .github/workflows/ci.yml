@@ -124,9 +124,9 @@ jobs:
           - branch: 'release-1.11'
             pipeline: 'julia-release-1-dot-11'
             build: 'x86_64-linux-gnuassert'
-          #- branch: 'master'
-          #  pipeline: 'julia-master'
-          #  build: 'x86_64-linux-gnuassert'
+          - branch: 'master'
+            pipeline: 'julia-master'
+            build: 'x86_64-linux-gnuassert'
     steps:
       - uses: actions/checkout@v4
         with:
