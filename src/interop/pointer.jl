@@ -227,7 +227,6 @@ end
                         bitcast!(builder, arg, actual_typ)
                     end
                 elseif argtyp <: Ptr
-                    # passed as i64
                     T = eltype(argtyp)
                     actual_typ = LLVM.PointerType(convert(LLVMType, T))
                     actual_arg = if const_arg == C_NULL
@@ -235,10 +234,13 @@ end
                     elseif const_arg !== nothing
                         intptr = LLVM.ConstantInt(LLVM.Int64Type(), Int(const_arg))
                         const_inttoptr(intptr, actual_typ)
+                    elseif value_type(arg) isa LLVM.PointerType
+                        # passed as i8* or ptr
+                        bitcast!(builder, arg, actual_typ)
                     else
+                        # passed as i64
                         inttoptr!(builder, arg, actual_typ)
                     end
-                    actual_arg = inttoptr!(builder, arg, actual_typ)
                 elseif argtyp <: Bool
                     # passed as i8
                     T = eltype(argtyp)
@@ -287,7 +289,11 @@ end
                 rv = if rettyp <: LLVMPtr
                     bitcast!(builder, rv, T_ret)
                 elseif rettyp <: Ptr
-                    ptrtoint!(builder, rv, T_ret)
+                    if T_ret isa LLVM.PointerType
+                        bitcast!(builder, rv, T_ret)
+                    else
+                        ptrtoint!(builder, rv, T_ret)
+                    end
                 elseif rettyp <: Bool
                     zext!(builder, rv, T_ret)
                 else
@@ -314,6 +320,11 @@ Perform a `ccall` while more accurately preserving argument types like LLVM expe
 
 These features can be useful to call LLVM intrinsics, which may expect a specific set of
 argument types.
+
+!!! note
+
+    This macro is not needed anymore on Julia 1.12, where the `llvmcall` ABI has been
+    extended to preserve argument types more accurately.
 """
 macro typed_ccall(intrinsic, cc, rettyp, argtyps, args...)
     # destructure and validate the arguments
