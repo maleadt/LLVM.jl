@@ -533,7 +533,7 @@ host_t = Target(triple=host_triple)
         add!(mpm, NewPMFunctionPassManager) do fpm
             add!(fpm, NewPMLoopPassManager) do lpm
                 @static if VERSION >= v"1.10.0-beta3.44"
-                    add!(mpm, LowerSIMDLoopPass())
+                    add!(lpm, LowerSIMDLoopPass())
                 end
                 add!(lpm, LoopRotatePass())
             end
