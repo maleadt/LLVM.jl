@@ -169,6 +169,7 @@ function handle_error(reason::Cstring)
 end
 
 function _install_handlers()
+    Base.generating_output() && return
     handler = @cfunction(handle_error, Cvoid, (Cstring,))
     API.LLVMInstallFatalErrorHandler(handler)
 end
