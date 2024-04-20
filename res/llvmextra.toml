@@ -4,6 +4,7 @@ prologue_file_path = ""
 epilogue_file_path = ""
 use_julia_native_enum_type = false
 use_deterministic_symbol = true
+generate_isystem_symbols = false
 printer_blacklist = [
     "LLVM_C_STRICT_PROTOTYPES_END",
     "LLVM_NATIVE_ARCH",
