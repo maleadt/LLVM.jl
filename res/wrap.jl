@@ -52,7 +52,7 @@ end
 function wrap(version; includedir, cppflags)
 
     args = get_default_args("x86_64-linux-gnu")
-    push!(args, "-Isystem$includedir")
+    push!(args, "-isystem$includedir")
     append!(args, split(cppflags))
 
     mkpath("../lib/$version")
@@ -82,22 +82,7 @@ function wrap(version; includedir, cppflags)
 
         ctx = create_context(header_files, args, options)
 
-        build!(ctx, BUILDSTAGE_NO_PRINTING)
-
-        # custom rewriter
-        function rewrite!(dag::ExprDAG)
-            replace!(get_nodes(dag)) do node
-                filename = normpath(Clang.get_filename(node.cursor))
-                if !contains(filename, "LLVMExtra")
-                    return ExprNode(node.id, Generators.Skip(), node.cursor, Expr[], node.adj)
-                end
-                return node
-            end
-        end
-
-        rewrite!(ctx.dag)
-
-        build!(ctx, BUILDSTAGE_PRINTING_ONLY)
+        build!(ctx)
     end
 
     return
