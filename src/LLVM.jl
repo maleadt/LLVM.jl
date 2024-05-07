@@ -40,9 +40,9 @@ let
     if version().major < 13
         error("LLVM.jl only supports LLVM 13 and later.")
     end
-    dir = if version().major > 16
-        @warn "LLVM.jl has not been tested with LLVM versions newer than 16."
-        joinpath(@__DIR__, "..", "lib", "16")
+    dir = if version().major > 17
+        @warn "LLVM.jl has not been tested with LLVM versions newer than 17."
+        joinpath(@__DIR__, "..", "lib", "17")
     else
         joinpath(@__DIR__, "..", "lib", string(version().major))
     end
@@ -55,12 +55,15 @@ include(joinpath(@__DIR__, "..", "lib", "libLLVM_julia.jl"))
 
 end # module API
 
+has_oldpm() = LLVM.version() < v"17"
 has_newpm() = LLVM.version() >= v"15"
 has_julia_ojit() = VERSION >= v"1.10.0-DEV.1395"
 
 # LLVM API wrappers
 include("support.jl")
-include("passregistry.jl")
+if LLVM.version() < v"17"
+    include("passregistry.jl")
+end
 include("init.jl")
 include("core.jl")
 include("linker.jl")
@@ -76,7 +79,9 @@ include("targetmachine.jl")
 include("datalayout.jl")
 include("ir.jl")
 include("bitcode.jl")
-include("transform.jl")
+if has_oldpm()
+    include("transform.jl")
+end
 include("debuginfo.jl")
 include("dibuilder.jl")
 include("jitevents.jl")

@@ -1,5 +1,6 @@
 @testitem "essentials" begin
 
+if LLVM.version() < v"17"
 @testset "pass registry" begin
     passreg = GlobalPassRegistry()
 
@@ -20,11 +21,12 @@
     InitializeIPA(passreg)
     InitializeCodeGen(passreg)
     InitializeTarget(passreg)
-
-    InitializeNativeTarget()
-    InitializeAllTargetInfos()
-    InitializeAllTargetMCs()
-    InitializeNativeAsmPrinter()
 end
+end
+
+InitializeNativeTarget()
+InitializeAllTargetInfos()
+InitializeAllTargetMCs()
+InitializeNativeAsmPrinter()
 
 end

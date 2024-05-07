@@ -379,7 +379,9 @@ is_function_pass(::Type{InvalidateAllAnalysesPass}) = true
 @function_pass "print<cost-model>" CostModelPrinterPass
 @function_pass "print<cycles>" CycleInfoPrinterPass
 @function_pass "print<da>" DependenceAnalysisPrinterPass
+if LLVM.version() < v"17"
 @function_pass "print<divergence>" DivergenceAnalysisPrinterPass
+end
 @function_pass "print<domtree>" DominatorTreePrinterPass
 @function_pass "print<postdomtree>" PostDominatorTreePrinterPass
 @function_pass "print<delinearization>" DelinearizationPrinterPass

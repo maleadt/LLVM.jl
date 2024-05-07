@@ -355,7 +355,7 @@ export ConstantExpr,
        const_sext, const_zext, const_fptrunc, const_fpext, const_uitofp, const_sitofp,
        const_fptoui, const_fptosi, const_ptrtoint, const_inttoptr, const_bitcast,
        const_addrspacecast, const_zextorbitcast, const_sextorbitcast, const_truncorbitcast,
-       const_pointercast, const_intcast, const_fpcast, const_select, const_shufflevector
+       const_pointercast, const_intcast, const_fpcast, const_shufflevector
 
 @checked struct ConstantExpr <: Constant
     ref::API.LLVMValueRef
@@ -492,9 +492,6 @@ const_intcast(val::Constant, ToType::LLVMType, isSigned::Bool) =
 const_fpcast(val::Constant, ToType::LLVMType) =
     Value(API.LLVMConstFPCast(val, ToType))
 
-const_select(cond::Constant, if_true::Value, if_false::Value) =
-    Value(API.LLVMConstSelect(cond, if_true, if_false))
-
 const_extractelement(vector::Constant, index::Constant) =
     Value(API.LLVMConstExtractElement(vector ,index))
 
@@ -541,6 +538,15 @@ const_fsub(lhs::Constant, rhs::Constant) =
 
 const_fmul(lhs::Constant, rhs::Constant) =
     Value(API.LLVMConstFMul(lhs, rhs))
+
+end
+
+if version() < v"17"
+
+export const_select
+
+const_select(cond::Constant, if_true::Value, if_false::Value) =
+    Value(API.LLVMConstSelect(cond, if_true, if_false))
 
 end
 
