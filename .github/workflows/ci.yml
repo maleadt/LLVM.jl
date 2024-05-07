@@ -48,18 +48,6 @@ jobs:
             os: 'windows-latest'
             arch: 'x64'
             llvm_args: '--opaque-pointers'
-          - version: 'nightly'
-            os: 'ubuntu-latest'
-            arch: 'x64'
-            llvm_args: '--opaque-pointers'
-          - version: 'nightly'
-            os: 'macOS-latest'
-            arch: 'x64'
-            llvm_args: '--opaque-pointers'
-          - version: 'nightly'
-            os: 'windows-latest'
-            arch: 'x64'
-            llvm_args: '--opaque-pointers'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -119,14 +107,19 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         arch: [x64]
-        llvm_args: ['', '--opaque-pointers']
         include:
           - branch: 'release-1.11'
             pipeline: 'julia-release-1-dot-11'
             build: 'x86_64-linux-gnuassert'
+            llvm_args: '--opaque-pointers'
+          - branch: 'release-1.11'
+            pipeline: 'julia-release-1-dot-11'
+            build: 'x86_64-linux-gnuassert'
+            llvm_args: ''
           - branch: 'master'
             pipeline: 'julia-master'
             build: 'x86_64-linux-gnuassert'
+            llvm_args: ''
     steps:
       - uses: actions/checkout@v4
         with:
