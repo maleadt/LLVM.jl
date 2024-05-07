@@ -4,17 +4,19 @@ export ismultithreaded
 
 ismultithreaded() = API.LLVMIsMultithreaded() |> Bool
 
-const subsystems = [:Core, :TransformUtils, :ScalarOpts, :Vectorization, :InstCombine,
-                    :IPO, :Analysis, :IPA, :CodeGen, :Target]
-if LLVM.version() < v"16"
-    append!(subsystems, [:ObjCARCOpts, :Instrumentation])
-end
-for subsystem in subsystems
-    jl_fname = Symbol(:Initialize, subsystem)
-    api_fname = Symbol(:LLVM, jl_fname)
-    @eval begin
-        export $jl_fname
-        $jl_fname(R::PassRegistry) = API.$api_fname(R)
+if LLVM.version() < v"17"
+    const subsystems = [:Core, :TransformUtils, :ScalarOpts, :Vectorization, :InstCombine,
+                        :IPO, :Analysis, :IPA, :CodeGen, :Target]
+    if LLVM.version() < v"16"
+        append!(subsystems, [:ObjCARCOpts, :Instrumentation])
+    end
+    for subsystem in subsystems
+        jl_fname = Symbol(:Initialize, subsystem)
+        api_fname = Symbol(:LLVM, jl_fname)
+        @eval begin
+            export $jl_fname
+            $jl_fname(R::PassRegistry) = API.$api_fname(R)
+        end
     end
 end
 

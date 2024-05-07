@@ -44,5 +44,9 @@ runtests(LLVM; worker_init_expr, nworkers=min(Sys.CPU_THREADS,4), nworker_thread
         LLVM.has_newpm() || return false
     end
 
+    if ti.name == "transform"
+        LLVM.has_oldpm() || return false
+    end
+
     true
 end
