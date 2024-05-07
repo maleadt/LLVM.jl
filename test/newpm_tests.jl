@@ -527,9 +527,14 @@ host_t = Target(triple=host_triple)
             add!(fpm, EarlyCSEPass())
             add!(fpm, AllocOptPass())
         end
-        add!(mpm, LowerSIMDLoopPass())
+        @static if VERSION < v"1.10.0-beta3.44"
+            add!(mpm, LowerSIMDLoopPass())
+        end
         add!(mpm, NewPMFunctionPassManager) do fpm
             add!(fpm, NewPMLoopPassManager) do lpm
+                @static if VERSION >= v"1.10.0-beta3.44"
+                    add!(lpm, LowerSIMDLoopPass())
+                end
                 add!(lpm, LoopRotatePass())
             end
             add!(fpm, NewPMLoopPassManager, #=UseMemorySSA=#true) do lpm

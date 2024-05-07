@@ -4,7 +4,9 @@ import ..LLVM: pass_string, options_string, add!
 
 @module_pass "CPUFeatures" CPUFeaturesPass
 @module_pass "RemoveNI" RemoveNIPass
-@module_pass "LowerSIMDLoop" LowerSIMDLoopPass
+@static if VERSION < v"1.10.0-beta3.44"
+    @module_pass "LowerSIMDLoop" LowerSIMDLoopPass
+end
 @module_pass "RemoveJuliaAddrspaces" RemoveJuliaAddrspacesPass
 @module_pass "RemoveAddrspaces" RemoveAddrspacesPass
 @static if VERSION < v"1.11.0-DEV.208"
@@ -44,6 +46,9 @@ options_string(options::GCInvariantVerifierPassOptions) = options.strong ? "<str
 @function_pass "GCInvariantVerifier" GCInvariantVerifierPass GCInvariantVerifierPassOptions
 
 @loop_pass "JuliaLICM" JuliaLICMPass
+@static if VERSION >= v"1.10.0-beta3.44"
+    @loop_pass "LowerSIMDLoop" LowerSIMDLoopPass
+end
 
 # The entire Julia pipeline
 struct JuliaPipelinePassOptions
