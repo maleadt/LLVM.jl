@@ -169,7 +169,13 @@ function handle_error(reason::Cstring)
 end
 
 function _install_handlers()
-    Base.generating_output() && return
+    precompiling = @static if VERSION >= v"1.11"
+        Base.generating_output()
+    else
+        ccall(:jl_generating_output, Cint, ()) != 0 && Base.JLOptions().incremental == 0
+    end
+    precompiling && return
+
     handler = @cfunction(handle_error, Cvoid, (Cstring,))
     API.LLVMInstallFatalErrorHandler(handler)
 end
