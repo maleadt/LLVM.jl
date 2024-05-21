@@ -141,7 +141,6 @@ end
 @module_pass "insert-gcov-profiling" GCOVProfilerPass
 @module_pass "instrorderfile" InstrOrderFilePass
 @module_pass "instrprof" InstrProfiling
-@module_pass "internalize" InternalizePass
 @module_pass "invalidate<all>" InvalidateAllAnalysesPass
 @module_pass "ipsccp" IPSCCPPass
 @module_pass "iroutliner" IROutlinerPass
@@ -261,6 +260,25 @@ if LLVM.version() < v"16"
     @function_pass "msan" MemorySanitizerPass MemorySanitizerPassOptions
 else
     @module_pass "msan" MemorySanitizerPass MemorySanitizerPassOptions
+end
+
+if LLVM.version() < v"17"
+    # NOTE: this is only supported by LLVM 19, but we backported it to 17.
+    @module_pass "internalize" InternalizePass
+else
+    struct InternalizePassOptions
+        preserved_gvs::Vector{String}
+    end
+    InternalizePassOptions(; preserved_gvs::Vector{String}=String[]) =
+        InternalizePassOptions(preserved_gvs)
+    function options_string(options::InternalizePassOptions)
+        final_options = String[]
+        for gv in options.preserved_gvs
+            push!(final_options, "preserve-gv=" * gv)
+        end
+        "<" * join(final_options, ";") * ">"
+    end
+    @module_pass "internalize" InternalizePass InternalizePassOptions
 end
 
 
