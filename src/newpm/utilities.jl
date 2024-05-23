@@ -34,6 +34,7 @@ function unsafe_run(f::Core.Function)
         io = IOBuffer()
         Base.showerror(io, e)
         error_msg = String(take!(io))
-        @error error_msg
+        print(Core.stdout, "ERROR: Unhandled exception in pass pipeline: " * error_msg)
+        Base.show_backtrace(Core.stdout, catch_backtrace())
     end
 end
