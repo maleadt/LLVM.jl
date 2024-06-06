@@ -771,6 +771,12 @@ end
     @test alignment(fn) == 0
     alignment!(fn, 4)
     @test alignment(fn) == 4
+
+    @test isempty(metadata(fn))
+    str = MDString("bar")
+    md = MDNode([str])
+    metadata(fn)["foo"] = md
+    @test !isempty(metadata(fn))
 end
 
 # global variables
@@ -968,8 +974,8 @@ mod = parse(LLVM.Module, raw"""
     bb = first(collect(blocks(fun)))
     inst = first(collect(instructions(bb)))
 
-    @test haskey(metadata(inst), LLVM.MD_dbg)
-    loc = metadata(inst)[LLVM.MD_dbg]
+    @test haskey(metadata(inst), "dbg")
+    loc = metadata(inst)["dbg"]
 
     @test loc isa DILocation
     @test LLVM.line(loc) == 94
@@ -1467,25 +1473,25 @@ end
     # metadata
     mdval = MDNode([MDString("whatever")])
     let md = metadata(brinst)
-        @test keytype(md) == LLVM.MD
+        @test keytype(md) == LLVM.MDKind
         @test valtype(md) == LLVM.MetadataAsValue
 
         @test isempty(md)
-        @test !haskey(md, LLVM.MD_dbg)
+        @test !haskey(md, "dbg")
 
-        md[LLVM.MD_dbg] = mdval
-        @test md[LLVM.MD_dbg] == mdval
+        md["dbg"] = mdval
+        @test md["dbg"] == mdval
 
         @test !isempty(md)
-        @test haskey(md, LLVM.MD_dbg)
+        @test haskey(md, "dbg")
 
-        @test !haskey(md, LLVM.MD_tbaa)
-        @test_throws KeyError md[LLVM.MD_tbaa]
+        @test !haskey(md, "tbaa")
+        @test_throws KeyError md["tbaa"]
 
-        delete!(md, LLVM.MD_dbg)
+        delete!(md, "dbg")
 
         @test isempty(md)
-        @test !haskey(md, LLVM.MD_dbg)
+        @test !haskey(md, "dbg")
     end
 
     @test retinst in instructions(bb3)

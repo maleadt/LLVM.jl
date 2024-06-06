@@ -1,5 +1,4 @@
 export Instruction, unsafe_delete!,
-       metadata,
        opcode,
        predicate_int, predicate_real
 
@@ -55,59 +54,6 @@ Base.show(io::IO, ::MIME"text/plain", inst::Instruction) = print(io, lstrip(stri
 
 # instructions are typically only a single line, so always display them in full
 Base.show(io::IO, inst::Instruction) = print(io, typeof(inst), "(", lstrip(string(inst)), ")")
-
-
-## metadata iteration
-# TODO: doesn't actually iterate, since we can't list the available keys
-
-@enum(MD, MD_dbg = 0,
-          MD_tbaa = 1,
-          MD_prof = 2,
-          MD_fpmath = 3,
-          MD_range = 4,
-          MD_tbaa_struct = 5,
-          MD_invariant_load = 6,
-          MD_alias_scope = 7,
-          MD_noalias = 8,
-          MD_nontemporal = 9,
-          MD_mem_parallel_loop_access = 10,
-          MD_nonnull = 11,
-          MD_dereferenceable = 12,
-          MD_dereferenceable_or_null = 13,
-          MD_make_implicit = 14,
-          MD_unpredictable = 15,
-          MD_invariant_group = 16,
-          MD_align = 17,
-          MD_loop = 18,
-          MD_type = 19,
-          MD_section_prefix = 20,
-          MD_absolute_symbol = 21,
-          MD_associated = 22)
-
-export InstructionMetadataDict
-
-struct InstructionMetadataDict <: AbstractDict{MD,MetadataAsValue}
-    inst::Instruction
-end
-
-metadata(inst::Instruction) = InstructionMetadataDict(inst)
-
-Base.isempty(md::InstructionMetadataDict) = !Bool(API.LLVMHasMetadata(md.inst))
-
-Base.haskey(md::InstructionMetadataDict, kind::MD) =
-  API.LLVMGetMetadata(md.inst, kind) != C_NULL
-
-function Base.getindex(md::InstructionMetadataDict, kind::MD)
-    objref = API.LLVMGetMetadata(md.inst, kind)
-    objref == C_NULL && throw(KeyError(kind))
-    return Metadata(MetadataAsValue(objref))
-  end
-
-Base.setindex!(md::InstructionMetadataDict, node::Metadata, kind::MD) =
-    API.LLVMSetMetadata(md.inst, kind, Value(node))
-
-Base.delete!(md::InstructionMetadataDict, kind::MD) =
-    API.LLVMSetMetadata(md.inst, kind, C_NULL)
 
 
 ## instruction types
