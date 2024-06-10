@@ -383,3 +383,37 @@ function LLVMSetMetadata2(Inst, KindID, Val)
     ccall((:LLVMSetMetadata2, libLLVMExtra), Cvoid, (LLVMValueRef, Cuint, LLVMValueRef), Inst, KindID, Val)
 end
 
+mutable struct LLVMOpaquePassBuilderExtensions end
+
+const LLVMPassBuilderExtensionsRef = Ptr{LLVMOpaquePassBuilderExtensions}
+
+function LLVMCreatePassBuilderExtensions()
+    ccall((:LLVMCreatePassBuilderExtensions, libLLVMExtra), LLVMPassBuilderExtensionsRef, ())
+end
+
+function LLVMDisposePassBuilderExtensions(Extensions)
+    ccall((:LLVMDisposePassBuilderExtensions, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef,), Extensions)
+end
+
+function LLVMPassBuilderExtensionsSetRegistrationCallback(Options, RegistrationCallback)
+    ccall((:LLVMPassBuilderExtensionsSetRegistrationCallback, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef, Ptr{Cvoid}), Options, RegistrationCallback)
+end
+
+# typedef LLVMBool ( * LLVMJuliaModulePassCallback ) ( LLVMModuleRef M , void * Thunk )
+const LLVMJuliaModulePassCallback = Ptr{Cvoid}
+
+# typedef LLVMBool ( * LLVMJuliaFunctionPassCallback ) ( LLVMValueRef F , void * Thunk )
+const LLVMJuliaFunctionPassCallback = Ptr{Cvoid}
+
+function LLVMPassBuilderExtensionsRegisterModulePass(Options, PassName, Callback, Thunk)
+    ccall((:LLVMPassBuilderExtensionsRegisterModulePass, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef, Cstring, LLVMJuliaModulePassCallback, Ptr{Cvoid}), Options, PassName, Callback, Thunk)
+end
+
+function LLVMPassBuilderExtensionsRegisterFunctionPass(Options, PassName, Callback, Thunk)
+    ccall((:LLVMPassBuilderExtensionsRegisterFunctionPass, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef, Cstring, LLVMJuliaFunctionPassCallback, Ptr{Cvoid}), Options, PassName, Callback, Thunk)
+end
+
+function LLVMRunJuliaPasses(M, Passes, TM, Options, Extensions)
+    ccall((:LLVMRunJuliaPasses, libLLVMExtra), LLVMErrorRef, (LLVMModuleRef, Cstring, LLVMTargetMachineRef, LLVMPassBuilderOptionsRef, LLVMPassBuilderExtensionsRef), M, Passes, TM, Options, Extensions)
+end
+

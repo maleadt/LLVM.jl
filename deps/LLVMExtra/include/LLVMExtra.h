@@ -5,6 +5,7 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/Orc.h>
 #include <llvm-c/Target.h>
+#include <llvm-c/Transforms/PassBuilder.h>
 #include <llvm-c/Types.h>
 #include <llvm/Support/CBindingWrapping.h>
 
@@ -237,6 +238,28 @@ LLVMBool LLVMCanValueUseFastMathFlags(LLVMValueRef Inst);
 int LLVMHasMetadata2(LLVMValueRef Inst);
 LLVMValueRef LLVMGetMetadata2(LLVMValueRef Inst, unsigned KindID);
 void LLVMSetMetadata2(LLVMValueRef Inst, unsigned KindID, LLVMValueRef Val);
+
+
+// NewPM extensions
+
+typedef struct LLVMOpaquePassBuilderExtensions *LLVMPassBuilderExtensionsRef;
+LLVMPassBuilderExtensionsRef LLVMCreatePassBuilderExtensions(void);
+void LLVMDisposePassBuilderExtensions(LLVMPassBuilderExtensionsRef Extensions);
+void LLVMPassBuilderExtensionsSetRegistrationCallback(LLVMPassBuilderExtensionsRef Options,
+                                                      void (*RegistrationCallback)(void *));
+typedef LLVMBool (*LLVMJuliaModulePassCallback)(LLVMModuleRef M, void *Thunk);
+typedef LLVMBool (*LLVMJuliaFunctionPassCallback)(LLVMValueRef F, void *Thunk);
+void LLVMPassBuilderExtensionsRegisterModulePass(LLVMPassBuilderExtensionsRef Options,
+                                                 const char *PassName,
+                                                 LLVMJuliaModulePassCallback Callback,
+                                                 void *Thunk);
+void LLVMPassBuilderExtensionsRegisterFunctionPass(LLVMPassBuilderExtensionsRef Options,
+                                                   const char *PassName,
+                                                   LLVMJuliaFunctionPassCallback Callback,
+                                                   void *Thunk);
+LLVMErrorRef LLVMRunJuliaPasses(LLVMModuleRef M, const char *Passes,
+                                LLVMTargetMachineRef TM, LLVMPassBuilderOptionsRef Options,
+                                LLVMPassBuilderExtensionsRef Extensions);
 
 LLVM_C_EXTERN_C_END
 #endif
