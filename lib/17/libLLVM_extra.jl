@@ -323,6 +323,18 @@ function LLVMCanValueUseFastMathFlags(Inst)
     ccall((:LLVMCanValueUseFastMathFlags, libLLVMExtra), LLVMBool, (LLVMValueRef,), Inst)
 end
 
+function LLVMHasMetadata2(Inst)
+    ccall((:LLVMHasMetadata2, libLLVMExtra), Cint, (LLVMValueRef,), Inst)
+end
+
+function LLVMGetMetadata2(Inst, KindID)
+    ccall((:LLVMGetMetadata2, libLLVMExtra), LLVMValueRef, (LLVMValueRef, Cuint), Inst, KindID)
+end
+
+function LLVMSetMetadata2(Inst, KindID, Val)
+    ccall((:LLVMSetMetadata2, libLLVMExtra), Cvoid, (LLVMValueRef, Cuint, LLVMValueRef), Inst, KindID, Val)
+end
+
 mutable struct LLVMOpaquePreservedAnalyses end
 
 const LLVMPreservedAnalysesRef = Ptr{LLVMOpaquePreservedAnalyses}
