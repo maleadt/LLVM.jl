@@ -682,4 +682,53 @@ LLVMBool LLVMCanValueUseFastMathFlags(LLVMValueRef V) {
   return isa<FPMathOperator>(Val);
 }
 
+
+// upstream bug: metadata APIs only accept instructions
+
+int LLVMHasMetadata2(LLVMValueRef Ref) {
+  Value *Val = unwrap<Value>(Ref);
+  if (auto I = dyn_cast<Instruction>(Val))
+    return I->hasMetadata();
+  else if (auto GO = dyn_cast<GlobalObject>(Val))
+    return GO->hasMetadata();
+  else
+    assert(0 && "Expected an instruction or a global object");
+}
+
+LLVMValueRef LLVMGetMetadata2(LLVMValueRef Ref, unsigned KindID) {
+  Value *Val = unwrap<Value>(Ref);
+  if (auto *I = dyn_cast<Instruction>(Val)) {
+    if (auto *MD = I->getMetadata(KindID))
+      return wrap(MetadataAsValue::get(I->getContext(), MD));
+  } else if (auto *GO = dyn_cast<GlobalObject>(Val)) {
+    if (auto *MD = GO->getMetadata(KindID))
+      return wrap(MetadataAsValue::get(GO->getContext(), MD));
+  } else {
+    assert(0 && "Expected an instruction or a global object");
+  }
+  return nullptr;
+}
+
+static MDNode *extractMDNode(MetadataAsValue *MAV) {
+  Metadata *MD = MAV->getMetadata();
+  assert((isa<MDNode>(MD) || isa<ConstantAsMetadata>(MD)) &&
+      "Expected a metadata node or a canonicalized constant");
+
+  if (MDNode *N = dyn_cast<MDNode>(MD))
+    return N;
+
+  return MDNode::get(MAV->getContext(), MD);
+}
+void LLVMSetMetadata2(LLVMValueRef Ref, unsigned KindID, LLVMValueRef MAV) {
+  Value *Val = unwrap<Value>(Ref);
+  MDNode *N = MAV ? extractMDNode(unwrap<MetadataAsValue>(MAV)) : nullptr;
+
+  if (auto *I = dyn_cast<Instruction>(Val))
+    I->setMetadata(KindID, N);
+  else if (auto *GO = dyn_cast<GlobalObject>(Val))
+    GO->setMetadata(KindID, N);
+  else
+    assert(0 && "Expected an instruction or a global object");
+}
+
 #endif

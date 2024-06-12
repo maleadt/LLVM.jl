@@ -175,28 +175,28 @@ MDKind(kind::MDKind) = kind
 
 # TODO: doesn't actually iterate, since we can't list the available keys
 struct ValueMetadataDict <: AbstractDict{MDKind,MetadataAsValue}
-    inst::Value
+    val::Value
 end
 
-metadata(inst::Value) = ValueMetadataDict(inst)
+metadata(val::Value) = ValueMetadataDict(val)
 
-Base.isempty(md::ValueMetadataDict) = !Bool(API.LLVMHasMetadata(md.inst))
+Base.isempty(md::ValueMetadataDict) = !Bool(API.LLVMHasMetadata2(md.val))
 
 Base.haskey(md::ValueMetadataDict, key) =
-  API.LLVMGetMetadata(md.inst, MDKind(key)) != C_NULL
+  API.LLVMGetMetadata2(md.val, MDKind(key)) != C_NULL
 
 function Base.getindex(md::ValueMetadataDict, key)
     kind = MDKind(key)
-    objref = API.LLVMGetMetadata(md.inst, kind)
+    objref = API.LLVMGetMetadata2(md.val, kind)
     objref == C_NULL && throw(KeyError(kind))
     return Metadata(MetadataAsValue(objref))
   end
 
 Base.setindex!(md::ValueMetadataDict, node::Metadata, key) =
-    API.LLVMSetMetadata(md.inst, MDKind(key), Value(node))
+    API.LLVMSetMetadata2(md.val, MDKind(key), Value(node))
 
 Base.delete!(md::ValueMetadataDict, key) =
-    API.LLVMSetMetadata(md.inst, MDKind(key), C_NULL)
+    API.LLVMSetMetadata2(md.val, MDKind(key), C_NULL)
 
 
 ## named metadata
