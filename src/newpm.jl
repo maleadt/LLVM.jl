@@ -231,24 +231,24 @@ function register!(pb::NewPMPassBuilder, pass::NewPMCustomPass)
 end
 
 """
-    run!(pb::NewPMPassBuilder, mod::Module, tm::TargetMachine)
-    run!(pipeline::String, mod::Module, tm::TargetMachine)
+    run!(pb::NewPMPassBuilder, mod::Module, [tm::TargetMachine])
+    run!(pipeline::String, mod::Module, [tm::TargetMachine])
 
 Run passes on a module. The passes are specified by a pass builder or a string that
 represents a pass pipeline. The target machine is used to optimize the passes.
 """
 run!
 
-function run!(pb::NewPMPassBuilder, mod::Module, tm::TargetMachine)
+function run!(pb::NewPMPassBuilder, mod::Module, tm::Union{Nothing,TargetMachine}=nothing)
     isempty(pb.passes) && return
 
     # XXX: The Base API is too restricted, not supporting custom passes
     #      or Julia's pass registration callback
     #@check API.LLVMRunPasses(mod, string(pb), tm, pb.opts)
 
-    API.LLVMPassBuilderExtensionsSetRegistrationCallback(pb.exts, cglobal(:jl_register_passbuilder_callbacks))
     thunks = Vector{Any}(undef, length(pb.custom_passes))
     GC.@preserve thunks begin
+        # register custom passes
         for (i,pass) in enumerate(pb.custom_passes)
             if pass.type === :module
                 cb = @cfunction(module_callback, Bool, (API.LLVMModuleRef, Ptr{Any}))
@@ -262,14 +262,20 @@ function run!(pb::NewPMPassBuilder, mod::Module, tm::TargetMachine)
             thunks[i] = pass.callback
             api(pb.exts, pass.name, cb, pointer(thunks, i))
         end
-        @check API.LLVMRunJuliaPasses(mod, string(pb), tm, pb.opts, pb.exts)
+
+        # register Julia passes
+        julia_callback = cglobal(:jl_register_passbuilder_callbacks)
+        API.LLVMPassBuilderExtensionsSetRegistrationCallback(pb.exts, julia_callback)
+
+        @check API.LLVMRunJuliaPasses(mod, string(pb), something(tm, C_NULL),
+                                      pb.opts, pb.exts)
     end
 end
 
-function run!(pass::String, mod::Module, tm::TargetMachine; kwargs...)
+function run!(pass::String, args...; kwargs...)
     pb = NewPMPassBuilder(; kwargs...)
     add!(pb, pass)
-    run!(pb, mod, tm)
+    run!(pb, args...)
 end
 
 

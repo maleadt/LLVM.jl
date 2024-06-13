@@ -3,9 +3,6 @@
 
 using LLVM.Interop
 
-host_triple = LLVM.triple()
-host_t = Target(triple=host_triple)
-
 function test_module()
     mod = LLVM.Module("test")
     ft = LLVM.FunctionType(LLVM.VoidType())
@@ -22,22 +19,22 @@ function test_module()
 end
 
 @testset "pass builder" begin
-    @dispose ctx=Context() tm=TargetMachine(host_t, host_triple) pb=NewPMPassBuilder() begin
+    @dispose ctx=Context() pb=NewPMPassBuilder() begin
         # single pass
         @dispose mod=test_module() begin
             # by string
-            @test run!("no-op-module", mod, tm) === nothing
+            @test run!("no-op-module", mod) === nothing
 
             # by object
-            @test run!(NoOpModulePass(), mod, tm) === nothing
+            @test run!(NoOpModulePass(), mod) === nothing
 
             # by object with options
-            @test run!(LoopExtractorPass(; single=true), mod, tm) === nothing
+            @test run!(LoopExtractorPass(; single=true), mod) === nothing
         end
 
         # default pipelines
         @dispose pb=NewPMPassBuilder() mod=test_module() begin
-            @test run!("default<O3>", mod, tm) === nothing
+            @test run!("default<O3>", mod) === nothing
         end
 
         # custom pipelines
@@ -53,23 +50,31 @@ end
 
             @test string(pb) == "no-op-module,no-op-module,loop-extract<single>"
 
-            @test run!(pb, mod, tm) === nothing
+            @test run!(pb, mod) === nothing
         end
 
         # options
         @dispose mod=test_module() begin
             @dispose pb=NewPMPassBuilder(; verify_each=true) begin
                 add!(pb, "no-op-module")
-                @test run!(pb, mod, tm) === nothing
+                @test run!(pb, mod) === nothing
             end
 
-            run!("no-op-module", mod, tm; verify_each=true)
+            run!("no-op-module", mod; verify_each=true)
+        end
+
+        # target machines
+        host_triple = LLVM.triple()
+        host_t = Target(triple=host_triple)
+        @dispose tm=TargetMachine(host_t, host_triple) mod=test_module() begin
+            @test run!(NoOpModulePass(), mod, tm) === nothing
+            @test run!("no-op-module", mod, tm) === nothing
         end
     end
 end
 
 @testset "pass manager" begin
-    @dispose ctx=Context() tm=TargetMachine(host_t, host_triple) pb=NewPMPassBuilder() begin
+    @dispose ctx=Context() pb=NewPMPassBuilder() begin
         # pass manager interface
         @dispose pb=NewPMPassBuilder() mod=test_module() begin
             add!(pb, "no-op-module")
@@ -88,7 +93,7 @@ end
             add!(pb, NoOpModulePass())
             @test string(pb) == "no-op-module,module(no-op-module,no-op-module,loop-extract<single>),no-op-module"
 
-            @test run!(pb, mod, tm) === nothing
+            @test run!(pb, mod) === nothing
         end
 
         # nested pass managers
@@ -104,14 +109,14 @@ end
             end
             @test string(pb) == "module(no-op-module,function(no-op-function,loop(no-op-loop)))"
 
-            @test run!(pb, mod, tm) === nothing
+            @test run!(pb, mod) === nothing
         end
     end
 end
 
 @testset "passes" begin
     function test_passes(typ, passes, skips=String[])
-        @dispose ctx=Context() tm=TargetMachine(host_t, host_triple) mod=test_module() begin
+        @dispose ctx=Context() mod=test_module() begin
             for pass in passes
                 if startswith(pass, "print") || startswith(pass, "dot") ||
                    startswith(pass, "view") || pass in skips
@@ -123,14 +128,14 @@ end
                 @dispose pb=NewPMPassBuilder() begin
                     add!(pb, pass)
                     add!(pb, "no-op-$typ")
-                    @test run!(pb, mod, tm) === nothing
+                    @test run!(pb, mod) === nothing
                 end
 
                 # same, but to catch type mismatches in the other direction
                 @dispose pb=NewPMPassBuilder() begin
                     add!(pb, "no-op-$typ")
                     add!(pb, pass)
-                    @test run!(pb, mod, tm) === nothing
+                    @test run!(pb, mod) === nothing
                 end
 
                 # XXX: add predicate functions to make these tests simpler?
@@ -195,7 +200,7 @@ end
     CustomModulePass() = NewPMModulePass("custom_module_pass", custom_module_pass!)
     CustomFunctionPass() = NewPMFunctionPass("custom_function_pass", custom_function_pass!)
 
-    @dispose ctx=Context() tm=TargetMachine(host_t, host_triple) mod=test_module() begin
+    @dispose ctx=Context() mod=test_module() begin
         pb = NewPMPassBuilder()
 
         register!(pb, CustomModulePass())
@@ -207,7 +212,7 @@ end
         end
         add!(pb, CustomModulePass())
 
-        @test run!(pb, mod, tm) === nothing
+        @test run!(pb, mod) === nothing
         @test module_pass_calls == 2
         @test function_pass_calls == 1
     end
@@ -215,16 +220,16 @@ end
 
 @testset "julia" begin
     @testset "pipeline" begin
-        @dispose ctx=Context() tm=TargetMachine(host_t, host_triple) mod=test_module() begin
-            @test run!("julia", mod, tm) === nothing
+        @dispose ctx=Context() mod=test_module() begin
+            @test run!("julia", mod) === nothing
 
             pipeline = JuliaPipelinePass(opt_level=2)
-            @test run!(pipeline, mod, tm) === nothing
+            @test run!(pipeline, mod) === nothing
         end
     end
 
     @testset "passes" begin
-        @dispose ctx=Context() tm=TargetMachine(host_t, host_triple) pb=NewPMPassBuilder() begin
+        @dispose ctx=Context() pb=NewPMPassBuilder() begin
             basicSimplifyCFGOptions =
                 (; forward_switch_cond_to_phi=true,
                    convert_switch_range_to_icmp=true,
@@ -360,7 +365,7 @@ end
             end
 
             @dispose mod=test_module() begin
-                @test run!(pb, mod, tm) === nothing
+                @test run!(pb, mod) === nothing
             end
         end
     end
