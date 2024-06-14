@@ -137,7 +137,7 @@ function __init__()
 
     _install_handlers()
     _install_handlers(GlobalContext())
-    atexit(check_memory)
+    atexit(report_leaks)
 end
 
 end

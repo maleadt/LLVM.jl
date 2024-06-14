@@ -13,7 +13,7 @@ Base.unsafe_convert(::Type{API.LLVMBuilderRef}, builder::IRBuilder) = builder.re
 
 IRBuilder() = mark_alloc(IRBuilder(API.LLVMCreateBuilderInContext(context())))
 
-dispose(builder::IRBuilder) = mark_dispose(API.LLVMDisposeBuilder(builder))
+dispose(builder::IRBuilder) = API.LLVMDisposeBuilder(mark_dispose(builder))
 
 context(builder::IRBuilder) = Context(API.LLVMGetBuilderContext(builder))
 

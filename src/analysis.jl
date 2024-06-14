@@ -32,7 +32,7 @@ end
 Base.unsafe_convert(::Type{API.LLVMDominatorTreeRef}, domtree::DomTree) = domtree.ref
 
 DomTree(f::Function) = mark_alloc(DomTree(API.LLVMCreateDominatorTree(f)))
-dispose(domtree::DomTree) = mark_dispose(API.LLVMDisposeDominatorTree(domtree))
+dispose(domtree::DomTree) = API.LLVMDisposeDominatorTree(mark_dispose(domtree))
 
 function dominates(domtree::DomTree, A::Instruction, B::Instruction)
     API.LLVMDominatorTreeInstructionDominates(domtree, A, B) |> Bool
@@ -52,7 +52,7 @@ Base.unsafe_convert(::Type{API.LLVMPostDominatorTreeRef}, postdomtree::PostDomTr
 
 PostDomTree(f::Function) = mark_alloc(PostDomTree(API.LLVMCreatePostDominatorTree(f)))
 dispose(postdomtree::PostDomTree) =
-    mark_dispose(API.LLVMDisposePostDominatorTree(postdomtree))
+    API.LLVMDisposePostDominatorTree(mark_dispose(postdomtree))
 
 function dominates(postdomtree::PostDomTree, A::Instruction, B::Instruction)
     API.LLVMPostDominatorTreeInstructionDominates(postdomtree, A, B) |> Bool

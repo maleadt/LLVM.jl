@@ -9,7 +9,11 @@ function Base.parse(::Type{Module}, membuf::MemoryBuffer)
     Module(out_ref[])
 end
 
-Base.parse(::Type{Module}, data::Vector) = parse(Module, MemoryBuffer(data, "", false))
+function Base.parse(::Type{Module}, data::Vector)
+    @dispose membuf = MemoryBuffer(data, "", false) begin
+        parse(Module, membuf)
+    end
+end
 
 
 ## writer

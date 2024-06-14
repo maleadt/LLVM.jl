@@ -23,7 +23,7 @@ function DataLayout(f::Core.Function, args...; kwargs...)
     end
 end
 
-dispose(data::DataLayout) = mark_dispose(API.LLVMDisposeTargetData(data))
+dispose(data::DataLayout) = API.LLVMDisposeTargetData(mark_dispose(data))
 
 Base.string(data::DataLayout) =
     unsafe_message(API.LLVMCopyStringRepOfTargetData(data))

@@ -10,28 +10,31 @@ const memcheck_enabled = parse(Bool, @load_preference("memcheck", "false"))
 const tracked_objects = Dict{Any,Any}()
 
 function mark_alloc(obj::Any)
-    @static memcheck_enabled || return obj
-    tracked_objects[obj] = backtrace()[3:end]
+    @static if memcheck_enabled
+        tracked_objects[obj] = backtrace()[2:end]
+    end
     return obj
 end
 
 function mark_dispose(obj)
-    @static memcheck_enabled || return obj
-    delete!(tracked_objects, obj)
+    @static if memcheck_enabled
+        delete!(tracked_objects, obj)
+    end
     return obj
 end
 
-function check_memory(code)
-    @static memcheck_enabled || return
+function report_leaks(code)
+    # if we errorred, we can't trust the memory state
     if code != 0
-        # if we errorred, we don't care about leaks
         return
     end
 
-    io = Core.stdout
-    for (obj, bt) in tracked_objects
-        print(io, "WARNING: An instance of $(typeof(obj)) was not properly disposed of.")
-        Base.show_backtrace(io, bt)
-        println(io)
+    @static if memcheck_enabled
+        io = Core.stdout
+        for (obj, bt) in tracked_objects
+            print(io, "WARNING: An instance of $(typeof(obj)) was not properly disposed of.")
+            Base.show_backtrace(io, bt)
+            println(io)
+        end
     end
 end

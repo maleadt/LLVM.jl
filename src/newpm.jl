@@ -274,9 +274,10 @@ function run!(pb::NewPMPassBuilder, mod::Module, tm::Union{Nothing,TargetMachine
 end
 
 function run!(pass::String, args...; kwargs...)
-    pb = NewPMPassBuilder(; kwargs...)
-    add!(pb, pass)
-    run!(pb, args...)
+    @dispose pb=NewPMPassBuilder(; kwargs...) begin
+        add!(pb, pass)
+        run!(pb, args...)
+    end
 end
 
 

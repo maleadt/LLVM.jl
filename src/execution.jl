@@ -45,7 +45,7 @@ GenericValue(ptr::Ptr) =
 Base.convert(::Type{Ptr{T}}, val::GenericValue) where {T} =
     convert(Ptr{T}, API.LLVMGenericValueToPointer(val))
 
-dispose(val::GenericValue) = mark_dispose(API.LLVMDisposeGenericValue(val))
+dispose(val::GenericValue) = API.LLVMDisposeGenericValue(mark_dispose(val))
 
 
 ## execution engine

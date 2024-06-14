@@ -192,14 +192,14 @@ function lookup_dylib(es::ExecutionSession, name)
 end
 
 function add!(lljit::LLJIT, jd::JITDylib, obj::MemoryBuffer)
-    @check API.LLVMOrcLLJITAddObjectFile(lljit, jd, obj)
+    @check API.LLVMOrcLLJITAddObjectFile(lljit, jd, mark_dispose(obj))
     return nothing
 end
 
 # LLVMOrcLLJITAddObjectFileWithRT(J, RT, ObjBuffer)
 
 function add!(lljit::LLJIT, jd::JITDylib, mod::ThreadSafeModule)
-    @check API.LLVMOrcLLJITAddLLVMIRModule(lljit, jd, mod)
+    @check API.LLVMOrcLLJITAddLLVMIRModule(lljit, jd, mark_dispose(mod))
     return nothing
 end
 
@@ -396,7 +396,7 @@ function JITDylib(jljit::JuliaOJIT)
 end
 
 function add!(jljit::JuliaOJIT, jd::JITDylib, obj::MemoryBuffer)
-    @check API.JLJITAddObjectFile(jljit, jd, obj)
+    @check API.JLJITAddObjectFile(jljit, jd, mark_dispose(obj))
     return nothing
 end
 
@@ -425,7 +425,7 @@ function add!(jljit::JuliaOJIT, jd::JITDylib, tsm::ThreadSafeModule)
     tsm() do mod
         decorate_module(mod)
     end
-    @check API.JLJITAddLLVMIRModule(jljit, jd, tsm)
+    @check API.JLJITAddLLVMIRModule(jljit, jd, mark_dispose(tsm))
     return nothing
 end
 
