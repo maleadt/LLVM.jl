@@ -13,14 +13,14 @@ end
 Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = val.ref
 
 GenericValue(typ::IntegerType, N::Signed) =
-    GenericValue(
+    mark_alloc(GenericValue(
         API.LLVMCreateGenericValueOfInt(typ,
-                                        reinterpret(Culonglong, convert(Int64, N)), true))
+                                        reinterpret(Culonglong, convert(Int64, N)), true)))
 
 GenericValue(typ::IntegerType, N::Unsigned) =
-    GenericValue(
+    mark_alloc(GenericValue(
         API.LLVMCreateGenericValueOfInt(typ,
-                                        reinterpret(Culonglong, convert(UInt64, N)), false))
+                                        reinterpret(Culonglong, convert(UInt64, N)), false)))
 
 intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(val)
 
@@ -45,7 +45,7 @@ GenericValue(ptr::Ptr) =
 Base.convert(::Type{Ptr{T}}, val::GenericValue) where {T} =
     convert(Ptr{T}, API.LLVMGenericValueToPointer(val))
 
-dispose(val::GenericValue) = API.LLVMDisposeGenericValue(val)
+dispose(val::GenericValue) = mark_dispose(API.LLVMDisposeGenericValue(val))
 
 
 ## execution engine
