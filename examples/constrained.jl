@@ -44,6 +44,7 @@ meta(::Type{FPExceptStrict}) = "fpexcept.strict"
         intrinsic = Intrinsic("llvm.experimental.constrained.$(func(F))")
         intrinsic_fun = LLVM.Function(mod, intrinsic, [typ])
         ftype = LLVM.FunctionType(intrinsic,[typ])
+
         # generate IR
         @dispose builder=IRBuilder() begin
             entry = BasicBlock(llvm_f, "entry")

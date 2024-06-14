@@ -48,6 +48,7 @@ function ThreadSafeModule(name::String)
     mod = context!(ctx) do
         Module(name)
     end
+    mark_dispose(mod)
     ThreadSafeModule(mod)
 end
 

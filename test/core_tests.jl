@@ -882,8 +882,7 @@ end
     @test convert(ConstantInt, val) == int
 end
 
-@dispose ctx=Context() begin
-    mod = LLVM.Module("SomeModule")
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
     ft = LLVM.FunctionType(LLVM.VoidType())
     f1 = LLVM.Function(mod, "f1", ft)
 
@@ -896,8 +895,7 @@ end
 end
 
 # different type; requires a hack
-@dispose ctx=Context() begin
-    mod = LLVM.Module("SomeModule")
+@dispose ctx=Context() mod=LLVM.Module("SomeModule") begin
     ft1 = LLVM.FunctionType(LLVM.VoidType())
     f1 = LLVM.Function(mod, "f1", ft1)
 
@@ -1017,7 +1015,7 @@ end
 @testset "module" begin
 
 @dispose ctx=Context() begin
-    let mod = LLVM.Module("SomeModule")
+    @dispose mod=LLVM.Module("SomeModule") begin
         @test context(mod) == ctx
 
         @test name(mod) == "SomeModule"

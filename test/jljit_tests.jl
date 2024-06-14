@@ -104,8 +104,7 @@ end
         jd = JITDylib(jljit)
 
         sym = "SomeFunction"
-        obj = @dispose ctx=Context() begin
-            mod = LLVM.Module("jit")
+        obj = @dispose ctx=Context() mod=LLVM.Module("jit") begin
             ft = LLVM.FunctionType(LLVM.VoidType())
             fn = LLVM.Function(mod, sym, ft)
 
@@ -134,8 +133,7 @@ end
         jd = JITDylib(jljit)
 
         sym = "SomeFunction"
-        obj = @dispose ctx=Context() begin
-            mod = LLVM.Module("jit")
+        obj = @dispose ctx=Context() mod=LLVM.Module("jit") begin
             ft = LLVM.FunctionType(LLVM.Int32Type())
             fn = LLVM.Function(mod, sym, ft)
 

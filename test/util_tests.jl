@@ -1,10 +1,8 @@
 @testitem "utils" begin
 
 @testset "function cloning" begin
-    @dispose ctx=Context() begin
+    @dispose ctx=Context() mod=LLVM.Module("my_module") begin
         # set-up
-        mod = LLVM.Module("my_module")
-
         param_types = [LLVM.Int32Type(), LLVM.Int32Type()]
         ret_type = LLVM.Int32Type()
         fun_type = LLVM.FunctionType(ret_type, param_types)

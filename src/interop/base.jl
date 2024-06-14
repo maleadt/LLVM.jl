@@ -33,6 +33,7 @@ function call_function(llvmf::LLVM.Function, rettyp::Type=Nothing, argtyp::Type=
     ir = string(mod)
     fn = LLVM.name(llvmf)
     @assert !isempty(fn)
+    dispose(mod)
     quote
         Base.@inline
         Base.llvmcall(($ir,$fn), $rettyp, $argtyp, $(args...))

@@ -12,7 +12,7 @@ abstract type Constant <: User end
 unsafe_destroy!(constant::Constant) = API.LLVMDestroyConstant(constant)
 
 # forward declarations
-@checked mutable struct Module
+@checked struct Module
     ref::API.LLVMModuleRef
 end
 abstract type Instruction <: User end

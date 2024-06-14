@@ -104,7 +104,7 @@ end
 
 function dispose(engine::ExecutionEngine)
     for mod in engine.mods
-        mod.ref = C_NULL
+        mark_dispose(mod)
     end
     API.LLVMDisposeExecutionEngine(engine)
 end
@@ -120,7 +120,10 @@ for x in [:ExecutionEngine, :Interpreter, :JIT]
     end
 end
 
-Base.push!(engine::ExecutionEngine, mod::Module) = API.LLVMAddModule(engine.ref, mod.ref)
+function Base.push!(engine::ExecutionEngine, mod::Module)
+    push!(engine.mods, mod)
+    API.LLVMAddModule(engine.ref, mod.ref)
+end
 
 # up to user to free the deleted module
 function Base.delete!(engine::ExecutionEngine, mod::Module)
