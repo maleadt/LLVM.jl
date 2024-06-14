@@ -180,7 +180,7 @@ Base.unsafe_convert(::Type{API.LLVMPassBuilderOptionsRef}, pb::NewPMPassBuilder)
 function NewPMPassBuilder(; kwargs...)
     opts = API.LLVMCreatePassBuilderOptions()
     exts = API.LLVMCreatePassBuilderExtensions()
-    obj = NewPMPassBuilder(opts, exts, [], [])
+    obj = mark_alloc(NewPMPassBuilder(opts, exts, [], []))
 
     for (name, value) in pairs(kwargs)
         if name == :verify_each
@@ -214,6 +214,7 @@ function NewPMPassBuilder(; kwargs...)
 end
 
 function dispose(pb::NewPMPassBuilder)
+    mark_dispose(pb)
     API.LLVMDisposePassBuilderOptions(pb.opts)
     API.LLVMDisposePassBuilderExtensions(pb.exts)
 end
