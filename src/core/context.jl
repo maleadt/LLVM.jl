@@ -9,7 +9,7 @@ end
 Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
 
 function Context(; opaque_pointers=nothing)
-    ctx = Context(API.LLVMContextCreate())
+    ctx = mark_alloc(Context(API.LLVMContextCreate()))
     if opaque_pointers !== nothing
         opaque_pointers!(ctx, opaque_pointers)
     end
@@ -20,7 +20,7 @@ end
 
 function dispose(ctx::Context)
     deactivate(ctx)
-    API.LLVMContextDispose(ctx)
+    API.LLVMContextDispose(mark_dispose(ctx))
 end
 
 function Context(f::Core.Function; kwargs...)
