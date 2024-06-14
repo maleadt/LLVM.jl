@@ -71,7 +71,7 @@ function ExecutionEngine(mod::Module)
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    return mark_alloc(ExecutionEngine(out_ref[], Set([mod])))
 end
 function Interpreter(mod::Module)
     API.LLVMLinkInInterpreter()
@@ -85,7 +85,7 @@ function Interpreter(mod::Module)
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    return mark_alloc(ExecutionEngine(out_ref[], Set([mod])))
 end
 function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault)
     API.LLVMLinkInMCJIT()
@@ -99,12 +99,12 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    return mark_alloc(ExecutionEngine(out_ref[], Set([mod])))
 end
 
 function dispose(engine::ExecutionEngine)
     mark_dispose.(engine.mods)
-    API.LLVMDisposeExecutionEngine(engine)
+    API.LLVMDisposeExecutionEngine(mark_dispose(engine))
 end
 
 for x in [:ExecutionEngine, :Interpreter, :JIT]
