@@ -11,20 +11,14 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMTargetMachineRef}, tm::TargetMachine) = tm.ref
 
-function TargetMachine(t::Target, triple::String, cpu::String="", features::String="";
-                       optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault,
-                       reloc::API.LLVMRelocMode=API.LLVMRelocDefault,
-                       code::API.LLVMCodeModel=API.LLVMCodeModelDefault)
-    obj = TargetMachine(API.LLVMCreateTargetMachine(t, triple, cpu, features, optlevel,
-                                                    reloc, code))
-    mark_alloc(obj)
-    return obj
-end
+TargetMachine(t::Target, triple::String, cpu::String="", features::String="";
+              optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault,
+              reloc::API.LLVMRelocMode=API.LLVMRelocDefault,
+              code::API.LLVMCodeModel=API.LLVMCodeModelDefault) =
+    mark_alloc(TargetMachine(API.LLVMCreateTargetMachine(t, triple, cpu, features, optlevel,
+                                                         reloc, code)))
 
-function dispose(tm::TargetMachine)
-    API.LLVMDisposeTargetMachine(tm)
-    mark_dispose(tm)
-end
+dispose(tm::TargetMachine) = API.LLVMDisposeTargetMachine(mark_dispose(tm))
 
 function TargetMachine(f::Core.Function, args...; kwargs...)
     tm = TargetMachine(args...; kwargs...)

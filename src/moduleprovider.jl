@@ -23,8 +23,8 @@ function ModuleProvider(f::Core.Function, args...; kwargs...)
 end
 
 function dispose(mp::ModuleProvider)
-    API.LLVMDisposeModuleProvider(mp)
-
     # NOTE: this destroys the underlying module
     mark_dispose(mp.mod)
+
+    API.LLVMDisposeModuleProvider(mp)
 end

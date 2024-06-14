@@ -103,9 +103,7 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
 end
 
 function dispose(engine::ExecutionEngine)
-    for mod in engine.mods
-        mark_dispose(mod)
-    end
+    mark_dispose.(engine.mods)
     API.LLVMDisposeExecutionEngine(engine)
 end
 

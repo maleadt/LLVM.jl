@@ -20,8 +20,7 @@ function TargetMachineBuilder()
 end
 
 function TargetMachineBuilder(tm::TargetMachine)
-    tmb = API.LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(tm)
-    mark_dispose(tm)
+    tmb = API.LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(mark_dispose(tm))
     TargetMachineBuilder(tmb)
 end
 

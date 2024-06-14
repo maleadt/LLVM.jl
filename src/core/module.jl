@@ -18,23 +18,13 @@ Base.:(==)(x::Module, y::Module) = (x.ref === y.ref)
     ref::API.LLVMTargetDataRef
 end
 
-function Module(name::String)
-    mod = Module(API.LLVMModuleCreateWithNameInContext(name, context()))
-    mark_alloc(mod)
-    return mod
-end
+Module(name::String) =
+    mark_alloc(Module(API.LLVMModuleCreateWithNameInContext(name, context())))
 
-function Module(mod::Module)
-    mod = Module(API.LLVMCloneModule(mod))
-    mark_alloc(mod)
-    return mod
-end
+Module(mod::Module) = mark_alloc(Module(API.LLVMCloneModule(mod)))
 Base.copy(mod::Module) = Module(mod)
 
-function dispose(mod::Module)
-    API.LLVMDisposeModule(mod)
-    mark_dispose(mod)
-end
+dispose(mod::Module) = API.LLVMDisposeModule(mark_dispose(mod))
 
 function Module(f::Core.Function, args...; kwargs...)
     mod = Module(args...; kwargs...)
