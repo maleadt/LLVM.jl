@@ -9,11 +9,12 @@ Base.unsafe_convert(::Type{API.LLVMMemoryBufferRef}, membuf::MemoryBuffer) = mem
 function MemoryBuffer(data::Vector{T}, name::String="", copy::Bool=true) where T<:Union{UInt8,Int8}
     ptr = pointer(data)
     len = Csize_t(length(data))
-    if copy
-        return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRangeCopy(ptr, len, name))
+    membuf = if copy
+        MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRangeCopy(ptr, len, name))
     else
-        return MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRange(ptr, len, name, false))
+        MemoryBuffer(API.LLVMCreateMemoryBufferWithMemoryRange(ptr, len, name, false))
     end
+    mark_alloc(membuf)
 end
 
 function MemoryBuffer(f::Core.Function, args...; kwargs...)
@@ -48,7 +49,7 @@ function MemoryBufferFile(f::Core.Function, args...; kwargs...)
     end
 end
 
-dispose(membuf::MemoryBuffer) = API.LLVMDisposeMemoryBuffer(membuf)
+dispose(membuf::MemoryBuffer) = API.LLVMDisposeMemoryBuffer(mark_dispose(membuf))
 
 Base.length(membuf::MemoryBuffer) = API.LLVMGetBufferSize(membuf)
 
