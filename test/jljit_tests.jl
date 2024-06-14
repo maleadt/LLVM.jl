@@ -78,10 +78,9 @@ end
                 ret!(builder, tmp)
             end
 
-            # TODO: Get TM from jljit?
-            tm = JITTargetMachine()
             triple!(mod, triple(jljit))
-            @dispose pm=ModulePassManager() begin
+            @dispose pm=ModulePassManager() tm=JITTargetMachine() begin
+                # TODO: Get TM from jljit?
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
                 run!(pm, mod)
@@ -117,8 +116,9 @@ end
             end
             verify(mod)
 
-            tm  = JITTargetMachine()
-            emit(tm, mod, LLVM.API.LLVMObjectFile)
+            @dispose tm=JITTargetMachine() begin
+                emit(tm, mod, LLVM.API.LLVMObjectFile)
+            end
         end
         add!(jljit, jd, MemoryBuffer(obj))
 
@@ -150,8 +150,9 @@ end
             end
             verify(mod)
 
-            tm  = JITTargetMachine()
-            emit(tm, mod, LLVM.API.LLVMObjectFile)
+            @dispose tm=JITTargetMachine() begin
+                emit(tm, mod, LLVM.API.LLVMObjectFile)
+            end
         end
 
         data = Ref{Int32}(42)
