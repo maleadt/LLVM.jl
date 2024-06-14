@@ -1,9 +1,5 @@
 using LLVM
 
-if Base.JLOptions().debug_level < 2
-    @warn "It is recommended to run the LLVM.jl test suite with -g2"
-end
-
 using InteractiveUtils
 @info "System information:\n" * sprint(io->versioninfo(io))
 
@@ -21,6 +17,8 @@ julia_typed_pointers = let
     end
 end
 @info "Pointer settings: Julia uses $(julia_typed_pointers ? "typed" : "opaque") pointers, default contexts use $(ctx_typed_pointers ? "typed" : "opaque") pointers"
+
+@info "Debug settings: typecheck = $(LLVM.typecheck_enabled), memcheck = $(LLVM.memcheck_enabled)"
 
 worker_init_expr = quote
     using LLVM

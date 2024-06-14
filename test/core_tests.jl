@@ -50,7 +50,7 @@ end
     @test typeof(typ.ref) == LLVM.API.LLVMTypeRef                 # untyped
 
     @test typeof(LLVM.IntegerType(typ.ref)) == LLVM.IntegerType   # type reconstructed
-    if Base.JLOptions().debug_level >= 2
+    if LLVM.typecheck_enabled
         @test_throws ErrorException LLVM.FunctionType(typ.ref)    # wrong type
     end
     @test_throws UndefRefError LLVM.FunctionType(LLVM.API.LLVMTypeRef(C_NULL))
@@ -224,7 +224,7 @@ end
     @test typeof(val.ref) == LLVM.API.LLVMValueRef                # untyped
 
     @test typeof(LLVM.Instruction(val.ref)) == LLVM.AllocaInst    # type reconstructed
-    if Base.JLOptions().debug_level >= 2
+    if LLVM.typecheck_enabled
         @test_throws ErrorException LLVM.Function(val.ref)        # wrong
     end
     @test_throws UndefRefError LLVM.Function(LLVM.API.LLVMValueRef(C_NULL))
