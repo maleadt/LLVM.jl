@@ -530,11 +530,8 @@ end
         if LLVM.has_newpm()
             host_triple = triple()
             host_t = Target(triple=host_triple)
-            @dispose tm=TargetMachine(host_t, host_triple) pb=PassBuilder(tm) begin
-                NewPMModulePassManager(pb) do mpm
-                    parse!(pb, mpm, "default<O3>")
-                    run!(mpm, mod, tm)
-                end
+            @dispose tm=TargetMachine(host_t, host_triple) begin
+                run!("default<O3>", mod, tm)
             end
         else
             pmb = PassManagerBuilder()

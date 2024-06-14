@@ -76,7 +76,7 @@ function wrap(version; includedir, cppflags)
         options = load_options(joinpath(@__DIR__, "llvmextra.toml"))
         options["general"]["output_file_path"] = "../lib/$version/libLLVM_extra.jl"
 
-        header_files = map(["LLVMExtra.h", "NewPM.h"]) do file
+        header_files = map(["LLVMExtra.h"]) do file
             realpath(joinpath(@__DIR__, "..", "deps", "LLVMExtra", "include", file))
         end
 

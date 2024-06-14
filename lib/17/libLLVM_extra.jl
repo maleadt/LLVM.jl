@@ -335,269 +335,37 @@ function LLVMSetMetadata2(Inst, KindID, Val)
     ccall((:LLVMSetMetadata2, libLLVMExtra), Cvoid, (LLVMValueRef, Cuint, LLVMValueRef), Inst, KindID, Val)
 end
 
-mutable struct LLVMOpaquePreservedAnalyses end
+mutable struct LLVMOpaquePassBuilderExtensions end
 
-const LLVMPreservedAnalysesRef = Ptr{LLVMOpaquePreservedAnalyses}
+const LLVMPassBuilderExtensionsRef = Ptr{LLVMOpaquePassBuilderExtensions}
 
-function LLVMCreatePreservedAnalysesNone()
-    ccall((:LLVMCreatePreservedAnalysesNone, libLLVMExtra), LLVMPreservedAnalysesRef, ())
+function LLVMCreatePassBuilderExtensions()
+    ccall((:LLVMCreatePassBuilderExtensions, libLLVMExtra), LLVMPassBuilderExtensionsRef, ())
 end
 
-function LLVMCreatePreservedAnalysesAll()
-    ccall((:LLVMCreatePreservedAnalysesAll, libLLVMExtra), LLVMPreservedAnalysesRef, ())
+function LLVMDisposePassBuilderExtensions(Extensions)
+    ccall((:LLVMDisposePassBuilderExtensions, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef,), Extensions)
 end
 
-function LLVMCreatePreservedAnalysesCFG()
-    ccall((:LLVMCreatePreservedAnalysesCFG, libLLVMExtra), LLVMPreservedAnalysesRef, ())
+function LLVMPassBuilderExtensionsSetRegistrationCallback(Options, RegistrationCallback)
+    ccall((:LLVMPassBuilderExtensionsSetRegistrationCallback, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef, Ptr{Cvoid}), Options, RegistrationCallback)
 end
 
-function LLVMDisposePreservedAnalyses(PA)
-    ccall((:LLVMDisposePreservedAnalyses, libLLVMExtra), Cvoid, (LLVMPreservedAnalysesRef,), PA)
-end
-
-function LLVMAreAllAnalysesPreserved(PA)
-    ccall((:LLVMAreAllAnalysesPreserved, libLLVMExtra), LLVMBool, (LLVMPreservedAnalysesRef,), PA)
-end
-
-function LLVMAreCFGAnalysesPreserved(PA)
-    ccall((:LLVMAreCFGAnalysesPreserved, libLLVMExtra), LLVMBool, (LLVMPreservedAnalysesRef,), PA)
-end
-
-mutable struct LLVMOpaqueModuleAnalysisManager end
-
-const LLVMModuleAnalysisManagerRef = Ptr{LLVMOpaqueModuleAnalysisManager}
-
-mutable struct LLVMOpaqueCGSCCAnalysisManager end
-
-const LLVMCGSCCAnalysisManagerRef = Ptr{LLVMOpaqueCGSCCAnalysisManager}
-
-mutable struct LLVMOpaqueFunctionAnalysisManager end
-
-const LLVMFunctionAnalysisManagerRef = Ptr{LLVMOpaqueFunctionAnalysisManager}
-
-mutable struct LLVMOpaqueLoopAnalysisManager end
-
-const LLVMLoopAnalysisManagerRef = Ptr{LLVMOpaqueLoopAnalysisManager}
-
-function LLVMCreateNewPMModuleAnalysisManager()
-    ccall((:LLVMCreateNewPMModuleAnalysisManager, libLLVMExtra), LLVMModuleAnalysisManagerRef, ())
-end
-
-function LLVMCreateNewPMCGSCCAnalysisManager()
-    ccall((:LLVMCreateNewPMCGSCCAnalysisManager, libLLVMExtra), LLVMCGSCCAnalysisManagerRef, ())
-end
-
-function LLVMCreateNewPMFunctionAnalysisManager()
-    ccall((:LLVMCreateNewPMFunctionAnalysisManager, libLLVMExtra), LLVMFunctionAnalysisManagerRef, ())
-end
-
-function LLVMCreateNewPMLoopAnalysisManager()
-    ccall((:LLVMCreateNewPMLoopAnalysisManager, libLLVMExtra), LLVMLoopAnalysisManagerRef, ())
-end
-
-function LLVMDisposeNewPMModuleAnalysisManager(AM)
-    ccall((:LLVMDisposeNewPMModuleAnalysisManager, libLLVMExtra), Cvoid, (LLVMModuleAnalysisManagerRef,), AM)
-end
-
-function LLVMDisposeNewPMCGSCCAnalysisManager(AM)
-    ccall((:LLVMDisposeNewPMCGSCCAnalysisManager, libLLVMExtra), Cvoid, (LLVMCGSCCAnalysisManagerRef,), AM)
-end
-
-function LLVMDisposeNewPMFunctionAnalysisManager(AM)
-    ccall((:LLVMDisposeNewPMFunctionAnalysisManager, libLLVMExtra), Cvoid, (LLVMFunctionAnalysisManagerRef,), AM)
-end
-
-function LLVMDisposeNewPMLoopAnalysisManager(AM)
-    ccall((:LLVMDisposeNewPMLoopAnalysisManager, libLLVMExtra), Cvoid, (LLVMLoopAnalysisManagerRef,), AM)
-end
-
-mutable struct LLVMOpaqueModulePassManager end
-
-const LLVMModulePassManagerRef = Ptr{LLVMOpaqueModulePassManager}
-
-mutable struct LLVMOpaqueCGSCCPassManager end
-
-const LLVMCGSCCPassManagerRef = Ptr{LLVMOpaqueCGSCCPassManager}
-
-mutable struct LLVMOpaqueFunctionPassManager end
-
-const LLVMFunctionPassManagerRef = Ptr{LLVMOpaqueFunctionPassManager}
-
-mutable struct LLVMOpaqueLoopPassManager end
-
-const LLVMLoopPassManagerRef = Ptr{LLVMOpaqueLoopPassManager}
-
-function LLVMCreateNewPMModulePassManager()
-    ccall((:LLVMCreateNewPMModulePassManager, libLLVMExtra), LLVMModulePassManagerRef, ())
-end
-
-function LLVMCreateNewPMCGSCCPassManager()
-    ccall((:LLVMCreateNewPMCGSCCPassManager, libLLVMExtra), LLVMCGSCCPassManagerRef, ())
-end
-
-function LLVMCreateNewPMFunctionPassManager()
-    ccall((:LLVMCreateNewPMFunctionPassManager, libLLVMExtra), LLVMFunctionPassManagerRef, ())
-end
-
-function LLVMCreateNewPMLoopPassManager()
-    ccall((:LLVMCreateNewPMLoopPassManager, libLLVMExtra), LLVMLoopPassManagerRef, ())
-end
-
-function LLVMDisposeNewPMModulePassManager(PM)
-    ccall((:LLVMDisposeNewPMModulePassManager, libLLVMExtra), Cvoid, (LLVMModulePassManagerRef,), PM)
-end
-
-function LLVMDisposeNewPMCGSCCPassManager(PM)
-    ccall((:LLVMDisposeNewPMCGSCCPassManager, libLLVMExtra), Cvoid, (LLVMCGSCCPassManagerRef,), PM)
-end
-
-function LLVMDisposeNewPMFunctionPassManager(PM)
-    ccall((:LLVMDisposeNewPMFunctionPassManager, libLLVMExtra), Cvoid, (LLVMFunctionPassManagerRef,), PM)
-end
-
-function LLVMDisposeNewPMLoopPassManager(PM)
-    ccall((:LLVMDisposeNewPMLoopPassManager, libLLVMExtra), Cvoid, (LLVMLoopPassManagerRef,), PM)
-end
-
-function LLVMRunNewPMModulePassManager(PM, M, AM)
-    ccall((:LLVMRunNewPMModulePassManager, libLLVMExtra), LLVMPreservedAnalysesRef, (LLVMModulePassManagerRef, LLVMModuleRef, LLVMModuleAnalysisManagerRef), PM, M, AM)
-end
-
-function LLVMRunNewPMFunctionPassManager(PM, F, AM)
-    ccall((:LLVMRunNewPMFunctionPassManager, libLLVMExtra), LLVMPreservedAnalysesRef, (LLVMFunctionPassManagerRef, LLVMValueRef, LLVMFunctionAnalysisManagerRef), PM, F, AM)
-end
-
-mutable struct LLVMOpaqueStandardInstrumentations end
-
-const LLVMStandardInstrumentationsRef = Ptr{LLVMOpaqueStandardInstrumentations}
-
-mutable struct LLVMOpaquePassInstrumentationCallbacks end
-
-const LLVMPassInstrumentationCallbacksRef = Ptr{LLVMOpaquePassInstrumentationCallbacks}
-
-function LLVMCreateStandardInstrumentations(C, DebugLogging, VerifyEach)
-    ccall((:LLVMCreateStandardInstrumentations, libLLVMExtra), LLVMStandardInstrumentationsRef, (LLVMContextRef, LLVMBool, LLVMBool), C, DebugLogging, VerifyEach)
-end
-
-function LLVMCreatePassInstrumentationCallbacks()
-    ccall((:LLVMCreatePassInstrumentationCallbacks, libLLVMExtra), LLVMPassInstrumentationCallbacksRef, ())
-end
-
-function LLVMDisposeStandardInstrumentations(SI)
-    ccall((:LLVMDisposeStandardInstrumentations, libLLVMExtra), Cvoid, (LLVMStandardInstrumentationsRef,), SI)
-end
-
-function LLVMDisposePassInstrumentationCallbacks(PIC)
-    ccall((:LLVMDisposePassInstrumentationCallbacks, libLLVMExtra), Cvoid, (LLVMPassInstrumentationCallbacksRef,), PIC)
-end
-
-function LLVMAddStandardInstrumentations(PIC, SI)
-    ccall((:LLVMAddStandardInstrumentations, libLLVMExtra), Cvoid, (LLVMPassInstrumentationCallbacksRef, LLVMStandardInstrumentationsRef), PIC, SI)
-end
-
-mutable struct LLVMOpaquePassBuilder end
-
-const LLVMPassBuilderRef = Ptr{LLVMOpaquePassBuilder}
-
-function LLVMCreatePassBuilder(TM, PIC)
-    ccall((:LLVMCreatePassBuilder, libLLVMExtra), LLVMPassBuilderRef, (LLVMTargetMachineRef, LLVMPassInstrumentationCallbacksRef), TM, PIC)
-end
-
-function LLVMDisposePassBuilder(PB)
-    ccall((:LLVMDisposePassBuilder, libLLVMExtra), Cvoid, (LLVMPassBuilderRef,), PB)
-end
-
-function LLVMPassBuilderParseModulePassPipeline(PB, PM, PipelineText, PipelineTextLength)
-    ccall((:LLVMPassBuilderParseModulePassPipeline, libLLVMExtra), LLVMErrorRef, (LLVMPassBuilderRef, LLVMModulePassManagerRef, Cstring, Csize_t), PB, PM, PipelineText, PipelineTextLength)
-end
-
-function LLVMPassBuilderParseCGSCCPassPipeline(PB, PM, PipelineText, PipelineTextLength)
-    ccall((:LLVMPassBuilderParseCGSCCPassPipeline, libLLVMExtra), LLVMErrorRef, (LLVMPassBuilderRef, LLVMCGSCCPassManagerRef, Cstring, Csize_t), PB, PM, PipelineText, PipelineTextLength)
-end
-
-function LLVMPassBuilderParseFunctionPassPipeline(PB, PM, PipelineText, PipelineTextLength)
-    ccall((:LLVMPassBuilderParseFunctionPassPipeline, libLLVMExtra), LLVMErrorRef, (LLVMPassBuilderRef, LLVMFunctionPassManagerRef, Cstring, Csize_t), PB, PM, PipelineText, PipelineTextLength)
-end
-
-function LLVMPassBuilderParseLoopPassPipeline(PB, PM, PipelineText, PipelineTextLength)
-    ccall((:LLVMPassBuilderParseLoopPassPipeline, libLLVMExtra), LLVMErrorRef, (LLVMPassBuilderRef, LLVMLoopPassManagerRef, Cstring, Csize_t), PB, PM, PipelineText, PipelineTextLength)
-end
-
-function LLVMPassBuilderRegisterModuleAnalyses(PB, AM)
-    ccall((:LLVMPassBuilderRegisterModuleAnalyses, libLLVMExtra), Cvoid, (LLVMPassBuilderRef, LLVMModuleAnalysisManagerRef), PB, AM)
-end
-
-function LLVMPassBuilderRegisterCGSCCAnalyses(PB, AM)
-    ccall((:LLVMPassBuilderRegisterCGSCCAnalyses, libLLVMExtra), Cvoid, (LLVMPassBuilderRef, LLVMCGSCCAnalysisManagerRef), PB, AM)
-end
-
-function LLVMPassBuilderRegisterFunctionAnalyses(PB, AM)
-    ccall((:LLVMPassBuilderRegisterFunctionAnalyses, libLLVMExtra), Cvoid, (LLVMPassBuilderRef, LLVMFunctionAnalysisManagerRef), PB, AM)
-end
-
-function LLVMPassBuilderRegisterLoopAnalyses(PB, AM)
-    ccall((:LLVMPassBuilderRegisterLoopAnalyses, libLLVMExtra), Cvoid, (LLVMPassBuilderRef, LLVMLoopAnalysisManagerRef), PB, AM)
-end
-
-function LLVMPassBuilderCrossRegisterProxies(PB, LAM, FAM, CGAM, MAM)
-    ccall((:LLVMPassBuilderCrossRegisterProxies, libLLVMExtra), Cvoid, (LLVMPassBuilderRef, LLVMLoopAnalysisManagerRef, LLVMFunctionAnalysisManagerRef, LLVMCGSCCAnalysisManagerRef, LLVMModuleAnalysisManagerRef), PB, LAM, FAM, CGAM, MAM)
-end
-
-function LLVMMPMAddMPM(PM, NestedPM)
-    ccall((:LLVMMPMAddMPM, libLLVMExtra), Cvoid, (LLVMModulePassManagerRef, LLVMModulePassManagerRef), PM, NestedPM)
-end
-
-function LLVMCGPMAddCGPM(PM, NestedPM)
-    ccall((:LLVMCGPMAddCGPM, libLLVMExtra), Cvoid, (LLVMCGSCCPassManagerRef, LLVMCGSCCPassManagerRef), PM, NestedPM)
-end
-
-function LLVMFPMAddFPM(PM, NestedPM)
-    ccall((:LLVMFPMAddFPM, libLLVMExtra), Cvoid, (LLVMFunctionPassManagerRef, LLVMFunctionPassManagerRef), PM, NestedPM)
-end
-
-function LLVMLPMAddLPM(PM, NestedPM)
-    ccall((:LLVMLPMAddLPM, libLLVMExtra), Cvoid, (LLVMLoopPassManagerRef, LLVMLoopPassManagerRef), PM, NestedPM)
-end
-
-function LLVMMPMAddCGPM(PM, NestedPM)
-    ccall((:LLVMMPMAddCGPM, libLLVMExtra), Cvoid, (LLVMModulePassManagerRef, LLVMCGSCCPassManagerRef), PM, NestedPM)
-end
-
-function LLVMCGPMAddFPM(PM, NestedPM)
-    ccall((:LLVMCGPMAddFPM, libLLVMExtra), Cvoid, (LLVMCGSCCPassManagerRef, LLVMFunctionPassManagerRef), PM, NestedPM)
-end
-
-function LLVMFPMAddLPM(PM, NestedPM, UseMemorySSA)
-    ccall((:LLVMFPMAddLPM, libLLVMExtra), Cvoid, (LLVMFunctionPassManagerRef, LLVMLoopPassManagerRef, LLVMBool), PM, NestedPM, UseMemorySSA)
-end
-
-function LLVMMPMAddFPM(PM, NestedPM)
-    ccall((:LLVMMPMAddFPM, libLLVMExtra), Cvoid, (LLVMModulePassManagerRef, LLVMFunctionPassManagerRef), PM, NestedPM)
-end
-
-# typedef LLVMPreservedAnalysesRef ( * LLVMJuliaModulePassCallback ) ( LLVMModuleRef M , LLVMModuleAnalysisManagerRef AM , void * Thunk )
+# typedef LLVMBool ( * LLVMJuliaModulePassCallback ) ( LLVMModuleRef M , void * Thunk )
 const LLVMJuliaModulePassCallback = Ptr{Cvoid}
 
-# typedef LLVMPreservedAnalysesRef ( * LLVMJuliaFunctionPassCallback ) ( LLVMValueRef F , LLVMFunctionAnalysisManagerRef AM , void * Thunk )
+# typedef LLVMBool ( * LLVMJuliaFunctionPassCallback ) ( LLVMValueRef F , void * Thunk )
 const LLVMJuliaFunctionPassCallback = Ptr{Cvoid}
 
-function LLVMMPMAddJuliaPass(PM, Callback, Thunk)
-    ccall((:LLVMMPMAddJuliaPass, libLLVMExtra), Cvoid, (LLVMModulePassManagerRef, LLVMJuliaModulePassCallback, Ptr{Cvoid}), PM, Callback, Thunk)
+function LLVMPassBuilderExtensionsRegisterModulePass(Options, PassName, Callback, Thunk)
+    ccall((:LLVMPassBuilderExtensionsRegisterModulePass, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef, Cstring, LLVMJuliaModulePassCallback, Ptr{Cvoid}), Options, PassName, Callback, Thunk)
 end
 
-function LLVMFPMAddJuliaPass(PM, Callback, Thunk)
-    ccall((:LLVMFPMAddJuliaPass, libLLVMExtra), Cvoid, (LLVMFunctionPassManagerRef, LLVMJuliaFunctionPassCallback, Ptr{Cvoid}), PM, Callback, Thunk)
+function LLVMPassBuilderExtensionsRegisterFunctionPass(Options, PassName, Callback, Thunk)
+    ccall((:LLVMPassBuilderExtensionsRegisterFunctionPass, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef, Cstring, LLVMJuliaFunctionPassCallback, Ptr{Cvoid}), Options, PassName, Callback, Thunk)
 end
 
-function LLVMRegisterTargetIRAnalysis(FAM, TM)
-    ccall((:LLVMRegisterTargetIRAnalysis, libLLVMExtra), LLVMBool, (LLVMFunctionAnalysisManagerRef, LLVMTargetMachineRef), FAM, TM)
-end
-
-function LLVMRegisterTargetLibraryAnalysis(FAM, Triple, TripleLength)
-    ccall((:LLVMRegisterTargetLibraryAnalysis, libLLVMExtra), LLVMBool, (LLVMFunctionAnalysisManagerRef, Cstring, Csize_t), FAM, Triple, TripleLength)
-end
-
-function LLVMRegisterAliasAnalyses(FAM, PB, TM, Analyses, AnalysesLength)
-    ccall((:LLVMRegisterAliasAnalyses, libLLVMExtra), LLVMErrorRef, (LLVMFunctionAnalysisManagerRef, LLVMPassBuilderRef, LLVMTargetMachineRef, Cstring, Csize_t), FAM, PB, TM, Analyses, AnalysesLength)
+function LLVMRunJuliaPasses(M, Passes, TM, Options, Extensions)
+    ccall((:LLVMRunJuliaPasses, libLLVMExtra), LLVMErrorRef, (LLVMModuleRef, Cstring, LLVMTargetMachineRef, LLVMPassBuilderOptionsRef, LLVMPassBuilderExtensionsRef), M, Passes, TM, Options, Extensions)
 end
 

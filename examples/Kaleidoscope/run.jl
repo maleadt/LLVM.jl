@@ -19,17 +19,13 @@ function optimize!(mod::LLVM.Module)
     if LLVM.has_newpm()
         host_triple = Sys.MACHINE # LLVM.triple() might be wrong (see LLVM.jl#108)
         host_t = LLVM.Target(triple=host_triple)
-        LLVM.@dispose tm=LLVM.TargetMachine(host_t, host_triple) pb=LLVM.PassBuilder(tm) begin
-            LLVM.NewPMModulePassManager(pb) do mpm
-                LLVM.add!(mpm, LLVM.NewPMFunctionPassManager) do fpm
-                    LLVM.add!(fpm, LLVM.InstCombinePass())
-                    LLVM.add!(fpm, LLVM.ReassociatePass())
-                    LLVM.add!(fpm, LLVM.GVNPass())
-                    LLVM.add!(fpm, LLVM.SimplifyCFGPass())
-                    LLVM.add!(fpm, LLVM.PromotePass())
-                end
-                LLVM.run!(mpm, mod, tm)
-            end
+        LLVM.@dispose tm=LLVM.TargetMachine(host_t, host_triple) pb=LLVM.NewPMPassBuilder() begin
+            LLVM.add!(pb, LLVM.InstCombinePass())
+            LLVM.add!(pb, LLVM.ReassociatePass())
+            LLVM.add!(pb, LLVM.GVNPass())
+            LLVM.add!(pb, LLVM.SimplifyCFGPass())
+            LLVM.add!(pb, LLVM.PromotePass())
+            LLVM.run!(pb, mod, tm)
         end
     else
         LLVM.@dispose pass_manager=LLVM.ModulePassManager() begin
