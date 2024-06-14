@@ -11,7 +11,7 @@ function add!(pm::PassManager, pass::Pass)
     API.LLVMAddPass(pm, pass)
 end
 
-dispose(pm::PassManager) = API.LLVMDisposePassManager(pm)
+dispose(pm::PassManager) = API.LLVMDisposePassManager(mark_dispose(pm))
 
 
 #
@@ -25,7 +25,7 @@ export ModulePassManager, run!
     roots::Vector{Any}
 end
 
-ModulePassManager() = ModulePassManager(API.LLVMCreatePassManager(), [])
+ModulePassManager() = mark_alloc(ModulePassManager(API.LLVMCreatePassManager(), []))
 
 function ModulePassManager(f::Core.Function, args...; kwargs...)
     mpm = ModulePassManager(args...; kwargs...)
@@ -53,7 +53,7 @@ export FunctionPassManager,
 end
 
 FunctionPassManager(mod::Module) =
-    FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(mod), [])
+    mark_alloc(FunctionPassManager(API.LLVMCreateFunctionPassManagerForModule(mod), []))
 
 function FunctionPassManager(f::Core.Function, args...; kwargs...)
     fpm = FunctionPassManager(args...; kwargs...)
