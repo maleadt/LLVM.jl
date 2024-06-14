@@ -10,9 +10,9 @@ export DataLayout, dispose,
 
 Base.unsafe_convert(::Type{API.LLVMTargetDataRef}, dl::DataLayout) = dl.ref
 
-DataLayout(rep::String) = DataLayout(API.LLVMCreateTargetData(rep))
+DataLayout(rep::String) = mark_alloc(DataLayout(API.LLVMCreateTargetData(rep)))
 
-DataLayout(tm::TargetMachine) = DataLayout(API.LLVMCreateTargetDataLayout(tm))
+DataLayout(tm::TargetMachine) = mark_alloc(DataLayout(API.LLVMCreateTargetDataLayout(tm)))
 
 function DataLayout(f::Core.Function, args...; kwargs...)
     data = DataLayout(args...; kwargs...)
@@ -23,7 +23,7 @@ function DataLayout(f::Core.Function, args...; kwargs...)
     end
 end
 
-dispose(data::DataLayout) = API.LLVMDisposeTargetData(data)
+dispose(data::DataLayout) = mark_dispose(API.LLVMDisposeTargetData(data))
 
 Base.string(data::DataLayout) =
     unsafe_message(API.LLVMCopyStringRepOfTargetData(data))
