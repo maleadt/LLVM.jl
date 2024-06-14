@@ -1,21 +1,25 @@
-function leakcheck_enabled()
-    parse(Bool, @load_preference("leakcheck", "false"))
-end
+## memcheck: keeping track of allocations and disposals
 
 const tracked_objects = Dict{Any,Any}()
 
+function memcheck_enabled()
+    parse(Bool, @load_preference("memcheck", "false"))
+end
+
 function mark_alloc(obj::Any)
-    @static leakcheck_enabled() || return
+    @static memcheck_enabled() || return obj
     tracked_objects[obj] = backtrace()[3:end]
+    return obj
 end
 
 function mark_dispose(obj)
-    @static leakcheck_enabled() || return
+    @static memcheck_enabled() || return obj
     delete!(tracked_objects, obj)
+    return obj
 end
 
-function check_leaks(code)
-    @static leakcheck_enabled() || return
+function check_memory(code)
+    @static memcheck_enabled() || return
     if code != 0
         # if we errorred, we don't care about leaks
         return
@@ -23,7 +27,7 @@ function check_leaks(code)
 
     io = Core.stdout
     for (obj, bt) in tracked_objects
-        print(io, "WARNING: Object $obj was not properly disposed of.")
+        print(io, "WARNING: An instance of $(typeof(obj)) was not properly disposed of.")
         Base.show_backtrace(io, bt)
         println(io)
     end
