@@ -88,7 +88,12 @@ jobs:
         if: runner.os == 'Windows'
 
       - name: Run tests
-        run: julia --project -e 'using Pkg; Pkg.test(; coverage=true, julia_args=`-g2`)'
+        run: |
+          julia -e 'open("LocalPreferences.toml", "a") do io
+                      println(io, "typecheck = \"true\"")
+                      println(io, "memcheck = \"true\"")
+                    end'
+          julia --project -e 'using Pkg; Pkg.test(; coverage=true)'
         env:
           JULIA_LLVM_ARGS: ${{ matrix.llvm_args }}
       - uses: julia-actions/julia-processcoverage@v1
@@ -151,7 +156,12 @@ jobs:
         run: julia --project=deps deps/build_ci.jl
 
       - name: Run tests
-        run: julia --project -e 'using Pkg; Pkg.test(; coverage=true, julia_args=`-g2`)'
+        run: |
+          julia -e 'open("LocalPreferences.toml", "a") do io
+                      println(io, "typecheck = \"true\"")
+                      println(io, "memcheck = \"true\"")
+                    end'
+          julia --project -e 'using Pkg; Pkg.test(; coverage=true)'
         env:
           JULIA_LLVM_ARGS: ${{ matrix.llvm_args }}
       - uses: julia-actions/julia-processcoverage@v1
