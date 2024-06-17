@@ -7,15 +7,7 @@ const typecheck_enabled = parse(Bool, @load_preference("typecheck", "false"))
 
 const memcheck_enabled = parse(Bool, @load_preference("memcheck", "false"))
 
-const foreign_objects = Set{Any}()
 const tracked_objects = Dict{Any,Any}()
-
-function mark_foreign(obj::Any)
-    @static if memcheck_enabled
-        push!(foreign_objects, obj)
-    end
-    return obj
-end
 
 function mark_alloc(obj::Any)
     @static if memcheck_enabled
@@ -43,14 +35,9 @@ function mark_use(obj::Any)
     @static if memcheck_enabled
         io = Core.stdout
 
-        if obj in foreign_objects
-            return obj
-        end
-
         if !haskey(tracked_objects, obj)
-            print("\nWARNING: An unknown instance of $(typeof(obj)) is being used.")
-            Base.show_backtrace(io, backtrace()[2:end])
-            println(io)
+            # we have to ignore unknown objects, as they may originate externally.
+            # for example, a Julia-created Type we call `context` on.
             return obj
         end
 
@@ -104,7 +91,7 @@ function mark_dispose(f, obj)
     return ret
 end
 
-function report_leaks(code)
+function report_leaks(code=0)
     # if we errored, we can't trust the memory state
     if code != 0
         return
