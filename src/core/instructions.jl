@@ -18,7 +18,7 @@ end
 
 function refcheck(::Type{T}, ref::API.LLVMValueRef) where T<:Instruction
     ref==C_NULL && throw(UndefRefError())
-    if Base.JLOptions().debug_level >= 2
+    if typecheck_enabled
         T′ = identify(Instruction, ref)
         if T != T′
             error("invalid conversion of $T′ instruction reference to $T")

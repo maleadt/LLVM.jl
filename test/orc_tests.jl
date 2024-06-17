@@ -78,10 +78,9 @@ end
                 ret!(builder, tmp)
             end
 
-            # TODO: Get TM from lljit?
-            tm = JITTargetMachine()
             triple!(mod, triple(lljit))
-            @dispose pm=ModulePassManager() begin
+            @dispose pm=ModulePassManager() tm=JITTargetMachine() begin
+                # TODO: Get TM from lljit?
                 add_library_info!(pm, triple(mod))
                 add_transform_info!(pm, tm)
                 run!(pm, mod)
@@ -103,8 +102,7 @@ end
         jd = JITDylib(lljit)
 
         sym = "SomeFunction"
-        obj = @dispose ctx=Context() begin
-            mod = LLVM.Module("jit")
+        obj = @dispose ctx=Context() mod=LLVM.Module("jit") begin
             ft = LLVM.FunctionType(LLVM.VoidType())
             fn = LLVM.Function(mod, sym, ft)
 
@@ -115,8 +113,9 @@ end
             end
             verify(mod)
 
-            tm  = JITTargetMachine()
-            emit(tm, mod, LLVM.API.LLVMObjectFile)
+            @dispose tm=JITTargetMachine() begin
+                emit(tm, mod, LLVM.API.LLVMObjectFile)
+            end
         end
         add!(lljit, jd, MemoryBuffer(obj))
 
@@ -128,12 +127,11 @@ end
         @test_throws LLVMException lookup(lljit, sym)
     end
 
-    @dispose lljit=LLJIT(;tm=JITTargetMachine()) begin
+    @dispose lljit=LLJIT(; tm=JITTargetMachine()) begin
         jd = JITDylib(lljit)
 
         sym = "SomeFunction"
-        obj = @dispose ctx=Context() begin
-            mod = LLVM.Module("jit")
+        obj = @dispose ctx=Context() mod=LLVM.Module("jit") begin
             ft = LLVM.FunctionType(LLVM.Int32Type())
             fn = LLVM.Function(mod, sym, ft)
 
@@ -148,8 +146,9 @@ end
             end
             verify(mod)
 
-            tm  = JITTargetMachine()
-            emit(tm, mod, LLVM.API.LLVMObjectFile)
+            @dispose tm=JITTargetMachine() begin
+                emit(tm, mod, LLVM.API.LLVMObjectFile)
+            end
         end
 
         data = Ref{Int32}(42)

@@ -5,12 +5,14 @@ export ModuleProvider, dispose
 
 @checked struct ModuleProvider
     ref::API.LLVMModuleProviderRef
+    mod::Module
 end
 
-Base.unsafe_convert(::Type{API.LLVMModuleProviderRef}, mp::ModuleProvider) = mp.ref
+Base.unsafe_convert(::Type{API.LLVMModuleProviderRef}, mp::ModuleProvider) =
+    mark_use(mp).ref
 
 ModuleProvider(mod::Module) =
-    ModuleProvider(API.LLVMCreateModuleProviderForExistingModule(mod))
+    mark_alloc(ModuleProvider(API.LLVMCreateModuleProviderForExistingModule(mod), mod))
 
 function ModuleProvider(f::Core.Function, args...; kwargs...)
     mp = ModuleProvider(args...; kwargs...)
@@ -21,5 +23,9 @@ function ModuleProvider(f::Core.Function, args...; kwargs...)
     end
 end
 
-# NOTE: this destroys the underlying module
-dispose(mp::ModuleProvider) = API.LLVMDisposeModuleProvider(mp)
+function dispose(mp::ModuleProvider)
+    # NOTE: this destroys the underlying module
+    mark_dispose(mp.mod)
+
+    mark_dispose(API.LLVMDisposeModuleProvider, mp)
+end

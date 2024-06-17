@@ -51,7 +51,7 @@ end
         end
     end
 
-    DataLayout(tm)
+    dispose(DataLayout(tm))
 end
 
 end

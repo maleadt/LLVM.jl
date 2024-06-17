@@ -1,5 +1,6 @@
 module LLVM
 
+using Preferences
 using Unicode
 using Printf
 using Libdl
@@ -58,6 +59,9 @@ end # module API
 has_oldpm() = LLVM.version() < v"17"
 has_newpm() = LLVM.version() >= v"15"
 has_julia_ojit() = VERSION >= v"1.10.0-DEV.1395"
+
+# helpers
+include("debug.jl")
 
 # LLVM API wrappers
 include("support.jl")
@@ -133,6 +137,7 @@ function __init__()
 
     _install_handlers()
     _install_handlers(GlobalContext())
+    atexit(report_leaks)
 end
 
 end

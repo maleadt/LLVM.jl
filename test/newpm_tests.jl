@@ -200,9 +200,7 @@ end
     CustomModulePass() = NewPMModulePass("custom_module_pass", custom_module_pass!)
     CustomFunctionPass() = NewPMFunctionPass("custom_function_pass", custom_function_pass!)
 
-    @dispose ctx=Context() mod=test_module() begin
-        pb = NewPMPassBuilder()
-
+    @dispose ctx=Context() mod=test_module() pb=NewPMPassBuilder() begin
         register!(pb, CustomModulePass())
         register!(pb, CustomFunctionPass())
 

@@ -154,9 +154,9 @@ end
             @test convert(Int, res) == 3
             dispose(res)
         end
-        @test_throws UndefRefError show(mod)
     end
 
+    dispose(mod)
     dispose.(args)
 end
 
@@ -178,7 +178,6 @@ end
             @test convert(Int, res) == 42
             dispose(res)
         end
-        @test_throws UndefRefError show(mod)
     end
 end
 
@@ -200,7 +199,6 @@ end
             @test convert(Int, res) == 42
             dispose(res)
         end
-        @test_throws UndefRefError show(mod)
     end
 end
 

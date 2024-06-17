@@ -30,6 +30,7 @@
     link!(mod1, mod2)
     @test haskey(functions(mod1), "SomeFunction")
     @test haskey(functions(mod1), "SomeOtherFunction")
+    dispose(mod1)
 end
 
 end

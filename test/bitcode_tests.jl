@@ -17,32 +17,28 @@ end
     verify(source_mod)
 
 
-    bitcode_buf = convert(MemoryBuffer, source_mod)
-
-    let
-        mod = parse(LLVM.Module, bitcode_buf)
-        verify(mod)
-        @test haskey(functions(mod), "SomeFunction")
-        dispose(mod)
+    @dispose bitcode_buf = convert(MemoryBuffer, source_mod) begin
+        @dispose mod=parse(LLVM.Module, bitcode_buf) begin
+            verify(mod)
+            @test haskey(functions(mod), "SomeFunction")
+        end
     end
 
 
-    bitcode = convert(Vector{UInt8}, source_mod)
+    let bitcode = convert(Vector{UInt8}, source_mod)
+        @dispose mod = parse(LLVM.Module, bitcode) begin
+            verify(mod)
+            @test haskey(functions(mod), "SomeFunction")
+        end
 
-    let
-        mod = parse(LLVM.Module, bitcode)
-        verify(mod)
-        @test haskey(functions(mod), "SomeFunction")
-        dispose(mod)
-    end
+        mktemp() do path, io
+            mark(io)
+            @test write(io, source_mod) > 0
+            flush(io)
+            reset(io)
 
-    mktemp() do path, io
-        mark(io)
-        @test write(io, source_mod) > 0
-        flush(io)
-        reset(io)
-
-        @test read(io) == bitcode
+            @test read(io) == bitcode
+        end
     end
 end
 

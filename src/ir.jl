@@ -7,6 +7,7 @@ function Base.parse(::Type{Module}, ir::String)
     out_ref = Ref{API.LLVMModuleRef}()
     out_error = Ref{Cstring}()
     status = API.LLVMParseIRInContext(context(), membuf, out_ref, out_error) |> Bool
+    mark_dispose(membuf)
 
     if status
         error = unsafe_message(out_error[])

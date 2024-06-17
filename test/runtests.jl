@@ -1,9 +1,5 @@
 using LLVM
 
-if Base.JLOptions().debug_level < 2
-    @warn "It is recommended to run the LLVM.jl test suite with -g2"
-end
-
 using InteractiveUtils
 @info "System information:\n" * sprint(io->versioninfo(io))
 
@@ -22,13 +18,15 @@ julia_typed_pointers = let
 end
 @info "Pointer settings: Julia uses $(julia_typed_pointers ? "typed" : "opaque") pointers, default contexts use $(ctx_typed_pointers ? "typed" : "opaque") pointers"
 
+@info "Debug settings: typecheck = $(LLVM.typecheck_enabled), memcheck = $(LLVM.memcheck_enabled)"
+
 worker_init_expr = quote
     using LLVM
 
     # HACK: if a test throws within a Context() do block, displaying the LLVM value may
     #       crash because the context has been disposed already. avoid that by disabling
     #       `dispose`, and only have it pop the context off the stack (but not destroy it).
-    LLVM.dispose(ctx::Context) = LLVM.deactivate(ctx)
+    LLVM.dispose(ctx::Context) = LLVM.mark_dispose(LLVM.deactivate, ctx)
 end
 
 using ReTestItems

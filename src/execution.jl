@@ -10,17 +10,17 @@ export GenericValue, dispose,
     ref::API.LLVMGenericValueRef
 end
 
-Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = val.ref
+Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = mark_use(val).ref
 
 GenericValue(typ::IntegerType, N::Signed) =
-    GenericValue(
+    mark_alloc(GenericValue(
         API.LLVMCreateGenericValueOfInt(typ,
-                                        reinterpret(Culonglong, convert(Int64, N)), true))
+                                        reinterpret(Culonglong, convert(Int64, N)), true)))
 
 GenericValue(typ::IntegerType, N::Unsigned) =
-    GenericValue(
+    mark_alloc(GenericValue(
         API.LLVMCreateGenericValueOfInt(typ,
-                                        reinterpret(Culonglong, convert(UInt64, N)), false))
+                                        reinterpret(Culonglong, convert(UInt64, N)), false)))
 
 intwidth(val::GenericValue) = API.LLVMGenericValueIntWidth(val)
 
@@ -45,7 +45,7 @@ GenericValue(ptr::Ptr) =
 Base.convert(::Type{Ptr{T}}, val::GenericValue) where {T} =
     convert(Ptr{T}, API.LLVMGenericValueToPointer(val))
 
-dispose(val::GenericValue) = API.LLVMDisposeGenericValue(val)
+dispose(val::GenericValue) = mark_dispose(API.LLVMDisposeGenericValue, val)
 
 
 ## execution engine
@@ -58,7 +58,8 @@ export ExecutionEngine, Interpreter, JIT,
     mods::Set{Module}
 end
 
-Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine) = engine.ref
+Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine) =
+    mark_use(engine).ref
 
 # NOTE: these takes ownership of the module
 function ExecutionEngine(mod::Module)
@@ -71,7 +72,7 @@ function ExecutionEngine(mod::Module)
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    return mark_alloc(ExecutionEngine(out_ref[], Set([mod])))
 end
 function Interpreter(mod::Module)
     API.LLVMLinkInInterpreter()
@@ -85,7 +86,7 @@ function Interpreter(mod::Module)
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    return mark_alloc(ExecutionEngine(out_ref[], Set([mod])))
 end
 function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault)
     API.LLVMLinkInMCJIT()
@@ -99,14 +100,12 @@ function JIT(mod::Module, optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevel
         throw(LLVMException(error))
     end
 
-    return ExecutionEngine(out_ref[], Set([mod]))
+    return mark_alloc(ExecutionEngine(out_ref[], Set([mod])))
 end
 
 function dispose(engine::ExecutionEngine)
-    for mod in engine.mods
-        mod.ref = C_NULL
-    end
-    API.LLVMDisposeExecutionEngine(engine)
+    mark_dispose.(engine.mods)
+    mark_dispose(API.LLVMDisposeExecutionEngine, engine)
 end
 
 for x in [:ExecutionEngine, :Interpreter, :JIT]
@@ -120,7 +119,10 @@ for x in [:ExecutionEngine, :Interpreter, :JIT]
     end
 end
 
-Base.push!(engine::ExecutionEngine, mod::Module) = API.LLVMAddModule(engine.ref, mod.ref)
+function Base.push!(engine::ExecutionEngine, mod::Module)
+    push!(engine.mods, mod)
+    API.LLVMAddModule(engine.ref, mod.ref)
+end
 
 # up to user to free the deleted module
 function Base.delete!(engine::ExecutionEngine, mod::Module)

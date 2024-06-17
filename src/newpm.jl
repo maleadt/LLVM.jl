@@ -175,12 +175,13 @@ end
 
 Base.string(pm::NewPMPassBuilder) = join(pm.passes, ",")
 
-Base.unsafe_convert(::Type{API.LLVMPassBuilderOptionsRef}, pb::NewPMPassBuilder) = pb.opts
+Base.unsafe_convert(::Type{API.LLVMPassBuilderOptionsRef}, pb::NewPMPassBuilder) =
+    mark_use(pb).opts
 
 function NewPMPassBuilder(; kwargs...)
     opts = API.LLVMCreatePassBuilderOptions()
     exts = API.LLVMCreatePassBuilderExtensions()
-    obj = NewPMPassBuilder(opts, exts, [], [])
+    obj = mark_alloc(NewPMPassBuilder(opts, exts, [], []))
 
     for (name, value) in pairs(kwargs)
         if name == :verify_each
@@ -216,6 +217,7 @@ end
 function dispose(pb::NewPMPassBuilder)
     API.LLVMDisposePassBuilderOptions(pb.opts)
     API.LLVMDisposePassBuilderExtensions(pb.exts)
+    mark_dispose(pb)
 end
 
 """
@@ -273,9 +275,10 @@ function run!(pb::NewPMPassBuilder, mod::Module, tm::Union{Nothing,TargetMachine
 end
 
 function run!(pass::String, args...; kwargs...)
-    pb = NewPMPassBuilder(; kwargs...)
-    add!(pb, pass)
-    run!(pb, args...)
+    @dispose pb=NewPMPassBuilder(; kwargs...) begin
+        add!(pb, pass)
+        run!(pb, args...)
+    end
 end
 
 
