@@ -10,7 +10,7 @@ export GenericValue, dispose,
     ref::API.LLVMGenericValueRef
 end
 
-Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = val.ref
+Base.unsafe_convert(::Type{API.LLVMGenericValueRef}, val::GenericValue) = mark_use(val).ref
 
 GenericValue(typ::IntegerType, N::Signed) =
     mark_alloc(GenericValue(
@@ -45,7 +45,7 @@ GenericValue(ptr::Ptr) =
 Base.convert(::Type{Ptr{T}}, val::GenericValue) where {T} =
     convert(Ptr{T}, API.LLVMGenericValueToPointer(val))
 
-dispose(val::GenericValue) = API.LLVMDisposeGenericValue(mark_dispose(val))
+dispose(val::GenericValue) = mark_dispose(API.LLVMDisposeGenericValue, val)
 
 
 ## execution engine
@@ -58,7 +58,8 @@ export ExecutionEngine, Interpreter, JIT,
     mods::Set{Module}
 end
 
-Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine) = engine.ref
+Base.unsafe_convert(::Type{API.LLVMExecutionEngineRef}, engine::ExecutionEngine) =
+    mark_use(engine).ref
 
 # NOTE: these takes ownership of the module
 function ExecutionEngine(mod::Module)
@@ -104,7 +105,7 @@ end
 
 function dispose(engine::ExecutionEngine)
     mark_dispose.(engine.mods)
-    API.LLVMDisposeExecutionEngine(mark_dispose(engine))
+    mark_dispose(API.LLVMDisposeExecutionEngine, engine)
 end
 
 for x in [:ExecutionEngine, :Interpreter, :JIT]

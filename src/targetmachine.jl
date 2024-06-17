@@ -9,7 +9,7 @@ export JITTargetMachine
     ref::API.LLVMTargetMachineRef
 end
 
-Base.unsafe_convert(::Type{API.LLVMTargetMachineRef}, tm::TargetMachine) = tm.ref
+Base.unsafe_convert(::Type{API.LLVMTargetMachineRef}, tm::TargetMachine) = mark_use(tm).ref
 
 TargetMachine(t::Target, triple::String, cpu::String="", features::String="";
               optlevel::API.LLVMCodeGenOptLevel=API.LLVMCodeGenLevelDefault,
@@ -18,7 +18,7 @@ TargetMachine(t::Target, triple::String, cpu::String="", features::String="";
     mark_alloc(TargetMachine(API.LLVMCreateTargetMachine(t, triple, cpu, features, optlevel,
                                                          reloc, code)))
 
-dispose(tm::TargetMachine) = API.LLVMDisposeTargetMachine(mark_dispose(tm))
+dispose(tm::TargetMachine) = mark_dispose(API.LLVMDisposeTargetMachine, tm)
 
 function TargetMachine(f::Core.Function, args...; kwargs...)
     tm = TargetMachine(args...; kwargs...)

@@ -26,7 +26,7 @@ worker_init_expr = quote
     # HACK: if a test throws within a Context() do block, displaying the LLVM value may
     #       crash because the context has been disposed already. avoid that by disabling
     #       `dispose`, and only have it pop the context off the stack (but not destroy it).
-    LLVM.dispose(ctx::Context) = LLVM.deactivate(LLVM.mark_dispose(ctx))
+    LLVM.dispose(ctx::Context) = LLVM.mark_dispose(LLVM.deactivate, ctx)
 end
 
 using ReTestItems

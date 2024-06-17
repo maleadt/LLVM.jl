@@ -4,7 +4,8 @@ export MemoryBuffer, MemoryBufferFile, dispose
     ref::API.LLVMMemoryBufferRef
 end
 
-Base.unsafe_convert(::Type{API.LLVMMemoryBufferRef}, membuf::MemoryBuffer) = membuf.ref
+Base.unsafe_convert(::Type{API.LLVMMemoryBufferRef}, membuf::MemoryBuffer) =
+    mark_use(membuf).ref
 
 function MemoryBuffer(data::Vector{T}, name::String="", copy::Bool=true) where T<:Union{UInt8,Int8}
     ptr = pointer(data)
@@ -49,7 +50,7 @@ function MemoryBufferFile(f::Core.Function, args...; kwargs...)
     end
 end
 
-dispose(membuf::MemoryBuffer) = API.LLVMDisposeMemoryBuffer(mark_dispose(membuf))
+dispose(membuf::MemoryBuffer) = mark_dispose(API.LLVMDisposeMemoryBuffer, membuf)
 
 Base.length(membuf::MemoryBuffer) = API.LLVMGetBufferSize(membuf)
 

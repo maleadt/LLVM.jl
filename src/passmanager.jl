@@ -4,14 +4,14 @@ export PassManager,
 # subtypes are expected to have a 'ref::API.LLVMPassManagerRef' field
 abstract type PassManager end
 
-Base.unsafe_convert(::Type{API.LLVMPassManagerRef}, pm::PassManager) = pm.ref
+Base.unsafe_convert(::Type{API.LLVMPassManagerRef}, pm::PassManager) = mark_use(pm).ref
 
 function add!(pm::PassManager, pass::Pass)
     push!(pm.roots, pass)
     API.LLVMAddPass(pm, pass)
 end
 
-dispose(pm::PassManager) = API.LLVMDisposePassManager(mark_dispose(pm))
+dispose(pm::PassManager) = mark_dispose(API.LLVMDisposePassManager, pm)
 
 
 #

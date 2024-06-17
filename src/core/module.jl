@@ -9,7 +9,7 @@ export dispose, context,
 
 # forward definition of Module in src/core/value/constant.jl
 
-Base.unsafe_convert(::Type{API.LLVMModuleRef}, mod::Module) = mod.ref
+Base.unsafe_convert(::Type{API.LLVMModuleRef}, mod::Module) = mark_use(mod).ref
 
 Base.:(==)(x::Module, y::Module) = (x.ref === y.ref)
 
@@ -24,7 +24,7 @@ Module(name::String) =
 Module(mod::Module) = mark_alloc(Module(API.LLVMCloneModule(mod)))
 Base.copy(mod::Module) = Module(mod)
 
-dispose(mod::Module) = API.LLVMDisposeModule(mark_dispose(mod))
+dispose(mod::Module) = mark_dispose(API.LLVMDisposeModule, mod)
 
 function Module(f::Core.Function, args...; kwargs...)
     mod = Module(args...; kwargs...)

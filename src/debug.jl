@@ -3,11 +3,19 @@
 const typecheck_enabled = parse(Bool, @load_preference("typecheck", "false"))
 
 
-## memcheck: keeping track of allocations and disposals
+## memcheck: keeping track when objects are valid
 
 const memcheck_enabled = parse(Bool, @load_preference("memcheck", "false"))
 
+const foreign_objects = Set{Any}()
 const tracked_objects = Dict{Any,Any}()
+
+function mark_foreign(obj::Any)
+    @static if memcheck_enabled
+        push!(foreign_objects, obj)
+    end
+    return obj
+end
 
 function mark_alloc(obj::Any)
     @static if memcheck_enabled
@@ -31,6 +39,36 @@ function mark_alloc(obj::Any)
     return obj
 end
 
+function mark_use(obj::Any)
+    @static if memcheck_enabled
+        io = Core.stdout
+
+        if obj in foreign_objects
+            return obj
+        end
+
+        if !haskey(tracked_objects, obj)
+            print("\nWARNING: An unknown instance of $(typeof(obj)) is being used.")
+            Base.show_backtrace(io, backtrace()[2:end])
+            println(io)
+            return obj
+        end
+
+        alloc_bt, dispose_bt = tracked_objects[obj]
+        if dispose_bt !== nothing
+            print("\nWARNING: An instance of $(typeof(obj)) is being used after it was disposed.")
+            print("\nThe object was allocated at:")
+            Base.show_backtrace(io, alloc_bt)
+            print("\nThe object was disposed at:")
+            Base.show_backtrace(io, dispose_bt)
+            print("\nThe object is being used at:")
+            Base.show_backtrace(io, backtrace()[2:end])
+            println(io)
+        end
+    end
+    return obj
+end
+
 function mark_dispose(obj)
     @static if memcheck_enabled
         io = Core.stdout
@@ -39,7 +77,7 @@ function mark_dispose(obj)
         if !haskey(tracked_objects, obj)
             print(io, "\nWARNING: An unknown instance of $(typeof(obj)) is being disposed of.")
             Base.show_backtrace(io, new_dispose_bt)
-            return obj
+            return
         end
 
         alloc_bt, old_dispose_bt = tracked_objects[obj]
@@ -56,7 +94,14 @@ function mark_dispose(obj)
 
         tracked_objects[obj] = (alloc_bt, new_dispose_bt)
     end
-    return obj
+    return
+end
+
+# helper for single-line disposal without a use-after-free warning
+function mark_dispose(f, obj)
+    ret = f(obj)
+    mark_dispose(obj)
+    return ret
 end
 
 function report_leaks(code)

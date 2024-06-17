@@ -8,7 +8,7 @@ export DataLayout, dispose,
 
 # forward definition of DataLayout in src/module.jl
 
-Base.unsafe_convert(::Type{API.LLVMTargetDataRef}, dl::DataLayout) = dl.ref
+Base.unsafe_convert(::Type{API.LLVMTargetDataRef}, dl::DataLayout) = mark_use(dl).ref
 
 DataLayout(rep::String) = mark_alloc(DataLayout(API.LLVMCreateTargetData(rep)))
 
@@ -23,7 +23,7 @@ function DataLayout(f::Core.Function, args...; kwargs...)
     end
 end
 
-dispose(data::DataLayout) = API.LLVMDisposeTargetData(mark_dispose(data))
+dispose(data::DataLayout) = mark_dispose(API.LLVMDisposeTargetData, data)
 
 Base.string(data::DataLayout) =
     unsafe_message(API.LLVMCopyStringRepOfTargetData(data))

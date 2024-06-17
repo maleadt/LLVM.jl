@@ -20,7 +20,8 @@ function TargetMachineBuilder()
 end
 
 function TargetMachineBuilder(tm::TargetMachine)
-    tmb = API.LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(mark_dispose(tm))
+    tmb = API.LLVMOrcJITTargetMachineBuilderCreateFromTargetMachine(tm)
+    mark_dispose(tm)
     TargetMachineBuilder(tmb)
 end
 
@@ -186,21 +187,23 @@ end
 function lookup_dylib(es::ExecutionSession, name)
     ref = API.LLVMOrcExecutionSessionGetJITDylibByName(es, name)
     if ref == C_NULL
-        return nothing
+        return
     end
     JITDylib(ref)
 end
 
 function add!(lljit::LLJIT, jd::JITDylib, obj::MemoryBuffer)
-    @check API.LLVMOrcLLJITAddObjectFile(lljit, jd, mark_dispose(obj))
-    return nothing
+    @check API.LLVMOrcLLJITAddObjectFile(lljit, jd, obj)
+    mark_dispose(obj)
+    return
 end
 
 # LLVMOrcLLJITAddObjectFileWithRT(J, RT, ObjBuffer)
 
 function add!(lljit::LLJIT, jd::JITDylib, mod::ThreadSafeModule)
-    @check API.LLVMOrcLLJITAddLLVMIRModule(lljit, jd, mark_dispose(mod))
-    return nothing
+    @check API.LLVMOrcLLJITAddLLVMIRModule(lljit, jd, mod)
+    mark_dispose(mod)
+    return
 end
 
 # LLVMOrcLLJITAddLLVMIRModuleWithRT(J, JD, TSM)
@@ -396,8 +399,9 @@ function JITDylib(jljit::JuliaOJIT)
 end
 
 function add!(jljit::JuliaOJIT, jd::JITDylib, obj::MemoryBuffer)
-    @check API.JLJITAddObjectFile(jljit, jd, mark_dispose(obj))
-    return nothing
+    @check API.JLJITAddObjectFile(jljit, jd, obj)
+    mark_dispose(obj)
+    return
 end
 
 function decorate_module(mod)
@@ -425,8 +429,9 @@ function add!(jljit::JuliaOJIT, jd::JITDylib, tsm::ThreadSafeModule)
     tsm() do mod
         decorate_module(mod)
     end
-    @check API.JLJITAddLLVMIRModule(jljit, jd, mark_dispose(tsm))
-    return nothing
+    @check API.JLJITAddLLVMIRModule(jljit, jd, tsm)
+    mark_dispose(tsm)
+    return
 end
 
 function lookup(jljit::JuliaOJIT, name, external_jd=true)

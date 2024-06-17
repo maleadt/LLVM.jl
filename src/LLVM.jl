@@ -136,7 +136,7 @@ function __init__()
     end
 
     _install_handlers()
-    _install_handlers(GlobalContext())
+    _install_handlers(mark_foreign(GlobalContext()))
     atexit(report_leaks)
 end
 

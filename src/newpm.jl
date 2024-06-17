@@ -175,7 +175,8 @@ end
 
 Base.string(pm::NewPMPassBuilder) = join(pm.passes, ",")
 
-Base.unsafe_convert(::Type{API.LLVMPassBuilderOptionsRef}, pb::NewPMPassBuilder) = pb.opts
+Base.unsafe_convert(::Type{API.LLVMPassBuilderOptionsRef}, pb::NewPMPassBuilder) =
+    mark_use(pb).opts
 
 function NewPMPassBuilder(; kwargs...)
     opts = API.LLVMCreatePassBuilderOptions()
@@ -214,9 +215,9 @@ function NewPMPassBuilder(; kwargs...)
 end
 
 function dispose(pb::NewPMPassBuilder)
-    mark_dispose(pb)
     API.LLVMDisposePassBuilderOptions(pb.opts)
     API.LLVMDisposePassBuilderExtensions(pb.exts)
+    mark_dispose(pb)
 end
 
 """

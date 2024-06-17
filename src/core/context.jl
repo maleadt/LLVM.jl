@@ -6,7 +6,7 @@ export Context, dispose, GlobalContext
     ref::API.LLVMContextRef
 end
 
-Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = ctx.ref
+Base.unsafe_convert(::Type{API.LLVMContextRef}, ctx::Context) = mark_use(ctx).ref
 
 function Context(; opaque_pointers=nothing)
     ctx = mark_alloc(Context(API.LLVMContextCreate()))
@@ -20,7 +20,7 @@ end
 
 function dispose(ctx::Context)
     deactivate(ctx)
-    API.LLVMContextDispose(mark_dispose(ctx))
+    mark_dispose(API.LLVMContextDispose, ctx)
 end
 
 function Context(f::Core.Function; kwargs...)

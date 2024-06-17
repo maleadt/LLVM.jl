@@ -8,7 +8,8 @@ export ModuleProvider, dispose
     mod::Module
 end
 
-Base.unsafe_convert(::Type{API.LLVMModuleProviderRef}, mp::ModuleProvider) = mp.ref
+Base.unsafe_convert(::Type{API.LLVMModuleProviderRef}, mp::ModuleProvider) =
+    mark_use(mp).ref
 
 ModuleProvider(mod::Module) =
     mark_alloc(ModuleProvider(API.LLVMCreateModuleProviderForExistingModule(mod), mod))
@@ -26,5 +27,5 @@ function dispose(mp::ModuleProvider)
     # NOTE: this destroys the underlying module
     mark_dispose(mp.mod)
 
-    API.LLVMDisposeModuleProvider(mark_dispose(mp))
+    mark_dispose(API.LLVMDisposeModuleProvider, mp)
 end
