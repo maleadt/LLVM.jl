@@ -1,0 +1,57 @@
+name: Enzyme [Downstream CI]
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  binary_test:
+    name: Enzyme Julia ${{ matrix.version }} ${{ matrix.llvm_args }} - ${{ matrix.os }} - ${{ matrix.arch }} , assertions ${{ matrix.assertions }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['1.10']
+        os: ['ubuntu-latest']
+        assertions:
+          - false
+          - true
+        arch: [x64]
+        llvm_args: ['']
+        include:
+          # starting with Julia 1.10, we can enable opaque pointers
+          - version: '1.10'
+            os: 'ubuntu-latest'
+            arch: 'x64'
+            llvm_args: '--opaque-pointers'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # build_ci.jl needs to be able to inspect the git log
+      - name: Clone Downstream
+        uses: actions/checkout@v2
+        with:
+          repository: EnzymeAD/Enzyme.jl
+          path: downstream
+
+      # install Julia
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: julia-actions/julia-buildpkg@latest
+      - name: Load this and run the downstream tests
+        shell: julia --color=yes --project=downstream {0}
+        run: |
+          using Pkg
+          # force it to use this PR's version of the package
+          Pkg.develop(PackageSpec(path="."))  # resolver may fail with main deps
+          Pkg.update()
+          Pkg.test(coverage=true)  # resolver may fail with test time deps
