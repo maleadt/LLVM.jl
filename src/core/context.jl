@@ -169,11 +169,12 @@ function handle_error(reason::Cstring)
 end
 
 function _install_handlers()
-    precompiling = @static if VERSION >= v"1.11"
+    precompiling = @static if VERSION >= v"1.11.0-"
         Base.generating_output()
     else
         ccall(:jl_generating_output, Cint, ()) != 0 && Base.JLOptions().incremental == 0
     end
+    return
     precompiling && return
 
     handler = @cfunction(handle_error, Cvoid, (Cstring,))
