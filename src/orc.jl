@@ -375,8 +375,10 @@ function reexports(lctm::LazyCallThroughManager, ism::IndirectStubsManager, jd::
     MaterializationUnit(ref)
 end
 
-#JuliaOJIT
-if has_julia_ojit()
+
+# JuliaOJIT
+
+export JuliaOJIT
 
 function ExecutionSession(jljit::JuliaOJIT)
     es = API.JLJITGetLLVMOrcExecutionSession(jljit)
@@ -460,8 +462,4 @@ end
 function IRCompileLayer(jljit::JuliaOJIT)
     ref = API.JLJITGetIRCompileLayer(jljit)
     IRCompileLayer(ref, jljit)
-end
-
-export JuliaOJIT
-
 end

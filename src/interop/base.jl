@@ -57,13 +57,8 @@ function isboxed(typ::Type)
 end
 function _isboxed(typ::Type)
     isboxed_ref = Ref{Bool}()
-    if VERSION >= v"1.9.0-DEV.115"
-        ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-              (Any, LLVM.API.LLVMContextRef, Ptr{Bool}), typ, context(), isboxed_ref)
-    else
-        ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-              (Any, Ptr{Bool}), typ, isboxed_ref)
-    end
+    ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
+           (Any, LLVM.API.LLVMContextRef, Ptr{Bool}), typ, context(), isboxed_ref)
     return isboxed_ref[]
 end
 
@@ -75,42 +70,11 @@ The `allow_boxed` argument determines whether boxed types are allowed.
 """
 function Base.convert(::Type{LLVMType}, typ::Type; allow_boxed::Bool=false)
     isboxed_ref = Ref{Bool}()
-    llvmtyp = if VERSION >= v"1.9.0-DEV.115"
+    llvmtyp =
         LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
                         (Any, Context, Ptr{Bool}), typ, context(), isboxed_ref))
-    else
-        LLVMType(ccall(:jl_type_to_llvm, LLVM.API.LLVMTypeRef,
-                        (Any, Ptr{Bool}), typ, isboxed_ref))
-    end
     if !allow_boxed && isboxed_ref[]
         error("Conversion of boxed type $typ is not allowed")
-    end
-
-    # HACK: older versions of Julia don't offer an API to fetch types in a specific context
-    if VERSION < v"1.9.0-DEV.115" && context() != context(llvmtyp)
-        src_ctx = context(llvmtyp)
-
-        # fast path for void
-        is_void = context!(src_ctx) do
-            llvmtyp == LLVM.VoidType()
-        end
-        if is_void
-            return LLVM.VoidType()
-        end
-
-        # serialize in the source context
-        buf = context!(src_ctx) do
-            mod = LLVM.Module("")
-            gv = LLVM.GlobalVariable(mod, llvmtyp, "")
-            convert(MemoryBuffer, mod)
-        end
-
-        # deserialize in our destination context
-        llvmtyp = let
-            mod = parse(LLVM.Module, buf)
-            gv = first(globals(mod))
-            global_value_type(gv)
-        end
     end
 
     return llvmtyp

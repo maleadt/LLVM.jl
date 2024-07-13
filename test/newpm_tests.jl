@@ -270,14 +270,9 @@ end
                     add!(fpm, EarlyCSEPass())
                     add!(fpm, AllocOptPass())
                 end
-                @static if VERSION < v"1.10.0-beta3.44"
-                    add!(mpm, LowerSIMDLoopPass())
-                end
                 add!(mpm, NewPMFunctionPassManager()) do fpm
                     add!(fpm, NewPMLoopPassManager()) do lpm
-                        @static if VERSION >= v"1.10.0-beta3.44"
-                            add!(lpm, LowerSIMDLoopPass())
-                        end
+                        add!(lpm, LowerSIMDLoopPass())
                         add!(lpm, LoopRotatePass())
                     end
                     add!(fpm, NewPMLoopPassManager(;use_memory_ssa=true)) do lpm

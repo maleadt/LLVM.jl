@@ -33,13 +33,8 @@ using ReTestItems
 runtests(LLVM; worker_init_expr, nworkers=min(Sys.CPU_THREADS,4), nworker_threads=1,
                testitem_timeout=60) do ti
     if ti.name == "jljit"
-        LLVM.has_julia_ojit() || return false
         # XXX: hangs on Windows
         Sys.iswindows() && return false
-    end
-
-    if ti.name == "newpm"
-        LLVM.has_newpm() || return false
     end
 
     if ti.name == "transform"

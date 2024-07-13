@@ -1,16 +1,9 @@
 # Julia's LLVM passes and pipelines
 
-if LLVM.has_newpm() && VERSION >= v"1.10.0-DEV.1622"
 using ..LLVM: @module_pass, @function_pass, @loop_pass
-end
-
-@static if LLVM.has_newpm() && VERSION >= v"1.10.0-DEV.1622"
 
 @module_pass "CPUFeatures" CPUFeaturesPass
 @module_pass "RemoveNI" RemoveNIPass
-@static if VERSION < v"1.10.0-beta3.44"
-    @module_pass "LowerSIMDLoop" LowerSIMDLoopPass
-end
 @module_pass "RemoveJuliaAddrspaces" RemoveJuliaAddrspacesPass
 @module_pass "RemoveAddrspaces" RemoveAddrspacesPass
 @static if VERSION < v"1.11.0-DEV.208"
@@ -50,9 +43,7 @@ Base.string(options::GCInvariantVerifierPassOptions) = options.strong ? "<strong
 @function_pass "GCInvariantVerifier" GCInvariantVerifierPass GCInvariantVerifierPassOptions
 
 @loop_pass "JuliaLICM" JuliaLICMPass
-@static if VERSION >= v"1.10.0-beta3.44"
-    @loop_pass "LowerSIMDLoop" LowerSIMDLoopPass
-end
+@loop_pass "LowerSIMDLoop" LowerSIMDLoopPass
 
 struct JuliaPipelinePassOptions
     opt_level::Int
@@ -80,8 +71,6 @@ end
 # XXX: if we go through the PassBuilder parser, Julia won't insert the PassBuilder's
 # callbacks in the right spots. that's why Julia also provides `jl_build_newpm_pipeline`.
 # is this still true? can we fix that, and continue using the PassBuilder interface?
-
-end
 
 
 ## legacy passes
