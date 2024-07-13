@@ -61,8 +61,6 @@ function LLVMAddCPUFeaturesPass(PM)
 end
 
 
-if VERSION >= v"1.10.0-DEV.1622"
-
 struct PipelineConfig
     Speedup::Cint
     Size::Cint
@@ -80,10 +78,6 @@ struct PipelineConfig
     cleanup::Cint
 end
 
-end
-
-
-if VERSION >= v"1.10.0-DEV.1395"
 
 mutable struct JLOpaqueJuliaOJIT end
 
@@ -131,6 +125,4 @@ end
 
 function JLJITGetIRCompileLayer(JIT)
     ccall(:JLJITGetIRCompileLayer, LLVMOrcIRCompileLayerRef, (JuliaOJITRef,), JIT)
-end
-
 end

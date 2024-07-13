@@ -57,8 +57,6 @@ include(joinpath(@__DIR__, "..", "lib", "libLLVM_julia.jl"))
 end # module API
 
 has_oldpm() = LLVM.version() < v"17"
-has_newpm() = LLVM.version() >= v"15"
-has_julia_ojit() = VERSION >= v"1.10.0-DEV.1395"
 
 # helpers
 include("debug.jl")
@@ -91,9 +89,7 @@ include("dibuilder.jl")
 include("jitevents.jl")
 include("utils.jl")
 include("orc.jl")
-if has_newpm()
-    include("newpm.jl")
-end
+include("newpm.jl")
 
 # high-level functionality
 include("state.jl")

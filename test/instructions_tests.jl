@@ -527,19 +527,10 @@ end
 
     # optimize
     function optimize(mod)
-        if LLVM.has_newpm()
-            host_triple = triple()
-            host_t = Target(triple=host_triple)
-            @dispose tm=TargetMachine(host_t, host_triple) begin
-                run!("default<O3>", mod, tm)
-            end
-        else
-            pmb = PassManagerBuilder()
-            optlevel!(pmb, 3)
-            @dispose mpm=ModulePassManager() begin
-                populate!(mpm, pmb)
-                run!(mpm, mod)
-            end
+        host_triple = triple()
+        host_t = Target(triple=host_triple)
+        @dispose tm=TargetMachine(host_t, host_triple) begin
+            run!("default<O3>", mod, tm)
         end
     end
     optimize(mod)

@@ -90,7 +90,7 @@ function get_prefix(lljit::LLJIT)
     return API.LLVMOrcLLJITGetGlobalPrefix(lljit)
 end
 
-if VERSION >= v"1.10.0-DEV.1395"
+
 # JuliaOJIT interface
 
 @checked mutable struct JuliaOJIT
@@ -131,6 +131,4 @@ function JuliaOJIT(f::Core.Function)
     finally
         dispose(jljit)
     end
-end
-
 end
