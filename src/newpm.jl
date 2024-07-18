@@ -55,6 +55,10 @@ Base.string(pm::NewPMPassManager) = "$(pm.type)($(join(pm.passes, ",")))"
 
 function add!(f::Base.Callable, parent::AbstractPassManager, nested::AbstractPassManager)
     f(nested)
+    if isempty(nested.passes)
+        # LLVM errors when doing `module()` etc, so catch this early
+        error("Cannot add an empty pass manager; did you forget to add passes?")
+    end
     add!(parent, nested)
 end
 
