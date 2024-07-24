@@ -274,6 +274,10 @@ atomic_rmw!(builder::IRBuilder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Val
     Instruction(API.LLVMBuildAtomicRMW(builder, op, Ptr, Val, ordering,
                                        singleThread))
 
+atomic_rmw!(builder::IRBuilder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Value,
+            ordering::API.LLVMAtomicOrdering, syncscope::String) =
+    Instruction(API.LLVMBuildAtomicRMWSyncScope(builder, op, Ptr, Val, ordering, syncscope))
+
 atomic_cmpxchg!(builder::IRBuilder, Ptr::Value, Cmp::Value, New::Value,
                 SuccessOrdering::API.LLVMAtomicOrdering,
                 FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Bool) =

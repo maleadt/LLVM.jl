@@ -261,5 +261,10 @@ LLVMErrorRef LLVMRunJuliaPasses(LLVMModuleRef M, const char *Passes,
                                 LLVMTargetMachineRef TM, LLVMPassBuilderOptionsRef Options,
                                 LLVMPassBuilderExtensionsRef Extensions);
 
+LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B,LLVMAtomicRMWBinOp op,
+                                         LLVMValueRef PTR, LLVMValueRef Val,
+                                         LLVMAtomicOrdering ordering,
+                                         const char* syncscope);
+
 LLVM_C_EXTERN_C_END
 #endif
