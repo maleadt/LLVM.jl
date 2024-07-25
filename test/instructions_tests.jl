@@ -224,6 +224,28 @@
         @check_ir gepinst1 "getelementptr inbounds i32, ptr %4, i32 %0"
     end
 
+    single_thread = false
+    atomic_rmw_inst = atomic_rmw!(builder,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, single_thread)
+    @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 seq_cst"
+
+    single_thread = true
+    atomic_rmw_inst = atomic_rmw!(builder,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, single_thread)
+    @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"singlethread\") seq_cst"
+
+    atomic_rmw_inst = atomic_rmw!(builder,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, "agent")
+    @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"agent\") seq_cst"
+
+    atomic_rmw_inst = atomic_rmw!(builder,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicOrderingMonotonic, "agent")
+    @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"agent\") monotonic"
+
     truncinst = trunc!(builder, int1, LLVM.Int16Type())
     @check_ir truncinst "trunc i32 %0 to i16"
 
