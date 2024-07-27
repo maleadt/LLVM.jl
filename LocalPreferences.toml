@@ -1,12 +1,2 @@
 [LLVM]
-# which extensions library to use. normally, this is provided by an artifact,
-# but if you are using a custom version of LLVM you will need to provide your own,
-# e.g., by running `deps/build_local.jl`.
-#libLLVMExtra = "/path/to/libLLVMExtra.so"
-
-# whether to enable additional object type checking
-#typecheck = "false"
-
-# whether to enable object memory checking. these are expensive checks that keep
-# track of allocated objects, whether they are freed correctly, etc.
-#memcheck = "false"
+libLLVMExtra = "/home/pxlth/.julia/scratchspaces/929cbde3-209d-540e-8aea-75f648917ca0/build/lib/libLLVMExtra-16.so"
