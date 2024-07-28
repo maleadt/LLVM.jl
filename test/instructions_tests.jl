@@ -224,6 +224,44 @@
         @check_ir gepinst1 "getelementptr inbounds i32, ptr %4, i32 %0"
     end
 
+    single_thread = false
+    atomic_rmw_inst = atomic_rmw!(builder,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, single_thread)
+    if LLVM.version() < v"16"
+        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, %1 seq_cst"
+    else
+        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 seq_cst"
+    end
+
+    single_thread = true
+    atomic_rmw_inst = atomic_rmw!(builder,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, single_thread)
+    if LLVM.version() < v"16"
+        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, %1 syncscope(\"singlethread\") seq_cst"
+    else
+        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"singlethread\") seq_cst"
+    end
+
+    atomic_rmw_inst = atomic_rmw!(builder,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, "agent")
+    if LLVM.version() < v"16"
+        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, %1 syncscope(\"agent\") seq_cst"
+    else
+        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"agent\") seq_cst"
+    end
+
+    atomic_rmw_inst = atomic_rmw!(builder,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicOrderingMonotonic, "agent")
+    if LLVM.version() < v"16"
+        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, %1 syncscope(\"agent\") monotonic"
+    else
+        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"agent\") monotonic"
+    end
+
     truncinst = trunc!(builder, int1, LLVM.Int16Type())
     @check_ir truncinst "trunc i32 %0 to i16"
 
