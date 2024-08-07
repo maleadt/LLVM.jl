@@ -2,45 +2,37 @@
 #
 # these wrappers are LLVM version-specific, so we generate multiple copies.
 
-using Pkg
-
 using Clang.Generators
 import Clang
 
 @add_def off_t
 
 # based on the supported Julia versions
-const llvm_versions = ["13", "14", "15", "16", "17"]
+const llvm_versions = ["15", "16", "17", "18"]
 const llvm_configs = Dict()
 
 function main()
     for version in llvm_versions
         config = get!(llvm_configs, version) do
-            current_project = Base.active_project()
-            try
-                # we cannot import multiple versions of the same module in a single session,
-                # so read all the information we need using a temporary process
-                script = raw"""
-                    version = ARGS[1]
+            # we cannot import multiple versions of the same module in a single session,
+            # so read all the information we need using a temporary process
+            script = raw"""
+                version = ARGS[1]
 
-                    using Pkg
-                    Pkg.activate(; temp=true)
-                    Pkg.add(; name="LLVM_full_jll", version)
+                using Pkg
+                Pkg.activate(; temp=true)
+                Pkg.add(; name="LLVM_full_jll", version)
 
-                    using LLVM_full_jll
-                    data = LLVM_full_jll.llvm_config() do exe
-                        (; includedir=readchomp(`$exe --includedir`),
-                           cppflags=readchomp(`$exe --cppflags`))
-                    end
-                    print(repr(data))
-                """
-                # XXX: this assumes juliaup...
-                cmd = `julia +nightly -e $script $version`
-                data = read(cmd, String)
-                eval(Meta.parse(data))
-            finally
-                Pkg.activate(current_project)
-            end
+                using LLVM_full_jll
+                data = LLVM_full_jll.llvm_config() do exe
+                    (; includedir=readchomp(`$exe --includedir`),
+                       cppflags=readchomp(`$exe --cppflags`))
+                end
+                print(repr(data))
+            """
+            cmd = `$(Base.julia_cmd()) -e $script $version`
+            data = read(cmd, String)
+            eval(Meta.parse(data))
         end
 
         cd(@__DIR__) do
