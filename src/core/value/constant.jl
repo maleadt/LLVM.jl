@@ -504,8 +504,9 @@ end
 if version() < v"18"
 
 export const_and, const_or, const_lshr, const_ashr, const_sext, const_zext,
-       const_fptrunc, const_fpext, const_fptoui, const_fptosi, const_uitofp, const_sitofp,
-       const_intcast, const_fpcast
+       const_fptrunc, const_fpext, const_fptoui, const_fptosi, const_uitofp,
+       const_sitofp, const_intcast, const_fpcast, const_zextorbitcast,
+       const_sextorbitcast
 
 const_and(lhs::Constant, rhs::Constant) =
     Value(API.LLVMConstAnd(lhs, rhs))
