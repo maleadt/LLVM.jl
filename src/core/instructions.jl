@@ -100,7 +100,7 @@ const CallBase = Union{CallBrInst, CallInst, InvokeInst}
 export callconv, callconv!,
        istailcall, tailcall!,
        called_operand, arguments, called_type,
-       OperandBundleUse, OperandBundleDef, operand_bundles
+       OperandBundle, operand_bundles
 
 callconv(inst::CallBase) = API.LLVMGetInstructionCallConv(inst)
 callconv!(inst::CallBase, cc) =
@@ -126,16 +126,23 @@ end
 
 # operand bundles
 
-# XXX: these objects are just C structures, whose lifetime isn't tied to LLVM IR structures.
-#      that means we need to create a copy when passing them to Julia, necessitating disposal.
+# NOTE: OperandBundle objects aren't LLVM IR objects, but created by the C API wrapper,
+#       so we need to free them explicitly when we get or create them.
 
-@checked mutable struct OperandBundleUse
-    ref::API.LLVMOperandBundleUseRef
+@checked mutable struct OperandBundle
+    ref::API.LLVMOperandBundleRef
 end
-Base.unsafe_convert(::Type{API.LLVMOperandBundleUseRef}, bundle::OperandBundleUse) =
+Base.unsafe_convert(::Type{API.LLVMOperandBundleRef}, bundle::OperandBundle) =
     bundle.ref
 
-struct OperandBundleIterator <: AbstractVector{OperandBundleUse}
+function OperandBundle(tag::String, args::Vector{<:Value}=Value[])
+    bundle = OperandBundle(API.LLVMCreateOperandBundle(tag, length(tag), args, length(args)))
+    finalizer(bundle) do obj
+        API.LLVMDisposeOperandBundle(obj)
+    end
+end
+
+struct OperandBundleIterator <: AbstractVector{OperandBundle}
     inst::Instruction
 end
 
@@ -147,70 +154,76 @@ Base.IndexStyle(::OperandBundleIterator) = IndexLinear()
 
 function Base.getindex(iter::OperandBundleIterator, i::Int)
     @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
-    bundle = OperandBundleUse(API.LLVMGetOperandBundle(iter.inst, i-1))
+    bundle = OperandBundle(API.LLVMGetOperandBundleAtIndex(iter.inst, i-1))
     finalizer(bundle) do obj
-        API.LLVMDisposeOperandBundleUse(obj)
+        API.LLVMDisposeOperandBundle(obj)
     end
 end
 
-tag_id(bundle::OperandBundleUse) = API.LLVMGetOperandBundleUseTagID(bundle)
-
-function tag_name(bundle::OperandBundleUse)
-    len = Ref{Cuint}()
-    data = API.LLVMGetOperandBundleUseTagName(bundle, len)
+function tag(bundle::OperandBundle)
+    len = Ref{Csize_t}()
+    data = API.LLVMGetOperandBundleTag(bundle, len)
     unsafe_string(convert(Ptr{Int8}, data), len[])
 end
 
-function inputs(bundle::OperandBundleUse)
-    nvals = API.LLVMGetOperandBundleUseNumInputs(bundle)
-    vals = Vector{API.LLVMValueRef}(undef, nvals)
-    API.LLVMGetOperandBundleUseInputs(bundle, vals)
-    return [Value(val) for val in vals]
+struct OperandBundleInputIterator <: AbstractVector{Value}
+    bundle::OperandBundle
 end
 
-@checked mutable struct OperandBundleDef
-    ref::API.LLVMOperandBundleDefRef
-end
-Base.unsafe_convert(::Type{API.LLVMOperandBundleDefRef}, bundle::OperandBundleDef) =
-    bundle.ref
+inputs(bundle::OperandBundle) = OperandBundleInputIterator(bundle)
 
-function tag_name(bundle::OperandBundleDef)
-    len = Ref{Cuint}()
-    data = API.LLVMGetOperandBundleDefTag(bundle, len)
-    unsafe_string(convert(Ptr{Int8}, data), len[])
-end
+Base.size(iter::OperandBundleInputIterator) = (API.LLVMGetNumOperandBundleArgs(iter.bundle),)
 
-function OperandBundleDef(bundle_use::OperandBundleUse)
-    bundle_def = OperandBundleDef(API.LLVMOperandBundleDefFromUse(bundle_use))
-    finalizer(bundle_def) do obj
-        API.LLVMDisposeOperandBundleDef(obj)
-    end
+Base.IndexStyle(::OperandBundleInputIterator) = IndexLinear()
+
+function Base.getindex(iter::OperandBundleInputIterator, i::Int)
+    @boundscheck 1 <= i <= length(iter) || throw(BoundsError(iter, i))
+    Value(API.LLVMGetOperandBundleArgAtIndex(iter.bundle, i-1))
 end
 
-function OperandBundleDef(tag::String, inputs::Vector{<:Value}=Value[])
-    bundle = OperandBundleDef(API.LLVMCreateOperandBundleDef(tag, inputs, length(inputs)))
-    finalizer(bundle) do obj
-        API.LLVMDisposeOperandBundleDef(obj)
-    end
-end
+# @checked mutable struct OperandBundleDef
+#     ref::API.LLVMOperandBundleDefRef
+# end
+# Base.unsafe_convert(::Type{API.LLVMOperandBundleDefRef}, bundle::OperandBundleDef) =
+#     bundle.ref
 
-function inputs(bundle::OperandBundleDef)
-    nvals = API.LLVMGetOperandBundleDefNumInputs(bundle)
-    vals = Vector{API.LLVMValueRef}(undef, nvals)
-    API.LLVMGetOperandBundleDefInputs(bundle, vals)
-    return [Value(val) for val in vals]
-end
+# function tag_name(bundle::OperandBundleDef)
+#     len = Ref{Cuint}()
+#     data = API.LLVMGetOperandBundleDefTag(bundle, len)
+#     unsafe_string(convert(Ptr{Int8}, data), len[])
+# end
 
-function Base.string(bundle::Union{OperandBundleUse,OperandBundleDef})
+# function OperandBundleDef(bundle_use::OperandBundle)
+#     bundle_def = OperandBundleDef(API.LLVMOperandBundleDefFromUse(bundle_use))
+#     finalizer(bundle_def) do obj
+#         API.LLVMDisposeOperandBundleDef(obj)
+#     end
+# end
+
+# function OperandBundleDef(tag::String, inputs::Vector{<:Value}=Value[])
+#     bundle = OperandBundleDef(API.LLVMCreateOperandBundleDef(tag, inputs, length(inputs)))
+#     finalizer(bundle) do obj
+#         API.LLVMDisposeOperandBundleDef(obj)
+#     end
+# end
+
+# function inputs(bundle::OperandBundleDef)
+#     nvals = API.LLVMGetOperandBundleDefNumInputs(bundle)
+#     vals = Vector{API.LLVMValueRef}(undef, nvals)
+#     API.LLVMGetOperandBundleDefInputs(bundle, vals)
+#     return [Value(val) for val in vals]
+# end
+
+function Base.string(bundle::OperandBundle)
     # mimic how bundles are rendered in LLVM IR
-    "\"$(tag_name(bundle))\"(" * join(string.(inputs(bundle)), ", ") * ")"
+    "\"$(tag(bundle))\"(" * join(string.(inputs(bundle)), ", ") * ")"
 end
 
-function Base.show(io::IO, ::MIME"text/plain", bundle::Union{OperandBundleUse,OperandBundleDef})
+function Base.show(io::IO, ::MIME"text/plain", bundle::OperandBundle)
     print(io, string(bundle))
 end
 
-Base.show(io::IO, bundle::Union{OperandBundleUse,OperandBundleDef}) =
+Base.show(io::IO, bundle::OperandBundle) =
     print(io, typeof(bundle), "(", string(bundle), ")")
 
 

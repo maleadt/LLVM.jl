@@ -146,32 +146,30 @@ void LLVMFunctionDeleteBody(LLVMValueRef Func);
 void LLVMDestroyConstant(LLVMValueRef Const);
 
 
-// operand bundles
-typedef struct LLVMOpaqueOperandBundleUse *LLVMOperandBundleUseRef;
-unsigned LLVMGetNumOperandBundles(LLVMValueRef Instr);
-LLVMOperandBundleUseRef LLVMGetOperandBundle(LLVMValueRef Val, unsigned Index);
-void LLVMDisposeOperandBundleUse(LLVMOperandBundleUseRef Bundle);
-uint32_t LLVMGetOperandBundleUseTagID(LLVMOperandBundleUseRef Bundle);
-const char *LLVMGetOperandBundleUseTagName(LLVMOperandBundleUseRef Bundle,
-                                           unsigned *Length);
-unsigned LLVMGetOperandBundleUseNumInputs(LLVMOperandBundleUseRef Bundle);
-void LLVMGetOperandBundleUseInputs(LLVMOperandBundleUseRef Bundle, LLVMValueRef *Dest);
-typedef struct LLVMOpaqueOperandBundleDef *LLVMOperandBundleDefRef;
-LLVMOperandBundleDefRef LLVMOperandBundleDefFromUse(LLVMOperandBundleUseRef Bundle);
-LLVMOperandBundleDefRef LLVMCreateOperandBundleDef(const char *Tag, LLVMValueRef *Inputs,
-                                                   unsigned NumInputs);
-void LLVMDisposeOperandBundleDef(LLVMOperandBundleDefRef Bundle);
-const char *LLVMGetOperandBundleDefTag(LLVMOperandBundleDefRef Bundle, unsigned *Length);
-unsigned LLVMGetOperandBundleDefNumInputs(LLVMOperandBundleDefRef Bundle);
-void LLVMGetOperandBundleDefInputs(LLVMOperandBundleDefRef Bundle, LLVMValueRef *Dest);
-LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
-                                       LLVMValueRef *Args, unsigned NumArgs,
-                                       LLVMOperandBundleDefRef *Bundles,
-                                       unsigned NumBundles, const char *Name);
-LLVMValueRef LLVMBuildCallWithOpBundle2(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
-                                        LLVMValueRef *Args, unsigned NumArgs,
-                                        LLVMOperandBundleDefRef *Bundles,
-                                        unsigned NumBundles, const char *Name);
+// operand bundles (backport of llvm-project/llvm#73914)
+#if LLVM_VERSION_MAJOR < 18
+typedef struct LLVMOpaqueOperandBundle *LLVMOperandBundleRef;
+LLVMOperandBundleRef LLVMCreateOperandBundle(const char *Tag, size_t TagLen,
+                                             LLVMValueRef *Args,
+                                             unsigned NumArgs);
+void LLVMDisposeOperandBundle(LLVMOperandBundleRef Bundle);
+const char *LLVMGetOperandBundleTag(LLVMOperandBundleRef Bundle, size_t *Len);
+unsigned LLVMGetNumOperandBundleArgs(LLVMOperandBundleRef Bundle);
+LLVMValueRef LLVMGetOperandBundleArgAtIndex(LLVMOperandBundleRef Bundle,
+                                            unsigned Index);
+unsigned LLVMGetNumOperandBundles(LLVMValueRef C);
+LLVMOperandBundleRef LLVMGetOperandBundleAtIndex(LLVMValueRef C,
+                                                 unsigned Index);
+LLVMValueRef LLVMBuildInvokeWithOperandBundles(
+    LLVMBuilderRef, LLVMTypeRef Ty, LLVMValueRef Fn, LLVMValueRef *Args,
+    unsigned NumArgs, LLVMBasicBlockRef Then, LLVMBasicBlockRef Catch,
+    LLVMOperandBundleRef *Bundles, unsigned NumBundles, const char *Name);
+LLVMValueRef
+LLVMBuildCallWithOperandBundles(LLVMBuilderRef, LLVMTypeRef, LLVMValueRef Fn,
+                                LLVMValueRef *Args, unsigned NumArgs,
+                                LLVMOperandBundleRef *Bundles,
+                                unsigned NumBundles, const char *Name);
+#endif
 
 
 // metadata
