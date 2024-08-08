@@ -377,6 +377,10 @@ function LLVMPassBuilderExtensionsRegisterFunctionPass(Options, PassName, Callba
     ccall((:LLVMPassBuilderExtensionsRegisterFunctionPass, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef, Cstring, LLVMJuliaFunctionPassCallback, Ptr{Cvoid}), Options, PassName, Callback, Thunk)
 end
 
+function LLVMPassBuilderExtensionsSetAAPipeline(Extensions, AAPipeline)
+    ccall((:LLVMPassBuilderExtensionsSetAAPipeline, libLLVMExtra), Cvoid, (LLVMPassBuilderExtensionsRef, Cstring), Extensions, AAPipeline)
+end
+
 function LLVMRunJuliaPasses(M, Passes, TM, Options, Extensions)
     ccall((:LLVMRunJuliaPasses, libLLVMExtra), LLVMErrorRef, (LLVMModuleRef, Cstring, LLVMTargetMachineRef, LLVMPassBuilderOptionsRef, LLVMPassBuilderExtensionsRef), M, Passes, TM, Options, Extensions)
 end

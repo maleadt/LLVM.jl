@@ -254,6 +254,8 @@ void LLVMPassBuilderExtensionsRegisterFunctionPass(LLVMPassBuilderExtensionsRef 
                                                    const char *PassName,
                                                    LLVMJuliaFunctionPassCallback Callback,
                                                    void *Thunk);
+void LLVMPassBuilderExtensionsSetAAPipeline(LLVMPassBuilderExtensionsRef Extensions,
+                                            const char *AAPipeline);
 LLVMErrorRef LLVMRunJuliaPasses(LLVMModuleRef M, const char *Passes,
                                 LLVMTargetMachineRef TM, LLVMPassBuilderOptionsRef Options,
                                 LLVMPassBuilderExtensionsRef Extensions);
