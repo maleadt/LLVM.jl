@@ -3,7 +3,8 @@
 
 ## pass managers
 
-export NewPMModulePassManager, NewPMCGSCCPassManager, NewPMFunctionPassManager, NewPMLoopPassManager
+export NewPMModulePassManager, NewPMCGSCCPassManager, NewPMFunctionPassManager,
+       NewPMLoopPassManager, NewPMAAManager
 
 abstract type AbstractPassManager end
 
@@ -174,6 +175,7 @@ mutable struct NewPMPassBuilder <: AbstractPassManager
     opts::API.LLVMPassBuilderOptionsRef
     exts::API.LLVMPassBuilderExtensionsRef
     passes::Vector{String}
+    aa_passes::Vector{String}
     custom_passes::Vector{NewPMCustomPass}
 end
 
@@ -185,7 +187,7 @@ Base.unsafe_convert(::Type{API.LLVMPassBuilderOptionsRef}, pb::NewPMPassBuilder)
 function NewPMPassBuilder(; kwargs...)
     opts = API.LLVMCreatePassBuilderOptions()
     exts = API.LLVMCreatePassBuilderExtensions()
-    obj = mark_alloc(NewPMPassBuilder(opts, exts, [], []))
+    obj = mark_alloc(NewPMPassBuilder(opts, exts, [], [], []))
 
     for (name, value) in pairs(kwargs)
         if name == :verify_each
@@ -247,6 +249,7 @@ run!
 
 function run!(pb::NewPMPassBuilder, mod::Module, tm::Union{Nothing,TargetMachine}=nothing)
     isempty(pb.passes) && return
+    pipeline = join(pb.passes, ",")
 
     # XXX: The Base API is too restricted, not supporting custom passes
     #      or Julia's pass registration callback
@@ -273,7 +276,13 @@ function run!(pb::NewPMPassBuilder, mod::Module, tm::Union{Nothing,TargetMachine
         julia_callback = cglobal(:jl_register_passbuilder_callbacks)
         API.LLVMPassBuilderExtensionsSetRegistrationCallback(pb.exts, julia_callback)
 
-        @check API.LLVMRunJuliaPasses(mod, string(pb), something(tm, C_NULL),
+        # register AA pipeline
+        if !isempty(pb.aa_passes)
+            aa_pipeline = join(pb.aa_passes, ",")
+            API.LLVMPassBuilderExtensionsSetAAPipeline(pb.exts, aa_pipeline)
+        end
+
+        @check API.LLVMRunJuliaPasses(mod, pipeline, something(tm, C_NULL),
                                       pb.opts, pb.exts)
     end
 end
@@ -863,3 +872,28 @@ Base.string(options::LICMPassOptions) =
 @loop_pass "licm" LICMPass LICMPassOptions
 
 @loop_pass "lnicm" LNICMPass LICMPassOptions
+
+
+## alias analyses
+
+struct NewPMAAManager <: AbstractPassManager
+    passes::Vector{String}
+
+    NewPMAAManager() = new([])
+end
+
+Base.string(pb::NewPMAAManager) = join(pb.passes, ",")
+
+add!(pb::NewPMPassBuilder, aa::NewPMAAManager) = push!(pb.aa_passes, string(aa))
+add!(pm::NewPMAAManager, aa::NewPMAAManager) =
+    error("Alias analyses can only be added to the top-level pass builder")
+
+macro aa_pass(pass_name, class_name, params=nothing)
+    define_pass(pass_name, class_name, params)
+end
+
+@aa_pass "basic-aa" BasicAA
+@aa_pass "objc-arc-aa" ObjCARCAA
+@aa_pass "scev-aa" SCEVAA
+@aa_pass "scoped-noalias-aa" ScopedNoAliasAA
+@aa_pass "tbaa" TypeBasedAA

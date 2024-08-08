@@ -1,5 +1,6 @@
 #include "LLVMExtra.h"
 
+#include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/StandardInstrumentations.h>
@@ -18,10 +19,6 @@ namespace llvm {
 // Keep this in sync with PassBuilderBindings.cpp!
 class LLVMPassBuilderOptions {
 public:
-  explicit LLVMPassBuilderOptions(bool DebugLogging = false, bool VerifyEach = false,
-                                  PipelineTuningOptions PTO = PipelineTuningOptions())
-      : DebugLogging(DebugLogging), VerifyEach(VerifyEach), PTO(PTO) {}
-
   bool DebugLogging;
   bool VerifyEach;
   PipelineTuningOptions PTO;
@@ -30,7 +27,13 @@ DEFINE_SIMPLE_CONVERSION_FUNCTIONS(LLVMPassBuilderOptions, LLVMPassBuilderOption
 
 class LLVMPassBuilderExtensions {
 public:
+  // A callback to register additional pipeline parsing callbacks with the pass builder.
+  // This is used to support Julia's passes.
   void (*RegistrationCallback)(void *);
+
+  // A list of callbacks that each register a single custom module or function pass.
+  // These callbacks are generated here in C++, and match against a pass name.
+  // This is used to enable custom LLVM passes implemented in Julia.
   SmallVector<std::function<bool(StringRef, ModulePassManager &,
                                  ArrayRef<PassBuilder::PipelineElement>)>,
               2>
@@ -39,6 +42,9 @@ public:
                                  ArrayRef<PassBuilder::PipelineElement>)>,
               2>
       FunctionPipelineParsingCallbacks;
+
+  // A pipeline describing the alias analysis passes to run.
+  const char *AAPipeline;
 };
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(LLVMPassBuilderExtensions, LLVMPassBuilderExtensionsRef)
 } // namespace llvm
@@ -120,6 +126,15 @@ void LLVMPassBuilderExtensionsRegisterFunctionPass(LLVMPassBuilderExtensionsRef 
   return;
 }
 
+// Alias analysis pipeline
+
+void LLVMPassBuilderExtensionsSetAAPipeline(LLVMPassBuilderExtensionsRef Extensions,
+                                            const char *AAPipeline) {
+  LLVMPassBuilderExtensions *PassExts = unwrap(Extensions);
+  PassExts->AAPipeline = AAPipeline;
+  return;
+}
+
 
 // Vendored API entrypoint
 
@@ -154,6 +169,15 @@ LLVMErrorRef LLVMRunJuliaPasses(LLVMModuleRef M, const char *Passes,
   CGSCCAnalysisManager CGAM;
   ModuleAnalysisManager MAM;
   PB.registerLoopAnalyses(LAM);
+  if (PassExts->AAPipeline) {
+    // If we have a custom AA pipeline, we need to register it _before_ calling
+    // registerFunctionAnalyses, or the default alias analysis pipeline is used.
+    AAManager AA;
+    if (auto Err = PB.parseAAPipeline(AA, PassExts->AAPipeline)) {
+      return wrap(std::move(Err));
+    }
+    FAM.registerPass([&] { return std::move(AA); });
+  }
   PB.registerFunctionAnalyses(FAM);
   PB.registerCGSCCAnalyses(CGAM);
   PB.registerModuleAnalyses(MAM);
