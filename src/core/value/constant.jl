@@ -350,12 +350,11 @@ export ConstantExpr,
 
        const_neg, const_nswneg, const_nuwneg, const_not, const_add,
        const_nswadd, const_nuwadd, const_sub, const_nswsub, const_nuwsub, const_mul,
-       const_nswmul, const_nuwmul, const_and, const_or, const_xor, const_icmp, const_fcmp,
-       const_shl, const_lshr, const_ashr, const_gep, const_inbounds_gep, const_trunc,
-       const_sext, const_zext, const_fptrunc, const_fpext, const_uitofp, const_sitofp,
-       const_fptoui, const_fptosi, const_ptrtoint, const_inttoptr, const_bitcast,
-       const_addrspacecast, const_zextorbitcast, const_sextorbitcast, const_truncorbitcast,
-       const_pointercast, const_intcast, const_fpcast, const_shufflevector
+       const_nswmul, const_nuwmul, const_xor, const_icmp, const_fcmp,
+       const_shl, const_gep, const_inbounds_gep, const_trunc,
+       const_ptrtoint, const_inttoptr, const_bitcast,
+       const_addrspacecast, const_truncorbitcast,
+       const_pointercast, const_shufflevector
 
 @checked struct ConstantExpr <: Constant
     ref::API.LLVMValueRef
@@ -403,12 +402,6 @@ const_nswmul(lhs::Constant, rhs::Constant) =
 const_nuwmul(lhs::Constant, rhs::Constant) =
     Value(API.LLVMConstNUWMul(lhs, rhs))
 
-const_and(lhs::Constant, rhs::Constant) =
-    Value(API.LLVMConstAnd(lhs, rhs))
-
-const_or(lhs::Constant, rhs::Constant) =
-    Value(API.LLVMConstOr(lhs, rhs))
-
 const_xor(lhs::Constant, rhs::Constant) =
     Value(API.LLVMConstXor(lhs, rhs))
 
@@ -421,12 +414,6 @@ const_fcmp(Predicate::API.LLVMRealPredicate, lhs::Constant, rhs::Constant) =
 const_shl(lhs::Constant, rhs::Constant) =
     Value(API.LLVMConstShl(lhs, rhs))
 
-const_lshr(lhs::Constant, rhs::Constant) =
-    Value(API.LLVMConstLShr(lhs, rhs))
-
-const_ashr(lhs::Constant, rhs::Constant) =
-    Value(API.LLVMConstAShr(lhs, rhs))
-
 function const_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
     Value(API.LLVMConstGEP2(val, Ty, Indices, length(Indices)))
 end
@@ -437,30 +424,6 @@ end
 
 const_trunc(val::Constant, ToType::LLVMType) =
     Value(API.LLVMConstTrunc(val, ToType))
-
-const_sext(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstSExt(val, ToType))
-
-const_zext(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstZExt(val, ToType))
-
-const_fptrunc(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstFPTrunc(val, ToType))
-
-const_fpext(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstFPExt(val, ToType))
-
-const_uitofp(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstUIToFP(val, ToType))
-
-const_sitofp(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstSIToFP(val, ToType))
-
-const_fptoui(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstFPToUI(val, ToType))
-
-const_fptosi(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstFPToSI(val, ToType))
 
 const_ptrtoint(val::Constant, ToType::LLVMType) =
     Value(API.LLVMConstPtrToInt(val, ToType))
@@ -474,23 +437,11 @@ const_bitcast(val::Constant, ToType::LLVMType) =
 const_addrspacecast(val::Constant, ToType::LLVMType) =
     Value(API.LLVMConstAddrSpaceCast(val, ToType))
 
-const_zextorbitcast(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstZExtOrBitCast(val, ToType))
-
-const_sextorbitcast(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstSExtOrBitCast(val, ToType))
-
 const_truncorbitcast(val::Constant, ToType::LLVMType) =
     Value(API.LLVMConstTruncOrBitCast(val, ToType))
 
 const_pointercast(val::Constant, ToType::LLVMType) =
     Value(API.LLVMConstPointerCast(val, ToType))
-
-const_intcast(val::Constant, ToType::LLVMType, isSigned::Bool) =
-    Value(API.LLVMConstIntCast(val, ToType, isSigned))
-
-const_fpcast(val::Constant, ToType::LLVMType) =
-    Value(API.LLVMConstFPCast(val, ToType))
 
 const_extractelement(vector::Constant, index::Constant) =
     Value(API.LLVMConstExtractElement(vector ,index))
@@ -547,6 +498,62 @@ export const_select
 
 const_select(cond::Constant, if_true::Value, if_false::Value) =
     Value(API.LLVMConstSelect(cond, if_true, if_false))
+
+end
+
+if version() < v"18"
+
+export const_and, const_or, const_lshr, const_ashr, const_sext, const_zext,
+       const_fptrunc, const_fpext, const_fptoui, const_fptosi, const_uitofp, const_sitofp,
+       const_intcast, const_fpcast
+
+const_and(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstAnd(lhs, rhs))
+
+const_or(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstOr(lhs, rhs))
+
+const_lshr(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstLShr(lhs, rhs))
+
+const_ashr(lhs::Constant, rhs::Constant) =
+    Value(API.LLVMConstAShr(lhs, rhs))
+
+const_sext(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstSExt(val, ToType))
+
+const_zext(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstZExt(val, ToType))
+
+const_fptrunc(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPTrunc(val, ToType))
+
+const_fpext(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPExt(val, ToType))
+
+const_fptoui(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPToUI(val, ToType))
+
+const_fptosi(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPToSI(val, ToType))
+
+const_uitofp(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstUIToFP(val, ToType))
+
+const_sitofp(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstSIToFP(val, ToType))
+
+const_intcast(val::Constant, ToType::LLVMType, isSigned::Bool) =
+    Value(API.LLVMConstIntCast(val, ToType, isSigned))
+
+const_fpcast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstFPCast(val, ToType))
+
+const_zextorbitcast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstZExtOrBitCast(val, ToType))
+
+const_sextorbitcast(val::Constant, ToType::LLVMType) =
+    Value(API.LLVMConstSExtOrBitCast(val, ToType))
 
 end
 

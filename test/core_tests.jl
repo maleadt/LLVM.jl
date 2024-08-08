@@ -605,12 +605,6 @@ end
             @check_ir ce "i32 84"
         end
 
-        ce = const_and(val, other_val)::LLVM.Constant
-        @check_ir ce "i32 2"
-
-        ce = const_or(val, other_val)::LLVM.Constant
-        @check_ir ce "i32 42"
-
         ce = const_xor(val, other_val)::LLVM.Constant
         @check_ir ce "i32 40"
 
@@ -620,34 +614,13 @@ end
         ce = const_shl(val, other_val)::LLVM.Constant
         @check_ir ce "i32 168"
 
-        for f in [const_lshr, const_ashr]
-            ce = f(val, other_val)::LLVM.Constant
-            @check_ir ce "i32 10"
-        end
-
         for f in [const_trunc, const_truncorbitcast]
             ce = const_trunc(val, LLVM.Int16Type())::LLVM.Constant
             @check_ir ce "i16 42"
         end
 
-        for f in [const_sext, const_zext, const_sextorbitcast, const_zextorbitcast]
-            ce = f(val, LLVM.Int64Type())::LLVM.Constant
-            @check_ir ce "i64 42"
-        end
-
-        for f in [const_uitofp, const_sitofp]
-            ce = f(val, LLVM.FloatType())::LLVM.Constant
-            @check_ir ce "float 4.200000e+01"
-        end
-
         ce = const_bitcast(val, LLVM.FloatType())::LLVM.Constant
         @check_ir ce "float 0x36F5000000000000"
-
-        ce = const_intcast(val, LLVM.Int64Type(), true)::LLVM.Constant
-        @check_ir ce "i64 42"
-
-        ce = const_intcast(val, LLVM.Int16Type(), true)::LLVM.Constant
-        @check_ir ce "i16 42"
 
         if LLVM.version() < v"15"
             for f in [const_udiv, const_sdiv]
@@ -663,6 +636,40 @@ end
                 @check_ir ce "i32 0"
             end
         end
+
+        if LLVM.version() < v"18"
+            ce = const_and(val, other_val)::LLVM.Constant
+            @check_ir ce "i32 2"
+
+            ce = const_or(val, other_val)::LLVM.Constant
+            @check_ir ce "i32 42"
+
+            for f in [const_uitofp, const_sitofp]
+                ce = f(val, LLVM.FloatType())::LLVM.Constant
+                @check_ir ce "float 4.200000e+01"
+            end
+
+            for f in [const_sext, const_zext]
+                ce = f(val, LLVM.Int64Type())::LLVM.Constant
+                @check_ir ce "i64 42"
+            end
+
+            for f in [const_lshr, const_ashr]
+                ce = f(val, other_val)::LLVM.Constant
+                @check_ir ce "i32 10"
+            end
+
+            for f in [const_sextorbitcast, const_zextorbitcast]
+                ce = f(val, LLVM.Int64Type())::LLVM.Constant
+                @check_ir ce "i64 42"
+            end
+
+            ce = const_intcast(val, LLVM.Int64Type(), true)::LLVM.Constant
+            @check_ir ce "i64 42"
+
+            ce = const_intcast(val, LLVM.Int16Type(), true)::LLVM.Constant
+            @check_ir ce "i16 42"
+        end
     end
 
     # floating-point
@@ -672,21 +679,6 @@ end
         other_val = LLVM.ConstantFP(Float32(2.))
         ce = const_fcmp(LLVM.API.LLVMRealUGT, val, other_val)::LLVM.Constant
         @check_ir ce "i1 true"
-
-        for f in [const_fptrunc, const_fpcast]
-            ce = f(val, LLVM.HalfType())::LLVM.Constant
-            @check_ir ce "half 0xH5140"
-        end
-
-        for f in [const_fpext, const_fpcast]
-            ce = f(val, LLVM.DoubleType())::LLVM.Constant
-            @check_ir ce "double 4.200000e+01"
-        end
-
-        for f in [const_fptoui, const_fptosi]
-            ce = const_fptoui(val, LLVM.Int32Type())::LLVM.Constant
-            @check_ir ce "i32 42"
-        end
 
         if LLVM.version() < v"15"
             other_val = LLVM.ConstantFP(Float32(2.))
@@ -705,6 +697,23 @@ end
 
             ce = const_frem(val, other_val)::LLVM.Constant
             @check_ir ce "float 0.000000e+00"
+        end
+
+        if LLVM.version() < v"18"
+            for f in [const_fptoui, const_fptosi]
+                ce = const_fptoui(val, LLVM.Int32Type())::LLVM.Constant
+                @check_ir ce "i32 42"
+            end
+
+            for f in [const_fptrunc, const_fpcast]
+                ce = f(val, LLVM.HalfType())::LLVM.Constant
+                @check_ir ce "half 0xH5140"
+            end
+
+            for f in [const_fpext, const_fpcast]
+                ce = f(val, LLVM.DoubleType())::LLVM.Constant
+                @check_ir ce "double 4.200000e+01"
+            end
         end
     end
 
