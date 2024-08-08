@@ -27,40 +27,12 @@ function LLVMAddBarrierNoopPass(PM)
     ccall((:LLVMAddBarrierNoopPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddDivRemPairsPass(PM)
-    ccall((:LLVMAddDivRemPairsPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopDistributePass(PM)
-    ccall((:LLVMAddLoopDistributePass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopFusePass(PM)
-    ccall((:LLVMAddLoopFusePass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopLoadEliminationPass(PM)
-    ccall((:LLVMAddLoopLoadEliminationPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
 function LLVMAddLoadStoreVectorizerPass(PM)
     ccall((:LLVMAddLoadStoreVectorizerPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
-function LLVMAddVectorCombinePass(PM)
-    ccall((:LLVMAddVectorCombinePass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
 function LLVMAddSpeculativeExecutionIfHasBranchDivergencePass(PM)
     ccall((:LLVMAddSpeculativeExecutionIfHasBranchDivergencePass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddSimpleLoopUnrollPass(PM)
-    ccall((:LLVMAddSimpleLoopUnrollPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddInductiveRangeCheckEliminationPass(PM)
-    ccall((:LLVMAddInductiveRangeCheckEliminationPass, libLLVMExtra), Cvoid, (LLVMPassManagerRef,), PM)
 end
 
 function LLVMAddSimpleLoopUnswitchLegacyPass(PM)
@@ -104,10 +76,6 @@ end
 
 function LLVMAddTargetLibraryInfoByTriple(T, PM)
     ccall((:LLVMAddTargetLibraryInfoByTriple, libLLVMExtra), Cvoid, (Cstring, LLVMPassManagerRef), T, PM)
-end
-
-function LLVMAddInternalizePassWithExportList(PM, ExportList, Length)
-    ccall((:LLVMAddInternalizePassWithExportList, libLLVMExtra), Cvoid, (LLVMPassManagerRef, Ptr{Cstring}, Csize_t), PM, ExportList, Length)
 end
 
 function LLVMAppendToUsed(Mod, Values, Count)
@@ -182,8 +150,8 @@ function LLVMGetGlobalValueType(Fn)
     ccall((:LLVMGetGlobalValueType, libLLVMExtra), LLVMTypeRef, (LLVMValueRef,), Fn)
 end
 
-function LLVMAddCFGSimplificationPass2(PM, BonusInstThreshold, ForwardSwitchCondToPhi, ConvertSwitchToLookupTable, NeedCanonicalLoop, HoistCommonInsts, SinkCommonInsts, SimplifyCondBranch, FoldTwoEntryPHINode)
-    ccall((:LLVMAddCFGSimplificationPass2, libLLVMExtra), Cvoid, (LLVMPassManagerRef, Cint, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool), PM, BonusInstThreshold, ForwardSwitchCondToPhi, ConvertSwitchToLookupTable, NeedCanonicalLoop, HoistCommonInsts, SinkCommonInsts, SimplifyCondBranch, FoldTwoEntryPHINode)
+function LLVMAddCFGSimplificationPass2(PM, BonusInstThreshold, ForwardSwitchCondToPhi, ConvertSwitchToLookupTable, NeedCanonicalLoop, HoistCommonInsts, SinkCommonInsts, SimplifyCondBranch, SpeculateBlocks)
+    ccall((:LLVMAddCFGSimplificationPass2, libLLVMExtra), Cvoid, (LLVMPassManagerRef, Cint, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool, LLVMBool), PM, BonusInstThreshold, ForwardSwitchCondToPhi, ConvertSwitchToLookupTable, NeedCanonicalLoop, HoistCommonInsts, SinkCommonInsts, SimplifyCondBranch, SpeculateBlocks)
 end
 
 function LLVMSetInitializer2(GlobalVar, ConstantVal)
@@ -217,74 +185,6 @@ function LLVMDestroyConstant(Const)
     ccall((:LLVMDestroyConstant, libLLVMExtra), Cvoid, (LLVMValueRef,), Const)
 end
 
-mutable struct LLVMOpaqueOperandBundleUse end
-
-const LLVMOperandBundleUseRef = Ptr{LLVMOpaqueOperandBundleUse}
-
-function LLVMGetNumOperandBundles(Instr)
-    ccall((:LLVMGetNumOperandBundles, libLLVMExtra), Cuint, (LLVMValueRef,), Instr)
-end
-
-function LLVMGetOperandBundle(Val, Index)
-    ccall((:LLVMGetOperandBundle, libLLVMExtra), LLVMOperandBundleUseRef, (LLVMValueRef, Cuint), Val, Index)
-end
-
-function LLVMDisposeOperandBundleUse(Bundle)
-    ccall((:LLVMDisposeOperandBundleUse, libLLVMExtra), Cvoid, (LLVMOperandBundleUseRef,), Bundle)
-end
-
-function LLVMGetOperandBundleUseTagID(Bundle)
-    ccall((:LLVMGetOperandBundleUseTagID, libLLVMExtra), UInt32, (LLVMOperandBundleUseRef,), Bundle)
-end
-
-function LLVMGetOperandBundleUseTagName(Bundle, Length)
-    ccall((:LLVMGetOperandBundleUseTagName, libLLVMExtra), Cstring, (LLVMOperandBundleUseRef, Ptr{Cuint}), Bundle, Length)
-end
-
-function LLVMGetOperandBundleUseNumInputs(Bundle)
-    ccall((:LLVMGetOperandBundleUseNumInputs, libLLVMExtra), Cuint, (LLVMOperandBundleUseRef,), Bundle)
-end
-
-function LLVMGetOperandBundleUseInputs(Bundle, Dest)
-    ccall((:LLVMGetOperandBundleUseInputs, libLLVMExtra), Cvoid, (LLVMOperandBundleUseRef, Ptr{LLVMValueRef}), Bundle, Dest)
-end
-
-mutable struct LLVMOpaqueOperandBundleDef end
-
-const LLVMOperandBundleDefRef = Ptr{LLVMOpaqueOperandBundleDef}
-
-function LLVMOperandBundleDefFromUse(Bundle)
-    ccall((:LLVMOperandBundleDefFromUse, libLLVMExtra), LLVMOperandBundleDefRef, (LLVMOperandBundleUseRef,), Bundle)
-end
-
-function LLVMCreateOperandBundleDef(Tag, Inputs, NumInputs)
-    ccall((:LLVMCreateOperandBundleDef, libLLVMExtra), LLVMOperandBundleDefRef, (Cstring, Ptr{LLVMValueRef}, Cuint), Tag, Inputs, NumInputs)
-end
-
-function LLVMDisposeOperandBundleDef(Bundle)
-    ccall((:LLVMDisposeOperandBundleDef, libLLVMExtra), Cvoid, (LLVMOperandBundleDefRef,), Bundle)
-end
-
-function LLVMGetOperandBundleDefTag(Bundle, Length)
-    ccall((:LLVMGetOperandBundleDefTag, libLLVMExtra), Cstring, (LLVMOperandBundleDefRef, Ptr{Cuint}), Bundle, Length)
-end
-
-function LLVMGetOperandBundleDefNumInputs(Bundle)
-    ccall((:LLVMGetOperandBundleDefNumInputs, libLLVMExtra), Cuint, (LLVMOperandBundleDefRef,), Bundle)
-end
-
-function LLVMGetOperandBundleDefInputs(Bundle, Dest)
-    ccall((:LLVMGetOperandBundleDefInputs, libLLVMExtra), Cvoid, (LLVMOperandBundleDefRef, Ptr{LLVMValueRef}), Bundle, Dest)
-end
-
-function LLVMBuildCallWithOpBundle(B, Fn, Args, NumArgs, Bundles, NumBundles, Name)
-    ccall((:LLVMBuildCallWithOpBundle, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Ptr{LLVMOperandBundleDefRef}, Cuint, Cstring), B, Fn, Args, NumArgs, Bundles, NumBundles, Name)
-end
-
-function LLVMBuildCallWithOpBundle2(B, Ty, Fn, Args, NumArgs, Bundles, NumBundles, Name)
-    ccall((:LLVMBuildCallWithOpBundle2, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Ptr{LLVMOperandBundleDefRef}, Cuint, Cstring), B, Ty, Fn, Args, NumArgs, Bundles, NumBundles, Name)
-end
-
 function LLVMMetadataAsValue2(C, Metadata)
     ccall((:LLVMMetadataAsValue2, libLLVMExtra), LLVMValueRef, (LLVMContextRef, LLVMMetadataRef), C, Metadata)
 end
@@ -293,24 +193,8 @@ function LLVMReplaceAllMetadataUsesWith(Old, New)
     ccall((:LLVMReplaceAllMetadataUsesWith, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMValueRef), Old, New)
 end
 
-function LLVMReplaceMDNodeOperandWith(V, Index, Replacement)
-    ccall((:LLVMReplaceMDNodeOperandWith, libLLVMExtra), Cvoid, (LLVMValueRef, Cuint, LLVMMetadataRef), V, Index, Replacement)
-end
-
 function LLVMConstDataArray(ElementTy, Data, NumElements)
     ccall((:LLVMConstDataArray, libLLVMExtra), LLVMValueRef, (LLVMTypeRef, Ptr{Cvoid}, Cuint), ElementTy, Data, NumElements)
-end
-
-function LLVMContextSupportsTypedPointers(C)
-    ccall((:LLVMContextSupportsTypedPointers, libLLVMExtra), LLVMBool, (LLVMContextRef,), C)
-end
-
-function LLVMPointerTypeIsOpaque(Ty)
-    ccall((:LLVMPointerTypeIsOpaque, libLLVMExtra), LLVMBool, (LLVMTypeRef,), Ty)
-end
-
-function LLVMPointerTypeInContext(C, AddressSpace)
-    ccall((:LLVMPointerTypeInContext, libLLVMExtra), LLVMTypeRef, (LLVMContextRef, Cuint), C, AddressSpace)
 end
 
 mutable struct LLVMOpaqueDominatorTree end
@@ -343,32 +227,6 @@ end
 
 function LLVMPostDominatorTreeInstructionDominates(Tree, InstA, InstB)
     ccall((:LLVMPostDominatorTreeInstructionDominates, libLLVMExtra), LLVMBool, (LLVMPostDominatorTreeRef, LLVMValueRef, LLVMValueRef), Tree, InstA, InstB)
-end
-
-@cenum __JL_Ctag_52::UInt32 begin
-    LLVMFastMathAllowReassoc = 1
-    LLVMFastMathNoNaNs = 2
-    LLVMFastMathNoInfs = 4
-    LLVMFastMathNoSignedZeros = 8
-    LLVMFastMathAllowReciprocal = 16
-    LLVMFastMathAllowContract = 32
-    LLVMFastMathApproxFunc = 64
-    LLVMFastMathNone = 0
-    LLVMFastMathAll = 127
-end
-
-const LLVMFastMathFlags = Cuint
-
-function LLVMGetFastMathFlags(FPMathInst)
-    ccall((:LLVMGetFastMathFlags, libLLVMExtra), LLVMFastMathFlags, (LLVMValueRef,), FPMathInst)
-end
-
-function LLVMSetFastMathFlags(FPMathInst, FMF)
-    ccall((:LLVMSetFastMathFlags, libLLVMExtra), Cvoid, (LLVMValueRef, LLVMFastMathFlags), FPMathInst, FMF)
-end
-
-function LLVMCanValueUseFastMathFlags(Inst)
-    ccall((:LLVMCanValueUseFastMathFlags, libLLVMExtra), LLVMBool, (LLVMValueRef,), Inst)
 end
 
 function LLVMHasMetadata2(Inst)

@@ -26,7 +26,11 @@
 #include <llvm/Transforms/Scalar/SimpleLoopUnswitch.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
+#if LLVM_VERSION_MAJOR < 18
 #include <llvm/Transforms/Vectorize.h>
+#else
+#include <llvm/Transforms/Vectorize/LoadStoreVectorizer.h>
+#endif
 
 using namespace llvm;
 using namespace llvm::legacy;
@@ -93,9 +97,11 @@ void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM) {
 }
 #endif
 
+#if LLVM_VERSION_MAJOR < 18
 void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSimpleLoopUnswitchLegacyPass());
 }
+#endif
 
 void LLVMAddExpandReductionsPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createExpandReductionsPass());
@@ -428,115 +434,76 @@ void LLVMDestroyConstant(LLVMValueRef Const) { unwrap<Constant>(Const)->destroyC
 
 // operand bundles
 
-DEFINE_STDCXX_CONVERSION_FUNCTIONS(OperandBundleUse, LLVMOperandBundleUseRef)
+#if LLVM_VERSION_MAJOR < 18
 
-unsigned LLVMGetNumOperandBundles(LLVMValueRef Instr) {
-  return unwrap<CallBase>(Instr)->getNumOperandBundles();
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(OperandBundleDef, LLVMOperandBundleRef)
+
+LLVMOperandBundleRef LLVMCreateOperandBundle(const char *Tag, size_t TagLen,
+                                             LLVMValueRef *Args,
+                                             unsigned NumArgs) {
+  return wrap(new OperandBundleDef(std::string(Tag, TagLen),
+                                   ArrayRef(unwrap(Args), NumArgs)));
 }
 
-LLVMOperandBundleUseRef LLVMGetOperandBundle(LLVMValueRef Val, unsigned Index) {
-  CallBase *CB = unwrap<CallBase>(Val);
-  return wrap(new OperandBundleUse(CB->getOperandBundleAt(Index)));
+void LLVMDisposeOperandBundle(LLVMOperandBundleRef Bundle) {
+  delete unwrap(Bundle);
 }
 
-void LLVMDisposeOperandBundleUse(LLVMOperandBundleUseRef Bundle) {
-  delete unwrap<OperandBundleUse>(Bundle);
-  return;
+const char *LLVMGetOperandBundleTag(LLVMOperandBundleRef Bundle, size_t *Len) {
+  StringRef Str = unwrap(Bundle)->getTag();
+  *Len = Str.size();
+  return Str.data();
 }
 
-uint32_t LLVMGetOperandBundleUseTagID(LLVMOperandBundleUseRef Bundle) {
-  const OperandBundleUse *S = unwrap<OperandBundleUse>(Bundle);
-  return S->getTagID();
+unsigned LLVMGetNumOperandBundleArgs(LLVMOperandBundleRef Bundle) {
+  return unwrap(Bundle)->inputs().size();
 }
 
-const char *LLVMGetOperandBundleUseTagName(LLVMOperandBundleUseRef Bundle,
-                                           unsigned *Length) {
-  const OperandBundleUse *S = unwrap<OperandBundleUse>(Bundle);
-  *Length = S->getTagName().size();
-  return S->getTagName().data();
+LLVMValueRef LLVMGetOperandBundleArgAtIndex(LLVMOperandBundleRef Bundle,
+                                            unsigned Index) {
+  return wrap(unwrap(Bundle)->inputs()[Index]);
 }
 
-unsigned LLVMGetOperandBundleUseNumInputs(LLVMOperandBundleUseRef Bundle) {
-  return unwrap<OperandBundleUse>(Bundle)->Inputs.size();
+unsigned LLVMGetNumOperandBundles(LLVMValueRef C) {
+  return unwrap<CallBase>(C)->getNumOperandBundles();
 }
 
-void LLVMGetOperandBundleUseInputs(LLVMOperandBundleUseRef Bundle, LLVMValueRef *Dest) {
-  size_t i = 0;
-  for (auto &input : unwrap<OperandBundleUse>(Bundle)->Inputs)
-    Dest[i++] = wrap(input);
+LLVMOperandBundleRef LLVMGetOperandBundleAtIndex(LLVMValueRef C,
+                                                 unsigned Index) {
+  return wrap(
+      new OperandBundleDef(unwrap<CallBase>(C)->getOperandBundleAt(Index)));
 }
 
-DEFINE_STDCXX_CONVERSION_FUNCTIONS(OperandBundleDef, LLVMOperandBundleDefRef)
-
-LLVMOperandBundleDefRef LLVMCreateOperandBundleDef(const char *Tag, LLVMValueRef *Inputs,
-                                                   unsigned NumInputs) {
-  SmallVector<Value *, 1> InputArray;
-  for (auto *Input : ArrayRef(Inputs, NumInputs))
-    InputArray.push_back(unwrap(Input));
-  return wrap(new OperandBundleDef(std::string(Tag), InputArray));
+LLVMValueRef LLVMBuildInvokeWithOperandBundles(
+    LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn, LLVMValueRef *Args,
+    unsigned NumArgs, LLVMBasicBlockRef Then, LLVMBasicBlockRef Catch,
+    LLVMOperandBundleRef *Bundles, unsigned NumBundles, const char *Name) {
+  SmallVector<OperandBundleDef, 8> OBs;
+  for (auto *Bundle : ArrayRef(Bundles, NumBundles)) {
+    OperandBundleDef *OB = unwrap(Bundle);
+    OBs.push_back(*OB);
+  }
+  return wrap(unwrap(B)->CreateInvoke(
+      unwrap<FunctionType>(Ty), unwrap(Fn), unwrap(Then), unwrap(Catch),
+      ArrayRef(unwrap(Args), NumArgs), OBs, Name));
 }
 
-LLVMOperandBundleDefRef LLVMOperandBundleDefFromUse(LLVMOperandBundleUseRef Bundle) {
-  return wrap(new OperandBundleDef(*unwrap<OperandBundleUse>(Bundle)));
-}
-
-void LLVMDisposeOperandBundleDef(LLVMOperandBundleDefRef Bundle) {
-  delete unwrap<OperandBundleDef>(Bundle);
-  return;
-}
-
-const char *LLVMGetOperandBundleDefTag(LLVMOperandBundleDefRef Bundle, unsigned *Length) {
-  const OperandBundleDef *S = unwrap<OperandBundleDef>(Bundle);
-  *Length = S->getTag().size();
-  return S->getTag().data();
-}
-
-unsigned LLVMGetOperandBundleDefNumInputs(LLVMOperandBundleDefRef Bundle) {
-  return unwrap<OperandBundleDef>(Bundle)->input_size();
-}
-
-void LLVMGetOperandBundleDefInputs(LLVMOperandBundleDefRef Bundle, LLVMValueRef *Dest) {
-  size_t i = 0;
-  for (auto input : unwrap<OperandBundleDef>(Bundle)->inputs())
-    Dest[i++] = wrap(input);
-}
-
-LLVMValueRef LLVMBuildCallWithOpBundle(LLVMBuilderRef B, LLVMValueRef Fn,
-                                       LLVMValueRef *Args, unsigned NumArgs,
-                                       LLVMOperandBundleDefRef *Bundles,
-                                       unsigned NumBundles, const char *Name) {
-  SmallVector<OperandBundleDef, 1> BundleArray;
-  for (auto *Bundle : ArrayRef(Bundles, NumBundles))
-    BundleArray.push_back(*unwrap<OperandBundleDef>(Bundle));
-
-  llvm::IRBuilder<> *Builder = unwrap(B);
-  llvm::ArrayRef<llvm::Value *> args = ArrayRef(unwrap(Args), NumArgs);
-
-  Value *V = unwrap(Fn);
-#if LLVM_VERSION_MAJOR >= 15
-  FunctionType *FnT = cast<Function>(V)->getFunctionType();
-#else
-  FunctionType *FnT = cast<FunctionType>(V->getType()->getPointerElementType());
-#endif
-  llvm::CallInst *CI = Builder->CreateCall(FnT, unwrap(Fn), args, BundleArray, Name);
-  return wrap(CI);
-}
-
-LLVMValueRef LLVMBuildCallWithOpBundle2(LLVMBuilderRef B, LLVMTypeRef Ty, LLVMValueRef Fn,
-                                        LLVMValueRef *Args, unsigned NumArgs,
-                                        LLVMOperandBundleDefRef *Bundles,
-                                        unsigned NumBundles, const char *Name) {
-  SmallVector<OperandBundleDef, 1> BundleArray;
-  for (auto *Bundle : ArrayRef(Bundles, NumBundles))
-    BundleArray.push_back(*unwrap<OperandBundleDef>(Bundle));
-
-  llvm::IRBuilder<> *Builder = unwrap(B);
-  llvm::ArrayRef<llvm::Value *> args = ArrayRef(unwrap(Args), NumArgs);
-
+LLVMValueRef
+LLVMBuildCallWithOperandBundles(LLVMBuilderRef B, LLVMTypeRef Ty,
+                                LLVMValueRef Fn, LLVMValueRef *Args,
+                                unsigned NumArgs, LLVMOperandBundleRef *Bundles,
+                                unsigned NumBundles, const char *Name) {
   FunctionType *FTy = unwrap<FunctionType>(Ty);
-  llvm::CallInst *CI = Builder->CreateCall(FTy, unwrap(Fn), args, BundleArray, Name);
-  return wrap(CI);
+  SmallVector<OperandBundleDef, 8> OBs;
+  for (auto *Bundle : ArrayRef(Bundles, NumBundles)) {
+    OperandBundleDef *OB = unwrap(Bundle);
+    OBs.push_back(*OB);
+  }
+  return wrap(unwrap(B)->CreateCall(
+      FTy, unwrap(Fn), ArrayRef(unwrap(Args), NumArgs), OBs, Name));
 }
+
+#endif
 
 
 // metadata
@@ -682,6 +649,8 @@ LLVMBool LLVMCanValueUseFastMathFlags(LLVMValueRef V) {
   return isa<FPMathOperator>(Val);
 }
 
+#endif
+
 
 // upstream bug: metadata APIs only accept instructions
 
@@ -781,5 +750,3 @@ LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B,LLVMAtomicRMWBinOp op,
       mapFromLLVMOrdering(ordering),
       unwrap(LLVMGetBuilderContext(B))->getOrInsertSyncScopeID(syncscope)));
 }
-
-#endif

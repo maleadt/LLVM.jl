@@ -67,9 +67,9 @@ mutable struct LLVMOpaqueModuleProvider end
 
 mutable struct LLVMOpaquePassManager end
 
-mutable struct LLVMOpaquePassRegistry end
-
 mutable struct LLVMOpaqueUse end
+
+mutable struct LLVMOpaqueOperandBundle end
 
 mutable struct LLVMOpaqueAttributeRef end
 
@@ -86,6 +86,8 @@ mutable struct LLVMOpaqueBinary end
 mutable struct LLVMOpaqueTargetData end
 
 mutable struct LLVMOpaqueTargetLibraryInfotData end
+
+mutable struct LLVMOpaqueTargetMachineOptions end
 
 mutable struct LLVMOpaqueTargetMachine end
 
@@ -131,13 +133,15 @@ mutable struct LLVMOrcOpaqueLazyCallThroughManager end
 
 mutable struct LLVMOrcOpaqueDumpObjects end
 
+mutable struct LLVMOrcOpaqueLLJITBuilder end
+
+mutable struct LLVMOrcOpaqueLLJIT end
+
 mutable struct LLVMOpaqueGenericValue end
 
 mutable struct LLVMOpaqueExecutionEngine end
 
 mutable struct LLVMOpaqueMCJITMemoryManager end
-
-mutable struct LLVMOpaquePassManagerBuilder end
 
 @cenum LLVMVerifierFailureAction::UInt32 begin
     LLVMAbortProcessAction = 0
@@ -340,6 +344,7 @@ end
     LLVMScalableVectorTypeKind = 17
     LLVMBFloatTypeKind = 18
     LLVMX86_AMXTypeKind = 19
+    LLVMTargetExtTypeKind = 20
 end
 
 @cenum LLVMLinkage::UInt32 begin
@@ -386,7 +391,6 @@ end
     LLVMColdCallConv = 9
     LLVMGHCCallConv = 10
     LLVMHiPECallConv = 11
-    LLVMWebKitJSCallConv = 12
     LLVMAnyRegCallConv = 13
     LLVMPreserveMostCallConv = 14
     LLVMPreserveAllCallConv = 15
@@ -452,6 +456,7 @@ end
     LLVMInlineAsmValueKind = 23
     LLVMInstructionValueKind = 24
     LLVMPoisonValueValueKind = 25
+    LLVMConstantTargetNoneValueKind = 26
 end
 
 @cenum LLVMIntPredicate::UInt32 begin
@@ -523,6 +528,8 @@ end
     LLVMAtomicRMWBinOpUMin = 10
     LLVMAtomicRMWBinOpFAdd = 11
     LLVMAtomicRMWBinOpFSub = 12
+    LLVMAtomicRMWBinOpFMax = 13
+    LLVMAtomicRMWBinOpFMin = 14
 end
 
 @cenum LLVMDiagnosticSeverity::UInt32 begin
@@ -551,16 +558,35 @@ end
     LLVMAttributeFunctionIndex = -1
 end
 
+@cenum LLVMTailCallKind::UInt32 begin
+    LLVMTailCallKindNone = 0
+    LLVMTailCallKindTail = 1
+    LLVMTailCallKindMustTail = 2
+    LLVMTailCallKindNoTail = 3
+end
+
 const LLVMAttributeIndex = Cuint
 
-const LLVMPassRegistryRef = Ptr{LLVMOpaquePassRegistry}
-
-function LLVMInitializeCore(R)
-    ccall((:LLVMInitializeCore, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
+@cenum __JL_Ctag_87::UInt32 begin
+    LLVMFastMathAllowReassoc = 1
+    LLVMFastMathNoNaNs = 2
+    LLVMFastMathNoInfs = 4
+    LLVMFastMathNoSignedZeros = 8
+    LLVMFastMathAllowReciprocal = 16
+    LLVMFastMathAllowContract = 32
+    LLVMFastMathApproxFunc = 64
+    LLVMFastMathNone = 0
+    LLVMFastMathAll = 127
 end
+
+const LLVMFastMathFlags = Cuint
 
 function LLVMShutdown()
     ccall((:LLVMShutdown, libllvm), Cvoid, ())
+end
+
+function LLVMGetVersion(Major, Minor, Patch)
+    ccall((:LLVMGetVersion, libllvm), Cvoid, (Ptr{Cuint}, Ptr{Cuint}, Ptr{Cuint}), Major, Minor, Patch)
 end
 
 function LLVMCreateMessage(Message)
@@ -801,6 +827,34 @@ end
 
 function LLVMGetInlineAsm(Ty, AsmString, AsmStringSize, Constraints, ConstraintsSize, HasSideEffects, IsAlignStack, Dialect, CanThrow)
     ccall((:LLVMGetInlineAsm, libllvm), LLVMValueRef, (LLVMTypeRef, Cstring, Csize_t, Cstring, Csize_t, LLVMBool, LLVMBool, LLVMInlineAsmDialect, LLVMBool), Ty, AsmString, AsmStringSize, Constraints, ConstraintsSize, HasSideEffects, IsAlignStack, Dialect, CanThrow)
+end
+
+function LLVMGetInlineAsmAsmString(InlineAsmVal, Len)
+    ccall((:LLVMGetInlineAsmAsmString, libllvm), Cstring, (LLVMValueRef, Ptr{Csize_t}), InlineAsmVal, Len)
+end
+
+function LLVMGetInlineAsmConstraintString(InlineAsmVal, Len)
+    ccall((:LLVMGetInlineAsmConstraintString, libllvm), Cstring, (LLVMValueRef, Ptr{Csize_t}), InlineAsmVal, Len)
+end
+
+function LLVMGetInlineAsmDialect(InlineAsmVal)
+    ccall((:LLVMGetInlineAsmDialect, libllvm), LLVMInlineAsmDialect, (LLVMValueRef,), InlineAsmVal)
+end
+
+function LLVMGetInlineAsmFunctionType(InlineAsmVal)
+    ccall((:LLVMGetInlineAsmFunctionType, libllvm), LLVMTypeRef, (LLVMValueRef,), InlineAsmVal)
+end
+
+function LLVMGetInlineAsmHasSideEffects(InlineAsmVal)
+    ccall((:LLVMGetInlineAsmHasSideEffects, libllvm), LLVMBool, (LLVMValueRef,), InlineAsmVal)
+end
+
+function LLVMGetInlineAsmNeedsAlignedStack(InlineAsmVal)
+    ccall((:LLVMGetInlineAsmNeedsAlignedStack, libllvm), LLVMBool, (LLVMValueRef,), InlineAsmVal)
+end
+
+function LLVMGetInlineAsmCanUnwind(InlineAsmVal)
+    ccall((:LLVMGetInlineAsmCanUnwind, libllvm), LLVMBool, (LLVMValueRef,), InlineAsmVal)
 end
 
 function LLVMGetModuleContext(M)
@@ -1113,12 +1167,28 @@ function LLVMArrayType(ElementType, ElementCount)
     ccall((:LLVMArrayType, libllvm), LLVMTypeRef, (LLVMTypeRef, Cuint), ElementType, ElementCount)
 end
 
+function LLVMArrayType2(ElementType, ElementCount)
+    ccall((:LLVMArrayType2, libllvm), LLVMTypeRef, (LLVMTypeRef, UInt64), ElementType, ElementCount)
+end
+
 function LLVMGetArrayLength(ArrayTy)
     ccall((:LLVMGetArrayLength, libllvm), Cuint, (LLVMTypeRef,), ArrayTy)
 end
 
+function LLVMGetArrayLength2(ArrayTy)
+    ccall((:LLVMGetArrayLength2, libllvm), UInt64, (LLVMTypeRef,), ArrayTy)
+end
+
 function LLVMPointerType(ElementType, AddressSpace)
     ccall((:LLVMPointerType, libllvm), LLVMTypeRef, (LLVMTypeRef, Cuint), ElementType, AddressSpace)
+end
+
+function LLVMPointerTypeIsOpaque(Ty)
+    ccall((:LLVMPointerTypeIsOpaque, libllvm), LLVMBool, (LLVMTypeRef,), Ty)
+end
+
+function LLVMPointerTypeInContext(C, AddressSpace)
+    ccall((:LLVMPointerTypeInContext, libllvm), LLVMTypeRef, (LLVMContextRef, Cuint), C, AddressSpace)
 end
 
 function LLVMGetPointerAddressSpace(PointerTy)
@@ -1175,6 +1245,10 @@ end
 
 function LLVMX86AMXType()
     ccall((:LLVMX86AMXType, libllvm), LLVMTypeRef, ())
+end
+
+function LLVMTargetExtTypeInContext(C, Name, TypeParams, TypeParamCount, IntParams, IntParamCount)
+    ccall((:LLVMTargetExtTypeInContext, libllvm), LLVMTypeRef, (LLVMContextRef, Cstring, Ptr{LLVMTypeRef}, Cuint, Ptr{Cuint}, Cuint), C, Name, TypeParams, TypeParamCount, IntParams, IntParamCount)
 end
 
 function LLVMTypeOf(Val)
@@ -1297,10 +1371,6 @@ function LLVMIsAGlobalAlias(Val)
     ccall((:LLVMIsAGlobalAlias, libllvm), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
-function LLVMIsAGlobalIFunc(Val)
-    ccall((:LLVMIsAGlobalIFunc, libllvm), LLVMValueRef, (LLVMValueRef,), Val)
-end
-
 function LLVMIsAGlobalObject(Val)
     ccall((:LLVMIsAGlobalObject, libllvm), LLVMValueRef, (LLVMValueRef,), Val)
 end
@@ -1311,6 +1381,10 @@ end
 
 function LLVMIsAGlobalVariable(Val)
     ccall((:LLVMIsAGlobalVariable, libllvm), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
+function LLVMIsAGlobalIFunc(Val)
+    ccall((:LLVMIsAGlobalIFunc, libllvm), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
 function LLVMIsAUndefValue(Val)
@@ -1573,6 +1647,10 @@ function LLVMIsAMDNode(Val)
     ccall((:LLVMIsAMDNode, libllvm), LLVMValueRef, (LLVMValueRef,), Val)
 end
 
+function LLVMIsAValueAsMetadata(Val)
+    ccall((:LLVMIsAValueAsMetadata, libllvm), LLVMValueRef, (LLVMValueRef,), Val)
+end
+
 function LLVMIsAMDString(Val)
     ccall((:LLVMIsAMDString, libllvm), LLVMValueRef, (LLVMValueRef,), Val)
 end
@@ -1711,8 +1789,16 @@ function LLVMConstArray(ElementTy, ConstantVals, Length)
     ccall((:LLVMConstArray, libllvm), LLVMValueRef, (LLVMTypeRef, Ptr{LLVMValueRef}, Cuint), ElementTy, ConstantVals, Length)
 end
 
+function LLVMConstArray2(ElementTy, ConstantVals, Length)
+    ccall((:LLVMConstArray2, libllvm), LLVMValueRef, (LLVMTypeRef, Ptr{LLVMValueRef}, UInt64), ElementTy, ConstantVals, Length)
+end
+
 function LLVMConstNamedStruct(StructTy, ConstantVals, Count)
     ccall((:LLVMConstNamedStruct, libllvm), LLVMValueRef, (LLVMTypeRef, Ptr{LLVMValueRef}, Cuint), StructTy, ConstantVals, Count)
+end
+
+function LLVMGetAggregateElement(C, Idx)
+    ccall((:LLVMGetAggregateElement, libllvm), LLVMValueRef, (LLVMValueRef, Cuint), C, Idx)
 end
 
 function LLVMGetElementAsConstant(C, idx)
@@ -1747,10 +1833,6 @@ function LLVMConstNUWNeg(ConstantVal)
     ccall((:LLVMConstNUWNeg, libllvm), LLVMValueRef, (LLVMValueRef,), ConstantVal)
 end
 
-function LLVMConstFNeg(ConstantVal)
-    ccall((:LLVMConstFNeg, libllvm), LLVMValueRef, (LLVMValueRef,), ConstantVal)
-end
-
 function LLVMConstNot(ConstantVal)
     ccall((:LLVMConstNot, libllvm), LLVMValueRef, (LLVMValueRef,), ConstantVal)
 end
@@ -1767,10 +1849,6 @@ function LLVMConstNUWAdd(LHSConstant, RHSConstant)
     ccall((:LLVMConstNUWAdd, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
-function LLVMConstFAdd(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFAdd, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
 function LLVMConstSub(LHSConstant, RHSConstant)
     ccall((:LLVMConstSub, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
@@ -1783,10 +1861,6 @@ function LLVMConstNUWSub(LHSConstant, RHSConstant)
     ccall((:LLVMConstNUWSub, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
-function LLVMConstFSub(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFSub, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
 function LLVMConstMul(LHSConstant, RHSConstant)
     ccall((:LLVMConstMul, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
@@ -1797,50 +1871,6 @@ end
 
 function LLVMConstNUWMul(LHSConstant, RHSConstant)
     ccall((:LLVMConstNUWMul, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstFMul(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFMul, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstUDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstUDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstExactUDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstExactUDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstSDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstSDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstExactSDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstExactSDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstFDiv(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFDiv, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstURem(LHSConstant, RHSConstant)
-    ccall((:LLVMConstURem, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstSRem(LHSConstant, RHSConstant)
-    ccall((:LLVMConstSRem, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstFRem(LHSConstant, RHSConstant)
-    ccall((:LLVMConstFRem, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstAnd(LHSConstant, RHSConstant)
-    ccall((:LLVMConstAnd, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstOr(LHSConstant, RHSConstant)
-    ccall((:LLVMConstOr, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
 function LLVMConstXor(LHSConstant, RHSConstant)
@@ -1859,24 +1889,8 @@ function LLVMConstShl(LHSConstant, RHSConstant)
     ccall((:LLVMConstShl, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
 end
 
-function LLVMConstLShr(LHSConstant, RHSConstant)
-    ccall((:LLVMConstLShr, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstAShr(LHSConstant, RHSConstant)
-    ccall((:LLVMConstAShr, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef), LHSConstant, RHSConstant)
-end
-
-function LLVMConstGEP(ConstantVal, ConstantIndices, NumIndices)
-    ccall((:LLVMConstGEP, libllvm), LLVMValueRef, (LLVMValueRef, Ptr{LLVMValueRef}, Cuint), ConstantVal, ConstantIndices, NumIndices)
-end
-
 function LLVMConstGEP2(Ty, ConstantVal, ConstantIndices, NumIndices)
     ccall((:LLVMConstGEP2, libllvm), LLVMValueRef, (LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint), Ty, ConstantVal, ConstantIndices, NumIndices)
-end
-
-function LLVMConstInBoundsGEP(ConstantVal, ConstantIndices, NumIndices)
-    ccall((:LLVMConstInBoundsGEP, libllvm), LLVMValueRef, (LLVMValueRef, Ptr{LLVMValueRef}, Cuint), ConstantVal, ConstantIndices, NumIndices)
 end
 
 function LLVMConstInBoundsGEP2(Ty, ConstantVal, ConstantIndices, NumIndices)
@@ -1885,38 +1899,6 @@ end
 
 function LLVMConstTrunc(ConstantVal, ToType)
     ccall((:LLVMConstTrunc, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstSExt(ConstantVal, ToType)
-    ccall((:LLVMConstSExt, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstZExt(ConstantVal, ToType)
-    ccall((:LLVMConstZExt, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstFPTrunc(ConstantVal, ToType)
-    ccall((:LLVMConstFPTrunc, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstFPExt(ConstantVal, ToType)
-    ccall((:LLVMConstFPExt, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstUIToFP(ConstantVal, ToType)
-    ccall((:LLVMConstUIToFP, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstSIToFP(ConstantVal, ToType)
-    ccall((:LLVMConstSIToFP, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstFPToUI(ConstantVal, ToType)
-    ccall((:LLVMConstFPToUI, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstFPToSI(ConstantVal, ToType)
-    ccall((:LLVMConstFPToSI, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstPtrToInt(ConstantVal, ToType)
@@ -1935,32 +1917,12 @@ function LLVMConstAddrSpaceCast(ConstantVal, ToType)
     ccall((:LLVMConstAddrSpaceCast, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
-function LLVMConstZExtOrBitCast(ConstantVal, ToType)
-    ccall((:LLVMConstZExtOrBitCast, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstSExtOrBitCast(ConstantVal, ToType)
-    ccall((:LLVMConstSExtOrBitCast, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
 function LLVMConstTruncOrBitCast(ConstantVal, ToType)
     ccall((:LLVMConstTruncOrBitCast, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
 end
 
 function LLVMConstPointerCast(ConstantVal, ToType)
     ccall((:LLVMConstPointerCast, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstIntCast(ConstantVal, ToType, isSigned)
-    ccall((:LLVMConstIntCast, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef, LLVMBool), ConstantVal, ToType, isSigned)
-end
-
-function LLVMConstFPCast(ConstantVal, ToType)
-    ccall((:LLVMConstFPCast, libllvm), LLVMValueRef, (LLVMValueRef, LLVMTypeRef), ConstantVal, ToType)
-end
-
-function LLVMConstSelect(ConstantCondition, ConstantIfTrue, ConstantIfFalse)
-    ccall((:LLVMConstSelect, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), ConstantCondition, ConstantIfTrue, ConstantIfFalse)
 end
 
 function LLVMConstExtractElement(VectorConstant, IndexConstant)
@@ -1973,14 +1935,6 @@ end
 
 function LLVMConstShuffleVector(VectorAConstant, VectorBConstant, MaskConstant)
     ccall((:LLVMConstShuffleVector, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef, LLVMValueRef), VectorAConstant, VectorBConstant, MaskConstant)
-end
-
-function LLVMConstExtractValue(AggConstant, IdxList, NumIdx)
-    ccall((:LLVMConstExtractValue, libllvm), LLVMValueRef, (LLVMValueRef, Ptr{Cuint}, Cuint), AggConstant, IdxList, NumIdx)
-end
-
-function LLVMConstInsertValue(AggConstant, ElementValueConstant, IdxList, NumIdx)
-    ccall((:LLVMConstInsertValue, libllvm), LLVMValueRef, (LLVMValueRef, LLVMValueRef, Ptr{Cuint}, Cuint), AggConstant, ElementValueConstant, IdxList, NumIdx)
 end
 
 const LLVMBasicBlockRef = Ptr{LLVMOpaqueBasicBlock}
@@ -2163,8 +2117,8 @@ function LLVMSetExternallyInitialized(GlobalVar, IsExtInit)
     ccall((:LLVMSetExternallyInitialized, libllvm), Cvoid, (LLVMValueRef, LLVMBool), GlobalVar, IsExtInit)
 end
 
-function LLVMAddAlias(M, Ty, Aliasee, Name)
-    ccall((:LLVMAddAlias, libllvm), LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, LLVMValueRef, Cstring), M, Ty, Aliasee, Name)
+function LLVMAddAlias2(M, ValueTy, AddrSpace, Aliasee, Name)
+    ccall((:LLVMAddAlias2, libllvm), LLVMValueRef, (LLVMModuleRef, LLVMTypeRef, Cuint, LLVMValueRef, Cstring), M, ValueTy, AddrSpace, Aliasee, Name)
 end
 
 function LLVMGetNamedGlobalAlias(M, Name, NameLen)
@@ -2395,6 +2349,10 @@ function LLVMGetMDNodeOperands(V, Dest)
     ccall((:LLVMGetMDNodeOperands, libllvm), Cvoid, (LLVMValueRef, Ptr{LLVMValueRef}), V, Dest)
 end
 
+function LLVMReplaceMDNodeOperandWith(V, Index, Replacement)
+    ccall((:LLVMReplaceMDNodeOperandWith, libllvm), Cvoid, (LLVMValueRef, Cuint, LLVMMetadataRef), V, Index, Replacement)
+end
+
 function LLVMMDStringInContext(C, Str, SLen)
     ccall((:LLVMMDStringInContext, libllvm), LLVMValueRef, (LLVMContextRef, Cstring, Cuint), C, Str, SLen)
 end
@@ -2409,6 +2367,28 @@ end
 
 function LLVMMDNode(Vals, Count)
     ccall((:LLVMMDNode, libllvm), LLVMValueRef, (Ptr{LLVMValueRef}, Cuint), Vals, Count)
+end
+
+const LLVMOperandBundleRef = Ptr{LLVMOpaqueOperandBundle}
+
+function LLVMCreateOperandBundle(Tag, TagLen, Args, NumArgs)
+    ccall((:LLVMCreateOperandBundle, libllvm), LLVMOperandBundleRef, (Cstring, Csize_t, Ptr{LLVMValueRef}, Cuint), Tag, TagLen, Args, NumArgs)
+end
+
+function LLVMDisposeOperandBundle(Bundle)
+    ccall((:LLVMDisposeOperandBundle, libllvm), Cvoid, (LLVMOperandBundleRef,), Bundle)
+end
+
+function LLVMGetOperandBundleTag(Bundle, Len)
+    ccall((:LLVMGetOperandBundleTag, libllvm), Cstring, (LLVMOperandBundleRef, Ptr{Csize_t}), Bundle, Len)
+end
+
+function LLVMGetNumOperandBundleArgs(Bundle)
+    ccall((:LLVMGetNumOperandBundleArgs, libllvm), Cuint, (LLVMOperandBundleRef,), Bundle)
+end
+
+function LLVMGetOperandBundleArgAtIndex(Bundle, Index)
+    ccall((:LLVMGetOperandBundleArgAtIndex, libllvm), LLVMValueRef, (LLVMOperandBundleRef, Cuint), Bundle, Index)
 end
 
 function LLVMBasicBlockAsValue(BB)
@@ -2553,6 +2533,10 @@ function LLVMInstructionEraseFromParent(Inst)
     ccall((:LLVMInstructionEraseFromParent, libllvm), Cvoid, (LLVMValueRef,), Inst)
 end
 
+function LLVMDeleteInstruction(Inst)
+    ccall((:LLVMDeleteInstruction, libllvm), Cvoid, (LLVMValueRef,), Inst)
+end
+
 function LLVMGetInstructionOpcode(Inst)
     ccall((:LLVMGetInstructionOpcode, libllvm), LLVMOpcode, (LLVMValueRef,), Inst)
 end
@@ -2585,8 +2569,8 @@ function LLVMGetInstructionCallConv(Instr)
     ccall((:LLVMGetInstructionCallConv, libllvm), Cuint, (LLVMValueRef,), Instr)
 end
 
-function LLVMSetInstrParamAlignment(Instr, index, Align)
-    ccall((:LLVMSetInstrParamAlignment, libllvm), Cvoid, (LLVMValueRef, Cuint, Cuint), Instr, index, Align)
+function LLVMSetInstrParamAlignment(Instr, Idx, Align)
+    ccall((:LLVMSetInstrParamAlignment, libllvm), Cvoid, (LLVMValueRef, LLVMAttributeIndex, Cuint), Instr, Idx, Align)
 end
 
 function LLVMAddCallSiteAttribute(C, Idx, A)
@@ -2625,12 +2609,28 @@ function LLVMGetCalledValue(Instr)
     ccall((:LLVMGetCalledValue, libllvm), LLVMValueRef, (LLVMValueRef,), Instr)
 end
 
+function LLVMGetNumOperandBundles(C)
+    ccall((:LLVMGetNumOperandBundles, libllvm), Cuint, (LLVMValueRef,), C)
+end
+
+function LLVMGetOperandBundleAtIndex(C, Index)
+    ccall((:LLVMGetOperandBundleAtIndex, libllvm), LLVMOperandBundleRef, (LLVMValueRef, Cuint), C, Index)
+end
+
 function LLVMIsTailCall(CallInst)
     ccall((:LLVMIsTailCall, libllvm), LLVMBool, (LLVMValueRef,), CallInst)
 end
 
 function LLVMSetTailCall(CallInst, IsTailCall)
     ccall((:LLVMSetTailCall, libllvm), Cvoid, (LLVMValueRef, LLVMBool), CallInst, IsTailCall)
+end
+
+function LLVMGetTailCallKind(CallInst)
+    ccall((:LLVMGetTailCallKind, libllvm), LLVMTailCallKind, (LLVMValueRef,), CallInst)
+end
+
+function LLVMSetTailCallKind(CallInst, kind)
+    ccall((:LLVMSetTailCallKind, libllvm), Cvoid, (LLVMValueRef, LLVMTailCallKind), CallInst, kind)
 end
 
 function LLVMGetNormalDest(InvokeInst)
@@ -2687,6 +2687,10 @@ end
 
 function LLVMSetIsInBounds(GEP, InBounds)
     ccall((:LLVMSetIsInBounds, libllvm), Cvoid, (LLVMValueRef, LLVMBool), GEP, InBounds)
+end
+
+function LLVMGetGEPSourceElementType(GEP)
+    ccall((:LLVMGetGEPSourceElementType, libllvm), LLVMTypeRef, (LLVMValueRef,), GEP)
 end
 
 function LLVMAddIncoming(PhiNode, IncomingValues, IncomingBlocks, Count)
@@ -2765,6 +2769,10 @@ function LLVMSetInstDebugLocation(Builder, Inst)
     ccall((:LLVMSetInstDebugLocation, libllvm), Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, Inst)
 end
 
+function LLVMAddMetadataToInst(Builder, Inst)
+    ccall((:LLVMAddMetadataToInst, libllvm), Cvoid, (LLVMBuilderRef, LLVMValueRef), Builder, Inst)
+end
+
 function LLVMBuilderGetDefaultFPMathTag(Builder)
     ccall((:LLVMBuilderGetDefaultFPMathTag, libllvm), LLVMMetadataRef, (LLVMBuilderRef,), Builder)
 end
@@ -2809,12 +2817,12 @@ function LLVMBuildIndirectBr(B, Addr, NumDests)
     ccall((:LLVMBuildIndirectBr, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cuint), B, Addr, NumDests)
 end
 
-function LLVMBuildInvoke(arg1, Fn, Args, NumArgs, Then, Catch, Name)
-    ccall((:LLVMBuildInvoke, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, LLVMBasicBlockRef, LLVMBasicBlockRef, Cstring), arg1, Fn, Args, NumArgs, Then, Catch, Name)
-end
-
 function LLVMBuildInvoke2(arg1, Ty, Fn, Args, NumArgs, Then, Catch, Name)
     ccall((:LLVMBuildInvoke2, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, LLVMBasicBlockRef, LLVMBasicBlockRef, Cstring), arg1, Ty, Fn, Args, NumArgs, Then, Catch, Name)
+end
+
+function LLVMBuildInvokeWithOperandBundles(arg1, Ty, Fn, Args, NumArgs, Then, Catch, Bundles, NumBundles, Name)
+    ccall((:LLVMBuildInvokeWithOperandBundles, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, LLVMBasicBlockRef, LLVMBasicBlockRef, Ptr{LLVMOperandBundleRef}, Cuint, Cstring), arg1, Ty, Fn, Args, NumArgs, Then, Catch, Bundles, NumBundles, Name)
 end
 
 function LLVMBuildUnreachable(arg1)
@@ -3033,6 +3041,58 @@ function LLVMBuildNot(arg1, V, Name)
     ccall((:LLVMBuildNot, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, V, Name)
 end
 
+function LLVMGetNUW(ArithInst)
+    ccall((:LLVMGetNUW, libllvm), LLVMBool, (LLVMValueRef,), ArithInst)
+end
+
+function LLVMSetNUW(ArithInst, HasNUW)
+    ccall((:LLVMSetNUW, libllvm), Cvoid, (LLVMValueRef, LLVMBool), ArithInst, HasNUW)
+end
+
+function LLVMGetNSW(ArithInst)
+    ccall((:LLVMGetNSW, libllvm), LLVMBool, (LLVMValueRef,), ArithInst)
+end
+
+function LLVMSetNSW(ArithInst, HasNSW)
+    ccall((:LLVMSetNSW, libllvm), Cvoid, (LLVMValueRef, LLVMBool), ArithInst, HasNSW)
+end
+
+function LLVMGetExact(DivOrShrInst)
+    ccall((:LLVMGetExact, libllvm), LLVMBool, (LLVMValueRef,), DivOrShrInst)
+end
+
+function LLVMSetExact(DivOrShrInst, IsExact)
+    ccall((:LLVMSetExact, libllvm), Cvoid, (LLVMValueRef, LLVMBool), DivOrShrInst, IsExact)
+end
+
+function LLVMGetNNeg(NonNegInst)
+    ccall((:LLVMGetNNeg, libllvm), LLVMBool, (LLVMValueRef,), NonNegInst)
+end
+
+function LLVMSetNNeg(NonNegInst, IsNonNeg)
+    ccall((:LLVMSetNNeg, libllvm), Cvoid, (LLVMValueRef, LLVMBool), NonNegInst, IsNonNeg)
+end
+
+function LLVMGetFastMathFlags(FPMathInst)
+    ccall((:LLVMGetFastMathFlags, libllvm), LLVMFastMathFlags, (LLVMValueRef,), FPMathInst)
+end
+
+function LLVMSetFastMathFlags(FPMathInst, FMF)
+    ccall((:LLVMSetFastMathFlags, libllvm), Cvoid, (LLVMValueRef, LLVMFastMathFlags), FPMathInst, FMF)
+end
+
+function LLVMCanValueUseFastMathFlags(Inst)
+    ccall((:LLVMCanValueUseFastMathFlags, libllvm), LLVMBool, (LLVMValueRef,), Inst)
+end
+
+function LLVMGetIsDisjoint(Inst)
+    ccall((:LLVMGetIsDisjoint, libllvm), LLVMBool, (LLVMValueRef,), Inst)
+end
+
+function LLVMSetIsDisjoint(Inst, IsDisjoint)
+    ccall((:LLVMSetIsDisjoint, libllvm), Cvoid, (LLVMValueRef, LLVMBool), Inst, IsDisjoint)
+end
+
 function LLVMBuildMalloc(arg1, Ty, Name)
     ccall((:LLVMBuildMalloc, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, Cstring), arg1, Ty, Name)
 end
@@ -3065,28 +3125,12 @@ function LLVMBuildFree(arg1, PointerVal)
     ccall((:LLVMBuildFree, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef), arg1, PointerVal)
 end
 
-function LLVMBuildLoad(arg1, PointerVal, Name)
-    ccall((:LLVMBuildLoad, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, PointerVal, Name)
-end
-
 function LLVMBuildLoad2(arg1, Ty, PointerVal, Name)
     ccall((:LLVMBuildLoad2, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Cstring), arg1, Ty, PointerVal, Name)
 end
 
 function LLVMBuildStore(arg1, Val, Ptr)
     ccall((:LLVMBuildStore, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef), arg1, Val, Ptr)
-end
-
-function LLVMBuildGEP(B, Pointer, Indices, NumIndices, Name)
-    ccall((:LLVMBuildGEP, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Cstring), B, Pointer, Indices, NumIndices, Name)
-end
-
-function LLVMBuildInBoundsGEP(B, Pointer, Indices, NumIndices, Name)
-    ccall((:LLVMBuildInBoundsGEP, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Cstring), B, Pointer, Indices, NumIndices, Name)
-end
-
-function LLVMBuildStructGEP(B, Pointer, Idx, Name)
-    ccall((:LLVMBuildStructGEP, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cuint, Cstring), B, Pointer, Idx, Name)
 end
 
 function LLVMBuildGEP2(B, Ty, Pointer, Indices, NumIndices, Name)
@@ -3225,6 +3269,10 @@ function LLVMBuildIntCast(arg1, Val, DestTy, Name)
     ccall((:LLVMBuildIntCast, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, Cstring), arg1, Val, DestTy, Name)
 end
 
+function LLVMGetCastOpcode(Src, SrcIsSigned, DestTy, DestIsSigned)
+    ccall((:LLVMGetCastOpcode, libllvm), LLVMOpcode, (LLVMValueRef, LLVMBool, LLVMTypeRef, LLVMBool), Src, SrcIsSigned, DestTy, DestIsSigned)
+end
+
 function LLVMBuildICmp(arg1, Op, LHS, RHS, Name)
     ccall((:LLVMBuildICmp, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMIntPredicate, LLVMValueRef, LLVMValueRef, Cstring), arg1, Op, LHS, RHS, Name)
 end
@@ -3237,12 +3285,12 @@ function LLVMBuildPhi(arg1, Ty, Name)
     ccall((:LLVMBuildPhi, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, Cstring), arg1, Ty, Name)
 end
 
-function LLVMBuildCall(arg1, Fn, Args, NumArgs, Name)
-    ccall((:LLVMBuildCall, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Cstring), arg1, Fn, Args, NumArgs, Name)
-end
-
 function LLVMBuildCall2(arg1, arg2, Fn, Args, NumArgs, Name)
     ccall((:LLVMBuildCall2, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Cstring), arg1, arg2, Fn, Args, NumArgs, Name)
+end
+
+function LLVMBuildCallWithOperandBundles(arg1, arg2, Fn, Args, NumArgs, Bundles, NumBundles, Name)
+    ccall((:LLVMBuildCallWithOperandBundles, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, Ptr{LLVMValueRef}, Cuint, Ptr{LLVMOperandBundleRef}, Cuint, Cstring), arg1, arg2, Fn, Args, NumArgs, Bundles, NumBundles, Name)
 end
 
 function LLVMBuildSelect(arg1, If, Then, Else, Name)
@@ -3285,8 +3333,8 @@ function LLVMBuildIsNotNull(arg1, Val, Name)
     ccall((:LLVMBuildIsNotNull, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, Cstring), arg1, Val, Name)
 end
 
-function LLVMBuildPtrDiff(arg1, LHS, RHS, Name)
-    ccall((:LLVMBuildPtrDiff, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, LHS, RHS, Name)
+function LLVMBuildPtrDiff2(arg1, ElemTy, LHS, RHS, Name)
+    ccall((:LLVMBuildPtrDiff2, libllvm), LLVMValueRef, (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, LLVMValueRef, Cstring), arg1, ElemTy, LHS, RHS, Name)
 end
 
 function LLVMBuildFence(B, ordering, singleThread, Name)
@@ -3373,10 +3421,6 @@ end
 
 function LLVMDisposeMemoryBuffer(MemBuf)
     ccall((:LLVMDisposeMemoryBuffer, libllvm), Cvoid, (LLVMMemoryBufferRef,), MemBuf)
-end
-
-function LLVMGetGlobalPassRegistry()
-    ccall((:LLVMGetGlobalPassRegistry, libllvm), LLVMPassRegistryRef, ())
 end
 
 const LLVMPassManagerRef = Ptr{LLVMOpaquePassManager}
@@ -3501,9 +3545,19 @@ end
     LLVMDWARFSourceLanguageFortran08 = 34
     LLVMDWARFSourceLanguageRenderScript = 35
     LLVMDWARFSourceLanguageBLISS = 36
-    LLVMDWARFSourceLanguageMips_Assembler = 37
-    LLVMDWARFSourceLanguageGOOGLE_RenderScript = 38
-    LLVMDWARFSourceLanguageBORLAND_Delphi = 39
+    LLVMDWARFSourceLanguageKotlin = 37
+    LLVMDWARFSourceLanguageZig = 38
+    LLVMDWARFSourceLanguageCrystal = 39
+    LLVMDWARFSourceLanguageC_plus_plus_17 = 40
+    LLVMDWARFSourceLanguageC_plus_plus_20 = 41
+    LLVMDWARFSourceLanguageC17 = 42
+    LLVMDWARFSourceLanguageFortran18 = 43
+    LLVMDWARFSourceLanguageAda2005 = 44
+    LLVMDWARFSourceLanguageAda2012 = 45
+    LLVMDWARFSourceLanguageMojo = 46
+    LLVMDWARFSourceLanguageMips_Assembler = 47
+    LLVMDWARFSourceLanguageGOOGLE_RenderScript = 48
+    LLVMDWARFSourceLanguageBORLAND_Delphi = 49
 end
 
 @cenum LLVMDWARFEmissionKind::UInt32 begin
@@ -3512,7 +3566,7 @@ end
     LLVMDWARFEmissionLineTablesOnly = 2
 end
 
-@cenum __JL_Ctag_133::UInt32 begin
+@cenum __JL_Ctag_117::UInt32 begin
     LLVMMDStringMetadataKind = 0
     LLVMConstantAsMetadataMetadataKind = 1
     LLVMLocalAsMetadataMetadataKind = 2
@@ -3548,6 +3602,7 @@ end
     LLVMDIStringTypeMetadataKind = 32
     LLVMDIGenericSubrangeMetadataKind = 33
     LLVMDIArgListMetadataKind = 34
+    LLVMDIAssignIDMetadataKind = 35
 end
 
 const LLVMMetadataKind = Cuint
@@ -3592,6 +3647,10 @@ function LLVMDIBuilderFinalize(Builder)
     ccall((:LLVMDIBuilderFinalize, libllvm), Cvoid, (LLVMDIBuilderRef,), Builder)
 end
 
+function LLVMDIBuilderFinalizeSubprogram(Builder, Subprogram)
+    ccall((:LLVMDIBuilderFinalizeSubprogram, libllvm), Cvoid, (LLVMDIBuilderRef, LLVMMetadataRef), Builder, Subprogram)
+end
+
 function LLVMDIBuilderCreateCompileUnit(Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling, SysRoot, SysRootLen, SDK, SDKLen)
     ccall((:LLVMDIBuilderCreateCompileUnit, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMDWARFSourceLanguage, LLVMMetadataRef, Cstring, Csize_t, LLVMBool, Cstring, Csize_t, Cuint, Cstring, Csize_t, LLVMDWARFEmissionKind, Cuint, LLVMBool, LLVMBool, Cstring, Csize_t, Cstring, Csize_t), Builder, Lang, FileRef, Producer, ProducerLen, isOptimized, Flags, FlagsLen, RuntimeVer, SplitName, SplitNameLen, Kind, DWOId, SplitDebugInlining, DebugInfoForProfiling, SysRoot, SysRootLen, SDK, SDKLen)
 end
@@ -3624,16 +3683,16 @@ function LLVMDIBuilderCreateImportedModuleFromNamespace(Builder, Scope, NS, File
     ccall((:LLVMDIBuilderCreateImportedModuleFromNamespace, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, Cuint), Builder, Scope, NS, File, Line)
 end
 
-function LLVMDIBuilderCreateImportedModuleFromAlias(Builder, Scope, ImportedEntity, File, Line)
-    ccall((:LLVMDIBuilderCreateImportedModuleFromAlias, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, Cuint), Builder, Scope, ImportedEntity, File, Line)
+function LLVMDIBuilderCreateImportedModuleFromAlias(Builder, Scope, ImportedEntity, File, Line, Elements, NumElements)
+    ccall((:LLVMDIBuilderCreateImportedModuleFromAlias, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, Cuint, Ptr{LLVMMetadataRef}, Cuint), Builder, Scope, ImportedEntity, File, Line, Elements, NumElements)
 end
 
-function LLVMDIBuilderCreateImportedModuleFromModule(Builder, Scope, M, File, Line)
-    ccall((:LLVMDIBuilderCreateImportedModuleFromModule, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, Cuint), Builder, Scope, M, File, Line)
+function LLVMDIBuilderCreateImportedModuleFromModule(Builder, Scope, M, File, Line, Elements, NumElements)
+    ccall((:LLVMDIBuilderCreateImportedModuleFromModule, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, Cuint, Ptr{LLVMMetadataRef}, Cuint), Builder, Scope, M, File, Line, Elements, NumElements)
 end
 
-function LLVMDIBuilderCreateImportedDeclaration(Builder, Scope, Decl, File, Line, Name, NameLen)
-    ccall((:LLVMDIBuilderCreateImportedDeclaration, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, Cuint, Cstring, Csize_t), Builder, Scope, Decl, File, Line, Name, NameLen)
+function LLVMDIBuilderCreateImportedDeclaration(Builder, Scope, Decl, File, Line, Name, NameLen, Elements, NumElements)
+    ccall((:LLVMDIBuilderCreateImportedDeclaration, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, LLVMMetadataRef, LLVMMetadataRef, Cuint, Cstring, Csize_t, Ptr{LLVMMetadataRef}, Cuint), Builder, Scope, Decl, File, Line, Name, NameLen, Elements, NumElements)
 end
 
 function LLVMDIBuilderCreateDebugLocation(Ctx, Line, Column, Scope, InlinedAt)
@@ -3821,15 +3880,19 @@ function LLVMDIBuilderGetOrCreateArray(Builder, Data, NumElements)
 end
 
 function LLVMDIBuilderCreateExpression(Builder, Addr, Length)
-    ccall((:LLVMDIBuilderCreateExpression, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, Ptr{Int64}, Csize_t), Builder, Addr, Length)
+    ccall((:LLVMDIBuilderCreateExpression, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, Ptr{UInt64}, Csize_t), Builder, Addr, Length)
 end
 
 function LLVMDIBuilderCreateConstantValueExpression(Builder, Value)
-    ccall((:LLVMDIBuilderCreateConstantValueExpression, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, Int64), Builder, Value)
+    ccall((:LLVMDIBuilderCreateConstantValueExpression, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, UInt64), Builder, Value)
 end
 
 function LLVMDIBuilderCreateGlobalVariableExpression(Builder, Scope, Name, NameLen, Linkage, LinkLen, File, LineNo, Ty, LocalToUnit, Expr, Decl, AlignInBits)
     ccall((:LLVMDIBuilderCreateGlobalVariableExpression, libllvm), LLVMMetadataRef, (LLVMDIBuilderRef, LLVMMetadataRef, Cstring, Csize_t, Cstring, Csize_t, LLVMMetadataRef, Cuint, LLVMMetadataRef, LLVMBool, LLVMMetadataRef, LLVMMetadataRef, UInt32), Builder, Scope, Name, NameLen, Linkage, LinkLen, File, LineNo, Ty, LocalToUnit, Expr, Decl, AlignInBits)
+end
+
+function LLVMGetDINodeTag(MD)
+    ccall((:LLVMGetDINodeTag, libllvm), UInt16, (LLVMMetadataRef,), MD)
 end
 
 function LLVMDIGlobalVariableExpressionGetVariable(GVE)
@@ -3916,7 +3979,7 @@ function LLVMGetMetadataKind(Metadata)
     ccall((:LLVMGetMetadataKind, libllvm), LLVMMetadataKind, (LLVMMetadataRef,), Metadata)
 end
 
-# typedef int ( * LLVMOpInfoCallback ) ( void * DisInfo , uint64_t PC , uint64_t Offset , uint64_t Size , int TagType , void * TagBuf )
+# typedef int ( * LLVMOpInfoCallback ) ( void * DisInfo , uint64_t PC , uint64_t Offset , uint64_t OpSize , uint64_t InstSize , int TagType , void * TagBuf )
 const LLVMOpInfoCallback = Ptr{Cvoid}
 
 # typedef const char * ( * LLVMSymbolLookupCallback ) ( void * DisInfo , uint64_t ReferenceValue , uint64_t * ReferenceType , uint64_t ReferencePC , const char * * ReferenceName )
@@ -4202,62 +4265,10 @@ function LLVMParseIRInContext(ContextRef, MemBuf, OutM, OutMessage)
     ccall((:LLVMParseIRInContext, libllvm), LLVMBool, (LLVMContextRef, LLVMMemoryBufferRef, Ptr{LLVMModuleRef}, Ptr{Cstring}), ContextRef, MemBuf, OutM, OutMessage)
 end
 
-function LLVMInitializeTransformUtils(R)
-    ccall((:LLVMInitializeTransformUtils, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeScalarOpts(R)
-    ccall((:LLVMInitializeScalarOpts, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeObjCARCOpts(R)
-    ccall((:LLVMInitializeObjCARCOpts, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeVectorization(R)
-    ccall((:LLVMInitializeVectorization, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeInstCombine(R)
-    ccall((:LLVMInitializeInstCombine, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeAggressiveInstCombiner(R)
-    ccall((:LLVMInitializeAggressiveInstCombiner, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeIPO(R)
-    ccall((:LLVMInitializeIPO, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeInstrumentation(R)
-    ccall((:LLVMInitializeInstrumentation, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeAnalysis(R)
-    ccall((:LLVMInitializeAnalysis, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeIPA(R)
-    ccall((:LLVMInitializeIPA, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeCodeGen(R)
-    ccall((:LLVMInitializeCodeGen, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
-function LLVMInitializeTarget(R)
-    ccall((:LLVMInitializeTarget, libllvm), Cvoid, (LLVMPassRegistryRef,), R)
-end
-
 # typedef LLVMOrcObjectLayerRef ( * LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction ) ( void * Ctx , LLVMOrcExecutionSessionRef ES , const char * Triple )
 const LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction = Ptr{Cvoid}
 
-mutable struct LLVMOrcOpaqueLLJITBuilder end
-
 const LLVMOrcLLJITBuilderRef = Ptr{LLVMOrcOpaqueLLJITBuilder}
-
-mutable struct LLVMOrcOpaqueLLJIT end
 
 const LLVMOrcLLJITRef = Ptr{LLVMOrcOpaqueLLJIT}
 
@@ -4361,6 +4372,10 @@ function LLVMOrcLLJITGetDataLayoutStr(J)
     ccall((:LLVMOrcLLJITGetDataLayoutStr, libllvm), Cstring, (LLVMOrcLLJITRef,), J)
 end
 
+function LLVMOrcLLJITEnableDebugSupport(J)
+    ccall((:LLVMOrcLLJITEnableDebugSupport, libllvm), LLVMErrorRef, (LLVMOrcLLJITRef,), J)
+end
+
 @cenum LLVMLinkerMode::UInt32 begin
     LLVMLinkerDestroySource = 0
     LLVMLinkerPreserveSource_Removed = 1
@@ -4398,6 +4413,7 @@ const LLVMRelocationIteratorRef = Ptr{LLVMOpaqueRelocationIterator}
     LLVMBinaryTypeMachO64L = 12
     LLVMBinaryTypeMachO64B = 13
     LLVMBinaryTypeWasm = 14
+    LLVMBinaryTypeOffload = 15
 end
 
 const LLVMBinaryRef = Ptr{LLVMOpaqueBinary}
@@ -4557,6 +4573,7 @@ end
 const LLVMOrcJITTargetAddress = UInt64
 
 @cenum LLVMJITSymbolGenericFlags::UInt32 begin
+    LLVMJITSymbolGenericFlagsNone = 0
     LLVMJITSymbolGenericFlagsExported = 1
     LLVMJITSymbolGenericFlagsWeak = 2
     LLVMJITSymbolGenericFlagsCallable = 4
@@ -4587,12 +4604,12 @@ end
 
 const LLVMOrcCSymbolFlagsMapPairs = Ptr{LLVMOrcCSymbolFlagsMapPair}
 
-struct LLVMJITCSymbolMapPair
+struct LLVMOrcCSymbolMapPair
     Name::LLVMOrcSymbolStringPoolEntryRef
     Sym::LLVMJITEvaluatedSymbol
 end
 
-const LLVMOrcCSymbolMapPairs = Ptr{LLVMJITCSymbolMapPair}
+const LLVMOrcCSymbolMapPairs = Ptr{LLVMOrcCSymbolMapPair}
 
 struct LLVMOrcCSymbolAliasMapEntry
     Name::LLVMOrcSymbolStringPoolEntryRef
@@ -4628,6 +4645,13 @@ end
     LLVMOrcJITDylibLookupFlagsMatchAllSymbols = 1
 end
 
+struct LLVMOrcCJITDylibSearchOrderElement
+    JD::LLVMOrcJITDylibRef
+    JDLookupFlags::LLVMOrcJITDylibLookupFlags
+end
+
+const LLVMOrcCJITDylibSearchOrder = Ptr{LLVMOrcCJITDylibSearchOrderElement}
+
 @cenum LLVMOrcSymbolLookupFlags::UInt32 begin
     LLVMOrcSymbolLookupFlagsRequiredSymbol = 0
     LLVMOrcSymbolLookupFlagsWeaklyReferencedSymbol = 1
@@ -4659,6 +4683,9 @@ const LLVMOrcLookupStateRef = Ptr{LLVMOrcOpaqueLookupState}
 
 # typedef LLVMErrorRef ( * LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction ) ( LLVMOrcDefinitionGeneratorRef GeneratorObj , void * Ctx , LLVMOrcLookupStateRef * LookupState , LLVMOrcLookupKind Kind , LLVMOrcJITDylibRef JD , LLVMOrcJITDylibLookupFlags JDLookupFlags , LLVMOrcCLookupSet LookupSet , size_t LookupSetSize )
 const LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction = Ptr{Cvoid}
+
+# typedef void ( * LLVMOrcDisposeCAPIDefinitionGeneratorFunction ) ( void * Ctx )
+const LLVMOrcDisposeCAPIDefinitionGeneratorFunction = Ptr{Cvoid}
 
 # typedef int ( * LLVMOrcSymbolPredicate ) ( void * Ctx , LLVMOrcSymbolStringPoolEntryRef Sym )
 const LLVMOrcSymbolPredicate = Ptr{Cvoid}
@@ -4696,6 +4723,13 @@ end
 
 function LLVMOrcExecutionSessionIntern(ES, Name)
     ccall((:LLVMOrcExecutionSessionIntern, libllvm), LLVMOrcSymbolStringPoolEntryRef, (LLVMOrcExecutionSessionRef, Cstring), ES, Name)
+end
+
+# typedef void ( * LLVMOrcExecutionSessionLookupHandleResultFunction ) ( LLVMErrorRef Err , LLVMOrcCSymbolMapPairs Result , size_t NumPairs , void * Ctx )
+const LLVMOrcExecutionSessionLookupHandleResultFunction = Ptr{Cvoid}
+
+function LLVMOrcExecutionSessionLookup(ES, K, SearchOrder, SearchOrderSize, Symbols, SymbolsSize, HandleResult, Ctx)
+    ccall((:LLVMOrcExecutionSessionLookup, libllvm), Cvoid, (LLVMOrcExecutionSessionRef, LLVMOrcLookupKind, LLVMOrcCJITDylibSearchOrder, Csize_t, LLVMOrcCLookupSet, Csize_t, LLVMOrcExecutionSessionLookupHandleResultFunction, Ptr{Cvoid}), ES, K, SearchOrder, SearchOrderSize, Symbols, SymbolsSize, HandleResult, Ctx)
 end
 
 function LLVMOrcRetainSymbolStringPoolEntry(S)
@@ -4838,12 +4872,24 @@ function LLVMOrcJITDylibAddGenerator(JD, DG)
     ccall((:LLVMOrcJITDylibAddGenerator, libllvm), Cvoid, (LLVMOrcJITDylibRef, LLVMOrcDefinitionGeneratorRef), JD, DG)
 end
 
-function LLVMOrcCreateCustomCAPIDefinitionGenerator(F, Ctx)
-    ccall((:LLVMOrcCreateCustomCAPIDefinitionGenerator, libllvm), LLVMOrcDefinitionGeneratorRef, (LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction, Ptr{Cvoid}), F, Ctx)
+function LLVMOrcCreateCustomCAPIDefinitionGenerator(F, Ctx, Dispose)
+    ccall((:LLVMOrcCreateCustomCAPIDefinitionGenerator, libllvm), LLVMOrcDefinitionGeneratorRef, (LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction, Ptr{Cvoid}, LLVMOrcDisposeCAPIDefinitionGeneratorFunction), F, Ctx, Dispose)
+end
+
+function LLVMOrcLookupStateContinueLookup(S, Err)
+    ccall((:LLVMOrcLookupStateContinueLookup, libllvm), Cvoid, (LLVMOrcLookupStateRef, LLVMErrorRef), S, Err)
 end
 
 function LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess(Result, GlobalPrefx, Filter, FilterCtx)
     ccall((:LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess, libllvm), LLVMErrorRef, (Ptr{LLVMOrcDefinitionGeneratorRef}, Cchar, LLVMOrcSymbolPredicate, Ptr{Cvoid}), Result, GlobalPrefx, Filter, FilterCtx)
+end
+
+function LLVMOrcCreateDynamicLibrarySearchGeneratorForPath(Result, FileName, GlobalPrefix, Filter, FilterCtx)
+    ccall((:LLVMOrcCreateDynamicLibrarySearchGeneratorForPath, libllvm), LLVMErrorRef, (Ptr{LLVMOrcDefinitionGeneratorRef}, Cstring, Cchar, LLVMOrcSymbolPredicate, Ptr{Cvoid}), Result, FileName, GlobalPrefix, Filter, FilterCtx)
+end
+
+function LLVMOrcCreateStaticLibrarySearchGeneratorForPath(Result, ObjLayer, FileName, TargetTriple)
+    ccall((:LLVMOrcCreateStaticLibrarySearchGeneratorForPath, libllvm), LLVMErrorRef, (Ptr{LLVMOrcDefinitionGeneratorRef}, LLVMOrcObjectLayerRef, Cstring, Cstring), Result, ObjLayer, FileName, TargetTriple)
 end
 
 function LLVMOrcCreateNewThreadSafeContext()
@@ -4946,8 +4992,18 @@ function LLVMOrcDumpObjects_CallOperator(DumpObjects, ObjBuffer)
     ccall((:LLVMOrcDumpObjects_CallOperator, libllvm), LLVMErrorRef, (LLVMOrcDumpObjectsRef, Ptr{LLVMMemoryBufferRef}), DumpObjects, ObjBuffer)
 end
 
+# typedef void * ( * LLVMMemoryManagerCreateContextCallback ) ( void * CtxCtx )
+const LLVMMemoryManagerCreateContextCallback = Ptr{Cvoid}
+
+# typedef void ( * LLVMMemoryManagerNotifyTerminatingCallback ) ( void * CtxCtx )
+const LLVMMemoryManagerNotifyTerminatingCallback = Ptr{Cvoid}
+
 function LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager(ES)
     ccall((:LLVMOrcCreateRTDyldObjectLinkingLayerWithSectionMemoryManager, libllvm), LLVMOrcObjectLayerRef, (LLVMOrcExecutionSessionRef,), ES)
+end
+
+function LLVMOrcCreateRTDyldObjectLinkingLayerWithMCJITMemoryManagerLikeCallbacks(ES, CreateContextCtx, CreateContext, NotifyTerminating, AllocateCodeSection, AllocateDataSection, FinalizeMemory, Destroy)
+    ccall((:LLVMOrcCreateRTDyldObjectLinkingLayerWithMCJITMemoryManagerLikeCallbacks, libllvm), LLVMOrcObjectLayerRef, (LLVMOrcExecutionSessionRef, Ptr{Cvoid}, LLVMMemoryManagerCreateContextCallback, LLVMMemoryManagerNotifyTerminatingCallback, LLVMMemoryManagerAllocateCodeSectionCallback, LLVMMemoryManagerAllocateDataSectionCallback, LLVMMemoryManagerFinalizeMemoryCallback, LLVMMemoryManagerDestroyCallback), ES, CreateContextCtx, CreateContext, NotifyTerminating, AllocateCodeSection, AllocateDataSection, FinalizeMemory, Destroy)
 end
 
 function LLVMOrcRTDyldObjectLinkingLayerRegisterJITEventListener(RTDyldObjLinkingLayer, Listener)
@@ -5195,6 +5251,8 @@ function LLVMOffsetOfElement(TD, StructTy, Element)
     ccall((:LLVMOffsetOfElement, libllvm), Culonglong, (LLVMTargetDataRef, LLVMTypeRef, Cuint), TD, StructTy, Element)
 end
 
+const LLVMTargetMachineOptionsRef = Ptr{LLVMOpaqueTargetMachineOptions}
+
 const LLVMTargetRef = Ptr{LLVMTarget}
 
 @cenum LLVMCodeGenOptLevel::UInt32 begin
@@ -5217,6 +5275,12 @@ end
 @cenum LLVMCodeGenFileType::UInt32 begin
     LLVMAssemblyFile = 0
     LLVMObjectFile = 1
+end
+
+@cenum LLVMGlobalISelAbortMode::UInt32 begin
+    LLVMGlobalISelAbortEnable = 0
+    LLVMGlobalISelAbortDisable = 1
+    LLVMGlobalISelAbortDisableWithDiag = 2
 end
 
 function LLVMGetFirstTarget()
@@ -5255,6 +5319,42 @@ function LLVMTargetHasAsmBackend(T)
     ccall((:LLVMTargetHasAsmBackend, libllvm), LLVMBool, (LLVMTargetRef,), T)
 end
 
+function LLVMCreateTargetMachineOptions()
+    ccall((:LLVMCreateTargetMachineOptions, libllvm), LLVMTargetMachineOptionsRef, ())
+end
+
+function LLVMDisposeTargetMachineOptions(Options)
+    ccall((:LLVMDisposeTargetMachineOptions, libllvm), Cvoid, (LLVMTargetMachineOptionsRef,), Options)
+end
+
+function LLVMTargetMachineOptionsSetCPU(Options, CPU)
+    ccall((:LLVMTargetMachineOptionsSetCPU, libllvm), Cvoid, (LLVMTargetMachineOptionsRef, Cstring), Options, CPU)
+end
+
+function LLVMTargetMachineOptionsSetFeatures(Options, Features)
+    ccall((:LLVMTargetMachineOptionsSetFeatures, libllvm), Cvoid, (LLVMTargetMachineOptionsRef, Cstring), Options, Features)
+end
+
+function LLVMTargetMachineOptionsSetABI(Options, ABI)
+    ccall((:LLVMTargetMachineOptionsSetABI, libllvm), Cvoid, (LLVMTargetMachineOptionsRef, Cstring), Options, ABI)
+end
+
+function LLVMTargetMachineOptionsSetCodeGenOptLevel(Options, Level)
+    ccall((:LLVMTargetMachineOptionsSetCodeGenOptLevel, libllvm), Cvoid, (LLVMTargetMachineOptionsRef, LLVMCodeGenOptLevel), Options, Level)
+end
+
+function LLVMTargetMachineOptionsSetRelocMode(Options, Reloc)
+    ccall((:LLVMTargetMachineOptionsSetRelocMode, libllvm), Cvoid, (LLVMTargetMachineOptionsRef, LLVMRelocMode), Options, Reloc)
+end
+
+function LLVMTargetMachineOptionsSetCodeModel(Options, CodeModel)
+    ccall((:LLVMTargetMachineOptionsSetCodeModel, libllvm), Cvoid, (LLVMTargetMachineOptionsRef, LLVMCodeModel), Options, CodeModel)
+end
+
+function LLVMCreateTargetMachineWithOptions(T, Triple, Options)
+    ccall((:LLVMCreateTargetMachineWithOptions, libllvm), LLVMTargetMachineRef, (LLVMTargetRef, Cstring, LLVMTargetMachineOptionsRef), T, Triple, Options)
+end
+
 function LLVMCreateTargetMachine(T, Triple, CPU, Features, Level, Reloc, CodeModel)
     ccall((:LLVMCreateTargetMachine, libllvm), LLVMTargetMachineRef, (LLVMTargetRef, Cstring, Cstring, Cstring, LLVMCodeGenOptLevel, LLVMRelocMode, LLVMCodeModel), T, Triple, CPU, Features, Level, Reloc, CodeModel)
 end
@@ -5287,6 +5387,22 @@ function LLVMSetTargetMachineAsmVerbosity(T, VerboseAsm)
     ccall((:LLVMSetTargetMachineAsmVerbosity, libllvm), Cvoid, (LLVMTargetMachineRef, LLVMBool), T, VerboseAsm)
 end
 
+function LLVMSetTargetMachineFastISel(T, Enable)
+    ccall((:LLVMSetTargetMachineFastISel, libllvm), Cvoid, (LLVMTargetMachineRef, LLVMBool), T, Enable)
+end
+
+function LLVMSetTargetMachineGlobalISel(T, Enable)
+    ccall((:LLVMSetTargetMachineGlobalISel, libllvm), Cvoid, (LLVMTargetMachineRef, LLVMBool), T, Enable)
+end
+
+function LLVMSetTargetMachineGlobalISelAbort(T, Mode)
+    ccall((:LLVMSetTargetMachineGlobalISelAbort, libllvm), Cvoid, (LLVMTargetMachineRef, LLVMGlobalISelAbortMode), T, Mode)
+end
+
+function LLVMSetTargetMachineMachineOutliner(T, Enable)
+    ccall((:LLVMSetTargetMachineMachineOutliner, libllvm), Cvoid, (LLVMTargetMachineRef, LLVMBool), T, Enable)
+end
+
 function LLVMTargetMachineEmitToFile(T, M, Filename, codegen, ErrorMessage)
     ccall((:LLVMTargetMachineEmitToFile, libllvm), LLVMBool, (LLVMTargetMachineRef, LLVMModuleRef, Cstring, LLVMCodeGenFileType, Ptr{Cstring}), T, M, Filename, codegen, ErrorMessage)
 end
@@ -5315,100 +5431,6 @@ function LLVMAddAnalysisPasses(T, PM)
     ccall((:LLVMAddAnalysisPasses, libllvm), Cvoid, (LLVMTargetMachineRef, LLVMPassManagerRef), T, PM)
 end
 
-function LLVMAddAggressiveInstCombinerPass(PM)
-    ccall((:LLVMAddAggressiveInstCombinerPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroEarlyPass(PM)
-    ccall((:LLVMAddCoroEarlyPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroSplitPass(PM)
-    ccall((:LLVMAddCoroSplitPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroElidePass(PM)
-    ccall((:LLVMAddCoroElidePass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCoroCleanupPass(PM)
-    ccall((:LLVMAddCoroCleanupPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-const LLVMPassManagerBuilderRef = Ptr{LLVMOpaquePassManagerBuilder}
-
-function LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints(PMB)
-    ccall((:LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints, libllvm), Cvoid, (LLVMPassManagerBuilderRef,), PMB)
-end
-
-function LLVMAddArgumentPromotionPass(PM)
-    ccall((:LLVMAddArgumentPromotionPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddConstantMergePass(PM)
-    ccall((:LLVMAddConstantMergePass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddMergeFunctionsPass(PM)
-    ccall((:LLVMAddMergeFunctionsPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCalledValuePropagationPass(PM)
-    ccall((:LLVMAddCalledValuePropagationPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddDeadArgEliminationPass(PM)
-    ccall((:LLVMAddDeadArgEliminationPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddFunctionAttrsPass(PM)
-    ccall((:LLVMAddFunctionAttrsPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddFunctionInliningPass(PM)
-    ccall((:LLVMAddFunctionInliningPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddAlwaysInlinerPass(PM)
-    ccall((:LLVMAddAlwaysInlinerPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddGlobalDCEPass(PM)
-    ccall((:LLVMAddGlobalDCEPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddGlobalOptimizerPass(PM)
-    ccall((:LLVMAddGlobalOptimizerPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddPruneEHPass(PM)
-    ccall((:LLVMAddPruneEHPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddIPSCCPPass(PM)
-    ccall((:LLVMAddIPSCCPPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddInternalizePass(arg1, AllButMain)
-    ccall((:LLVMAddInternalizePass, libllvm), Cvoid, (LLVMPassManagerRef, Cuint), arg1, AllButMain)
-end
-
-function LLVMAddInternalizePassWithMustPreservePredicate(PM, Context, MustPreserve)
-    ccall((:LLVMAddInternalizePassWithMustPreservePredicate, libllvm), Cvoid, (LLVMPassManagerRef, Ptr{Cvoid}, Ptr{Cvoid}), PM, Context, MustPreserve)
-end
-
-function LLVMAddStripDeadPrototypesPass(PM)
-    ccall((:LLVMAddStripDeadPrototypesPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddStripSymbolsPass(PM)
-    ccall((:LLVMAddStripSymbolsPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddInstructionCombiningPass(PM)
-    ccall((:LLVMAddInstructionCombiningPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
 mutable struct LLVMOpaquePassBuilderOptions end
 
 const LLVMPassBuilderOptionsRef = Ptr{LLVMOpaquePassBuilderOptions}
@@ -5417,7 +5439,6 @@ function LLVMRunPasses(M, Passes, TM, Options)
     ccall((:LLVMRunPasses, libllvm), LLVMErrorRef, (LLVMModuleRef, Cstring, LLVMTargetMachineRef, LLVMPassBuilderOptionsRef), M, Passes, TM, Options)
 end
 
-# no prototype is found for this function at PassBuilder.h:53:27, please use with caution
 function LLVMCreatePassBuilderOptions()
     ccall((:LLVMCreatePassBuilderOptions, libllvm), LLVMPassBuilderOptionsRef, ())
 end
@@ -5466,240 +5487,64 @@ function LLVMPassBuilderOptionsSetMergeFunctions(Options, MergeFunctions)
     ccall((:LLVMPassBuilderOptionsSetMergeFunctions, libllvm), Cvoid, (LLVMPassBuilderOptionsRef, LLVMBool), Options, MergeFunctions)
 end
 
+function LLVMPassBuilderOptionsSetInlinerThreshold(Options, Threshold)
+    ccall((:LLVMPassBuilderOptionsSetInlinerThreshold, libllvm), Cvoid, (LLVMPassBuilderOptionsRef, Cint), Options, Threshold)
+end
+
 function LLVMDisposePassBuilderOptions(Options)
     ccall((:LLVMDisposePassBuilderOptions, libllvm), Cvoid, (LLVMPassBuilderOptionsRef,), Options)
 end
 
-function LLVMPassManagerBuilderCreate()
-    ccall((:LLVMPassManagerBuilderCreate, libllvm), LLVMPassManagerBuilderRef, ())
+struct llvm_blake3_chunk_state
+    cv::NTuple{8, UInt32}
+    chunk_counter::UInt64
+    buf::NTuple{64, UInt8}
+    buf_len::UInt8
+    blocks_compressed::UInt8
+    flags::UInt8
 end
 
-function LLVMPassManagerBuilderDispose(PMB)
-    ccall((:LLVMPassManagerBuilderDispose, libllvm), Cvoid, (LLVMPassManagerBuilderRef,), PMB)
+struct llvm_blake3_hasher
+    key::NTuple{8, UInt32}
+    chunk::llvm_blake3_chunk_state
+    cv_stack_len::UInt8
+    cv_stack::NTuple{1760, UInt8}
 end
 
-function LLVMPassManagerBuilderSetOptLevel(PMB, OptLevel)
-    ccall((:LLVMPassManagerBuilderSetOptLevel, libllvm), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, OptLevel)
+function llvm_blake3_version()
+    ccall((:llvm_blake3_version, libllvm), Cstring, ())
 end
 
-function LLVMPassManagerBuilderSetSizeLevel(PMB, SizeLevel)
-    ccall((:LLVMPassManagerBuilderSetSizeLevel, libllvm), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, SizeLevel)
+function llvm_blake3_hasher_init(self)
+    ccall((:llvm_blake3_hasher_init, libllvm), Cvoid, (Ptr{llvm_blake3_hasher},), self)
 end
 
-function LLVMPassManagerBuilderSetDisableUnitAtATime(PMB, Value)
-    ccall((:LLVMPassManagerBuilderSetDisableUnitAtATime, libllvm), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+function llvm_blake3_hasher_init_keyed(self, key)
+    ccall((:llvm_blake3_hasher_init_keyed, libllvm), Cvoid, (Ptr{llvm_blake3_hasher}, Ptr{UInt8}), self, key)
 end
 
-function LLVMPassManagerBuilderSetDisableUnrollLoops(PMB, Value)
-    ccall((:LLVMPassManagerBuilderSetDisableUnrollLoops, libllvm), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+function llvm_blake3_hasher_init_derive_key(self, context)
+    ccall((:llvm_blake3_hasher_init_derive_key, libllvm), Cvoid, (Ptr{llvm_blake3_hasher}, Cstring), self, context)
 end
 
-function LLVMPassManagerBuilderSetDisableSimplifyLibCalls(PMB, Value)
-    ccall((:LLVMPassManagerBuilderSetDisableSimplifyLibCalls, libllvm), Cvoid, (LLVMPassManagerBuilderRef, LLVMBool), PMB, Value)
+function llvm_blake3_hasher_init_derive_key_raw(self, context, context_len)
+    ccall((:llvm_blake3_hasher_init_derive_key_raw, libllvm), Cvoid, (Ptr{llvm_blake3_hasher}, Ptr{Cvoid}, Csize_t), self, context, context_len)
 end
 
-function LLVMPassManagerBuilderUseInlinerWithThreshold(PMB, Threshold)
-    ccall((:LLVMPassManagerBuilderUseInlinerWithThreshold, libllvm), Cvoid, (LLVMPassManagerBuilderRef, Cuint), PMB, Threshold)
+function llvm_blake3_hasher_update(self, input, input_len)
+    ccall((:llvm_blake3_hasher_update, libllvm), Cvoid, (Ptr{llvm_blake3_hasher}, Ptr{Cvoid}, Csize_t), self, input, input_len)
 end
 
-function LLVMPassManagerBuilderPopulateFunctionPassManager(PMB, PM)
-    ccall((:LLVMPassManagerBuilderPopulateFunctionPassManager, libllvm), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
+function llvm_blake3_hasher_finalize(self, out, out_len)
+    ccall((:llvm_blake3_hasher_finalize, libllvm), Cvoid, (Ptr{llvm_blake3_hasher}, Ptr{UInt8}, Csize_t), self, out, out_len)
 end
 
-function LLVMPassManagerBuilderPopulateModulePassManager(PMB, PM)
-    ccall((:LLVMPassManagerBuilderPopulateModulePassManager, libllvm), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef), PMB, PM)
+function llvm_blake3_hasher_finalize_seek(self, seek, out, out_len)
+    ccall((:llvm_blake3_hasher_finalize_seek, libllvm), Cvoid, (Ptr{llvm_blake3_hasher}, UInt64, Ptr{UInt8}, Csize_t), self, seek, out, out_len)
 end
 
-function LLVMPassManagerBuilderPopulateLTOPassManager(PMB, PM, Internalize, RunInliner)
-    ccall((:LLVMPassManagerBuilderPopulateLTOPassManager, libllvm), Cvoid, (LLVMPassManagerBuilderRef, LLVMPassManagerRef, LLVMBool, LLVMBool), PMB, PM, Internalize, RunInliner)
-end
-
-function LLVMAddAggressiveDCEPass(PM)
-    ccall((:LLVMAddAggressiveDCEPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddDCEPass(PM)
-    ccall((:LLVMAddDCEPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddBitTrackingDCEPass(PM)
-    ccall((:LLVMAddBitTrackingDCEPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddAlignmentFromAssumptionsPass(PM)
-    ccall((:LLVMAddAlignmentFromAssumptionsPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCFGSimplificationPass(PM)
-    ccall((:LLVMAddCFGSimplificationPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddDeadStoreEliminationPass(PM)
-    ccall((:LLVMAddDeadStoreEliminationPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddScalarizerPass(PM)
-    ccall((:LLVMAddScalarizerPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddMergedLoadStoreMotionPass(PM)
-    ccall((:LLVMAddMergedLoadStoreMotionPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddGVNPass(PM)
-    ccall((:LLVMAddGVNPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddNewGVNPass(PM)
-    ccall((:LLVMAddNewGVNPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddIndVarSimplifyPass(PM)
-    ccall((:LLVMAddIndVarSimplifyPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddInstructionSimplifyPass(PM)
-    ccall((:LLVMAddInstructionSimplifyPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddJumpThreadingPass(PM)
-    ccall((:LLVMAddJumpThreadingPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLICMPass(PM)
-    ccall((:LLVMAddLICMPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopDeletionPass(PM)
-    ccall((:LLVMAddLoopDeletionPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopIdiomPass(PM)
-    ccall((:LLVMAddLoopIdiomPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopRotatePass(PM)
-    ccall((:LLVMAddLoopRotatePass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopRerollPass(PM)
-    ccall((:LLVMAddLoopRerollPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopUnrollPass(PM)
-    ccall((:LLVMAddLoopUnrollPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopUnrollAndJamPass(PM)
-    ccall((:LLVMAddLoopUnrollAndJamPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopUnswitchPass(PM)
-    ccall((:LLVMAddLoopUnswitchPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLowerAtomicPass(PM)
-    ccall((:LLVMAddLowerAtomicPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddMemCpyOptPass(PM)
-    ccall((:LLVMAddMemCpyOptPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddPartiallyInlineLibCallsPass(PM)
-    ccall((:LLVMAddPartiallyInlineLibCallsPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddReassociatePass(PM)
-    ccall((:LLVMAddReassociatePass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddSCCPPass(PM)
-    ccall((:LLVMAddSCCPPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddScalarReplAggregatesPass(PM)
-    ccall((:LLVMAddScalarReplAggregatesPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddScalarReplAggregatesPassSSA(PM)
-    ccall((:LLVMAddScalarReplAggregatesPassSSA, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddScalarReplAggregatesPassWithThreshold(PM, Threshold)
-    ccall((:LLVMAddScalarReplAggregatesPassWithThreshold, libllvm), Cvoid, (LLVMPassManagerRef, Cint), PM, Threshold)
-end
-
-function LLVMAddSimplifyLibCallsPass(PM)
-    ccall((:LLVMAddSimplifyLibCallsPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddTailCallEliminationPass(PM)
-    ccall((:LLVMAddTailCallEliminationPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddDemoteMemoryToRegisterPass(PM)
-    ccall((:LLVMAddDemoteMemoryToRegisterPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddVerifierPass(PM)
-    ccall((:LLVMAddVerifierPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddCorrelatedValuePropagationPass(PM)
-    ccall((:LLVMAddCorrelatedValuePropagationPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddEarlyCSEPass(PM)
-    ccall((:LLVMAddEarlyCSEPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddEarlyCSEMemSSAPass(PM)
-    ccall((:LLVMAddEarlyCSEMemSSAPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLowerExpectIntrinsicPass(PM)
-    ccall((:LLVMAddLowerExpectIntrinsicPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLowerConstantIntrinsicsPass(PM)
-    ccall((:LLVMAddLowerConstantIntrinsicsPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddTypeBasedAliasAnalysisPass(PM)
-    ccall((:LLVMAddTypeBasedAliasAnalysisPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddScopedNoAliasAAPass(PM)
-    ccall((:LLVMAddScopedNoAliasAAPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddBasicAliasAnalysisPass(PM)
-    ccall((:LLVMAddBasicAliasAnalysisPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddUnifyFunctionExitNodesPass(PM)
-    ccall((:LLVMAddUnifyFunctionExitNodesPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLowerSwitchPass(PM)
-    ccall((:LLVMAddLowerSwitchPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddPromoteMemoryToRegisterPass(PM)
-    ccall((:LLVMAddPromoteMemoryToRegisterPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddAddDiscriminatorsPass(PM)
-    ccall((:LLVMAddAddDiscriminatorsPass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddLoopVectorizePass(PM)
-    ccall((:LLVMAddLoopVectorizePass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
-end
-
-function LLVMAddSLPVectorizePass(PM)
-    ccall((:LLVMAddSLPVectorizePass, libllvm), Cvoid, (LLVMPassManagerRef,), PM)
+function llvm_blake3_hasher_reset(self)
+    ccall((:llvm_blake3_hasher_reset, libllvm), Cvoid, (Ptr{llvm_blake3_hasher},), self)
 end
 
 const lto_bool_t = Bool
@@ -5836,6 +5681,10 @@ end
 
 function lto_module_get_macho_cputype(mod, out_cputype, out_cpusubtype)
     ccall((:lto_module_get_macho_cputype, libllvm), lto_bool_t, (lto_module_t, Ptr{Cuint}, Ptr{Cuint}), mod, out_cputype, out_cpusubtype)
+end
+
+function lto_module_has_ctor_dtor(mod)
+    ccall((:lto_module_has_ctor_dtor, libllvm), lto_bool_t, (lto_module_t,), mod)
 end
 
 @cenum lto_codegen_diagnostic_severity_t::UInt32 begin
@@ -6139,5 +5988,17 @@ const LLVMErrorSuccess = 0
 
 const REMARKS_API_VERSION = 1
 
-const LTO_API_VERSION = 28
+const LLVM_BLAKE3_VERSION_STRING = "1.3.1"
+
+const LLVM_BLAKE3_KEY_LEN = 32
+
+const LLVM_BLAKE3_OUT_LEN = 32
+
+const LLVM_BLAKE3_BLOCK_LEN = 64
+
+const LLVM_BLAKE3_CHUNK_LEN = 1024
+
+const LLVM_BLAKE3_MAX_DEPTH = 54
+
+const LTO_API_VERSION = 29
 

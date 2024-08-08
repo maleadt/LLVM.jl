@@ -226,40 +226,40 @@
 
     single_thread = false
     atomic_rmw_inst = atomic_rmw!(builder,
-        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, ptr1, int1,
         LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, single_thread)
-    if LLVM.version() < v"16"
-        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, %1 seq_cst"
+    if supports_typed_pointers(ctx)
+        @check_ir atomic_rmw_inst "atomicrmw add i32* %4, i32 %0 seq_cst"
     else
-        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 seq_cst"
+        @check_ir atomic_rmw_inst "atomicrmw add ptr %4, i32 %0 seq_cst"
     end
 
     single_thread = true
     atomic_rmw_inst = atomic_rmw!(builder,
-        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, ptr1, int1,
         LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, single_thread)
-    if LLVM.version() < v"16"
-        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, %1 syncscope(\"singlethread\") seq_cst"
+    if supports_typed_pointers(ctx)
+        @check_ir atomic_rmw_inst "atomicrmw add i32* %4, i32 %0 syncscope(\"singlethread\") seq_cst"
     else
-        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"singlethread\") seq_cst"
+        @check_ir atomic_rmw_inst "atomicrmw add ptr %4, i32 %0 syncscope(\"singlethread\") seq_cst"
     end
 
     atomic_rmw_inst = atomic_rmw!(builder,
-        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, ptr1, int1,
         LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, "agent")
-    if LLVM.version() < v"16"
-        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, %1 syncscope(\"agent\") seq_cst"
+    if supports_typed_pointers(ctx)
+        @check_ir atomic_rmw_inst "atomicrmw add i32* %4, i32 %0 syncscope(\"agent\") seq_cst"
     else
-        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"agent\") seq_cst"
+        @check_ir atomic_rmw_inst "atomicrmw add ptr %4, i32 %0 syncscope(\"agent\") seq_cst"
     end
 
     atomic_rmw_inst = atomic_rmw!(builder,
-        LLVM.API.LLVMAtomicRMWBinOpAdd, int1, int2,
+        LLVM.API.LLVMAtomicRMWBinOpAdd, ptr1, int1,
         LLVM.API.LLVMAtomicOrderingMonotonic, "agent")
-    if LLVM.version() < v"16"
-        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, %1 syncscope(\"agent\") monotonic"
+    if supports_typed_pointers(ctx)
+        @check_ir atomic_rmw_inst "atomicrmw add i32* %4, i32 %0 syncscope(\"agent\") monotonic"
     else
-        @check_ir atomic_rmw_inst "atomicrmw add i32 %0, i32 %1 syncscope(\"agent\") monotonic"
+        @check_ir atomic_rmw_inst "atomicrmw add ptr %4, i32 %0 syncscope(\"agent\") monotonic"
     end
 
     truncinst = trunc!(builder, int1, LLVM.Int16Type())
@@ -470,8 +470,7 @@ end
             let bundles = operand_bundles(cy)
                 @test length(bundles) == 1
                 bundle = first(bundles)
-                @test LLVM.tag_name(bundle) == "deopt"
-                @test LLVM.tag_id(bundle) isa Integer
+                @test LLVM.tag(bundle) == "deopt"
                 @test string(bundle) == "\"deopt\"(i32 1, i64 2)"
 
                 inputs = LLVM.inputs(bundle)
@@ -504,11 +503,10 @@ end
             bb = first(blocks(g))
             inst = first(instructions(bb))
 
-            # direct creation
             inputs = [LLVM.ConstantInt(Int32(1)), LLVM.ConstantInt(Int64(2))]
-            bundle1 = OperandBundleDef("unknown", inputs)
-            @test bundle1 isa OperandBundleDef
-            @test LLVM.tag_name(bundle1) == "unknown"
+            bundle1 = OperandBundle("unknown", inputs)
+            @test bundle1 isa OperandBundle
+            @test LLVM.tag(bundle1) == "unknown"
             @test LLVM.inputs(bundle1) == inputs
             @test string(bundle1) == "\"unknown\"(i32 1, i64 2)"
 
@@ -523,21 +521,10 @@ end
                 @test length(bundles) == 1
 
                 bundle2 = bundles[1]
-                @test bundle2 isa OperandBundleUse
-                @test LLVM.tag_name(bundle2) == "unknown"
+                @test bundle2 isa OperandBundle
+                @test LLVM.tag(bundle2) == "unknown"
                 @test LLVM.inputs(bundle2) == inputs
                 @test string(bundle2) == "\"unknown\"(i32 1, i64 2)"
-
-                # creating from a use
-                bundle3 = OperandBundleDef(bundle2)
-                @test bundle3 isa OperandBundleDef
-                @test LLVM.tag_name(bundle3) == "unknown"
-                @test LLVM.inputs(bundle3) == inputs
-                @test string(bundle3) == "\"unknown\"(i32 1, i64 2)"
-
-                # creating a call should perform the necessary conversion automatically
-                call!(builder, ft, f, Value[], operand_bundles(inst))
-                call!(builder, ft, f, Value[], [bundle2])
             end
         end
     end

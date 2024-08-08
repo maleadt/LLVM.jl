@@ -38,12 +38,12 @@ end
 
 # auto-generated wrappers
 let
-    if version().major < 13
-        error("LLVM.jl only supports LLVM 13 and later.")
+    if version().major < 15
+        error("LLVM.jl only supports LLVM 15 and later.")
     end
-    dir = if version().major > 17
-        @warn "LLVM.jl has not been tested with LLVM versions newer than 17."
-        joinpath(@__DIR__, "..", "lib", "17")
+    dir = if version().major > 18
+        @warn "LLVM.jl has not been tested with LLVM versions newer than 18."
+        joinpath(@__DIR__, "..", "lib", "18")
     else
         joinpath(@__DIR__, "..", "lib", string(version().major))
     end
