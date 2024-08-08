@@ -2,6 +2,7 @@
 @testitem "newpm" begin
 
 using LLVM.Interop
+using IOCapture
 
 function test_module()
     mod = LLVM.Module("test")
@@ -19,7 +20,7 @@ function test_module()
 end
 
 @testset "pass builder" begin
-    @dispose ctx=Context() pb=NewPMPassBuilder() begin
+    @dispose ctx=Context() begin
         # single pass
         @dispose mod=test_module() begin
             # by string
@@ -74,7 +75,7 @@ end
 end
 
 @testset "pass manager" begin
-    @dispose ctx=Context() pb=NewPMPassBuilder() begin
+    @dispose ctx=Context() begin
         # pass manager interface
         @dispose pb=NewPMPassBuilder() mod=test_module() begin
             add!(pb, "no-op-module")
@@ -360,6 +361,46 @@ end
             @dispose mod=test_module() begin
                 @test run!(pb, mod) === nothing
             end
+        end
+    end
+end
+
+@testset "alias analyses" begin
+    # default pipeline
+    @dispose ctx=Context() pb=NewPMPassBuilder() begin
+        @dispose pb=NewPMPassBuilder(;debug_logging=true) mod=test_module() begin
+            add!(pb, "aa-eval")
+
+            io = IOCapture.capture() do
+                run!(pb, mod)
+            end
+
+            @test contains(io.output, "Running analysis: BasicAA")
+            @test contains(io.output, "Running analysis: TypeBasedAA")
+            @test contains(io.output, "Running analysis: ScopedNoAliasAA")
+        end
+    end
+
+    # custom pipeline
+    @dispose ctx=Context() pb=NewPMPassBuilder() begin
+        @dispose pb=NewPMPassBuilder(;debug_logging=true) mod=test_module() begin
+            add!(pb, NewPMAAManager()) do aa
+                # by string
+                add!(aa, "basic-aa")
+
+                # by object
+                add!(aa, SCEVAA())
+            end
+            add!(pb, "aa-eval")
+
+            io = IOCapture.capture() do
+                run!(pb, mod)
+            end
+
+            @test contains(io.output, "Running analysis: BasicAA")
+            @test contains(io.output, "Running analysis: SCEVAA")
+            @test !contains(io.output, "Running analysis: TypeBasedAA")
+            @test !contains(io.output, "Running analysis: ScopedNoAliasAA")
         end
     end
 end
