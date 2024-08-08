@@ -241,7 +241,6 @@ void LLVMSetMetadata2(LLVMValueRef Inst, unsigned KindID, LLVMValueRef Val);
 
 
 // NewPM extensions
-
 typedef struct LLVMOpaquePassBuilderExtensions *LLVMPassBuilderExtensionsRef;
 LLVMPassBuilderExtensionsRef LLVMCreatePassBuilderExtensions(void);
 void LLVMDisposePassBuilderExtensions(LLVMPassBuilderExtensionsRef Extensions);

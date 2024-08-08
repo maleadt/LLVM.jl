@@ -26,7 +26,11 @@
 #include <llvm/Transforms/Scalar/SimpleLoopUnswitch.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
+#if LLVM_VERSION_MAJOR < 18
 #include <llvm/Transforms/Vectorize.h>
+#else
+#include <llvm/Transforms/Vectorize/LoadStoreVectorizer.h>
+#endif
 
 using namespace llvm;
 using namespace llvm::legacy;
@@ -93,9 +97,11 @@ void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM) {
 }
 #endif
 
+#if LLVM_VERSION_MAJOR < 18
 void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSimpleLoopUnswitchLegacyPass());
 }
+#endif
 
 void LLVMAddExpandReductionsPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createExpandReductionsPass());
@@ -682,6 +688,8 @@ LLVMBool LLVMCanValueUseFastMathFlags(LLVMValueRef V) {
   return isa<FPMathOperator>(Val);
 }
 
+#endif
+
 
 // upstream bug: metadata APIs only accept instructions
 
@@ -781,5 +789,3 @@ LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B,LLVMAtomicRMWBinOp op,
       mapFromLLVMOrdering(ordering),
       unwrap(LLVMGetBuilderContext(B))->getOrInsertSyncScopeID(syncscope)));
 }
-
-#endif
