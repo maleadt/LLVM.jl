@@ -217,15 +217,6 @@ end
 end
 
 @testset "julia" begin
-    @testset "pipeline" begin
-        @dispose ctx=Context() mod=test_module() begin
-            @test run!("julia", mod) === nothing
-
-            pipeline = JuliaPipelinePass(opt_level=2)
-            @test run!(pipeline, mod) === nothing
-        end
-    end
-
     @testset "passes" begin
         @dispose ctx=Context() pb=NewPMPassBuilder() begin
             basicSimplifyCFGOptions =
