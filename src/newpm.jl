@@ -247,7 +247,7 @@ represents a pass pipeline. The target machine is used to optimize the passes.
 """
 run!
 
-function run!(pb::NewPMPassBuilder, mod::Module, tm::Union{Nothing,TargetMachine}=nothing)
+function run!(pb::NewPMPassBuilder, target::Union{Module,Function}, tm::Union{Nothing,TargetMachine}=nothing)
     isempty(pb.passes) && return
     pipeline = join(pb.passes, ",")
     aa_pipeline = join(pb.aa_passes, ",")
@@ -286,8 +286,13 @@ function run!(pb::NewPMPassBuilder, mod::Module, tm::Union{Nothing,TargetMachine
             end
         end
 
-        @check API.LLVMRunJuliaPasses(mod, pipeline, something(tm, C_NULL),
-                                      pb.opts, pb.exts)
+        if target isa Module
+            @check API.LLVMRunJuliaPasses(target, pipeline, something(tm, C_NULL),
+                                          pb.opts, pb.exts)
+        elseif target isa Function
+            @check API.LLVMRunJuliaPassesOnFunction(target, pipeline, something(tm, C_NULL),
+                                                    pb.opts, pb.exts)
+        end
     end
 end
 

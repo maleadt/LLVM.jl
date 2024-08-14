@@ -254,11 +254,17 @@ void LLVMPassBuilderExtensionsRegisterFunctionPass(LLVMPassBuilderExtensionsRef 
                                                    const char *PassName,
                                                    LLVMJuliaFunctionPassCallback Callback,
                                                    void *Thunk);
+#if LLVM_VERSION_MAJOR < 20
 void LLVMPassBuilderExtensionsSetAAPipeline(LLVMPassBuilderExtensionsRef Extensions,
                                             const char *AAPipeline);
+#endif
 LLVMErrorRef LLVMRunJuliaPasses(LLVMModuleRef M, const char *Passes,
                                 LLVMTargetMachineRef TM, LLVMPassBuilderOptionsRef Options,
                                 LLVMPassBuilderExtensionsRef Extensions);
+LLVMErrorRef LLVMRunJuliaPassesOnFunction(LLVMValueRef F, const char *Passes,
+                                          LLVMTargetMachineRef TM,
+                                          LLVMPassBuilderOptionsRef Options,
+                                          LLVMPassBuilderExtensionsRef Extensions);
 
 LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B,LLVMAtomicRMWBinOp op,
                                          LLVMValueRef PTR, LLVMValueRef Val,

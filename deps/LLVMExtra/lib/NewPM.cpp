@@ -145,16 +145,12 @@ void LLVMPassBuilderExtensionsSetAAPipeline(LLVMPassBuilderExtensionsRef Extensi
 
 // Vendored API entrypoint
 
-LLVMErrorRef LLVMRunJuliaPasses(LLVMModuleRef M, const char *Passes,
-                                LLVMTargetMachineRef TM, LLVMPassBuilderOptionsRef Options,
-                                LLVMPassBuilderExtensionsRef Extensions) {
-  TargetMachine *Machine = unwrap(TM);
-  LLVMPassBuilderOptions *PassOpts = unwrap(Options);
-  LLVMPassBuilderExtensions *PassExts = unwrap(Extensions);
+static LLVMErrorRef runJuliaPasses(Module *Mod, Function *Fun, const char *Passes,
+                                   TargetMachine *Machine, LLVMPassBuilderOptions *PassOpts,
+                                   LLVMPassBuilderExtensions *PassExts) {
   bool Debug = PassOpts->DebugLogging;
   bool VerifyEach = PassOpts->VerifyEach;
 
-  Module *Mod = unwrap(M);
   PassInstrumentationCallbacks PIC;
 #if LLVM_VERSION_MAJOR >= 16
   PassBuilder PB(Machine, PassOpts->PTO, std::nullopt, &PIC);
@@ -203,14 +199,43 @@ LLVMErrorRef LLVMRunJuliaPasses(LLVMModuleRef M, const char *Passes,
 #else
   SI.registerCallbacks(PIC, &FAM);
 #endif
-  ModulePassManager MPM;
-  if (VerifyEach) {
-    MPM.addPass(VerifierPass());
-  }
-  if (auto Err = PB.parsePassPipeline(MPM, Passes)) {
-    return wrap(std::move(Err));
+
+  if (Fun) {
+    FunctionPassManager FPM;
+    if (VerifyEach)
+      FPM.addPass(VerifierPass());
+    if (auto Err = PB.parsePassPipeline(FPM, Passes))
+      return wrap(std::move(Err));
+    FPM.run(*Fun, FAM);
+  } else {
+    ModulePassManager MPM;
+    if (VerifyEach)
+      MPM.addPass(VerifierPass());
+    if (auto Err = PB.parsePassPipeline(MPM, Passes))
+      return wrap(std::move(Err));
+    MPM.run(*Mod, MAM);
   }
 
-  MPM.run(*Mod, MAM);
   return LLVMErrorSuccess;
+}
+
+LLVMErrorRef LLVMRunJuliaPasses(LLVMModuleRef M, const char *Passes,
+                                LLVMTargetMachineRef TM, LLVMPassBuilderOptionsRef Options,
+                                LLVMPassBuilderExtensionsRef Extensions) {
+  TargetMachine *Machine = unwrap(TM);
+  LLVMPassBuilderOptions *PassOpts = unwrap(Options);
+  LLVMPassBuilderExtensions *PassExts = unwrap(Extensions);
+  Module *Mod = unwrap(M);
+  return runJuliaPasses(Mod, nullptr, Passes, Machine, PassOpts, PassExts);
+}
+
+LLVMErrorRef LLVMRunJuliaPassesOnFunction(LLVMValueRef F, const char *Passes,
+                                          LLVMTargetMachineRef TM,
+                                          LLVMPassBuilderOptionsRef Options,
+                                          LLVMPassBuilderExtensionsRef Extensions) {
+  TargetMachine *Machine = unwrap(TM);
+  LLVMPassBuilderOptions *PassOpts = unwrap(Options);
+  LLVMPassBuilderExtensions *PassExts = unwrap(Extensions);
+  Function *Fun = unwrap<Function>(F);
+  return runJuliaPasses(Fun->getParent(), Fun, Passes, Machine, PassOpts, PassExts);
 }
