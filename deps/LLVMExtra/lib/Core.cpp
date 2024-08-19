@@ -559,13 +559,6 @@ LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef GV) {
   return wrap(Ftype);
 }
 
-#if LLVM_VERSION_MAJOR < 15
-LLVMBool LLVMPointerTypeIsOpaque(LLVMTypeRef Ty) { return unwrap(Ty)->isOpaquePointerTy(); }
-LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace) {
-  return wrap(PointerType::get(*unwrap(C), AddressSpace));
-}
-#endif
-
 
 // DominatorTree and PostDominatorTree
 
@@ -731,10 +724,8 @@ static AtomicRMWInst::BinOp mapFromLLVMRMWBinOp(LLVMAtomicRMWBinOp BinOp) {
     case LLVMAtomicRMWBinOpUMin: return AtomicRMWInst::UMin;
     case LLVMAtomicRMWBinOpFAdd: return AtomicRMWInst::FAdd;
     case LLVMAtomicRMWBinOpFSub: return AtomicRMWInst::FSub;
-#if LLVM_VERSION_MAJOR >= 15
     case LLVMAtomicRMWBinOpFMax: return AtomicRMWInst::FMax;
     case LLVMAtomicRMWBinOpFMin: return AtomicRMWInst::FMin;
-#endif
   }
 
   llvm_unreachable("Invalid LLVMAtomicRMWBinOp value!");

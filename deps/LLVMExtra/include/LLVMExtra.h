@@ -189,10 +189,6 @@ LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data,
 #if LLVM_VERSION_MAJOR < 17
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
 #endif
-#if LLVM_VERSION_MAJOR < 15
-LLVMBool LLVMPointerTypeIsOpaque(LLVMTypeRef Ty);
-LLVMTypeRef LLVMPointerTypeInContext(LLVMContextRef C, unsigned AddressSpace);
-#endif
 
 
 // (Post)DominatorTree
