@@ -23,14 +23,19 @@ end
     @dispose ctx=Context() begin
         # single pass
         @dispose mod=test_module() begin
+            fun = only(functions(mod))
+
             # by string
             @test run!("no-op-module", mod) === nothing
+            @test run!("no-op-function", fun) === nothing
 
             # by object
             @test run!(NoOpModulePass(), mod) === nothing
+            @test run!(NoOpFunctionPass(), fun) === nothing
 
             # by object with options
             @test run!(LoopExtractorPass(; single=true), mod) === nothing
+            @test run!(EarlyCSEPass(; memssa=true), fun) === nothing
         end
 
         # default pipelines
