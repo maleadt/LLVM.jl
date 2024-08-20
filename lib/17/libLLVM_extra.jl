@@ -349,7 +349,31 @@ function LLVMRunJuliaPassesOnFunction(F, Passes, TM, Options, Extensions)
     ccall((:LLVMRunJuliaPassesOnFunction, libLLVMExtra), LLVMErrorRef, (LLVMValueRef, Cstring, LLVMTargetMachineRef, LLVMPassBuilderOptionsRef, LLVMPassBuilderExtensionsRef), F, Passes, TM, Options, Extensions)
 end
 
-function LLVMBuildAtomicRMWSyncScope(B, op, PTR, Val, ordering, syncscope)
-    ccall((:LLVMBuildAtomicRMWSyncScope, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMAtomicRMWBinOp, LLVMValueRef, LLVMValueRef, LLVMAtomicOrdering, Cstring), B, op, PTR, Val, ordering, syncscope)
+function LLVMGetSyncScopeID(C, Name, SLen)
+    ccall((:LLVMGetSyncScopeID, libLLVMExtra), Cuint, (LLVMContextRef, Cstring, Csize_t), C, Name, SLen)
+end
+
+function LLVMBuildFenceSyncScope(B, ordering, SSID, Name)
+    ccall((:LLVMBuildFenceSyncScope, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMAtomicOrdering, Cuint, Cstring), B, ordering, SSID, Name)
+end
+
+function LLVMBuildAtomicRMWSyncScope(B, op, PTR, Val, ordering, SSID)
+    ccall((:LLVMBuildAtomicRMWSyncScope, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMAtomicRMWBinOp, LLVMValueRef, LLVMValueRef, LLVMAtomicOrdering, Cuint), B, op, PTR, Val, ordering, SSID)
+end
+
+function LLVMBuildAtomicCmpXchgSyncScope(B, Ptr, Cmp, New, SuccessOrdering, FailureOrdering, SSID)
+    ccall((:LLVMBuildAtomicCmpXchgSyncScope, libLLVMExtra), LLVMValueRef, (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMAtomicOrdering, LLVMAtomicOrdering, Cuint), B, Ptr, Cmp, New, SuccessOrdering, FailureOrdering, SSID)
+end
+
+function LLVMIsAtomic(Inst)
+    ccall((:LLVMIsAtomic, libLLVMExtra), LLVMBool, (LLVMValueRef,), Inst)
+end
+
+function LLVMGetAtomicSyncScopeID(AtomicInst)
+    ccall((:LLVMGetAtomicSyncScopeID, libLLVMExtra), Cuint, (LLVMValueRef,), AtomicInst)
+end
+
+function LLVMSetAtomicSyncScopeID(AtomicInst, SSID)
+    ccall((:LLVMSetAtomicSyncScopeID, libLLVMExtra), Cvoid, (LLVMValueRef, Cuint), AtomicInst, SSID)
 end
 

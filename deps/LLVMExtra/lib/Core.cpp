@@ -693,6 +693,11 @@ void LLVMSetMetadata2(LLVMValueRef Ref, unsigned KindID, LLVMValueRef MAV) {
     assert(0 && "Expected an instruction or a global object");
 }
 
+
+// atomics with syncscope
+
+#if LLVM_VERSION_MAJOR < 20
+
 static AtomicOrdering mapFromLLVMOrdering(LLVMAtomicOrdering Ordering) {
   switch (Ordering) {
     case LLVMAtomicOrderingNotAtomic: return AtomicOrdering::NotAtomic;
@@ -731,13 +736,61 @@ static AtomicRMWInst::BinOp mapFromLLVMRMWBinOp(LLVMAtomicRMWBinOp BinOp) {
   llvm_unreachable("Invalid LLVMAtomicRMWBinOp value!");
 }
 
-LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B,LLVMAtomicRMWBinOp op,
-                                         LLVMValueRef PTR, LLVMValueRef Val,
-                                         LLVMAtomicOrdering ordering,
-                                         const char* syncscope) {
-  AtomicRMWInst::BinOp intop = mapFromLLVMRMWBinOp(op);
-  return wrap(unwrap(B)->CreateAtomicRMW(
-      intop, unwrap(PTR), unwrap(Val), MaybeAlign(),
-      mapFromLLVMOrdering(ordering),
-      unwrap(LLVMGetBuilderContext(B))->getOrInsertSyncScopeID(syncscope)));
+inline void setAtomicSyncScopeID(Instruction *I, SyncScope::ID SSID) {
+  assert(I->isAtomic());
+  if (auto *AI = dyn_cast<LoadInst>(I))
+    AI->setSyncScopeID(SSID);
+  else if (auto *AI = dyn_cast<StoreInst>(I))
+    AI->setSyncScopeID(SSID);
+  else if (auto *AI = dyn_cast<FenceInst>(I))
+    AI->setSyncScopeID(SSID);
+  else if (auto *AI = dyn_cast<AtomicCmpXchgInst>(I))
+    AI->setSyncScopeID(SSID);
+  else if (auto *AI = dyn_cast<AtomicRMWInst>(I))
+    AI->setSyncScopeID(SSID);
+  else
+    llvm_unreachable("unhandled atomic operation");
 }
+
+unsigned LLVMGetSyncScopeID(LLVMContextRef C, const char *Name, size_t SLen) {
+  return unwrap(C)->getOrInsertSyncScopeID(StringRef(Name, SLen));
+}
+
+LLVMValueRef LLVMBuildFenceSyncScope(LLVMBuilderRef B, LLVMAtomicOrdering Ordering,
+                                     unsigned SSID, const char *Name) {
+  return wrap(unwrap(B)->CreateFence(mapFromLLVMOrdering(Ordering), SSID, Name));
+}
+
+LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B, LLVMAtomicRMWBinOp op,
+                                         LLVMValueRef PTR, LLVMValueRef Val,
+                                         LLVMAtomicOrdering ordering, unsigned SSID) {
+  AtomicRMWInst::BinOp intop = mapFromLLVMRMWBinOp(op);
+  return wrap(unwrap(B)->CreateAtomicRMW(intop, unwrap(PTR), unwrap(Val), MaybeAlign(),
+                                         mapFromLLVMOrdering(ordering), SSID));
+}
+
+LLVMValueRef LLVMBuildAtomicCmpXchgSyncScope(LLVMBuilderRef B, LLVMValueRef Ptr,
+                                             LLVMValueRef Cmp, LLVMValueRef New,
+                                             LLVMAtomicOrdering SuccessOrdering,
+                                             LLVMAtomicOrdering FailureOrdering,
+                                             unsigned SSID) {
+  return wrap(unwrap(B)->CreateAtomicCmpXchg(
+      unwrap(Ptr), unwrap(Cmp), unwrap(New), MaybeAlign(),
+      mapFromLLVMOrdering(SuccessOrdering), mapFromLLVMOrdering(FailureOrdering), SSID));
+}
+
+LLVMBool LLVMIsAtomic(LLVMValueRef Inst) { return unwrap<Instruction>(Inst)->isAtomic(); }
+
+unsigned LLVMGetAtomicSyncScopeID(LLVMValueRef AtomicInst) {
+  Instruction *I = unwrap<Instruction>(AtomicInst);
+  assert(I->isAtomic() && "Expected an atomic instruction");
+  return *getAtomicSyncScopeID(I);
+}
+
+void LLVMSetAtomicSyncScopeID(LLVMValueRef AtomicInst, unsigned SSID) {
+  Instruction *I = unwrap<Instruction>(AtomicInst);
+  assert(I->isAtomic() && "Expected an atomic instruction");
+  setAtomicSyncScopeID(I, SSID);
+}
+
+#endif

@@ -269,13 +269,16 @@ fence!(builder::IRBuilder, ordering::API.LLVMAtomicOrdering, singleThread::Bool=
        Name::String="") =
     Instruction(API.LLVMBuildFence(builder, ordering, singleThread, Name))
 
-atomic_rmw!(builder::IRBuilder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Value,
-            ordering::API.LLVMAtomicOrdering, singleThread::Bool) =
-    Instruction(API.LLVMBuildAtomicRMW(builder, op, Ptr, Val, ordering,
-                                       singleThread))
+fence!(builder::IRBuilder, ordering::API.LLVMAtomicOrdering, syncscope::SyncScope,
+       Name::String="") =
+    Instruction(API.LLVMBuildFenceSyncScope(builder, ordering, syncscope, Name))
 
 atomic_rmw!(builder::IRBuilder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Value,
-            ordering::API.LLVMAtomicOrdering, syncscope::String) =
+            ordering::API.LLVMAtomicOrdering, singleThread::Bool) =
+    Instruction(API.LLVMBuildAtomicRMW(builder, op, Ptr, Val, ordering, singleThread))
+
+atomic_rmw!(builder::IRBuilder, op::API.LLVMAtomicRMWBinOp, Ptr::Value, Val::Value,
+            ordering::API.LLVMAtomicOrdering, syncscope::SyncScope) =
     Instruction(API.LLVMBuildAtomicRMWSyncScope(builder, op, Ptr, Val, ordering, syncscope))
 
 atomic_cmpxchg!(builder::IRBuilder, Ptr::Value, Cmp::Value, New::Value,
@@ -283,6 +286,12 @@ atomic_cmpxchg!(builder::IRBuilder, Ptr::Value, Cmp::Value, New::Value,
                 FailureOrdering::API.LLVMAtomicOrdering, SingleThread::Bool) =
     Instruction(API.LLVMBuildAtomicCmpXchg(builder, Ptr, Cmp, New, SuccessOrdering,
                                            FailureOrdering, SingleThread))
+
+atomic_cmpxchg!(builder::IRBuilder, Ptr::Value, Cmp::Value, New::Value,
+                SuccessOrdering::API.LLVMAtomicOrdering,
+                FailureOrdering::API.LLVMAtomicOrdering, syncscope::SyncScope) =
+    Instruction(API.LLVMBuildAtomicCmpXchgSyncScope(builder, Ptr, Cmp, New, SuccessOrdering,
+                                                    FailureOrdering, syncscope))
 
 function gep!(builder::IRBuilder, Ty::LLVMType, Pointer::Value, Indices::Vector{<:Value},
               Name::String="")
