@@ -63,8 +63,6 @@ LLVMPassRef LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback,
 // Various missing functions
 unsigned int LLVMGetDebugMDVersion(void);
 
-LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef B);
-LLVMContextRef LLVMGetValueContext(LLVMValueRef V);
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
 #if LLVM_VERSION_MAJOR < 17
 void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **ExportList,
@@ -278,6 +276,12 @@ LLVMValueRef LLVMBuildAtomicCmpXchgSyncScope(LLVMBuilderRef B, LLVMValueRef Ptr,
 LLVMBool LLVMIsAtomic(LLVMValueRef Inst);
 unsigned LLVMGetAtomicSyncScopeID(LLVMValueRef AtomicInst);
 void LLVMSetAtomicSyncScopeID(LLVMValueRef AtomicInst, unsigned SSID);
+#endif
+
+// more LLVMContextRef getters (backport of llvm/llvm-project#99087)
+#if LLVM_VERSION_MAJOR < 20
+LLVMContextRef LLVMGetValueContext(LLVMValueRef Val);
+LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef Builder);
 #endif
 
 LLVM_C_EXTERN_C_END

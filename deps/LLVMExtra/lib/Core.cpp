@@ -173,14 +173,6 @@ LLVMPassRef LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback,
 
 unsigned int LLVMGetDebugMDVersion() { return DEBUG_METADATA_VERSION; }
 
-LLVMContextRef LLVMGetValueContext(LLVMValueRef V) {
-  return wrap(&unwrap(V)->getContext());
-}
-
-LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef B) {
-  return wrap(&unwrap(B)->getContext());
-}
-
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM) {
   unwrap(PM)->add(new TargetLibraryInfoWrapperPass(Triple(T)));
 }
@@ -792,5 +784,20 @@ void LLVMSetAtomicSyncScopeID(LLVMValueRef AtomicInst, unsigned SSID) {
   assert(I->isAtomic() && "Expected an atomic instruction");
   setAtomicSyncScopeID(I, SSID);
 }
+
+
+// more LLVMContextRef getters
+
+#if LLVM_VERSION_MAJOR < 20
+
+LLVMContextRef LLVMGetValueContext(LLVMValueRef Val) {
+  return wrap(&unwrap(Val)->getContext());
+}
+
+LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef Builder) {
+  return wrap(&unwrap(Builder)->getContext());
+}
+
+#endif
 
 #endif

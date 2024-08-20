@@ -94,14 +94,6 @@ function LLVMGetDebugMDVersion()
     ccall((:LLVMGetDebugMDVersion, libLLVMExtra), Cuint, ())
 end
 
-function LLVMGetBuilderContext(B)
-    ccall((:LLVMGetBuilderContext, libLLVMExtra), LLVMContextRef, (LLVMBuilderRef,), B)
-end
-
-function LLVMGetValueContext(V)
-    ccall((:LLVMGetValueContext, libLLVMExtra), LLVMContextRef, (LLVMValueRef,), V)
-end
-
 function LLVMAddTargetLibraryInfoByTriple(T, PM)
     ccall((:LLVMAddTargetLibraryInfoByTriple, libLLVMExtra), Cvoid, (Cstring, LLVMPassManagerRef), T, PM)
 end
@@ -415,5 +407,13 @@ end
 
 function LLVMSetAtomicSyncScopeID(AtomicInst, SSID)
     ccall((:LLVMSetAtomicSyncScopeID, libLLVMExtra), Cvoid, (LLVMValueRef, Cuint), AtomicInst, SSID)
+end
+
+function LLVMGetValueContext(Val)
+    ccall((:LLVMGetValueContext, libLLVMExtra), LLVMContextRef, (LLVMValueRef,), Val)
+end
+
+function LLVMGetBuilderContext(Builder)
+    ccall((:LLVMGetBuilderContext, libLLVMExtra), LLVMContextRef, (LLVMBuilderRef,), Builder)
 end
 
