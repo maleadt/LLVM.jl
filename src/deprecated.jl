@@ -8,3 +8,18 @@
 @deprecate has_julia_ojit() true false
 
 Base.@deprecate_binding InstructionMetadataDict LLVM.ValueMetadataDict
+
+
+@deprecate(fence!(builder::IRBuilder, ordering::API.LLVMAtomicOrdering, syncscope::String,
+                  Name::String=""),
+           fence!(builder, ordering, SyncScope(syncscope), Name), false)
+
+@deprecate(atomic_rmw!(builder::IRBuilder, op::API.LLVMAtomicRMWBinOp, Ptr::Value,
+                       Val::Value, ordering::API.LLVMAtomicOrdering, syncscope::String),
+           atomic_rmw!(builder, op, Ptr, Val, ordering, SyncScope(syncscope)), false)
+
+@deprecate(atomic_cmpxchg!(builder::IRBuilder, Ptr::Value, Cmp::Value, New::Value,
+                           SuccessOrdering::API.LLVMAtomicOrdering,
+                           FailureOrdering::API.LLVMAtomicOrdering, syncscope::String),
+           atomic_cmpxchg!(builder, Ptr, Cmp, New, SuccessOrdering, FailureOrdering,
+                           SyncScope(syncscope)), false)

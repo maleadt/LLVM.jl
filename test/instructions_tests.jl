@@ -12,7 +12,7 @@
 
     entrybb = BasicBlock(fn, "entry")
     position!(builder, entrybb)
-    @assert position(builder) == entrybb
+    @test position(builder) == entrybb
 
     @test debuglocation(builder) === nothing
     loc = DILocation(1, 1)
@@ -192,13 +192,19 @@
     alignment!(loadinst, 4)
     @test alignment(loadinst) == 4
 
+    @test !is_atomic(loadinst)
     ordering!(loadinst, LLVM.API.LLVMAtomicOrderingSequentiallyConsistent)
+    @test is_atomic(loadinst)
     if supports_typed_pointers(ctx)
         @check_ir loadinst "load atomic i32, i32* %4 seq_cst"
     else
         @check_ir loadinst "load atomic i32, ptr %4 seq_cst"
     end
     @test ordering(loadinst) == LLVM.API.LLVMAtomicOrderingSequentiallyConsistent
+
+    @test syncscope(loadinst) == SyncScope("system")
+    syncscope!(loadinst, SyncScope("singlethread"))
+    @test syncscope(loadinst) == SyncScope("singlethread")
 
     storeinst = store!(builder, int1, ptr1)
     if supports_typed_pointers(ctx)
@@ -246,7 +252,7 @@
 
     atomic_rmw_inst = atomic_rmw!(builder,
         LLVM.API.LLVMAtomicRMWBinOpAdd, ptr1, int1,
-        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, "agent")
+        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, SyncScope("agent"))
     if supports_typed_pointers(ctx)
         @check_ir atomic_rmw_inst "atomicrmw add i32* %4, i32 %0 syncscope(\"agent\") seq_cst"
     else
@@ -255,7 +261,7 @@
 
     atomic_rmw_inst = atomic_rmw!(builder,
         LLVM.API.LLVMAtomicRMWBinOpAdd, ptr1, int1,
-        LLVM.API.LLVMAtomicOrderingMonotonic, "agent")
+        LLVM.API.LLVMAtomicOrderingMonotonic, SyncScope("agent"))
     if supports_typed_pointers(ctx)
         @check_ir atomic_rmw_inst "atomicrmw add i32* %4, i32 %0 syncscope(\"agent\") monotonic"
     else

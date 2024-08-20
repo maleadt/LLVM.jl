@@ -82,14 +82,52 @@ end
 
 ## atomics
 
-export ordering, ordering!
+export is_atomic, ordering, ordering!, SyncScope, syncscope, syncscope!
 
-# Ordering getter/setter are supported only for a subset of instructions
-# https://github.com/llvm/llvm-project/blob/llvmorg-14.0.3/llvm/lib/IR/Core.cpp#L3779-L3798
+is_atomic(inst::Instruction) = API.LLVMIsAtomic(inst) |> Bool
 
-ordering(val::Union{LoadInst,StoreInst,AtomicRMWInst}) = API.LLVMGetOrdering(val)
-ordering!(val::Union{LoadInst,StoreInst}, ord::API.LLVMAtomicOrdering) =
-    API.LLVMSetOrdering(val, ord)
+function ordering(inst::Instruction)
+    is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
+    API.LLVMGetOrdering(inst)
+end
+function ordering!(inst::Instruction, ord::API.LLVMAtomicOrdering)
+    # loads and stores can be made atomic by setting an ordering
+    API.LLVMSetOrdering(inst, ord)
+end
+
+struct SyncScope
+    id::Cuint
+end
+
+function SyncScope(name::String)
+    # the default, system syncscope gets encoded as an empty string
+    if name == "system"
+        name = ""
+    end
+    SyncScope(API.LLVMGetSyncScopeID(context(), name, length(name)))
+end
+
+Base.convert(::Type{Cuint}, scope::SyncScope) = scope.id
+
+function Base.show(io::IO, scope::SyncScope)
+    if scope.id == 0
+        print(io, "SyncScope(\"singlethread\")")
+    elseif scope.id == 1
+        print(io, "SyncScope(\"system\")")
+    else
+        print(io, "SyncScope(target-specific scope $(scope.id))")
+    end
+end
+
+function syncscope(inst::Instruction)
+    is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
+    SyncScope(API.LLVMGetAtomicSyncScopeID(inst))
+end
+
+function syncscope!(inst::Instruction, scope::SyncScope)
+    is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
+    API.LLVMSetAtomicSyncScopeID(inst, scope)
+end
 
 
 ## call sites and invocations

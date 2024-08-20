@@ -262,10 +262,23 @@ LLVMErrorRef LLVMRunJuliaPassesOnFunction(LLVMValueRef F, const char *Passes,
                                           LLVMPassBuilderOptionsRef Options,
                                           LLVMPassBuilderExtensionsRef Extensions);
 
-LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B,LLVMAtomicRMWBinOp op,
+// atomics with syncscope (backport of llvm/llvm-project#104775)
+#if LLVM_VERSION_MAJOR < 20
+unsigned LLVMGetSyncScopeID(LLVMContextRef C, const char *Name, size_t SLen);
+LLVMValueRef LLVMBuildFenceSyncScope(LLVMBuilderRef B, LLVMAtomicOrdering ordering,
+                                     unsigned SSID, const char *Name);
+LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B, LLVMAtomicRMWBinOp op,
                                          LLVMValueRef PTR, LLVMValueRef Val,
-                                         LLVMAtomicOrdering ordering,
-                                         const char* syncscope);
+                                         LLVMAtomicOrdering ordering, unsigned SSID);
+LLVMValueRef LLVMBuildAtomicCmpXchgSyncScope(LLVMBuilderRef B, LLVMValueRef Ptr,
+                                             LLVMValueRef Cmp, LLVMValueRef New,
+                                             LLVMAtomicOrdering SuccessOrdering,
+                                             LLVMAtomicOrdering FailureOrdering,
+                                             unsigned SSID);
+LLVMBool LLVMIsAtomic(LLVMValueRef Inst);
+unsigned LLVMGetAtomicSyncScopeID(LLVMValueRef AtomicInst);
+void LLVMSetAtomicSyncScopeID(LLVMValueRef AtomicInst, unsigned SSID);
+#endif
 
 LLVM_C_EXTERN_C_END
 #endif
