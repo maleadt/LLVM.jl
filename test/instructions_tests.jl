@@ -526,6 +526,9 @@ end
                 bundles = operand_bundles(inst)
                 @test length(bundles) == 1
 
+                # test the ability to directly forward `operand_bundles`
+                inst2 = call!(builder, ft, f, Value[], bundles)
+
                 bundle2 = bundles[1]
                 @test bundle2 isa OperandBundle
                 @test LLVM.tag(bundle2) == "unknown"

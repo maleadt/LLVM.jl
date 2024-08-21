@@ -412,6 +412,11 @@ function call!(builder::IRBuilder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value
                                                     length(Bundles), Name))
 end
 
+# convenience function to be able to call `call!` with an `operand_bundles(call)` argument
+call!(builder::IRBuilder, Ty::LLVMType, Fn::Value, Args::Vector{<:Value},
+      Bundles::OperandBundleIterator, Name::String="") =
+    call!(builder, Ty, Fn, Args, collect(Bundles), Name)
+
 va_arg!(builder::IRBuilder, List::Value, Ty::LLVMType, Name::String="") =
     Instruction(API.LLVMBuildVAArg(builder, List, Ty, Name))
 
