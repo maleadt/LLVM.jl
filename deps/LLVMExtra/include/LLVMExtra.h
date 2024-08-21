@@ -226,12 +226,6 @@ LLVMBool LLVMCanValueUseFastMathFlags(LLVMValueRef Inst);
 #endif
 
 
-// bug: metadata APIs only accept Instructions
-int LLVMHasMetadata2(LLVMValueRef Inst);
-LLVMValueRef LLVMGetMetadata2(LLVMValueRef Inst, unsigned KindID);
-void LLVMSetMetadata2(LLVMValueRef Inst, unsigned KindID, LLVMValueRef Val);
-
-
 // NewPM extensions
 typedef struct LLVMOpaquePassBuilderExtensions *LLVMPassBuilderExtensionsRef;
 LLVMPassBuilderExtensionsRef LLVMCreatePassBuilderExtensions(void);

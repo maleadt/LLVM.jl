@@ -7,7 +7,7 @@
 @deprecate has_newpm() true false
 @deprecate has_julia_ojit() true false
 
-Base.@deprecate_binding InstructionMetadataDict LLVM.ValueMetadataDict
+Base.@deprecate_binding ValueMetadataDict LLVM.InstructionMetadataDict
 
 
 @deprecate(fence!(builder::IRBuilder, ordering::API.LLVMAtomicOrdering, syncscope::String,

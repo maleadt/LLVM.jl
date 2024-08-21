@@ -5,6 +5,8 @@ using Unicode
 using Printf
 using Libdl
 
+using CEnum
+
 if !isdefined(Base, :get_extension)
     using Requires: @require
 end

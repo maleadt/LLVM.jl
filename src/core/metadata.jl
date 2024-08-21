@@ -143,60 +143,110 @@ Base.unsafe_convert(::Type{API.LLVMMetadataRef}, md::MDNull) =
     convert(API.LLVMMetadataRef, C_NULL)
 
 
-## value metadata
+## metadata
 
-export metadata
+export metadata, MDKind
 
-@enum(MDKind, MD_dbg = 0,
-              MD_tbaa = 1,
-              MD_prof = 2,
-              MD_fpmath = 3,
-              MD_range = 4,
-              MD_tbaa_struct = 5,
-              MD_invariant_load = 6,
-              MD_alias_scope = 7,
-              MD_noalias = 8,
-              MD_nontemporal = 9,
-              MD_mem_parallel_loop_access = 10,
-              MD_nonnull = 11,
-              MD_dereferenceable = 12,
-              MD_dereferenceable_or_null = 13,
-              MD_make_implicit = 14,
-              MD_unpredictable = 15,
-              MD_invariant_group = 16,
-              MD_align = 17,
-              MD_loop = 18,
-              MD_type = 19,
-              MD_section_prefix = 20,
-              MD_absolute_symbol = 21,
-              MD_associated = 22)
+@cenum(MDKind, MD_dbg = 0,
+               MD_tbaa = 1,
+               MD_prof = 2,
+               MD_fpmath = 3,
+               MD_range = 4,
+               MD_tbaa_struct = 5,
+               MD_invariant_load = 6,
+               MD_alias_scope = 7,
+               MD_noalias = 8,
+               MD_nontemporal = 9,
+               MD_mem_parallel_loop_access = 10,
+               MD_nonnull = 11,
+               MD_dereferenceable = 12,
+               MD_dereferenceable_or_null = 13,
+               MD_make_implicit = 14,
+               MD_unpredictable = 15,
+               MD_invariant_group = 16,
+               MD_align = 17,
+               MD_loop = 18,
+               MD_type = 19,
+               MD_section_prefix = 20,
+               MD_absolute_symbol = 21,
+               MD_associated = 22)
 MDKind(name::String) = API.LLVMGetMDKindIDInContext(context(), name, length(name))
 MDKind(kind::MDKind) = kind
 
+# XXX: automatically converting string keys to MDKind is too automagical
+
+# instructions (using MetadataAsValue values)
+
 # TODO: doesn't actually iterate, since we can't list the available keys
-struct ValueMetadataDict <: AbstractDict{MDKind,MetadataAsValue}
+struct InstructionMetadataDict <: AbstractDict{MDKind,MetadataAsValue}
     val::Value
 end
 
-metadata(val::Value) = ValueMetadataDict(val)
+metadata(val::Value) = InstructionMetadataDict(val)
 
-Base.isempty(md::ValueMetadataDict) = !Bool(API.LLVMHasMetadata2(md.val))
+Base.isempty(md::InstructionMetadataDict) = !Bool(API.LLVMHasMetadata(md.val))
 
-Base.haskey(md::ValueMetadataDict, key) =
-  API.LLVMGetMetadata2(md.val, MDKind(key)) != C_NULL
+Base.haskey(md::InstructionMetadataDict, key) =
+  API.LLVMGetMetadata(md.val, MDKind(key)) != C_NULL
 
-function Base.getindex(md::ValueMetadataDict, key)
+function Base.getindex(md::InstructionMetadataDict, key)
     kind = MDKind(key)
-    objref = API.LLVMGetMetadata2(md.val, kind)
+    objref = API.LLVMGetMetadata(md.val, kind)
     objref == C_NULL && throw(KeyError(kind))
     return Metadata(MetadataAsValue(objref))
   end
 
-Base.setindex!(md::ValueMetadataDict, node::Metadata, key) =
-    API.LLVMSetMetadata2(md.val, MDKind(key), Value(node))
+Base.setindex!(md::InstructionMetadataDict, node::Metadata, key) =
+    API.LLVMSetMetadata(md.val, MDKind(key), Value(node))
 
-Base.delete!(md::ValueMetadataDict, key) =
-    API.LLVMSetMetadata2(md.val, MDKind(key), C_NULL)
+Base.delete!(md::InstructionMetadataDict, key) =
+    API.LLVMSetMetadata(md.val, MDKind(key), C_NULL)
+
+# global objects (using Metadata values)
+
+struct GlobalMetadataDict <: AbstractDict{MDKind,Metadata}
+    val::GlobalObject
+end
+
+metadata(val::GlobalObject) = GlobalMetadataDict(val)
+
+function Base.length(md::GlobalMetadataDict)
+    num_entries = Ref{Csize_t}()
+    valptr = API.LLVMGlobalCopyAllMetadata(md.val, num_entries)
+    API.LLVMDisposeValueMetadataEntries(valptr)
+    Int(num_entries[])
+end
+
+Base.empty!(md::GlobalMetadataDict) = API.LLVMGlobalClearMetadata(md.val)
+
+function Base.iterate(md::GlobalMetadataDict)
+    num_entries = Ref{Csize_t}()
+    entries = API.LLVMGlobalCopyAllMetadata(md.val, num_entries)
+    num_entries[] == 0 && return nothing
+
+    metadata = Pair{MDKind,Metadata}[]
+    for i in 1:num_entries[]
+        kind = API.LLVMValueMetadataEntriesGetKind(entries, i-1)
+        entry = API.LLVMValueMetadataEntriesGetMetadata(entries, i-1)
+        metadata = push!(metadata, MDKind(kind) => Metadata(entry))
+    end
+    API.LLVMDisposeValueMetadataEntries(entries)
+
+    val, state = iterate(metadata)
+    val, (state, metadata)
+end
+function Base.iterate(md::GlobalMetadataDict, (state, metadata))
+    out = iterate(metadata, state)
+    out === nothing && return nothing
+    val, state = out
+    val, (state, metadata)
+end
+
+Base.setindex!(md::GlobalMetadataDict, node::Metadata, key) =
+    API.LLVMGlobalSetMetadata(md.val, MDKind(key), node)
+
+Base.delete!(md::GlobalMetadataDict, key) =
+    API.LLVMGlobalEraseMetadata(md.val, MDKind(key))
 
 
 ## named metadata
