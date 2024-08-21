@@ -786,6 +786,10 @@ end
     md = MDNode([str])
     metadata(fn)["foo"] = md
     @test !isempty(metadata(fn))
+    # XXX: keyset contains raw MDKinds
+    @test collect(values(metadata(fn))) == [md]
+    empty!(metadata(fn))
+    @test isempty(metadata(fn))
 end
 
 # global variables
