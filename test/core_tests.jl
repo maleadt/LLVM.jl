@@ -1126,6 +1126,9 @@ end
     ft = LLVM.FunctionType(st, [st])
     @test isempty(functions(mod))
 
+    @test_throws BoundsError first(functions(mod))
+    @test_throws BoundsError last(functions(mod))
+
     dummyfn = LLVM.Function(mod, "SomeFunction", ft)
     let fns = functions(mod)
         @test eltype(fns) == LLVM.Function
@@ -1147,6 +1150,12 @@ end
         @test !haskey(fns, "SomeOtherFunction")
         @test_throws KeyError fns["SomeOtherFunction"]
     end
+
+    anotherfn = LLVM.Function(mod, "SomeOtherFunction", ft)
+    @test prevfun(dummyfn) === nothing
+    @test nextfun(dummyfn) == anotherfn
+    @test prevfun(anotherfn) == dummyfn
+    @test nextfun(anotherfn) === nothing
 end
 
 end
@@ -1355,11 +1364,16 @@ end
     ft = LLVM.FunctionType(LLVM.VoidType())
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
+    @test_throws BoundsError first(blocks(fn))
+    @test_throws BoundsError last(blocks(fn))
     bb2 = BasicBlock(fn, "SomeOtherBasicBlock")
     @test LLVM.parent(bb2) == fn
     @test isempty(instructions(bb2))
     @test isempty(predecessors(bb2))
     @test_throws ArgumentError successors(bb2)
+
+    @test_throws BoundsError first(instructions(bb2))
+    @test_throws BoundsError last(instructions(bb2))
 
     bb1 = BasicBlock(bb2, "SomeBasicBlock")
     @test LLVM.parent(bb2) == fn
@@ -1373,6 +1387,11 @@ end
 
     @test terminator(bb1) == brinst
     @test terminator(bb2) == retinst
+
+    @test prevblock(bb1) === nothing
+    @test nextblock(bb1) == bb2
+    @test prevblock(bb2) == bb1
+    @test nextblock(bb2) === nothing
 
     bb3 = BasicBlock("YetAnotherBasicBlock")
     @test LLVM.parent(bb3) == nothing
@@ -1398,6 +1417,9 @@ end
     # basic block iteration
     let bbs = blocks(fn)
         @test collect(bbs) == [bb1, bb2]
+
+        @test first(bbs) == bb1
+        @test last(bbs) == bb2
 
         move_before(bb2, bb1)
         @test collect(bbs) == [bb2, bb1]
@@ -1432,8 +1454,14 @@ end
     bb3 = BasicBlock(fn, "else")
 
     position!(builder, bb1)
+    addinst = add!(builder, parameters(fn)[1], parameters(fn)[2])
     brinst = br!(builder, parameters(fn)[1], bb2, bb3)
     @test opcode(brinst) == LLVM.API.LLVMBr
+
+    @test previnst(addinst) === nothing
+    @test nextinst(addinst) == brinst
+    @test previnst(brinst) == addinst
+    @test nextinst(brinst) === nothing
 
     position!(builder, bb2)
     retinst = ret!(builder)

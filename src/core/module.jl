@@ -17,6 +17,9 @@ Base.:(==)(x::Module, y::Module) = (x.ref === y.ref)
 @checked struct DataLayout
     ref::API.LLVMTargetDataRef
 end
+@checked struct Function <: GlobalObject
+    ref::API.LLVMValueRef
+end
 
 Module(name::String) =
     mark_alloc(Module(API.LLVMModuleCreateWithNameInContext(name, context())))
@@ -85,7 +88,7 @@ set_compiler_used!(mod::Module, values::GlobalVariable...) =
 
 ## global variable iteration
 
-export globals
+export globals, prevglobal, nextglobal
 
 struct ModuleGlobalSet
     mod::Module
@@ -99,13 +102,33 @@ function Base.iterate(iter::ModuleGlobalSet, state=API.LLVMGetFirstGlobal(iter.m
     state == C_NULL ? nothing : (GlobalVariable(state), API.LLVMGetNextGlobal(state))
 end
 
-Base.last(iter::ModuleGlobalSet) =
-    GlobalVariable(API.LLVMGetLastGlobal(iter.mod))
+function Base.first(iter::ModuleGlobalSet)
+    ref = API.LLVMGetFirstGlobal(iter.mod)
+    ref == C_NULL && throw(BoundsError(iter))
+    GlobalVariable(ref)
+end
 
-Base.isempty(iter::ModuleGlobalSet) =
-    API.LLVMGetLastGlobal(iter.mod) == C_NULL
+function Base.last(iter::ModuleGlobalSet)
+    ref = API.LLVMGetLastGlobal(iter.mod)
+    ref == C_NULL && throw(BoundsError(iter))
+    GlobalVariable(ref)
+end
+
+Base.isempty(iter::ModuleGlobalSet) = API.LLVMGetLastGlobal(iter.mod) == C_NULL
 
 Base.IteratorSize(::ModuleGlobalSet) = Base.SizeUnknown()
+
+function prevglobal(gv::GlobalVariable)
+    ref = API.LLVMGetPreviousGlobal(gv)
+    ref == C_NULL && return nothing
+    GlobalVariable(ref)
+end
+
+function nextglobal(gv::GlobalVariable)
+    ref = API.LLVMGetNextGlobal(gv)
+    ref == C_NULL && return nothing
+    GlobalVariable(ref)
+end
 
 # partial associative interface
 
@@ -122,7 +145,7 @@ end
 
 ## function iteration
 
-export functions
+export functions, prevfun, nextfun
 
 struct ModuleFunctionSet
     mod::Module
@@ -136,13 +159,33 @@ function Base.iterate(iter::ModuleFunctionSet, state=API.LLVMGetFirstFunction(it
     state == C_NULL ? nothing : (Function(state), API.LLVMGetNextFunction(state))
 end
 
-Base.last(iter::ModuleFunctionSet) =
-    Function(API.LLVMGetLastFunction(iter.mod))
+function Base.first(iter::ModuleFunctionSet)
+    ref = API.LLVMGetFirstFunction(iter.mod)
+    ref == C_NULL && throw(BoundsError(iter))
+    Function(ref)
+end
 
-Base.isempty(iter::ModuleFunctionSet) =
-    API.LLVMGetLastFunction(iter.mod) == C_NULL
+function Base.last(iter::ModuleFunctionSet)
+    ref = API.LLVMGetFirstFunction(iter.mod)
+    ref == C_NULL && throw(BoundsError(iter))
+    Function(ref)
+end
+
+Base.isempty(iter::ModuleFunctionSet) = API.LLVMGetLastFunction(iter.mod) == C_NULL
 
 Base.IteratorSize(::ModuleFunctionSet) = Base.SizeUnknown()
+
+function prevfun(fun::Function)
+    ref = API.LLVMGetPreviousFunction(fun)
+    ref == C_NULL && return nothing
+    Function(ref)
+end
+
+function nextfun(fun::Function)
+    ref = API.LLVMGetNextFunction(fun)
+    ref == C_NULL && return nothing
+    Function(ref)
+end
 
 # partial associative interface
 

@@ -10,11 +10,6 @@ register(BasicBlock, API.LLVMBasicBlockValueKind)
 BasicBlock(ref::API.LLVMBasicBlockRef) = BasicBlock(API.LLVMBasicBlockAsValue(ref))
 Base.unsafe_convert(::Type{API.LLVMBasicBlockRef}, bb::BasicBlock) = API.LLVMValueAsBasicBlock(bb)
 
-# forward declarations
-@checked struct Function <: GlobalObject
-    ref::API.LLVMValueRef
-end
-
 # create empty
 BasicBlock(name::String) =
     BasicBlock(API.LLVMCreateBasicBlockInContext(context(), name))
@@ -50,7 +45,7 @@ move_after(bb::BasicBlock, pos::BasicBlock) =
 
 ## instruction iteration
 
-export instructions
+export instructions, previnst, nextinst
 
 struct BasicBlockInstructionSet
     bb::BasicBlock
@@ -65,13 +60,35 @@ function Base.iterate(iter::BasicBlockInstructionSet,
     state == C_NULL ? nothing : (Instruction(state), API.LLVMGetNextInstruction(state))
 end
 
-Base.last(iter::BasicBlockInstructionSet) =
-    Instruction(API.LLVMGetLastInstruction(iter.bb))
+function Base.first(iter::BasicBlockInstructionSet)
+    ref = API.LLVMGetFirstInstruction(iter.bb)
+    ref == C_NULL && throw(BoundsError(iter))
+    Instruction(ref)
+end
+
+function Base.last(iter::BasicBlockInstructionSet)
+    ref = API.LLVMGetLastInstruction(iter.bb)
+    ref == C_NULL && throw(BoundsError(iter))
+    Instruction(ref)
+end
 
 Base.isempty(iter::BasicBlockInstructionSet) =
     API.LLVMGetLastInstruction(iter.bb) == C_NULL
 
 Base.IteratorSize(::BasicBlockInstructionSet) = Base.SizeUnknown()
+
+function previnst(inst::Instruction)
+    ref = API.LLVMGetPreviousInstruction(inst)
+    ref == C_NULL && return nothing
+    Instruction(ref)
+end
+
+function nextinst(inst::Instruction)
+    ref = API.LLVMGetNextInstruction(inst)
+    ref == C_NULL && return nothing
+    Instruction(ref)
+end
+
 
 
 ## cfg-like operations

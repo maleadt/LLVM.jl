@@ -329,8 +329,17 @@ function Base.iterate(iter::ModuleMetadataIterator, state=API.LLVMGetFirstNamedM
     end
 end
 
-Base.last(iter::ModuleMetadataIterator) =
-    NamedMDNode(iter.mod, API.LLVMGetLastNamedMetadata(iter.mod))
+function Base.first(iter::ModuleMetadataIterator)
+    ref = API.LLVMGetFirstNamedMetadata(iter.mod)
+    ref == C_NULL && throw(BoundsError(iter))
+    NamedMDNode(iter.mod, ref)
+end
+
+function Base.last(iter::ModuleMetadataIterator)
+    ref = API.LLVMGetLastNamedMetadata(iter.mod)
+    ref == C_NULL && throw(BoundsError(iter))
+    NamedMDNode(iter.mod, ref)
+end
 
 Base.isempty(iter::ModuleMetadataIterator) =
     API.LLVMGetLastNamedMetadata(iter.mod) == C_NULL
