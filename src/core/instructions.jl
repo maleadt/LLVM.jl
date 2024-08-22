@@ -219,39 +219,6 @@ function Base.getindex(iter::OperandBundleInputIterator, i::Int)
     Value(API.LLVMGetOperandBundleArgAtIndex(iter.bundle, i-1))
 end
 
-# @checked mutable struct OperandBundleDef
-#     ref::API.LLVMOperandBundleDefRef
-# end
-# Base.unsafe_convert(::Type{API.LLVMOperandBundleDefRef}, bundle::OperandBundleDef) =
-#     bundle.ref
-
-# function tag_name(bundle::OperandBundleDef)
-#     len = Ref{Cuint}()
-#     data = API.LLVMGetOperandBundleDefTag(bundle, len)
-#     unsafe_string(convert(Ptr{Int8}, data), len[])
-# end
-
-# function OperandBundleDef(bundle_use::OperandBundle)
-#     bundle_def = OperandBundleDef(API.LLVMOperandBundleDefFromUse(bundle_use))
-#     finalizer(bundle_def) do obj
-#         API.LLVMDisposeOperandBundleDef(obj)
-#     end
-# end
-
-# function OperandBundleDef(tag::String, inputs::Vector{<:Value}=Value[])
-#     bundle = OperandBundleDef(API.LLVMCreateOperandBundleDef(tag, inputs, length(inputs)))
-#     finalizer(bundle) do obj
-#         API.LLVMDisposeOperandBundleDef(obj)
-#     end
-# end
-
-# function inputs(bundle::OperandBundleDef)
-#     nvals = API.LLVMGetOperandBundleDefNumInputs(bundle)
-#     vals = Vector{API.LLVMValueRef}(undef, nvals)
-#     API.LLVMGetOperandBundleDefInputs(bundle, vals)
-#     return [Value(val) for val in vals]
-# end
-
 function Base.string(bundle::OperandBundle)
     # mimic how bundles are rendered in LLVM IR
     "\"$(tag(bundle))\"(" * join(string.(inputs(bundle)), ", ") * ")"
@@ -308,7 +275,7 @@ Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i::Int) =
 
 # incoming iteration
 
-export PhiIncomingSet
+export incoming
 
 struct PhiIncomingSet <: AbstractVector{Tuple{Value,BasicBlock}}
     phi::Instruction

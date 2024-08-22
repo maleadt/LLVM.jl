@@ -104,7 +104,17 @@ function Base.iterate(iter::FunctionParameterSet, state=API.LLVMGetFirstParam(it
     state == C_NULL ? nothing : (Argument(state), API.LLVMGetNextParam(state))
 end
 
-Base.last(iter::FunctionParameterSet) = Argument(API.LLVMGetLastParam(iter.f))
+function Base.first(iter::FunctionParameterSet)
+    ref = API.LLVMGetFirstParam(iter.f)
+    ref == C_NULL && throw(BoundsError(iter))
+    Argument(ref)
+end
+
+function Base.last(iter::FunctionParameterSet)
+    ref = API.LLVMGetLastParam(iter.f)
+    ref == C_NULL && throw(BoundsError(iter))
+    Argument(ref)
+end
 
 # NOTE: optimized `collect`
 function Base.collect(iter::FunctionParameterSet)
@@ -115,7 +125,7 @@ end
 
 # basic block iteration
 
-export blocks
+export blocks, prevblock, nextblock
 
 struct FunctionBlockSet <: AbstractVector{BasicBlock}
     f::Function
@@ -133,6 +143,7 @@ function Base.first(iter::FunctionBlockSet)
     ref == C_NULL && throw(BoundsError(iter))
     BasicBlock(ref)
 end
+
 function Base.last(iter::FunctionBlockSet)
     ref = API.LLVMGetLastBasicBlock(iter.f)
     ref == C_NULL && throw(BoundsError(iter))
@@ -141,6 +152,18 @@ end
 
 function Base.iterate(iter::FunctionBlockSet, state=API.LLVMGetFirstBasicBlock(iter.f))
     state == C_NULL ? nothing : (BasicBlock(state), API.LLVMGetNextBasicBlock(state))
+end
+
+function prevblock(bb::BasicBlock)
+    ref = API.LLVMGetPreviousBasicBlock(bb)
+    ref == C_NULL && return nothing
+    BasicBlock(ref)
+end
+
+function nextblock(bb::BasicBlock)
+    ref = API.LLVMGetNextBasicBlock(bb)
+    ref == C_NULL && return nothing
+    BasicBlock(ref)
 end
 
 # provide a random access interface by maintaining a cache of blocks
