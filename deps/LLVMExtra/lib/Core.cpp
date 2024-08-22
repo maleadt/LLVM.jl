@@ -171,8 +171,6 @@ LLVMPassRef LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback,
 
 // Various missing functions
 
-unsigned int LLVMGetDebugMDVersion() { return DEBUG_METADATA_VERSION; }
-
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM) {
   unwrap(PM)->add(new TargetLibraryInfoWrapperPass(Triple(T)));
 }

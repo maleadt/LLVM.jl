@@ -62,10 +62,6 @@ function LLVMCreateFunctionPass2(Name, Callback, Data)
     ccall((:LLVMCreateFunctionPass2, libLLVMExtra), LLVMPassRef, (Cstring, LLVMPassCallback, Ptr{Cvoid}), Name, Callback, Data)
 end
 
-function LLVMGetDebugMDVersion()
-    ccall((:LLVMGetDebugMDVersion, libLLVMExtra), Cuint, ())
-end
-
 function LLVMAddTargetLibraryInfoByTriple(T, PM)
     ccall((:LLVMAddTargetLibraryInfoByTriple, libLLVMExtra), Cvoid, (Cstring, LLVMPassManagerRef), T, PM)
 end

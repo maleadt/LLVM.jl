@@ -59,9 +59,7 @@ LLVMPassRef LLVMCreateModulePass2(const char *Name, LLVMPassCallback Callback, v
 LLVMPassRef LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback,
                                     void *Data);
 
-
 // Various missing functions
-unsigned int LLVMGetDebugMDVersion(void);
 
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
 #if LLVM_VERSION_MAJOR < 17
