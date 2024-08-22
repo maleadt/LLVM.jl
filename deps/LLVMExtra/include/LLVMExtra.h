@@ -15,6 +15,7 @@ LLVM_C_EXTERN_C_BEGIN
 //      maybe LLVM_C_EXTERN_C_BEGIN somehow eats the function definition?
 void dummy();
 
+// Initialization functions
 LLVMBool LLVMExtraInitializeNativeTarget(void);
 LLVMBool LLVMExtraInitializeNativeAsmParser(void);
 LLVMBool LLVMExtraInitializeNativeAsmPrinter(void);
@@ -27,7 +28,7 @@ typedef enum {
   LLVMDebugEmissionKindDebugDirectivesOnly = 3
 } LLVMDebugEmissionKind;
 
-// Various missing passes (being upstreamed)
+// Missing LegacyPM passes
 void LLVMAddBarrierNoopPass(LLVMPassManagerRef PM);
 #if LLVM_VERSION_MAJOR < 17
 void LLVMAddDivRemPairsPass(LLVMPassManagerRef PM);
@@ -46,57 +47,6 @@ void LLVMAddInductiveRangeCheckEliminationPass(LLVMPassManagerRef PM);
 #endif
 void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM);
 void LLVMAddExpandReductionsPass(LLVMPassManagerRef PM);
-
-
-// Infrastructure for writing LLVM passes in Julia
-typedef struct LLVMOpaquePass *LLVMPassRef;
-
-void LLVMAddPass(LLVMPassManagerRef PM, LLVMPassRef P);
-typedef LLVMBool (*LLVMPassCallback)(void *Ref, void *Data);
-
-LLVMPassRef LLVMCreateModulePass2(const char *Name, LLVMPassCallback Callback, void *Data);
-
-LLVMPassRef LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback,
-                                    void *Data);
-
-// Various missing functions
-
-void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
-#if LLVM_VERSION_MAJOR < 17
-void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **ExportList,
-                                          size_t Length);
-#endif
-
-void LLVMAppendToUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count);
-void LLVMAppendToCompilerUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count);
-void LLVMAddGenericAnalysisPasses(LLVMPassManagerRef PM);
-
-void LLVMDumpMetadata(LLVMMetadataRef MD);
-
-char *LLVMPrintMetadataToString(LLVMMetadataRef MD);
-
-const char *LLVMDIScopeGetName(LLVMMetadataRef File, unsigned *Len);
-
-// APIs without MetadataAsValue
-const char *LLVMGetMDString2(LLVMMetadataRef MD, unsigned *Length);
-unsigned LLVMGetMDNodeNumOperands2(LLVMMetadataRef MD);
-void LLVMGetMDNodeOperands2(LLVMMetadataRef MD, LLVMMetadataRef *Dest);
-unsigned LLVMGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD);
-void LLVMGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest);
-void LLVMAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
-void LLVMReplaceMDNodeOperandWith2(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
-
-typedef struct LLVMOrcOpaqueIRCompileLayer *LLVMOrcIRCompileLayerRef;
-
-void LLVMOrcIRCompileLayerEmit(LLVMOrcIRCompileLayerRef IRLayer,
-                               LLVMOrcMaterializationResponsibilityRef MR,
-                               LLVMOrcThreadSafeModuleRef TSM);
-
-char *LLVMDumpJitDylibToString(LLVMOrcJITDylibRef JD);
-
-LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn);
-LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef Fn);
-
 #if LLVM_VERSION_MAJOR >= 17
 void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
                                    LLVMBool ForwardSwitchCondToPhi,
@@ -112,19 +62,59 @@ void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold
                                    LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
                                    LLVMBool FoldTwoEntryPHINode);
 #endif
+#if LLVM_VERSION_MAJOR < 17
+void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **ExportList,
+                                          size_t Length);
+#endif
 
+// Custom LegacyPM pass infrastructure
+typedef struct LLVMOpaquePass *LLVMPassRef;
+void LLVMAddPass(LLVMPassManagerRef PM, LLVMPassRef P);
+typedef LLVMBool (*LLVMPassCallback)(void *Ref, void *Data);
+LLVMPassRef LLVMCreateModulePass2(const char *Name, LLVMPassCallback Callback, void *Data);
+LLVMPassRef LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback,
+                                    void *Data);
+
+// Missing functionality
+void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM);
+void LLVMAppendToUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count);
+void LLVMAppendToCompilerUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count);
+void LLVMAddGenericAnalysisPasses(LLVMPassManagerRef PM);
+void LLVMDumpMetadata(LLVMMetadataRef MD);
+char *LLVMPrintMetadataToString(LLVMMetadataRef MD);
+const char *LLVMDIScopeGetName(LLVMMetadataRef File, unsigned *Len);
+void LLVMFunctionDeleteBody(LLVMValueRef Func);
+void LLVMDestroyConstant(LLVMValueRef Const);
+LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn);
+LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef Fn);
 
 // Bug fixes
 void LLVMSetInitializer2(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);
 void LLVMSetPersonalityFn2(LLVMValueRef Fn, LLVMValueRef PersonalityFn);
 
+// APIs without MetadataAsValue
+const char *LLVMGetMDString2(LLVMMetadataRef MD, unsigned *Length);
+unsigned LLVMGetMDNodeNumOperands2(LLVMMetadataRef MD);
+void LLVMGetMDNodeOperands2(LLVMMetadataRef MD, LLVMMetadataRef *Dest);
+unsigned LLVMGetNamedMetadataNumOperands2(LLVMNamedMDNodeRef NMD);
+void LLVMGetNamedMetadataOperands2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef *Dest);
+void LLVMAddNamedMetadataOperand2(LLVMNamedMDNodeRef NMD, LLVMMetadataRef Val);
+void LLVMReplaceMDNodeOperandWith2(LLVMMetadataRef MD, unsigned I, LLVMMetadataRef New);
+
+// ORC API extensions
+typedef struct LLVMOrcOpaqueIRCompileLayer *LLVMOrcIRCompileLayerRef;
+void LLVMOrcIRCompileLayerEmit(LLVMOrcIRCompileLayerRef IRLayer,
+                               LLVMOrcMaterializationResponsibilityRef MR,
+                               LLVMOrcThreadSafeModuleRef TSM);
+char *LLVMDumpJitDylibToString(LLVMOrcJITDylibRef JD);
+
+// Cloning functionality
 typedef enum {
   LLVMCloneFunctionChangeTypeLocalChangesOnly = 0,
   LLVMCloneFunctionChangeTypeGlobalChanges = 1,
   LLVMCloneFunctionChangeTypeDifferentModule = 2,
   LLVMCloneFunctionChangeTypeClonedModule = 3
 } LLVMCloneFunctionChangeType;
-
 void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
                            LLVMValueRef *ValueMap, unsigned ValueMapElements,
                            LLVMCloneFunctionChangeType Changes, const char *NameSuffix,
@@ -132,18 +122,12 @@ void LLVMCloneFunctionInto(LLVMValueRef NewFunc, LLVMValueRef OldFunc,
                            void *TypeMapperData,
                            LLVMValueRef (*Materializer)(LLVMValueRef, void *),
                            void *MaterializerData);
-
 LLVMBasicBlockRef LLVMCloneBasicBlock(LLVMBasicBlockRef BB, const char *NameSuffix,
                                       LLVMValueRef *ValueMap, unsigned ValueMapElements,
                                       LLVMValueRef F);
 
-void LLVMFunctionDeleteBody(LLVMValueRef Func);
-
-void LLVMDestroyConstant(LLVMValueRef Const);
-
-
-// operand bundles (backport of llvm-project/llvm#73914)
-#if LLVM_VERSION_MAJOR < 18
+// Operand bundles
+#if LLVM_VERSION_MAJOR < 18 // llvm-project/llvm#73914
 typedef struct LLVMOpaqueOperandBundle *LLVMOperandBundleRef;
 LLVMOperandBundleRef LLVMCreateOperandBundle(const char *Tag, size_t TagLen,
                                              LLVMValueRef *Args,
@@ -167,25 +151,22 @@ LLVMBuildCallWithOperandBundles(LLVMBuilderRef, LLVMTypeRef, LLVMValueRef Fn,
                                 unsigned NumBundles, const char *Name);
 #endif
 
-
-// metadata
+// Metadata API extensions
 LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata);
 void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New);
-#if LLVM_VERSION_MAJOR < 17
+#if LLVM_VERSION_MAJOR < 17 // D136637
 void LLVMReplaceMDNodeOperandWith(LLVMValueRef V, unsigned Index,
                                   LLVMMetadataRef Replacement);
 #endif
 
-// constant data
+// Constant data
 LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data,
                                 unsigned NumElements);
 
-
-// missing opaque pointer APIs
+// Missing opaque pointer APIs
 #if LLVM_VERSION_MAJOR < 17
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C);
 #endif
-
 
 // (Post)DominatorTree
 typedef struct LLVMOpaqueDominatorTree *LLVMDominatorTreeRef;
@@ -193,16 +174,14 @@ LLVMDominatorTreeRef LLVMCreateDominatorTree(LLVMValueRef Fn);
 void LLVMDisposeDominatorTree(LLVMDominatorTreeRef Tree);
 LLVMBool LLVMDominatorTreeInstructionDominates(LLVMDominatorTreeRef Tree,
                                                LLVMValueRef InstA, LLVMValueRef InstB);
-
 typedef struct LLVMOpaquePostDominatorTree *LLVMPostDominatorTreeRef;
 LLVMPostDominatorTreeRef LLVMCreatePostDominatorTree(LLVMValueRef Fn);
 void LLVMDisposePostDominatorTree(LLVMPostDominatorTreeRef Tree);
 LLVMBool LLVMPostDominatorTreeInstructionDominates(LLVMPostDominatorTreeRef Tree,
                                                    LLVMValueRef InstA, LLVMValueRef InstB);
 
-
-// fastmath (backport of llvm/llvm-project#75123)
-#if LLVM_VERSION_MAJOR < 18
+// fastmath
+#if LLVM_VERSION_MAJOR < 18 // llvm/llvm-project#75123
 enum {
   LLVMFastMathAllowReassoc = (1 << 0),
   LLVMFastMathNoNaNs = (1 << 1),
@@ -217,12 +196,34 @@ enum {
                     LLVMFastMathAllowContract | LLVMFastMathApproxFunc,
 };
 typedef unsigned LLVMFastMathFlags;
-
 LLVMFastMathFlags LLVMGetFastMathFlags(LLVMValueRef FPMathInst);
 void LLVMSetFastMathFlags(LLVMValueRef FPMathInst, LLVMFastMathFlags FMF);
 LLVMBool LLVMCanValueUseFastMathFlags(LLVMValueRef Inst);
 #endif
 
+// atomics with syncscope
+#if LLVM_VERSION_MAJOR < 20 // llvm/llvm-project#104775
+unsigned LLVMGetSyncScopeID(LLVMContextRef C, const char *Name, size_t SLen);
+LLVMValueRef LLVMBuildFenceSyncScope(LLVMBuilderRef B, LLVMAtomicOrdering ordering,
+                                     unsigned SSID, const char *Name);
+LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B, LLVMAtomicRMWBinOp op,
+                                         LLVMValueRef PTR, LLVMValueRef Val,
+                                         LLVMAtomicOrdering ordering, unsigned SSID);
+LLVMValueRef LLVMBuildAtomicCmpXchgSyncScope(LLVMBuilderRef B, LLVMValueRef Ptr,
+                                             LLVMValueRef Cmp, LLVMValueRef New,
+                                             LLVMAtomicOrdering SuccessOrdering,
+                                             LLVMAtomicOrdering FailureOrdering,
+                                             unsigned SSID);
+LLVMBool LLVMIsAtomic(LLVMValueRef Inst);
+unsigned LLVMGetAtomicSyncScopeID(LLVMValueRef AtomicInst);
+void LLVMSetAtomicSyncScopeID(LLVMValueRef AtomicInst, unsigned SSID);
+#endif
+
+// more LLVMContextRef APIs
+#if LLVM_VERSION_MAJOR < 20 // llvm/llvm-project#99087
+LLVMContextRef LLVMGetValueContext(LLVMValueRef Val);
+LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef Builder);
+#endif
 
 // NewPM extensions
 typedef struct LLVMOpaquePassBuilderExtensions *LLVMPassBuilderExtensionsRef;
@@ -240,7 +241,7 @@ void LLVMPassBuilderExtensionsRegisterFunctionPass(LLVMPassBuilderExtensionsRef 
                                                    const char *PassName,
                                                    LLVMJuliaFunctionPassCallback Callback,
                                                    void *Thunk);
-#if LLVM_VERSION_MAJOR < 20
+#if LLVM_VERSION_MAJOR < 20 // llvm/llvm-project#102482
 void LLVMPassBuilderExtensionsSetAAPipeline(LLVMPassBuilderExtensionsRef Extensions,
                                             const char *AAPipeline);
 #endif
@@ -251,30 +252,6 @@ LLVMErrorRef LLVMRunJuliaPassesOnFunction(LLVMValueRef F, const char *Passes,
                                           LLVMTargetMachineRef TM,
                                           LLVMPassBuilderOptionsRef Options,
                                           LLVMPassBuilderExtensionsRef Extensions);
-
-// atomics with syncscope (backport of llvm/llvm-project#104775)
-#if LLVM_VERSION_MAJOR < 20
-unsigned LLVMGetSyncScopeID(LLVMContextRef C, const char *Name, size_t SLen);
-LLVMValueRef LLVMBuildFenceSyncScope(LLVMBuilderRef B, LLVMAtomicOrdering ordering,
-                                     unsigned SSID, const char *Name);
-LLVMValueRef LLVMBuildAtomicRMWSyncScope(LLVMBuilderRef B, LLVMAtomicRMWBinOp op,
-                                         LLVMValueRef PTR, LLVMValueRef Val,
-                                         LLVMAtomicOrdering ordering, unsigned SSID);
-LLVMValueRef LLVMBuildAtomicCmpXchgSyncScope(LLVMBuilderRef B, LLVMValueRef Ptr,
-                                             LLVMValueRef Cmp, LLVMValueRef New,
-                                             LLVMAtomicOrdering SuccessOrdering,
-                                             LLVMAtomicOrdering FailureOrdering,
-                                             unsigned SSID);
-LLVMBool LLVMIsAtomic(LLVMValueRef Inst);
-unsigned LLVMGetAtomicSyncScopeID(LLVMValueRef AtomicInst);
-void LLVMSetAtomicSyncScopeID(LLVMValueRef AtomicInst, unsigned SSID);
-#endif
-
-// more LLVMContextRef getters (backport of llvm/llvm-project#99087)
-#if LLVM_VERSION_MAJOR < 20
-LLVMContextRef LLVMGetValueContext(LLVMValueRef Val);
-LLVMContextRef LLVMGetBuilderContext(LLVMBuilderRef Builder);
-#endif
 
 LLVM_C_EXTERN_C_END
 #endif
