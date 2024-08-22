@@ -70,7 +70,7 @@ end
         end
 
         # target machines
-        host_triple = LLVM.triple()
+        host_triple = triple()
         host_t = Target(triple=host_triple)
         @dispose tm=TargetMachine(host_t, host_triple) mod=test_module() begin
             @test run!(NoOpModulePass(), mod, tm) === nothing

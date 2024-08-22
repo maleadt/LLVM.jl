@@ -275,7 +275,7 @@ Base.setindex!(iter::TerminatorSuccessorSet, bb::BasicBlock, i::Int) =
 
 # incoming iteration
 
-export PhiIncomingSet
+export incoming
 
 struct PhiIncomingSet <: AbstractVector{Tuple{Value,BasicBlock}}
     phi::Instruction

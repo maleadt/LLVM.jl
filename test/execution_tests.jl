@@ -114,16 +114,16 @@ function emit_phi()
         br!(builder, merge)
 
         position!(builder, elsee)
-        elsecg = sub!(builder, LLVM.parameters(fn)[2], LLVM.ConstantInt(LLVM.Int32Type(), 5))
+        elsecg = sub!(builder, parameters(fn)[2], LLVM.ConstantInt(LLVM.Int32Type(), 5))
         br!(builder, merge)
 
         position!(builder, merge)
         phi = phi!(builder, LLVM.Int32Type(), "iftmp")
 
-        append!(LLVM.incoming(phi), [(thencg, then), (elsecg, elsee)])
+        append!(incoming(phi), [(thencg, then), (elsecg, elsee)])
 
-        @test length(LLVM.incoming(phi)) == 2
-        @test_throws BoundsError LLVM.incoming(phi)[3]
+        @test length(incoming(phi)) == 2
+        @test_throws BoundsError incoming(phi)[3]
 
         ret!(builder, phi)
     end
