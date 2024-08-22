@@ -35,8 +35,10 @@
 using namespace llvm;
 using namespace llvm::legacy;
 
+//
 // Initialization functions
 //
+
 // The LLVMInitialize* functions and friends are defined `static inline`
 
 LLVMBool LLVMExtraInitializeNativeTarget() { return InitializeNativeTarget(); }
@@ -51,7 +53,10 @@ LLVMBool LLVMExtraInitializeNativeDisassembler() {
   return InitializeNativeTargetDisassembler();
 }
 
-// Various missing passes (being upstreamed)
+
+//
+// Missing LegacyPM passes
+//
 
 void LLVMAddBarrierNoopPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createBarrierNoopPass());
@@ -106,8 +111,62 @@ void LLVMAddSimpleLoopUnswitchLegacyPass(LLVMPassManagerRef PM) {
 void LLVMAddExpandReductionsPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createExpandReductionsPass());
 }
+#if LLVM_VERSION_MAJOR >= 17
+void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
+                                   LLVMBool ForwardSwitchCondToPhi,
+                                   LLVMBool ConvertSwitchToLookupTable,
+                                   LLVMBool NeedCanonicalLoop, LLVMBool HoistCommonInsts,
+                                   LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
+                                   LLVMBool SpeculateBlocks) {
+  auto simplifyCFGOptions = SimplifyCFGOptions()
+                                .bonusInstThreshold(BonusInstThreshold)
+                                .forwardSwitchCondToPhi(ForwardSwitchCondToPhi)
+                                .convertSwitchToLookupTable(ConvertSwitchToLookupTable)
+                                .needCanonicalLoops(NeedCanonicalLoop)
+                                .hoistCommonInsts(HoistCommonInsts)
+                                .sinkCommonInsts(SinkCommonInsts)
+                                .setSimplifyCondBranch(SimplifyCondBranch)
+                                .speculateBlocks(SpeculateBlocks);
+  unwrap(PM)->add(createCFGSimplificationPass(simplifyCFGOptions));
+}
+#else
+void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
+                                   LLVMBool ForwardSwitchCondToPhi,
+                                   LLVMBool ConvertSwitchToLookupTable,
+                                   LLVMBool NeedCanonicalLoop, LLVMBool HoistCommonInsts,
+                                   LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
+                                   LLVMBool FoldTwoEntryPHINode) {
+  auto simplifyCFGOptions = SimplifyCFGOptions()
+                                .bonusInstThreshold(BonusInstThreshold)
+                                .forwardSwitchCondToPhi(ForwardSwitchCondToPhi)
+                                .convertSwitchToLookupTable(ConvertSwitchToLookupTable)
+                                .needCanonicalLoops(NeedCanonicalLoop)
+                                .hoistCommonInsts(HoistCommonInsts)
+                                .sinkCommonInsts(SinkCommonInsts)
+                                .setSimplifyCondBranch(SimplifyCondBranch)
+                                .setFoldTwoEntryPHINode(FoldTwoEntryPHINode);
+  unwrap(PM)->add(createCFGSimplificationPass(simplifyCFGOptions));
+}
+#endif
 
-// Infrastructure for writing LLVM passes in Julia
+#if LLVM_VERSION_MAJOR < 17
+void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **ExportList,
+                                          size_t Length) {
+  auto PreserveFobj = [=](const GlobalValue &GV) {
+    for (size_t i = 0; i < Length; i++) {
+      if (strcmp(ExportList[i], GV.getName().data()) == 0)
+        return true;
+    }
+    return false;
+  };
+  unwrap(PM)->add(createInternalizePass(PreserveFobj));
+}
+#endif
+
+
+//
+// Custom LegacyPM pass infrastructure
+//
 
 typedef struct LLVMOpaquePass *LLVMPassRef;
 DEFINE_STDCXX_CONVERSION_FUNCTIONS(Pass, LLVMPassRef)
@@ -169,25 +228,14 @@ LLVMPassRef LLVMCreateFunctionPass2(const char *Name, LLVMPassCallback Callback,
   return wrap(new JuliaFunctionPass(Name, Callback, Data));
 }
 
-// Various missing functions
+
+//
+// Missing functionality
+//
 
 void LLVMAddTargetLibraryInfoByTriple(const char *T, LLVMPassManagerRef PM) {
   unwrap(PM)->add(new TargetLibraryInfoWrapperPass(Triple(T)));
 }
-
-#if LLVM_VERSION_MAJOR < 17
-void LLVMAddInternalizePassWithExportList(LLVMPassManagerRef PM, const char **ExportList,
-                                          size_t Length) {
-  auto PreserveFobj = [=](const GlobalValue &GV) {
-    for (size_t i = 0; i < Length; i++) {
-      if (strcmp(ExportList[i], GV.getName().data()) == 0)
-        return true;
-    }
-    return false;
-  };
-  unwrap(PM)->add(createInternalizePass(PreserveFobj));
-}
-#endif
 
 void LLVMAppendToUsed(LLVMModuleRef Mod, LLVMValueRef *Values, size_t Count) {
   SmallVector<GlobalValue *, 1> GlobalValues;
@@ -231,45 +279,39 @@ char *LLVMPrintMetadataToString(LLVMMetadataRef MD) {
   return strdup(buf.c_str());
 }
 
-#if LLVM_VERSION_MAJOR >= 17
-void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
-                                   LLVMBool ForwardSwitchCondToPhi,
-                                   LLVMBool ConvertSwitchToLookupTable,
-                                   LLVMBool NeedCanonicalLoop, LLVMBool HoistCommonInsts,
-                                   LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
-                                   LLVMBool SpeculateBlocks) {
-  auto simplifyCFGOptions = SimplifyCFGOptions()
-                                .bonusInstThreshold(BonusInstThreshold)
-                                .forwardSwitchCondToPhi(ForwardSwitchCondToPhi)
-                                .convertSwitchToLookupTable(ConvertSwitchToLookupTable)
-                                .needCanonicalLoops(NeedCanonicalLoop)
-                                .hoistCommonInsts(HoistCommonInsts)
-                                .sinkCommonInsts(SinkCommonInsts)
-                                .setSimplifyCondBranch(SimplifyCondBranch)
-                                .speculateBlocks(SpeculateBlocks);
-  unwrap(PM)->add(createCFGSimplificationPass(simplifyCFGOptions));
-}
-#else
-void LLVMAddCFGSimplificationPass2(LLVMPassManagerRef PM, int BonusInstThreshold,
-                                   LLVMBool ForwardSwitchCondToPhi,
-                                   LLVMBool ConvertSwitchToLookupTable,
-                                   LLVMBool NeedCanonicalLoop, LLVMBool HoistCommonInsts,
-                                   LLVMBool SinkCommonInsts, LLVMBool SimplifyCondBranch,
-                                   LLVMBool FoldTwoEntryPHINode) {
-  auto simplifyCFGOptions = SimplifyCFGOptions()
-                                .bonusInstThreshold(BonusInstThreshold)
-                                .forwardSwitchCondToPhi(ForwardSwitchCondToPhi)
-                                .convertSwitchToLookupTable(ConvertSwitchToLookupTable)
-                                .needCanonicalLoops(NeedCanonicalLoop)
-                                .hoistCommonInsts(HoistCommonInsts)
-                                .sinkCommonInsts(SinkCommonInsts)
-                                .setSimplifyCondBranch(SimplifyCondBranch)
-                                .setFoldTwoEntryPHINode(FoldTwoEntryPHINode);
-  unwrap(PM)->add(createCFGSimplificationPass(simplifyCFGOptions));
-}
-#endif
+void LLVMFunctionDeleteBody(LLVMValueRef Func) { unwrap<Function>(Func)->deleteBody(); }
 
-// versions of API without MetadataAsValue
+void LLVMDestroyConstant(LLVMValueRef Const) { unwrap<Constant>(Const)->destroyConstant(); }
+
+LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn) {
+  auto Ftype = unwrap<Function>(Fn)->getFunctionType();
+  return wrap(Ftype);
+}
+
+LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef GV) {
+  auto Ftype = unwrap<GlobalValue>(GV)->getValueType();
+  return wrap(Ftype);
+}
+
+
+//
+// Bug fixes
+//
+
+void LLVMSetInitializer2(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal) {
+  unwrap<GlobalVariable>(GlobalVar)->setInitializer(
+      ConstantVal ? unwrap<Constant>(ConstantVal) : nullptr);
+}
+
+void LLVMSetPersonalityFn2(LLVMValueRef Fn, LLVMValueRef PersonalityFn) {
+  unwrap<Function>(Fn)->setPersonalityFn(PersonalityFn ? unwrap<Constant>(PersonalityFn)
+                                                       : nullptr);
+}
+
+
+//
+// APIs without MetadataAsValue
+//
 
 const char *LLVMGetMDString2(LLVMMetadataRef MD, unsigned *Length) {
   const MDString *S = unwrap<MDString>(MD);
@@ -306,17 +348,10 @@ void LLVMReplaceMDNodeOperandWith2(LLVMMetadataRef MD, unsigned I, LLVMMetadataR
   unwrap<MDNode>(MD)->replaceOperandWith(I, unwrap(New));
 }
 
-// Bug fixes (TODO: upstream these)
 
-void LLVMSetInitializer2(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal) {
-  unwrap<GlobalVariable>(GlobalVar)->setInitializer(
-      ConstantVal ? unwrap<Constant>(ConstantVal) : nullptr);
-}
-
-void LLVMSetPersonalityFn2(LLVMValueRef Fn, LLVMValueRef PersonalityFn) {
-  unwrap<Function>(Fn)->setPersonalityFn(PersonalityFn ? unwrap<Constant>(PersonalityFn)
-                                                       : nullptr);
-}
+//
+// ORC API extensions
+//
 
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(orc::MaterializationResponsibility,
                                    LLVMOrcMaterializationResponsibilityRef)
@@ -343,6 +378,11 @@ char *LLVMDumpJitDylibToString(LLVMOrcJITDylibRef JD) {
   rso.flush();
   return strdup(str.c_str());
 }
+
+
+//
+// Cloning functionality
+//
 
 class ExternalTypeRemapper : public ValueMapTypeRemapper {
 public:
@@ -417,12 +457,10 @@ LLVMBasicBlockRef LLVMCloneBasicBlock(LLVMBasicBlockRef BB, const char *NameSuff
   return wrap(NewBB);
 }
 
-void LLVMFunctionDeleteBody(LLVMValueRef Func) { unwrap<Function>(Func)->deleteBody(); }
 
-void LLVMDestroyConstant(LLVMValueRef Const) { unwrap<Constant>(Const)->destroyConstant(); }
-
-
-// operand bundles
+//
+// Operand bundles
+//
 
 #if LLVM_VERSION_MAJOR < 18
 
@@ -496,7 +534,9 @@ LLVMBuildCallWithOperandBundles(LLVMBuilderRef B, LLVMTypeRef Ty,
 #endif
 
 
-// metadata
+//
+// Metadata API extensions
+//
 
 LLVMValueRef LLVMMetadataAsValue2(LLVMContextRef C, LLVMMetadataRef Metadata) {
   auto *MD = unwrap(Metadata);
@@ -510,7 +550,6 @@ void LLVMReplaceAllMetadataUsesWith(LLVMValueRef Old, LLVMValueRef New) {
   ValueAsMetadata::handleRAUW(unwrap<Value>(Old), unwrap<Value>(New));
 }
 
-// back-port of D136637
 #if LLVM_VERSION_MAJOR < 17
 void LLVMReplaceMDNodeOperandWith(LLVMValueRef V, unsigned Index,
                                   LLVMMetadataRef Replacement) {
@@ -521,7 +560,9 @@ void LLVMReplaceMDNodeOperandWith(LLVMValueRef V, unsigned Index,
 #endif
 
 
-// constant data
+//
+// Constant data
+//
 
 LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data,
                                 unsigned NumElements) {
@@ -531,7 +572,9 @@ LLVMValueRef LLVMConstDataArray(LLVMTypeRef ElementTy, const void *Data,
 }
 
 
-// missing opaque pointer APIs
+//
+// Missing opaque pointer APIs
+//
 
 #if LLVM_VERSION_MAJOR < 17
 LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
@@ -539,18 +582,10 @@ LLVMBool LLVMContextSupportsTypedPointers(LLVMContextRef C) {
 }
 #endif
 
-LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn) {
-  auto Ftype = unwrap<Function>(Fn)->getFunctionType();
-  return wrap(Ftype);
-}
 
-LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef GV) {
-  auto Ftype = unwrap<GlobalValue>(GV)->getValueType();
-  return wrap(Ftype);
-}
-
-
+//
 // DominatorTree and PostDominatorTree
+//
 
 DEFINE_STDCXX_CONVERSION_FUNCTIONS(DominatorTree, LLVMDominatorTreeRef)
 
@@ -579,7 +614,9 @@ LLVMBool LLVMPostDominatorTreeInstructionDominates(LLVMPostDominatorTreeRef Tree
 }
 
 
-// fastmath (backport of llvm/llvm-project#75123)
+//
+// fastmath
+//
 
 #if LLVM_VERSION_MAJOR < 18
 
@@ -735,7 +772,9 @@ void LLVMSetAtomicSyncScopeID(LLVMValueRef AtomicInst, unsigned SSID) {
 }
 
 
+//
 // more LLVMContextRef getters
+//
 
 #if LLVM_VERSION_MAJOR < 20
 
