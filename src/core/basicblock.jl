@@ -43,6 +43,7 @@ move_before(bb::BasicBlock, pos::BasicBlock) =
 move_after(bb::BasicBlock, pos::BasicBlock) =
     API.LLVMMoveBasicBlockAfter(bb, pos)
 
+
 ## instruction iteration
 
 export instructions, previnst, nextinst
@@ -88,7 +89,6 @@ function nextinst(inst::Instruction)
     ref == C_NULL && return nothing
     Instruction(ref)
 end
-
 
 
 ## cfg-like operations

@@ -23,3 +23,5 @@ Base.@deprecate_binding ValueMetadataDict LLVM.InstructionMetadataDict
                            FailureOrdering::API.LLVMAtomicOrdering, syncscope::String),
            atomic_cmpxchg!(builder, Ptr, Cmp, New, SuccessOrdering, FailureOrdering,
                            SyncScope(syncscope)), false)
+
+@deprecate Base.size(vectyp::VectorType) length(vectyp) false

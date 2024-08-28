@@ -46,9 +46,6 @@ parent(inst::Instruction) =
 
 opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(inst)
 
-predicate_int(inst::Instruction) = API.LLVMGetICmpPredicate(inst)
-predicate_real(inst::Instruction) = API.LLVMGetFCmpPredicate(inst)
-
 # strip unnecessary whitespace
 Base.show(io::IO, ::MIME"text/plain", inst::Instruction) = print(io, lstrip(string(inst)))
 
@@ -80,17 +77,26 @@ for op in opcodes
 end
 
 
+## comparisons
+
+predicate_int(inst::ICmpInst) = API.LLVMGetICmpPredicate(inst)
+
+predicate_real(inst::FCmpInst) = API.LLVMGetFCmpPredicate(inst)
+
+
 ## atomics
 
 export is_atomic, ordering, ordering!, SyncScope, syncscope, syncscope!
 
+const AtomicInst = Union{LoadInst, StoreInst, FenceInst, AtomicRMWInst, AtomicCmpXchgInst}
+
 is_atomic(inst::Instruction) = API.LLVMIsAtomic(inst) |> Bool
 
-function ordering(inst::Instruction)
+function ordering(inst::AtomicInst)
     is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
     API.LLVMGetOrdering(inst)
 end
-function ordering!(inst::Instruction, ord::API.LLVMAtomicOrdering)
+function ordering!(inst::AtomicInst, ord::API.LLVMAtomicOrdering)
     # loads and stores can be made atomic by setting an ordering
     API.LLVMSetOrdering(inst, ord)
 end
@@ -119,12 +125,12 @@ function Base.show(io::IO, scope::SyncScope)
     end
 end
 
-function syncscope(inst::Instruction)
+function syncscope(inst::AtomicInst)
     is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
     SyncScope(API.LLVMGetAtomicSyncScopeID(inst))
 end
 
-function syncscope!(inst::Instruction, scope::SyncScope)
+function syncscope!(inst::AtomicInst, scope::SyncScope)
     is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
     API.LLVMSetAtomicSyncScopeID(inst, scope)
 end
@@ -184,7 +190,7 @@ struct OperandBundleIterator <: AbstractVector{OperandBundle}
     inst::Instruction
 end
 
-operand_bundles(inst::Instruction) = OperandBundleIterator(inst)
+operand_bundles(inst::CallBase) = OperandBundleIterator(inst)
 
 Base.size(iter::OperandBundleIterator) = (API.LLVMGetNumOperandBundles(iter.inst),)
 
@@ -238,15 +244,12 @@ export isterminator, isconditional, condition, condition!, default_dest
 
 isterminator(inst::Instruction) = API.LLVMIsATerminatorInst(inst) != C_NULL
 
-isconditional(br::Instruction) = API.LLVMIsConditional(br) |> Bool
+isconditional(br::BrInst) = API.LLVMIsConditional(br) |> Bool
 
-condition(br::Instruction) =
-    Value(API.LLVMGetCondition(br))
-condition!(br::Instruction, cond::Value) =
-    API.LLVMSetCondition(br, cond)
+condition(br::BrInst) = Value(API.LLVMGetCondition(br))
+condition!(br::BrInst, cond::Value) = API.LLVMSetCondition(br, cond)
 
-default_dest(switch::Instruction) =
-    BasicBlock(API.LLVMGetSwitchDefaultDest(switch))
+default_dest(switch::SwitchInst) = BasicBlock(API.LLVMGetSwitchDefaultDest(switch))
 
 # successor iteration
 
@@ -281,7 +284,7 @@ struct PhiIncomingSet <: AbstractVector{Tuple{Value,BasicBlock}}
     phi::Instruction
 end
 
-incoming(phi::Instruction) = PhiIncomingSet(phi)
+incoming(phi::PHIInst) = PhiIncomingSet(phi)
 
 Base.size(iter::PhiIncomingSet) = (API.LLVMCountIncoming(iter.phi),)
 

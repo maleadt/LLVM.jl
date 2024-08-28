@@ -130,7 +130,7 @@ end
     @test eltype(vectyp) == eltyp
     @test context(vectyp) == context(eltyp)
 
-    @test size(vectyp) == 2
+    @test length(vectyp) == 2
 end
 
 # structure
