@@ -75,7 +75,7 @@ end
 IntType(bits::Integer) =
     IntegerType(API.LLVMIntTypeInContext(context(), bits))
 
-width(inttyp::IntegerType) = API.LLVMGetIntTypeWidth(inttyp)
+width(inttyp::IntegerType) = Int(API.LLVMGetIntTypeWidth(inttyp))
 
 
 ## floating-point
