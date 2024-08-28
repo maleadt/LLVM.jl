@@ -28,7 +28,7 @@ function Base.convert(::Type{Vector{T}}, mod::Module) where {T<:Union{UInt8,Int8
     return vec
 end
 
-function Base.write(io::IOStream, mod::Module)
+function Base.write(io::IO, mod::Module)
     # XXX: can't use the LLVM API because it returns 0, not the number of bytes written
     #API.LLVMWriteBitcodeToFD(mod, Cint(fd(io)), false, true)
     buf = convert(MemoryBuffer, mod)

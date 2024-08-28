@@ -39,6 +39,8 @@ end
 
             @test read(io) == bitcode
         end
+
+        @test String(bitcode) == sprint(write, source_mod)
     end
 end
 
