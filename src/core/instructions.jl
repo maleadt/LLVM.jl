@@ -1,7 +1,14 @@
 export Instruction, remove!, erase!, parent,
        opcode
 
+"""
+    Instruction
+
+An instruction in the LLVM IR.
+"""
+Instruction
 # forward definition of Instruction in src/core/value/constant.jl
+
 register(Instruction, API.LLVMInstructionValueKind)
 
 const instruction_opcodes = Vector{Type}(fill(Nothing, typemax(API.LLVMOpcode)+1))
@@ -32,13 +39,37 @@ function Instruction(ref::API.LLVMValueRef)
     return T(ref)
 end
 
+"""
+    copy(inst::Instruction)
+
+Create a copy of the given instruction.
+"""
 Base.copy(inst::Instruction) = Instruction(API.LLVMInstructionClone(inst))
 
+"""
+    remove!(inst::Instruction)
+
+Remove the given instruction from the containing basic block, but do not delete the object.
+"""
 remove!(inst::Instruction) = API.LLVMInstructionRemoveFromParent(inst)
+
+"""
+    erase!(inst::Instruction)
+
+Remove the given instruction from the containing basic block and delete the object.
+
+!!! warning
+
+    This function is unsafe because it does not check if the instruction is used elsewhere.
+"""
 erase!(inst::Instruction) = API.LLVMInstructionEraseFromParent(inst)
 
-parent(inst::Instruction) =
-    BasicBlock(API.LLVMGetInstructionParent(inst))
+"""
+    parent(inst::Instruction)
+
+Get the basic block that contains the given instruction.
+"""
+parent(inst::Instruction) = BasicBlock(API.LLVMGetInstructionParent(inst))
 
 opcode(inst::Instruction) = API.LLVMGetInstructionOpcode(inst)
 
@@ -77,8 +108,15 @@ end
 
 export predicate
 
-predicate(inst::ICmpInst) = API.LLVMGetICmpPredicate(inst)
+"""
+    predicate(inst::ICmpInst)
+    predicate(inst::FCmpInst)
 
+Get the comparison predicate of the given integer or floating-point comparison instruction.
+"""
+predicate
+
+predicate(inst::ICmpInst) = API.LLVMGetICmpPredicate(inst)
 predicate(inst::FCmpInst) = API.LLVMGetFCmpPredicate(inst)
 
 
@@ -88,21 +126,50 @@ export is_atomic, ordering, ordering!, SyncScope, syncscope, syncscope!
 
 const AtomicInst = Union{LoadInst, StoreInst, FenceInst, AtomicRMWInst, AtomicCmpXchgInst}
 
+"""
+    is_atomic(inst::Instruction)
+
+Check if the given instruction is atomic. This includes atomic operations such as
+`atomicrmw` or `fence`, but also loads and stores that have been made atomic by setting an
+atomic ordering.
+"""
 is_atomic(inst::Instruction) = API.LLVMIsAtomic(inst) |> Bool
 
+"""
+    ordering(atomic_inst::Instruction)
+
+Get the atomic ordering of the given atomic instruction.
+"""
 function ordering(inst::AtomicInst)
     is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
     API.LLVMGetOrdering(inst)
 end
+
+"""
+    ordering!(inst::Instruction, ordering::LLVM.AtomicOrdering)
+
+Set the atomic ordering of the given instruction.
+"""
 function ordering!(inst::AtomicInst, ord::API.LLVMAtomicOrdering)
     # loads and stores can be made atomic by setting an ordering
     API.LLVMSetOrdering(inst, ord)
 end
 
+"""
+    SyncScope
+
+A synchronization scope for atomic operations.
+"""
 struct SyncScope
     id::Cuint
 end
 
+"""
+    SyncScope(name::String)
+
+Create a synchronization scope with the given name. This can be a well-known scope such as
+`"singlethread"` or `"system"`, or a target-specific scope.
+"""
 function SyncScope(name::String)
     # the default, system syncscope gets encoded as an empty string
     if name == "system"
@@ -123,11 +190,21 @@ function Base.show(io::IO, scope::SyncScope)
     end
 end
 
+"""
+    syncscope(inst::AtomicInst)
+
+Get the synchronization scope of the given atomic instruction.
+"""
 function syncscope(inst::AtomicInst)
     is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
     SyncScope(API.LLVMGetAtomicSyncScopeID(inst))
 end
 
+"""
+    syncscope!(inst::AtomicInst, scope::SyncScope)
+
+Set the synchronization scope of the given atomic instruction.
+"""
 function syncscope!(inst::AtomicInst, scope::SyncScope)
     is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
     API.LLVMSetAtomicSyncScopeID(inst, scope)
@@ -141,18 +218,49 @@ const CallBase = Union{CallBrInst, CallInst, InvokeInst}
 
 export callconv, callconv!,
        istailcall, tailcall!,
-       called_operand, arguments, called_type,
-       OperandBundle, operand_bundles
+       called_operand, arguments, called_type
 
+"""
+    callconv(call_inst::Instruction)
+
+Get the calling convention of the given callable instruction.
+"""
 callconv(inst::CallBase) = API.LLVMGetInstructionCallConv(inst)
+
+"""
+    callconv!(call_inst::Instruction, cc)
+
+Set the calling convention of the given callable instruction.
+"""
 callconv!(inst::CallBase, cc) =
     API.LLVMSetInstructionCallConv(inst, cc)
 
+"""
+    istailcall(call_inst::Instruction)
+
+Tests if this call site must be tail call optimized.
+"""
 istailcall(inst::CallBase) = API.LLVMIsTailCall(inst) |> Bool
+
+"""
+    tailcall!(call_inst::Instruction, is_tail::Bool)
+
+Sets whether this call site must be tail call optimized.
+"""
 tailcall!(inst::CallBase, bool) = API.LLVMSetTailCall(inst, bool)
 
+"""
+    called_operand(call_inst::Instruction)
+
+Get the operand of a callable instruction that represents the called function.
+"""
 called_operand(inst::CallBase) = Value(API.LLVMGetCalledValue(inst))
 
+"""
+    called_type(call_inst::Instruction)
+
+Get the type of the function being called by the given callable instruction.
+"""
 function called_type(inst::CallBase)
     @static if version() >= v"11"
         LLVMType(API.LLVMGetCalledFunctionType(inst))
@@ -161,6 +269,11 @@ function called_type(inst::CallBase)
     end
 end
 
+"""
+    arguments(call_inst::Instruction)
+
+Get the arguments of a callable instruction.
+"""
 function arguments(inst::CallBase)
     nargs = API.LLVMGetNumArgOperands(inst)
     operands(inst)[1:nargs]
@@ -168,15 +281,27 @@ end
 
 # operand bundles
 
+export OperandBundle, operand_bundles, tag, inputs
+
 # NOTE: OperandBundle objects aren't LLVM IR objects, but created by the C API wrapper,
 #       so we need to free them explicitly when we get or create them.
 
+"""
+    OperandBundle
+
+An operand bundle attached to a call site.
+"""
 @checked mutable struct OperandBundle
     ref::API.LLVMOperandBundleRef
 end
 Base.unsafe_convert(::Type{API.LLVMOperandBundleRef}, bundle::OperandBundle) =
     bundle.ref
 
+"""
+    OperandBundle(tag::String, args::Vector{Value}=Value[])
+
+Create a new operand bundle with the given tag and arguments.
+"""
 function OperandBundle(tag::String, args::Vector{<:Value}=Value[])
     bundle = OperandBundle(API.LLVMCreateOperandBundle(tag, length(tag), args, length(args)))
     finalizer(bundle) do obj
@@ -188,6 +313,11 @@ struct OperandBundleIterator <: AbstractVector{OperandBundle}
     inst::Instruction
 end
 
+"""
+    operand_bundles(call_inst::Instruction)
+
+Get the operand bundles attached to the given call instruction.
+"""
 operand_bundles(inst::CallBase) = OperandBundleIterator(inst)
 
 Base.size(iter::OperandBundleIterator) = (API.LLVMGetNumOperandBundles(iter.inst),)
@@ -202,6 +332,11 @@ function Base.getindex(iter::OperandBundleIterator, i::Int)
     end
 end
 
+"""
+    tag(bundle::OperandBundle)
+
+Get the tag of the given operand bundle.
+"""
 function tag(bundle::OperandBundle)
     len = Ref{Csize_t}()
     data = API.LLVMGetOperandBundleTag(bundle, len)
@@ -212,6 +347,11 @@ struct OperandBundleInputIterator <: AbstractVector{Value}
     bundle::OperandBundle
 end
 
+"""
+    inputs(bundle::OperandBundle)
+
+Get an iterator over the inputs of the given operand bundle.
+"""
 inputs(bundle::OperandBundle) = OperandBundleInputIterator(bundle)
 
 Base.size(iter::OperandBundleInputIterator) = (API.LLVMGetNumOperandBundleArgs(iter.bundle),)
@@ -240,13 +380,39 @@ Base.show(io::IO, bundle::OperandBundle) =
 
 export isterminator, isconditional, condition, condition!, default_dest
 
+"""
+    isterminator(inst::Instruction)
+
+Check if the given instruction is a terminator instruction.
+"""
 isterminator(inst::Instruction) = API.LLVMIsATerminatorInst(inst) != C_NULL
 
+"""
+    isconditional(br::BrInst)
+
+Check if the given branch instruction is conditional.
+"""
 isconditional(br::BrInst) = API.LLVMIsConditional(br) |> Bool
 
+"""
+    condition(br::BrInst)
+
+Get the condition of the given branch instruction.
+"""
 condition(br::BrInst) = Value(API.LLVMGetCondition(br))
+
+"""
+    condition!(br::BrInst, cond::Value)
+
+Set the condition of the given branch instruction.
+"""
 condition!(br::BrInst, cond::Value) = API.LLVMSetCondition(br, cond)
 
+"""
+    default_dest(switch::SwitchInst)
+
+Get the default destination of the given switch instruction.
+"""
 default_dest(switch::SwitchInst) = BasicBlock(API.LLVMGetSwitchDefaultDest(switch))
 
 # successor iteration
@@ -257,6 +423,14 @@ struct TerminatorSuccessorSet <: AbstractVector{BasicBlock}
     term::Instruction
 end
 
+"""
+    successors(term::Instruction)
+
+Get an iterator over the successors of the given terminator instruction.
+
+This is a mutable iterator, so you can modify the successors of the terminator by
+calling `setindex!`.
+"""
 successors(term::Instruction) = TerminatorSuccessorSet(term)
 
 Base.size(iter::TerminatorSuccessorSet) = (API.LLVMGetNumSuccessors(iter.term),)
@@ -282,6 +456,15 @@ struct PhiIncomingSet <: AbstractVector{Tuple{Value,BasicBlock}}
     phi::Instruction
 end
 
+"""
+    incoming(phi::PhiInst)
+
+Get an iterator over the incoming values of the given phi node.
+
+This is a mutable iterator, so you can modify the incoming values of the phi node by
+calling `push!` or `append!`, passing a tuple of the incoming value and the originating
+basic block.
+"""
 incoming(phi::PHIInst) = PhiIncomingSet(phi)
 
 Base.size(iter::PhiIncomingSet) = (API.LLVMCountIncoming(iter.phi),)
@@ -360,3 +543,22 @@ function fast_math!(inst::Instruction; nnan=false, ninf=false, nsz=false, arcp=f
         API.LLVMSetFastMathFlags(inst, flags)
     end
 end
+
+
+## alignment
+
+# XXX: only for load, store, alloca
+
+"""
+    alignment(val::Instruction)
+
+Get the alignment of the instruction.
+"""
+alignment(inst::Instruction) = API.LLVMGetAlignment(inst)
+
+"""
+    alignment!(val::Instruction, bytes::Integer)
+
+Set the alignment of the instruction.
+"""
+alignment!(inst::Instruction, bytes::Integer) = API.LLVMSetAlignment(inst, bytes)

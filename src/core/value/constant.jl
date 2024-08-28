@@ -1,12 +1,10 @@
 export null, isnull, all_ones
 
-null(typ::LLVMType) = Value(API.LLVMConstNull(typ))
+"""
+    LLVM.Constant <: LLVM.User
 
-all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(typ))
-
-isnull(val::Value) = API.LLVMIsNull(val) |> Bool
-
-
+Abstract supertype for all constant values.
+"""
 abstract type Constant <: User end
 
 unsafe_destroy!(constant::Constant) = API.LLVMDestroyConstant(constant)
@@ -18,37 +16,97 @@ end
 abstract type Instruction <: User end
 
 
+## convenience constructors
+
+"""
+    null(typ::LLVMType)
+
+Create a null constant of the given type.
+"""
+null(typ::LLVMType) = Value(API.LLVMConstNull(typ))
+
+"""
+    all_ones(typ::LLVMType)
+
+Create a constant with all bits set to one of the given type.
+"""
+all_ones(typ::LLVMType) = Value(API.LLVMConstAllOnes(typ))
+
+"""
+    isnull(val::LLVM.Value)
+
+Check if the given value is a null constant.
+"""
+isnull(val::Value) = API.LLVMIsNull(val) |> Bool
+
+
 ## data
 
-export ConstantData, PointerNull, UndefValue, PoisonValue, ConstantInt, ConstantFP
+export PointerNull, UndefValue, PoisonValue, ConstantInt, ConstantFP
 
+# Abstract supertype for all constant value without operands.
 abstract type ConstantData <: Constant end
 
 
+"""
+    PointerNull <: LLVM.ConstantData
+
+A null pointer constant.
+"""
 @checked struct PointerNull <: ConstantData
     ref::API.LLVMValueRef
 end
 register(PointerNull, API.LLVMConstantPointerNullValueKind)
 
+"""
+    PointerNull(typ::LLVMType)
+
+Create a null pointer constant of the given type.
+"""
 PointerNull(typ::PointerType) = PointerNull(API.LLVMConstPointerNull(typ))
 
 
+"""
+    UndefValue <: LLVM.ConstantData
+
+An undefined constant value.
+"""
 @checked struct UndefValue <: ConstantData
     ref::API.LLVMValueRef
 end
 register(UndefValue, API.LLVMUndefValueValueKind)
 
+"""
+    UndefValue(typ::LLVMType)
+
+Create an constant undefined value of the given type.
+"""
 UndefValue(typ::LLVMType) = UndefValue(API.LLVMGetUndef(typ))
 
-@static if version() >= v"12"
+
+"""
+    PoisonValue <: LLVM.ConstantData
+
+A poison constant value.
+"""
 @checked struct PoisonValue <: ConstantData # XXX: actually <: UndefValue
     ref::API.LLVMValueRef
 end
 register(PoisonValue, API.LLVMPoisonValueValueKind)
 
-PoisonValue(typ::LLVMType) = PoisonValue(API.LLVMGetPoison(typ))
-end
+"""
+    PoisonValue(typ::LLVMType)
 
+Create a poison constant value of the given type.
+"""
+PoisonValue(typ::LLVMType) = PoisonValue(API.LLVMGetPoison(typ))
+
+
+"""
+    ConstantInt <: LLVM.ConstantData
+
+A constant integer value.
+"""
 @checked struct ConstantInt <: ConstantData
     ref::API.LLVMValueRef
 end
@@ -62,6 +120,12 @@ const SmallInteger = Union{Bool, Int8, Int16, Int32, UInt8, UInt16, UInt32}
 ConstantInt(typ::IntegerType, val::SmallInteger, signed=false) =
     ConstantInt(typ, convert(Int64, val), signed)
 
+"""
+    ConstantInt(typ::LLVM.IntegerType, val, [signed=false])
+
+Create a constant integer value of the given type and value. If `signed` is `true`, the
+value is treated as a signed integer.
+"""
 function ConstantInt(typ::IntegerType, val::Integer, signed=false)
     valbits = ceil(Int, log2(abs(val))) + 1 # FIXME: doesn't work for val=0
     numwords = ceil(Int, valbits / 64)
@@ -72,8 +136,16 @@ function ConstantInt(typ::IntegerType, val::Integer, signed=false)
     return ConstantInt(API.LLVMConstIntOfArbitraryPrecision(typ, numwords, words))
 end
 
+"""
+    ConstantInt(val::Integer)
+
+Create a constant integer value of the appropriate type for the given value.
+"""
+ConstantInt(val::Integer)
+
 # NOTE: fixed set where sizeof(T) does match the numerical width
-const SizeableInteger = Union{Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128}
+const SizeableInteger = Union{Int8, Int16, Int32, Int64, Int128,
+                              UInt8, UInt16, UInt32, UInt64, UInt128}
 function ConstantInt(val::T) where T<:SizeableInteger
     typ = IntType(sizeof(T)*8)
     return ConstantInt(typ, val, T<:Signed)
@@ -81,6 +153,13 @@ end
 
 # Booleans are encoded with a single bit, so we can't use sizeof
 ConstantInt(val::Bool) = ConstantInt(Int1Type(), val ? 1 : 0)
+
+"""
+    convert(::Type{<:Integer}, val::ConstantInt)
+
+Convert a constant integer value back to a Julia integer.
+"""
+Base.convert(::Type, val::ConstantInt)
 
 Base.convert(::Type{T}, val::ConstantInt) where {T<:Unsigned} =
     convert(T, API.LLVMConstIntGetZExtValue(val))
@@ -92,18 +171,40 @@ Base.convert(::Type{T}, val::ConstantInt) where {T<:Signed} =
 Base.convert(::Type{Bool}, val::ConstantInt) = convert(Int, val) != 0
 
 
+"""
+    ConstantFP <: LLVM.ConstantData
+
+A constant floating point value.
+"""
 @checked struct ConstantFP <: ConstantData
     ref::API.LLVMValueRef
 end
 register(ConstantFP, API.LLVMConstantFPValueKind)
 
+"""
+    ConstantFP(typ::LLVMType, val::Real)
+
+Create a constant floating point value of the given type and value.
+"""
 ConstantFP(typ::FloatingPointType, val::Real) =
     ConstantFP(API.LLVMConstReal(typ, Cdouble(val)))
+
+"""
+    ConstantFP(val::Real)
+
+Create a constant floating point value of the appropriate type for the given value.
+"""
+ConstantFP(val::Real)
 
 ConstantFP(val::Float64) = ConstantFP(DoubleType(), val)
 ConstantFP(val::Float32) = ConstantFP(FloatType(), val)
 ConstantFP(val::Float16) = ConstantFP(HalfType(), val)
 
+"""
+    convert(::Type{<:AbstractFloat}, val::ConstantFP)
+
+Convert a constant floating point value back to a Julia floating point number.
+"""
 Base.convert(::Type{T}, val::ConstantFP) where {T<:AbstractFloat} =
     convert(T, API.LLVMConstRealGetDouble(val, Ref{API.LLVMBool}()))
 
@@ -144,16 +245,40 @@ function Base.collect(cda::ConstantDataSequential)
     return constants
 end
 
+"""
+    ConstantDataArray <: LLVM.ConstantDataSequential
+
+A constant array of simple data values, i.e., whose element type is a simple 1/2/4/8-byte
+integer or half/bfloat/float/double, and whose elements are just simple data values
+
+See also: [`ConstantArray`](@ref)
+"""
 @checked struct ConstantDataArray <: ConstantDataSequential
     ref::API.LLVMValueRef
 end
 register(ConstantDataArray, API.LLVMConstantDataArrayValueKind)
 
-function ConstantDataArray(typ::LLVMType, data::Array{T}) where {T <: Union{Integer, AbstractFloat}}
+"""
+    ConstantDataArray(typ::LLVMType, data::AbstractVector)
+
+Create a constant array of simple data values of the given type and data.
+
+!!! warning
+
+    The memory layout of the data array must match the expected layout of the LLVM type.
+"""
+function ConstantDataArray(typ::LLVMType, data::AbstractVector{T}) where {T <: Union{Integer, AbstractFloat}}
     # TODO: can we look up the primitive size of the LLVM type?
     #       use that to assert it matches the Julia element type.
     return ConstantDataArray(API.LLVMConstDataArray(typ, data, length(data)))
 end
+
+"""
+    ConstantDataArray(data::AbstractVector)
+
+Create a constant array of simple data values from a Julia vector.
+"""
+ConstantDataArray(::AbstractVector)
 
 # shorthands with arrays of plain Julia data
 # FIXME: duplicates the ConstantInt/ConstantFP conversion rules
@@ -169,6 +294,12 @@ ConstantDataArray(data::AbstractVector{Float32}) =
 ConstantDataArray(data::AbstractVector{Float16}) =
     ConstantDataArray(HalfType(), data)
 
+"""
+    ConstantDataVector <: LLVM.ConstantDataSequential
+
+A constant vector of simple data values, i.e., whose element type is a simple 1/2/4/8-byte
+integer or half/bfloat/float/double, and whose elements are just simple data values
+"""
 @checked struct ConstantDataVector <: ConstantDataSequential
     ref::API.LLVMValueRef
 end
@@ -196,20 +327,38 @@ Base.collect(caz::ConstantAggregateZero) = Value[]
 
 ## regular aggregate
 
-export ConstantAggregate
-
+# Abstract supertype for all constant aggregate values, which are aggregates of other
+# constants, stored as operands.
 abstract type ConstantAggregate <: Constant end
 
 # arrays
 
 export ConstantArray
 
+"""
+    ConstantArray <: LLVM.ConstantAggregate
+
+A constant array of values.
+
+This type implements the Julia array interface, so (to some extent) it can be used as a
+regular Julia array.
+"""
 @checked struct ConstantArray <: ConstantAggregate
     ref::API.LLVMValueRef
 end
 register(ConstantArray, API.LLVMConstantArrayValueKind)
 
 # generic constructor taking an array of constants
+"""
+    ConstantArray(typ::LLVMType, data::AbstractArray)
+
+Create a constant array of values of the given type and data.
+
+!!! note
+
+    When using simple data types, this constructor can also return a
+    [`ConstantDataArray`](@ref).
+"""
 function ConstantArray(typ::LLVMType, data::AbstractArray{<:Constant,N}) where {N}
     @assert all(x->x==typ, value_type.(data))
 
@@ -238,7 +387,18 @@ ConstantArray(data::AbstractArray{Float32}) =
 ConstantArray(data::AbstractArray{Float64}) =
     ConstantArray(DoubleType(), ConstantFP[ConstantFP(x) for x in data])
 
-# convert back to known array types
+"""
+    ConstantArray(data::AbstractArray)
+
+Create a constant array of values from a Julia array, using the appropriate constant type.
+"""
+ConstantArray(::AbstractArray)
+
+"""
+    collect(ca::ConstantArray)
+
+Convert a constant array back to a Julia array.
+"""
 function Base.collect(ca::ConstantArray)
     constants = Array{Value}(undef, size(ca))
     for I in CartesianIndices(size(ca))
@@ -284,6 +444,11 @@ end
 
 export ConstantStruct
 
+"""
+    ConstantStruct <: LLVM.ConstantAggregate
+
+A constant struct of values.
+"""
 @checked struct ConstantStruct <: ConstantAggregate
     ref::API.LLVMValueRef
 end
@@ -291,16 +456,28 @@ register(ConstantStruct, API.LLVMConstantStructValueKind)
 
 ConstantStructOrAggregateZero(value) = Value(value)::Union{ConstantStruct,ConstantAggregateZero}
 
-# anonymous
+"""
+    ConstantStruct(values::Vector{<:Constant}, [packed=false])
+
+Create an anonymous constant struct of the given values.
+"""
 ConstantStruct(values::Vector{<:Constant}; packed::Bool=false) =
     ConstantStructOrAggregateZero(API.LLVMConstStructInContext(context(), values,
                                                                length(values), packed))
 
-# named
+"""
+    ConstantStruct(typ::LLVM.StructType, values::Vector{<:Constant})
+
+Create a constant struct of the given type and values.
+"""
 ConstantStruct(typ::StructType, values::Vector{<:Constant}) =
     ConstantStructOrAggregateZero(API.LLVMConstNamedStruct(typ, values, length(values)))
 
-# create a ConstantStruct from a Julia object
+"""
+    ConstantStruct(value::T, [name=String(nameof(T)), anonymous=false, packed=false])
+
+Create a constant struct from an (isbits) Julia struct instance.
+"""
 function ConstantStruct(value::T, name::AbstractString=String(nameof(T));
                         anonymous::Bool=false, packed::Bool=false) where {T}
     isbitstype(T) || throw(ArgumentError("Can only create a ConstantStruct from an isbits struct"))
@@ -356,6 +533,14 @@ export ConstantExpr,
        const_addrspacecast, const_truncorbitcast,
        const_pointercast, const_shufflevector
 
+"""
+    LLVM.ConstantExpr <: LLVM.Constant
+
+A constant value that is initialized with an expression using other constant values.
+
+Constant expressions are created using `const_`-prefixed functions, which correspond to
+the LLVM IR instructions: `const_neg`, `const_not`, etc.
+"""
 @checked struct ConstantExpr <: Constant
     ref::API.LLVMValueRef
 end
@@ -565,11 +750,25 @@ end
 
 export InlineAsm
 
+"""
+    InlineAsm <: LLVM.Constant
+
+A constant inline assembly block.
+"""
 @checked struct InlineAsm <: Constant
     ref::API.LLVMValueRef
 end
 register(InlineAsm, API.LLVMInlineAsmValueKind)
 
+"""
+    InlineAsm(typ::LLVM.FunctionType, asm::String, constraints::String, side_effects::Bool,
+              [align_stack::Bool=false])
+
+Create a constant inline assembly block with the given type, assembly code, constraints,
+and a boolean indicating whether the assembly has side effects. The optional boolean
+`align_stack` specifies whether the stack should be aligned, forcing the compiler to
+generate its usual stack alignment code in the prologue.
+"""
 InlineAsm(typ::FunctionType, asm::String, constraints::String,
           side_effects::Bool, align_stack::Bool=false) =
     InlineAsm(API.LLVMConstInlineAsm(typ, asm, constraints, side_effects, align_stack))
@@ -577,6 +776,11 @@ InlineAsm(typ::FunctionType, asm::String, constraints::String,
 
 ## global values
 
+"""
+    LLVM.GlobalValue <: LLVM.Constant
+
+Abstract supertype for all global values.
+"""
 abstract type GlobalValue <: Constant end
 
 export GlobalValue, global_value_type,
@@ -588,16 +792,50 @@ export GlobalValue, global_value_type,
        unnamed_addr, unnamed_addr!,
        alignment, alignment!
 
+"""
+    parent(val::LLVM.GlobalValue)
+
+Get the parent module of the global value.
+"""
 parent(val::GlobalValue) = Module(API.LLVMGetGlobalParent(val))
 
+"""
+    global_value_type(val::LLVM.GlobalValue)
+
+Get the type of the global value.
+
+This differs from [`value_type`](@ref) in that it returns the type of the contained value,
+not the type of the global value itself which is always a pointer type.
+"""
 global_value_type(val::GlobalValue) = LLVMType(API.LLVMGetGlobalValueType(val))
 
+"""
+    isdeclaration(val::LLVM.GlobalValue)
+
+Check if the global value is a declaration, i.e. it does not have a definition.
+"""
 isdeclaration(val::GlobalValue) = API.LLVMIsDeclaration(val) |> Bool
 
+"""
+    linkage(val::LLVM.GlobalValue)
+
+Get the linkage of the global value.
+"""
 linkage(val::GlobalValue) = API.LLVMGetLinkage(val)
+
+"""
+    linkage!(val::LLVM.GlobalValue, linkage::LLVM.LLVMLinkage)
+
+Set the linkage of the global value.
+"""
 linkage!(val::GlobalValue, linkage::API.LLVMLinkage) =
     API.LLVMSetLinkage(val, linkage)
 
+"""
+    section(val::LLVM.GlobalValue)
+
+Get the section of the global value.
+"""
 function section(val::GlobalValue)
   #=
   The following started to fail on LLVM 4.0:
@@ -613,22 +851,71 @@ function section(val::GlobalValue)
   section_ptr = API.LLVMGetSection(val)
   return section_ptr != C_NULL ? unsafe_string(section_ptr) : ""
 end
+
+"""
+    section!(val::LLVM.GlobalValue, sec::String)
+
+Set the section of the global value.
+"""
 section!(val::GlobalValue, sec::String) = API.LLVMSetSection(val, sec)
 
+"""
+    visibility(val::LLVM.GlobalValue)
+
+Get the visibility of the global value.
+"""
 visibility(val::GlobalValue) = API.LLVMGetVisibility(val)
+
+"""
+    visibility!(val::LLVM.GlobalValue, viz::LLVM.LLVMVisibility)
+
+Set the visibility of the global value.
+"""
 visibility!(val::GlobalValue, viz::API.LLVMVisibility) =
     API.LLVMSetVisibility(val, viz)
 
+"""
+    dllstorage(val::LLVM.GlobalValue)
+
+Get the DLL storage class of the global value.
+"""
 dllstorage(val::GlobalValue) = API.LLVMGetDLLStorageClass(val)
+
+"""
+    dllstorage!(val::LLVM.GlobalValue, storage::LLVM.LLVMDLLStorageClass)
+
+Set the DLL storage class of the global value.
+"""
 dllstorage!(val::GlobalValue, storage::API.LLVMDLLStorageClass) =
     API.LLVMSetDLLStorageClass(val, storage)
 
+"""
+    unnamed_addr(val::LLVM.GlobalValue)
+
+Check if the global value has the unnamed address flag set.
+"""
 unnamed_addr(val::GlobalValue) = API.LLVMHasUnnamedAddr(val) |> Bool
+
+"""
+    unnamed_addr!(val::LLVM.GlobalValue, flag::Bool)
+
+Set the unnamed address flag of the global value.
+"""
 unnamed_addr!(val::GlobalValue, flag::Bool) = API.LLVMSetUnnamedAddr(val, flag)
 
-const AlignedValue = Union{GlobalValue,Instruction}   # load, store, alloca
-alignment(val::AlignedValue) = API.LLVMGetAlignment(val)
-alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(val, bytes)
+"""
+    alignment(val::LLVM.GlobalValue)
+
+Get the alignment of the global value.
+"""
+alignment(val::GlobalValue) = API.LLVMGetAlignment(val)
+
+"""
+    alignment!(val::LLVM.GlobalValue, bytes::Integer)
+
+Set the alignment of the global value.
+"""
+alignment!(val::GlobalValue, bytes::Integer) = API.LLVMSetAlignment(val, bytes)
 
 
 ## global variables
@@ -642,38 +929,113 @@ export GlobalVariable, erase!,
        isconstant, constant!,
        isextinit, extinit!
 
+"""
+    GlobalVariable <: LLVM.GlobalObject
+
+A global variable.
+"""
 @checked struct GlobalVariable <: GlobalObject
     ref::API.LLVMValueRef
 end
 register(GlobalVariable, API.LLVMGlobalVariableValueKind)
 
-GlobalVariable(mod::Module, typ::LLVMType, name::String) =
-    GlobalVariable(API.LLVMAddGlobal(mod, typ, name))
+"""
+    GlobalVariable(mod::LLVM.Module, typ::LLVM.Type, name::String, [addrspace=0])
 
-GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer) =
+Create a global variable in the given module with the given type, name, and optional
+address space.
+"""
+GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer=0) =
     GlobalVariable(API.LLVMAddGlobalInAddressSpace(mod, typ,
                                                    name, addrspace))
 
+"""
+    erase!(gv::GlobalVariable)
+
+Remove the global variable from its parent module and delete it.
+
+!!! warning
+
+    This function is unsafe as it does not check if the global variable is still used
+    elsewhere.
+"""
 erase!(gv::GlobalVariable) = API.LLVMDeleteGlobal(gv)
 
+"""
+    initializer(gv::GlobalVariable)
+
+Get the initializer of the global variable.
+"""
 function initializer(gv::GlobalVariable)
     init = API.LLVMGetInitializer(gv)
     init == C_NULL ? nothing : Value(init)
 end
+
+"""
+    initializer!(gv::GlobalVariable, val::Constant)
+
+Set the initializer of the global variable. Setting the value to `nothing` removes the
+current initializer.
+"""
 function initializer!(gv::GlobalVariable, val::Union{Constant,Nothing})
     api = version() >= v"20" ? API.LLVMSetInitializer : API.LLVMSetInitializer2
     api(gv, something(val, C_NULL))
 end
 
+"""
+    isthreadlocal(gv::GlobalVariable)
+
+Check if the global variable is thread-local.
+"""
 isthreadlocal(gv::GlobalVariable) = API.LLVMIsThreadLocal(gv) |> Bool
+
+"""
+    threadlocal!(gv::GlobalVariable, flag::Bool)
+
+Set the thread-local flag of the global variable.
+"""
 threadlocal!(gv::GlobalVariable, bool) =
   API.LLVMSetThreadLocal(gv, bool)
 
+"""
+    isconstant(gv::GlobalVariable)
+
+Check if the global variable is a global constant, i.e., its value is immutable throughout
+the runtime execution of the program.
+"""
 isconstant(gv::GlobalVariable) = API.LLVMIsGlobalConstant(gv) |> Bool
+
+"""
+    constant!(gv::GlobalVariable, flag::Bool)
+
+Set the constant flag of the global variable.
+"""
 constant!(gv::GlobalVariable, bool) = API.LLVMSetGlobalConstant(gv, bool)
 
+"""
+    threadlocalmode(gv::GlobalVariable)
+
+Get the thread-local mode of the global variable.
+"""
 threadlocalmode(gv::GlobalVariable) = API.LLVMGetThreadLocalMode(gv)
+
+"""
+    threadlocalmode!(gv::GlobalVariable, mode::LLVM.LLVMThreadLocalMode)
+
+Set the thread-local mode of the global variable.
+"""
 threadlocalmode!(gv::GlobalVariable, mode) = API.LLVMSetThreadLocalMode(gv, mode)
 
+"""
+    isextinit(gv::GlobalVariable)
+
+Check if the global variable is externally initialized.
+"""
 isextinit(gv::GlobalVariable) = API.LLVMIsExternallyInitialized(gv) |> Bool
+
+"""
+    extinit!(gv::GlobalVariable, flag::Bool)
+
+Set the externally initialized flag of the global variable.
+"""
 extinit!(gv::GlobalVariable, bool) = API.LLVMSetExternallyInitialized(gv, bool)

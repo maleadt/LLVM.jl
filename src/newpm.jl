@@ -9,7 +9,7 @@ export NewPMModulePassManager, NewPMCGSCCPassManager, NewPMFunctionPassManager,
 abstract type AbstractPassManager end
 
 """
-    add!(pm, pass)
+    add!(pm::AbstractPassManager, pass)
 
 Adds a pass or pipeline to a pass builder or pass manager.
 
@@ -29,6 +29,7 @@ add!(pm::AbstractPassManager, pass) = push!(pm.passes, string(pass))
     NewPMCGSCCPassManager()
     NewPMFunctionPassManager()
     NewPMLoopPassManager(; use_memory_ssa=false)
+    NewPMAAManager()
 
 Create a new pass manager of the specified type. These objects can be used to construct
 pass pipelines, by `add!`ing passes to them, and finally `add!`ing them to a parent
@@ -43,7 +44,7 @@ add!(parent, NewPMModulePassManager()) do mpm
 end
 ```
 
-See also: [`add!`](@ref), [`PassBuilder`](@ref)
+See also: [`add!`](@ref), [`NewPMPassBuilder`](@ref)
 """
 struct NewPMPassManager <: AbstractPassManager
     type::String
@@ -63,16 +64,18 @@ function add!(f::Base.Callable, parent::AbstractPassManager, nested::AbstractPas
     add!(parent, nested)
 end
 
+@doc (@doc NewPMPassManager)
 NewPMModulePassManager() = NewPMPassManager("module")
+
+@doc (@doc NewPMPassManager)
 NewPMCGSCCPassManager() = NewPMPassManager("cgscc")
+
+@doc (@doc NewPMPassManager)
 NewPMFunctionPassManager() = NewPMPassManager("function")
+
+@doc (@doc NewPMPassManager)
 NewPMLoopPassManager(; use_memory_ssa=false) =
     NewPMPassManager(use_memory_ssa ? "loop-mssa" : "loop")
-
-@doc (@doc NewPMPassManager) NewPMModulePassManager
-@doc (@doc NewPMPassManager) NewPMCGSCCPassManager
-@doc (@doc NewPMPassManager) NewPMFunctionPassManager
-@doc (@doc NewPMPassManager) NewPMLoopPassManager
 
 
 ## custom passes
@@ -102,11 +105,11 @@ end
 
 Base.string(pass::NewPMCustomPass) = pass.name
 
+@doc (@doc NewPMCustomPass)
 NewPMModulePass(name, callback)   = NewPMCustomPass(:module, name, callback)
-NewPMFunctionPass(name, callback) = NewPMCustomPass(:function, name, callback)
 
-@doc (@doc NewPMModulePass) NewPMModulePass
-@doc (@doc NewPMFunctionPass) NewPMFunctionPass
+@doc (@doc NewPMCustomPass)
+NewPMFunctionPass(name, callback) = NewPMCustomPass(:function, name, callback)
 
 function module_callback(ref::API.LLVMModuleRef, thunk::Ptr{Any})
     mod = LLVM.Module(ref)
@@ -163,7 +166,7 @@ end
 ```
 
 For quickly running a simple pass or pipeline, a shorthand `run!` method is provided that
-obviates the construction of a `PassBuilder`:
+obviates the construction of a `NewPMPassBuilder`:
 
 ```julia
 run!("some-pass", mod, tm; verify_each=true)
@@ -888,6 +891,7 @@ Base.string(options::LICMPassOptions) =
 
 ## alias analyses
 
+@doc (@doc NewPMPassManager)
 struct NewPMAAManager <: AbstractPassManager
     passes::Vector{String}
 

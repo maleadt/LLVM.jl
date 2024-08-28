@@ -4,12 +4,22 @@ export Target,
        name, description,
        hasjit, hastargetmachine, hasasmparser
 
+"""
+    Target
+
+A structure exposing target-specific information.
+"""
 @checked struct Target
     ref::API.LLVMTargetRef
 end
 
 Base.unsafe_convert(::Type{API.LLVMTargetRef}, target::Target) = target.ref
 
+"""
+    Target(; name=nothing, triple=nothing)
+
+Create a target from its name or triple, either of which must be specified.
+"""
 function Target(; name=nothing, triple=nothing)
     (name !== nothing) ⊻ (triple !== nothing) ||
         throw(ArgumentError("Specify either name or triple."))
@@ -35,12 +45,39 @@ function Target(; name=nothing, triple=nothing)
     end
 end
 
+"""
+    name(target::Target)
+
+Get the name of the given target.
+"""
 name(t::Target) = unsafe_string(API.LLVMGetTargetName(t))
 
+"""
+    description(target::Target)
+
+Get a short description of the given target.
+"""
 description(t::Target) = unsafe_string(API.LLVMGetTargetDescription(t))
 
+"""
+    hasjit(target::Target)
+
+Check if this targets supports the just-in-time compilation.
+"""
 hasjit(t::Target) = API.LLVMTargetHasJIT(t) |> Bool
+
+"""
+    hastargetmachine(target::Target)
+
+Check if this target supports code generation.
+"""
 hastargetmachine(t::Target) = API.LLVMTargetHasTargetMachine(t) |> Bool
+
+"""
+    hasasmparser(target::Target)
+
+Check if this target supports assembly parsing.
+"""
 hasasmparser(t::Target) = API.LLVMTargetHasAsmBackend(t) |> Bool
 
 function Base.show(io::IO, ::MIME"text/plain", target::Target)
@@ -54,6 +91,11 @@ export targets
 
 struct TargetIterator end
 
+"""
+    targets()
+
+Get an iterator over the available targets.
+"""
 targets() = TargetIterator()
 
 Base.eltype(::TargetIterator) = Target

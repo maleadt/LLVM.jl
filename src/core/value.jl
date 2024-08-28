@@ -3,9 +3,14 @@
 
 export Value
 
-# subtypes are expected to have a 'ref::API.LLVMValueRef' field
+"""
+    LLVM.Value
+
+Abstract type representing an LLVM value.
+"""
 abstract type Value end
 
+# subtypes are expected to have a 'ref::API.LLVMValueRef' field
 Base.unsafe_convert(::Type{API.LLVMValueRef}, val::Value) = val.ref
 
 const value_kinds = Vector{Type}(fill(Nothing, typemax(API.LLVMValueKind)+1))
@@ -39,14 +44,30 @@ end
 
 ## general APIs
 
-export value_type, name, name!, replace_uses!, replace_metadata_uses!, isconstant, isundef, ispoison, context
+export value_type, name, name!, isconstant, isundef, ispoison, context
 
+"""
+    value_type(val::Value)
+
+Get the type of the given value.
+"""
 value_type(val::Value) = LLVMType(API.LLVMTypeOf(val))
 
 # defer size queries to the LLVM type (where we'll error)
 Base.sizeof(val::Value) = sizeof(value_type(val))
 
+"""
+    name(val::Value)
+
+Get the name of the given value.
+"""
 name(val::Value) = unsafe_string(API.LLVMGetValueName(val))
+
+"""
+    name!(val::Value, name::String)
+
+Set the name of the given value.
+"""
 name!(val::Value, name::String) = API.LLVMSetValueName(val, name)
 
 Base.string(val::Value) = unsafe_message(API.LLVMPrintValueToString(val))
@@ -65,8 +86,64 @@ function Base.show(io::IO, ::MIME"text/plain", val::Value)
     print(io, strip(string(val)))
 end
 
+"""
+    isconstant(val::LLVM.Value)
+
+Check if the given value is a constant value.
+"""
+isconstant(val::Value) = API.LLVMIsConstant(val) |> Bool
+
+"""
+    isundef(val::LLVM.Value)
+
+Check if the given value is an undef value.
+"""
+isundef(val::Value) = API.LLVMIsUndef(val) |> Bool
+
+"""
+    ispoison(val::LLVM.Value)
+
+Check if the given value is a poison value.
+"""
+ispoison(val::Value) = API.LLVMIsPoison(val) |> Bool
+
+"""
+    context(val::LLVM.Value)
+
+Return the context in which the given value was created.
+"""
+context(val::Value) = Context(API.LLVMGetValueContext(val))
+
+
+## user values
+
+include("value/user.jl")
+
+
+## constants
+
+include("value/constant.jl")
+
+
+## usage
+
+export replace_uses!, replace_metadata_uses!, Use, user, value
+
+"""
+    replace_uses!(old::LLVM.Value, new::LLVM.Value)
+
+Replace all uses of an `old` value in the IR with `new`.
+
+This does not replace uses in metadata, which must be done separately with
+[`replace_metadata_uses!`](@ref).
+"""
 replace_uses!(old::Value, new::Value) = API.LLVMReplaceAllUsesWith(old, new)
 
+"""
+    replace_metadata_uses!(old::LLVM.Value, new::LLVM.Value)
+
+Replace all uses of an `old` value in metadata with `new`.
+"""
 function replace_metadata_uses!(old::Value, new::Value)
     if value_type(old) == value_type(new)
         API.LLVMReplaceAllMetadataUsesWith(old, new)
@@ -99,36 +176,31 @@ function replace_metadata_uses!(old::Value, new::Value)
     end
 end
 
-isconstant(val::Value) = API.LLVMIsConstant(val) |> Bool
+"""
+    LLVM.Use
 
-isundef(val::Value) = API.LLVMIsUndef(val) |> Bool
+A use of a value in the IR. Knows both the user and the used value.
 
-ispoison(val::Value) = API.LLVMIsPoison(val) |> Bool
-
-context(val::Value) = Context(API.LLVMGetValueContext(val))
-
-
-## user values
-
-include("value/user.jl")
-
-
-## constants
-
-include("value/constant.jl")
-
-
-## usage
-
-export Use, user, value
-
+See also: [`user`](@ref), [`value`](@ref).
+"""
 @checked struct Use
     ref::API.LLVMUseRef
 end
 
 Base.unsafe_convert(::Type{API.LLVMUseRef}, use::Use) = use.ref
 
+"""
+    user(use::LLVM.Use)
+
+Get the user of the given use.
+"""
 user(use::Use) =  Value(API.LLVMGetUser(     use))
+
+"""
+    value(use::LLVM.Use)
+
+Get the used value of the given use.
+"""
 value(use::Use) = Value(API.LLVMGetUsedValue(use))
 
 # use iteration
@@ -139,6 +211,13 @@ struct ValueUseSet
     val::Value
 end
 
+"""
+    uses(val::LLVM.Value)
+
+Get an iterator over the uses of the given value.
+
+See also: [`LLVM.Use`](@ref).
+"""
 uses(val::Value) = ValueUseSet(val)
 
 Base.eltype(::ValueUseSet) = Use

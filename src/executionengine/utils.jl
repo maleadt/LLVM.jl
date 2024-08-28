@@ -3,11 +3,7 @@
 end
 Base.unsafe_convert(::Type{API.LLVMErrorRef}, err::LLVMError) = err.ref
 
-"""
-    consume(err::LLVMError)
-
-Consumes the error without handling it.
-"""
+# Consumes the error without handling it.
 function consume(err::LLVMError)
     API.LLVMConsumeError(err)
 end

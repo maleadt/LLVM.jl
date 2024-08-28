@@ -15,6 +15,21 @@ function materializer_callback(val, materializer)
     end
 end
 
+"""
+    clone_into!(new::LLVM.Function, old::LLVM.Function; [suffix::String],
+                [value_map::Dict{<:Value,<:Value}],
+                [changes::LLVM.LLVMCloneFunctionChangeType],
+                [type_mapper::Function],
+                [materializer::Function])
+
+Clone the contents of a function `old` into a new function `new`. The `value_map` dictionary
+can be used to remap values from the old function to the new function, while `suffix`
+appends a suffix to all values cloned. The `type_mapper` and `materializer` functions can be
+used to respectively map types and materialize values on demand.
+
+The `changes` argument determines how this function behaves; refer to the LLVM documentation
+of `CloneFunctionInto` for more details.
+"""
 function clone_into!(new::Function, old::Function;
                      value_map::Dict{<:Value,<:Value}=Dict{Value,Value}(),
                      changes=API.LLVMCloneFunctionChangeTypeLocalChangesOnly,
@@ -43,6 +58,12 @@ function clone_into!(new::Function, old::Function;
                               materializer_ptr, materializer_data)
 end
 
+"""
+    clone(f::Function; [value_map::Dict{Value,Value}])
+
+Simpler version of [`clone_into!`](@ref) that clones a function `f` into a new function,
+optionally mapping values according to the `value_map` dictionary.
+"""
 function clone(f::Function; value_map::Dict{<:Value,<:Value}=Dict{Value,Value}())
     argtypes = LLVMType[]
 
@@ -82,7 +103,7 @@ function clone(f::Function; value_map::Dict{<:Value,<:Value}=Dict{Value,Value}()
 end
 
 """
-    clone(bb::BasicBlock]; dest=parent(bb), suffix="", value_map=Dict{Value,Value})
+    clone(bb::BasicBlock]; dest=parent(bb), [suffix::String], [value_map::Dict{Value,Value}])
 
 Clone a basic block `bb` by copying all instructions. The new block is inserted at the end
 of the parent function; this can be altered by setting `dest` to a different function, or to

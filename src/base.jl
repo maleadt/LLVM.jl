@@ -68,14 +68,13 @@ end
 export @dispose
 
 """
-    LLVM.@dispose foo=Foo() bar=Bar() begin
+    @dispose foo=Foo() bar=Bar() begin
         ...
     end
 
-Helper macro for disposing resources (by calling the `LLVM.dispose` function for every
-resource in reverse order) after executing a block of code. This is often equivalent to
-calling the recourse constructor with do-block syntax, but without using (potentially
-costly) closures.
+Helper macro for disposing resources (by calling the `dispose` function for every resource
+in reverse order) after executing a block of code. This is often equivalent to calling the
+recourse constructor with do-block syntax, but without using (potentially costly) closures.
 """
 macro dispose(ex...)
     resources = ex[1:end-1]

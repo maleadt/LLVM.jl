@@ -1167,6 +1167,75 @@ end
     @test nextfun(anotherfn) === nothing
 end
 
+# textual IR
+@dispose ctx=Context() builder=IRBuilder() source_mod=LLVM.Module("SomeModule") begin
+    invalid_ir = "invalid"
+    @test_throws LLVMException parse(LLVM.Module, invalid_ir)
+
+    ft = LLVM.FunctionType(LLVM.VoidType())
+    fn = LLVM.Function(source_mod, "SomeFunction", ft)
+
+    entry = BasicBlock(fn, "entry")
+    position!(builder, entry)
+
+    ret!(builder)
+
+    verify(source_mod)
+
+
+    ir = string(source_mod)
+
+    let
+        mod = parse(LLVM.Module, ir)
+        verify(mod)
+        @test haskey(functions(mod), "SomeFunction")
+        dispose(mod)
+    end
+end
+
+# binary bitcode
+@dispose ctx=Context() builder=IRBuilder() source_mod=LLVM.Module("SomeModule") begin
+    invalid_bitcode = "invalid"
+    @test_throws LLVMException parse(LLVM.Module, unsafe_wrap(Vector{UInt8}, invalid_bitcode))
+
+    ft = LLVM.FunctionType(LLVM.VoidType())
+    fn = LLVM.Function(source_mod, "SomeFunction", ft)
+
+    entry = BasicBlock(fn, "entry")
+    position!(builder, entry)
+
+    ret!(builder)
+
+    verify(source_mod)
+
+
+    @dispose bitcode_buf = convert(MemoryBuffer, source_mod) begin
+        @dispose mod=parse(LLVM.Module, bitcode_buf) begin
+            verify(mod)
+            @test haskey(functions(mod), "SomeFunction")
+        end
+    end
+
+
+    let bitcode = convert(Vector{UInt8}, source_mod)
+        @dispose mod = parse(LLVM.Module, bitcode) begin
+            verify(mod)
+            @test haskey(functions(mod), "SomeFunction")
+        end
+
+        mktemp() do path, io
+            mark(io)
+            @test write(io, source_mod) > 0
+            flush(io)
+            reset(io)
+
+            @test read(io) == bitcode
+        end
+
+        @test String(bitcode) == sprint(write, source_mod)
+    end
+end
+
 end
 
 
@@ -1320,7 +1389,7 @@ end
     fn = LLVM.Function(mod, "SomeFunction", ft)
 
     let params = parameters(fn)
-        @test eltype(params) == Argument
+        @test eltype(params) == LLVM.Argument
 
         @test length(params) == 1
 

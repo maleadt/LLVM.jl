@@ -1,8 +1,23 @@
+export ThreadSafeModule, ThreadSafeContext
+
+"""
+    ThreadSafeContext
+
+A thread-safe version of [`Context`](@ref).
+"""
 @checked struct ThreadSafeContext
     ref::API.LLVMOrcThreadSafeContextRef
 end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeContextRef}, ctx::ThreadSafeContext) = ctx.ref
 
+"""
+    ThreadSafeContext(; opaque_pointers=nothing)
+
+Create a new thread-safe context. The behavior of `opaque_pointers` is the same as in
+[`Context`](@ref).
+
+This object needs to be disposed of using [`dispose(::ThreadSafeContext)`](@ref).
+"""
 function ThreadSafeContext(; opaque_pointers=nothing)
     ts_ctx = ThreadSafeContext(API.LLVMOrcCreateNewThreadSafeContext())
     if opaque_pointers !== nothing
@@ -21,21 +36,53 @@ function ThreadSafeContext(f::Core.Function; kwargs...)
     end
 end
 
+"""
+    context(ts_ctx::ThreadSafeContext)
+
+Obtain the context associated with a thread-safe context.
+
+!!! warning
+
+    This is an usafe operation, as the return context can be accessed in a thread-unsafe
+    manner.
+"""
 function context(ctx::ThreadSafeContext)
     ref = API.LLVMOrcThreadSafeContextGetContext(ctx)
     Context(ref)
 end
 
+"""
+    dispose(ctx::ThreadSafeContext)
+
+Dispose of the thread-safe context, releasing all resources associated with it.
+"""
 function dispose(ctx::ThreadSafeContext)
     deactivate(ctx)
     API.LLVMOrcDisposeThreadSafeContext(ctx)
 end
 
+"""
+    ThreadSafeModule
+
+A thread-safe version of [`LLVM.Module`](@ref).
+"""
 @checked struct ThreadSafeModule
     ref::API.LLVMOrcThreadSafeModuleRef
 end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeModuleRef}, mod::ThreadSafeModule) = mod.ref
 
+"""
+    ThreadSafeModule(mod::Module)
+
+Create a thread-safe module from a regular module. This transfers ownership of the module to
+the thread-safe module.
+
+!!! warning
+
+    The context of the module must be the same as the current thread-safe context.
+
+This object needs to be disposed of using [`dispose(::ThreadSafeModule)`](@ref).
+"""
 function ThreadSafeModule(mod::Module)
     if context(mod) != context(ts_context())
         # XXX: the C API doesn't expose the convenience method to create a TSModule from a
@@ -56,6 +103,13 @@ function ThreadSafeModule(mod::Module)
     return tsm
 end
 
+"""
+    ThreadSafeModule(name::String)
+
+Create a thread-safe module with the given name.
+
+This object needs to be disposed of using [`dispose(::ThreadSafeModule)`](@ref).
+"""
 function ThreadSafeModule(name::String)
     ts_ctx = ts_context()
     # XXX: we should lock the context here
@@ -66,6 +120,11 @@ function ThreadSafeModule(name::String)
     ThreadSafeModule(mod)
 end
 
+"""
+    dispose(mod::ThreadSafeModule)
+
+Dispose of the thread-safe module, releasing all resources associated with it.
+"""
 function dispose(mod::ThreadSafeModule)
     API.LLVMOrcDisposeThreadSafeModule(mod)
 end
