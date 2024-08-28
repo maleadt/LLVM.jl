@@ -3,7 +3,7 @@ export LLVMType, issized, context, show
 # subtypes are expected to have a 'ref::API.LLVMTypeRef' field
 abstract type LLVMType end
 
-Base.eltype(typ::LLVMType) = Any
+Base.eltype(typ::LLVMType) = LLVMType(API.LLVMGetElementType(typ))
 Base.sizeof(typ::LLVMType) = error("LLVM types are not sized")
 # TODO: expose LLVMSizeOf/LLVMAlignOf, yielding run-time values?
 # XXX: can we query type sizes from the data layout or target?
@@ -130,21 +130,11 @@ end
 
 
 
-## composite types
-
-abstract type CompositeType <: LLVMType end
-
-
-## sequential types
+## pointer types
 
 export addrspace, is_opaque
 
-abstract type SequentialType <: CompositeType end
-
-Base.eltype(typ::SequentialType) = LLVMType(API.LLVMGetElementType(typ))
-
-
-@checked struct PointerType <: SequentialType
+@checked struct PointerType <: LLVMType
     ref::API.LLVMTypeRef
 end
 register(PointerType, API.LLVMPointerTypeKind)
@@ -162,7 +152,7 @@ if version() >= v"13"
 
     function Base.eltype(typ::PointerType)
         is_opaque(typ) && throw(error("Taking the type of an opaque pointer is illegal"))
-        invoke(eltype, Tuple{SequentialType}, typ)
+        invoke(eltype, Tuple{LLVMType}, typ)
     end
 else
     is_opaque(ptrtyp::PointerType) = false
@@ -171,7 +161,10 @@ end
 addrspace(ptrtyp::PointerType) =
     API.LLVMGetPointerAddressSpace(ptrtyp)
 
-@checked struct ArrayType <: SequentialType
+
+## array types
+
+@checked struct ArrayType <: LLVMType
     ref::API.LLVMTypeRef
 end
 register(ArrayType, API.LLVMArrayTypeKind)
@@ -185,7 +178,9 @@ Base.length(arrtyp::ArrayType) = Int(API.LLVMGetArrayLength(arrtyp))
 Base.isempty(@nospecialize(T::ArrayType)) = length(T) == 0 || isempty(eltype(T))
 
 
-@checked struct VectorType <: SequentialType
+## vector types
+
+@checked struct VectorType <: LLVMType
     ref::API.LLVMTypeRef
 end
 register(VectorType, API.LLVMVectorTypeKind)
@@ -201,7 +196,7 @@ Base.size(vectyp::VectorType) = API.LLVMGetVectorSize(vectyp)
 
 export name, ispacked, isopaque, elements!
 
-@checked struct StructType <: SequentialType
+@checked struct StructType <: LLVMType
     ref::API.LLVMTypeRef
 end
 register(StructType, API.LLVMStructTypeKind)
