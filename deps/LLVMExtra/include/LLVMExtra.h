@@ -89,8 +89,10 @@ LLVMTypeRef LLVMGetFunctionType(LLVMValueRef Fn);
 LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef Fn);
 
 // Bug fixes
+#if LLVM_VERSION_MAJOR < 20 // llvm/llvm-project#105521
 void LLVMSetInitializer2(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal);
 void LLVMSetPersonalityFn2(LLVMValueRef Fn, LLVMValueRef PersonalityFn);
+#endif
 
 // APIs without MetadataAsValue
 const char *LLVMGetMDString2(LLVMMetadataRef MD, unsigned *Length);

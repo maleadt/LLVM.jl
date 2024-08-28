@@ -20,8 +20,10 @@ function personality(f::Function)
     has_personality = API.LLVMHasPersonalityFn(f) |> Bool
     return has_personality ? Function(API.LLVMGetPersonalityFn(f)) : nothing
 end
-personality!(f::Function, persfn::Union{Nothing,Function}) =
-    API.LLVMSetPersonalityFn2(f, persfn===nothing ? C_NULL : persfn)
+function personality!(f::Function, persfn::Union{Nothing,Function})
+    api = version() >= v"20" ? API.LLVMSetPersonalityFn : API.LLVMSetPersonalityFn2
+    api(f, something(persfn, C_NULL))
+end
 
 callconv(f::Function) = API.LLVMGetFunctionCallConv(f)
 callconv!(f::Function, cc) = API.LLVMSetFunctionCallConv(f, cc)

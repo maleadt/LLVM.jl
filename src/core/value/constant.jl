@@ -660,10 +660,10 @@ function initializer(gv::GlobalVariable)
     init = API.LLVMGetInitializer(gv)
     init == C_NULL ? nothing : Value(init)
 end
-initializer!(gv::GlobalVariable, val::Constant) =
-  API.LLVMSetInitializer2(gv, val)
-initializer!(gv::GlobalVariable, ::Nothing) =
-  API.LLVMSetInitializer2(gv, C_NULL)
+function initializer!(gv::GlobalVariable, val::Union{Constant,Nothing})
+    api = version() >= v"20" ? API.LLVMSetInitializer : API.LLVMSetInitializer2
+    api(gv, something(val, C_NULL))
+end
 
 isthreadlocal(gv::GlobalVariable) = API.LLVMIsThreadLocal(gv) |> Bool
 threadlocal!(gv::GlobalVariable, bool) =
