@@ -298,6 +298,9 @@ LLVMTypeRef LLVMGetGlobalValueType(LLVMValueRef GV) {
 // Bug fixes
 //
 
+
+#if LLVM_VERSION_MAJOR < 20
+
 void LLVMSetInitializer2(LLVMValueRef GlobalVar, LLVMValueRef ConstantVal) {
   unwrap<GlobalVariable>(GlobalVar)->setInitializer(
       ConstantVal ? unwrap<Constant>(ConstantVal) : nullptr);
@@ -307,6 +310,8 @@ void LLVMSetPersonalityFn2(LLVMValueRef Fn, LLVMValueRef PersonalityFn) {
   unwrap<Function>(Fn)->setPersonalityFn(PersonalityFn ? unwrap<Constant>(PersonalityFn)
                                                        : nullptr);
 }
+
+#endif
 
 
 //
