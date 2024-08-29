@@ -147,7 +147,7 @@ end
 
     let mod = emit_inc(1)
         @dispose engine=JIT(mod) begin
-            addr = function_address(engine, "add_1")
+            addr = lookup(engine, "add_1")
             res = ccall(addr, Int32, (Int32,), 41)
             @test res == 42
         end
@@ -188,7 +188,7 @@ end
             @test haskey(functions(engine), "add_2")
             @test functions(engine)["add_2"] isa LLVM.Function
 
-            addr = function_address(engine, "add_2")
+            addr = lookup(engine, "add_2")
             res = ccall(addr, Int32, (Int32,), 40)
             @test res == 42
         end

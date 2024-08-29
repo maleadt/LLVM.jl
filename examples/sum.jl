@@ -33,7 +33,7 @@ end
 
     # analysis and execution
     @dispose engine=JIT(mod) begin
-        add = function_address(engine, "sum")
+        add = lookup(engine, "sum")
         res = ccall(add, Int32, (Int32, Int32), x, y)
         @test res == x + y
     end

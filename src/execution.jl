@@ -51,7 +51,7 @@ dispose(val::GenericValue) = mark_dispose(API.LLVMDisposeGenericValue, val)
 ## execution engine
 
 export Interpreter, JIT,
-       run, function_address
+       run, lookup
 
 @checked struct ExecutionEngine
     ref::API.LLVMExecutionEngineRef
@@ -137,7 +137,7 @@ Base.run(engine::ExecutionEngine, f::Function, args::Vector{GenericValue}=Generi
     GenericValue(API.LLVMRunFunction(engine, f,
                                      length(args), args))
 
-function function_address(engine::ExecutionEngine, fn::String)
+function lookup(engine::ExecutionEngine, fn::String)
     addr = Ptr{Nothing}(API.LLVMGetFunctionAddress(engine, fn))
     if addr == C_NULL
         throw(KeyError(fn))
