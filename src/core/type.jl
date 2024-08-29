@@ -159,7 +159,7 @@ else
 end
 
 addrspace(ptrtyp::PointerType) =
-    API.LLVMGetPointerAddressSpace(ptrtyp)
+    Int(API.LLVMGetPointerAddressSpace(ptrtyp))
 
 
 ## array types
@@ -189,7 +189,7 @@ function VectorType(eltyp::LLVMType, count)
     return VectorType(API.LLVMVectorType(eltyp, count))
 end
 
-Base.size(vectyp::VectorType) = API.LLVMGetVectorSize(vectyp)
+Base.length(vectyp::VectorType) = Int(API.LLVMGetVectorSize(vectyp))
 
 
 ## structure types
