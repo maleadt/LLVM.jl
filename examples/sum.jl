@@ -32,14 +32,9 @@ end
     end
 
     # analysis and execution
-    @dispose engine=Interpreter(mod) begin
-        args = [GenericValue(LLVM.Int32Type(), x),
-                GenericValue(LLVM.Int32Type(), y)]
-
-        res = LLVM.run(engine, sum, args)
-        @test convert(Int, res) == x + y
-
-        dispose.(args)
-        dispose(res)
+    @dispose engine=JIT(mod) begin
+        add = lookup(engine, "sum")
+        res = ccall(add, Int32, (Int32, Int32), x, y)
+        @test res == x + y
     end
 end
