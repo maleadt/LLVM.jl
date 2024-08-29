@@ -337,6 +337,9 @@ const cgscc_passes = String[]
 const function_passes = String[]
 const loop_passes = String[]
 
+macro pipeline(pass_name, class_name, params=nothing)
+    define_pass(pass_name, class_name, params)
+end
 macro module_pass(pass_name, class_name, params=nothing)
     push!(module_passes, pass_name)
     define_pass(pass_name, class_name, params)
@@ -906,3 +909,17 @@ end
 @aa_pass "scev-aa" SCEVAA
 @aa_pass "scoped-noalias-aa" ScopedNoAliasAA
 @aa_pass "tbaa" TypeBasedAA
+
+
+## pipelines
+
+struct DefaultPipelineOptions
+    opt_level::Union{Int,Char}
+end
+DefaultPipelineOptions(; opt_level=0) =
+    DefaultPipelineOptions(opt_level)
+function Base.string(options::DefaultPipelineOptions)
+    optlevel = "O$(options.opt_level)"
+    "<$optlevel>"
+end
+@pipeline "default" DefaultPipeline DefaultPipelineOptions

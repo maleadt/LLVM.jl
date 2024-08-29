@@ -39,8 +39,15 @@ end
         end
 
         # default pipelines
-        @dispose pb=NewPMPassBuilder() mod=test_module() begin
+        @dispose mod=test_module() begin
+            # by string
             @test run!("default<O3>", mod) === nothing
+
+            # by object
+            @test run!(DefaultPipeline(), mod) === nothing
+
+            # by object with options
+            @test run!(DefaultPipeline(; opt_level='s'), mod) === nothing
         end
 
         # custom pipelines
@@ -225,10 +232,14 @@ end
 @testset "julia" begin
     @testset "pipeline" begin
         @dispose ctx=Context() mod=test_module() begin
+            # by string
             @test run!("julia", mod) === nothing
 
-            pipeline = JuliaPipelinePass(opt_level=2)
-            @test run!(pipeline, mod) === nothing
+            # by object
+            @test run!(JuliaPipeline(), mod) === nothing
+
+            # by object with options
+            @test run!(JuliaPipeline(opt_level=2), mod) === nothing
         end
     end
 
