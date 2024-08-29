@@ -3,3 +3,4 @@
 deps/Manifest.toml
 test/Manifest.toml
 Manifest.toml
+deps/build
