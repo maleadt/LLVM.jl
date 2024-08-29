@@ -383,41 +383,37 @@ end
 
 @testset "alias analyses" begin
     # default pipeline
-    @dispose ctx=Context() pb=NewPMPassBuilder() begin
-        @dispose pb=NewPMPassBuilder(;debug_logging=true) mod=test_module() begin
-            add!(pb, "aa-eval")
+    @dispose ctx=Context() mod=test_module() pb=NewPMPassBuilder(;debug_logging=true) begin
+        add!(pb, "aa-eval")
 
-            io = IOCapture.capture() do
-                run!(pb, mod)
-            end
-
-            @test contains(io.output, "Running analysis: BasicAA")
-            @test contains(io.output, "Running analysis: TypeBasedAA")
-            @test contains(io.output, "Running analysis: ScopedNoAliasAA")
+        io = IOCapture.capture() do
+            run!(pb, mod)
         end
+
+        @test contains(io.output, "Running analysis: BasicAA")
+        @test contains(io.output, "Running analysis: TypeBasedAA")
+        @test contains(io.output, "Running analysis: ScopedNoAliasAA")
     end
 
     # custom pipeline
-    @dispose ctx=Context() pb=NewPMPassBuilder() begin
-        @dispose pb=NewPMPassBuilder(;debug_logging=true) mod=test_module() begin
-            add!(pb, NewPMAAManager()) do aa
-                # by string
-                add!(aa, "basic-aa")
+    @dispose ctx=Context() mod=test_module() pb=NewPMPassBuilder(;debug_logging=true) begin
+        add!(pb, NewPMAAManager()) do aam
+            # by string
+            add!(aam, "basic-aa")
 
-                # by object
-                add!(aa, SCEVAA())
-            end
-            add!(pb, "aa-eval")
-
-            io = IOCapture.capture() do
-                run!(pb, mod)
-            end
-
-            @test contains(io.output, "Running analysis: BasicAA")
-            @test contains(io.output, "Running analysis: SCEVAA")
-            @test !contains(io.output, "Running analysis: TypeBasedAA")
-            @test !contains(io.output, "Running analysis: ScopedNoAliasAA")
+            # by object
+            add!(aam, SCEVAA())
         end
+        add!(pb, "aa-eval")
+
+        io = IOCapture.capture() do
+            run!(pb, mod)
+        end
+
+        @test contains(io.output, "Running analysis: BasicAA")
+        @test contains(io.output, "Running analysis: SCEVAA")
+        @test !contains(io.output, "Running analysis: TypeBasedAA")
+        @test !contains(io.output, "Running analysis: ScopedNoAliasAA")
     end
 end
 
