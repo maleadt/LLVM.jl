@@ -29,7 +29,7 @@ function Target(; name=nothing, triple=nothing)
     elseif name !== nothing
         target = API.LLVMGetTargetFromName(name)
         if target == C_NULL
-            throw(ArgumentError("Cannot find target '$triple'"))
+            throw(ArgumentError("Cannot find target '$name'"))
         end
         return Target(target)
     end
