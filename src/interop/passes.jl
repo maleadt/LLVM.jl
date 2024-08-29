@@ -1,6 +1,6 @@
 # Julia's LLVM passes and pipelines
 
-using ..LLVM: @module_pass, @function_pass, @loop_pass
+using ..LLVM: @pipeline, @module_pass, @function_pass, @loop_pass
 
 @module_pass "CPUFeatures" CPUFeaturesPass
 @module_pass "RemoveNI" RemoveNIPass
@@ -45,20 +45,20 @@ Base.string(options::GCInvariantVerifierPassOptions) = options.strong ? "<strong
 @loop_pass "JuliaLICM" JuliaLICMPass
 @loop_pass "LowerSIMDLoop" LowerSIMDLoopPass
 
-struct JuliaPipelinePassOptions
+struct JuliaPipelineOptions
     opt_level::Int
     lower_intrinsics::Bool
     dump_native::Bool
     external_use::Bool
     llvm_only::Bool
 end
-JuliaPipelinePassOptions(; opt_level=Base.JLOptions().opt_level,
+JuliaPipelineOptions(; opt_level=Base.JLOptions().opt_level,
                            lower_intrinsics::Bool=true,
                            dump_native::Bool=false, external_use::Bool=false,
                            llvm_only::Bool=false) =
-    JuliaPipelinePassOptions(convert(Int, opt_level), lower_intrinsics, dump_native,
-                             external_use, llvm_only)
-function Base.string(options::JuliaPipelinePassOptions)
+    JuliaPipelineOptions(convert(Int, opt_level), lower_intrinsics, dump_native,
+                         external_use, llvm_only)
+function Base.string(options::JuliaPipelineOptions)
     optlevel = "level=$(options.opt_level)"
     lower_intrinsics = options.lower_intrinsics ? "lower_intrinsics" : "no_lower_intrinsics"
     dump_native = options.dump_native ? "dump_native" : "no_dump_native"
@@ -66,11 +66,14 @@ function Base.string(options::JuliaPipelinePassOptions)
     llvm_only = options.llvm_only ? "llvm_only" : "no_llvm_only"
     "<$optlevel;$lower_intrinsics;$dump_native;$external_use;$llvm_only>"
 end
-@module_pass "julia" JuliaPipelinePass JuliaPipelinePassOptions
+@pipeline "julia" JuliaPipeline JuliaPipelineOptions
 
 # XXX: if we go through the PassBuilder parser, Julia won't insert the PassBuilder's
 # callbacks in the right spots. that's why Julia also provides `jl_build_newpm_pipeline`.
 # is this still true? can we fix that, and continue using the PassBuilder interface?
+
+Base.@deprecate_binding JuliaPipelinePass JuliaPipeline
+Base.@deprecate_binding JuliaPipelinePassOptions JuliaPipelineOptions false
 
 
 ## legacy passes
