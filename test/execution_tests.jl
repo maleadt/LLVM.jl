@@ -42,46 +42,21 @@ end
 
 @testset "execution engine" begin
 
-@dispose ctx=Context() begin
-    mod = LLVM.Module("SomeModule")
-    @dispose engine=ExecutionEngine(mod) begin end
-end
-
-function emit_sum()
+function emit_inc(val)
     mod = LLVM.Module("SomeModule")
 
-    param_types = [LLVM.Int32Type(), LLVM.Int32Type()]
+    param_types = [LLVM.Int32Type()]
     ret_type = LLVM.FunctionType(LLVM.Int32Type(), param_types)
 
-    sum = LLVM.Function(mod, "SomeFunctionSum", ret_type)
+    sum = LLVM.Function(mod, "add_$(val)", ret_type)
 
     entry = BasicBlock(sum, "entry")
 
     @dispose builder=IRBuilder() begin
         position!(builder, entry)
 
-        tmp = add!(builder, parameters(sum)[1], parameters(sum)[2])
+        tmp = add!(builder, parameters(sum)[1], ConstantInt(LLVM.Int32Type(), val))
         ret!(builder, tmp)
-
-        verify(mod)
-    end
-
-    return mod
-end
-
-function emit_retint(val)
-    mod = LLVM.Module("SomeModule")
-
-    ret_type = LLVM.FunctionType(LLVM.Int32Type())
-
-    fn = LLVM.Function(mod, "SomeFunction", ret_type)
-
-    entry = BasicBlock(fn, "entry")
-
-    @dispose builder=IRBuilder() begin
-        position!(builder, entry)
-
-        ret!(builder, ConstantInt(LLVM.Int32Type(), val))
 
         verify(mod)
     end
@@ -132,10 +107,9 @@ function emit_phi()
 end
 
 @dispose ctx=Context() begin
-    mod = emit_sum()
+    mod = emit_inc(1)
 
-    args = [GenericValue(LLVM.Int32Type(), 1),
-            GenericValue(LLVM.Int32Type(), 2)]
+    args = [GenericValue(LLVM.Int32Type(), 41)]
 
     let mod = copy(mod)
         engine = Interpreter(mod)
@@ -148,10 +122,10 @@ end
     end
 
     let mod = copy(mod)
-        fn = functions(mod)["SomeFunctionSum"]
+        fn = functions(mod)["add_1"]
         @dispose engine=Interpreter(mod) begin
-            res = LLVM.run(engine, fn, args)
-            @test convert(Int, res) == 3
+            res = run(engine, fn, args)
+            @test convert(Int, res) == 42
             dispose(res)
         end
     end
@@ -161,43 +135,21 @@ end
 end
 
 @dispose ctx=Context() begin
-    let mod = emit_retint(42)
+    let mod = emit_inc(1)
         engine = JIT(mod)
         dispose(engine)
     end
 
-    let mod = emit_retint(42)
+    let mod = emit_inc(1)
         JIT(mod) do engine
         end
     end
 
-    let mod = emit_retint(42)
-        fn = functions(mod)["SomeFunction"]
+    let mod = emit_inc(1)
         @dispose engine=JIT(mod) begin
-            res = LLVM.run(engine, fn)
-            @test convert(Int, res) == 42
-            dispose(res)
-        end
-    end
-end
-
-@dispose ctx=Context() begin
-    let mod = emit_retint(42)
-        engine = ExecutionEngine(mod)
-        dispose(engine)
-    end
-
-    let mod = emit_retint(42)
-        ExecutionEngine(mod) do engine
-        end
-    end
-
-    let mod = emit_retint(42)
-        fn = functions(mod)["SomeFunction"]
-        @dispose engine=ExecutionEngine(mod) begin
-            res = LLVM.run(engine, fn)
-            @test convert(Int, res) == 42
-            dispose(res)
+            addr = function_address(engine, "add_1")
+            res = ccall(addr, Int32, (Int32,), 41)
+            @test res == 42
         end
     end
 end
@@ -213,7 +165,7 @@ end
         let mod = emit_phi()
             fn = functions(mod)["gt"]
             @dispose engine=Interpreter(mod) begin
-                res = LLVM.run(engine, fn, args)
+                res = run(engine, fn, args)
                 @test convert(Int, res) == true_res
                 dispose(res)
             end
@@ -221,22 +173,24 @@ end
         dispose.(args)
     end
 
-    let mod1 = emit_sum(), mod2 = emit_retint(42)
-        @dispose engine=Interpreter(mod1) begin
+    let mod1 = emit_inc(1), mod2 = emit_inc(2)
+        @dispose engine=JIT(mod1) begin
             @test_throws ErrorException collect(functions(engine))
-            @test haskey(functions(engine), "SomeFunctionSum")
-            @test functions(engine)["SomeFunctionSum"] isa LLVM.Function
-            delete!(engine, mod1)
-            @test_throws KeyError functions(engine)["SomeFunctionSum"]
-            @test !haskey(functions(engine), "SomeFunctionSum")
-            dispose(mod1)
-            push!(engine, mod2)
-            @test haskey(functions(engine), "SomeFunction")
-            @test functions(engine)["SomeFunction"] isa LLVM.Function
+            @test haskey(functions(engine), "add_1")
+            @test functions(engine)["add_1"] isa LLVM.Function
 
-            res = LLVM.run(engine, functions(engine)["SomeFunction"])
-            @test convert(Int, res) == 42
-            dispose(res)
+            delete!(engine, mod1)
+            @test_throws KeyError functions(engine)["add_1"]
+            @test !haskey(functions(engine), "add_1")
+            dispose(mod1)
+
+            push!(engine, mod2)
+            @test haskey(functions(engine), "add_2")
+            @test functions(engine)["add_2"] isa LLVM.Function
+
+            addr = function_address(engine, "add_2")
+            res = ccall(addr, Int32, (Int32,), 40)
+            @test res == 42
         end
     end
 end
