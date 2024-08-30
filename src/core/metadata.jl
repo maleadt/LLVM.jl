@@ -36,9 +36,10 @@ function Metadata(ref::API.LLVMMetadataRef)
     return T(ref)
 end
 
-function Base.show(io::IO, md::Metadata)
-    output = unsafe_message(API.LLVMPrintMetadataToString(md))
-    print(io, output)
+Base.string(md::Metadata) = unsafe_message(API.LLVMPrintMetadataToString(md))
+
+function Base.show(io::IO, ::MIME"text/plain", md::Metadata)
+    print(io, strip(string(md)))
 end
 
 

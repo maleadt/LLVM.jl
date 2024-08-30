@@ -44,11 +44,11 @@ context(typ::LLVMType) = Context(API.LLVMGetTypeContext(typ))
 Base.string(typ::LLVMType) = unsafe_message(API.LLVMPrintTypeToString(typ))
 
 function Base.show(io::IO, ::MIME"text/plain", typ::LLVMType)
-    print(io, string(typ))
+    print(io, strip(string(typ)))
 end
 
 function Base.show(io::IO, typ::LLVMType)
-    print(io, typeof(typ), "(", string(typ), ")")
+    print(io, typeof(typ), "(", strip(string(typ)), ")")
 end
 
 Base.isempty(@nospecialize(T::LLVMType)) = false

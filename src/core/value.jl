@@ -62,7 +62,7 @@ end
 
 # when more output is requested, render the value (which may print multiple lines)
 function Base.show(io::IO, ::MIME"text/plain", val::Value)
-    print(io, string(val))
+    print(io, strip(string(val)))
 end
 
 replace_uses!(old::Value, new::Value) = API.LLVMReplaceAllUsesWith(old, new)
