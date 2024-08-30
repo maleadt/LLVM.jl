@@ -43,7 +43,7 @@ function Base.show(io::IO, mod::Module)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", mod::Module)
-    output = string(mod)
+    output = strip(string(mod))
     print(io, output)
 end
 
