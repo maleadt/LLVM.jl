@@ -104,9 +104,7 @@ function Base.showerror(io::IO, err::LLVMException)
 end
 
 
-## diagnostics
-
-export DiagnosticInfo, severity, message
+## diagnostic handling
 
 @checked struct DiagnosticInfo
     ref::API.LLVMDiagnosticInfoRef
@@ -116,9 +114,6 @@ Base.unsafe_convert(::Type{API.LLVMDiagnosticInfoRef}, di::DiagnosticInfo) = di.
 
 severity(di::DiagnosticInfo) = API.LLVMGetDiagInfoSeverity(di)
 message(di::DiagnosticInfo) = unsafe_message(API.LLVMGetDiagInfoDescription(di))
-
-
-## handlers
 
 function handle_diagnostic(diag_ref::API.LLVMDiagnosticInfoRef, args::Ptr{Cvoid})
     di = DiagnosticInfo(diag_ref)
