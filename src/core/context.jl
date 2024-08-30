@@ -1,6 +1,6 @@
 # Contexts are execution states for the core LLVM IR system.
 
-export Context, dispose, GlobalContext
+export Context, dispose
 
 @checked struct Context
     ref::API.LLVMContextRef
@@ -32,13 +32,8 @@ function Context(f::Core.Function; kwargs...)
     end
 end
 
-GlobalContext() = Context(API.LLVMGetGlobalContext())
-
 function Base.show(io::IO, ctx::Context)
     @printf(io, "LLVM.Context(%p", ctx.ref)
-    if ctx == GlobalContext()
-        print(io, ", global instance")
-    end
     if v"14" <= version() < v"17"
         # migration to opaque pointers
         print(io, ", ", supports_typed_pointers(ctx) ? "typed ptrs" : "opaque ptrs")
