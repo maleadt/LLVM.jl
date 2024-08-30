@@ -4,22 +4,6 @@ export ismultithreaded
 
 ismultithreaded() = API.LLVMIsMultithreaded() |> Bool
 
-if LLVM.version() < v"17"
-    const subsystems = [:Core, :TransformUtils, :ScalarOpts, :Vectorization, :InstCombine,
-                        :IPO, :Analysis, :IPA, :CodeGen, :Target]
-    if LLVM.version() < v"16"
-        append!(subsystems, [:ObjCARCOpts, :Instrumentation])
-    end
-    for subsystem in subsystems
-        jl_fname = Symbol(:Initialize, subsystem)
-        api_fname = Symbol(:LLVM, jl_fname)
-        @eval begin
-            export $jl_fname
-            $jl_fname(R::PassRegistry) = API.$api_fname(R)
-        end
-    end
-end
-
 
 ## back-end initialization
 
@@ -91,7 +75,10 @@ for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
     api_fname = Symbol(:LLVMExtra, jl_fname)
     @eval begin
         export $jl_fname
-        $jl_fname() = Bool(API.$api_fname()) &&
-                      throw(LLVMException($"Could not initialize native $component"))
+        function $jl_fname()
+            if Bool(API.$api_fname())
+               throw(LLVMException("No native target available."))
+            end
+        end
     end
 end

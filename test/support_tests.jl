@@ -29,8 +29,8 @@ code = """
 
 end
 
-@testset "memcheck" begin
 if LLVM.memcheck_enabled
+@testset "memcheck" begin
     # use after dispose
     let (; out, err) =
         execute_code("""buf = LLVM.MemoryBuffer(UInt8[])
