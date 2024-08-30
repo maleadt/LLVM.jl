@@ -65,9 +65,6 @@ include("debug.jl")
 
 # LLVM API wrappers
 include("support.jl")
-if LLVM.version() < v"17"
-    include("passregistry.jl")
-end
 include("init.jl")
 include("core.jl")
 include("linker.jl")
