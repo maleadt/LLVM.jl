@@ -21,7 +21,12 @@ end
 
 let
     ctx = Context()
-    @assert ctx != GlobalContext()
+    @test context() == ctx
+    let ctx2 = Context()
+        @test context() == ctx2
+        @test ctx !== ctx2
+        dispose(ctx2)
+    end
     @test context() == ctx
     dispose(ctx)
     @test context(; throw_error=false) === nothing
