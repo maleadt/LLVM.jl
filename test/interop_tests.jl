@@ -160,35 +160,71 @@ end
 
 end
 
+function test_module()
+    mod = LLVM.Module("test")
+    ft = LLVM.FunctionType(LLVM.VoidType())
+    fn = LLVM.Function(mod, "SomeFunction", ft)
 
-VERSION < v"1.11.0-DEV.428" && @testset "passes" begin
+    @dispose builder=IRBuilder() begin
+        entry = BasicBlock(fn, "entry")
+        position!(builder, entry)
 
-@dispose ctx=Context() mod=LLVM.Module("SomeModule") pm=ModulePassManager() begin
+        ret!(builder)
+    end
 
-demote_float16!(pm)
-julia_licm!(pm)
-alloc_opt!(pm)
-barrier_noop!(pm)
-gc_invariant_verifier!(pm)
-gc_invariant_verifier!(pm, true)
-lower_exc_handlers!(pm)
-combine_mul_add!(pm)
-multi_versioning!(pm)
-propagate_julia_addrsp!(pm)
-lower_ptls!(pm)
-lower_ptls!(pm, true)
-lower_simdloop!(pm)
-remove_ni!(pm)
-late_lower_gc_frame!(pm)
-final_lower_gc!(pm)
-cpu_features!(pm)
-
+    return mod
 end
 
-@test "we didn't crash!" != ""
+@testset "passes" begin
+    if VERSION < v"1.11.0-DEV.428"
+        @dispose ctx=Context() mod=test_module() pm=ModulePassManager() begin
 
+            demote_float16!(pm)
+            julia_licm!(pm)
+            alloc_opt!(pm)
+            barrier_noop!(pm)
+            gc_invariant_verifier!(pm)
+            gc_invariant_verifier!(pm, true)
+            lower_exc_handlers!(pm)
+            combine_mul_add!(pm)
+            multi_versioning!(pm)
+            propagate_julia_addrsp!(pm)
+            lower_ptls!(pm)
+            lower_ptls!(pm, true)
+            lower_simdloop!(pm)
+            remove_ni!(pm)
+            late_lower_gc_frame!(pm)
+            final_lower_gc!(pm)
+            cpu_features!(pm)
+
+        end
+        @test "we didn't crash!" != ""
+    end
+
+    @dispose ctx=Context() mod=test_module() begin
+        # by string
+        @test run!("julia", mod) === nothing
+
+        # by object
+        @test run!(JuliaPipeline(), mod) === nothing
+
+        # by object with options
+        pipeline = JuliaPipeline(opt_level=2)
+        @test run!(pipeline, mod) === nothing
+
+        if VERSION >= v"1.12.0-DEV.1029" ||         # JuliaLang/julia#55407
+           (v"1.11.0-rc3" <= VERSION < v"1.12-")    # backport
+            pipeline = JuliaPipeline(opt_level=3, enable_vector_pipeline=false)
+            @test run!(pipeline, mod) === nothing
+            # TODO: check that the vector pipeline didn't run
+
+            pipeline = JuliaPipeline(enable_early_simplifications=false,
+                                     enable_early_optimizations=false)
+            @test contains(string(pipeline), "no_enable_early_simplifications")
+            @test contains(string(pipeline), "no_enable_early_optimizations")
+        end
+    end
 end
-
 
 @testset "intrinsics" begin
     @test assume(true) === nothing
