@@ -45,58 +45,52 @@ Base.string(options::GCInvariantVerifierPassOptions) = options.strong ? "<strong
 @loop_pass "JuliaLICM" JuliaLICMPass
 @loop_pass "LowerSIMDLoop" LowerSIMDLoopPass
 
-struct JuliaPipelineOptions
-    opt_level::Int
-    lower_intrinsics::Bool
-    dump_native::Bool
-    external_use::Bool
-    llvm_only::Bool
-    always_inline::Bool
-    enable_early_simplifications::Bool
-    enable_early_optimizations::Bool
-    enable_scalar_optimizations::Bool
-    enable_loop_optimizations::Bool
-    enable_vector_pipeline::Bool
-    remove_ni::Bool
-    cleanup::Bool
-    warn_missed_transformations::Bool
+Base.@kwdef struct JuliaPipelineOptions
+    opt_level::Int = Base.JLOptions().opt_level
+
+    lower_intrinsics::Union{Nothing,Bool} = nothing
+    dump_native::Union{Nothing,Bool} = nothing
+    external_use::Union{Nothing,Bool} = nothing
+    llvm_only::Union{Nothing,Bool} = nothing
+    always_inline::Union{Nothing,Bool} = nothing
+    enable_early_simplifications::Union{Nothing,Bool} = nothing
+    enable_early_optimizations::Union{Nothing,Bool} = nothing
+    enable_scalar_optimizations::Union{Nothing,Bool} = nothing
+    enable_loop_optimizations::Union{Nothing,Bool} = nothing
+    enable_vector_pipeline::Union{Nothing,Bool} = nothing
+    remove_ni::Union{Nothing,Bool} = nothing
+    cleanup::Union{Nothing,Bool} = nothing
+    warn_missed_transformations::Union{Nothing,Bool} = nothing
 end
 
-JuliaPipelineOptions(; opt_level=Base.JLOptions().opt_level,
-                      lower_intrinsics::Bool=true,
-                      dump_native::Bool=false, external_use::Bool=false,
-                      llvm_only::Bool=false, always_inline::Bool=true,
-                      enable_early_simplifications::Bool=true, enable_early_optimizations::Bool=true,
-                      enable_scalar_optimizations::Bool=true, enable_loop_optimizations::Bool=true,
-                      enable_vector_pipeline::Bool=true, remove_ni::Bool=true, cleanup::Bool=true,
-                      warn_missed_transformations::Bool=false) =
-    JuliaPipelineOptions(convert(Int, opt_level), lower_intrinsics, dump_native,
-                        external_use, llvm_only, always_inline, enable_early_simplifications,
-                        enable_early_optimizations, enable_scalar_optimizations, enable_loop_optimizations,
-                        enable_vector_pipeline, remove_ni, cleanup, warn_missed_transformations)
-
 function Base.string(options::JuliaPipelineOptions)
-    optlevel = "level=$(options.opt_level)"
-    lower_intrinsics = options.lower_intrinsics ? "lower_intrinsics" : "no_lower_intrinsics"
-    dump_native = options.dump_native ? "dump_native" : "no_dump_native"
-    external_use = options.external_use ? "external_use" : "no_external_use"
-    llvm_only = options.llvm_only ? "llvm_only" : "no_llvm_only"
-    always_inline = options.always_inline ? "always_inline" : "no_always_inline"
-    enable_early_simplifications = options.enable_early_simplifications ? "enable_early_simplifications" : "no_enable_early_simplifications"
-    enable_early_optimizations = options.enable_early_optimizations ? "enable_early_optimizations" : "no_enable_early_optimizations"
-    enable_scalar_optimizations = options.enable_scalar_optimizations ? "enable_scalar_optimizations" : "no_enable_scalar_optimizations"
-    enable_loop_optimizations = options.enable_loop_optimizations ? "enable_loop_optimizations" : "no_enable_loop_optimizations"
-    enable_vector_pipeline = options.enable_vector_pipeline ? "enable_vector_pipeline" : "no_enable_vector_pipeline"
-    remove_ni = options.remove_ni ? "remove_ni" : "no_remove_ni"
-    cleanup = options.cleanup ? "cleanup" : "no_cleanup"
-    warn_missed_transformations = options.warn_missed_transformations ? "warn_missed_transformations" : "no_warn_missed_transformations"
-    opt_string = "<$optlevel;$lower_intrinsics;$dump_native;$external_use;$llvm_only"
-    if VERSION >= v"1.12.0-DEV.1029" || (v"1.11.0-rc3" <= VERSION < v"1.12-") # Extended string parsing
-        opt_string *= ";$always_inline;$enable_early_simplifications;$enable_early_optimizations;$enable_scalar_optimizations"
-        opt_string *= ";$enable_loop_optimizations;$enable_vector_pipeline;$remove_ni;$cleanup;$warn_missed_transformations"
+    final_options = String[]
+    push!(final_options, "level=$(options.opt_level)")
+
+    function handle_option(name::Symbol)
+        val = getfield(options, name)
+        if val !== nothing
+            push!(final_options, val ? String(name) : "no_$name")
+        end
     end
-    opt_string *= ">"
-    return opt_string
+    handle_option(:lower_intrinsics)
+    handle_option(:dump_native)
+    handle_option(:external_use)
+    handle_option(:llvm_only)
+    if VERSION >= v"1.12.0-DEV.1029" ||         # JuliaLang/julia#55407
+       (v"1.11.0-rc3" <= VERSION < v"1.12-")    # backport
+        handle_option(:always_inline)
+        handle_option(:enable_early_simplifications)
+        handle_option(:enable_early_optimizations)
+        handle_option(:enable_scalar_optimizations)
+        handle_option(:enable_loop_optimizations)
+        handle_option(:enable_vector_pipeline)
+        handle_option(:remove_ni)
+        handle_option(:cleanup)
+        handle_option(:warn_missed_transformations)
+    end
+
+    "<" * join(final_options, ";") * ">"
 end
 
 @pipeline "julia" JuliaPipeline JuliaPipelineOptions

@@ -212,11 +212,16 @@ end
         pipeline = JuliaPipeline(opt_level=2)
         @test run!(pipeline, mod) === nothing
 
-        if VERSION >= v"1.12.0-DEV.1029" || (v"1.11.0-rc3" <= VERSION < v"1.12-") # Extended string parsing
-            pipeline = JuliaPipelinePass(opt_level=3, enable_vector_pipeline=false)
-            @test run!(pipeline, mod) === nothing # Is there a way to check if the vector pipeline didn't run?
+        if VERSION >= v"1.12.0-DEV.1029" ||         # JuliaLang/julia#55407
+           (v"1.11.0-rc3" <= VERSION < v"1.12-")    # backport
+            pipeline = JuliaPipeline(opt_level=3, enable_vector_pipeline=false)
+            @test run!(pipeline, mod) === nothing
+            # TODO: check that the vector pipeline didn't run
 
-            @test contains(string(LLVM.Interop.JuliaPipelinePassOptions(enable_early_simplifications=false, enable_early_optimizations=false)), "no_enable_early_simplifications;no_enable_early_optimizations")
+            pipeline = JuliaPipeline(enable_early_simplifications=false,
+                                     enable_early_optimizations=false)
+            @test contains(string(pipeline), "no_enable_early_simplifications")
+            @test contains(string(pipeline), "no_enable_early_optimizations")
         end
     end
 end
