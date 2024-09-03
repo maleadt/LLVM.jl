@@ -25,3 +25,6 @@ Base.@deprecate_binding ValueMetadataDict LLVM.InstructionMetadataDict
                            SyncScope(syncscope)), false)
 
 @deprecate Base.size(vectyp::VectorType) length(vectyp) false
+
+@deprecate Module(mod::Module) copy(mod) false
+@deprecate Instruction(inst::Instruction) copy(inst) false
