@@ -1,4 +1,4 @@
-export unsafe_delete!,
+export erase!,
        personality, personality!,
        callconv, callconv!,
        gc, gc!,
@@ -14,7 +14,7 @@ function_type(Fn::Function) = FunctionType(API.LLVMGetFunctionType(Fn))
 
 Base.empty!(f::Function) = API.LLVMFunctionDeleteBody(f)
 
-unsafe_delete!(::Module, f::Function) = API.LLVMDeleteFunction(f)
+erase!(f::Function) = API.LLVMDeleteFunction(f)
 
 function personality(f::Function)
     has_personality = API.LLVMHasPersonalityFn(f) |> Bool

@@ -28,3 +28,8 @@ Base.@deprecate_binding ValueMetadataDict LLVM.InstructionMetadataDict
 
 @deprecate Module(mod::Module) copy(mod) false
 @deprecate Instruction(inst::Instruction) copy(inst) false
+
+@deprecate unsafe_delete!(::Module, gv::GlobalVariable) erase!(gv)
+@deprecate unsafe_delete!(::Module, f::Function) erase!(f)
+@deprecate unsafe_delete!(::Function, bb::BasicBlock) erase!(bb)
+@deprecate unsafe_delete!(::BasicBlock, inst::Instruction) erase!(inst)

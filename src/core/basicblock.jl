@@ -1,4 +1,4 @@
-export BasicBlock, unsafe_delete!,
+export BasicBlock, remove!, erase!,
        terminator, name,
        move_before, move_after
 
@@ -20,9 +20,8 @@ BasicBlock(f::Function, name::String;) =
 BasicBlock(bb::BasicBlock, name::String) =
     BasicBlock(API.LLVMInsertBasicBlockInContext(context(bb), bb, name))
 
-unsafe_delete!(::Function, bb::BasicBlock) = API.LLVMDeleteBasicBlock(bb)
-Base.delete!(::Function, bb::BasicBlock) =
-    API.LLVMRemoveBasicBlockFromParent(bb)
+remove!(bb::BasicBlock) = API.LLVMRemoveBasicBlockFromParent(bb)
+erase!(bb::BasicBlock) = API.LLVMDeleteBasicBlock(bb)
 
 function parent(bb::BasicBlock)
     ref = API.LLVMGetBasicBlockParent(bb)

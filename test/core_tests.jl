@@ -831,16 +831,16 @@ end
     @test !haskey(globals(mod), "llvm.used")
     set_used!(mod, gv)
     @test haskey(globals(mod), "llvm.used")
-    unsafe_delete!(mod, globals(mod)["llvm.used"])
+    erase!(globals(mod)["llvm.used"])
 
     @test !haskey(globals(mod), "llvm.compiler.used")
     set_compiler_used!(mod, gv)
     @test haskey(globals(mod), "llvm.compiler.used")
-    unsafe_delete!(mod, globals(mod)["llvm.compiler.used"])
+    erase!(globals(mod)["llvm.compiler.used"])
 
     let gvars = globals(mod)
         @test gv in gvars
-        unsafe_delete!(mod, gv)
+        erase!(gv)
         @test isempty(gvars)
     end
 end
@@ -1181,7 +1181,7 @@ end
     @test personality(fn) == pers_fn
     personality!(fn, nothing)
     @test personality(fn) === nothing
-    unsafe_delete!(mod, pers_fn)
+    erase!(pers_fn)
 
     @test !isintrinsic(fn)
 
@@ -1195,7 +1195,7 @@ end
 
     let fns = functions(mod)
         @test fn in fns
-        unsafe_delete!(mod, fn)
+        erase!(fn)
         @test isempty(fns)
     end
 end
@@ -1417,7 +1417,7 @@ end
         @test collect(insts) == [brinst]
     end
 
-    unsafe_delete!(bb1, brinst)    # we'll be deleting bb2, so remove uses of it
+    erase!(brinst)    # we'll be deleting bb2, so remove uses of it
 
     # basic block iteration
     let bbs = blocks(fn)
@@ -1434,8 +1434,8 @@ end
 
         @test bb1 in bbs
         @test bb2 in bbs
-        delete!(fn, bb1)
-        unsafe_delete!(fn, bb2)
+        remove!(bb1)
+        erase!(bb2)
         @test isempty(bbs)
     end
 end
@@ -1539,12 +1539,12 @@ end
     end
 
     @test retinst in instructions(bb3)
-    delete!(bb3, retinst)
+    remove!(retinst)
     @test !(retinst in instructions(bb3))
     @test opcode(retinst) == LLVM.API.LLVMRet   # make sure retinst is still alive
 
     @test brinst in instructions(bb1)
-    unsafe_delete!(bb1, brinst)
+    erase!(brinst)
     @test !(brinst in instructions(bb1))
 end
 
