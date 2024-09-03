@@ -635,7 +635,7 @@ alignment!(val::AlignedValue, bytes::Integer) = API.LLVMSetAlignment(val, bytes)
 
 abstract type GlobalObject <: GlobalValue end
 
-export GlobalVariable, unsafe_delete!,
+export GlobalVariable, erase!,
        initializer, initializer!,
        isthreadlocal, threadlocal!,
        threadlocalmode, threadlocalmode!,
@@ -654,7 +654,7 @@ GlobalVariable(mod::Module, typ::LLVMType, name::String, addrspace::Integer) =
     GlobalVariable(API.LLVMAddGlobalInAddressSpace(mod, typ,
                                                    name, addrspace))
 
-unsafe_delete!(::Module, gv::GlobalVariable) = API.LLVMDeleteGlobal(gv)
+erase!(gv::GlobalVariable) = API.LLVMDeleteGlobal(gv)
 
 function initializer(gv::GlobalVariable)
     init = API.LLVMGetInitializer(gv)

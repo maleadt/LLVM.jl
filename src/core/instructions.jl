@@ -1,4 +1,4 @@
-export Instruction, unsafe_delete!,
+export Instruction, remove!, erase!, parent,
        opcode,
        predicate_int, predicate_real
 
@@ -35,10 +35,8 @@ end
 
 Base.copy(inst::Instruction) = Instruction(API.LLVMInstructionClone(inst))
 
-unsafe_delete!(::BasicBlock, inst::Instruction) =
-    API.LLVMInstructionEraseFromParent(inst)
-Base.delete!(::BasicBlock, inst::Instruction) =
-    API.LLVMInstructionRemoveFromParent(inst)
+remove!(inst::Instruction) = API.LLVMInstructionRemoveFromParent(inst)
+erase!(inst::Instruction) = API.LLVMInstructionEraseFromParent(inst)
 
 parent(inst::Instruction) =
     BasicBlock(API.LLVMGetInstructionParent(inst))
