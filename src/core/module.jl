@@ -24,8 +24,7 @@ end
 Module(name::String) =
     mark_alloc(Module(API.LLVMModuleCreateWithNameInContext(name, context())))
 
-Module(mod::Module) = mark_alloc(Module(API.LLVMCloneModule(mod)))
-Base.copy(mod::Module) = Module(mod)
+Base.copy(mod::Module) = mark_alloc(Module(API.LLVMCloneModule(mod)))
 
 dispose(mod::Module) = mark_dispose(API.LLVMDisposeModule, mod)
 

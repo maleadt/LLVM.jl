@@ -33,8 +33,7 @@ function Instruction(ref::API.LLVMValueRef)
     return T(ref)
 end
 
-Instruction(inst::Instruction) =
-    Instruction(API.LLVMInstructionClone(inst))
+Base.copy(inst::Instruction) = Instruction(API.LLVMInstructionClone(inst))
 
 unsafe_delete!(::BasicBlock, inst::Instruction) =
     API.LLVMInstructionEraseFromParent(inst)
