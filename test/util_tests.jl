@@ -88,6 +88,24 @@
             @test value_type(add) == LLVM.Int64Type()
         end
     end
+
+    # bug in basic clone: mapped parameters were incorrect
+    let
+        ir = """
+            define i64 @"add"(i64 %0, i64 %1) {
+            top:
+                %2 = add i64 %1, %0
+                ret i64 %2
+            }""";
+        @dispose ctx=Context() mod=parse(LLVM.Module, ir) begin
+            src = functions(mod)["add"]
+            value_map = Dict(
+                parameters(src)[1] => ConstantInt(42)
+            );
+            dst = clone(src; value_map)
+            @test length(parameters(dst)) == 1
+        end
+    end
 end
 
 @testset "basic block cloning" begin

@@ -6,7 +6,7 @@ function Base.parse(::Type{Module}, membuf::MemoryBuffer)
     status = API.LLVMParseBitcodeInContext2(context(), membuf, out_ref) |> Bool
     @assert !status # caught by diagnostics handler
 
-    Module(out_ref[])
+    mark_alloc(Module(out_ref[]))
 end
 
 function Base.parse(::Type{Module}, data::Vector)

@@ -14,7 +14,7 @@ function Base.parse(::Type{Module}, ir::String)
         throw(LLVMException(error))
     end
 
-    Module(out_ref[])
+    mark_alloc(Module(out_ref[]))
 end
 
 

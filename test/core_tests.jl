@@ -949,42 +949,44 @@ end
 
     bar_md = MDNode([ConstantInt(Int32(42)), nothing, MDString("string")])
     @test foo_md == bar_md
+
+    dispose(mod)
 end
 
 @testset "debuginfo" begin
 
 @dispose ctx=Context() begin
-mod = parse(LLVM.Module, raw"""
-       define double @test(i64 signext %0, double %1) !dbg !5 {
-       top:
-         %2 = sitofp i64 %0 to double, !dbg !7
-         %3 = fadd double %2, %1, !dbg !18
-         ret double %3, !dbg !17
-       }
+    mod = parse(LLVM.Module, raw"""
+        define double @test(i64 signext %0, double %1) !dbg !5 {
+        top:
+          %2 = sitofp i64 %0 to double, !dbg !7
+          %3 = fadd double %2, %1, !dbg !18
+          ret double %3, !dbg !17
+        }
 
-       !llvm.module.flags = !{!0, !1}
-       !llvm.dbg.cu = !{!2}
+        !llvm.module.flags = !{!0, !1}
+        !llvm.dbg.cu = !{!2}
 
-       !0 = !{i32 2, !"Dwarf Version", i32 4}
-       !1 = !{i32 1, !"Debug Info Version", i32 3}
-       !2 = distinct !DICompileUnit(language: DW_LANG_Julia, file: !3, producer: "julia", isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug, enums: !4, nameTableKind: GNU)
-       !3 = !DIFile(filename: "promotion.jl", directory: ".")
-       !4 = !{}
-       !5 = distinct !DISubprogram(name: "+", linkageName: "julia_+_2055", scope: null, file: !3, line: 321, type: !6, scopeLine: 321, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
-       !6 = !DISubroutineType(types: !4)
-       !7 = !DILocation(line: 94, scope: !8, inlinedAt: !10)
-       !8 = distinct !DISubprogram(name: "Float64;", linkageName: "Float64", scope: !9, file: !9, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
-       !9 = !DIFile(filename: "float.jl", directory: ".")
-       !10 = !DILocation(line: 7, scope: !11, inlinedAt: !13)
-       !11 = distinct !DISubprogram(name: "convert;", linkageName: "convert", scope: !12, file: !12, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
-       !12 = !DIFile(filename: "number.jl", directory: ".")
-       !13 = !DILocation(line: 269, scope: !14, inlinedAt: !15)
-       !14 = distinct !DISubprogram(name: "_promote;", linkageName: "_promote", scope: !3, file: !3, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
-       !15 = !DILocation(line: 292, scope: !16, inlinedAt: !17)
-       !16 = distinct !DISubprogram(name: "promote;", linkageName: "promote", scope: !3, file: !3, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
-       !17 = !DILocation(line: 321, scope: !5)
-       !18 = !DILocation(line: 326, scope: !19, inlinedAt: !17)
-       !19 = distinct !DISubprogram(name: "+;", linkageName: "+", scope: !9, file: !9, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)""")
+        !0 = !{i32 2, !"Dwarf Version", i32 4}
+        !1 = !{i32 1, !"Debug Info Version", i32 3}
+        !2 = distinct !DICompileUnit(language: DW_LANG_Julia, file: !3, producer: "julia", isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug, enums: !4, nameTableKind: GNU)
+        !3 = !DIFile(filename: "promotion.jl", directory: ".")
+        !4 = !{}
+        !5 = distinct !DISubprogram(name: "+", linkageName: "julia_+_2055", scope: null, file: !3, line: 321, type: !6, scopeLine: 321, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+        !6 = !DISubroutineType(types: !4)
+        !7 = !DILocation(line: 94, scope: !8, inlinedAt: !10)
+        !8 = distinct !DISubprogram(name: "Float64;", linkageName: "Float64", scope: !9, file: !9, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+        !9 = !DIFile(filename: "float.jl", directory: ".")
+        !10 = !DILocation(line: 7, scope: !11, inlinedAt: !13)
+        !11 = distinct !DISubprogram(name: "convert;", linkageName: "convert", scope: !12, file: !12, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+        !12 = !DIFile(filename: "number.jl", directory: ".")
+        !13 = !DILocation(line: 269, scope: !14, inlinedAt: !15)
+        !14 = distinct !DISubprogram(name: "_promote;", linkageName: "_promote", scope: !3, file: !3, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+        !15 = !DILocation(line: 292, scope: !16, inlinedAt: !17)
+        !16 = distinct !DISubprogram(name: "promote;", linkageName: "promote", scope: !3, file: !3, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)
+        !17 = !DILocation(line: 321, scope: !5)
+        !18 = !DILocation(line: 326, scope: !19, inlinedAt: !17)
+        !19 = distinct !DISubprogram(name: "+;", linkageName: "+", scope: !9, file: !9, type: !6, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !4)""")
 
     fun = functions(mod)["test"]
     bb = first(collect(blocks(fun)))
@@ -1023,6 +1025,8 @@ mod = parse(LLVM.Module, raw"""
 
     loc = LLVM.inlined_at(loc)
     @test loc === nothing
+
+    dispose(mod)
 end
 
 end
