@@ -83,7 +83,7 @@ Metadata(val::Value) = Metadata(API.LLVMValueAsMetadata(val))
 Base.convert(T::Type{<:Metadata}, val::Value) = Metadata(val)::T
 
 
-## values
+## strings
 
 export MDString
 
@@ -95,7 +95,7 @@ register(MDString, API.LLVMMDStringMetadataKind)
 MDString(val::String) =
     MDString(API.LLVMMDStringInContext2(context(), val, length(val)))
 
-function Base.string(md::MDString)
+function Base.convert(::Type{String}, md::MDString)
     len = Ref{Cuint}()
     ptr = API.LLVMGetMDString2(md, len)
     return unsafe_string(convert(Ptr{Int8}, ptr), len[])

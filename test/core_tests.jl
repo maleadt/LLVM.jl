@@ -870,7 +870,7 @@ end
 
 @dispose ctx=Context() begin
     str = MDString("foo")
-    @test string(str) == "foo"
+    @test convert(String, str) == "foo"
 
     # wrap as Value
     val = Value(str)

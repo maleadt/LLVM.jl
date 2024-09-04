@@ -33,3 +33,9 @@ Base.@deprecate_binding ValueMetadataDict LLVM.InstructionMetadataDict
 @deprecate unsafe_delete!(::Module, f::Function) erase!(f)
 @deprecate unsafe_delete!(::Function, bb::BasicBlock) erase!(bb)
 @deprecate unsafe_delete!(::BasicBlock, inst::Instruction) erase!(inst)
+
+@deprecate Base.string(md::MDString) convert(String, md) false
+function Base.show(io::IO, ::MIME"text/plain", md::MDString)
+    str = @invoke string(md::Metadata)
+    print(io, strip(str))
+end
