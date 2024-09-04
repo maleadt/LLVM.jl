@@ -20,11 +20,9 @@ end
         @test_throws LLVMException ts_mod() do mod
             error("Error")
         end
-        run = Ref{Bool}(false)
-        ts_mod() do mod
-            run[] = true
+        @test ts_mod() do mod
+            true
         end
-        @test run[]
     end
 end
 
