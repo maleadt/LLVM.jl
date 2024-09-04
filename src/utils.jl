@@ -16,7 +16,7 @@ function materializer_callback(val, materializer)
 end
 
 function clone_into!(new::Function, old::Function;
-                     value_map::Dict{Value,Value}=Dict{Value,Value}(),
+                     value_map::Dict{<:Value,<:Value}=Dict{Value,Value}(),
                      changes=API.LLVMCloneFunctionChangeTypeLocalChangesOnly,
                      suffix::String="", type_mapper=nothing, materializer=nothing)
     value_map_array = Value[]
@@ -43,14 +43,16 @@ function clone_into!(new::Function, old::Function;
                               materializer_ptr, materializer_data)
 end
 
-function clone(f::Function; value_map::Dict{Value,Value}=Dict{Value,Value}())
+function clone(f::Function; value_map::Dict{<:Value,<:Value}=Dict{Value,Value}())
     argtypes = LLVMType[]
 
     # The user might be deleting arguments to the function by specifying them in
     # the VMap. If so, we need to not add the arguments to the arg ty vector
+    remaining_parameters = Value[]
     for arg in parameters(f)
         if !in(arg, keys(value_map))    # Haven't mapped the argument to anything yet?
             push!(argtypes, value_type(arg))
+            push!(remaining_parameters, arg)
         end
     end
 
@@ -65,7 +67,8 @@ function clone(f::Function; value_map::Dict{Value,Value}=Dict{Value,Value}())
     # TODO: address space
 
     # Loop over the arguments, copying the names of the mapped arguments over...
-    for (arg, new_arg) in zip(parameters(f), parameters(new_f))
+    value_map = Dict{Value,Value}(value_map)
+    for (arg, new_arg) in zip(remaining_parameters, parameters(new_f))
         if !in(arg, keys(value_map))    # Is this argument preserved?
             name!(new_arg, name(arg))   # Copy the name over...
             value_map[arg] = new_arg    # Add mapping to VMap
@@ -95,7 +98,7 @@ basic block.
     This can be done passing a `value_map` dictionary.
 """
 function clone(bb::BasicBlock; dest::Union{Nothing,Function}=parent(bb), suffix::String="",
-               value_map::Dict{Value,Value}=Dict{Value,Value}())
+               value_map::Dict{<:Value,<:Value}=Dict{Value,Value}())
     value_map_array = Value[]
     for (src, dest) in value_map
         push!(value_map_array, src)
