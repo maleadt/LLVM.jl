@@ -24,6 +24,22 @@ end
             true
         end
     end
+
+    @dispose ctx=Context() ts_ctx=ThreadSafeContext() begin
+        src_mod = LLVM.Module("SomeModule")
+        ts_mod = ThreadSafeModule(src_mod)
+        ts_mod() do copied_mod
+            # XXX: this is a very specific test to check the current implementation of the
+            #      ThreadSafeModule constructor, which currently copies the source module
+            #      from its context into the thread safe one. This is questionable; maybe
+            #      it should create a ThreadSafeModule in a ThreadSafeContext matching the
+            #      source context. However, that would result in a TSMod that doesn't match
+            #      the currently-active ts_context()...
+            @test context(copied_mod) != context(src_mod)
+            @test context(copied_mod) == context(ts_context())
+        end
+        dispose(ts_mod)
+    end
 end
 
 @testset "JITDylib" begin
