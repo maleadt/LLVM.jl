@@ -1,6 +1,5 @@
 export Instruction, remove!, erase!, parent,
-       opcode,
-       predicate_int, predicate_real
+       opcode
 
 # forward definition of Instruction in src/core/value/constant.jl
 register(Instruction, API.LLVMInstructionValueKind)
@@ -76,9 +75,11 @@ end
 
 ## comparisons
 
-predicate_int(inst::ICmpInst) = API.LLVMGetICmpPredicate(inst)
+export predicate
 
-predicate_real(inst::FCmpInst) = API.LLVMGetFCmpPredicate(inst)
+predicate(inst::ICmpInst) = API.LLVMGetICmpPredicate(inst)
+
+predicate(inst::FCmpInst) = API.LLVMGetFCmpPredicate(inst)
 
 
 ## atomics

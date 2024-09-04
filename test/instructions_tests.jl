@@ -351,9 +351,11 @@
 
     icmpinst = icmp!(builder, LLVM.API.LLVMIntEQ, int1, int2)
     @check_ir icmpinst "icmp eq i32 %0, %1"
+    @test predicate(icmpinst) == LLVM.API.LLVMIntEQ
 
     fcmpinst = fcmp!(builder, LLVM.API.LLVMRealOEQ, float1, float2)
     @check_ir fcmpinst "fcmp oeq float %2, %3"
+    @test predicate(fcmpinst) == LLVM.API.LLVMRealOEQ
 
     phiinst = phi!(builder, LLVM.Int32Type())
     @check_ir phiinst "phi i32 "
