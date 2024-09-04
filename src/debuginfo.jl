@@ -161,14 +161,14 @@ register(DICompileUnit, API.LLVMDICompileUnitMetadataKind)
 
 ## other
 
-export DEBUG_METADATA_VERSION, strip_debuginfo!
+export DEBUG_METADATA_VERSION, strip_debuginfo!, subprogram, subprogram!
 
 DEBUG_METADATA_VERSION() = API.LLVMDebugMetadataVersion()
 
 strip_debuginfo!(mod::Module) = API.LLVMStripModuleDebugInfo(mod)
 
-function get_subprogram(func::Function)
+function subprogram(func::Function)
     ref = API.LLVMGetSubprogram(func)
     ref==C_NULL ? nothing : Metadata(ref)::DISubProgram
 end
-set_subprogram!(func::Function, sp::DISubProgram) = API.LLVMSetSubprogram(func, sp)
+subprogram!(func::Function, sp::DISubProgram) = API.LLVMSetSubprogram(func, sp)

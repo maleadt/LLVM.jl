@@ -47,14 +47,14 @@ DEBUG_METADATA_VERSION()
 
     foo = functions(mod)["foo"]
 
-    let sp = LLVM.get_subprogram(foo)
+    let sp = subprogram(foo)
       @test sp !== nothing
       @test LLVM.line(sp) == 1
 
       bar = functions(mod)["bar"]
-      @test LLVM.get_subprogram(bar) === nothing
-      LLVM.set_subprogram!(bar, sp)
-      @test LLVM.get_subprogram(bar) == sp
+      @test subprogram(bar) === nothing
+      subprogram!(bar, sp)
+      @test subprogram(bar) == sp
     end
 
     bb = entry(foo)
