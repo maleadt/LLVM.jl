@@ -9,7 +9,6 @@
 
 Base.@deprecate_binding ValueMetadataDict LLVM.InstructionMetadataDict
 
-
 @deprecate(fence!(builder::IRBuilder, ordering::API.LLVMAtomicOrdering, syncscope::String,
                   Name::String=""),
            fence!(builder, ordering, SyncScope(syncscope), Name), false)
@@ -28,6 +27,9 @@ Base.@deprecate_binding ValueMetadataDict LLVM.InstructionMetadataDict
 
 @deprecate Module(mod::Module) copy(mod) false
 @deprecate Instruction(inst::Instruction) copy(inst) false
+
+@deprecate Base.delete!(::Function, bb::BasicBlock) remove!(bb) false
+@deprecate Base.delete!(::BasicBlock, inst::Instruction) remove!(inst) false
 
 @deprecate unsafe_delete!(::Module, gv::GlobalVariable) erase!(gv)
 @deprecate unsafe_delete!(::Module, f::Function) erase!(f)
