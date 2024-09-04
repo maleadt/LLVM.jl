@@ -58,7 +58,10 @@ function dispose(mod::ThreadSafeModule)
 end
 
 mutable struct ThreadSafeModuleCallback
+    ret::Ref{Any}
     callback
+
+    ThreadSafeModuleCallback(callback) = new(Ref{Any}(), callback)
 end
 
 function tsm_callback(data::Ptr{Cvoid}, ref::API.LLVMModuleRef)
@@ -67,7 +70,7 @@ function tsm_callback(data::Ptr{Cvoid}, ref::API.LLVMModuleRef)
     ctx = context(mod)
     activate(ctx)
     try
-        cb.callback(Module(ref))
+        cb.ret = cb.callback(Module(ref))
     catch err
         msg = sprint(Base.display_error, err, Base.catch_backtrace())
         return API.LLVMCreateStringError(msg)
@@ -91,5 +94,5 @@ function (mod::ThreadSafeModule)(f)
             @cfunction(tsm_callback, API.LLVMErrorRef, (Ptr{Cvoid}, API.LLVMModuleRef)),
             Base.pointer_from_objref(cb))
     end
-    return mod
+    cb.ret[]
 end
