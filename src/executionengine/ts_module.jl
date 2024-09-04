@@ -37,8 +37,23 @@ end
 Base.unsafe_convert(::Type{API.LLVMOrcThreadSafeModuleRef}, mod::ThreadSafeModule) = mod.ref
 
 function ThreadSafeModule(mod::Module)
+    if context(mod) != context(ts_context())
+        # XXX: the C API doesn't expose the convenience method to create a TSModule from a
+        #      Module and a regular Context, only a method to create one from a Module
+        #      and a pre-existing TSContext, which isn't useful...
+        # TODO: expose the other convenience method?
+        # XXX: work around this by serializing/deserializing the module in the correct contex
+        bitcode = convert(MemoryBuffer, mod)
+        mod = context!(context(ts_context())) do
+            parse(Module, bitcode)
+        end
+    end
+    @assert context(mod) == context(ts_context())
+
     ref = API.LLVMOrcCreateNewThreadSafeModule(mod, ts_context())
-    ThreadSafeModule(ref)
+    tsm = ThreadSafeModule(ref)
+    mark_dispose(mod)
+    return tsm
 end
 
 function ThreadSafeModule(name::String)
@@ -48,9 +63,7 @@ function ThreadSafeModule(name::String)
     mod = context!(ctx) do
         Module(name)
     end
-    tsm = ThreadSafeModule(mod)
-    mark_dispose(mod)
-    return tsm
+    ThreadSafeModule(mod)
 end
 
 function dispose(mod::ThreadSafeModule)
