@@ -41,3 +41,6 @@ function Base.show(io::IO, ::MIME"text/plain", md::MDString)
     str = @invoke string(md::Metadata)
     print(io, strip(str))
 end
+
+@deprecate get_subprogram(func::Function) subprogram(func) false
+@deprecate set_subprogram!(func::Function, sp::DISubProgram) subprogram!(func, sp) false
