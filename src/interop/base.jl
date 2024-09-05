@@ -87,6 +87,8 @@ end
 Check if a type is a ghost type, implying it would not be emitted by the Julia compiler.
 This only works for types created by the Julia compiler (living in its LLVM context).
 """
+isghosttype
+
 isghosttype(@nospecialize(T::LLVMType)) = T == LLVM.VoidType() || isempty(T)
 function isghosttype(@nospecialize(t::Type))
     if context(; throw_error=false) === nothing

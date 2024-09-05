@@ -1,7 +1,18 @@
 export trap, assume
 
+"""
+    trap()
+
+Trap the program, causing it to abort.
+"""
 @inline trap() = ccall("llvm.trap", llvmcall, Cvoid, ())
 
+"""
+    assume(cond::Bool)
+
+Assume that the condition `cond` is true. This is a hint to the compiler, possibly enabling
+it to optimize more aggressively.
+"""
 @inline assume(cond::Bool) = Base.llvmcall(("""
         declare void @llvm.assume(i1)
 

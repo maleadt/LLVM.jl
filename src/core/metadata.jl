@@ -2,9 +2,14 @@
 
 export Metadata
 
-# subtypes are expected to have a 'ref::API.LLVMMetadataRef' field
+"""
+    Metadata
+
+Abstract supertype for all metadata types.
+"""
 abstract type Metadata end
 
+# subtypes are expected to have a 'ref::API.LLVMMetadataRef' field
 Base.unsafe_convert(::Type{API.LLVMMetadataRef}, md::Metadata) = md.ref
 
 # XXX: LLVMMetadataKind is simply unsigned, so we don't know the max enum
@@ -47,13 +52,26 @@ end
 
 # this is for interfacing with (older) APIs that accept a Value*, not a Metadata*
 
+"""
+    LLVM.MetadataAsValue
+
+Metadata wrapped as a regular value, for use in APIs that expect a `LLVM.Value`.
+
+See also: [`Value(::Metadata)`](@ref) to convert back to a value.
+"""
 @checked struct MetadataAsValue <: Value
     ref::API.LLVMValueRef
 end
 register(MetadataAsValue, API.LLVMMetadataAsValueValueKind)
 
-# NOTE: this can be used to both pack e.g. metadata as a value, and to extract the
-#       value from an ValueAsMetadata, so we don't type-assert narrowly here
+"""
+    Value(md::Metadata)
+
+Wrap the given metadata as a value, for use in APIs that expect a `LLVM.Value`.
+
+When the metadata is already a value wrapped as metadata, this will simply return the
+original value.
+"""
 Value(md::Metadata) = Value(API.LLVMMetadataAsValue2(context(), md))
 
 Base.convert(T::Type{<:Value}, val::Metadata) = Value(val)::T
@@ -64,6 +82,13 @@ Base.convert(T::Type{<:Value}, val::Metadata) = Value(val)::T
 
 ## value as metadata
 
+"""
+    LLVM.ValueAsMetadata
+
+Abstract type for values wrapped as metadata, for use in APIs that expect a `LLVM.Metadata`.
+
+See also: [`Metadata(::Value)`](@ref) to convert back to a metadata.
+"""
 abstract type ValueAsMetadata <: Metadata end
 
 @checked struct ConstantAsMetadata <: ValueAsMetadata
@@ -76,25 +101,47 @@ register(ConstantAsMetadata, API.LLVMConstantAsMetadataMetadataKind)
 end
 register(LocalAsMetadata, API.LLVMLocalAsMetadataMetadataKind)
 
-# NOTE: this can be used to both pack e.g. constants as metadata, and to extract the
-#       metadata from an MetadataAsValue, so we don't type-assert narrowly here
+"""
+    Metadata(val::Value)
+
+Wrap the given value as metadata, for use in APIs that expect a `LLVM.Metadata`.
+
+When the value is already metadata wrapped as a value, this will simply return the
+original metadata.
+"""
 Metadata(val::Value) = Metadata(API.LLVMValueAsMetadata(val))
 
 Base.convert(T::Type{<:Metadata}, val::Value) = Metadata(val)::T
 
 
 ## strings
+## strings
 
 export MDString
 
+"""
+    MDString
+
+A string metadata node.
+"""
 @checked struct MDString <: Metadata
     ref::API.LLVMMetadataRef
 end
 register(MDString, API.LLVMMDStringMetadataKind)
 
+"""
+    MDString(val::String)
+
+Create a new string metadata node from the given Julia string.
+"""
 MDString(val::String) =
     MDString(API.LLVMMDStringInContext2(context(), val, length(val)))
 
+"""
+    convert(String, md::MDString)
+
+Get the string value of the given string metadata node.
+"""
 function Base.convert(::Type{String}, md::MDString)
     len = Ref{Cuint}()
     ptr = API.LLVMGetMDString2(md, len)
@@ -106,8 +153,20 @@ end
 
 export MDNode, operands
 
+"""
+    MDNode
+
+Abstract supertype for metadata nodes that can have operands.
+
+See also: [`MDTuple`](@ref) for a concrete subtype.
+"""
 abstract type MDNode <: Metadata end
 
+"""
+    operands(md::MDNode)
+
+Get the operands of the given metadata node.
+"""
 function operands(md::MDNode)
     nops = API.LLVMGetMDNodeNumOperands2(md)
     ops = Vector{API.LLVMMetadataRef}(undef, nops)
@@ -125,16 +184,27 @@ end
 
 export MDTuple
 
+"""
+    MDTuple
+
+A tuple metadata node.
+"""
 @checked struct MDTuple <: MDNode
     ref::API.LLVMMetadataRef
 end
 register(MDTuple, API.LLVMMDTupleMetadataKind)
 
-# MDTuples are commonly referred to as MDNodes, so keep that name
-MDNode(mds::Vector{<:Metadata}) =
-    MDTuple(API.LLVMMDNodeInContext2(context(), mds, length(mds)))
+"""
+    MDNode(vals::Vector) -> MDTuple
+
+Create a new tuple metadata node from the given operands.
+
+Passing `nothing` as a value will result in a null operand.
+"""
 MDNode(vals::Vector) =
     MDNode(convert(Vector{Metadata}, vals))
+MDNode(mds::Vector{<:Metadata}) =
+    MDTuple(API.LLVMMDNodeInContext2(context(), mds, length(mds)))
 
 # we support passing `nothing`, but convert it to a non-exported `MDNull` instance
 # so that we can keep everything as a subtype of `Metadata`
@@ -147,6 +217,16 @@ Base.unsafe_convert(::Type{API.LLVMMetadataRef}, md::MDNull) =
 ## metadata
 
 export metadata, MDKind
+
+"""
+    metadata(inst::Instruction)
+    metadata(inst::GlobalObject)
+
+Iterate over the metadata of the given instruction or global object.
+
+These iterators are mutable, and implement `setindex!` and `delete!` to modify the metadata.
+"""
+metadata(::Union{Instruction, GlobalObject})
 
 @cenum(MDKind, MD_dbg = 0,
                MD_tbaa = 1,
@@ -180,10 +260,10 @@ MDKind(kind::MDKind) = kind
 
 # TODO: doesn't actually iterate, since we can't list the available keys
 struct InstructionMetadataDict <: AbstractDict{MDKind,MetadataAsValue}
-    val::Value
+    val::Instruction
 end
 
-metadata(val::Value) = InstructionMetadataDict(val)
+metadata(inst::Instruction) = InstructionMetadataDict(inst)
 
 Base.isempty(md::InstructionMetadataDict) = !Bool(API.LLVMHasMetadata(md.val))
 
@@ -254,8 +334,11 @@ Base.delete!(md::GlobalMetadataDict, key) =
 
 export NamedMDNode, operands
 
-# a named metadata note, tying together a name and a MDNode
+"""
+    NamedMDNode
 
+A named metadata node, which is a collection of metadata nodes with a name.
+"""
 struct NamedMDNode
     mod::LLVM.Module # not exposed by the API
     ref::API.LLVMNamedMDNodeRef
@@ -263,6 +346,11 @@ end
 
 Base.unsafe_convert(::Type{API.LLVMNamedMDNodeRef}, node::NamedMDNode) = node.ref
 
+"""
+    name(node::NamedMDNode)
+
+Get the name of the given named metadata node.
+"""
 function name(node::NamedMDNode)
     len = Ref{Csize_t}()
     data = API.LLVMGetNamedMetadataName(node, len)
@@ -279,6 +367,11 @@ function Base.show(io::IO, mime::MIME"text/plain", node::NamedMDNode)
     return io
 end
 
+"""
+    operands(node::NamedMDNode)
+
+Get the operands of the given named metadata node.
+"""
 function operands(node::NamedMDNode)
     nops = API.LLVMGetNamedMetadataNumOperands2(node)
     ops = Vector{API.LLVMMetadataRef}(undef, nops)
@@ -288,6 +381,11 @@ function operands(node::NamedMDNode)
     return [Metadata(op) for op in ops]
 end
 
+"""
+    push!(node::NamedMDNode, val::MDNode)
+
+Add a metadata node to the given named metadata node.
+"""
 Base.push!(node::NamedMDNode, val::MDNode) =
     API.LLVMAddNamedMetadataOperand2(node, val)
 

@@ -1,5 +1,12 @@
 ## user values (<: llvm::User)
 
+"""
+    LLVM.User <: LLVM.Value
+
+A value that uses other values.
+
+See also: [`operands`](@ref).
+"""
 abstract type User <: Value end
 
 # operand iteration
@@ -10,6 +17,11 @@ struct UserOperandSet <: AbstractVector{Value}
     user::User
 end
 
+"""
+    operands(user::LLVM.User)
+
+Get an iterator over the operands of the given user.
+"""
 operands(user::User) = UserOperandSet(user)
 
 Base.size(iter::UserOperandSet) = (API.LLVMGetNumOperands(iter.user),)

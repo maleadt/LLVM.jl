@@ -1,5 +1,4 @@
-export LLJITBuilder, LLJIT, ExecutionSession, JITDylib,
-       ThreadSafeModule, ThreadSafeContext, OrcTargetAddress
+export LLJITBuilder, LLJIT, ExecutionSession, JITDylib, OrcTargetAddress
 export TargetMachineBuilder, targetmachinebuilder!, linkinglayercreator!
 export mangle, lookup, intern
 export ObjectLinkingLayer, register!

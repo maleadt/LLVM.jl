@@ -2,12 +2,63 @@
 
 export ismultithreaded
 
+"""
+    ismultithreaded()
+
+Check whether LLVM is executing in thread-safe mode or not.
+"""
 ismultithreaded() = API.LLVMIsMultithreaded() |> Bool
 
 
 ## back-end initialization
 
 export backends
+
+@doc """
+    LLVM.InitializeAllTargetInfos()
+	LLVM.InitializeXXXTargetInfo()
+
+Enables access to specific targets.
+""" InitializeAllTargetInfos
+
+@doc """
+	LLVM.InitializeAllTargets()
+	LLVM.InitializeXXXTarget()
+	LLVM.InitializeNativeTarget()
+
+Enables use of specific targets.
+""" InitializeAllTargets
+
+@doc """
+	LLVM.InitializeAllTargetMCs()
+	LLVM.InitializeXXXTargetMC()
+
+Enable use of machine code generation for specific targets.
+""" InitializeAllTargetMCs
+
+@doc """
+	LLVM.InitializeAllAsmPrinters()
+	LLVM.InitializeXXXAsmPrinter()
+	LLVM.InitializeNativeAsmPrinter()
+
+Enables use of assembly output functionality for specific targets.
+""" InitializeAllAsmPrinters
+
+@doc """
+	LLVM.InitializeAllAsmParsers()
+	LLVM.InitializeXXXAsmParser()
+	LLVM.InitializeNativeAsmParser()
+
+Enables use of assembly parsing functionality for specific targets.
+""" InitializeAllAsmParsers
+
+@doc """
+	LLVM.InitializeAllDisassemblers()
+	LLVM.InitializeXXXDisassembler()
+	LLVM.InitializeNativeDisassembler()
+
+Enables use of disassembly functionality for specific targets.
+""" InitializeAllDisassemblers
 
 const libllvm_backends = [:AArch64, :AMDGPU, :ARC, :ARM, :AVR, :BPF, :Hexagon, :Lanai,
                           :MSP430, :Mips, :NVPTX, :PowerPC, :RISCV, :Sparc, :SystemZ,
@@ -24,7 +75,14 @@ Libdl.dlopen(libllvm) do library
         initializer = "LLVMInitialize$(backend)Target"
         Libdl.dlsym(library, initializer; throw_error=false) !== nothing
     end
-    @eval backends() = $supported_backends
+    @eval begin
+        """
+            backends()
+
+        Return a list of back-ends supported by the LLVM library.
+        """
+        backends() = $supported_backends
+    end
 
     # generate subsystem initialization routines for every back-end
     supported_components = Dict(component => [] for component in libllvm_components)
@@ -33,7 +91,11 @@ Libdl.dlopen(libllvm) do library
 
         for component in libllvm_components
             jl_fname = Symbol(:Initialize, backend, component)
-            @eval export $jl_fname
+            jl_all_fname = Symbol(:Initialize, :All, component, :s)
+            @eval begin
+                export $jl_fname
+                @doc (@doc $jl_all_fname) $jl_fname
+            end
 
             api_fname = Symbol(:LLVM, jl_fname)
             if backend_supported
@@ -72,9 +134,11 @@ end
 # same, for the native back-end
 for component in [:Target, :AsmPrinter, :AsmParser, :Disassembler]
     jl_fname = Symbol(:Initialize, :Native, component)
+    jl_all_fname = Symbol(:Initialize, :All, component, :s)
     api_fname = Symbol(:LLVMExtra, jl_fname)
     @eval begin
         export $jl_fname
+        @doc (@doc $jl_all_fname) $jl_fname
         function $jl_fname()
             if Bool(API.$api_fname())
                throw(LLVMException("No native target available."))

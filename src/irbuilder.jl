@@ -5,6 +5,11 @@ export IRBuilder,
        position!,
        debuglocation, debuglocation!
 
+"""
+    IRBuilder
+
+An instruction builder, which is used to build instructions within a basic block.
+"""
 @checked struct IRBuilder
     ref::API.LLVMBuilderRef
 end
@@ -12,10 +17,27 @@ end
 Base.unsafe_convert(::Type{API.LLVMBuilderRef}, builder::IRBuilder) =
     mark_use(builder).ref
 
+"""
+    IRBuilder()
+
+Create a new, unpositioned instruction builder.
+
+This object needs to be disposed of using [`dispose`](@ref).
+"""
 IRBuilder() = mark_alloc(IRBuilder(API.LLVMCreateBuilderInContext(context())))
 
+"""
+    dispose(builder::IRBuilder)
+
+Dispose of an instruction builder.
+"""
 dispose(builder::IRBuilder) = mark_dispose(API.LLVMDisposeBuilder, builder)
 
+"""
+    context(builder::IRBuilder)
+
+Get the context associated with an instruction builder.
+"""
 context(builder::IRBuilder) = Context(API.LLVMGetBuilderContext(builder))
 
 function IRBuilder(f::Core.Function, args...; kwargs...)
@@ -29,28 +51,82 @@ end
 
 Base.show(io::IO, builder::IRBuilder) = @printf(io, "IRBuilder(%p)", builder.ref)
 
+"""
+    position(builder::IRBuilder)
+
+Return the current position of the instruction builder.
+"""
 Base.position(builder::IRBuilder) = BasicBlock(API.LLVMGetInsertBlock(builder))
+
+"""
+    position!(builder::IRBuilder, inst::Instruction)
+
+Position the instruction builder before the given instruction.
+"""
 position!(builder::IRBuilder, inst::Instruction) =
     API.LLVMPositionBuilderBefore(builder, inst)
+
+"""
+    position!(builder::IRBuilder, bb::BasicBlock)
+
+Position the instruction builder at the end of the given basic block.
+"""
 position!(builder::IRBuilder, bb::BasicBlock) =
     API.LLVMPositionBuilderAtEnd(builder, bb)
+
+"""
+    position!(builder::IRBuilder)
+
+Clear the current position of the instruction builder.
+"""
 position!(builder::IRBuilder) = API.LLVMClearInsertionPosition(builder)
 
-Base.insert!(builder::IRBuilder, inst::Instruction) =
-    API.LLVMInsertIntoBuilder(builder, inst)
+"""
+    insert!(builder::IRBuilder, inst::Instruction, [name::String])
+
+Insert an instruction into the current basic block at the current position, optionally
+giving it a name.
+"""
 Base.insert!(builder::IRBuilder, inst::Instruction, name::String) =
     API.LLVMInsertIntoBuilderWithName(builder, inst, name)
 
+"""
+    debuglocation(builder::IRBuilder)
+
+Get the current debug location of the instruction builder, or `nothing` if no location is
+set.
+"""
 function debuglocation(builder::IRBuilder)
     ref = API.LLVMGetCurrentDebugLocation2(builder)
     ref == C_NULL ? nothing : Metadata(ref)
 end
+
+"""
+    debuglocation!(builder::IRBuilder)
+
+Clear the current debug location of the instruction builder.
+"""
 debuglocation!(builder::IRBuilder) =
     API.LLVMSetCurrentDebugLocation2(builder, C_NULL)
+
+"""
+    debuglocation!(builder::IRBuilder, loc)
+
+Set the current debug location of the instruction builder to `loc`, which can be a
+`Metadata` or `MetadataAsValue`.
+"""
+debuglocation!(builder::IRBuilder, loc::Union{Metadata,MetadataAsValue})
 debuglocation!(builder::IRBuilder, loc::Metadata) =
     API.LLVMSetCurrentDebugLocation2(builder, loc)
 debuglocation!(builder::IRBuilder, loc::MetadataAsValue) =
     API.LLVMSetCurrentDebugLocation2(builder, Metadata(loc))
+
+"""
+    debuglocation!(builder::IRBuilder, inst::Instruction)
+
+Set the current debug location of the instruction builder to the location of the given
+instruction.
+"""
 debuglocation!(builder::IRBuilder, inst::Instruction) =
     API.LLVMSetInstDebugLocation(builder, inst)
 
