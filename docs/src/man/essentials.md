@@ -154,7 +154,7 @@ julia> @dispose ctx=Context() mod=LLVM.Module("jit") begin
 
 It is recommended to use the [`@dispose`](@ref) macro whenever possible.
 
-## Debugging missing disposals
+### Debugging missing disposals
 
 To ensure that all resources are properly disposed of, LLVM.jl provides functionality to
 track the creation and disposal of objects. This can be enabled by setting the `memcheck`
