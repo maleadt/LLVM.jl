@@ -4,13 +4,6 @@ using Test
 
 using LLVM
 
-if LLVM.version() >= v"17" && Sys.islinux()
-
-# maleadt/LLVM.jl#405
-@error "ORC is broken on Linux with LLVM >= 17"
-
-else
-
 if length(ARGS) == 2
     x, y = parse.([Int32], ARGS[1:2])
 else
@@ -68,5 +61,3 @@ end
 @test call_sum(x, y) == x + y
 LLVM.dispose(jit)
 LLVM.dispose(tm)
-
-end

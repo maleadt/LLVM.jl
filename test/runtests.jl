@@ -41,12 +41,5 @@ runtests(LLVM; worker_init_expr, nworkers=min(Sys.CPU_THREADS,4), nworker_thread
         LLVM.has_oldpm() || return false
     end
 
-    if ti.name == "orc"
-        if LLVM.version() >= v"17" && Sys.islinux()
-            # maleadt/LLVM.jl#405
-            return false
-        end
-    end
-
     true
 end
