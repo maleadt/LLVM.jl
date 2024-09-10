@@ -164,6 +164,7 @@ end
             verify(f2)
         end
 
+        dispose(mod)
     end
 
 end

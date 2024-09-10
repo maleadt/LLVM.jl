@@ -91,9 +91,11 @@ function ThreadSafeModule(mod::Module)
         # TODO: expose the other convenience method?
         # XXX: work around this by serializing/deserializing the module in the correct contex
         bitcode = convert(MemoryBuffer, mod)
-        mod = context!(context(ts_context())) do
+        new_mod = context!(context(ts_context())) do
             parse(Module, bitcode)
         end
+        dispose(mod)
+        mod = new_mod
     end
     @assert context(mod) == context(ts_context())
 

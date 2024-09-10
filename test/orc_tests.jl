@@ -35,7 +35,7 @@ end
             #      it should create a ThreadSafeModule in a ThreadSafeContext matching the
             #      source context. However, that would result in a TSMod that doesn't match
             #      the currently-active ts_context()...
-            @test context(copied_mod) != context(src_mod)
+            @test context(copied_mod) != ctx
             @test context(copied_mod) == context(ts_context())
         end
         dispose(ts_mod)
