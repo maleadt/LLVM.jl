@@ -389,13 +389,16 @@
     strinst = globalstring!(builder, "foobar")
     @check_ir strinst "private unnamed_addr constant [7 x i8] c\"foobar\\00\""
 
+    str2inst = globalstring!(builder, "foobar"; addrspace=2, add_null=false)
+    @check_ir str2inst "private unnamed_addr addrspace(2) constant [6 x i8] c\"foobar\""
+
     strptrinst = globalstring_ptr!(builder, "foobar")
     if supports_typed_pointers(ctx)
-        @check_ir strptrinst "i8* getelementptr inbounds ([7 x i8], [7 x i8]* @1, i32 0, i32 0)"
+        @check_ir strptrinst "i8* getelementptr inbounds ([7 x i8], [7 x i8]* @2, i32 0, i32 0)"
     elseif LLVM.version() < v"15"
         # globalstring_ptr! returns a i8* ptr instead of a ptr to an i8 array.
         # that difference is moot when we have opaque pointers...
-        @check_ir strptrinst "ptr getelementptr inbounds ([7 x i8], ptr @1, i32 0, i32 0)"
+        @check_ir strptrinst "ptr getelementptr inbounds ([7 x i8], ptr @2, i32 0, i32 0)"
     else
         # ... so it is folded away now.
         @check_ir strptrinst "private unnamed_addr constant [7 x i8] c\"foobar\\00\""
