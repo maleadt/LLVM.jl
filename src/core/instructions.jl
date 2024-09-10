@@ -1,5 +1,4 @@
-export Instruction, remove!, erase!, parent,
-       opcode
+export Instruction, remove!, erase!, opcode
 
 """
     Instruction
