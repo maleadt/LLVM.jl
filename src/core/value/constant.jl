@@ -599,12 +599,12 @@ const_fcmp(Predicate::API.LLVMRealPredicate, lhs::Constant, rhs::Constant) =
 const_shl(lhs::Constant, rhs::Constant) =
     Value(API.LLVMConstShl(lhs, rhs))
 
-function const_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
-    Value(API.LLVMConstGEP2(val, Ty, Indices, length(Indices)))
+function const_gep(Ty::LLVMType, val::Constant, Indices::Vector{<:Constant})
+    Value(API.LLVMConstGEP2(Ty, val, Indices, length(Indices)))
 end
 
-function const_inbounds_gep(val::Constant, Ty::LLVMType, Indices::Vector{<:Constant})
-    Value(API.LLVMConstInBoundsGEP2(val, Ty, Indices, length(Indices)))
+function const_inbounds_gep(Ty::LLVMType, val::Constant, Indices::Vector{<:Constant})
+    Value(API.LLVMConstInBoundsGEP2(Ty, val, Indices, length(Indices)))
 end
 
 const_trunc(val::Constant, ToType::LLVMType) =

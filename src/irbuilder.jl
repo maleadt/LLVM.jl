@@ -518,11 +518,41 @@ not!(builder::IRBuilder, V::Value, Name::String="") =
 
 # other build methods
 
-globalstring!(builder::IRBuilder, Str::String, Name::String="") =
-    Value(API.LLVMBuildGlobalString(builder, Str, Name))
+#globalstring!(builder::IRBuilder, Str::String, Name::String="") =
+#    Value(API.LLVMBuildGlobalString(builder, Str, Name))
 
-globalstring_ptr!(builder::IRBuilder, Str::String, Name::String="") =
-    Value(API.LLVMBuildGlobalStringPtr(builder, Str, Name))
+# re-implementation for flexibility (exposing addrspace, add_null)
+function globalstring!(mod::LLVM.Module, str::String, name::String="";
+                       addrspace::Integer=0, add_null::Bool=true)
+    bytes = Vector{UInt8}(str)
+    if add_null
+        push!(bytes, 0x00)
+    end
+    constant = ConstantDataArray(bytes)
+
+    gv = GlobalVariable(mod, value_type(constant), name, addrspace)
+    alignment!(gv, 1)
+    unnamed_addr!(gv, true)
+    initializer!(gv, constant)
+    constant!(gv, true)
+    linkage!(gv, LLVM.API.LLVMPrivateLinkage)
+
+    return gv
+end
+function globalstring!(builder::IRBuilder, args...; kwargs...)
+    mod = parent(parent(position(builder)))
+    globalstring!(mod, args...; kwargs...)
+end
+
+#globalstring_ptr!(builder::IRBuilder, Str::String, Name::String="") =
+#    Value(API.LLVMBuildGlobalStringPtr(builder, Str, Name))
+
+function globalstring_ptr!(args...; kwargs...)
+    gv = globalstring!(args...; kwargs...)
+    zero = LLVM.ConstantInt(LLVM.IntType(32), 0)
+    indices = [zero, zero]
+    const_inbounds_gep(global_value_type(gv), gv, indices)
+end
 
 isnull!(builder::IRBuilder, Val::Value, Name::String="") =
     Value(API.LLVMBuildIsNull(builder, Val, Name))
