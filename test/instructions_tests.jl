@@ -541,6 +541,8 @@ end
                 @test string(bundle2) == "\"unknown\"(i32 1, i64 2)"
             end
         end
+
+        dispose(mod)
     end
 end
 

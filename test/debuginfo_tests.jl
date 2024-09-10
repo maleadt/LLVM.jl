@@ -85,6 +85,8 @@ DEBUG_METADATA_VERSION()
       strip_debuginfo!(mod)
       @test isempty(metadata(inst))
     end
+
+    dispose(mod)
 end
 
 end
