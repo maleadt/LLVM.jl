@@ -1,18 +1,17 @@
 # LLVM.jl release notes
 
 
-## In development: LLVM.jl v9.1
+## LLVM.jl v9.1
 
 The most important feature of this release is the addition of documentation, both in the
 form of function docstrings, and an extensive manual.
 
 As part of the documentation writing effort, many minor issues or areas for improvement were
 identified, resulting in a large amount of minor, but breaking changes. For all of those,
-deprecations are in place, so this release is not technically breaking. However, it is
-strongly recommended to update your code to the new APIs as soon as possible, which can be
-done by testing your code with `--depwarn=error`.
+deprecations are in place. However, it is strongly recommended to update your code to the
+new APIs as soon as possible, which can be done by testing your code with `--depwarn=error`.
 
-Technically beaking changes:
+Technically beaking changes (unlikely to affect any users):
 
 - Metadata values attached using the `metadata` function [now need to
   be](https://github.com/maleadt/LLVM.jl/pull/476) a subtype of `MDNode`. This behavior
@@ -23,7 +22,7 @@ Technically beaking changes:
   The previous behavior resulted in the wrong context being used, which could lead to
   crashes.
 
-Minor changes:
+Minor changes (breaking changes with deprecations):
 
 - Branch instruction predicate getters [have been
   renamed](https://github.com/maleadt/LLVM.jl/pull/473) from `predicate_int` and
@@ -47,6 +46,8 @@ New features:
   enable extracting the address of a compiled function from an execution engine. This makes
   it possible to simply `ccall` a compiled function without having to deal with
   `GenericValue`s.
+- `globalstring!` and `globalstring_ptr!` now support `addrspace` and `add_null` arguments,
+  similar to their C++ counterparts.
 
 
 ## LLVM.jl v9.0
