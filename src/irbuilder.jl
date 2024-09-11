@@ -87,7 +87,7 @@ position!(builder::IRBuilder) = API.LLVMClearInsertionPosition(builder)
 Insert an instruction into the current basic block at the current position, optionally
 giving it a name.
 """
-Base.insert!(builder::IRBuilder, inst::Instruction, name::String) =
+Base.insert!(builder::IRBuilder, inst::Instruction, name::String="") =
     API.LLVMInsertIntoBuilderWithName(builder, inst, name)
 
 """

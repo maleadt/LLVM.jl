@@ -558,11 +558,14 @@ end
         entry = BasicBlock(fun, "entry")
         position!(builder, entry)
         # add and substract 42
+
         a = fadd!(builder, parameters(fun)[1], LLVM.ConstantFP(Float32(42.)), "a")
-        # fast_math!(a; all=true)
         b = fsub!(builder, a, LLVM.ConstantFP(Float32(42.)), "b")
-        # fast_math!(b; all=true)
-        ret!(builder, b)
+        retinst = ret!(builder, b)
+
+        # support for removing/insertion
+        remove!(retinst)
+        insert!(builder, retinst)
     end
     verify(mod)
 
