@@ -9,11 +9,11 @@ Returns both the newly created function, and its type.
 """
 function create_function(rettyp::LLVMType=LLVM.VoidType(),
                          argtyp::Vector{<:LLVMType}=LLVMType[],
-                         name::String="entry")
+                         name::String="entry"; vararg::Bool=false)
     mod = LLVM.Module("llvmcall")
     isempty(name) && throw(ArgumentError("Function name cannot be empty"))
 
-    ft = LLVM.FunctionType(rettyp, argtyp)
+    ft = LLVM.FunctionType(rettyp, argtyp; vararg=vararg)
     f = LLVM.Function(mod, name, ft)
     push!(function_attributes(f), EnumAttribute("alwaysinline", 0))
 
