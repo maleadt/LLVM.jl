@@ -7,10 +7,6 @@ using Libdl
 
 using CEnum
 
-if !isdefined(Base, :get_extension)
-    using Requires: @require
-end
-
 
 ## source code includes
 
@@ -117,12 +113,6 @@ function __init__()
         # and an LLVM upgrade without recompiling Julia.
         @error """Julia was compiled for LLVM $(version()), whereas you are now using LLVM $(runtime_version()).
                   Please re-compile Julia and LLVM.jl (but note that USE_SYSTEM_LLVM is not a supported configuration)."""
-    end
-
-    @static if !isdefined(Base, :get_extension)
-        @require BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b" begin
-            include("../ext/BFloat16sExt.jl")
-        end
     end
 
     _install_handlers()

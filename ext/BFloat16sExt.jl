@@ -3,7 +3,7 @@ module BFloat16sExt
 using LLVM
 using LLVM: API
 
-isdefined(Base, :get_extension) ? (using BFloat16s) : (using ..BFloat16s)
+using BFloat16s
 
 ## constant values
 
