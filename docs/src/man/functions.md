@@ -68,7 +68,7 @@ julia> isoverloaded(intr)
 true
 
 julia> LLVM.Function(mod, intr, [LLVM.Int32Type()])
-; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
 declare i32 @llvm.abs.i32(i32, i1 immarg) #0
 ```
 
@@ -108,13 +108,13 @@ Different kinds of attributes are supported:
 
 ```jldoctest
 julia> EnumAttribute("nounwind")
-EnumAttribute 39=0
+EnumAttribute 36=0
 
 julia> StringAttribute("frame-pointer", "none")
 StringAttribute frame-pointer=none
 
 julia> TypeAttribute("byval", LLVM.Int32Type())
-TypeAttribute 72=LLVM.IntegerType(i32)
+TypeAttribute 70=LLVM.IntegerType(i32)
 ```
 
 

@@ -91,10 +91,11 @@ add(1,2)
 
 # output
 
-define i64 @julia_add_3944(i64 signext %0, i64 signext %1) #0 {
+; Function Signature: add(Int64, Int64)
+define i64 @julia_add_3944(i64 signext %"x::Int64", i64 signext %"y::Int64") #0 {
 top:
-  %2 = add i64 %1, %0
-  ret i64 %2
+  %0 = add i64 %"y::Int64", %"x::Int64"
+  ret i64 %0
 }
 3
 ```
@@ -165,10 +166,11 @@ intrinsic calls:
 julia> max(a, b) = a < b ? b : a;
 
 julia> @code_llvm debuginfo=:none max(1,2)
-define i64 @julia_max_509(i64 signext %0, i64 signext %1) #0 {
+; Function Signature: max(Int64, Int64)
+define i64 @julia_max_22435(i64 signext %"a::Int64", i64 signext %"b::Int64") #0 {
 top:
-  %2 = call i64 @llvm.smax.i64(i64 %0, i64 %1)
-  ret i64 %2
+  %"a::Int64.b::Int64" = call i64 @llvm.smax.i64(i64 %"a::Int64", i64 %"b::Int64")
+  ret i64 %"a::Int64.b::Int64"
 }
 
 julia> function max(a, b)
@@ -177,11 +179,12 @@ julia> function max(a, b)
        end;
 
 julia> @code_llvm debuginfo=:none max(1,2)
-define i64 @julia_max_529(i64 signext %0, i64 signext %1) #0 {
+; Function Signature: max(Int64, Int64)
+define i64 @julia_max_22441(i64 signext %"a::Int64", i64 signext %"b::Int64") #0 {
 top:
-  %2 = icmp slt i64 %1, %0
-  call void @llvm.assume(i1 %2)
-  ret i64 %0
+  %0 = icmp slt i64 %"b::Int64", %"a::Int64"
+  call void @llvm.assume(i1 %0)
+  ret i64 %"a::Int64"
 }
 ```
 
