@@ -100,7 +100,13 @@ julia> String(emit(tm, mod, LLVM.API.LLVMAssemblyFile)) |> println
 	.text
 	.file	"SomeModule"
 	.section	.custom_section.target_features,"",@
-	.int8	1
+	.int8	3
+	.int8	43
+	.int8	15
+	.ascii	"mutable-globals"
+	.int8	43
+	.int8	8
+	.ascii	"sign-ext"
 	.int8	43
 	.int8	8
 	.ascii	"memory64"
@@ -134,6 +140,11 @@ julia> mod
 ; ModuleID = 'SomeModule'
 source_filename = "SomeModule"
 target datalayout = "e-m:e-p:64:64-i64:64-n32:64-S128"
+
+!llvm.module.flags = !{!0, !1}
+
+!0 = !{i32 1, !"wasm-feature-mutable-globals", i32 43}
+!1 = !{i32 1, !"wasm-feature-sign-ext", i32 43}
 ```
 
 The data layout object can be used to query various properties that are relevant for

@@ -349,7 +349,9 @@ end
                     add!(fpm, SimplifyCFGPass(; aggressiveSimplifyCFGOptions...))
                 end
                 add!(mpm, NewPMFunctionPassManager()) do fpm
-                    add!(fpm, CombineMulAddPass())
+                    if VERSION < v"1.12.0-DEV.1390"
+                        add!(fpm, CombineMulAddPass())
+                    end
                     add!(fpm, DivRemPairsPass())
                 end
                 add!(mpm, NewPMFunctionPassManager()) do fpm
