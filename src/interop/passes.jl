@@ -25,7 +25,9 @@ Base.string(options::LowerPTLSPassOptions) = options.imaging ? "<imaging>" : ""
 @module_pass "LowerPTLSPass" LowerPTLSPass LowerPTLSPassOptions
 
 @function_pass "DemoteFloat16" DemoteFloat16Pass
+@static if VERSION < v"1.12.0-DEV.1390"
 @function_pass "CombineMulAdd" CombineMulAddPass
+end
 @function_pass "LateLowerGCFrame" LateLowerGCPass
 @function_pass "AllocOpt" AllocOptPass
 @function_pass "PropagateJuliaAddrspaces" PropagateJuliaAddrspacesPass
