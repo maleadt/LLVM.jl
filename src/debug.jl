@@ -9,12 +9,12 @@ const memcheck_enabled = parse(Bool, @load_preference("memcheck", "false"))
 
 const tracked_objects = Dict{Any,Any}()
 
-function mark_alloc(obj::Any)
+function mark_alloc(obj::Any; allow_overwrite::Bool=false)
     @static if memcheck_enabled
         io = Core.stdout
         new_alloc_bt = backtrace()[2:end]
 
-        if haskey(tracked_objects, obj)
+        if haskey(tracked_objects, obj) && !allow_overwrite
             old_alloc_bt, dispose_bt = tracked_objects[obj]
             if dispose_bt == nothing
                 print("\nWARNING: An instance of $(typeof(obj)) was not properly disposed of, and a new allocation will overwrite it.")

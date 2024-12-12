@@ -89,13 +89,12 @@ function ThreadSafeModule(mod::Module)
         #      Module and a regular Context, only a method to create one from a Module
         #      and a pre-existing TSContext, which isn't useful...
         # TODO: expose the other convenience method?
-        # XXX: work around this by serializing/deserializing the module in the correct contex
+        # XXX: work around this by serializing/deserializing in the correct context
         bitcode = convert(MemoryBuffer, mod)
-        new_mod = context!(context(ts_context())) do
+        dispose(mod)
+        mod = context!(context(ts_context())) do
             parse(Module, bitcode)
         end
-        dispose(mod)
-        mod = new_mod
     end
     @assert context(mod) == context(ts_context())
 
@@ -140,7 +139,7 @@ end
 
 function tsm_callback(data::Ptr{Cvoid}, ref::API.LLVMModuleRef)
     cb = Base.unsafe_pointer_to_objref(data)::ThreadSafeModuleCallback
-    mod = Module(ref)
+    mod = mark_alloc(Module(ref); allow_overwrite=true)
     ctx = context(mod)
     activate(ctx)
     try
@@ -149,6 +148,7 @@ function tsm_callback(data::Ptr{Cvoid}, ref::API.LLVMModuleRef)
         msg = sprint(Base.display_error, err, Base.catch_backtrace())
         return API.LLVMCreateStringError(msg)
     finally
+        mark_dispose(mod)
         deactivate(ctx)
     end
     return convert(API.LLVMErrorRef, C_NULL)
