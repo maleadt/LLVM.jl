@@ -203,7 +203,7 @@ function NewPMPassBuilder(; kwargs...)
             API.LLVMPassBuilderOptionsSetSLPVectorization(obj, value)
         elseif name == :loop_unrolling
             API.LLVMPassBuilderOptionsSetLoopUnrolling(obj, value)
-        elseif loop == :forget_all_scev_in_loop_unroll
+        elseif name == :forget_all_scev_in_loop_unroll
             API.LLVMPassBuilderOptionsSetForgetAllSCEVInLoopUnroll(obj, value)
         elseif name == :licm_mssa_opt_cap
             API.LLVMPassBuilderOptionsSetLicmMSSAOptCap(obj, value)
