@@ -64,7 +64,7 @@ end
 Simpler version of [`clone_into!`](@ref) that clones a function `f` into a new function,
 optionally mapping values according to the `value_map` dictionary.
 """
-function clone(f::Function; value_map::Dict{<:Value,<:Value}=Dict{Value,Value}())
+function clone(f::Function; value_map::Dict{<:Value,<:Value}=Dict{Value,Value}(), kwargs...)
     argtypes = LLVMType[]
 
     # The user might be deleting arguments to the function by specifying them in
@@ -96,8 +96,7 @@ function clone(f::Function; value_map::Dict{<:Value,<:Value}=Dict{Value,Value}()
         end
     end
 
-    clone_into!(new_f, f;
-                value_map, changes=API.LLVMCloneFunctionChangeTypeLocalChangesOnly)
+    clone_into!(new_f, f; value_map, kwargs...)
 
    return new_f
 end
