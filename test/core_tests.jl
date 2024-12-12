@@ -421,6 +421,8 @@ end
         typ = LLVM.BFloatType()
         c = ConstantFP(typ, BFloat16(1.1))
         @test convert(BFloat16, c) == BFloat16(1.1)
+        d = ConstantFP(BFloat16(1.1))
+        @test convert(BFloat16, d) == BFloat16(1.1)
     end
     let
         typ = LLVM.X86FP80Type()
@@ -551,7 +553,7 @@ end
         @test size(vec) == size(cda)
         @test collect(cda) == ConstantInt.(vec)
     end
-    for T in [Float32, Float64]
+    for T in [Float32, Float64, BFloat16]
         vec = T[1,2,3,4]
         cda = ConstantDataArray(vec)
         @test cda isa ConstantDataArray
