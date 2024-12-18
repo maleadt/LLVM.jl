@@ -121,7 +121,8 @@ predicate(inst::FCmpInst) = API.LLVMGetFCmpPredicate(inst)
 
 ## atomics
 
-export is_atomic, ordering, ordering!, SyncScope, syncscope, syncscope!
+export is_atomic, ordering, ordering!, SyncScope, syncscope, syncscope!, binop,
+       isweak, weak!, success_ordering, success_ordering!, failure_ordering, failure_ordering!
 
 const AtomicInst = Union{LoadInst, StoreInst, FenceInst, AtomicRMWInst, AtomicCmpXchgInst}
 
@@ -207,6 +208,69 @@ Set the synchronization scope of the given atomic instruction.
 function syncscope!(inst::AtomicInst, scope::SyncScope)
     is_atomic(inst) || throw(ArgumentError("Instruction is not atomic"))
     API.LLVMSetAtomicSyncScopeID(inst, scope)
+end
+
+"""
+    binop(inst::AtomicRMWInst)
+
+Get the binary operation of the given atomic read-modify-write instruction.
+"""
+function binop(inst::AtomicRMWInst)
+    API.LLVMGetAtomicRMWBinOp(inst)
+end
+
+"""
+    isweak(inst::AtomicCmpXchgInst)
+
+Check if the given atomic compare-and-exchange instruction is weak.
+"""
+function isweak(inst::AtomicCmpXchgInst)
+    API.LLVMGetWeak(inst) |> Bool
+end
+
+"""
+    weak!(inst::AtomicCmpXchgInst, is_weak::Bool)
+
+Set whether the given atomic compare-and-exchange instruction is weak.
+"""
+function weak!(inst::AtomicCmpXchgInst, is_weak::Bool)
+    API.LLVMSetWeak(inst, is_weak)
+end
+
+"""
+    success_ordering(inst::AtomicCmpXchgInst)
+
+Get the success ordering of the given atomic compare-and-exchange instruction.
+"""
+function success_ordering(inst::AtomicCmpXchgInst)
+    API.LLVMGetCmpXchgSuccessOrdering(inst)
+end
+
+"""
+    success_ordering!(inst::AtomicCmpXchgInst, ord::API.LLVMAtomicOrdering)
+
+Set the success ordering of the given atomic compare-and-exchange instruction.
+"""
+function success_ordering!(inst::AtomicCmpXchgInst, ord::API.LLVMAtomicOrdering)
+    API.LLVMSetCmpXchgSuccessOrdering(inst, ord)
+end
+
+"""
+    failure_ordering(inst::AtomicCmpXchgInst)
+
+Get the failure ordering of the given atomic compare-and-exchange instruction.
+"""
+function failure_ordering(inst::AtomicCmpXchgInst)
+    API.LLVMGetCmpXchgFailureOrdering(inst)
+end
+
+"""
+    failure_ordering!(inst::AtomicCmpXchgInst, ord::API.LLVMAtomicOrdering)
+
+Set the failure ordering of the given atomic compare-and-exchange instruction.
+"""
+function failure_ordering!(inst::AtomicCmpXchgInst, ord::API.LLVMAtomicOrdering)
+    API.LLVMSetCmpXchgFailureOrdering(inst, ord)
 end
 
 
