@@ -252,11 +252,11 @@
         @check_ir atomic_cmpxchg_inst "cmpxchg ptr %4, i32 %0, i32 %1 seq_cst acquire"
     end
     @test success_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingSequentiallyConsistent
-    success_ordering!(atomic_cmpxchg_inst, LLVM.API.LLVMAtomicOrderingAcquire)
-    @test success_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingAcquire
+    success_ordering!(atomic_cmpxchg_inst, LLVM.API.LLVMAtomicOrderingAcquireRelease)
+    @test success_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingAcquireRelease
     @test failure_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingAcquire
-    failure_ordering!(atomic_cmpxchg_inst, LLVM.API.LLVMAtomicOrderingRelease)
-    @test failure_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingRelease
+    failure_ordering!(atomic_cmpxchg_inst, LLVM.API.LLVMAtomicOrderingMonotonic)
+    @test failure_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingMonotonic
     @test !isweak(atomic_cmpxchg_inst)
     weak!(atomic_cmpxchg_inst, true)
     @test isweak(atomic_cmpxchg_inst)
