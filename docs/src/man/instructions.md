@@ -88,9 +88,14 @@ the instruction. This is done by calling the `debuglocation!` function on the bu
 Atomic instructions support a few additional APIs:
 
 - `is_atomic`: check if the instruction is atomic.
-- `ordering`/`ordering!`: get or set the ordering of the instruction.
+- `isweak`/`weak!`: check if the instruction is weak, or set it to be weak.
 - `syncscope`/`syncscope!`: get or set the synchronization scope of the instruction to
   a specific `SyncScope`
+- `ordering`/`ordering!`: get or set the ordering of the instruction.
+- `success_ordering`/`success_ordering!`: get or set the success ordering of an atomic
+  compare-and-swap instruction.
+- `failure_ordering`/`failure_ordering!`: get or set the failure ordering of an atomic
+- `binop`: to get the binary operation of an atomic read-modify-write instruction.
 
 
 ## Call sites instructions

@@ -40,6 +40,13 @@ ordering!
 SyncScope
 syncscope
 syncscope!
+binop
+isweak
+weak!
+success_ordering
+success_ordering!
+failure_ordering
+failure_ordering!
 ```
 
 ## Call instructions
