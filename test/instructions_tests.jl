@@ -239,6 +239,27 @@
     else
         @check_ir atomic_rmw_inst "atomicrmw add ptr %4, i32 %0 seq_cst"
     end
+    @test binop(atomic_rmw_inst) == LLVM.API.LLVMAtomicRMWBinOpAdd
+    @test syncscope(atomic_rmw_inst) == SyncScope("system")
+    syncscope!(atomic_rmw_inst, SyncScope("agent"))
+    @test syncscope(atomic_rmw_inst) == SyncScope("agent")
+
+    atomic_cmpxchg_inst = atomic_cmpxchg!(builder, ptr1, int1, int2,
+        LLVM.API.LLVMAtomicOrderingSequentiallyConsistent, LLVM.API.LLVMAtomicOrderingAcquire, single_thread)
+    if supports_typed_pointers(ctx)
+        @check_ir atomic_cmpxchg_inst "cmpxchg i32* %4, i32 %0, i32 %1 seq_cst acquire"
+    else
+        @check_ir atomic_cmpxchg_inst "cmpxchg ptr %4, i32 %0, i32 %1 seq_cst acquire"
+    end
+    @test success_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingSequentiallyConsistent
+    success_ordering!(atomic_cmpxchg_inst, LLVM.API.LLVMAtomicOrderingAcquireRelease)
+    @test success_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingAcquireRelease
+    @test failure_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingAcquire
+    failure_ordering!(atomic_cmpxchg_inst, LLVM.API.LLVMAtomicOrderingMonotonic)
+    @test failure_ordering(atomic_cmpxchg_inst) == LLVM.API.LLVMAtomicOrderingMonotonic
+    @test !isweak(atomic_cmpxchg_inst)
+    weak!(atomic_cmpxchg_inst, true)
+    @test isweak(atomic_cmpxchg_inst)
 
     single_thread = true
     atomic_rmw_inst = atomic_rmw!(builder,
