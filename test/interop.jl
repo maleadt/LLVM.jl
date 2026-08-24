@@ -535,4 +535,107 @@ else
     end
 end
 
+@testset "julia dialects" begin
+
+if has_julia_dialects()
+
+@testset "gc frame" begin
+    @dispose ctx=Context() dialect_ctx=JuliaDialectContext() mod=LLVM.Module("dialects") builder=IRBuilder() begin
+        fn = LLVM.Function(mod, "f", LLVM.FunctionType(LLVM.VoidType()))
+        entry = BasicBlock(fn, "entry")
+        position!(builder, entry)
+
+        pgcstack = get_pgcstack!(builder)
+        @test pgcstack isa Instruction
+
+        frame = new_gc_frame!(builder, ConstantInt(Int32(2)))
+        @test frame isa Instruction
+        push_gc_frame!(builder, frame, ConstantInt(Int32(2)))
+        slot = get_gc_frame_slot!(builder, frame, ConstantInt(Int32(0)))
+        @test slot isa Instruction
+        pop_gc_frame!(builder, frame)
+        ret!(builder)
+
+        @test verify_dialects(mod) === nothing
+
+        ir = string(mod)
+        @test occursin("call ptr @julia.get_pgcstack()", ir)
+        @test occursin("call ptr @julia.new_gc_frame(i32 2)", ir)
+        @test occursin("declare noalias nonnull ptr @julia.new_gc_frame(i32)", ir)
+    end
+end
+
+@testset "gc operations" begin
+    @dispose ctx=Context() dialect_ctx=JuliaDialectContext() mod=LLVM.Module("dialects") builder=IRBuilder() begin
+        # the gc_alloc_bytes size type is defined by the module datalayout
+        datalayout!(mod, "e-p:$(Sys.WORD_SIZE):$(Sys.WORD_SIZE)")
+        T_size = gc_alloc_bytes_size_type(mod)
+        @test T_size == LLVM.IntType(Sys.WORD_SIZE)
+
+        T_ptr = LLVM.PointerType()
+        T_tracked = LLVM.PointerType(#=Tracked=# 10)
+        ft = LLVM.FunctionType(LLVM.VoidType(), [T_ptr, T_tracked, T_ptr])
+        fn = LLVM.Function(mod, "f", ft)
+        signal_page, obj, interior = parameters(fn)
+        entry = BasicBlock(fn, "entry")
+        position!(builder, entry)
+
+        pgcstack = get_pgcstack_or_new!(builder)
+        safepoint!(builder, signal_page)
+        loaded = gc_loaded!(builder, obj, interior)
+        @test loaded isa Instruction
+        @test addrspace(value_type(loaded)) == 13
+        queue_gc_root!(builder, obj)
+        alloc = gc_alloc_bytes!(builder, pgcstack, ConstantInt(T_size, 8),
+                                ConstantInt(T_size, 0))
+        @test alloc isa Instruction
+        @test addrspace(value_type(alloc)) == 10
+        ret!(builder)
+
+        @test verify_dialects(mod) === nothing
+
+        ir = string(mod)
+        @test occursin("call ptr @julia.get_pgcstack_or_new()", ir)
+        @test occursin("call void @julia.safepoint(ptr %0)", ir)
+        @test occursin("@julia.gc_loaded", ir)
+        @test occursin("@julia.queue_gc_root", ir)
+        @test occursin("@julia.gc_alloc_bytes", ir)
+    end
+end
+
+@testset "verification failure" begin
+    @dispose ctx=Context() dialect_ctx=JuliaDialectContext() mod=LLVM.Module("dialects") builder=IRBuilder() begin
+        fn = LLVM.Function(mod, "f", LLVM.FunctionType(LLVM.VoidType()))
+        entry = BasicBlock(fn, "entry")
+        position!(builder, entry)
+
+        # call a dialect operation through a mistyped declaration
+        bad_ft = LLVM.FunctionType(LLVM.VoidType(), [LLVM.Int32Type()])
+        bad_fn = LLVM.Function(mod, "julia.safepoint", bad_ft)
+        call!(builder, bad_ft, bad_fn, [ConstantInt(Int32(42))])
+        ret!(builder)
+
+        @test_throws LLVMException verify_dialects(mod)
+        err = try
+            verify_dialects(mod)
+            nothing
+        catch err
+            err
+        end
+        @test err isa LLVMException
+        @test occursin("julia.safepoint", err.info)
+    end
+end
+
+else
+
+@testset "unsupported" begin
+    @test !has_julia_dialects()
+    @test_throws ErrorException JuliaDialectContext()
+end
+
+end
+
+end
+
 end

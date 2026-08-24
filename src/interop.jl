@@ -9,5 +9,6 @@ include("interop/pointer.jl")
 include("interop/utils.jl")
 include("interop/intrinsics.jl")
 include("interop/passes.jl")
+include("interop/dialects.jl")
 
 end
