@@ -173,6 +173,7 @@ end
 
             # does bad things
             "trigger-crash",
+            "trigger-crash-module",
             "check-debugify",
             "debugify",
         ]
@@ -189,6 +190,7 @@ end
             "msan",
 
             # does bad things
+            "trigger-crash-function",
             "aa-eval",
             "chr",
             "helloworld"

@@ -584,7 +584,11 @@ end
 @static if version() < v"20"
     @module_pass "synthetic-counts-propagation" SyntheticCountsPropagation
 end
-@module_pass "trigger-crash" TriggerCrashPass
+@static if version() < v"19"
+    @module_pass "trigger-crash" TriggerCrashPass
+else
+    @module_pass "trigger-crash-module" TriggerCrashModulePass
+end
 @module_pass "verify" VerifierPass
 @module_pass "view-callgraph" CallGraphViewerPass
 @module_pass "wholeprogramdevirt" WholeProgramDevirtPass
@@ -702,6 +706,9 @@ end
 @function_pass "gvn-hoist" GVNHoistPass
 @function_pass "gvn-sink" GVNSinkPass
 @function_pass "helloworld" HelloWorldPass
+@static if version() >= v"19"
+    @function_pass "trigger-crash-function" TriggerCrashFunctionPass
+end
 @function_pass "infer-address-spaces" InferAddressSpacesPass
 @function_pass "instcombine" InstCombinePass false
 function InstCombinePass(; kwargs...)
