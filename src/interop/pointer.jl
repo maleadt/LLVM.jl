@@ -6,13 +6,13 @@ export @typed_ccall
 
 using Core: LLVMPtr
 
-@inline @generated function pointerref(ptr::LLVMPtr{T,A}, i::I, ::Val{align}) where {T,A,I,align}
+@inline @generated function pointerref(ptr::LLVMPtr{T,A}, i::Int, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return T.instance
     ispow2(align) || return :(error("pointerref: alignment must be a power of 2, got $($align)"))
     @dispose ctx=Context() begin
         eltyp = convert(LLVMType, T)
 
-        T_idx = convert(LLVMType, I)
+        T_idx = convert(LLVMType, Int)
         T_ptr = convert(LLVMType, ptr)
 
         T_typed_ptr = LLVM.PointerType(eltyp, A)
@@ -40,17 +40,17 @@ using Core: LLVMPtr
             ret!(builder, ld)
         end
 
-        call_function(llvm_f, T, Tuple{LLVMPtr{T,A}, I}, :ptr, :(i-one(I)))
+        call_function(llvm_f, T, Tuple{LLVMPtr{T,A}, Int}, :ptr, :(i - 1))
     end
 end
 
-@inline @generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::I, ::Val{align}) where {T,A,I,align}
+@inline @generated function pointerset(ptr::LLVMPtr{T,A}, x::T, i::Int, ::Val{align}) where {T,A,align}
     sizeof(T) == 0 && return
     ispow2(align) || return :(error("pointerset: alignment must be a power of 2, got $($align)"))
     @dispose ctx=Context() begin
         eltyp = convert(LLVMType, T)
 
-        T_idx = convert(LLVMType, I)
+        T_idx = convert(LLVMType, Int)
         T_ptr = convert(LLVMType, ptr)
 
         T_typed_ptr = LLVM.PointerType(eltyp, A)
@@ -79,17 +79,21 @@ end
             ret!(builder)
         end
 
-        call_function(llvm_f, Cvoid, Tuple{LLVMPtr{T,A}, T, I},
-                      :ptr, :(convert(T,x)), :(i-one(I)))
+        call_function(llvm_f, Cvoid, Tuple{LLVMPtr{T,A}, T, Int},
+                      :ptr, :(convert(T,x)), :(i - 1))
     end
 end
 
+# Like Base's `unsafe_load`/`unsafe_store!` for `Ptr`, the index is widened to `Int`
+# before reaching the intrinsic. This ensures the conversion is done in Julia, where
+# the signedness of the index is known, rather than by `getelementptr`, which would
+# sign-extend an unsigned index. `Int` must be at least as wide as the index width of
+# every address space this is compiled for.
 @inline Base.unsafe_load(ptr::Core.LLVMPtr, i::Integer=1, align::Val=Val(1)) =
-    pointerref(ptr, i, align)
+    pointerref(ptr, Int(i), align)
 
 @inline Base.unsafe_store!(ptr::Core.LLVMPtr{T}, x, i::Integer=1, align::Val=Val(1)) where {T} =
-    pointerset(ptr, convert(T, x), i, align)
-
+    pointerset(ptr, convert(T, x), Int(i), align)
 
 # pointer operations
 
