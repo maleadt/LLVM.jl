@@ -2,6 +2,9 @@ name: TestAsserts
 
 # This workflow runs tests using assert builds downloaded by GetAsserts.
 # It does not use any secrets (BUILDKITE_TOKEN access is confined to GetAsserts).
+#
+# The real GetAsserts never runs on `pull_request`, so a same-named workflow added by a
+# fork PR cannot be used to feed this workflow an attacker-built artifact.
 
 on:
   workflow_run:
@@ -13,14 +16,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch }}
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: true
 
 jobs:
   report-start:
     name: Report assertion tests started
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.conclusion == 'success'
     permissions:
       checks: write
     steps:
@@ -105,7 +108,7 @@ jobs:
   report-result:
     name: Report assertion test results
     needs: test
-    if: always() && github.event.workflow_run.conclusion == 'success'
+    if: always() && github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -151,7 +154,7 @@ jobs:
   report-failure:
     name: Report download failure
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'failure'
+    if: github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.conclusion == 'failure'
     permissions:
       checks: write
     steps:
