@@ -1,11 +1,35 @@
 export @asmcall
 
+function check_asm_operand(T::Type, llvm_T::LLVMType, what::String)
+    llvm_T isa Union{LLVM.IntegerType,LLVM.FloatingPointType,
+                     LLVM.PointerType,LLVM.VectorType} && return
+
+    throw(ArgumentError("@asmcall $what must lower to an LLVM scalar or vector type; " *
+                        "$T lowers to `$(string(llvm_T))`"))
+end
+
 @generated function _asmcall(::Val{asm}, ::Val{constraints}, ::Val{side_effects},
                              ::Val{rettyp}, ::Val{argtyp}, args...) where
                             {asm, constraints, side_effects, rettyp, argtyp}
     @dispose ctx=Context() begin
         llvm_rettyp = convert(LLVMType, rettyp)
-        llvm_argtyp = LLVMType[convert.(LLVMType, [argtyp.parameters...])...]
+        llvm_argtyp = LLVMType[convert(LLVMType, T) for T in argtyp.parameters]
+
+        # LLVM accepts aggregate inputs in IR, but can crash while selecting them.
+        for (i, T) in enumerate(argtyp.parameters)
+            check_asm_operand(T, llvm_argtyp[i], "argument $i")
+        end
+
+        # Tuples describe multiple outputs, except when they lower to an LLVM vector.
+        multiple_outputs = rettyp <: Tuple && !(llvm_rettyp isa LLVM.VectorType)
+        if multiple_outputs
+            for (i, T) in enumerate(rettyp.parameters)
+                check_asm_operand(T, convert(LLVMType, T), "return value element $i")
+            end
+        elseif rettyp !== Nothing
+            check_asm_operand(rettyp, llvm_rettyp, "return value")
+        end
+
         llvm_f, llvm_ft = create_function(llvm_rettyp, llvm_argtyp)
 
         # LLVM dictates the inline asm's return shape from the number of direct
@@ -14,7 +38,7 @@ export @asmcall
         # NTuple) to [N x T]. Drive the asm callee's return type from `rettyp`
         # (Tuple ⇒ struct, scalar ⇒ T) so we always match LLVM's rule, then
         # bridge to llvm_rettyp via insertvalue when Julia's lowering disagrees.
-        asm_rettyp = if rettyp <: Tuple && length(rettyp.parameters) > 0
+        asm_rettyp = if multiple_outputs && length(rettyp.parameters) > 0
             elem_types = LLVMType[convert(LLVMType, T) for T in rettyp.parameters]
             length(elem_types) == 1 ? elem_types[1] : LLVM.StructType(elem_types)
         else
@@ -58,6 +82,9 @@ end
 Call some inline assembly `asm`, optionally constrained by `constraints` and denoting other
 side effects in `side_effects`, specifying the return type in `rettyp` and types of
 arguments as a tuple-type in `argtyp`.
+
+Inputs and individual direct outputs must lower to LLVM scalar or vector types. Pass
+aggregate inputs as separate values or through a pointer.
 
 For inline asm with multiple direct outputs (e.g. constraints `"=r,=r"`), pass `rettyp` as a
 `Tuple` whose element count matches the number of `=` outputs in `constraints`; the result

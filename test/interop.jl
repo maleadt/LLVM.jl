@@ -180,9 +180,46 @@ let ir = sprint(io -> code_llvm(io, e7, Tuple{Int32}))
     @test !occursin(r"call \[2 x i32\] asm", ir)
 end
 
+# tuples of VecElements lower to a single vector output
+
+g1(x) = @asmcall("paddd \$1, \$0", "=x,x,0", NTuple{4,VecElement{Int32}},
+                 Tuple{NTuple{4,VecElement{Int32}},NTuple{4,VecElement{Int32}}}, x, x)
+let v = ntuple(i -> VecElement(Int32(i)), 4)
+    @test g1(v) == ntuple(i -> VecElement(Int32(2i)), 4)
+end
+
 # TODO: alternative test snippets for other platforms
 
 end
+
+# aggregate operands are rejected before code generation
+
+bad_asm_argument(t) = @asmcall("mov \$1, \$0", "=r,r", Int, Tuple{Tuple{Int,Int}}, t)
+
+struct AsmPair
+    a::Int
+    b::Int
+end
+bad_asm_return() = @asmcall("mov \$\$1, \$0; mov \$\$2, \$1;", "=r,=r", AsmPair)
+
+bad_asm_return_element() =
+    @asmcall("mov \$\$1, \$0; mov \$\$2, \$1;", "=r,=r", Tuple{Int,Tuple{Int,Int}})
+
+function check_asmcall_error(f, location, julia_type)
+    err = try
+        f()
+    catch err
+        err
+    end
+    @test err isa ArgumentError
+    err isa ArgumentError || return
+    @test occursin("@asmcall $location must lower to an LLVM scalar or vector type", err.msg)
+    @test occursin(julia_type, err.msg)
+end
+
+check_asmcall_error(() -> bad_asm_argument((1, 2)), "argument 1", "Tuple{Int")
+check_asmcall_error(bad_asm_return, "return value", "AsmPair")
+check_asmcall_error(bad_asm_return_element, "return value element 2", "Tuple{Int")
 
 @testset "macro hygiene" begin
     mod = @eval module $(gensym())
